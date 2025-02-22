@@ -952,103 +952,91 @@ export default {
     // add sting chat
     this.addStingChat();
     // Nav Dropdown Behaviors
-  const navMore = document.querySelector(".nav-more .nav-link");
-  const dropdownMenus = document.querySelectorAll(".nav-dropdown");
-  const bars = document.querySelectorAll(".nav-bars .bar");
+    const navMore = document.querySelector(".nav-more .nav-link");
+    const dropdownMenus = document.querySelectorAll(".nav-dropdown");
+    const bars = document.querySelectorAll(".nav-bars .bar");
 
-  let isHoverListenerActive = false;
+    let isHoverListenerActive = false;
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints;
 
-  function toggleNavMore(event) {
-    event.preventDefault();
-    bars.forEach(bar => bar.classList.toggle("x"));
-    
-    // Manually remove focus to prevent hover-like state persisting
-    navMore.blur();
-  }
-
-  function closeNavMore(event) {
-    if (
-      !navMore.contains(event.target) &&
-      !Array.from(dropdownMenus).some(menu => menu.contains(event.target))
-    ) {
-      bars.forEach(bar => bar.classList.remove("x"));
+    function toggleNavMore(event) {
+      event.preventDefault();
+      bars.forEach(bar => bar.classList.toggle("x"));
     }
-  }
 
-  function dropdownHoverHandler(event) {
-    dropdownMenus.forEach(otherDropdown => {
-      const toggleButton = otherDropdown.querySelector(".dropdown-toggle");
-      const dropdownInstance = bootstrap.Dropdown.getInstance(toggleButton);
-
-      if (dropdownInstance && otherDropdown !== event.currentTarget) {
-        dropdownInstance.hide();
-
-        if (!navMore.matches(":hover")) {
-          bars.forEach(bar => bar.classList.remove("x"));
-        }
+    function closeNavMore(event) {
+      if (
+        !navMore.contains(event.target) &&
+        !Array.from(dropdownMenus).some(menu => menu.contains(event.target))
+      ) {
+        bars.forEach(bar => bar.classList.remove("x"));
       }
-    });
-  }
+    }
 
-  function addDropdownHoverListeners() {
-    if (window.innerWidth > 768 && !isHoverListenerActive) {
-      dropdownMenus.forEach(dropdown => {
-        dropdown.addEventListener("mouseover", dropdownHoverHandler);
+    function dropdownHoverHandler(event) {
+      dropdownMenus.forEach(otherDropdown => {
+        const toggleButton = otherDropdown.querySelector(".dropdown-toggle");
+        const dropdownInstance = bootstrap.Dropdown.getInstance(toggleButton);
+
+        if (dropdownInstance && otherDropdown !== event.currentTarget) {
+          dropdownInstance.hide();
+
+          if (!navMore.matches(":hover")) {
+            bars.forEach(bar => bar.classList.remove("x"));
+          }
+        }
       });
-      isHoverListenerActive = true;
     }
-  }
 
-  function removeDropdownHoverListeners() {
-    if (isHoverListenerActive) {
-      dropdownMenus.forEach(dropdown => {
-        dropdown.removeEventListener("mouseover", dropdownHoverHandler);
-      });
-      isHoverListenerActive = false;
+    function addDropdownHoverListeners() {
+      if (window.innerWidth > 768 && !isHoverListenerActive && !isTouchDevice) {
+        dropdownMenus.forEach(dropdown => {
+          dropdown.addEventListener("mouseover", dropdownHoverHandler);
+        });
+        isHoverListenerActive = true;
+      }
     }
-  }
 
-  function disableHoverOnTouch() {
-    if ("ontouchstart" in window || navigator.maxTouchPoints > 0) {
-      removeDropdownHoverListeners(); // Disable hover on touch devices
-    } else {
-      addDropdownHoverListeners(); // Enable hover on non-touch devices
+    function removeDropdownHoverListeners() {
+      if (isHoverListenerActive) {
+        dropdownMenus.forEach(dropdown => {
+          dropdown.removeEventListener("mouseover", dropdownHoverHandler);
+        });
+        isHoverListenerActive = false;
+      }
     }
-  }
 
-  function handleResize() {
-    if (window.innerWidth > 768) {
-      disableHoverOnTouch();
-    } else {
-      removeDropdownHoverListeners();
+    function handleResize() {
+      if (window.innerWidth > 768 && !isTouchDevice) {
+        addDropdownHoverListeners();
+      } else {
+        removeDropdownHoverListeners();
+      }
     }
-  }
 
-  // Add event listeners when component is mounted
-  if (navMore) {
-    navMore.addEventListener("click", toggleNavMore);
-  }
-  document.addEventListener("click", closeNavMore);
-
-  disableHoverOnTouch(); // Run on mount
-  window.addEventListener("resize", handleResize);
-
-  // Store references for cleanup
-  this._cleanup = () => {
+    // Add event listeners when component is mounted
     if (navMore) {
-      navMore.removeEventListener("click", toggleNavMore);
+      navMore.addEventListener("click", toggleNavMore);
     }
-    document.removeEventListener("click", closeNavMore);
-    window.removeEventListener("resize", handleResize);
-    removeDropdownHoverListeners();
-  };
-},
+    document.addEventListener("click", closeNavMore);
+    handleResize();
+    window.addEventListener("resize", handleResize);
 
-beforeUnmount() {
-  if (this._cleanup) {
-    this._cleanup();
-  }
-},
+    // Store references for cleanup
+    this._cleanup = () => {
+      if (navMore) {
+        navMore.removeEventListener("click", toggleNavMore);
+      }
+      document.removeEventListener("click", closeNavMore);
+      window.removeEventListener("resize", handleResize);
+      removeDropdownHoverListeners();
+    };
+  },
+  beforeUnmount() {
+    if (this._cleanup) {
+      this._cleanup();
+    }
+  },
   computed: {
     avatar: {
       get() {
