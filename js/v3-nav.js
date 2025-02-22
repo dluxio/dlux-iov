@@ -962,6 +962,7 @@ export default {
     function toggleNavMore(event) {
       event.preventDefault();
       bars.forEach(bar => bar.classList.toggle("x"));
+      navMore.blur(); // Remove focus after tapping
     }
 
     function closeNavMore(event) {
@@ -1037,6 +1038,7 @@ export default {
       this._cleanup();
     }
   },
+
   computed: {
     avatar: {
       get() {
