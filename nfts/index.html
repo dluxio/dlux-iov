@@ -143,8 +143,8 @@
                 @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" @refresh="run($event)"
                 :op="toSign" :lapi="lapi" />
         </div>
-        <main role="main" class="d-flex flex-column flex-grow-1 padmain-subbar" v-cloak>
-            <div class="container fixed-top navbar-subbar">
+        <main role="main" class="d-flex flex-column flex-grow-1 padmain" v-cloak>
+            <div class="container fixed-top navbar-subbar p-0 d-none">
                 <div class="navbar-subbar-container">
                     <div class="navbar-subbar-content">
                         <a class="btn btn-outline-light d-flex" href="sets" type="button">
@@ -167,7 +167,7 @@
                 </div>
             </div>
             <div class="container">
-                <div class="bg-blur-darkg rounded border border-dark mt-1 mb-2 pt-2 pb-1">
+                <div class="bg-darkg-80 rounded border border-dark mt-1 mb-2 pt-2 pb-1">
                     <div
                         class="d-flex justify-content-between align-items-baseline flex-wrap pt-1 pb-1 mb-2 mx-2 border border-light-50 border-bottom border-start-0 border-end-0 border-top-0">
                         <h3 class="hero-subtitle mb-0">NFT Marketplace</h3>

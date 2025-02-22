@@ -799,8 +799,8 @@ html {
 
 @media (max-width: 576px) {
     .navbar-subbar-container {
-        margin-left: 15px;
-        margin-right: 15px;
+        margin-left: 12px;
+        margin-right: 12px;
     }
 
     .hero-brand {
