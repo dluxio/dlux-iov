@@ -218,19 +218,19 @@ html {
 
 .navbar-nav .nav-more .dropdown-menu {
     position: absolute;
-    right: 0;
+    align-self: flex-end;
     top: 100%;
     background-color: rgb(235, 245, 236);
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     border: 1px solid black;
     z-index: 1050;
-    width: 484px;
     margin-top: 6px;
     color: black;
     padding: 0;
     flex-direction: column;
     overflow-y: auto;
     max-height: calc(100vh - 170px);
+    width: 484px;
 }
 
 .navbar-nav .nav-more .dropdown-menu.show {
@@ -239,20 +239,20 @@ html {
 
 .navbar-nav .nav-item .dropdown-menu {
     position: absolute;
+    /* align-self: flex-start; */
+    top: 100%;
     background: rgb(235, 245, 236);
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
+    /* border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px; */
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     border: 1px solid black;
-    left: 0;
-    top: 100%;
+    z-index: 1050;
+    margin-top: 6px;
     color: black !important;
     padding: 0;
     flex-direction: column;
     overflow-y: auto;
-    margin-top: 6px;
-    z-index: 1050;
-    align-items: flex-start;
+    max-height: calc(100vh - 170px);
     min-width: 200px;
     width: 100%;
 }
@@ -733,12 +733,15 @@ html {
     }
 
     .nav-item .dropdown-menu {
+        
         left: calc(50% - 4.5px) !important;
         transform: translateX(-50%);
         width: calc(100vw - 24px) !important;
     }
 
     .nav-more .dropdown-menu {
+        right: -1px !important;
+      /*   transform: translateX(-50%); */
 
         width: calc(100vw - 24px) !important;
     }
@@ -755,9 +758,10 @@ html {
     }
 }
 
-@media (min-width: 768px) {
+/* moved to v3-nav.js */
+/* @media (min-width: 768px) {
 
-   /*  .nav-dropdown.dropdown:hover .dropdown-menu {
+    .nav-dropdown.dropdown:hover .dropdown-menu {
         display: block;
     }
 
@@ -794,9 +798,9 @@ html {
 
     .dropdown-extra:hover {
         color: #0ed18c !important;
-    } */
+    }
 
-}
+} */
 
 @media (max-width: 576px) {
     .navbar-subbar-container {
