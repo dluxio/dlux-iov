@@ -952,12 +952,12 @@ export default {
     // add sting chat
     this.addStingChat();
 
-    // Nav Dropdown Behaviors
     const navMore = document.querySelector(".nav-more .nav-link");
     const dropdownMenus = document.querySelectorAll(".nav-dropdown");
     const bars = document.querySelectorAll(".nav-bars .bar");
 
     let isHoverListenerActive = false;
+    let styleTag = null; // Reference to the dynamically added style tag
 
     function toggleNavMore(event) {
       event.preventDefault();
@@ -989,11 +989,12 @@ export default {
     }
 
     function addDropdownHoverListeners() {
-      if (window.innerWidth > 768 && !isHoverListenerActive) {
+      if (window.innerWidth > 768 && !isHoverListenerActive && !window.matchMedia("(pointer: coarse)").matches) {
         dropdownMenus.forEach(dropdown => {
           dropdown.addEventListener("mouseover", dropdownHoverHandler);
         });
         isHoverListenerActive = true;
+        addDropdownHoverCSS();
       }
     }
 
@@ -1003,11 +1004,66 @@ export default {
           dropdown.removeEventListener("mouseover", dropdownHoverHandler);
         });
         isHoverListenerActive = false;
+        removeDropdownHoverCSS();
+      }
+    }
+
+    function addDropdownHoverCSS() {
+      if (!styleTag) {
+        styleTag = document.createElement("style");
+        styleTag.innerHTML = `
+        .nav-dropdown.dropdown:hover .dropdown-menu {
+          display: block;
+        }
+
+        .navbar-nav .nav-item .dropdown-menu li .dropdown-item:hover {
+          color: white !important;
+          background-color: black;
+        }
+
+        .navbar-nav .nav-item .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
+          color: white !important;
+        }
+
+        .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover {
+          color: white !important;
+          background-color: black !important;
+        }
+
+        .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
+          color: white !important;
+        }
+        
+        .nav-highlight:hover {
+          background-color: black;
+          color: white !important;
+        }
+
+        .nav-highlight:hover .nav-subtitle {
+          color: white !important;
+        }
+
+        .nav-more .nav-link:hover .bar {
+          background-color: white !important;
+        }
+
+        .dropdown-extra:hover {
+          color: #0ed18c !important;
+        }
+      `;
+        document.head.appendChild(styleTag);
+      }
+    }
+
+    function removeDropdownHoverCSS() {
+      if (styleTag) {
+        styleTag.remove();
+        styleTag = null;
       }
     }
 
     function handleResize() {
-      if (window.innerWidth > 768) {
+      if (window.innerWidth > 768 && !window.matchMedia("(pointer: coarse)").matches) {
         addDropdownHoverListeners();
       } else {
         removeDropdownHoverListeners();

@@ -757,17 +757,8 @@ html {
 
 @media (min-width: 768px) {
 
-    .nav-dropdown.dropdown:hover .dropdown-menu {
+   /*  .nav-dropdown.dropdown:hover .dropdown-menu {
         display: block;
-    }
-
-    .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover {
-        color: white !important;
-        background-color: black !important;
-    }
-
-    .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
-        color: white !important;
     }
 
     .navbar-nav .nav-item .dropdown-menu li .dropdown-item:hover {
@@ -779,11 +770,20 @@ html {
         color: white !important;
     }
 
+    .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover {
+        color: white !important;
+        background-color: black !important;
+    }
+
+    .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
+        color: white !important;
+    }
+        
     .nav-highlight:hover {
         background-color: black;
         color: white !important;
-    }
-
+    } 
+    
     .nav-highlight:hover .nav-subtitle {
         color: white !important;
     }
@@ -794,7 +794,8 @@ html {
 
     .dropdown-extra:hover {
         color: #0ed18c !important;
-    }
+    } */
+
 }
 
 @media (max-width: 576px) {
