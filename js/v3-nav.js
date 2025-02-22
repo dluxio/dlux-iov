@@ -1145,9 +1145,11 @@ export default {
           <li>
             <a class="dropdown-item subnav-title" href="/user#wallet/" @click="showTab('wallet')">Wallet<span
                 class="subnav-subtitle">Honeycomb Tokens</span></a>
+          </li>
           <li>
             <a class="dropdown-item subnav-title" href="/user#inventory/" @click="showTab('inventory')">Inventory<span
                 class="subnav-subtitle">NFT Collection</span></a>
+          </li>
           <li>
             <a class="dropdown-item subnav-title" href="/user#drive/" @click="showTab('drive')">IPFS Drive<span
                 class="subnav-subtitle">SPK
@@ -1159,10 +1161,12 @@ export default {
           </li>
           <li class="subnav-extra-middle d-none">
             <a class="dropdown-extra" role="button" href="#" data-bs-toggle="modal"
-              data-bs-target="#qrModal" aria-controls="qrModal">QR Code</a></li>
+              data-bs-target="#qrModal" aria-controls="qrModal">QR Code</a>
+          </li>
           <li class="subnav-extra-middle">
             <a class="dropdown-extra" role="button" href="#" data-bs-toggle="modal"
-              data-bs-target="#loginModal" aria-controls="loginModal">Switch User</a></li>
+              data-bs-target="#loginModal" aria-controls="loginModal">Switch User</a>
+          </li>
           <li class="subnav-extra-bottom">
             <a class="dropdown-extra" role="button" href="#" @click="logout()">Logout</a>
           </li>
