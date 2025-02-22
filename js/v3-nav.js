@@ -961,6 +961,9 @@ export default {
   function toggleNavMore(event) {
     event.preventDefault();
     bars.forEach(bar => bar.classList.toggle("x"));
+    
+    // Manually remove focus to prevent hover-like state persisting
+    navMore.blur();
   }
 
   function closeNavMore(event) {
@@ -1006,7 +1009,7 @@ export default {
   }
 
   function disableHoverOnTouch() {
-    if ("ontouchstart" in window || navigator.maxTouchPoints) {
+    if ("ontouchstart" in window || navigator.maxTouchPoints > 0) {
       removeDropdownHoverListeners(); // Disable hover on touch devices
     } else {
       addDropdownHoverListeners(); // Enable hover on non-touch devices
@@ -1026,7 +1029,7 @@ export default {
     navMore.addEventListener("click", toggleNavMore);
   }
   document.addEventListener("click", closeNavMore);
-  
+
   disableHoverOnTouch(); // Run on mount
   window.addEventListener("resize", handleResize);
 
