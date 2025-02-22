@@ -1182,7 +1182,7 @@ export default {
           </span>
         </a>
         <div class="hover-gap"></div>
-        <ul class="dropdown-menu dropdown-menu-end container">
+        <ul class="dropdown-menu container">
           <li class="nav-show"><a class="dropdown-item subnav-title" href="/hub">HUB<span class="subnav-subtitle">Social
                 dApps</span></a></li>
           <li class="nav-show"><a class="dropdown-item subnav-title" href="/dex">DEX<span
