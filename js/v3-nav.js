@@ -951,13 +951,13 @@ export default {
     document.head.appendChild(script);
     // add sting chat
     this.addStingChat();
+
     // Nav Dropdown Behaviors
     const navMore = document.querySelector(".nav-more .nav-link");
     const dropdownMenus = document.querySelectorAll(".nav-dropdown");
     const bars = document.querySelectorAll(".nav-bars .bar");
 
     let isHoverListenerActive = false;
-    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
 
     function toggleNavMore(event) {
       event.preventDefault();
@@ -989,7 +989,7 @@ export default {
     }
 
     function addDropdownHoverListeners() {
-      if (window.innerWidth > 768 && !isHoverListenerActive && !isTouchDevice) {
+      if (window.innerWidth > 768 && !isHoverListenerActive) {
         dropdownMenus.forEach(dropdown => {
           dropdown.addEventListener("mouseover", dropdownHoverHandler);
         });
@@ -1007,8 +1007,7 @@ export default {
     }
 
     function handleResize() {
-      const touchCheck = window.matchMedia("(pointer: coarse)").matches;
-      if (window.innerWidth > 768 && !touchCheck) {
+      if (window.innerWidth > 768) {
         addDropdownHoverListeners();
       } else {
         removeDropdownHoverListeners();
