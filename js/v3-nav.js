@@ -957,12 +957,11 @@ export default {
     const bars = document.querySelectorAll(".nav-bars .bar");
 
     let isHoverListenerActive = false;
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints;
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
 
     function toggleNavMore(event) {
       event.preventDefault();
       bars.forEach(bar => bar.classList.toggle("x"));
-      navMore.blur(); // Remove focus after tapping
     }
 
     function closeNavMore(event) {
@@ -1008,7 +1007,8 @@ export default {
     }
 
     function handleResize() {
-      if (window.innerWidth > 768 && !isTouchDevice) {
+      const touchCheck = window.matchMedia("(pointer: coarse)").matches;
+      if (window.innerWidth > 768 && !touchCheck) {
         addDropdownHoverListeners();
       } else {
         removeDropdownHoverListeners();
@@ -1038,7 +1038,6 @@ export default {
       this._cleanup();
     }
   },
-
   computed: {
     avatar: {
       get() {
