@@ -13287,6 +13287,10 @@ a-scene {
   border-color: black;
 }
 
+.bg-blue {
+  background: #0e4f81;
+}
+
 .btn-outline-blue {
   color: #fff;
   border-color: #033efd;

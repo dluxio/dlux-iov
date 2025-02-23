@@ -150,12 +150,22 @@ html {
 */
 
 
+.navbar-nav .nav-item:first-child {
+    flex: 0 0 64px;
+}
 
-
-.navbar-nav .nav-brand {
+.navbar-nav .nav-logotype {
     font-size: 2.5em;
     font-weight: 400;
     font-family: "Audiowide", serif;
+}
+
+.nav-logomark {
+
+}
+
+.nav-logo {
+
 }
 
 .card-title {
@@ -221,6 +231,7 @@ html {
     align-self: flex-end;
     top: 100%;
     background-color: rgb(235, 245, 236);
+    background-image: none;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     border: 1px solid black;
     z-index: 1050;
@@ -493,8 +504,12 @@ html {
     margin-top: 40px
 }
 
-.how-box a:hover {
+.hover-turq:hover {
     color: #0ed18c !important;
+}
+
+.hover-blue:hover {
+    color: #1c9bfc !important;
 }
 
 .vision-container {
@@ -591,7 +606,7 @@ html {
         height: 100%;
     }
 
-    .navbar-nav .nav-brand {
+    .navbar-nav .nav-logotype {
         display: none;
     }
 
@@ -741,8 +756,6 @@ html {
 
     .nav-more .dropdown-menu {
         right: -1px !important;
-      /*   transform: translateX(-50%); */
-
         width: calc(100vw - 24px) !important;
     }
 
@@ -755,6 +768,10 @@ html {
     .how-grid .how-box {
         width: 100%;
         max-width: 400px;
+    }
+
+    .navbar-nav .nav-item:first-child {
+        flex: 0 0 64px;
     }
 }
 
@@ -846,4 +863,12 @@ html {
     50% {
         transform: translateY(-10px);
     }
+}
+
+.bg-mint-darkest {
+    background-color: #D5E1D7;
+}
+
+.bg-mint-darker {
+    background-color: #E7F4E8;
 }

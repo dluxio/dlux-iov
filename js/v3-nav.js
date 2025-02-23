@@ -1106,7 +1106,7 @@ export default {
   template: `<div>
   <nav class="navbar navbar-floating navbar-expand-lg p-0 container">
     <ul class="navbar-nav mx-auto">
-      <li class="nav-item">
+      <li class="nav-item nav-logo">
         <a class="nav-link d-flex align-items-center" href="/">
           <svg class="nav-logo" viewBox="0 0 333 333" xmlns="http://www.w3.org/2000/svg">
             <polygon class="cls-1"
@@ -1150,7 +1150,7 @@ export default {
             <polygon class="cls-1"
               points="186.56 292.91 186.62 292.91 203.93 292.76 176.49 245.76 185.75 229.62 231.79 307.99 140.56 308.18 149.16 293.24 186.56 292.91" />
           </svg>
-          <span class="nav-brand ms-1">DLUX</span></a>
+          <span class="nav-logotype ms-1">DLUX</span></a>
       </li>
       <li class="nav-item nav-hide">
         <a class="nav-link nav-highlight nav-title" href="/hub">HUB<span class="nav-subtitle">Social
