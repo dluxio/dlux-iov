@@ -1106,7 +1106,7 @@ export default {
   template: `<div>
   <nav class="navbar navbar-floating navbar-expand-lg p-0 container">
     <ul class="navbar-nav mx-auto">
-      <li class="nav-item nav-logo">
+      <li class="nav-item">
         <a class="nav-link d-flex align-items-center" href="/">
           <svg class="nav-logo" viewBox="0 0 333 333" xmlns="http://www.w3.org/2000/svg">
             <polygon class="cls-1"
