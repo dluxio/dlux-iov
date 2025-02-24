@@ -1185,7 +1185,7 @@ export default {
       <li v-show="user" class="nav-item dropdown nav-dropdown">
         <a class="nav-link nav-highlight nav-title dropdown-toggle d-flex align-items-center" href="#" role="button"
           data-bs-toggle="dropdown" aria-expanded="false">
-          <img :src="avatar" class="pfp rounded-circle img-fluid bg-mint"><span
+          <img :src="avatar" class="pfp rounded-circle img-fluid bg-mint-blue"><span
             class="navbar-username ms-2">{{user}}</span></a>
         <div class="hover-gap"></div>
         <ul class="dropdown-menu container">

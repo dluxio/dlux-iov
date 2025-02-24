@@ -21,16 +21,14 @@ html {
     color: rgb(235, 245, 236) !important;
 }
 
-.bg-mint {
-    background-color: rgb(235, 245, 236) !important;
-}
+
 
 .navbar-floating {
     position: fixed;
     top: 8px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgb(235, 245, 236) !important;
+    background-color: rgb(235, 245, 241) !important;
     border-radius: 10px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
@@ -42,11 +40,11 @@ html {
 }
 
 .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover {
-    background-color: rgb(235, 245, 236);
+    background-color: rgb(235, 245, 241);
 }
 
 .nav-dropdown .dropdown-menu li .dropdown-item:hover {
-    background-color: rgb(235, 245, 236);
+    background-color: rgb(235, 245, 241);
 }
 
 
@@ -230,7 +228,7 @@ html {
     position: absolute;
     align-self: flex-end;
     top: 100%;
-    background-color: rgb(235, 245, 236);
+    background-color: rgb(235, 245, 241);
     background-image: none;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     border: 1px solid black;
@@ -865,10 +863,34 @@ html {
     }
 }
 
-.bg-mint-darkest {
-    background-color: #D5E1D7;
+.bg-mint {
+    background-color: rgb(235, 245, 236) !important;
 }
 
 .bg-mint-darker {
     background-color: #E7F4E8;
+}
+
+.bg-mint-darkest {
+    background-color: #D5E1D7;
+}
+
+.text-mint-blue {
+    color: rgb(235, 245, 241) !important;
+}
+
+.bg-mint-blue {
+    background-color: rgb(235, 245, 241) !important;
+}
+
+.bg-mint-blue-darker {
+    background-color: #e7f4f0;
+}
+
+.bg-mint-blue-darkest {
+    background-color: #d5e1de;
+}
+
+#learn {
+    align-self:flex-end; padding-bottom: 100px;
 }
