@@ -1208,19 +1208,19 @@ export default {
                 Network</span></a>
           </li>
           <li class="subnav-extra-top">
-            <a class="dropdown-extra" role="button" href="#" @click="toggleChat"
+            <a class="dropdown-extra" role="button" href="#/" @click="toggleChat"
               data-bs-toggle="offcanvas" data-bs-target="#offcanvasSting" aria-controls="offcanvasSting">Sting Chat</a>
           </li>
           <li class="subnav-extra-middle d-none">
-            <a class="dropdown-extra" role="button" href="#" data-bs-toggle="modal"
+            <a class="dropdown-extra" role="button" href="#/" data-bs-toggle="modal"
               data-bs-target="#qrModal" aria-controls="qrModal">QR Code</a>
           </li>
           <li class="subnav-extra-middle">
-            <a class="dropdown-extra" role="button" href="#" data-bs-toggle="modal"
+            <a class="dropdown-extra" role="button" href="#/" data-bs-toggle="modal"
               data-bs-target="#loginModal" aria-controls="loginModal">Switch User</a>
           </li>
           <li class="subnav-extra-bottom">
-            <a class="dropdown-extra" role="button" href="#" @click="logout()">Logout</a>
+            <a class="dropdown-extra" role="button" href="#/" @click="logout()">Logout</a>
           </li>
         </ul>
       </li>
