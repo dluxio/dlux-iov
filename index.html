@@ -9,7 +9,6 @@
   <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
   <!-- Bootstrap -->
   <link href="/css/custom.css" rel="stylesheet" />
-  <link href="/css/v3.css" rel="stylesheet" />
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,13 +36,13 @@
       <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
         @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
     </div>
-    <section class="hero-section container-fluid d-flex">
+    <section class="hero-section container-fluid d-flex bg-img-gradient">
       <div class="hero-text hero-text-bottom container">
-        <h1 class="hero-brand text-mint-blue">DLUX</h1>
-        <p class="hero-subtitle mb-3 text-mint-blue">Layer 2 for HIVE<br><span class="text-turq">dApps • Storage •
+        <h1 class="hero-brand text-light-1">DLUX</h1>
+        <p class="hero-subtitle mb-3 text-light-1">Layer 2 for HIVE<br><span class="text-turq">dApps • Storage •
             Tokens</span>
         </p>
-        <p class="hero-lead mb-4 text-mint-blue">Open Source Tools for<br>Decentralized Communities</p>
+        <p class="hero-lead mb-4 text-light-1">Open Source Tools for<br>Decentralized Communities</p>
         <div class="hero-buttons">
           <a role="button" class="btn btn-hero btn-turq btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="#vision">Our
             Vision</a>
@@ -194,29 +193,29 @@
         </div>
       </div>
     </section>
-    <section class="how-section py-5 bg-mint-blue-darkest text-black" id="how">
+    <section class="how-section py-5 bg-light-3 text-black" id="how">
       <h2 class="section-title fs-1">How it Works</h2>
       <div class="how-grid flex-wrap px-1">
-        <div class="how-box bg-mint-blue-darker">
+        <div class="how-box bg-light-2">
           <h3 class="card-title mb-2">Blockchain</h3>
           <p class="card-text mb-auto">Three second transaction times and social network
             features make HIVE the most developer friendly blockchain in the world. DLUX Layer 2 brings new
             features to its thousands of Montly Active Users.</p>
-          <a href="https://hivexplorer.com/" target="_blank" role="button" class="d-flex hover-turq"><span class="me-1">HIVE Blockchain Explorer</span><i class="ms-auto fa-solid fa-arrow-up-right-from-square"></i></a>
+          <a href="https://hivexplorer.com/" target="_blank" role="button" class="d-flex hover-1"><span class="me-1">HIVE Blockchain Explorer</span><i class="ms-auto fa-solid fa-arrow-up-right-from-square"></i></a>
         </div>
-        <div class="how-box bg-mint-blue-darker">
+        <div class="how-box bg-light-2">
           <h3 class="card-title mb-2">L2 Nodes</h3>
           <p class="card-text mb-auto">The global network of Honeycomb Layer 2 nodes utilize spare compute
             resources to
             power decentralized storage, token exchange, video transcoding, streaming, and turn servers. </p>
-          <a href="node" role="button" class="hover-turq">Run a DePIN Node</a>
+          <a href="node" role="button" class="hover-1">Run a DePIN Node</a>
         </div>
-        <div class="how-box bg-mint-blue-darker">
+        <div class="how-box bg-light-2">
           <h3 class="card-title mb-2">Platform</h3>
           <p class="card-text mb-auto">HIVE scalability, DLUX node architecture, IPFS data storage, and
             censorship resistant publishing empower next generation Web3 dApps to do more for their communities.
           </p>
-          <a href="/build/" role="button" class="hover-turq">Build on DLUX</a>
+          <a href="/build/" role="button" class="hover-1">Build on DLUX</a>
         </div>
       </div>
     </section>
@@ -225,7 +224,7 @@
         <source src="/vid/glowing_hexagon.webmhd.webm" type="video/webm">
       </video>
       <div class="hero-text container my-5 d-flex flex-column justify-content-center">
-        <div><p class="hero-title mb-3 text-mint-blue text-center">DePIN</p></div>
+        <div><p class="hero-title mb-3 text-light-1 text-center">DePIN</p></div>
         <div style="max-width: 600px;" class="mx-auto"><p class="hero-lead mb-4 text-mint text-center">Node are rewarded with tokens for providing services to the Decentralized Physical Infrastructure Network.</p></div>
         <div class="hero-buttons mx-auto">
           <a class="btn btn-hero btn-outline-honey btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="/node/">Node Rewards</a>

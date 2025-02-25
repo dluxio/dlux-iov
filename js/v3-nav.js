@@ -1004,56 +1004,13 @@ export default {
 
     function addDropdownHoverCSS() {
       if (!styleTag) {
-        styleTag = document.createElement("style");
-        styleTag.innerHTML = `
-            .nav-dropdown.dropdown:hover .dropdown-menu {
-              display: block;
-            }
-    
-            .navbar-nav .nav-item .dropdown-menu li .dropdown-item:hover {
-              color: white !important;
-              background-color: black;
-            }
-    
-            .navbar-nav .nav-item .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
-              color: white !important;
-            }
-    
-            .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover {
-              color: white !important;
-              background-color: black !important;
-            }
-    
-            .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
-              color: white !important;
-            }
-            
-            .nav-highlight:hover {
-              background-color: black;
-              color: white !important;
-            }
-    
-            .nav-highlight:hover .nav-subtitle {
-              color: white !important;
-            }
-    
-            .nav-more .nav-link:hover .bar {
-              background-color: white !important;
-            }
-    
-            .dropdown-extra:hover {
-              color: #0ed18c !important;
-            }
-            }
-          `;
-        document.head.appendChild(styleTag);
+        document.body.setAttribute("data-touch", "false");
       }
     }
 
     function removeDropdownHoverCSS() {
       if (styleTag) {
-        styleTag.remove();
-        styleTag = null;
+        document.body.setAttribute("data-touch", "true");
       }
     }
 
