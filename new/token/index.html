@@ -19,7 +19,7 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@300..700&display=swap"
-	  rel="stylesheet">
+		rel="stylesheet">
 	<!-- Markdown -->
 	<script src="https://unpkg.com/showdown@1.x/dist/showdown.min.js"></script>
 	<link rel="stylesheet" href="/css/simplemde-bs-dark.css">
@@ -56,14 +56,14 @@
 </head>
 
 <body>
-	<div id="app">
+	<div id="app" class="d-flex flex-column vh-100" v-cloak>
 		<!-- navbar -->
 		<div>
 			<nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
 				@logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
 				:lapi="lapi" />
 		</div>
-		<main role="main" class="mb-auto" style="padding-top: 94px;">
+		<main role="main" class="d-flex flex-column flex-grow-1 padmain">
 			<div v-if="!account">
 				<div class="container-fluid mt-2">
 					<div class="container mt-2 pt-md-5">
@@ -73,8 +73,7 @@
 									Login to see this page
 								</div>
 								<button class="fs-6 btn btn-success btn-success-lg text-black" type="button"
-									data-bs-toggle="modal" data-bs-target="#loginModal"
-									aria-controls="loginModal"
+									data-bs-toggle="modal" data-bs-target="#loginModal" aria-controls="loginModal"
 									style="font-family: 'Lucida Console', Monaco, monospace;">login</button>
 							</div>
 						</div>
@@ -82,7 +81,7 @@
 				</div>
 			</div>
 			<div v-if="account" class="container p-0 rounded-top">
-				<div class="d-flex flex-column justify-content-center bg-blur-darkg-50 rounded-top">
+				<div class="d-flex flex-column justify-content-center bg-blur-darkg-50 rounded-top mb-4">
 					<!-- toolbar -->
 					<div class="d-flex bg-dark py-1 border-0 rounded-top">
 						<div class="d-flex flex-wrap align-items-center ms-4 me-auto justify-content-center">
@@ -141,7 +140,7 @@
 						</div>
 					</div>
 					<!-- cols -->
-					<div class="d-flex">
+					<div class="d-flex bg-darker">
 						<div class="col-6 order-2" style="max-height: calc(100vh - 160px); overflow-y: scroll;">
 
 							<div class="mx-2">
@@ -1024,9 +1023,7 @@
 													</div>
 												-->
 		</main>
-		<div>
-			<foot-vue />
-		</div>
+		<foot-vue />
 	</div>
 
 	<!-- Bootstrap -->

@@ -12371,7 +12371,7 @@ textarea.form-control-lg {
 }
 
 /* CSS Document */
-.body {
+body {
   background-color: #242e39;
 }
 
@@ -14466,6 +14466,10 @@ html {
 
 .bg-dark-2 {
   background-color: #242e39;
+}
+
+.bg-dark-3 {
+  background-color: #08233c;
 }
 
 .hover-1:hover {
