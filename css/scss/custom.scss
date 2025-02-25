@@ -4,8 +4,8 @@
 @import "../bootswatch/quartz/_bootswatch.scss";
 
 /* CSS Document */
-body {
-  background-color: $bg-light-1;
+.body {
+  background-color: $bg-dark-2;
 }
 
 #app {
@@ -1581,14 +1581,6 @@ html {
     font-family: "Audiowide", serif;
 }
 
-.nav-logomark {
-
-}
-
-.nav-logo {
-
-}
-
 .card-title {
     font-family: 'Space Grotesk', serif;
     font-size: 2rem;
@@ -1635,7 +1627,6 @@ html {
 }
 
 .navbar-nav .nav-more {
-
     height: 72px;
     width: 72px;
     display: flex;
@@ -1644,8 +1635,6 @@ html {
     justify-content: center;
     position: relative;
 }
-
-
 
 .navbar-nav .nav-more .dropdown-menu {
     position: absolute;
@@ -2068,8 +2057,6 @@ html {
 
 @media (min-width: 1400px) {
 
-
-
     .vision-container {
         min-height: 960px;
     }
@@ -2197,50 +2184,6 @@ html {
     }
 }
 
-/* moved to v3-nav.js */
-/* @media (min-width: 768px) {
-
-    .nav-dropdown.dropdown:hover .dropdown-menu {
-        display: block;
-    }
-
-    .navbar-nav .nav-item .dropdown-menu li .dropdown-item:hover {
-        color: white !important;
-        background-color: black;
-    }
-
-    .navbar-nav .nav-item .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
-        color: white !important;
-    }
-
-    .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover {
-        color: white !important;
-        background-color: black !important;
-    }
-
-    .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
-        color: white !important;
-    }
-        
-    .nav-highlight:hover {
-        background-color: black;
-        color: white !important;
-    } 
-    
-    .nav-highlight:hover .nav-subtitle {
-        color: white !important;
-    }
-
-    .nav-more .nav-link:hover .bar {
-        background-color: white !important;
-    }
-
-    .dropdown-extra:hover {
-        color: #0ed18c !important;
-    }
-
-} */
-
 @media (max-width: 576px) {
     .navbar-subbar-container {
         margin-left: 12px;
@@ -2297,22 +2240,6 @@ html {
 
 .bg-mint-darkest {
     background-color: #D5E1D7;
-}
-
-.text-mint-blue {
-    color: rgb(235, 245, 241) !important;
-}
-
-.bg-mint-blue {
-    background-color: rgb(235, 245, 241) !important;
-}
-
-.bg-mint-blue-darker {
-    background-color: #e7f4f0;
-}
-
-.bg-mint-blue-darkest {
-    background-color: #d5e1de;
 } */
 
 #learn {
@@ -2339,11 +2266,15 @@ html {
   background-color: $bg-dark-1;
 }
 
+.bg-dark-2 {
+  background-color: $bg-dark-2;
+}
+
 .hover-1:hover {
   color: $hover-1;
 }
 
-
+// Nav dropdown hover on non-touch devices
 
 body[data-touch="false"] .nav-dropdown.dropdown:hover .dropdown-menu {
   display: block;
