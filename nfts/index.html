@@ -22,18 +22,28 @@
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
     <script type="module" src="/js/v3-nfts.js"></script>
     <script>
-        if ('serviceWorker' in navigator) {
-            navigator
-                .serviceWorker
-                .register(
-                    // path to the service worker file
-                    '/sw.js'
-                )
-                // the registration is async and it returns a promise
-                .then(function (reg) {
-                    console.log('Registration Successful');
-                });
+        var activeWorker = 0
+    if ('serviceWorker' in navigator) {
+      const version = '2025.02.26.'
+      navigator.serviceWorker.register(`/sw.js?v=${version}`)
+        .then(reg => {
+          console.log('Registration succeeded. Scope is ' + reg.scope);
+          activeWorker = reg.active;
+          console.log('Service Worker Ready for VUE', activeWorker)
+          reg.update().then(() => {
+            console.log('Service worker updated');
+          });
+        })
+        .catch(error => {
+          console.log('Registration failed with ' + error);
+        });
+      navigator.serviceWorker.addEventListener('message', event => {
+        if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
+          console.log('New version available, reloading...');
+          window.location.reload(); // Reload the page to get the latest content
         }
+      });
+    }
     </script>
     <style>
         .circle {
