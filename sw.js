@@ -1,4 +1,4 @@
-this.version = "2025.02.26.2";
+this.version = "2025.02.26.3";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -232,36 +232,59 @@ self.addEventListener("install", function (event) {
   );
 });
 
-self.addEventListener("fetch", function (event) {
-  event.respondWith(
-    /* Check if the cache has the file */
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.match(event.request).then(resp => {
-          // Request found in current cache, or fetch the file
-          return resp || fetch(event.request).then(response => {
-              /* Check if the cache has the file */
-              if(response.status == 429)throw new Error('Rate Limit@', event.request.url);
-              if (!response || response.status !== 200 || response.type !== "basic") {
-                return response;
+self.addEventListener('fetch', function(event) {
+  if (event.request.url.startsWith('https://api.coingecko.com/')) {
+    // Bypass service worker for Coingecko API
+    event.respondWith(fetch(event.request));
+} else event.respondWith(
+      caches.match(event.request).then(function(response) {
+          if (response) {
+              return response; // Serve from cache if available
+          }
+          return fetch(event.request).then(function(networkResponse) {
+              if (!networkResponse || networkResponse.status !== 200) {
+                  console.error('Failed to fetch:', event.request.url);
+                  // Optional: Return a fallback response here
               }
-              // Cache the newly fetched file for next time
-              if (
-                (!response.headers.get("content-type").includes("json") && !response.headers.get("retry-after")) &&
-                event.request.method === "GET" && 
-                event.request.url.startsWith('http'))cache.put(event.request, response.clone());
-              return response;
-          // Fetch failed, user is offline
-          }).catch(() => {
-              // Look in the whole cache to load a fallback version of the file
-              return caches.match(event.request).then(fallback => {
-                  return fallback;
-              });
+              return networkResponse;
+          }).catch(function(error) {
+              console.error('Network error for:', event.request.url, error);
+              // Optional: Return a fallback response here
           });
-      });
-    })
-
+      })
   );
 });
+
+// self.addEventListener("fetch", function (event) {
+//   event.respondWith(
+//     /* Check if the cache has the file */
+//     caches.open(CACHE_NAME).then(cache => {
+//       return cache.match(event.request).then(resp => {
+//           // Request found in current cache, or fetch the file
+//           return resp || fetch(event.request).then(response => {
+//               /* Check if the cache has the file */
+//               if(response.status == 429)throw new Error('Rate Limit@', event.request.url);
+//               if (!response || response.status !== 200 || response.type !== "basic") {
+//                 return response;
+//               }
+//               // Cache the newly fetched file for next time
+//               if (
+//                 (!response.headers.get("content-type").includes("json") && !response.headers.get("retry-after")) &&
+//                 event.request.method === "GET" && 
+//                 event.request.url.startsWith('http'))cache.put(event.request, response.clone());
+//               return response;
+//           // Fetch failed, user is offline
+//           }).catch(() => {
+//               // Look in the whole cache to load a fallback version of the file
+//               return caches.match(event.request).then(fallback => {
+//                   return fallback;
+//               });
+//           });
+//       });
+//     })
+
+//   );
+// });
 
 self.addEventListener("activate", function (event) {
   console.log("SW: Activated. Cache name:" + CACHE_NAME);
