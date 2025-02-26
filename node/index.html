@@ -30,20 +30,21 @@
 </head>
 
 <body>
-  <div id="app">
+  <div id="app" class="text-dark-1">
     <!-- navbar -->
     <div>
       <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
         @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
     </div>
-    <section class="hero-section container-fluid d-flex">
+    <section class="hero-section container-fluid d-flex text-light-1" style="background-color: #112D36;">
+      <img src="/vid/stills/connected_dots.jpg" class="bg-video">
       <video autoplay muted loop playsinline preload="auto" onloadeddata="this.play();" class="bg-video">
         <source src="/vid/connected_dots.m4v" type="video/mp4">
       </video>
       <div class="hero-text container">
-        <p class="hero-title mb-3 text-mint hero-text-800">Node Rewards
+        <p class="hero-title mb-3 hero-text-800">Node Rewards
         </p>
-        <p class="hero-subtitle mb-4 text-mint hero-text-800">Put your computer to work.
+        <p class="hero-subtitle mb-4 hero-text-800">Put your computer to work.
         </p>
         <div class="hero-buttons">
           <a class="btn btn-hero btn-turq btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill d-none" href="/docs/honeycomb/new-node"
@@ -54,13 +55,13 @@
       <div id="learn"></div>
     </section>
     <!-- 3 Steps -->
-    <section class="container-fluid bg-light-3 text-dark">
+    <section class="container-fluid bg-light-3">
       <div class="container p-0">
         <div class="mx-auto row flex-wrap px-1 pt-4">
           <div class="d-flex flex-column col-12 col-md-4 mb-4">
             <span class="text-center"><i class="fa-solid fa-clone fa-fw fs-1 mb-3"></i></span>
             <div class="d-flex justify-content-center align-items-center mb-2">
-              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark me-2"><i
+              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark-1 me-2"><i
                     class="fa-solid fa-1 fa-fw"></i></span></h3>
               <h3 class="card-title mb-0">Clone</h3>
             </div>
@@ -69,7 +70,7 @@
           <div class="d-flex flex-column col-12 col-md-4 mb-4">
             <span class="text-center"><i class="fa-solid fa-key fa-fw fs-1 mb-3"></i></span>
             <div class="d-flex justify-content-center align-items-center mb-2">
-              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark me-2"><i
+              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark-1 me-2"><i
                     class="fa-solid fa-2 fa-fw"></i></span></h3>
               <h3 class="card-title mb-0">Configure</h3>
             </div>
@@ -78,7 +79,7 @@
           <div class="d-flex flex-column col-12 col-md-4 mb-4">
             <span class="text-center"><i class="fa-solid fa-gift fa-fw fs-1 mb-3"></i></span>
             <div class="d-flex justify-content-center align-items-center mb-2">
-              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark me-2"><i
+              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark-1 me-2"><i
                     class="fa-solid fa-3 fa-fw"></i></span></h3>
               <h3 class="card-title mb-0">Rewards</h3>
             </div>
@@ -88,7 +89,7 @@
       </div>
     </section>
     <!-- DePIN Services -->
-    <section class="container-fluid py-4 bg-light-2 text-black">
+    <section class="container-fluid py-4 bg-light-2">
       <div class="container p-0">
         <div class="row d-flex justify-content-center align-items-center mt-3">
           <div class="col-12 col-lg-5 p-0 mb-3">
@@ -101,12 +102,12 @@
               drives.</p>
           </div>
           <div class="col-12 col-lg-5 p-0 mb-3 d-flex justify-content-center">
-            <ul class="ms-lg-auto border border-black rounded list-unstyled bg-light-1 mb-0">
-              <li class="d-flex align-items-center p-3 border-bottom border-dark"><i
+            <ul class="ms-lg-auto border border-dark-1 rounded list-unstyled bg-light-1 mb-0">
+              <li class="d-flex align-items-center p-3 border-bottom border-dark-1"><i
                   class="fa-solid fa-circle-check fa-fw me-2"></i><span class="hero-lead">Earn DLUX for concensus
                   reports</span>
               </li>
-              <li class="d-flex align-items-center p-3 border-bottom border-dark"><i
+              <li class="d-flex align-items-center p-3 border-bottom border-dark-1"><i
                   class="fa-solid fa-circle-check fa-fw me-2"></i><span class="hero-lead">Earn SPK for file
                   hosting</span>
               </li>
@@ -118,26 +119,26 @@
       </div>
     </section>
     <!-- Proof of Storage -->
-    <section class="container-fluid py-4 bg-light-2 text-black">
+    <section class="container-fluid py-4 bg-light-2">
       <div class="container p-0">
         <div class="bg-light-3 d-flex flex-column rounded px-2 py-3">
-          <h2 class="section-title mx-3 mb-2 text-black text-center">DePIN</h2>
+          <h2 class="section-title mx-3 mb-2 text-center">DePIN</h2>
           <h3 class="hero-lead text-center">Decentralized Physical Infrastructure Network</h3>
           <p class="mx-auto text-center mb-3" style="max-width: 700px;">Running Honeycomb Network nodes to validate transactions and store files is true Web3: Decentralized internet owned and operated by users, with profit sharing through tokens. </p>
-          <div class="d-flex flex-column" style="color: rgb(86, 86, 86);">
+          <div class="d-flex flex-column text-dark-muted">
             <div class="d-flex align-items-center justify-content-center flex-wrap mx-auto">
               <div class="p-2 hero-lead"><i class="fa-solid fa-atom fa-fw me-1"></i>Validation</div>
               <div class="p-2 hero-lead"><i class="fa-solid fa-hard-drive fa-fw me-1"></i>Storage</div>
-              <div class="p-2 hero-lead position-relative"><span class="d-flex align-items-center"><i class="fa-solid fa-arrows-spin fa-fw me-1"></i>Transcode</span><span class="badge bg-light-1 border border-dark position-absolute top-100 start-50 translate-middle" style="font-size: .5em; margin-top: -5px; color: rgb(86, 86, 86);">Coming Soon</span></div>
+              <div class="p-2 hero-lead position-relative"><span class="d-flex align-items-center"><i class="fa-solid fa-arrows-spin fa-fw me-1"></i>Transcoding</span><span class="badge bg-light-1 text-dark-muted border border-dark-1 position-absolute top-100 start-50 translate-middle" style="font-size: .5em; margin-top: -5px;">Coming Soon</span></div>
             </div>
           </div>
         </div>
       </div>
     </section>
     <!-- Token Ecosystem -->
-    <section class="how-section py-4 bg-light-2 text-black container-fluid" id="how">
+    <section class="how-section py-4 bg-light-2 container-fluid" id="how">
       <div class="container">
-        <h2 class="section-title fs-3 text-black">Honeycomb Networks</h2>
+        <h2 class="section-title fs-3">Honeycomb Networks</h2>
         <div class="how-grid mx-auto flex-wrap px-1">
           <div class="how-box bg-light-1">
             <h3 class="card-title mb-2">DLUX</h3>
@@ -159,34 +160,34 @@
       </div>
     </section>
     <!-- DePIN Services -->
-    <section class="container-fluid py-4 bg-light-2 text-black">
+    <section class="container-fluid py-4 bg-light-2">
       <div class="container p-0">
         <div class="d-flex flex-column bg-light-3 rounded p-3">
           <p class="hero-subtitle mb-4">Validator Nodes<br></p>
           <h2 class="hero-lead">
             DLUX Node (earns DLUX)</h2>
           <pre
-            class="bg-darkg text-white p-2 mb-4"><code>git clone https://github.com/dluxio/dlux_open_token.git cd dlux_open_token</code></pre>
+            class="bg-dark-1 text-light-1 p-2 mb-4"><code>git clone https://github.com/dluxio/dlux_open_token.git cd dlux_open_token</code></pre>
           <h2 class="hero-lead">
             SPK Network Node (earns LARYNX)</h2>
           <pre
-            class="bg-darkg text-white p-2 mb-4"><code>git clone https://github.com/3speaknetwork/honeycomb-spkcc.git cd honeycomb-spkcc</code></pre>
+            class="bg-dark-1 text-light-1 p-2 mb-4"><code>git clone https://github.com/3speaknetwork/honeycomb-spkcc.git cd honeycomb-spkcc</code></pre>
           <h2 class="hero-lead">
             Ragnarok Node (earns DUAT)</h2>
           <pre
-            class="bg-darkg text-white p-2 mb-4"><code>git clone https://github.com/disregardfiat/honeycomb.git && cd honeycomb && git checkout ragnarok</code></pre>
-          <a class="ms-auto btn btn-outline-dark rounded-pill mb-3" role="button" href="/docs/honeycomb/new-node"
+            class="bg-dark-1 text-light-1 p-2 mb-4"><code>git clone https://github.com/disregardfiat/honeycomb.git && cd honeycomb && git checkout ragnarok</code></pre>
+          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-3" role="button" href="/docs/honeycomb/new-node"
             target="_blank">Validator Quickstart<i class="ms-2 fa-solid fa-arrow-right"></i></a>
           <p class="hero-subtitle my-4">Resource Nodes<br></p>
           <h2 class="hero-lead">
             SPK Storage Node (earns SPK)</h2>
-          <pre class="bg-darkg text-white p-2 mb-4"><code>git clone https://github.com/spknetwork/trole</code></pre>
-          <a class="ms-auto btn btn-outline-dark rounded-pill mb-3" role="button" href="/docs/spk/trole"
+          <pre class="bg-dark-1 text-light-1 p-2 mb-4"><code>git clone https://github.com/spknetwork/trole</code></pre>
+          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-3" role="button" href="/docs/spk/trole"
             target="_blank">Storage Quickstart<i class="ms-2 fa-solid fa-arrow-right"></i></a>
             <h2 class="hero-lead">
               SPK Transcode Node (earns SPK)</h2>
-            <pre class="bg-darkg text-white p-2 mb-4"><code>COMING SOON</code></pre>
-            <a class="ms-auto btn btn-outline-dark rounded-pill mb-3 disabled" role="button"
+            <pre class="bg-dark-1 text-light-1 p-2 mb-4"><code>COMING SOON</code></pre>
+            <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-3" role="button"
               >Coming Soon<i class="ms-2 fa-solid fa-arrow-right d-none"></i></a>
         </div>
       </div>

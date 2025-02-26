@@ -87,7 +87,7 @@
     </div>
     <main role="main" class="d-flex flex-column flex-grow-1 padmain">
       <div class="container p-0" v-if="ready">
-        <div class="card bg-dark border border-dark  text-white rounded-top">
+        <div class="card bg-dark border border-dark  text-light rounded-top">
           <div>
             <img class="banner-img w-100 img-fluid rounded-top"
               :src="makeLink('https://ipfs.dlux.io/ipfs/', chains[jsontoken].sets[setname].computed.set ? chains[jsontoken].sets[setname].computed.set.banner : '')"></img>
@@ -172,7 +172,7 @@
                   <div
                     class="flex-grow-1 mb-1 me-2 progress bg-secondary border rounded-pill border-dark border-2 mint-bar">
                     <!--burned-->
-                    <div class="progress-bar bg-danger-50 text-black" role="progressbar"
+                    <div class="progress-bar bg-danger-50 text-dark" role="progressbar"
                       :style="{'width': ((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100) + '%'}"
                       aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                       <span><i class="me-1 fa-solid fa-fire"></i></span>
@@ -180,7 +180,7 @@
                         v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].deleted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
                     </div>
                     <!--opened-->
-                    <div class="progress-bar bg-success-50 text-black" role="progressbar"
+                    <div class="progress-bar bg-success-50 text-dark" role="progressbar"
                       :style="{'width': (((chains[jsontoken].sets[setname].minted-chains[jsontoken].sets[setname].deleted)/chains[jsontoken].sets[setname].max)*100) + '%'}"
                       aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                       <span><i class="me-1 fa-solid fa-box-open"></i></span>
@@ -188,7 +188,7 @@
                         v-cloak>{{formatNumber(((chains[jsontoken].sets[setname].minted/chains[jsontoken].sets[setname].max)*100),2,'.',',')}}%</span>
                     </div>
                     <!--closed-->
-                    <div class="progress-bar bg-primary-50 text-black" role="progressbar"
+                    <div class="progress-bar bg-primary-50 text-dark" role="progressbar"
                       :style="{'width': (((chains[jsontoken].sets[setname].max-chains[jsontoken].sets[setname].minted)/chains[jsontoken].sets[setname].max)*100) + '%'}"
                       aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                       <span><i class="me-1 fa-solid fa-box"></i></span>
@@ -267,7 +267,7 @@
                         </div>
                       </a>
                       <div class="ms-4">
-                        <p class="text-white-50 description" v-cloak>{{chains[jsontoken].sets[setname].computed.set ?
+                        <p class="text-light-50 description" v-cloak>{{chains[jsontoken].sets[setname].computed.set ?
                           chains[jsontoken].sets[setname].computed.set.Description
                           : '...'}}</p>
                         <p>Permlink: <a :href="makeLink('/blog/@',chains[jsontoken].sets[setname].link)"
@@ -305,7 +305,7 @@
             <div class="accordion bg-dark" id="accordionFilter">
               <div class="accordion-item bg-secondary">
                 <h2 class="accordion-header" id="headingOne">
-                  <button class="accordion-button bg-darkg text-white" type="button" data-bs-toggle="collapse"
+                  <button class="accordion-button bg-darkg text-light" type="button" data-bs-toggle="collapse"
                     data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
                     Status
                   </button>
@@ -313,27 +313,27 @@
                 <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
                   data-bs-parent="#accordionFilter">
                   <div class="accordion-body bg-darkest">
-                    <label class="form-label text-white-50">market</label>
+                    <label class="form-label text-light-50">market</label>
                     <ul class="list-group">
-                      <li class="list-group-item bg-black border border-dark text-white-50">
+                      <li class="list-group-item bg-black border border-dark text-light-50">
                         <input class="form-check-input me-1" type="checkbox" :checked="NFTselect.saleOnly"
                           @click="NFTselect.saleOnly = !NFTselect.saleOnly;selectNFTs()" aria-label="...">
                         Buy Now ({{sales.length}})
                       </li>
-                      <li class="list-group-item bg-black border border-dark text-white-50">
+                      <li class="list-group-item bg-black border border-dark text-light-50">
                         <input class="form-check-input me-1" type="checkbox" :checked="NFTselect.auctionOnly"
                           @click="NFTselect.auctionOnly = !NFTselect.auctionOnly;selectNFTs()" aria-label="...">
                         At Auction ({{auctions.length}})
                       </li>
                     </ul>
-                    <label class="form-label mt-3 text-white-50">@{{account}}</label>
+                    <label class="form-label mt-3 text-light-50">@{{account}}</label>
                     <ul class="list-group">
-                      <li class="list-group-item bg-black border border-dark text-white-50">
+                      <li class="list-group-item bg-black border border-dark text-light-50">
                         <input class="form-check-input me-1" type="checkbox" :checked="iOwnCheckbox" @click="iOwnView()"
                           aria-label="...">
                         Owner ({{iOwn.length}})
                       </li>
-                      <li class="list-group-item bg-black border border-dark text-white-50">
+                      <li class="list-group-item bg-black border border-dark text-light-50">
                         <input class="form-check-input me-1" type="checkbox" :checked="highBidderCheckbox"
                           @click="highBidderView()" aria-label="...">
                         High Bidder ({{highBidder.length}})
@@ -342,9 +342,9 @@
                   </div>
                 </div>
               </div>
-              <div class="accordion-item bg-secondary bg-secondary text-white">
+              <div class="accordion-item bg-secondary bg-secondary text-light">
                 <h2 class="accordion-header" id="headingThree">
-                  <button class="accordion-button bg-darkg text-white collapsed" type="button" data-bs-toggle="collapse"
+                  <button class="accordion-button bg-darkg text-light collapsed" type="button" data-bs-toggle="collapse"
                     data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                     Currency
                   </button>
@@ -353,15 +353,15 @@
                   data-bs-parent="#accordionFilters">
                   <div class="accordion-body bg-darkest">
                     <ul class="list-group">
-                      <li class="list-group-item bg-black border border-dark text-white-50">
+                      <li class="list-group-item bg-black border border-dark text-light-50">
                         <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
                         {{TOKEN}}
                       </li>
-                      <li class="list-group-item bg-black border border-dark text-white-50">
+                      <li class="list-group-item bg-black border border-dark text-light-50">
                         <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
                         HIVE
                       </li>
-                      <li class="list-group-item bg-black border border-dark text-white-50">
+                      <li class="list-group-item bg-black border border-dark text-light-50">
                         <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
                         HBD
                       </li>
@@ -372,7 +372,7 @@
               </div>
               <div class="accordion-item bg-secondary">
                 <h2 class="accordion-header" id="headingTwo">
-                  <button class="accordion-button bg-darkg text-white collapsed" type="button" data-bs-toggle="collapse"
+                  <button class="accordion-button bg-darkg text-light collapsed" type="button" data-bs-toggle="collapse"
                     data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
                     Price
                   </button>
@@ -387,7 +387,7 @@
               </div>
               <div class="accordion-item bg-secondary">
                 <h2 class="accordion-header" id="headingFour">
-                  <button class="accordion-button bg-darkg text-white collapsed" type="button" data-bs-toggle="collapse"
+                  <button class="accordion-button bg-darkg text-light collapsed" type="button" data-bs-toggle="collapse"
                     data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
                     Attribute 1
                   </button>
@@ -396,23 +396,23 @@
                   data-bs-parent="#accordionFilters">
                   <div class="accordion-body bg-darkest">
                     <ul class="list-group">
-                      <li class="list-group-item bg-black border border-dark text-white-50">
+                      <li class="list-group-item bg-black border border-dark text-light-50">
                         <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
                         Value 1 (#)
                       </li>
-                      <li class="list-group-item bg-black border border-dark text-white-50">
+                      <li class="list-group-item bg-black border border-dark text-light-50">
                         <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
                         Value 2 (#)
                       </li>
-                      <li class="list-group-item bg-black border border-dark text-white-50">
+                      <li class="list-group-item bg-black border border-dark text-light-50">
                         <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
                         Value 3 (#)
                       </li>
-                      <li class="list-group-item bg-black border border-dark text-white-50">
+                      <li class="list-group-item bg-black border border-dark text-light-50">
                         <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
                         Value 4 (#)
                       </li>
-                      <li class="list-group-item bg-black border border-dark text-white-50">
+                      <li class="list-group-item bg-black border border-dark text-light-50">
                         <input class="form-check-input me-1" type="checkbox" value="" aria-label="...">
                         Value 5 (#)
                       </li>
@@ -439,7 +439,7 @@
                     <i class="fa-solid fa-filter me-2"></i> Filter
                   </button>
                   <ul class="dropdown-menu dropdown-menu-dark p-2" aria-labelledby="filterDropdown">
-                    <li class="mt-3"> <button class="btn btn-dark border-secondary text-white-50 w-100 dropdown-toggle"
+                    <li class="mt-3"> <button class="btn btn-dark border-secondary text-light-50 w-100 dropdown-toggle"
                         type="button" id="dropdownFilterButton" data-bs-toggle="dropdown" aria-expanded="false">
                         <span>Search in:</span>
                         <span v-if="NFTselect.searchDeep">Attributes</span>
@@ -464,7 +464,7 @@
                       </ul>
                     </li>
                     <li class="mt-3"><button
-                        class="form-control btn btn-dark border-danger text-white-50 w-100 dropdown-toggle"
+                        class="form-control btn btn-dark border-danger text-light-50 w-100 dropdown-toggle"
                         type="button" id="dropdownFilterButton2" data-bs-toggle="dropdown" aria-expanded="false"
                         v-if="NFTselect.searchDeepK">
                         <span>{{NFTselect.searching ? 'Searching...' :
@@ -479,7 +479,7 @@
                         </li>
                       </ul>
                     </li>
-                    <li class="my-3"><button class="btn btn-dark border-danger text-white-50 w-100 dropdown-toggle"
+                    <li class="my-3"><button class="btn btn-dark border-danger text-light-50 w-100 dropdown-toggle"
                         type="button" id="dropdownFilterButton3" data-bs-toggle="dropdown" aria-expanded="false"
                         v-if="NFTselect.searchDeepKey">
                         <span>Value:</span>
@@ -696,7 +696,7 @@
                 <div class="d-flex flex-wrap mt-2 d-xl-none" v-if="NFTselect.keys.length">
                   <div v-for="(item, index) in NFTselect.keys">
                     <div v-if="index > 1"
-                      class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
+                      class="rounded bg-secondary text-dark filter-bubble me-1 mb-1 d-flex align-items-center">
                       <span>{{item}}</span>
                       <button @click="clearFilters(item)" type="button" class="ms-1 btn-close btn-close-white"></button>
                     </div>
@@ -717,7 +717,7 @@
             <div class="d-flex flex-wrap mt-2 d-none d-xl-flex" v-if="NFTselect.keys.length">
               <div v-for="(item, index) in NFTselect.keys">
                 <div v-if="index > 1"
-                  class="rounded bg-secondary text-black filter-bubble me-1 mb-1 d-flex align-items-center">
+                  class="rounded bg-secondary text-dark filter-bubble me-1 mb-1 d-flex align-items-center">
                   <span>{{item}}</span>
                   <button @click="clearFilters(item)" type="button" class="ms-1 btn-close btn-close-white"></button>
                 </div>

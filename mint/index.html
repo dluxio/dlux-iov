@@ -30,25 +30,26 @@
 </head>
 
 <body>
-  <div id="app">
+  <div id="app" class="text-light-1">
     <!-- navbar -->
     <div>
       <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
         @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
     </div>
-    <section class="hero-section container-fluid d-flex">
+    <section class="hero-section container-fluid d-flex" style="background-color: #B36D18;">
+      <img src="/vid/stills/orange_cube.jpg" class="bg-video">
       <video autoplay muted loop playsinline preload="auto" onloadeddata="this.play();" class="bg-video">
         <source src="/vid/orange_cube.m4v" type="video/mp4">
       </video>
       <div class="container">
         <div class="d-flex">
           <div class="hero-text bg-blur-darkg rounded p-3" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.5); max-width: 800px">
-            <p class="hero-title mb-3 text-light-1 hero-text-800">NFT Minting
+            <p class="hero-title mb-3 hero-text-800">NFT Minting
             </p>
-            <p class="hero-subtitle mb-4 text-light-1 hero-text-800">PFP sets directly on the DLUX chain.
+            <p class="hero-subtitle mb-4 hero-text-800">PFP sets directly on the DLUX chain.
             </p>
             <div class="hero-buttons">
-              <a class="btn btn-hero btn-light btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="#">Coming Soon</a>
+              <a class="btn btn-hero btn-light-1 btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="#">Coming Soon</a>
             </div>
           </div>
         </div>

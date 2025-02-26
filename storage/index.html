@@ -30,38 +30,39 @@
 </head>
 
 <body>
-  <div id="app">
+  <div id="app" class="text-dark-1">
     <!-- navbar -->
     <div>
       <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
         @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
     </div>
-    <section class="hero-section container-fluid d-flex">
+    <section class="hero-section container-fluid d-flex" style="background-color: #0B568A;">
+      <img src="/vid/stills/data_lake.jpg" class="bg-video">
       <video autoplay muted loop playsinline preload="auto" onloadeddata="this.play();" class="bg-video">
         <source src="/vid/data_lake.m4v" type="video/mp4">
       </video>
-      <div class="hero-text container">
-        <p class="hero-title mb-3 text-mint hero-text-800">IPFS Storage
+      <div class="hero-text container text-light-1">
+        <p class="hero-title mb-3 hero-text-800">IPFS Storage
         </p>
-        <p class="hero-subtitle mb-4 text-mint hero-text-800">File pinning on the InterPlanetary File System via SPK
+        <p class="hero-subtitle mb-4 hero-text-800">File pinning on the InterPlanetary File System via SPK
           Network.</p>
         <div class="hero-buttons">
           <a class="btn btn-hero btn-blue btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="#learn">Learn How<i
               class="ms-2 fa-solid fa-arrow-down"></i></a>
-          <a class="btn btn-hero btn-outline-light btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="/user#drive/">Upload Files
+          <a class="btn btn-hero btn-outline-light-1 btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="/user#drive/">Upload Files
             </a>
         </div>
       </div>
       <div id="learn"></div>
     </section>
     <!-- 3 Steps -->
-    <section class="container-fluid bg-light-3 text-dark">
+    <section class="container-fluid bg-light-3">
       <div class="container p-0">
         <div class="mx-auto row flex-wrap px-1 pt-4">
           <div class="d-flex flex-column col-12 col-md-4 mb-4">
             <span class="text-center"><i class="fa-solid fa-file-signature fa-fw fs-1 mb-3"></i></span>
             <div class="d-flex justify-content-center align-items-center mb-2">
-              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark me-2"><i
+              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark-1 me-2"><i
                     class="fa-solid fa-1 fa-fw"></i></span></h3>
               <h3 class="card-title mb-0">Contract</h3>
             </div>
@@ -71,7 +72,7 @@
           <div class="d-flex flex-column col-12 col-md-4 mb-4">
             <span class="text-center"><i class="fa-solid fa-cloud-arrow-up fa-fw fs-1 mb-3"></i></span>
             <div class="d-flex justify-content-center align-items-center mb-2">
-              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark me-2"><i
+              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark-1 me-2"><i
                     class="fa-solid fa-2 fa-fw"></i></span></h3>
               <h3 class="card-title mb-0">Upload</h3>
             </div>
@@ -80,7 +81,7 @@
           <div class="d-flex flex-column col-12 col-md-4 mb-4">
             <span class="text-center"><i class="fa-solid fa-thumbtack fa-fw fs-1 mb-3"></i></span>
             <div class="d-flex justify-content-center align-items-center mb-2">
-              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark me-2"><i
+              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark-1 me-2"><i
                     class="fa-solid fa-3 fa-fw"></i></span></h3>
               <h3 class="card-title mb-0">Pinned</h3>
             </div>
@@ -90,7 +91,7 @@
       </div>
     </section>
     <!-- IPFS Pinning -->
-    <section class="container-fluid py-4 bg-light-2 text-black">
+    <section class="container-fluid py-4 bg-light-2">
       <div class="container p-0">
         <div class="row d-flex justify-content-center align-items-center mt-3">
           <div class="col-12 col-lg-5 p-0 mb-3">
@@ -105,11 +106,11 @@
               terminated at any time.</p>
           </div>
           <div class="col-12 col-lg-5 p-0 mb-3 d-flex justify-content-center">
-            <ul class="ms-lg-auto border border-black rounded list-unstyled bg-light-1 mb-0">
-              <li class="d-flex align-items-center p-3 border-bottom border-dark"><i
+            <ul class="ms-lg-auto border border-dark-1 rounded list-unstyled bg-light-1 mb-0">
+              <li class="d-flex align-items-center p-3 border-bottom border-dark-1"><i
                   class="fa-solid fa-circle-check fa-fw me-2"></i><span class="hero-lead">Private file encryption</span>
               </li>
-              <li class="d-flex align-items-center p-3 border-bottom border-dark"><i
+              <li class="d-flex align-items-center p-3 border-bottom border-dark-1"><i
                   class="fa-solid fa-circle-check fa-fw me-2"></i><span class="hero-lead">Redundant storage nodes</span>
               </li>
               <li class="d-flex align-items-center p-3"><i class="fa-solid fa-circle-check fa-fw me-2"></i><span
@@ -120,18 +121,17 @@
       </div>
     </section>
     <!-- Proof of Storage -->
-    <section class="container-fluid py-4 bg-light-2 text-black">
+    <section class="container-fluid py-4 bg-light-2">
       <div class="container p-0">
         <div class="bg-light-3 d-flex flex-column rounded px-2 py-3">
-          <h2 class="section-title mx-3 mb-2 text-black text-center">Proof of Storage</h2>
-          <h3 class="hero-lead text-center d-none">Decentralized Physical Infrastructure Network (DePIN)</h3>
+          <h2 class="section-title mx-3 mb-2 text-center">Proof of Storage</h2>
           <p class="mx-auto text-center mb-3" style="max-width: 700px;">The Proof of Storage algorithim runs checks on
             the storage nodes to
             ensure your
             data is online
             and available. BROCA contracts give you control over renewal and node redundancy. Storage node runners DePIN
             your data in exchange for BROCA.</p>
-          <div class="d-flex flex-column" style="color: rgb(86, 86, 86);">
+          <div class="d-flex flex-column text-dark-muted">
             <div class="hero-lead text-center mt-1 mb-0" style="font-size: 1em;">Supports All File Types</div>
             <div class="d-flex align-items-center justify-content-center flex-wrap mx-auto">
               <div class="p-2 hero-lead"><i class="fa-solid fa-vr-cardboard fa-fw me-1"></i>XR</div>
@@ -146,9 +146,9 @@
       </div>
     </section>
     <!-- Token Ecosystem -->
-    <section class="how-section py-4 bg-light-2 text-black container-fluid" id="how">
+    <section class="how-section py-4 bg-light-2 container-fluid" id="how">
       <div class="container">
-        <h2 class="section-title fs-3 text-black">Token Ecosystem</h2>
+        <h2 class="section-title fs-3">Token Ecosystem</h2>
         <div class="how-grid mx-auto flex-wrap px-1">
           <div class="how-box bg-light-1">
             <h3 class="card-title mb-2">SPK</h3>
@@ -173,20 +173,20 @@
       </div>
     </section>
     <!-- DePIN Services -->
-    <section class="container-fluid py-4 bg-light-2 text-black">
+    <section class="container-fluid py-4 bg-light-2">
       <div class="container p-0">
         <div class="d-flex flex-column bg-light-3 rounded p-3">
           <p class="hero-lead mb-3 mx-auto text-center">Run SPK DePIN Services<br></p>
           <h2 class="hero-subtitle">
             Validator Node</h2>
           <pre
-            class="bg-darkg text-white p-2 mb-2"><code>git clone https://github.com/3speaknetwork/honeycomb-spkcc.git cd honeycomb-spkcc</code></pre>
-          <a class="ms-auto btn btn-outline-dark rounded-pill mb-3" role="button" href="/docs/honeycomb/new-node"
+            class="bg-dark-1 text-light p-2 mb-2"><code>git clone https://github.com/3speaknetwork/honeycomb-spkcc.git cd honeycomb-spkcc</code></pre>
+          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-3" role="button" href="/docs/honeycomb/new-node"
             target="_blank">Validator Quickstart<i class="ms-2 fa-solid fa-arrow-right"></i></a>
           <h2 class="hero-subtitle">
             Storage Node</h2>
-          <pre class="bg-darkg text-white p-2 mb-2"><code>git clone https://github.com/spknetwork/trole</code></pre>
-          <a class="ms-auto btn btn-outline-dark rounded-pill mb-3" role="button" href="/docs/spk/trole"
+          <pre class="bg-dark-1 text-light p-2 mb-2"><code>git clone https://github.com/spknetwork/trole</code></pre>
+          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-3" role="button" href="/docs/spk/trole"
             target="_blank">Storage Quickstart<i class="ms-2 fa-solid fa-arrow-right"></i></a>
         </div>
       </div>

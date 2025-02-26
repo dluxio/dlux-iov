@@ -30,37 +30,38 @@
 </head>
 
 <body>
-  <div id="app">
+  <div id="app" class="text-dark-1">
     <!-- navbar -->
     <div>
       <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
         @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" />
     </div>
-    <section class="hero-section container-fluid d-flex">
+    <section class="hero-section container-fluid d-flex" style="background-color: #af934b;">
+      <img src="/vid/stills/gold_wave.jpg" class="bg-video">
       <video autoplay muted loop playsinline preload="auto" onloadeddata="this.play();" class="bg-video">
         <source src="/vid/gold_wave.m4v" type="video/mp4">
       </video>
       <div class="hero-text container ">
-        <p class="hero-title mb-3 text-black">Honeycomb
+        <p class="hero-title mb-3">Honeycomb
         </p>
-        <p class="hero-subtitle mb-4 text-black">Power your decentralized community tokens and NFTs.</p>
+        <p class="hero-subtitle mb-4">Power your decentralized community tokens and NFTs.</p>
         <div class="hero-buttons">
-          <a role="button" class="btn btn-hero btn-dark btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="#learn">Learn
+          <a role="button" class="btn btn-hero btn-dark-1 btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="#learn">Learn
             How<i class="ms-2 fa-solid fa-arrow-down"></i></a>
-          <a role="button" class="d-none btn btn-hero btn-outline-dark btn-lg py-2 px-4 mb-2 rounded-pill"
+          <a role="button" class="d-none btn btn-hero btn-outline-dark-1 btn-lg py-2 px-4 mb-2 rounded-pill"
             href="#learn">Keep Reading</a>
         </div>
       </div>
       <div id="learn"></div>
     </section>
     <!-- 3 Steps -->
-    <section class="container-fluid bg-light-3 text-dark">
+    <section class="container-fluid bg-light-3">
       <div class="container p-0">
         <div class="mx-auto row flex-wrap px-1 pt-4">
           <div class="d-flex flex-column col-12 col-md-4 mb-4">
             <span class="text-center"><i class="fa-solid fa-sliders fa-fw fs-1 mb-3"></i></span>
             <div class="d-flex justify-content-center align-items-center mb-2">
-              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark me-2"><i
+              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark-1 me-2"><i
                     class="fa-solid fa-1 fa-fw"></i></span></h3>
               <h3 class="card-title mb-0">Customize</h3>
             </div>
@@ -69,7 +70,7 @@
           <div class="d-flex flex-column col-12 col-md-4 mb-4">
             <span class="text-center"><i class="fa-solid fa-circle-nodes fa-fw fs-1 mb-3"></i></span>
             <div class="d-flex justify-content-center align-items-center mb-2">
-              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark me-2"><i
+              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark-1 me-2"><i
                     class="fa-solid fa-2 fa-fw"></i></span></h3>
               <h3 class="card-title mb-0">Deploy</h3>
             </div>
@@ -79,7 +80,7 @@
           <div class="d-flex flex-column col-12 col-md-4 mb-4">
             <span class="text-center"><i class="fa-solid fa-crown fa-fw fs-1 mb-3"></i></span>
             <div class="d-flex justify-content-center align-items-center mb-2">
-              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark me-2"><i
+              <h3 class="card-title mb-0"><span class="rounded-circle border border-2 border-dark-1 me-2"><i
                     class="fa-solid fa-3 fa-fw"></i></span></h3>
               <h3 class="card-title mb-0">Rule</h3>
             </div>
@@ -89,7 +90,7 @@
       </div>
     </section>
     <!-- DePIN Services -->
-    <section class="container-fluid py-4 bg-light-2 text-black">
+    <section class="container-fluid py-4 bg-light-2">
       <div class="container p-0">
         <div class="row d-flex justify-content-center align-items-center mt-3">
           <div class="col-12 col-lg-5 p-0 mb-3">
@@ -99,11 +100,11 @@
             <p class="text-center text-lg-start me-md-3">Start your decentralized Layer 2 on the HIVE blockchain, where it can never be deleted or censored. Configure the tokenomics that reward your community, with support for Smart Contracts and NFTs. Customize the software to support any type of use case you can imagine.</p>
           </div>
           <div class="col-12 col-lg-5 p-0 mb-3 d-flex justify-content-center">
-            <ul class="ms-lg-auto border border-black rounded list-unstyled bg-light-1 mb-0">
-              <li class="d-flex align-items-center p-3 border-bottom border-dark"><i
+            <ul class="ms-lg-auto border border-dark-1 rounded list-unstyled bg-light-1 mb-0">
+              <li class="d-flex align-items-center p-3 border-bottom border-dark-1"><i
                   class="fa-solid fa-circle-check fa-fw me-2"></i><span class="hero-lead">Immutable and censorship resistant</span>
               </li>
-              <li class="d-flex align-items-center p-3 border-bottom border-dark"><i
+              <li class="d-flex align-items-center p-3 border-bottom border-dark-1"><i
                   class="fa-solid fa-circle-check fa-fw me-2"></i><span class="hero-lead">Governance voting for token holders</span>
               </li>
               <li class="d-flex align-items-center p-3"><i class="fa-solid fa-circle-check fa-fw me-2"></i><span
@@ -114,13 +115,13 @@
       </div>
     </section>
     <!-- Proof of Storage -->
-    <section class="container-fluid py-4 bg-light-2 text-black">
+    <section class="container-fluid py-4 bg-light-2">
       <div class="container p-0">
         <div class="bg-light-3 d-flex flex-column rounded px-2 py-3">
-          <h2 class="section-title mx-3 mb-2 text-black text-center">DAO</h2>
+          <h2 class="section-title mx-3 mb-2 text-center">DAO</h2>
           <h3 class="hero-lead text-center">Decentralized Autonomous Organization</h3>
           <p class="mx-auto text-center mb-3" style="max-width: 700px;">Honeycomb allows your community to run a DAO with Governance tokens and voting. Customizable logic and smart contracts, with optional features like NFTs.</p>
-          <div class="d-flex flex-column" style="color: rgb(86, 86, 86);">
+          <div class="d-flex flex-column text-dark-muted">
             <div class="d-flex align-items-center justify-content-center flex-wrap mx-auto">
               <div class="p-2 hero-lead"><i class="fa-solid fa-file-contract fa-fw me-1"></i>Contracts</div>
               <div class="p-2 hero-lead"><i class="fa-solid fa-coins fa-fw me-1"></i>Tokens</div>
@@ -133,7 +134,7 @@
     <!-- Token Ecosystem -->
     <section class="how-section py-4 bg-light-2 text-black container-fluid" id="how">
       <div class="container">
-        <h2 class="section-title fs-3 text-black">Honeycomb Networks</h2>
+        <h2 class="section-title fs-3">Honeycomb Networks</h2>
         <div class="how-grid mx-auto flex-wrap px-1">
           <div class="how-box bg-light-1">
             <h3 class="card-title mb-2">DLUX</h3>
@@ -159,19 +160,19 @@
       </div>
     </section>
     <!-- DePIN Services -->
-    <section class="container-fluid py-4 bg-light-2 text-black">
+    <section class="container-fluid py-4 bg-light-2">
       <div class="container p-0">
         <div class="d-flex flex-column bg-light-3 rounded p-3">
           <p class="hero-subtitle mb-4">Honeycomb<br></p>
           <h2 class="hero-lead">
             Version 1.5</h2>
           <pre
-            class="bg-darkg text-white p-2 mb-4"><code>git clone https://github.com/disregardfiat/honeycomb.git && cd honeycomb</code></pre>
+            class="bg-dark-1 text-light-1 p-2 mb-4"><code>git clone https://github.com/disregardfiat/honeycomb.git && cd honeycomb</code></pre>
             <div class="d-flex ms-auto">
-          <a class="ms-auto btn btn-outline-dark rounded-pill mb-3 me-2" role="button" href="/new/token/"
+          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-3 me-2" role="button" href="/new/token/"
             >Token Configurator<i class="ms-2 fa-solid fa-arrow-right"></i></a>
           </a>
-          <a class="ms-auto btn btn-outline-dark rounded-pill mb-3" role="button" href="/docs/honeycomb/new-token"
+          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-3" role="button" href="/docs/honeycomb/new-token"
             target="_blank">Token Quickstart<i class="ms-2 fa-solid fa-arrow-right"></i></a>
           </a>
           </div>

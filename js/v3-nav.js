@@ -1223,7 +1223,7 @@ export default {
     </div>
   </div>
   <!-- sting chat -->
-  <div class="offcanvas offcanvas-end bg-blur-darkg bg-img-none text-white-50" tabindex="-1" id="offcanvasSting"
+  <div class="offcanvas offcanvas-end bg-blur-darkg bg-img-none text-light-50" tabindex="-1" id="offcanvasSting"
     aria-labelledby="offcanvasStingLabel">
     <div class="offcanvas-header d-flex align-items-center justify-content-between">
       <div class="d-flex">
@@ -1319,7 +1319,7 @@ export default {
           <div v-if="!decrypted.pin">
             <label class="form-label">Add user</label>
             <div class="position-relative has-validation">
-              <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
+              <span class="position-absolute top-50 translate-middle-y ps-2 text-light">
                 <i class="fa-solid fa-at fa-fw"></i>
               </span>
               <input v-model="userField" autocapitalize="off" placeholder="username" @keyup.enter="setUser()"
@@ -1339,7 +1339,7 @@ export default {
           <div class="mt-1" v-if="recentUsers.length">
             <label class="form-label">Recent users</label>
             <div class="d-none position-relative has-validation">
-              <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
+              <span class="position-absolute top-50 translate-middle-y ps-2 text-light">
                 <i class="fa-solid fa-at fa-fw"></i>
               </span>
               <input type="search" v-model="filterUsers" autocapitalize="off" placeholder="search"
