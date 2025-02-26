@@ -1,4 +1,4 @@
-this.version = "2025.02.26.3";
+this.version = "2025.02.26.4";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -233,7 +233,9 @@ self.addEventListener("install", function (event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  if (event.request.url.startsWith('https://api.coingecko.com/')) {
+  if (event.request.url.endsWith('.m4v')) {
+    event.respondWith(fetch(event.request));
+} else if (event.request.url.startsWith('https://api.coingecko.com/')) {
     // Bypass service worker for Coingecko API
     event.respondWith(fetch(event.request));
 } else event.respondWith(
