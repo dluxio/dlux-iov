@@ -25,16 +25,16 @@
 
   <script>
     if ('serviceWorker' in navigator) {
-        navigator
-            .serviceWorker
-            .register(
-                // path to the service worker file
-                '/sw.js'
-            )
-            // the registration is async and it returns a promise
-            .then(function (reg) {
-                console.log('Registration Successful');
-            });
+      navigator
+        .serviceWorker
+        .register(
+          // path to the service worker file
+          '/sw.js'
+        )
+        // the registration is async and it returns a promise
+        .then(function (reg) {
+          console.log('Registration Successful');
+        });
     }
   </script>
   <style>
@@ -77,19 +77,15 @@
   </style>
 </head>
 
-<body class="bg-dark-2" id="explore">
-  <div id="app" v-cloak>
+<body class="bg-img-gradient" id="explore">
+  <div id="app" class="d-flex flex-column vh-100" v-cloak>
+    <!-- navbar -->
     <div>
-      <nav-vue 
-        @login="setValue('account', $event);getTokenUser($event);getHiveUser($event);getUserNFTs()"
-        @logout="setValue('account', '');removeUser()" 
-        @ack="removeOp($event)" 
-        @refresh="run($event)" 
-        :op="toSign"
+      <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event);getUserNFTs()"
+        @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
         :lapi="lapi" />
     </div>
-    <main role="main" class="flex-shrink-0">
-
+    <main role="main" class="d-flex flex-column flex-grow-1 padmain">
       <div class="container" v-if="ready">
         <div class="card bg-dark border border-dark  text-white rounded-top">
           <div>
