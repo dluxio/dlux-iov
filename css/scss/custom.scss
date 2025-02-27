@@ -2372,10 +2372,7 @@ html {
 .btn-honey-1:active:hover {
   color: $honey-1;
   background-color: $dark-1;
-}
-
-.test-test {
-  color: red !important;
+  border-color: $dark-1;
 }
 
 // Nav dropdown hover on non-touch devices
