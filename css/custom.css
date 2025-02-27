@@ -14567,6 +14567,11 @@ html {
   background-color: #282C31;
 }
 
+.btn-honey-1:active:hover {
+  color: #EBA937;
+  background-color: #282C31;
+}
+
 body[data-touch=false] .nav-dropdown.dropdown:hover .dropdown-menu {
   display: block;
 }
