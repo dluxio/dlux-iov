@@ -13419,7 +13419,7 @@ a-scene {
 .btn-honey:hover {
   color: #EBA937 !important;
   background: black !important;
-  border-color: #EBA937 !important;
+  border-color: rgb(232, 0, 0) !important;
 }
 
 .btn-outline-honey {
@@ -14555,6 +14555,16 @@ html {
   background-color: #282C31;
   border-color: #282C31;
   color: #e7eef4;
+}
+
+.btn-honey-1 {
+  color: #282C31;
+  background-color: #EBA937;
+}
+
+.btn-honey-1:hover {
+  color: #EBA937;
+  background-color: #282C31;
 }
 
 body[data-touch=false] .nav-dropdown.dropdown:hover .dropdown-menu {

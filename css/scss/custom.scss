@@ -1138,7 +1138,7 @@ a-scene {
 .btn-honey:hover {
   color: #EBA937 !important;
   background: black !important;
-  border-color: #EBA937 !important;
+  border-color: rgb(232, 0, 0) !important;
 }
 
 .btn-outline-honey {
@@ -2357,6 +2357,16 @@ html {
   background-color: $dark-1;
   border-color: $dark-1;
   color: $light-1;
+}
+
+.btn-honey-1 {
+  color: $dark-1;
+  background-color: $honey-1;
+}
+
+.btn-honey-1:hover {
+  color: $honey-1;
+  background-color: $dark-1;
 }
 
 // Nav dropdown hover on non-touch devices
