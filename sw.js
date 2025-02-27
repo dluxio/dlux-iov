@@ -1,4 +1,4 @@
-this.version = "2025.02.27.2";
+this.version = "2025.02.27.3";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -196,6 +196,7 @@ var urlsToCache = [
   `/open.html`,
   `/open/index.html`,
   `/qr/index.html`,
+  `/reg-sw.js`,
   `/storage/index.html`,
   `/sw.js`,
   `/update.html`,
