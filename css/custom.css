@@ -13749,6 +13749,17 @@ html {
   border-bottom-left-radius: 10px;
 }
 
+.navbar-subbanner-container {
+  margin-top: -30px;
+  z-index: 900;
+}
+
+.navbar-subbanner-content {
+  background-color: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
 .navbar-nav {
   display: flex;
   width: 100%;
@@ -13917,7 +13928,7 @@ html {
   background-color: #e7eef4;
   background-image: none;
   /* border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px; */
+    border-bottom-right-radius: 10px; */
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   border: 1px solid #282C31;
   z-index: 1050;
