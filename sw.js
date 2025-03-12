@@ -245,8 +245,7 @@ self.addEventListener("install", function (event) {
 
 // GROK Code
 self.addEventListener('fetch', function(event) {
-  const isLocal = event.request.url.includes('127.0.0.1') || event.request.url.includes('localhost');
-  if (event.request.url.endsWith('.m4v') || event.request.url.startsWith('https://api.coingecko.com/') || isLocal) {
+  if (event.request.url.endsWith('.m4v') || event.request.url.startsWith('https://api.coingecko.com/')) {
       event.respondWith(fetch(event.request));
   } else {
       event.respondWith(
@@ -257,7 +256,7 @@ self.addEventListener('fetch', function(event) {
               return fetch(event.request).then(function(networkResponse) {
                   if (!networkResponse || networkResponse.status !== 200) {
                       console.error('Failed to fetch:', event.request.url);
-                      return caches.match(event.request);
+                      return caches.match(event.request); // Fallback to cache
                   }
                   caches.open(CACHE_NAME).then(function(cache) {
                       cache.put(event.request, networkResponse.clone());
@@ -265,7 +264,7 @@ self.addEventListener('fetch', function(event) {
                   return networkResponse;
               }).catch(function(error) {
                   console.error('Network error for:', event.request.url, error);
-                  return caches.match(event.request);
+                  return caches.match(event.request); // Fallback to cache if offline
               });
           })
       );
