@@ -1,6 +1,6 @@
 var activeWorker = 0
 if ('serviceWorker' in navigator) {
-    const version = '2025.03.12.3'
+    const version = '2025.03.12.4'
     navigator.serviceWorker.register(`/sw.js?v=${version}`)
         .then(reg => {
             console.log('Registration succeeded. Scope is ' + reg.scope);

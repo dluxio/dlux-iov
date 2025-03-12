@@ -1,4 +1,4 @@
-this.version = "2025.03.12.3";
+this.version = "2025.03.12.4";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -233,7 +233,35 @@ self.addEventListener("install", function (event) {
   );
 });
 
+// GROK Code
 self.addEventListener('fetch', function(event) {
+  if (event.request.url.endsWith('.m4v') || event.request.url.startsWith('https://api.coingecko.com/')) {
+      event.respondWith(fetch(event.request));
+  } else {
+      event.respondWith(
+          caches.match(event.request).then(function(response) {
+              if (response) {
+                  return response; // Serve from cache if available
+              }
+              return fetch(event.request).then(function(networkResponse) {
+                  if (!networkResponse || networkResponse.status !== 200) {
+                      console.error('Failed to fetch:', event.request.url);
+                      return networkResponse;
+                  }
+                  // Cache the new response
+                  caches.open(CACHE_NAME).then(function(cache) {
+                      cache.put(event.request, networkResponse.clone());
+                  });
+                  return networkResponse;
+              }).catch(function(error) {
+                  console.error('Network error for:', event.request.url, error);
+              });
+          })
+      );
+  }
+});
+
+/* self.addEventListener('fetch', function(event) {
   if (event.request.url.endsWith('.m4v')) {
     event.respondWith(fetch(event.request));
 } else if (event.request.url.startsWith('https://api.coingecko.com/')) {
@@ -256,7 +284,7 @@ self.addEventListener('fetch', function(event) {
           });
       })
   );
-});
+}); */
 
 // self.addEventListener("fetch", function (event) {
 //   event.respondWith(
@@ -289,7 +317,26 @@ self.addEventListener('fetch', function(event) {
 //   );
 // });
 
+// GROK Code
 self.addEventListener("activate", function (event) {
+  console.log("SW: Activated. Cache name:" + CACHE_NAME);
+  event.waitUntil(
+      caches.keys().then(function (cacheNames) {
+          return Promise.all(
+              cacheNames
+                  .filter(function (cacheName) {
+                      return cacheName != CACHE_NAME;
+                  })
+                  .map(function (cacheName) {
+                      console.log("Deleting cache: " + cacheName);
+                      return caches.delete(cacheName);
+                  })
+          );
+      }).then(() => self.clients.claim()) // Take control of clients immediately
+  );
+});
+
+/* self.addEventListener("activate", function (event) {
   console.log("SW: Activated. Cache name:" + CACHE_NAME);
   event.waitUntil(
     caches.keys().then(function (cacheNames) {
@@ -305,7 +352,7 @@ self.addEventListener("activate", function (event) {
       );
     })
   );
-});
+}); */
 
 self.addEventListener("message", function (e) {
   const message = e.data, p = e.source;
