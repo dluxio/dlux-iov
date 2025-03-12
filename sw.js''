@@ -1,4 +1,4 @@
-this.version = "2025.03.12.5";
+this.version = "2025.03.12.6";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -353,12 +353,6 @@ self.addEventListener("activate", function (event) {
     })
   );
 }); */
-
-// GROK Code
-navigator.serviceWorker.addEventListener('controllerchange', () => {
-  console.log('New service worker activated, reloading...');
-  window.location.reload(); // Reload to apply new assets
-});
 
 self.addEventListener("message", function (e) {
   const message = e.data, p = e.source;

@@ -1,6 +1,6 @@
 var activeWorker = 0
 if ('serviceWorker' in navigator) {
-    const version = '2025.03.12.5'
+    const version = '2025.03.12.6'
     navigator.serviceWorker.register(`/sw.js?v=${version}`)
         .then(reg => {
             console.log('Registration succeeded. Scope is ' + reg.scope);
@@ -18,5 +18,10 @@ if ('serviceWorker' in navigator) {
             console.log('New version available, reloading...');
             window.location.reload(); // Reload the page to get the latest content
         }
+    });
+    // GROK Code
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log('New service worker activated, reloading...');
+        window.location.reload(); // Reload to apply new assets
     });
 }
