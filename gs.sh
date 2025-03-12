@@ -9,6 +9,13 @@ git pull
 # Define the target file
 file="./sw.js"
 
+# Detect OS and set sed syntax
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    SED="sed -i ''"
+else
+    SED="sed -i"
+fi
+
 if [ -f "$file" ]; then
     # Read the first line of sw.js
     first_line=$(head -n 1 "$file")
@@ -29,11 +36,11 @@ if [ -f "$file" ]; then
         if [[ $version_date == $current_day ]]; then
             new_version_letter=$((version_letter + 1))
             new_version="$current_day.$new_version_letter"
-            sed -i "1 s/^.*$/this.version = \"$new_version\";/" "$file"
+            $SED "1 s/^.*$/this.version = \"$new_version\";/" "$file"
             echo "First line of $file incremented to: $new_version"
         else
             new_version="$current_day.1"
-            sed -i "1 s/^.*$/this.version = \"$new_version\";/" "$file"
+            $SED "1 s/^.*$/this.version = \"$new_version\";/" "$file"
             echo "First line of $file updated to: $new_version"
         fi
 
@@ -57,13 +64,19 @@ if [ -f "$file" ]; then
         echo "$new_list" > new_list.txt
 
         # Replace the old urlsToCache list with the new one
-        sed -i "$((N+1)),$((M-1))d; ${N}r new_list.txt" "$file"
+        $SED "$((N+1)),$((M-1))d; ${N}r new_list.txt" "$file"
 
         # Clean up the temporary file
         rm new_list.txt
 
-        # Update version in all .html files
-        find . -name "reg-sw.js" -exec sed -i "s/const version = '[0-9.]*'/const version = '$new_version'/" {} \;
+        # Update version in all reg-sw.js files
+        find . -name "reg-sw.js" -exec $SED "s/const version = '[0-9.]*'/const version = '$new_version'/" {} \;
+
+        # Debug: Verify changes
+        echo "Updated sw.js first line:"
+        head -n 1 "$file"
+        echo "Updated reg-sw.js version:"
+        grep "const version" ./reg-sw.js
     else
         echo "Invalid format in the first line of $file."
         exit 1

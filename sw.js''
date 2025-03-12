@@ -77,7 +77,7 @@ var urlsToCache = [
   `/img/meta/index.png`,
   `/img/meta/mint.png`,
   `/img/meta/node.png`,
-  `/img/meta/storage1.png`,
+  `/img/meta/storage.png`,
   `/img/metaverse-vr-comp.jpg`,
   `/img/mov-file-type-svgrepo-com.svg`,
   `/img/mp3-file-type-svgrepo-com.svg`,
