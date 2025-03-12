@@ -1,4 +1,4 @@
-this.version = "2025.03.12.6";
+this.version = "2025.03.12.7";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -223,7 +223,17 @@ var urlsToCache = [
 
 this.nftscripts = {}
 
+// GROK Code
 self.addEventListener("install", function (event) {
+  event.waitUntil(
+      caches.open(CACHE_NAME).then(function (cache) {
+          console.log("Opened cache:" + CACHE_NAME);
+          return cache.addAll(urlsToCache);
+      })
+  );
+});
+
+/* self.addEventListener("install", function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
       console.log("Opened cache:" + CACHE_NAME);
@@ -231,30 +241,31 @@ self.addEventListener("install", function (event) {
       return cache.addAll(urlsToCache);
     })
   );
-});
+}); */
 
 // GROK Code
 self.addEventListener('fetch', function(event) {
-  if (event.request.url.endsWith('.m4v') || event.request.url.startsWith('https://api.coingecko.com/')) {
+  const isLocal = event.request.url.includes('127.0.0.1') || event.request.url.includes('localhost');
+  if (event.request.url.endsWith('.m4v') || event.request.url.startsWith('https://api.coingecko.com/') || isLocal) {
       event.respondWith(fetch(event.request));
   } else {
       event.respondWith(
           caches.match(event.request).then(function(response) {
               if (response) {
-                  return response; // Serve from cache if available
+                  return response;
               }
               return fetch(event.request).then(function(networkResponse) {
                   if (!networkResponse || networkResponse.status !== 200) {
                       console.error('Failed to fetch:', event.request.url);
-                      return networkResponse;
+                      return caches.match(event.request);
                   }
-                  // Cache the new response
                   caches.open(CACHE_NAME).then(function(cache) {
                       cache.put(event.request, networkResponse.clone());
                   });
                   return networkResponse;
               }).catch(function(error) {
                   console.error('Network error for:', event.request.url, error);
+                  return caches.match(event.request);
               });
           })
       );
