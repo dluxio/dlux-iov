@@ -1,6 +1,6 @@
 var activeWorker = 0
 if ('serviceWorker' in navigator) {
-    const version = '2025.03.12.7'
+    const version = '2025.03.12.8'
     navigator.serviceWorker.register(`/sw.js?v=${version}`)
         .then(reg => {
             console.log('Registration succeeded. Scope is ' + reg.scope);
@@ -21,7 +21,10 @@ if ('serviceWorker' in navigator) {
     });
     // GROK Code
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-        console.log('New service worker activated, reloading...');
-        window.location.reload(); // Reload to apply new assets
+        console.log('New service worker activated');
+        // Only reload in production, not locally
+        if (!window.location.hostname.includes('127.0.0.1') && !window.location.hostname.includes('localhost')) {
+            window.location.reload();
+        }
     });
 }
