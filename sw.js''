@@ -1,4 +1,4 @@
-this.version = "2025.03.12.9";
+this.version = "2025.03.12.10";
 
 console.log( "SW:" + this.version + " - online.");
 
@@ -251,20 +251,20 @@ self.addEventListener('fetch', function(event) {
       event.respondWith(
           caches.match(event.request).then(function(response) {
               if (response) {
-                  return response;
+                  return response; // Serve from cache if available
               }
               return fetch(event.request).then(function(networkResponse) {
                   if (!networkResponse || networkResponse.status !== 200) {
                       console.error('Failed to fetch:', event.request.url);
-                      return caches.match(event.request); // Fallback to cache
+                      return networkResponse;
                   }
+                  // Cache the new response
                   caches.open(CACHE_NAME).then(function(cache) {
                       cache.put(event.request, networkResponse.clone());
                   });
                   return networkResponse;
               }).catch(function(error) {
                   console.error('Network error for:', event.request.url, error);
-                  return caches.match(event.request); // Fallback to cache if offline
               });
           })
       );
