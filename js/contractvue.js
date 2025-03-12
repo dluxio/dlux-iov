@@ -18,8 +18,8 @@ export default {
         "choices-vue": ChoicesVue
     },
     template: `
-    <div class="d-flex flex-column rounded">
-        <div class="rounded-top border-bottom-0" v-if="!nodeview && saccountapi.pubKey != 'NA'"  style="background-color: rgba(146, 146, 146, 0.3);">
+    <div class="d-flex flex-column">
+        <div class="border-bottom-0" v-if="!nodeview && saccountapi.pubKey != 'NA'">
           <div class="container pt-1">
             <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-4">
                 <!-- spk token widget -->

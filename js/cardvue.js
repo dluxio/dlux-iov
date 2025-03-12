@@ -13,7 +13,7 @@ export default {
         "pop-vue": Pop
     },
     template: `
-    <div class="card text-white">
+    <div class="card text-white border-0">
    <div class="card-header px-2 pt-1 pb-0">
       <div class="d-flex align-items-center position-relative">
             <div class="d-flex align-items-center mt-1 mb-2">

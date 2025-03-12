@@ -764,7 +764,7 @@ PORT=3000
         "tags": [
           "dlux"
         ],
-        "vrHash": "video"
+        "vrHash": "QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k"
       },
       nftTradeTabTo: "",
       reloaded: true,

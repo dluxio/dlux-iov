@@ -15,7 +15,6 @@
     <script src="/js/cryptojs.min.js"></script>
     <!-- Bootstrap -->
     <link href="/css/custom.css" rel="stylesheet" />
-    <link href="/css/v3.css" rel="stylesheet" />
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -172,7 +171,7 @@
 </head>
 
 <body>
-    <div id="app" class="d-flex flex-column vh-100">
+    <div id="app" class="d-flex flex-column vh-100" v-cloak>
         <!-- navbar -->
         <div>
             <nav-vue @login="account = $event;newme($event)" @logout="account = '';removeUser()" @ack="removeOp($event)"
@@ -374,7 +373,7 @@
                                     <a role="button" class="btn-close" data-bs-toggle="collapse" aria-label="Close"
                                         href="#spkNetwork"></a>
                                 </div>
-                                <div class="modal-body p-0">
+                                <div class="modal-body">
                                     <contract-vue :nodeview="false" :account="account" :cc="true"
                                         @tosign="toSign=$event" @bens="addBens($event)" :postpage="true"
                                         :prop_contracts="contracts" :assets="true" @addasset="addAsset($event)"

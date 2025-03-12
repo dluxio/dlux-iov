@@ -14489,6 +14489,18 @@ html {
   background-color: #08233c;
 }
 
+.bg-dark-4 {
+  background-color: #565c62;
+}
+
+.bg-dark-5 {
+  background-color: #0E121D;
+}
+
+.bg-dark-6 {
+  background-color: #161D29;
+}
+
 .hover-1:hover {
   color: #2F7AD0;
 }

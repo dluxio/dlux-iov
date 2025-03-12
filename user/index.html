@@ -1394,10 +1394,12 @@
                         <!-- drive tab -->
                         <div role="tabpanel" ref="driveTab" class="tab-pane fade" id="drive" aria-labelledby="drivetab">
                             <div class="container">
-                                <div class="rounded mt-3 mb-4">
+                                <div class="mt-3 mb-4">
+                                    <div class="card bg-img-none pt-1">
                                     <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
                                         @tosign="toSign=$event" :prop_contracts="contracts" :accountinfo="accountinfo"
                                         :spkapi="spkapi" @done="getSapi"></contract-vue>
+                                    </div>
                                 </div>
                             </div>
                         </div>
