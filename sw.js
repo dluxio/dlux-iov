@@ -1,4 +1,4 @@
-this.version = "2025.03.12.15";
+this.version = "2025.03.12.16";
 
 console.log("SW:" + this.version + " - online.");
 
@@ -287,14 +287,18 @@ self.addEventListener("activate", function (event) {
           self.clients.claim()
       ])
       .then(() => {
-          console.log('Claiming clients');
-          return self.clients.matchAll({ includeUncontrolled: true });
+          console.log('Claiming all clients');
+          return self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
       })
       .then(clients => {
+          console.log('Found clients:', clients.length);
           clients.forEach(client => {
               console.log('Notifying client:', client.id);
               client.postMessage({ type: 'SW_UPDATED' });
           });
+          if (clients.length === 0) {
+              console.log('No clients found, forcing activation');
+          }
       })
       .catch(function(error) {
           console.error('Activation failed:', error);
@@ -305,9 +309,10 @@ self.addEventListener("activate", function (event) {
 self.addEventListener('message', (event) => {
   console.log('SW received message:', event.data);
   if (event.data && event.data.type === 'SKIP_WAITING') {
-      console.log('Skipping waiting...');
+      console.log('SKIP_WAITING received, activating now...');
       self.skipWaiting().then(() => {
-          console.log('Skip waiting completed');
+          console.log('Skip waiting completed, claiming clients');
+          self.clients.claim();
       }).catch(err => {
           console.error('Skip waiting failed:', err);
       });

@@ -1,70 +1,82 @@
 var activeWorker = 0;
-const enableServiceWorker = true; // Toggle: false for local dev, true for production/test
+const enableServiceWorker = true; // Set to true for testing
 if ('serviceWorker' in navigator && enableServiceWorker) {
-    const version = '2025.03.12.14'; // Increment version for testing
+    const version = '2025.03.12.12'; // Increment for each test
+    console.log('Registering service worker with version:', version);
     navigator.serviceWorker.register(`/sw.js?v=${version}`, { scope: '/' })
         .then(reg => {
             console.log('Registration succeeded. Scope is ' + reg.scope);
             activeWorker = reg.active;
-            console.log('Service Worker Ready for VUE', activeWorker);
+            console.log('Active worker:', activeWorker);
 
-            // Force update check
+            // Immediate update check
             reg.update().then(() => {
                 console.log('Update check completed');
-            }).catch(err => console.error('Update check failed:', err));
+            }).catch(err => console.error('Update failed:', err));
 
-            // Check for waiting or installing workers
+            // Handle waiting worker
             if (reg.waiting) {
-                console.log('Found waiting worker, sending SKIP_WAITING');
+                console.log('Found waiting worker:', reg.waiting);
                 reg.waiting.postMessage({ type: 'SKIP_WAITING' });
             }
+
+            // Handle installing worker
             if (reg.installing) {
-                console.log('Found installing worker');
+                console.log('Found installing worker:', reg.installing.state);
                 reg.installing.addEventListener('statechange', () => {
+                    console.log('Installing worker state:', reg.installing.state);
                     if (reg.installing.state === 'installed') {
-                        console.log('Installing worker now installed, sending SKIP_WAITING');
+                        console.log('Sending SKIP_WAITING to installing worker');
                         reg.installing.postMessage({ type: 'SKIP_WAITING' });
                     }
                 });
             }
 
-            // Listen for new updates
+            // Listen for updates
             reg.addEventListener('updatefound', () => {
                 const newWorker = reg.installing;
-                console.log('Update found, new worker state:', newWorker.state);
+                console.log('Update found. New worker state:', newWorker.state);
                 newWorker.addEventListener('statechange', () => {
-                    console.log('New worker state changed to:', newWorker.state);
-                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        console.log('New worker installed, forcing activation');
+                    console.log('New worker state:', newWorker.state);
+                    if (newWorker.state === 'installed') {
+                        console.log('New worker installed, forcing SKIP_WAITING');
                         newWorker.postMessage({ type: 'SKIP_WAITING' });
                     }
                     if (newWorker.state === 'activated') {
-                        console.log('New worker activated');
+                        console.log('New worker fully activated');
                     }
                 });
             });
+
+            // Manual trigger for testing
+            window.forceSWUpdate = () => {
+                if (reg.waiting) {
+                    console.log('Manual trigger: Forcing waiting worker to activate');
+                    reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                }
+            };
         })
         .catch(error => {
-            console.error('Registration failed with ' + error);
+            console.error('Registration failed:', error);
         });
 
-    // Handle controller changes
+    // Controller change handler
     let hasChanged = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!hasChanged) {
             hasChanged = true;
-            console.log('Controller changed, reloading...');
+            console.log('Controller changed, reloading page...');
             window.location.reload();
         }
     });
 
-    // Periodically check for updates (every 5 minutes)
+    // Periodic update check (every 30 seconds for testing)
     setInterval(() => {
         navigator.serviceWorker.getRegistration().then(reg => {
             reg.update();
             console.log('Periodic update check');
         });
-    }, 5 * 60 * 1000);
+    }, 30 * 1000);
 } else {
     console.log('Service worker disabled');
 }
