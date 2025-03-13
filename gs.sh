@@ -10,13 +10,6 @@ git pull
 sw_file="./sw.js"
 reg_sw_file="./reg-sw.js"
 
-# Detect OS and set sed syntax (no backup files)
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    SED="sed -i ''"  # macOS: empty string means no backup
-else
-    SED="sed -i"     # Linux: no backup by default
-fi
-
 if [ -f "$sw_file" ]; then
     # Read the first line of sw.js
     first_line=$(head -n 1 "$sw_file")
@@ -37,13 +30,16 @@ if [ -f "$sw_file" ]; then
         if [[ $version_date == $current_day ]]; then
             new_version_number=$((version_number + 1))
             new_version="$current_day.$new_version_number"
-            $SED "1s|^.*$|this.version = \"$new_version\";|" "$sw_file"
-            echo "First line of $sw_file incremented to: $new_version"
         else
             new_version="$current_day.1"
-            $SED "1s|^.*$|this.version = \"$new_version\";|" "$sw_file"
-            echo "First line of $sw_file updated to: $new_version"
         fi
+
+        # Update sw.js first line using a temp file
+        temp_file=$(mktemp)
+        echo "this.version = \"$new_version\";" > "$temp_file"
+        tail -n +2 "$sw_file" >> "$temp_file"
+        mv "$temp_file" "$sw_file"
+        echo "First line of $sw_file updated to: $new_version"
 
         # Generate the new urlsToCache list from tracked files
         new_list=$(git ls-files -- '*.html' '*.css' '*.js' '*.png' '*.jpg' '*.svg' '*.m4v' | sed 's|^|  `/|' | sed 's|$|`,|')
@@ -61,18 +57,19 @@ if [ -f "$sw_file" ]; then
             exit 1
         fi
 
-        # Write the new list to a temporary file
-        echo "$new_list" > new_list.txt
+        # Update urlsToCache using a temp file
+        temp_file=$(mktemp)
+        head -n "$N" "$sw_file" > "$temp_file"
+        echo "$new_list" >> "$temp_file"
+        tail -n "+$M" "$sw_file" >> "$temp_file"
+        mv "$temp_file" "$sw_file"
+        echo "Updated urlsToCache in $sw_file"
 
-        # Replace the old urlsToCache list with the new one
-        $SED "$((N+1)),$((M-1))d; ${N}r new_list.txt" "$sw_file"
-
-        # Clean up the temporary file
-        rm new_list.txt
-
-        # Update version in reg-sw.js (ensure it exists)
+        # Update version in reg-sw.js using a temp file
         if [ -f "$reg_sw_file" ]; then
-            $SED "s/const version = '[0-9.]*'/const version = '$new_version'/" "$reg_sw_file"
+            temp_file=$(mktemp)
+            sed "s/const version = '[0-9.]*'/const version = '$new_version'/" "$reg_sw_file" > "$temp_file"
+            mv "$temp_file" "$reg_sw_file"
             echo "Updated $reg_sw_file version:"
             grep "const version" "$reg_sw_file"
         else
