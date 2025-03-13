@@ -78,36 +78,6 @@
     </section>
     <foot-vue />
   </div>
-  <script>
-    // Change Aframe position
-    function updateAFramePosition() {
-      const entity = document.querySelector("#hypercube"); // Replace with your entity ID
-      if (window.matchMedia("(max-width: 768px)").matches) {
-        entity.setAttribute("position", "0 2 -3"); // Adjust for smaller screens
-      } else if (window.matchMedia("(max-width: 992px)").matches) {
-        entity.setAttribute("position", "2 0 -3"); // Adjust for smaller screens
-      } else {
-        entity.setAttribute("position", "2 0 -2.6"); // Default for larger screens
-      }
-    }
-    // Run on load and on resize
-    window.addEventListener("load", updateAFramePosition);
-    window.addEventListener("resize", updateAFramePosition);
-
-    // Vision Headers clickable
-    function updateCollapseAttributes() {
-      document.querySelectorAll(".vision-box-header").forEach(box => {
-        if (window.innerWidth <= 1400) {
-          box.setAttribute("data-bs-toggle", "collapse");
-        } else {
-          box.removeAttribute("data-bs-toggle");
-        }
-      });
-    }
-    document.addEventListener("DOMContentLoaded", updateCollapseAttributes);
-    window.addEventListener("resize", updateCollapseAttributes);
-
-  </script>
   <!-- Bootstrap -->
   <script src="/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"

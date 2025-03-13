@@ -66,10 +66,8 @@
         </p>
         <p class="hero-subtitle mb-4">Power your decentralized community tokens and NFTs.</p>
         <div class="hero-buttons">
-          <a role="button" class="btn btn-honey-1 btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="#learn">Learn
+          <a role="button" class="btn btn-hero btn-honey-1 btn-lg py-2 px-4 me-sm-2 mb-2 rounded-pill" href="#learn">Learn
             How<i class="ms-2 fa-solid fa-arrow-down"></i></a>
-          <a role="button" class="d-none btn btn-hero btn-outline-dark-1 btn-lg py-2 px-4 mb-2 rounded-pill"
-            href="#learn">Keep Reading</a>
         </div>
       </div>
       <div id="learn"></div>
@@ -151,7 +149,7 @@
             <div class="d-flex align-items-center justify-content-center flex-wrap mx-auto">
               <div class="p-2 hero-lead"><i class="fa-solid fa-file-contract fa-fw me-1"></i>Contracts</div>
               <div class="p-2 hero-lead"><i class="fa-solid fa-coins fa-fw me-1"></i>Tokens</div>
-              <div class="p-2 hero-lead"><i class="fa-solid fa-user-astronaut fa-fw me-1"></i>NFTs</div>
+              <div class="p-2 hero-lead"><i class="fa-solid fa-trophy fa-fw me-1"></i>NFTs</div>
             </div>
           </div>
         </div>
@@ -190,15 +188,15 @@
       <div class="container p-0">
         <div class="d-flex flex-column bg-light-3 rounded p-3">
           <p class="hero-subtitle mb-4">Honeycomb<br></p>
-          <h2 class="hero-lead">
+          <h2 class="hero-lead mb-2">
             Version 1.5</h2>
           <pre
-            class="bg-dark-1 text-light-1 p-2 mb-4"><code>git clone https://github.com/disregardfiat/honeycomb.git && cd honeycomb</code></pre>
+            class="bg-dark-1 text-light-1 p-2 mb-2"><code>git clone https://github.com/disregardfiat/honeycomb.git && cd honeycomb</code></pre>
           <div class="d-flex flex-wrap justify-content-end">
-            <a class="btn btn-outline-dark-1 rounded-pill mb-3 ms-2" role="button" href="/new/token/">Token
+            <a class="btn btn-outline-dark-1 rounded-pill mb-4 ms-2" role="button" href="/new/token/">Token
               Configurator<i class="ms-2 fa-solid fa-arrow-right"></i></a>
             </a>
-            <a class="btn btn-outline-dark-1 rounded-pill mb-3 ms-2" role="button" href="/docs/honeycomb/new-token"
+            <a class="btn btn-outline-dark-1 rounded-pill mb-4 ms-2" role="button" href="/docs/honeycomb/new-token"
               target="_blank">Token Quickstart<i class="ms-2 fa-solid fa-arrow-right"></i></a>
             </a>
           </div>
@@ -207,36 +205,6 @@
     </section>
     <foot-vue />
   </div>
-  <script>
-    // Change Aframe position
-    function updateAFramePosition() {
-      const entity = document.querySelector("#hypercube"); // Replace with your entity ID
-      if (window.matchMedia("(max-width: 768px)").matches) {
-        entity.setAttribute("position", "0 2 -3"); // Adjust for smaller screens
-      } else if (window.matchMedia("(max-width: 992px)").matches) {
-        entity.setAttribute("position", "2 0 -3"); // Adjust for smaller screens
-      } else {
-        entity.setAttribute("position", "2 0 -2.6"); // Default for larger screens
-      }
-    }
-    // Run on load and on resize
-    window.addEventListener("load", updateAFramePosition);
-    window.addEventListener("resize", updateAFramePosition);
-
-    // Vision Headers clickable
-    function updateCollapseAttributes() {
-      document.querySelectorAll(".vision-box-header").forEach(box => {
-        if (window.innerWidth <= 1400) {
-          box.setAttribute("data-bs-toggle", "collapse");
-        } else {
-          box.removeAttribute("data-bs-toggle");
-        }
-      });
-    }
-    document.addEventListener("DOMContentLoaded", updateCollapseAttributes);
-    window.addEventListener("resize", updateCollapseAttributes);
-
-  </script>
   <!-- Bootstrap -->
   <script src="/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"

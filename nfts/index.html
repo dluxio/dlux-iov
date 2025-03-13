@@ -121,8 +121,8 @@
     </style>
 </head>
 
-<body id="index">
-    <div id="app" class="d-flex flex-column vh-100 bg-img-gradient" v-cloak>
+<body id="index" class="bg-img-gradient">
+    <div id="app" class="d-flex flex-column vh-100" v-cloak>
         <!-- navbar -->
         <div>
             <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event);getUserNFTs()"
@@ -156,7 +156,7 @@
             <!-- banner menu -->
             <div class="container-fluid navbar-subbanner-container">
                 <div class="container navbar-subbanner-content p-0 rounded">
-                    <div class="mb-1 pt-3 pb-1">
+                    <div class="pt-3 pb-1">
                         <div
                             class="d-flex justify-content-between align-items-baseline flex-wrap pt-1 pb-1 mb-2 mx-2 border border-light-50 border-bottom border-start-0 border-end-0 border-top-0">
                             <h3 class="hero-subtitle mb-0">NFT Marketplace</h3>
@@ -496,20 +496,34 @@
                     </div>
                 </div>
             </div>
-
-            <div class="w-100 ms-0 row row-cols-xxl-6 row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-xs-1"
-                :class="{'row-cols-sm-2' : buyhive.checked, 'row-cols-sm-1' : buyhbd.checked }">
-                <!-- NFTCARD REPEAT AUCTION -->
-                <div class="col my-1" v-for="(item, name, index) in displayNFTs">
-                    <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
-                        @focusitem="focusItem = $event" :multisig="chains[item.token].multisig"
-                        :colors="getSetDetailsColors(item.script)" :index="index" :auction="item.auction"
-                        :sale="item.sale" :account="account"
-                        @detail="modalIndex('itemModal', $event, 'displayNFTs');itemModal.hidden = false"
-                        @tosign="toSign = $event" />
+            <!--main view-->
+            <div class="container-fluid d-flex flex-grow-1 my-3 align-items-center justify-content-center" v-if="displayNFTs.length == 0">
+                <div class="card" style="max-width: 600px;">
+                    <div class="card-body text-center">
+                        <div style="font-size: 10em;" class="text-white-50 ">
+                            <i class="fa-solid fa-trophy position-relative">
+                                <span style="font-size: .3em;"
+                                    class="d-none px-1 py-1 text-white bg-warning rounded position-absolute top-0 start-100 translate-middle">
+                                    <i class="fa-solid fa-triangle-exclamation fa-fw"></i></span></i>
+                        </div>
+                        <h1 style="font-size: 1.5em;" class="fw-light">It looks like there's nothing here</p>
+                    </div>
                 </div>
             </div>
-
+            <div class="container-fluid flex-grow-1 pt-3"  v-if="displayNFTs.length != 0">
+                <div class="row mb-3 row-cols-xxl-6 row-cols-xl-5 row-cols-lg-4 row-cols-md-3 row-cols-xs-1"
+                    :class="{'row-cols-sm-2' : buyhive.checked, 'row-cols-sm-1' : buyhbd.checked }">
+                    <!-- NFTCARD REPEAT AUCTION -->
+                    <div class="col my-1" v-for="(item, name, index) in displayNFTs">
+                        <nftcard :item="item" :uid="Base64toNumber(item.uid)" :icon="getIcon(item.script)"
+                            @focusitem="focusItem = $event" :multisig="chains[item.token].multisig"
+                            :colors="getSetDetailsColors(item.script)" :index="index" :auction="item.auction"
+                            :sale="item.sale" :account="account"
+                            @detail="modalIndex('itemModal', $event, 'displayNFTs');itemModal.hidden = false"
+                            @tosign="toSign = $event" />
+                    </div>
+                </div>
+            </div>
 
             <!-- wallet modal -->
             <div class="modal fade" id="walletModal" tabindex="-1" aria-labelledby="walletModalLabel"
@@ -532,7 +546,8 @@
                                                 class="accordion-button rounded-0 text-black collapsed" type="button"
                                                 data-bs-toggle="collapse" data-bs-target="#collapsehive"
                                                 aria-expanded="false" aria-controls="collapsehive">
-                                                HIVE<span class="ms-auto small" id="hiveBal">{{formatNumber(barhive, 3,
+                                                HIVE<span class="ms-auto small" id="hiveBal">{{formatNumber(barhive,
+                                                    3,
                                                     '.', ',')}}</span>
                                             </button>
                                         </h2>

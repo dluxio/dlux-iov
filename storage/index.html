@@ -194,58 +194,28 @@
     <section class="container-fluid py-4 bg-light-2">
       <div class="container p-0">
         <div class="d-flex flex-column bg-light-3 rounded p-3">
-          <p class="hero-lead mb-3 mx-auto text-center">Run SPK DePIN Services<br></p>
-          <h2 class="hero-subtitle">
+          <p class="hero-lead mb-3 mx-auto text-center">Run SPK DePIN Services</p>
+          <h2 class="hero-subtitle mb-2">
             Validator Node</h2>
           <pre
             class="bg-dark-1 text-light p-2 mb-2"><code>git clone https://github.com/3speaknetwork/honeycomb-spkcc.git cd honeycomb-spkcc</code></pre>
-          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-3" role="button" href="/docs/honeycomb/new-node"
+          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-4" role="button" href="/docs/honeycomb/new-node"
             target="_blank">Validator Quickstart<i class="ms-2 fa-solid fa-arrow-right"></i></a>
-          <h2 class="hero-subtitle">
+          <h2 class="hero-subtitle mb-2">
             Storage Node</h2>
           <pre class="bg-dark-1 text-light p-2 mb-2"><code>git clone https://github.com/spknetwork/trole</code></pre>
-          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-3" role="button" href="/docs/spk/trole"
+          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-4" role="button" href="/docs/spk/trole"
             target="_blank">Storage Quickstart<i class="ms-2 fa-solid fa-arrow-right"></i></a>
-          <h2 class="hero-subtitle">
+          <h2 class="hero-subtitle mb-2">
             Transcode Node</h2>
           <pre class="bg-dark-1 text-light p-2 mb-2"><code>COMING SOON</code></pre>
-          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-3 disabled" role="button" href="#/"
+          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-4 disabled" role="button" href="#/"
             target="_blank">Coming Soon</a>
         </div>
       </div>
     </section>
     <foot-vue />
   </div>
-  <script>
-    // Change Aframe position
-    function updateAFramePosition() {
-      const entity = document.querySelector("#hypercube"); // Replace with your entity ID
-      if (window.matchMedia("(max-width: 768px)").matches) {
-        entity.setAttribute("position", "0 2 -3"); // Adjust for smaller screens
-      } else if (window.matchMedia("(max-width: 992px)").matches) {
-        entity.setAttribute("position", "2 0 -3"); // Adjust for smaller screens
-      } else {
-        entity.setAttribute("position", "2 0 -2.6"); // Default for larger screens
-      }
-    }
-    // Run on load and on resize
-    window.addEventListener("load", updateAFramePosition);
-    window.addEventListener("resize", updateAFramePosition);
-
-    // Vision Headers clickable
-    function updateCollapseAttributes() {
-      document.querySelectorAll(".vision-box-header").forEach(box => {
-        if (window.innerWidth <= 1400) {
-          box.setAttribute("data-bs-toggle", "collapse");
-        } else {
-          box.removeAttribute("data-bs-toggle");
-        }
-      });
-    }
-    document.addEventListener("DOMContentLoaded", updateCollapseAttributes);
-    window.addEventListener("resize", updateCollapseAttributes);
-
-  </script>
   <!-- Bootstrap -->
   <script src="/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"

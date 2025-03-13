@@ -196,66 +196,36 @@
       <div class="container p-0">
         <div class="d-flex flex-column bg-light-3 rounded p-3">
           <p class="hero-subtitle mb-4">Validator Nodes<br></p>
-          <h2 class="hero-lead">
+          <h2 class="hero-lead mb-2">
             DLUX Node (earns DLUX)</h2>
           <pre
             class="bg-dark-1 text-light-1 p-2 mb-4"><code>git clone https://github.com/dluxio/dlux_open_token.git cd dlux_open_token</code></pre>
-          <h2 class="hero-lead">
+          <h2 class="hero-lead mb-2">
             SPK Network Node (earns LARYNX)</h2>
           <pre
             class="bg-dark-1 text-light-1 p-2 mb-4"><code>git clone https://github.com/3speaknetwork/honeycomb-spkcc.git cd honeycomb-spkcc</code></pre>
-          <h2 class="hero-lead">
+          <h2 class="hero-lead mb-2">
             Ragnarok Node (earns DUAT)</h2>
           <pre
-            class="bg-dark-1 text-light-1 p-2 mb-4"><code>git clone https://github.com/disregardfiat/honeycomb.git && cd honeycomb && git checkout ragnarok</code></pre>
-          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-3" role="button" href="/docs/honeycomb/new-node"
+            class="bg-dark-1 text-light-1 p-2 mb-2"><code>git clone https://github.com/disregardfiat/honeycomb.git && cd honeycomb && git checkout ragnarok</code></pre>
+          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-4" role="button" href="/docs/honeycomb/new-node"
             target="_blank">Validator Quickstart<i class="ms-2 fa-solid fa-arrow-right"></i></a>
           <p class="hero-subtitle my-4">Resource Nodes<br></p>
-          <h2 class="hero-lead">
+          <h2 class="hero-lead mb-2">
             SPK Storage Node (earns SPK)</h2>
-          <pre class="bg-dark-1 text-light-1 p-2 mb-4"><code>git clone https://github.com/spknetwork/trole</code></pre>
-          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-3" role="button" href="/docs/spk/trole"
+          <pre class="bg-dark-1 text-light-1 p-2 mb-2"><code>git clone https://github.com/spknetwork/trole</code></pre>
+          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-4" role="button" href="/docs/spk/trole"
             target="_blank">Storage Quickstart<i class="ms-2 fa-solid fa-arrow-right"></i></a>
-          <h2 class="hero-lead">
+          <h2 class="hero-lead mb-2">
             SPK Transcode Node (earns SPK)</h2>
-          <pre class="bg-dark-1 text-light-1 p-2 mb-4"><code>COMING SOON</code></pre>
-          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-3" role="button">Coming Soon<i
+          <pre class="bg-dark-1 text-light-1 p-2 mb-2"><code>COMING SOON</code></pre>
+          <a class="ms-auto btn btn-outline-dark-1 rounded-pill mb-4 disabled" role="button">Coming Soon<i
               class="ms-2 fa-solid fa-arrow-right d-none"></i></a>
         </div>
       </div>
     </section>
     <foot-vue />
   </div>
-  <script>
-    // Change Aframe position
-    function updateAFramePosition() {
-      const entity = document.querySelector("#hypercube"); // Replace with your entity ID
-      if (window.matchMedia("(max-width: 768px)").matches) {
-        entity.setAttribute("position", "0 2 -3"); // Adjust for smaller screens
-      } else if (window.matchMedia("(max-width: 992px)").matches) {
-        entity.setAttribute("position", "2 0 -3"); // Adjust for smaller screens
-      } else {
-        entity.setAttribute("position", "2 0 -2.6"); // Default for larger screens
-      }
-    }
-    // Run on load and on resize
-    window.addEventListener("load", updateAFramePosition);
-    window.addEventListener("resize", updateAFramePosition);
-
-    // Vision Headers clickable
-    function updateCollapseAttributes() {
-      document.querySelectorAll(".vision-box-header").forEach(box => {
-        if (window.innerWidth <= 1400) {
-          box.setAttribute("data-bs-toggle", "collapse");
-        } else {
-          box.removeAttribute("data-bs-toggle");
-        }
-      });
-    }
-    document.addEventListener("DOMContentLoaded", updateCollapseAttributes);
-    window.addEventListener("resize", updateCollapseAttributes);
-
-  </script>
   <!-- Bootstrap -->
   <script src="/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
