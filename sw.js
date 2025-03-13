@@ -1,4 +1,4 @@
-this.version = "2025.03.12.17";
+this.version = "2025.03.12.18";
 
 console.log("SW:" + this.version + " - online.");
 
@@ -268,6 +268,24 @@ self.addEventListener('fetch', function(event) {
   }
 });
 
+self.addEventListener('message', (event) => {
+  console.log('SW received message:', event.data);
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+      console.log('SKIP_WAITING received, activating now...');
+      self.skipWaiting().then(() => {
+          console.log('Skip waiting completed, claiming clients...');
+          return self.clients.claim();
+      }).then(() => {
+          console.log('Clients claimed, notifying...');
+          return self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
+      }).then(clients => {
+          clients.forEach(client => client.postMessage({ type: 'SW_UPDATED' }));
+      }).catch(err => {
+          console.error('Skip waiting or claim failed:', err);
+      });
+  }
+});
+
 self.addEventListener("activate", function (event) {
   console.log("SW: Activated. Cache name:" + CACHE_NAME);
   event.waitUntil(
@@ -297,26 +315,13 @@ self.addEventListener("activate", function (event) {
               client.postMessage({ type: 'SW_UPDATED' });
           });
           if (clients.length === 0) {
-              console.log('No clients found, forcing activation');
+              console.log('No clients found');
           }
       })
       .catch(function(error) {
           console.error('Activation failed:', error);
       })
   );
-});
-
-self.addEventListener('message', (event) => {
-  console.log('SW received message:', event.data);
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-      console.log('SKIP_WAITING received, activating now...');
-      self.skipWaiting().then(() => {
-          console.log('Skip waiting completed, claiming clients');
-          self.clients.claim();
-      }).catch(err => {
-          console.error('Skip waiting failed:', err);
-      });
-  }
 });
 
 self.addEventListener("message", function (e) {
