@@ -1,6 +1,6 @@
-this.version = "2025.03.12.10";
+this.version = "2025.03.12.11";
 
-console.log( "SW:" + this.version + " - online.");
+console.log("SW:" + this.version + " - online.");
 
 var CACHE_NAME = "sw-cache-v" + this.version;
 
@@ -221,162 +221,84 @@ var urlsToCache = [
   `/vr/vue.html`,
 ];
 
-this.nftscripts = {}
+this.nftscripts = {};
 
-// GROK Code
 self.addEventListener("install", function (event) {
-  event.waitUntil(
-      caches.open(CACHE_NAME).then(function (cache) {
-          console.log("Opened cache:" + CACHE_NAME);
-          return cache.addAll(urlsToCache);
-      })
-  );
-});
-
-/* self.addEventListener("install", function (event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
       console.log("Opened cache:" + CACHE_NAME);
-      
       return cache.addAll(urlsToCache);
+    }).catch(function(error) {
+      console.error('Cache installation failed:', error);
     })
   );
-}); */
+});
 
-// GROK Code
 self.addEventListener('fetch', function(event) {
+  // Skip caching for videos and API calls
   if (event.request.url.endsWith('.m4v') || event.request.url.startsWith('https://api.coingecko.com/')) {
-      event.respondWith(fetch(event.request));
+    event.respondWith(fetch(event.request));
   } else {
-      event.respondWith(
-          caches.match(event.request).then(function(response) {
-              if (response) {
-                  return response; // Serve from cache if available
-              }
-              return fetch(event.request).then(function(networkResponse) {
-                  if (!networkResponse || networkResponse.status !== 200) {
-                      console.error('Failed to fetch:', event.request.url);
-                      return networkResponse;
-                  }
-                  // Cache the new response
-                  caches.open(CACHE_NAME).then(function(cache) {
-                      cache.put(event.request, networkResponse.clone());
-                  });
-                  return networkResponse;
-              }).catch(function(error) {
-                  console.error('Network error for:', event.request.url, error);
+    event.respondWith(
+      caches.match(event.request).then(function(response) {
+        if (response) {
+          return response; // Serve from cache if available
+        }
+        return fetch(event.request).then(function(networkResponse) {
+          if (!networkResponse || !networkResponse.ok) {
+            console.error('Failed to fetch:', event.request.url);
+            return networkResponse;
+          }
+          // Clone the response for caching
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(function(cache) {
+            return cache.put(event.request, responseToCache)
+              .catch(function(error) {
+                console.error('Cache put failed:', event.request.url, error);
               });
-          })
-      );
+          });
+          return networkResponse;
+        }).catch(function(error) {
+          console.error('Network error for:', event.request.url, error);
+          // Optional: Add offline fallback here if you have an offline page
+          // return caches.match('/offline.html');
+        });
+      })
+    );
   }
 });
 
-/* self.addEventListener('fetch', function(event) {
-  if (event.request.url.endsWith('.m4v')) {
-    event.respondWith(fetch(event.request));
-} else if (event.request.url.startsWith('https://api.coingecko.com/')) {
-    // Bypass service worker for Coingecko API
-    event.respondWith(fetch(event.request));
-} else event.respondWith(
-      caches.match(event.request).then(function(response) {
-          if (response) {
-              return response; // Serve from cache if available
-          }
-          return fetch(event.request).then(function(networkResponse) {
-              if (!networkResponse || networkResponse.status !== 200) {
-                  console.error('Failed to fetch:', event.request.url);
-                  // Optional: Return a fallback response here
-              }
-              return networkResponse;
-          }).catch(function(error) {
-              console.error('Network error for:', event.request.url, error);
-              // Optional: Return a fallback response here
-          });
-      })
-  );
-}); */
-
-// self.addEventListener("fetch", function (event) {
-//   event.respondWith(
-//     /* Check if the cache has the file */
-//     caches.open(CACHE_NAME).then(cache => {
-//       return cache.match(event.request).then(resp => {
-//           // Request found in current cache, or fetch the file
-//           return resp || fetch(event.request).then(response => {
-//               /* Check if the cache has the file */
-//               if(response.status == 429)throw new Error('Rate Limit@', event.request.url);
-//               if (!response || response.status !== 200 || response.type !== "basic") {
-//                 return response;
-//               }
-//               // Cache the newly fetched file for next time
-//               if (
-//                 (!response.headers.get("content-type").includes("json") && !response.headers.get("retry-after")) &&
-//                 event.request.method === "GET" && 
-//                 event.request.url.startsWith('http'))cache.put(event.request, response.clone());
-//               return response;
-//           // Fetch failed, user is offline
-//           }).catch(() => {
-//               // Look in the whole cache to load a fallback version of the file
-//               return caches.match(event.request).then(fallback => {
-//                   return fallback;
-//               });
-//           });
-//       });
-//     })
-
-//   );
-// });
-
-// GROK Code
 self.addEventListener("activate", function (event) {
-  console.log("SW: Activated. Cache name:" + CACHE_NAME);
-  event.waitUntil(
-      caches.keys().then(function (cacheNames) {
-          return Promise.all(
-              cacheNames
-                  .filter(function (cacheName) {
-                      return cacheName != CACHE_NAME;
-                  })
-                  .map(function (cacheName) {
-                      console.log("Deleting cache: " + cacheName);
-                      return caches.delete(cacheName);
-                  })
-          );
-      }).then(() => self.clients.claim()) // Take control of clients immediately
-  );
-});
-
-/* self.addEventListener("activate", function (event) {
   console.log("SW: Activated. Cache name:" + CACHE_NAME);
   event.waitUntil(
     caches.keys().then(function (cacheNames) {
       return Promise.all(
         cacheNames
           .filter(function (cacheName) {
-            return cacheName != CACHE_NAME
+            return cacheName !== CACHE_NAME;
           })
           .map(function (cacheName) {
-            console.log("Deleteing cache: " + cacheName);
+            console.log("Deleting cache: " + cacheName);
             return caches.delete(cacheName);
           })
       );
+    }).then(() => self.clients.claim())
+    .catch(function(error) {
+      console.error('Activation failed:', error);
     })
   );
-}); */
+});
 
 self.addEventListener("message", function (e) {
   const message = e.data, p = e.source;
   switch (message.id) {
     case "callScript":
-
-      callScript(message.o, p)
+      callScript(message.o, p);
       break;
     default:
       console.log("SW msg:", message);
   }
 });
-
-
 
 function tryLocal(m) {
   return new Promise((resolve, reject) => {
@@ -386,44 +308,48 @@ function tryLocal(m) {
       } else {
         reject("no data");
       }
-    })
+    });
   });
 }
 
-function callScript (o,p){
-    if (this.nftscripts[o.script] && this.nftscripts[o.script] != "Loading...") {
-      const code = `(//${this.nftscripts[o.script]}\n)("${ o.uid ? o.uid : 0}")`;
-      var computed = eval(code);
-      computed.uid = o.uid || "";
-      computed.owner = o.owner || "";
-      computed.script = o.script;
-      (computed.setname = o.set), (computed.token = o.token);
-      p.postMessage(computed);
-    } else {
-      this.pullScript(o.script).then((empty) => {
-        this.callScript(o,p)
-      });
-    }
+function callScript(o, p) {
+  if (this.nftscripts[o.script] && this.nftscripts[o.script] !== "Loading...") {
+    const code = `(//${this.nftscripts[o.script]}\n)("${o.uid ? o.uid : 0}")`;
+    var computed = eval(code);
+    computed.uid = o.uid || "";
+    computed.owner = o.owner || "";
+    computed.script = o.script;
+    (computed.setname = o.set), (computed.token = o.token);
+    p.postMessage(computed);
+  } else {
+    this.pullScript(o.script).then((empty) => {
+      this.callScript(o, p);
+    });
+  }
 }
 
 function pullScript(id) {
-      return new Promise((resolve, reject) => {
-        if (this.nftscripts[id] == "Loading...") {
-          setTimeout(() => {
-              pullScript(id).then((r) => {
-              resolve(r);
-            });
-          }, 2000);
-        } else if (this.nftscripts[id]) {
+  return new Promise((resolve, reject) => {
+    if (this.nftscripts[id] === "Loading...") {
+      setTimeout(() => {
+        pullScript(id).then((r) => {
+          resolve(r);
+        });
+      }, 2000);
+    } else if (this.nftscripts[id]) {
+      resolve("OK");
+    } else {
+      this.nftscripts[id] = "Loading...";
+      fetch(`https://ipfs.dlux.io/ipfs/${id}`)
+        .then((response) => response.text())
+        .then((data) => {
+          this.nftscripts[id] = data;
           resolve("OK");
-        } else {
-          this.nftscripts[id] = "Loading...";
-          fetch(`https://ipfs.dlux.io/ipfs/${id}`)
-          .then((response) => response.text())
-          .then((data) => {
-            this.nftscripts[id] = data;
-            resolve("OK");
-          });
-        }
-      });
+        })
+        .catch((error) => {
+          console.error('Failed to fetch script:', id, error);
+          reject(error);
+        });
     }
+  });
+}
