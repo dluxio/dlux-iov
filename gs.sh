@@ -70,7 +70,7 @@ if [ -f "$sw_file" ]; then
             temp_file=$(mktemp)
             sed "s/const version = '[0-9.]*'/const version = '$new_version'/" "$reg_sw_file" > "$temp_file"
             mv "$temp_file" "$reg_sw_file"
-            echo "Updated $reg_sw_file version:"
+            echo "Updated $reg_sw_file version to: $new_version"
             grep "const version" "$reg_sw_file"
         else
             echo "Warning: $reg_sw_file not found, skipping version update"
