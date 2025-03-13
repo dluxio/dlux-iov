@@ -1,100 +1,56 @@
-var activeWorker = null;
-const enableServiceWorker = true; // Keep true for testing
-
-if ('serviceWorker' in navigator && enableServiceWorker) {
-    const version = '2025.03.12.27'; // Increment for new versions
+if ('serviceWorker' in navigator) {
+    const version = '2025.03.12.28'; // Update this with each new version
     console.log('Registering service worker with version:', version);
 
-    // Clean up old registrations and register new worker sequentially
+    // Utility function for delay
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // Step 1: Clean up all existing registrations
     navigator.serviceWorker.getRegistrations()
-        .then(regs => {
-            const unregistrations = regs.map(reg => {
-                if (reg.active && reg.active.scriptURL.includes('sw.js') && !reg.active.scriptURL.includes(version)) {
-                    console.log('Unregistering old worker:', reg.active.scriptURL);
-                    return reg.unregister();
-                }
-                return Promise.resolve();
+        .then(registrations => {
+            const unregistrations = registrations.map(reg => {
+                console.log('Found registration:', reg.active?.scriptURL || 'No active worker');
+                return reg.unregister().then(() => {
+                    console.log('Unregistered:', reg.active?.scriptURL || 'Unknown');
+                });
             });
             return Promise.all(unregistrations);
         })
         .then(() => {
-            console.log('All old workers unregistered, registering new worker...');
+            console.log('All old registrations cleared. Waiting 1 second...');
+            return delay(1000); // Wait to ensure unregistration completes
+        })
+        .then(() => {
+            // Step 2: Register the new service worker
+            console.log('Registering new service worker...');
             return navigator.serviceWorker.register(`/sw.js?v=${version}`, { scope: '/' });
         })
         .then(reg => {
-            console.log('Registration succeeded. Scope is ' + reg.scope);
-            activeWorker = reg.active;
-            console.log('Active worker:', activeWorker ? activeWorker.state : 'None');
+            console.log('Service worker registered successfully. Scope:', reg.scope);
 
-            // Immediate update check
-            reg.update()
-                .then(() => console.log('Update check completed'))
-                .catch(err => console.error('Update failed:', err));
-
-            // Handle waiting or installing workers
-            if (reg.waiting) {
-                console.log('Found waiting worker, sending SKIP_WAITING');
-                reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-            } else if (reg.installing) {
-                console.log('Found installing worker, state:', reg.installing.state);
+            // Handle installing/waiting workers
+            if (reg.installing) {
+                console.log('Installing worker detected, state:', reg.installing.state);
                 reg.installing.addEventListener('statechange', () => {
                     if (reg.installing.state === 'installed') {
-                        console.log('Installing worker installed, sending SKIP_WAITING');
+                        console.log('Worker installed, sending SKIP_WAITING');
                         reg.installing.postMessage({ type: 'SKIP_WAITING' });
                     }
                 });
-            } else {
-                console.log('No installing or waiting worker found');
+            } else if (reg.waiting) {
+                console.log('Waiting worker detected, sending SKIP_WAITING');
+                reg.waiting.postMessage({ type: 'SKIP_WAITING' });
             }
 
-            // Listen for updates
-            reg.addEventListener('updatefound', () => {
-                const newWorker = reg.installing;
-                console.log('Update found. New worker state:', newWorker ? newWorker.state : 'null');
-                newWorker?.addEventListener('statechange', () => {
-                    if (newWorker.state === 'installed') {
-                        console.log('New worker installed, sending SKIP_WAITING');
-                        newWorker.postMessage({ type: 'SKIP_WAITING' });
-                    }
-                    if (newWorker.state === 'activated') {
-                        console.log('New worker fully activated');
-                    }
-                });
+            // Listen for controller changes
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                console.log('Controller changed, reloading page...');
+                window.location.reload();
             });
-
-            // Manual trigger for testing
-            window.forceSWUpdate = () => {
-                if (reg.waiting) {
-                    console.log('Manual trigger: Forcing waiting worker to activate');
-                    reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-                } else {
-                    console.log('No waiting worker found for manual trigger');
-                }
-            };
         })
         .catch(error => {
-            console.error('Registration failed:', error);
+            console.error('Service worker registration failed:', error);
         });
-
-    // Controller change handler
-    let hasChanged = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!hasChanged) {
-            hasChanged = true;
-            console.log('Controller changed, reloading page...');
-            window.location.reload();
-        }
-    });
-
-    // Periodic update check (every 5 minutes for production)
-    setInterval(() => {
-        navigator.serviceWorker.getRegistration()
-            .then(reg => {
-                reg.update();
-                console.log('Periodic update check');
-            })
-            .catch(err => console.error('Periodic update failed:', err));
-    }, 5 * 60 * 1000); // 5 minutes
 } else {
-    console.log('Service worker disabled');
+    console.log('Service workers not supported in this browser.');
 }
