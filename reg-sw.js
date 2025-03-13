@@ -1,7 +1,7 @@
 var activeWorker = 0;
 const enableServiceWorker = true; // Set to true for testing
 if ('serviceWorker' in navigator && enableServiceWorker) {
-    const version = '2025.03.12.18'; // Increment for next test
+    const version = '2025.03.12.19'; // Increment for next test
     console.log('Registering service worker with version:', version);
     navigator.serviceWorker.register(`/sw.js?v=${version}`, { scope: '/' })
         .then(reg => {
