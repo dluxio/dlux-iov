@@ -1,7 +1,7 @@
 var activeWorker = 0;
 const enableServiceWorker = true;
 if ('serviceWorker' in navigator && enableServiceWorker) {
-    const version = '2025.03.12.29'; // Increment for testing
+    const version = '2025.03.12.30'; // Increment for testing
     console.log('Registering service worker with version:', version);
 
     // Clean up old registrations
@@ -18,6 +18,7 @@ if ('serviceWorker' in navigator && enableServiceWorker) {
         console.log('Registration succeeded. Scope is ' + reg.scope);
         activeWorker = reg.active;
         console.log('Active worker:', activeWorker ? activeWorker.state : 'None');
+        console.log('Current controller:', navigator.serviceWorker.controller ? navigator.serviceWorker.controller.scriptURL : 'None');
 
         reg.update().then(() => {
             console.log('Update check completed');
@@ -74,7 +75,8 @@ if ('serviceWorker' in navigator && enableServiceWorker) {
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!hasChanged) {
             hasChanged = true;
-            console.log('Controller changed, reloading page...');
+            console.log('Controller changed to:', navigator.serviceWorker.controller?.scriptURL);
+            console.log('Reloading page...');
             window.location.reload();
         }
     });

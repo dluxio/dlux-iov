@@ -1,4 +1,4 @@
-this.version = "2025.03.12.29";
+this.version = "2025.03.12.30";
 
 console.log("SW:" + this.version + " - online.");
 
@@ -272,8 +272,12 @@ self.addEventListener('message', (event) => {
   console.log('SW received message:', event.data);
   if (event.data && event.data.type === 'SKIP_WAITING') {
       console.log('SKIP_WAITING received, activating now...');
+      console.log('Current controller before skip:', self.registration.active?.scriptURL || 'None');
       Promise.resolve()
-          .then(() => self.skipWaiting())
+          .then(() => {
+              console.log('Calling skipWaiting...');
+              return self.skipWaiting();
+          })
           .then(() => {
               console.log('Skip waiting completed, claiming clients...');
               return self.clients.claim();
@@ -291,6 +295,7 @@ self.addEventListener('message', (event) => {
               if (clients.length === 0) {
                   console.log('No clients found to notify');
               }
+              console.log('New controller after claim:', self.registration.active?.scriptURL || 'None');
           })
           .catch(err => {
               console.error('Error during skipWaiting or claim:', err);
@@ -326,6 +331,7 @@ self.addEventListener("activate", function (event) {
               console.log('Notifying client during activation:', client.id);
               client.postMessage({ type: 'SW_UPDATED' });
           });
+          console.log('Controller after activation:', self.registration.active?.scriptURL || 'None');
       })
       .catch(function(error) {
           console.error('Activation failed:', error);
