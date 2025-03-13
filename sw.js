@@ -1,4 +1,4 @@
-this.version = "2025.03.12.13";
+this.version = "2025.03.12.14";
 
 console.log("SW:" + this.version + " - online.");
 
@@ -268,7 +268,6 @@ self.addEventListener('fetch', function(event) {
   }
 });
 
-// Modified activate event listener
 self.addEventListener("activate", function (event) {
   console.log("SW: Activated. Cache name:" + CACHE_NAME);
   event.waitUntil(
@@ -285,14 +284,16 @@ self.addEventListener("activate", function (event) {
                       })
               );
           }),
-          self.clients.claim() // Take control immediately
+          self.clients.claim()
       ])
       .then(() => {
-          // Notify all clients about the update
-          self.clients.matchAll().then(clients => {
-              clients.forEach(client => 
-                  client.postMessage({ type: 'SW_UPDATED' })
-              );
+          console.log('Claiming clients');
+          return self.clients.matchAll({ includeUncontrolled: true });
+      })
+      .then(clients => {
+          clients.forEach(client => {
+              console.log('Notifying client:', client.id);
+              client.postMessage({ type: 'SW_UPDATED' });
           });
       })
       .catch(function(error) {
@@ -302,9 +303,14 @@ self.addEventListener("activate", function (event) {
 });
 
 self.addEventListener('message', (event) => {
+  console.log('SW received message:', event.data);
   if (event.data && event.data.type === 'SKIP_WAITING') {
-      console.log('Received SKIP_WAITING message');
-      self.skipWaiting();
+      console.log('Skipping waiting...');
+      self.skipWaiting().then(() => {
+          console.log('Skip waiting completed');
+      }).catch(err => {
+          console.error('Skip waiting failed:', err);
+      });
   }
 });
 
