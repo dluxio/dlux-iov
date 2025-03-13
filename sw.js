@@ -1,10 +1,8 @@
-this.version = "2025.03.12.36";
+this.version = "2025.03.12.27";
+console.log("SW:" + version + " - online.");
+const CACHE_NAME = "sw-cache-v" + version;
 
-console.log("SW:" + this.version + " - online.");
-
-var CACHE_NAME = "sw-cache-v" + this.version;
-
-// The files we want to cache
+// Files to cache (same as your original list, omitted for brevity)
 var urlsToCache = [
   `/about/index.html`,
   `/blog/index.html`,
@@ -221,187 +219,148 @@ var urlsToCache = [
   `/vr/vue.html`,
 ];
 
-this.nftscripts = {};
+self.nftscripts = {};
+const scriptPromises = {}; // Store ongoing fetch promises
 
 self.addEventListener("install", function (event) {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(function (cache) {
-      console.log("Opened cache:" + CACHE_NAME);
-      return cache.addAll(urlsToCache);
-    }).catch(function(error) {
-      console.error('Cache installation failed:', error);
-    })
-  );
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => {
+                console.log("Opened cache:" + CACHE_NAME);
+                return cache.addAll(urlsToCache);
+            })
+            .catch(error => console.error('Cache installation failed:', error))
+    );
 });
 
 self.addEventListener('fetch', function(event) {
-  // Skip caching for videos and API calls
-  if (event.request.url.endsWith('.m4v') || event.request.url.startsWith('https://api.coingecko.com/')) {
-    event.respondWith(fetch(event.request));
-  } else {
-    event.respondWith(
-      caches.match(event.request).then(function(response) {
-        if (response) {
-          return response; // Serve from cache if available
-        }
-        return fetch(event.request).then(function(networkResponse) {
-          if (!networkResponse || !networkResponse.ok) {
-            console.error('Failed to fetch:', event.request.url);
-            return networkResponse;
-          }
-          // Clone the response for caching
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then(function(cache) {
-            return cache.put(event.request, responseToCache)
-              .catch(function(error) {
-                console.error('Cache put failed:', event.request.url, error);
-              });
-          });
-          return networkResponse;
-        }).catch(function(error) {
-          console.error('Network error for:', event.request.url, error);
-          // Optional: Add offline fallback here if you have an offline page
-          // return caches.match('/offline.html');
-        });
-      })
-    );
-  }
+    if (event.request.url.endsWith('.m4v') || event.request.url.startsWith('https://api.coingecko.com/')) {
+        event.respondWith(fetch(event.request));
+    } else {
+        event.respondWith(
+            caches.match(event.request)
+                .then(cachedResponse => {
+                    const fetchPromise = fetch(event.request)
+                        .then(networkResponse => {
+                            if (!networkResponse || !networkResponse.ok) {
+                                console.error('Failed to fetch:', event.request.url);
+                                return cachedResponse || networkResponse; // Fallback to cache if available
+                            }
+                            if (networkResponse.status === 200 && networkResponse.type === 'basic') { // Ensure cacheable
+                                const responseToCache = networkResponse.clone();
+                                caches.open(CACHE_NAME)
+                                    .then(cache => {
+                                        cache.put(event.request, responseToCache)
+                                            .catch(error => console.error('Cache put failed:', event.request.url, error));
+                                    });
+                            }
+                            return networkResponse;
+                        })
+                        .catch(error => {
+                            console.error('Network error for:', event.request.url, error);
+                            return cachedResponse; // Fallback to cache on network failure
+                        });
+                    return cachedResponse || fetchPromise; // Serve cache first, then update
+                })
+        );
+    }
 });
 
 self.addEventListener('message', (event) => {
-  console.log('SW received message:', event.data);
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-      console.log('SKIP_WAITING received, activating now...');
-      console.log('Current controller before skip:', self.registration.active?.scriptURL || 'None');
-      console.log('This worker URL:', self.location.href);
-      Promise.resolve()
-          .then(() => {
-              console.log('Calling skipWaiting...');
-              return self.skipWaiting();
-          })
-          .then(() => {
-              console.log('Skip waiting completed, claiming clients...');
-              return self.clients.claim();
-          })
-          .then(() => {
-              console.log('Clients claimed, notifying all clients...');
-              return self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
-          })
-          .then(clients => {
-              console.log('Found', clients.length, 'clients');
-              clients.forEach(client => {
-                  console.log('Notifying client:', client.id);
-                  client.postMessage({ type: 'SW_UPDATED' });
-              });
-              if (clients.length === 0) {
-                  console.log('No clients found to notify');
-              }
-              console.log('New controller after claim:', self.registration.active?.scriptURL || 'None');
-          })
-          .catch(err => {
-              console.error('Error during skipWaiting or claim:', err);
-          });
-  }
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        console.log('SKIP_WAITING received, activating now...');
+        self.skipWaiting()
+            .then(() => {
+                console.log('Skip waiting completed, claiming clients...');
+                return self.clients.claim();
+            })
+            .then(() => {
+                console.log('Clients claimed, notifying all clients...');
+                return self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
+            })
+            .then(clients => {
+                clients.forEach(client => {
+                    client.postMessage({ type: 'SW_UPDATED' });
+                    console.log('Notified client:', client.id);
+                });
+            })
+            .catch(err => console.error('Skip waiting or claim failed:', err));
+    }
 });
 
 self.addEventListener("activate", function (event) {
-  console.log("SW: Activated. Cache name:" + CACHE_NAME);
-  console.log('Activated worker URL:', self.location.href);
-  event.waitUntil(
-      Promise.all([
-          caches.keys().then(function (cacheNames) {
-              return Promise.all(
-                  cacheNames
-                      .filter(function (cacheName) {
-                          return cacheName !== CACHE_NAME;
-                      })
-                      .map(function (cacheName) {
-                          console.log("Deleting cache: " + cacheName);
-                          return caches.delete(cacheName);
-                      })
-              );
-          }),
-          self.clients.claim()
-      ])
-      .then(() => {
-          console.log('Claiming all clients during activation');
-          return self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
-      })
-      .then(clients => {
-          console.log('Found', clients.length, 'clients during activation');
-          clients.forEach(client => {
-              console.log('Notifying client during activation:', client.id);
-              client.postMessage({ type: 'SW_UPDATED' });
-          });
-          console.log('Controller after activation:', self.registration.active?.scriptURL || 'None');
-      })
-      .catch(function(error) {
-          console.error('Activation failed:', error);
-      })
-  );
+    event.waitUntil(
+        Promise.all([
+            caches.keys().then(cacheNames => {
+                return Promise.all(
+                    cacheNames
+                        .filter(cacheName => cacheName !== CACHE_NAME)
+                        .map(cacheName => {
+                            console.log("Deleting cache: " + cacheName);
+                            return caches.delete(cacheName);
+                        })
+                );
+            }),
+            self.clients.claim()
+        ])
+        .then(() => {
+            return self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
+        })
+        .then(clients => {
+            clients.forEach(client => {
+                client.postMessage({ type: 'SW_UPDATED' });
+                console.log('Notified client:', client.id);
+            });
+        })
+        .catch(error => console.error('Activation failed:', error))
+    );
 });
 
+// NFT script handling
 self.addEventListener("message", function (e) {
-  const message = e.data, p = e.source;
-  switch (message.id) {
-    case "callScript":
-      callScript(message.o, p);
-      break;
-    default:
-      console.log("SW msg:", message);
-  }
+    const message = e.data, p = e.source;
+    switch (message.id) {
+        case "callScript":
+            callScript(message.o, p);
+            break;
+        default:
+            console.log("SW msg:", message);
+    }
 });
-
-function tryLocal(m) {
-  return new Promise((resolve, reject) => {
-    localStorage.getItem(m.o).then((data) => {
-      if (data) {
-        resolve(data);
-      } else {
-        reject("no data");
-      }
-    });
-  });
-}
 
 function callScript(o, p) {
-  if (this.nftscripts[o.script] && this.nftscripts[o.script] !== "Loading...") {
-    const code = `(//${this.nftscripts[o.script]}\n)("${o.uid ? o.uid : 0}")`;
-    var computed = eval(code);
-    computed.uid = o.uid || "";
-    computed.owner = o.owner || "";
-    computed.script = o.script;
-    (computed.setname = o.set), (computed.token = o.token);
-    p.postMessage(computed);
-  } else {
-    this.pullScript(o.script).then((empty) => {
-      this.callScript(o, p);
-    });
-  }
+    if (self.nftscripts[o.script] && self.nftscripts[o.script] !== "Loading...") {
+        const code = `(//${self.nftscripts[o.script]}\n)("${o.uid ? o.uid : 0}")`;
+        const computed = eval(code);
+        computed.uid = o.uid || "";
+        computed.owner = o.owner || "";
+        computed.script = o.script;
+        computed.setname = o.set;
+        computed.token = o.token;
+        p.postMessage(computed);
+    } else {
+        pullScript(o.script).then(() => callScript(o, p));
+    }
 }
 
 function pullScript(id) {
-  return new Promise((resolve, reject) => {
-    if (this.nftscripts[id] === "Loading...") {
-      setTimeout(() => {
-        pullScript(id).then((r) => {
-          resolve(r);
-        });
-      }, 2000);
-    } else if (this.nftscripts[id]) {
-      resolve("OK");
+    if (self.nftscripts[id] && self.nftscripts[id] !== "Loading...") {
+        return Promise.resolve("OK");
+    } else if (scriptPromises[id]) {
+        return scriptPromises[id];
     } else {
-      this.nftscripts[id] = "Loading...";
-      fetch(`https://ipfs.dlux.io/ipfs/${id}`)
-        .then((response) => response.text())
-        .then((data) => {
-          this.nftscripts[id] = data;
-          resolve("OK");
-        })
-        .catch((error) => {
-          console.error('Failed to fetch script:', id, error);
-          reject(error);
-        });
+        scriptPromises[id] = fetch(`https://ipfs.dlux.io/ipfs/${id}`)
+            .then(response => response.text())
+            .then(data => {
+                self.nftscripts[id] = data;
+                delete scriptPromises[id];
+                return "OK";
+            })
+            .catch(error => {
+                console.error('Failed to fetch script:', id, error);
+                delete scriptPromises[id];
+                throw error;
+            });
+        return scriptPromises[id];
     }
-  });
 }
