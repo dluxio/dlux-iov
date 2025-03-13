@@ -1,4 +1,4 @@
-this.version = "2025.03.12.19";
+this.version = "2025.03.12.20";
 
 console.log("SW:" + this.version + " - online.");
 
@@ -276,10 +276,17 @@ self.addEventListener('message', (event) => {
           console.log('Skip waiting completed, claiming clients...');
           return self.clients.claim();
       }).then(() => {
-          console.log('Clients claimed, notifying...');
+          console.log('Clients claimed, notifying all clients...');
           return self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
       }).then(clients => {
-          clients.forEach(client => client.postMessage({ type: 'SW_UPDATED' }));
+          console.log('Notifying', clients.length, 'clients');
+          clients.forEach(client => {
+              client.postMessage({ type: 'SW_UPDATED' });
+              console.log('Notified client:', client.id);
+          });
+          if (clients.length === 0) {
+              console.log('No clients found to notify');
+          }
       }).catch(err => {
           console.error('Skip waiting or claim failed:', err);
       });
