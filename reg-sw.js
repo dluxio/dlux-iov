@@ -1,7 +1,7 @@
 var activeWorker = 0;
 const enableServiceWorker = true;
 if ('serviceWorker' in navigator && enableServiceWorker) {
-    const version = '2025.03.12.30'; // Increment for testing
+    const version = '2025.03.12.31'; // Increment for testing
     console.log('Registering service worker with version:', version);
 
     // Clean up old registrations
