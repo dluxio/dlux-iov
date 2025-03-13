@@ -1,4 +1,4 @@
-this.version = "2025.03.12.32";
+this.version = "2025.03.12.33";
 
 console.log("SW:" + this.version + " - online.");
 
@@ -273,6 +273,7 @@ self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
       console.log('SKIP_WAITING received, activating now...');
       console.log('Current controller before skip:', self.registration.active?.scriptURL || 'None');
+      console.log('This worker URL:', self.location.href);
       Promise.resolve()
           .then(() => {
               console.log('Calling skipWaiting...');
@@ -305,6 +306,7 @@ self.addEventListener('message', (event) => {
 
 self.addEventListener("activate", function (event) {
   console.log("SW: Activated. Cache name:" + CACHE_NAME);
+  console.log('Activated worker URL:', self.location.href);
   event.waitUntil(
       Promise.all([
           caches.keys().then(function (cacheNames) {

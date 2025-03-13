@@ -1,10 +1,9 @@
 var activeWorker = 0;
 const enableServiceWorker = true;
 if ('serviceWorker' in navigator && enableServiceWorker) {
-    const version = '2025.03.12.32'; // Increment for testing
+    const version = '2025.03.12.33'; // Increment to test
     console.log('Registering service worker with version:', version);
 
-    // Clean up old registrations
     navigator.serviceWorker.getRegistrations().then(regs => {
         regs.forEach(reg => {
             if (reg.active && reg.active.scriptURL.includes('sw.js') && !reg.active.scriptURL.includes(version)) {
@@ -17,7 +16,7 @@ if ('serviceWorker' in navigator && enableServiceWorker) {
     }).then(reg => {
         console.log('Registration succeeded. Scope is ' + reg.scope);
         activeWorker = reg.active;
-        console.log('Active worker:', activeWorker ? activeWorker.state : 'None');
+        console.log('Active worker:', activeWorker ? `${activeWorker.state} (${activeWorker.scriptURL})` : 'None');
         console.log('Current controller:', navigator.serviceWorker.controller ? navigator.serviceWorker.controller.scriptURL : 'None');
 
         reg.update().then(() => {
@@ -25,14 +24,14 @@ if ('serviceWorker' in navigator && enableServiceWorker) {
         }).catch(err => console.error('Update failed:', err));
 
         if (reg.waiting) {
-            console.log('Found waiting worker, state:', reg.waiting.state);
+            console.log('Found waiting worker, state:', reg.waiting.state, 'URL:', reg.waiting.scriptURL);
             reg.waiting.postMessage({ type: 'SKIP_WAITING' });
         }
 
         if (reg.installing) {
-            console.log('Found installing worker, state:', reg.installing.state);
+            console.log('Found installing worker, state:', reg.installing.state, 'URL:', reg.installing.scriptURL);
             reg.installing.addEventListener('statechange', () => {
-                console.log('Installing worker state:', reg.installing.state);
+                console.log('Installing worker state:', reg.installing.state, 'URL:', reg.installing.scriptURL);
                 if (reg.installing.state === 'installed') {
                     console.log('Sending SKIP_WAITING to installing worker');
                     reg.installing.postMessage({ type: 'SKIP_WAITING' });
@@ -44,10 +43,10 @@ if ('serviceWorker' in navigator && enableServiceWorker) {
 
         reg.addEventListener('updatefound', () => {
             const newWorker = reg.installing;
-            console.log('Update found. New worker:', newWorker ? newWorker.state : 'null');
+            console.log('Update found. New worker:', newWorker ? `${newWorker.state} (${newWorker.scriptURL})` : 'null');
             if (newWorker) {
                 newWorker.addEventListener('statechange', () => {
-                    console.log('New worker state:', newWorker.state);
+                    console.log('New worker state:', newWorker.state, 'URL:', newWorker.scriptURL);
                     if (newWorker.state === 'installed') {
                         console.log('New worker installed, forcing SKIP_WAITING');
                         newWorker.postMessage({ type: 'SKIP_WAITING' });
@@ -61,7 +60,7 @@ if ('serviceWorker' in navigator && enableServiceWorker) {
 
         window.forceSWUpdate = () => {
             if (reg.waiting) {
-                console.log('Manual trigger: Forcing waiting worker to activate');
+                console.log('Manual trigger: Forcing waiting worker to activate', reg.waiting.scriptURL);
                 reg.waiting.postMessage({ type: 'SKIP_WAITING' });
             } else {
                 console.log('No waiting worker found for manual trigger');
