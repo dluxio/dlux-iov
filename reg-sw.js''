@@ -7,8 +7,28 @@ if ('serviceWorker' in navigator && enableServiceWorker) {
             console.log('Registration succeeded. Scope is ' + reg.scope);
             activeWorker = reg.active;
             console.log('Service Worker Ready for VUE', activeWorker);
+
+            // Check for updates immediately
             reg.update().then(() => {
                 console.log('Service worker updated');
+            });
+
+            // If there's a waiting worker, skip waiting
+            if (reg.waiting) {
+                console.log('New service worker waiting, forcing activation');
+                reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+            }
+
+            // Listen for updates
+            reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing;
+                console.log('New service worker found');
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        console.log('New service worker installed, forcing activation');
+                        newWorker.postMessage({ type: 'SKIP_WAITING' });
+                    }
+                });
             });
         })
         .catch(error => {

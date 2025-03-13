@@ -1,4 +1,4 @@
-this.version = "2025.03.12.11";
+this.version = "2025.03.12.12";
 
 console.log("SW:" + this.version + " - online.");
 
@@ -268,25 +268,44 @@ self.addEventListener('fetch', function(event) {
   }
 });
 
+// Modified activate event listener
 self.addEventListener("activate", function (event) {
   console.log("SW: Activated. Cache name:" + CACHE_NAME);
   event.waitUntil(
-    caches.keys().then(function (cacheNames) {
-      return Promise.all(
-        cacheNames
-          .filter(function (cacheName) {
-            return cacheName !== CACHE_NAME;
-          })
-          .map(function (cacheName) {
-            console.log("Deleting cache: " + cacheName);
-            return caches.delete(cacheName);
-          })
-      );
-    }).then(() => self.clients.claim())
-    .catch(function(error) {
-      console.error('Activation failed:', error);
-    })
+      Promise.all([
+          caches.keys().then(function (cacheNames) {
+              return Promise.all(
+                  cacheNames
+                      .filter(function (cacheName) {
+                          return cacheName !== CACHE_NAME;
+                      })
+                      .map(function (cacheName) {
+                          console.log("Deleting cache: " + cacheName);
+                          return caches.delete(cacheName);
+                      })
+              );
+          }),
+          self.clients.claim() // Take control immediately
+      ])
+      .then(() => {
+          // Notify all clients about the update
+          self.clients.matchAll().then(clients => {
+              clients.forEach(client => 
+                  client.postMessage({ type: 'SW_UPDATED' })
+              );
+          });
+      })
+      .catch(function(error) {
+          console.error('Activation failed:', error);
+      })
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+      console.log('Received SKIP_WAITING message');
+      self.skipWaiting();
+  }
 });
 
 self.addEventListener("message", function (e) {
