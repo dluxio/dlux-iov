@@ -1,7 +1,7 @@
 var activeWorker = 0;
 const enableServiceWorker = true; // Toggle: false for local dev, true for production/test
 if ('serviceWorker' in navigator && enableServiceWorker) {
-    const version = '2025.03.12.10'; // Update to latest
+    const version = '2025.03.12.12'; // Update to latest
     navigator.serviceWorker.register(`/sw.js?v=${version}`)
         .then(reg => {
             console.log('Registration succeeded. Scope is ' + reg.scope);
