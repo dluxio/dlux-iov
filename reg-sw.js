@@ -1,7 +1,7 @@
 var activeWorker = 0;
 const enableServiceWorker = true;
 if ('serviceWorker' in navigator && enableServiceWorker) {
-    const version = '2025.03.12.33'; // Increment to test
+    const version = '2025.03.12.34'; // Increment to test
     console.log('Registering service worker with version:', version);
 
     navigator.serviceWorker.getRegistrations().then(regs => {
