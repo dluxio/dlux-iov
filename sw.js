@@ -1,4 +1,4 @@
-this.version = "2025.03.12.27";
+this.version = "2025.03.12.28";
 
 console.log("SW:" + this.version + " - online.");
 
@@ -272,24 +272,29 @@ self.addEventListener('message', (event) => {
   console.log('SW received message:', event.data);
   if (event.data && event.data.type === 'SKIP_WAITING') {
       console.log('SKIP_WAITING received, activating now...');
-      self.skipWaiting().then(() => {
-          console.log('Skip waiting completed, claiming clients...');
-          return self.clients.claim();
-      }).then(() => {
-          console.log('Clients claimed, notifying all clients...');
-          return self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
-      }).then(clients => {
-          console.log('Notifying', clients.length, 'clients');
-          clients.forEach(client => {
-              client.postMessage({ type: 'SW_UPDATED' });
-              console.log('Notified client:', client.id);
+      Promise.resolve()
+          .then(() => self.skipWaiting())
+          .then(() => {
+              console.log('Skip waiting completed, claiming clients...');
+              return self.clients.claim();
+          })
+          .then(() => {
+              console.log('Clients claimed, notifying all clients...');
+              return self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
+          })
+          .then(clients => {
+              console.log('Found', clients.length, 'clients');
+              clients.forEach(client => {
+                  console.log('Notifying client:', client.id);
+                  client.postMessage({ type: 'SW_UPDATED' });
+              });
+              if (clients.length === 0) {
+                  console.log('No clients found to notify');
+              }
+          })
+          .catch(err => {
+              console.error('Error during skipWaiting or claim:', err);
           });
-          if (clients.length === 0) {
-              console.log('No clients found to notify');
-          }
-      }).catch(err => {
-          console.error('Skip waiting or claim failed:', err);
-      });
   }
 });
 
@@ -312,18 +317,15 @@ self.addEventListener("activate", function (event) {
           self.clients.claim()
       ])
       .then(() => {
-          console.log('Claiming all clients');
+          console.log('Claiming all clients during activation');
           return self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
       })
       .then(clients => {
-          console.log('Found clients:', clients.length);
+          console.log('Found', clients.length, 'clients during activation');
           clients.forEach(client => {
-              console.log('Notifying client:', client.id);
+              console.log('Notifying client during activation:', client.id);
               client.postMessage({ type: 'SW_UPDATED' });
           });
-          if (clients.length === 0) {
-              console.log('No clients found');
-          }
       })
       .catch(function(error) {
           console.error('Activation failed:', error);
