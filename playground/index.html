@@ -477,8 +477,11 @@
 
         function addEntity(type) {
             const entity = document.createElement(`a-${type}`);
+            const randomColor = Math.floor(Math.random() * 16777215).toString(16);
             entity.setAttribute('position', '0 1.5 -3');
-            entity.setAttribute('color', '#' + Math.floor(Math.random() * 16777215).toString(16));
+            entity.setAttribute('color', '#' + randomColor);
+            entity.setAttribute('material', 'color: #' + randomColor);
+            entity.setAttribute('geometry', 'primitive: ' + type);
 
             insertEntityInScene(entity);
             flushAllEntitiesToDOM();
