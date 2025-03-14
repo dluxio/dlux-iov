@@ -486,24 +486,28 @@
 
         function useAsset(assetId, type) {
             let entity;
+            const entityId = `${type.split('/')[0]}-${assetId}`; // Unique ID for the entity
 
             if (type.startsWith('image/')) {
                 entity = document.createElement('a-image');
                 entity.setAttribute('src', `#${assetId}`);
                 entity.setAttribute('position', '0 1.5 -3');
+                entity.setAttribute('id', entityId);
             } else if (type.startsWith('video/')) {
                 entity = document.createElement('a-video');
                 entity.setAttribute('src', `#${assetId}`);
                 entity.setAttribute('position', '0 1.5 -3');
+                entity.setAttribute('id', entityId);
             } else if (type.includes('gltf')) {
                 entity = document.createElement('a-entity');
-                // Explicitly set gltf-model to reference the asset ID from <a-assets>
                 entity.setAttribute('gltf-model', `#${assetId}`);
                 entity.setAttribute('position', '0 1.5 -3');
                 entity.setAttribute('scale', '1 1 1');
+                entity.setAttribute('id', entityId);
             }
-
+            
             insertEntityInScene(entity);
+            flushAllEntitiesToDOM();
             updateCodePanel();
         }
 
