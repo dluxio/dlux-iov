@@ -215,9 +215,9 @@
 
         <div class="main-content">
             <div class="toolbar">
-                <button onclick="toggleView('scene')">Preview Scene</button>
-                <button onclick="toggleView('code')">Edit Code</button>
-                <button onclick="toggleView('inspector')">Inspector</button>
+                <button onclick="switchToView('scene')">Preview Scene</button>
+                <button onclick="switchToView('code')">Edit Code</button>
+                <button onclick="switchToView('inspector')">Inspector</button>
                 <button onclick="saveScene()">Save Scene</button>
                 <button onclick="resetScene()">Reset Scene</button>
                 <button onclick="clearScene()">Clear Scene</button>
@@ -260,80 +260,59 @@
         });
 
         function switchToView(view) {
-            // Save previous view for reference
             const previousView = currentView;
-
-            // Hide all views
-            scene.style.display = 'none';
-            codePanel.style.display = 'none';
-
-            // Close inspector if it's open and we're not switching to it
-            if (view !== 'inspector') {
-                try {
-                    if (AFRAME.INSPECTOR && AFRAME.INSPECTOR.opened) {
-                        AFRAME.INSPECTOR.close();
-                    }
-                } catch (e) {
-                    console.warn('Inspector cleanup skipped:', e);
-                }
-            }
-
-            // Update current view
             currentView = view;
 
-            // Handle view-specific logic
+            cleanupInspector(); // Ensure inspector is closed and cleaned up before switching views
+
             switch (view) {
                 case 'scene':
                     scene.style.display = 'block';
-                    // If coming from code view, ensure scene is updated
-                    if (previousView === 'code' && editor && editor.getValue() !== '') {
+                    codePanel.style.display = 'none';
+                    if (previousView === 'code') {
                         updateSceneFromCode();
                     }
                     break;
 
                 case 'code':
+                    scene.style.display = 'none';
                     codePanel.style.display = 'block';
                     updateCodePanel();
                     break;
 
                 case 'inspector':
                     scene.style.display = 'block';
-                    // If coming from code view, ensure scene is updated before opening inspector
-                    if (previousView === 'code' && editor && editor.getValue() !== '') {
+                    codePanel.style.display = 'none';
+                    if (previousView === 'code') {
                         updateSceneFromCode();
-                        // Small delay to ensure scene is updated before opening inspector
-                        setTimeout(() => {
-                            openInspector();
-                        }, 100);
-                    } else {
-                        openInspector();
                     }
+                    setTimeout(() => {
+                        openInspector();
+                    }, 100);
                     break;
             }
         }
 
-        // Update toggleView to use the new switchToView function
-        function toggleView(view) {
-            // If clicking the current view button, do nothing
-            if (view === currentView && view !== 'inspector') {
-                return;
-            }
-
-            // Switch to the requested view
-            switchToView(view);
-        }
-
-
         function updateSceneFromCode() {
             try {
                 const newContent = editor.getValue();
-                // Only update if there are actual changes
-                if (newContent.trim() !== scene.innerHTML.trim()) {
-                    scene.innerHTML = newContent;
-                }
+
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = `<a-scene embedded>${newContent}</a-scene>`;
+
+                const newScene = tempDiv.querySelector('a-scene');
+                const currentScene = document.querySelector('a-scene');
+                currentScene.parentNode.replaceChild(newScene, currentScene);
+
+                scene = newScene;
+
+                newScene.addEventListener('loaded', () => {
+                    scene = newScene;
+                    setupInspectorListeners();
+                    updateCodePanel();
+                });
             } catch (error) {
                 console.error('Error updating scene:', error);
-                // Optionally add user feedback here
             }
         }
 
@@ -355,18 +334,19 @@
         }
 
         function setupInspectorListeners() {
-            // Watch for changes to entity positions, rotations, scales
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.type === 'attributes') {
-                        updateCodePanel();
-                    }
-                });
+            // Disconnect existing observer if present
+            if (window.sceneObserver) {
+                window.sceneObserver.disconnect();
+            }
+
+            // Create a new observer
+            window.sceneObserver = new MutationObserver(() => {
+                updateCodePanel();
             });
 
-            // Observe all entities in the scene
+            // Observe all entities for attribute changes
             scene.querySelectorAll('*').forEach(entity => {
-                observer.observe(entity, {
+                window.sceneObserver.observe(entity, {
                     attributes: true,
                     childList: true,
                     subtree: true
@@ -375,7 +355,7 @@
 
             // Listen for new entities being added
             scene.addEventListener('child-attached', (evt) => {
-                observer.observe(evt.detail.el, {
+                window.sceneObserver.observe(evt.detail.el, {
                     attributes: true,
                     childList: true,
                     subtree: true
@@ -383,24 +363,104 @@
                 updateCodePanel();
             });
 
-            // Update code when inspector closes
+            // Inspector events
+            document.addEventListener('inspector-loaded', () => {
+                document.body.classList.add('aframe-inspector-opened');
+            });
+
             document.addEventListener('inspector-closed', () => {
+                document.body.classList.remove('aframe-inspector-opened');
+                if (currentView === 'inspector') {
+                    switchToView('scene');
+                }
                 updateCodePanel();
             });
         }
 
         function updateCodePanel() {
-            const sceneContent = scene.innerHTML;
-            editor.setValue(sceneContent);
-            // Format the code
-            editor.setOption('value', editor.getValue());
+            const sceneClone = scene.cloneNode(true);
+            cleanupSceneElement(sceneClone);
+            const formattedContent = formatSceneContent(sceneClone);
+            editor.setValue(formattedContent);
+            editor.refresh();
+        }
+
+        function cleanupSceneElement(el) {
+            const injectedSelectors = [
+                'canvas',
+                '.a-enter-vr',
+                '.a-orientation-modal',
+                '.a-loader-title',
+                '[aframe-injected]'
+            ];
+            injectedSelectors.forEach(selector => {
+                el.querySelectorAll(selector).forEach(node => node.remove());
+            });
+
+            const attributesToRemove = [
+                'aframe-injected',
+                'data-aframe-canvas',
+                'data-engine',
+                'material',
+                'geometry',
+                'camera',
+                'look-controls',
+                'wasd-controls'
+            ];
+            el.querySelectorAll('*').forEach(node => {
+                attributesToRemove.forEach(attr => {
+                    if (node.getAttribute(attr) === '') {
+                        node.removeAttribute(attr);
+                    }
+                });
+            });
         }
 
         function addEntity(type) {
             const entity = document.createElement(`a-${type}`);
             entity.setAttribute('position', '0 1.5 -3');
             entity.setAttribute('color', '#' + Math.floor(Math.random() * 16777215).toString(16));
-            scene.appendChild(entity);
+
+            insertEntityInScene(entity);
+            updateCodePanel();
+        }
+
+        function useAsset(assetId, type) {
+            let entity;
+            if (type.startsWith('image/')) {
+                entity = document.createElement('a-image');
+                entity.setAttribute('src', `#${assetId}`);
+                entity.setAttribute('position', '0 1.5 -3');
+            } else if (type.startsWith('video/')) {
+                entity = document.createElement('a-video');
+                entity.setAttribute('src', `#${assetId}`);
+                entity.setAttribute('position', '0 1.5 -3');
+            } else if (type.includes('gltf')) {
+                entity = document.createElement('a-entity');
+                entity.setAttribute('gltf-model', `#${assetId}`);
+                entity.setAttribute('position', '0 1.5 -3');
+                entity.setAttribute('scale', '1 1 1');
+            }
+
+            insertEntityInScene(entity);
+            updateCodePanel();
+        }
+
+        // Helper function to insert entities correctly
+        function insertEntityInScene(entity) {
+            const sky = scene.querySelector('a-sky');
+            const firstLight = scene.querySelector('[light]');
+            if (sky) {
+                scene.insertBefore(entity, sky);
+            } else if (firstLight) {
+                scene.insertBefore(entity, firstLight);
+            } else {
+                scene.appendChild(entity);
+            }
+
+            // Notify inspector of new entity
+            scene.emit('child-attached', { el: entity });
+
             updateCodePanel();
         }
 
@@ -418,20 +478,19 @@
                     assetEl = document.createElement('img');
                     assetEl.setAttribute('src', assetUrl);
                     assetEl.setAttribute('id', assetId);
-                    // Add to library immediately for images
                     addToAssetLibrary(assetId, file.type);
                 } else if (file.type.startsWith('video/')) {
                     assetEl = document.createElement('video');
                     assetEl.setAttribute('src', assetUrl);
                     assetEl.setAttribute('id', assetId);
-                    // Add to library immediately for videos
+                    assetEl.setAttribute('loop', '');
+                    assetEl.setAttribute('preload', 'auto');
                     addToAssetLibrary(assetId, file.type);
                 } else if (file.name.endsWith('.gltf') || file.name.endsWith('.glb')) {
                     assetEl = document.createElement('a-asset-item');
                     assetEl.setAttribute('id', assetId);
                     assetEl.setAttribute('src', assetUrl);
                     assetEl.setAttribute('response-type', 'arraybuffer');
-                    // Wait for 3D models to load before adding to library
                     assetEl.addEventListener('loaded', () => {
                         addToAssetLibrary(assetId, 'model/gltf-binary');
                     });
@@ -495,28 +554,6 @@
             container.appendChild(button);
             container.appendChild(label);
             library.appendChild(container);
-        }
-
-        function useAsset(assetId, type) {
-            let entity;
-            if (type.startsWith('image/')) {
-                entity = document.createElement('a-image');
-                entity.setAttribute('src', `#${assetId}`);
-                entity.setAttribute('position', '0 1.5 -3');
-            } else if (type.startsWith('video/')) {
-                entity = document.createElement('a-video');
-                entity.setAttribute('src', `#${assetId}`);
-                entity.setAttribute('position', '0 1.5 -3');
-            } else if (type.includes('gltf')) {
-                entity = document.createElement('a-entity');
-                entity.setAttribute('gltf-model', `#${assetId}`);
-                entity.setAttribute('position', '0 1.5 -3');
-                entity.setAttribute('scale', '1 1 1');
-                entity.setAttribute('rotation', '0 0 0');
-            }
-
-            scene.appendChild(entity);
-            updateCodePanel();
         }
 
         function saveScene() {
@@ -607,29 +644,26 @@
 
         // Update the openInspector function
         function openInspector() {
-            // Only load inspector if it hasn't been loaded yet
-            if (!window.AFRAME.INSPECTOR) {
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js';
-
-                script.onload = function () {
-                    requestAnimationFrame(() => {
-                        if (window.AFRAME.INSPECTOR) {
-                            window.AFRAME.INSPECTOR.open();
-                            // Add event listener for when inspector is closed
-                            window.addEventListener('inspector-closed', () => {
-                                if (currentView === 'inspector') {
-                                    switchToView('scene');
-                                }
-                            });
-                        }
-                    });
-                };
-
-                document.head.appendChild(script);
-            } else {
-                window.AFRAME.INSPECTOR.open();
+            if (window.AFRAME.INSPECTOR && window.AFRAME.INSPECTOR.opened) {
+                window.AFRAME.INSPECTOR.close();
             }
+
+            // Remove existing inspector script if present
+            const existingScript = document.querySelector('script[src*="aframe-inspector.min.js"]');
+            if (existingScript) existingScript.remove();
+
+            // Remove existing inspector elements
+            document.querySelectorAll('.a-inspector-loader, .a-inspector').forEach(el => el.remove());
+
+            // Load inspector fresh each time
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js';
+            script.onload = () => {
+                AFRAME.INSPECTOR.open();
+                document.body.classList.add('aframe-inspector-opened');
+                setupInspectorListeners();
+            };
+            document.head.appendChild(script);
         }
 
         // Add function to remove inspector
@@ -854,6 +888,71 @@
                     updateCodePanel();
                 });
             }
+        }
+
+        function formatSceneContent(sceneEl) {
+            const assets = sceneEl.querySelector('a-assets');
+            const camera = sceneEl.querySelector('a-camera');
+            const sky = sceneEl.querySelector('a-sky');
+            const lights = Array.from(sceneEl.querySelectorAll('[light]'));
+
+            // Get all other entities (excluding assets, camera, sky, lights)
+            const entities = Array.from(sceneEl.children).filter(el =>
+                el !== assets &&
+                el !== camera &&
+                el !== sky &&
+                !lights.includes(el)
+            );
+
+            let content = '';
+
+            // Assets
+            content += '<a-assets id="asset-container">\n';
+            content += '    <!-- Assets -->\n';
+            if (assets) {
+                Array.from(assets.children).forEach(asset => {
+                    content += '    ' + asset.outerHTML + '\n';
+                });
+            }
+            content += '</a-assets>\n\n';
+
+            // Camera
+            if (camera) {
+                content += '<!-- Camera -->\n';
+                content += camera.outerHTML + '\n\n';
+            }
+
+            // Entities
+            if (entities.length > 0) {
+                content += '<!-- Scene Entities -->\n';
+                entities.forEach(entity => {
+                    content += entity.outerHTML + '\n';
+                });
+                content += '\n';
+            }
+
+            // Environment (Sky)
+            if (sky) {
+                content += '<!-- Environment -->\n';
+                content += sky.outerHTML + '\n\n';
+            }
+
+            // Lighting
+            if (lights.length > 0) {
+                content += '<!-- Lighting -->\n';
+                lights.forEach(light => {
+                    content += light.outerHTML + '\n';
+                });
+            }
+
+            return content;
+        }
+
+        function cleanupInspector() {
+            if (AFRAME.INSPECTOR && AFRAME.INSPECTOR.opened) {
+                AFRAME.INSPECTOR.close();
+            }
+            document.body.classList.remove('aframe-inspector-opened');
         }
     </script>
 </body>
