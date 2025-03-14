@@ -194,14 +194,14 @@
                         </div>
                     </div>
                     <!-- page tab content -->
-                    <div class="container-fluid tab-content">
+                    <div class="container-fluid tab-content mt-3">
                         <!-- blog tab -->
                         <div role="tabpanel" class="tab-pane fade show active" id="blog" aria-labelledby="blogtab">
                             <!-- blog repeat -->
                             <!--main view-->
                             <div class="container-fluid">
                                 <div class="row">
-                                    <div class="col-sm-6 col-lg-4 col-xl-3 my-2 card-group" v-for="post in displayPosts"
+                                    <div class="col-sm-6 col-lg-4 col-xl-3 mb-3 card-group" v-for="post in displayPosts"
                                         :key="post.url">
                                         <card-vue :post="post" :account="account" :post_select="postSelect"
                                             :voteval="voteVal" :head_block="sstats.head_block"
@@ -215,7 +215,8 @@
                             </div>
                         </div>
                         <!-- wallet tab -->
-                        <div role="tabpanel" class="tab-pane fade" id="wallet" aria-labelledby="wallettab">
+                        <div role="tabpanel" class="tab-pane fade mb-3" id="wallet" aria-labelledby="wallettab">
+                            <div class="container card bg-img-none" style="background-color: rgba(146, 146, 146, 0.3);">
                             <div class="p-3">
                                 <ul id="wallettabs" class="nav nav-pills justify-content-center" role="tablist">
                                     <li class="nav-item"> <a class="nav-link active" href="#dlux" id="dluxtab"
@@ -283,7 +284,7 @@
                                                         </div>
                                                         <div v-show="accountapi.gov > 0" class="text-white">
                                                             <div class="input-group my-3">
-                                                                <span class="input-group-text border-info text-info">
+                                                                <span class="input-group-text bg-dark-2">
                                                                     <div class="form-check form-switch ">
                                                                         <input class="form-check-input" type="checkbox"
                                                                             role="switch" id="flexSwitchCheckDefault"
@@ -1264,9 +1265,10 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
                         <!-- inventory tab -->
                         <div role="tabpanel" class="tab-pane fade show" id="inventory" aria-labelledby="inventorytab">
-                            <div class="container">
+                            <div class="container ">
                                 <div v-if="FTtrades.length || NFTtrades.length"
                                     class="mt-5 border-bottom border-light border-3">
                                     <h2 class="mb-1">PENDING TRADES</h2>
