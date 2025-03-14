@@ -19,9 +19,133 @@ export default {
     },
     template: `
     <div class="d-flex flex-column">
-        <div class="border-bottom-0" v-if="!nodeview && saccountapi.pubKey != 'NA'">
+    <div class="d-flex align-items-center px-2 py-3">
+     <div class="hero-subtitle">IPFS Drive</div>
+     <div class="ms-auto">
+                    <ul id="drivetabs" class="nav nav-tabs rounded mx-2 fs-5 " role="tablist" style="background-color: rgb(0,0,0,0.3)">
+                    <li class="nav-item">
+                            <a class="nav-link active px-4" href="#status" id="statustab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
+                                aria-controls="statustab" aria-expanded="true">SPK</a>
+                        </li>    
+                    <li class="nav-item">
+                            <a class="nav-link px-4" href="#contracts" id="contractstab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
+                                aria-controls="contractstab" aria-expanded="false">CONTRACTS</a>
+                        </li>
+                        <li v-if="!cc" class="nav-item">
+                            <a class="nav-link px-4" aria-current="page" href="#files" id="filestab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
+                                aria-controls="filestab" aria-expanded="false">FILES</a>
+                        </li>
+                        <li v-if="cc" class="nav-item">
+                            <a class="nav-link px-4" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
+                                aria-controls="cctab" aria-expanded="false">FILES</a>
+                        </li>
+                    </ul>
+                </div>
+        </div>
+        
+    <!-- register account -->
+    <div v-if="saccountapi.pubKey == 'NA'">
+        <div class="mx-xl-5">
+            <div class="card p-1 p-md-3 mx-lg-5">
+                <div class="card-body text-center">
+                    <div class="fs-4 lead mb-3">
+                        Register your account on SPK Network for free<br>to start storing your files on IPFS
+                    </div>
+                    <button type="button" class="btn btn-primary my-3" @click="updatePubkey()">
+                        <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
+                </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- tabs nav -->
+    <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column square rounded-bottom p-0">
+        <!-- top menu -->
+        <div class="pb-1">
+            <div class="d-flex flex-wrap align-items-center">
+                <!--fake invisible button -->
+                <div class="btn-group m-2 d-none d-lg-block invisible" role="group" aria-label="Storage Actions" v-if="title == 'new'">
+                    <button @click="storeAll()" role="button" class="btn btn-primary"><i class="fa-solid fa-download fa-fw me-2"></i>Store Selected</button>
+                        <button type="button"
+                            class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                            disabled></button>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-filter fa-fw"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark bg-dark">
+                            <div class="p-2" style="max-width: 200px">
+                                <div class="d-flex flex-column">
+                                    <div class="text-center mb-3">
+                                        <label for="fileSize" class="lead form-label">File Size</label>
+                                        <input required="required" type="range" @change="filterSize()" class="form-range" :min="filter.min" :max="filter.max" :step="filter.step" v-model="filter.size" id="fileSize">
+                                        <span>{{fancyBytes(filter.size)}}</span>
+                                    </div>
+                                    <div class="form-check form-switch d-none">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+                                        <label class="form-check-label" for="flexSwitchCheckChecked">NSFW</label>
+                                    </div>
+                                    <div class="form-check form-switch d-none">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+                                        <label class="form-check-label" for="flexSwitchCheckChecked">Encrypted</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" @change="filterSlots()" type="checkbox" role="switch" id="flexSwitchCheckChecked" :checked="filter.slots" v-model="filter.slots">
+                                        <label class="form-check-label" for="flexSwitchCheckChecked">Open Slots</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </ul>
+                    </div>
+                </div>
+               
+                
+                
+                <div class="btn-group m-2" role="group" aria-label="Storage Actions" v-if="title == 'new'">
+                <!-- real visible button -->
+                    <button @click="storeAll()" role="button" class="btn btn-danger" :disabled="!contracts.length" :class="{'disabled': !contracts.length}"><i class="fa-solid fa-download fa-fw me-2"></i>Store Selected</button>
+                      <button type="button"
+                            class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                            disabled></button>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-danger dropdown-toggle" type="button" :disabled="!contracts.length" :class="{'disabled': !contracts.length}" data-bs-toggle="dropdown" aria-expanded="false">
+                          <i class="fa-solid fa-filter fa-fw"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark bg-dark">
+                            <div class="p-2" style="max-width: 200px">
+                                <div class="d-flex flex-column">
+                                    <div class="text-center mb-3">
+                                        <label for="fileSize" class="lead form-label">File Size</label>
+                                        <input required="required" type="range" @change="filterSize()" class="form-range" :min="filter.min" :max="filter.max" :step="filter.step" v-model="filter.size" id="fileSize">
+                                        <span>{{fancyBytes(filter.size)}}</span>
+                                    </div>
+                                    <div class="form-check form-switch d-none">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+                                        <label class="form-check-label" for="flexSwitchCheckChecked">NSFW</label>
+                                    </div>
+                                    <div class="form-check form-switch d-none">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+                                        <label class="form-check-label" for="flexSwitchCheckChecked">Encrypted</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" @change="filterSlots()" type="checkbox" role="switch" id="flexSwitchCheckChecked" :checked="filter.slots" v-model="filter.slots">
+                                        <label class="form-check-label" for="flexSwitchCheckChecked">Open Slots</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- tabs -->
+        <div class="tab-content">
+
+            <!-- status -->
+            <div role="tabpanel" class="tab-pane show active" id="status" aria-labelledby="statustab">
+                    <div class="border-bottom-0" v-if="!nodeview && saccountapi.pubKey != 'NA'">
           <div class="container pt-1">
-            <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-4">
+            <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-4" >
                 <!-- spk token widget -->
                 <div class="order-lg-3 order-xl-0 mb-3 col spk-widg">
                     <div class="card-header d-flex align-items-center border-bottom border-1 px-2 py-1 fs-4"><i class="fa-solid fa-atom me-1"></i><span>SPK Token</span></div>
@@ -103,118 +227,7 @@ export default {
             </div>
         </div>
     </div>
-    <!-- register account -->
-    <div v-if="saccountapi.pubKey == 'NA'">
-        <div class="mx-xl-5">
-            <div class="card p-1 p-md-3 mx-lg-5">
-                <div class="card-body text-center">
-                    <div class="fs-4 lead mb-3">
-                        Register your account on SPK Network for free<br>to start storing your files on IPFS
-                    </div>
-                    <button type="button" class="btn btn-primary my-3" @click="updatePubkey()">
-                        <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
-                </button>
-                </div>
             </div>
-        </div>
-    </div>
-    <!-- tabs nav -->
-    <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column card square rounded-bottom p-0" style="background-color: rgba(0, 0, 0, 0.3);">
-        <!-- top menu -->
-        <div class="pb-1">
-            <div class="d-flex flex-wrap align-items-center my-3">
-                <!--fake invisible button -->
-                <div class="btn-group m-2 d-none d-lg-block invisible" role="group" aria-label="Storage Actions" v-if="title == 'new'">
-                    <button @click="storeAll()" role="button" class="btn btn-primary"><i class="fa-solid fa-download fa-fw me-2"></i>Store Selected</button>
-                        <button type="button"
-                            class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                            disabled></button>
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-filter fa-fw"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-dark bg-dark">
-                            <div class="p-2" style="max-width: 200px">
-                                <div class="d-flex flex-column">
-                                    <div class="text-center mb-3">
-                                        <label for="fileSize" class="lead form-label">File Size</label>
-                                        <input required="required" type="range" @change="filterSize()" class="form-range" :min="filter.min" :max="filter.max" :step="filter.step" v-model="filter.size" id="fileSize">
-                                        <span>{{fancyBytes(filter.size)}}</span>
-                                    </div>
-                                    <div class="form-check form-switch d-none">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
-                                        <label class="form-check-label" for="flexSwitchCheckChecked">NSFW</label>
-                                    </div>
-                                    <div class="form-check form-switch d-none">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
-                                        <label class="form-check-label" for="flexSwitchCheckChecked">Encrypted</label>
-                                    </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" @change="filterSlots()" type="checkbox" role="switch" id="flexSwitchCheckChecked" :checked="filter.slots" v-model="filter.slots">
-                                        <label class="form-check-label" for="flexSwitchCheckChecked">Open Slots</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </ul>
-                    </div>
-                </div>
-               
-                <div class="mx-auto ">
-                    <ul id="drivetabs" class="nav nav-tabs rounded mx-auto my-2 fs-5 " role="tablist" style="background-color: rgb(0,0,0,0.3)">
-                        <li class="nav-item">
-                            <a class="nav-link active px-4" href="#contracts" id="contractstab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
-                                aria-controls="contractstab" aria-expanded="true">CONTRACTS</a>
-                        </li>
-                        <li v-if="!cc" class="nav-item">
-                            <a class="nav-link px-4" aria-current="page" href="#files" id="filestab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
-                                aria-controls="filestab" aria-expanded="false">FILES</a>
-                        </li>
-                        <li v-if="cc" class="nav-item">
-                            <a class="nav-link px-4" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
-                                aria-controls="cctab" aria-expanded="false">FILES</a>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="btn-group m-2" role="group" aria-label="Storage Actions" v-if="title == 'new'">
-                <!-- real visible button -->
-                    <button @click="storeAll()" role="button" class="btn btn-danger" :disabled="!contracts.length" :class="{'disabled': !contracts.length}"><i class="fa-solid fa-download fa-fw me-2"></i>Store Selected</button>
-                      <button type="button"
-                            class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                            disabled></button>
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-danger dropdown-toggle" type="button" :disabled="!contracts.length" :class="{'disabled': !contracts.length}" data-bs-toggle="dropdown" aria-expanded="false">
-                          <i class="fa-solid fa-filter fa-fw"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-dark bg-dark">
-                            <div class="p-2" style="max-width: 200px">
-                                <div class="d-flex flex-column">
-                                    <div class="text-center mb-3">
-                                        <label for="fileSize" class="lead form-label">File Size</label>
-                                        <input required="required" type="range" @change="filterSize()" class="form-range" :min="filter.min" :max="filter.max" :step="filter.step" v-model="filter.size" id="fileSize">
-                                        <span>{{fancyBytes(filter.size)}}</span>
-                                    </div>
-                                    <div class="form-check form-switch d-none">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
-                                        <label class="form-check-label" for="flexSwitchCheckChecked">NSFW</label>
-                                    </div>
-                                    <div class="form-check form-switch d-none">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
-                                        <label class="form-check-label" for="flexSwitchCheckChecked">Encrypted</label>
-                                    </div>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" @change="filterSlots()" type="checkbox" role="switch" id="flexSwitchCheckChecked" :checked="filter.slots" v-model="filter.slots">
-                                        <label class="form-check-label" for="flexSwitchCheckChecked">Open Slots</label>
-                                    </div>
-                                </div>
-                            </div>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- tabs -->
-        <div class="tab-content">
 
             <!-- cc -->
             <div v-if="cc" role="tabpanel" class="tab-pane" id="ccTab" aria-labelledby="cctab">
@@ -286,7 +299,7 @@ export default {
             
             
             <!-- contracts -->
-            <div role="tabpanel" class="tab-pane show active" id="contracts" aria-labelledby="contractstab">
+            <div role="tabpanel" class="tab-pane " id="contracts" aria-labelledby="contractstab">
                 
                 <div class="card-body p-0">
                     <!-- registered -->
@@ -319,7 +332,30 @@ export default {
                                 </div>
                             </div>
                         </div>
-
+                        <div class="d-none">
+                          <div class="d-flex justify-content-center mt-1">
+                                    <!-- new contract button -->
+                                    <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
+                                        class="btn btn-sm btn-dark border-info text-info me-1" style="width:110px;">
+                                        <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
+                                            :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
+                                            v-slot:trigger>
+                                            <span slot="trigger" class="trigger"><i
+                                                    class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
+                                        </modal-vue>
+                                    </button>
+                                    <!-- free button -->
+                                    <button v-if="saccountapi.pubKey != 'NA'" type="button" class="btn btn-sm btn-dark border-success text-success ms-1"
+                                        data-bs-toggle="modal" data-bs-target="#sponsoredModal" style="width:110px;">
+                                        <span class=""></span><i class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE
+                                    </button>
+                                    <!-- register -->
+                                    <button v-if="saccountapi.pubKey == 'NA'" type="button" class="btn btn-sm btn-dark border-info text-info"
+                                        @click="updatePubkey()" style="width:110px;">
+                                        <span class=""></span><i class="fa-solid fa-user-plus fa-fw me-1"></i>Register
+                                    </button>
+                            </div>    
+                        </div>
                         <!-- contracts -->
                         <div v-show="contracts.length" class="table-responsive">
                             <table class="table table-hover text-center align-middle mb-0" id="files-table">
