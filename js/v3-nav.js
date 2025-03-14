@@ -1147,20 +1147,20 @@ export default {
         <div class="hover-gap"></div>
         <ul class="dropdown-menu container">
           <li>
-            <a class="dropdown-item subnav-title" href="/user#blog/" @click="showTab('blog')">Profile<span
+            <a class="dropdown-item subnav-title" href="/me#blog/" @click="showTab('blog')">Profile<span
                 class="subnav-subtitle">HIVE
                 Blog</span></a>
           </li>
           <li>
-            <a class="dropdown-item subnav-title" href="/user#wallet/" @click="showTab('wallet')">Wallet<span
+            <a class="dropdown-item subnav-title" href="/me#wallet/" @click="showTab('wallet')">Wallet<span
                 class="subnav-subtitle">Honeycomb Tokens</span></a>
           </li>
           <li>
-            <a class="dropdown-item subnav-title" href="/user#inventory/" @click="showTab('inventory')">Inventory<span
+            <a class="dropdown-item subnav-title" href="/me#inventory/" @click="showTab('inventory')">Inventory<span
                 class="subnav-subtitle">NFT Collection</span></a>
           </li>
           <li>
-            <a class="dropdown-item subnav-title" href="/user#drive/" @click="showTab('drive')">IPFS Drive<span
+            <a class="dropdown-item subnav-title" href="/me#drive/" @click="showTab('drive')">IPFS Drive<span
                 class="subnav-subtitle">SPK
                 Network</span></a>
           </li>
