@@ -6,6 +6,10 @@
     <script src="/js/aframe.min.js"></script>
     <script src="/js/aframe-extras.min.js"></script>
     <script src="/js/aframe-environment-component.min.js"></script>
+    
+    <!-- Remove the standalone THREE.js library which is causing conflicts -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script> -->
+    
     <link rel="stylesheet" href="/css/codemirror.min.css">
     <link rel="stylesheet" href="/css/codemirror-monokai.min.css">
     <script src="/js/codemirror.min.js"></script>
@@ -334,6 +338,22 @@
             fill: currentColor;
             fill-opacity: 0.2;
         }
+
+        .playing {
+            background-color: #35a35f;
+        }
+
+        .playing:hover {
+            background-color: #2d8a50;
+        }
+
+        .paused {
+            background-color: #2c2c2c;
+        }
+
+        .paused:hover {
+            background-color: #3c3c3c;
+        }
     </style>
 </head>
 
@@ -499,6 +519,50 @@
                         <line x1="4" y1="15" x2="20" y2="15"/>
                     </svg>
                     Grid
+                </button>
+            </div>
+
+            <h3>Particle Effects</h3>
+            <div class="particle-buttons" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 15px;">
+                <button id="snow-btn" onclick="toggleParticleSystem('snow')" class="effect-btn">
+                    <svg viewBox="0 0 24 24">
+                        <!-- Snowflake icon -->
+                        <path d="M12,2L12,6M12,18L12,22M5.6,4.6L8.5,7.4M15.5,16.5L18.4,19.4M3,12L7,12M17,12L21,12M4.6,18.4L7.4,15.5M16.5,8.5L19.4,5.6" 
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M12,8L12,16M9,9.5L15,14.5M9,14.5L15,9.5" 
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    Snow
+                </button>
+                <button id="dust-btn" onclick="toggleParticleSystem('dust')" class="effect-btn">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="6" cy="6" r="1" />
+                        <circle cx="10" cy="12" r="1" />
+                        <circle cx="15" cy="6" r="1" />
+                        <circle cx="19" cy="12" r="1" />
+                        <circle cx="8" cy="18" r="1" />
+                        <circle cx="16" cy="18" r="1" />
+                        <circle cx="12" cy="4" r="1" />
+                        <circle cx="4" cy="12" r="1" />
+                        <circle cx="20" cy="4" r="1" />
+                    </svg>
+                    Dust
+                </button>
+                <button id="rain-btn" onclick="toggleParticleSystem('rain')" class="effect-btn">
+                    <svg viewBox="0 0 24 24">
+                        <!-- Simplified rain drops icon - just vertical lines -->
+                        <path d="M6,8L6,20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M10,4L10,18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M14,6L14,19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M18,5L18,16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    Rain
+                </button>
+                <button id="toggle-animation-btn" onclick="toggleParticleAnimation()" class="effect-btn" disabled>
+                    <svg viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" id="animation-icon" />
+                    </svg>
+                    <span id="animation-text">Start</span>
                 </button>
             </div>
 
@@ -2360,6 +2424,589 @@
                 });
             }
         }
+
+        // Global reference to the active particle system entities
+        let activeParticleSystems = {
+            snow: null,
+            dust: null,
+            rain: null
+        };
+
+        // Custom simplified particle system component
+        AFRAME.registerComponent('particle-system', {
+            schema: {
+                preset: {type: 'string', default: 'snow'},
+                particleCount: {type: 'number', default: 1000},
+                texture: {type: 'string', default: ''},
+                color: {type: 'color', default: '#FFFFFF'},
+                size: {type: 'number', default: 1.0},
+                velocity: {type: 'vec3', default: {x: 0, y: -1, z: 0}},
+                acceleration: {type: 'vec3', default: {x: 0, y: 0, z: 0}},
+                randomizeVelocity: {type: 'vec3', default: {x: 0.2, y: 0.1, z: 0.2}},
+                maxAge: {type: 'number', default: 6},
+                blending: {type: 'string', default: 'additive'},
+                active: {type: 'boolean', default: true}
+            },
+
+            init: function() {
+                // Access THREE through A-Frame to ensure compatibility
+                this.THREE = AFRAME.THREE;
+                
+                // Initialize the arrays and clock first
+                this.particles = [];
+                this.time = 0;
+                
+                // Use A-Frame's built-in THREE reference
+                this.clock = new this.THREE.Clock();
+                
+                // Use a paused property instead of pause to avoid conflicts
+                this.isPaused = false;
+                
+                // Create Three.js particle system
+                this.setupParticleSystem();
+                
+                // Only start if active is true
+                if (this.data.active) {
+                    this.startParticles();
+                } else {
+                    this.isPaused = true;
+                }
+            },
+
+            // Add proper A-Frame lifecycle methods
+            pause: function() {
+                this.isPaused = true;
+                // Remove these lines that modify the animation button
+                // document.getElementById('animation-text').textContent = 'Start';
+                // document.getElementById('animation-icon').setAttribute('d', 'M8 5v14l11-7z'); // Play icon
+            },
+            
+            play: function() {
+                this.isPaused = false;
+                
+                // Reset the clock if needed
+                if (this.clock && typeof this.clock.getElapsedTime === 'function') {
+                    this.time = this.clock.getElapsedTime();
+                } else {
+                    this.time = Date.now() / 1000;
+                    this.clock = new this.THREE.Clock();
+                }
+                
+                // Remove these lines that modify the animation button
+                // document.getElementById('animation-text').textContent = 'Stop';
+                // document.getElementById('animation-icon').setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z'); // Pause icon
+            },
+
+            setupParticleSystem: function() {
+                try {
+                    // Reset any existing system
+                    if (this.particleGroup) {
+                        this.el.removeObject3D('particle-system');
+                        
+                        // Clear particles array when rebuilding the system
+                        this.particles = [];
+                    }
+                    
+                    // Configure based on preset
+                    this.applyPreset(this.data.preset);
+                    
+                    // Create material based on preset settings
+                    this.particleMaterial = new this.THREE.PointsMaterial({
+                        color: new this.THREE.Color(this.data.color),
+                        size: this.data.size * 0.1,
+                        transparent: true,
+                        blending: this.data.blending === 'additive' ? 
+                            this.THREE.AdditiveBlending : this.THREE.NormalBlending,
+                        depthWrite: false
+                    });
+                    
+                    // Use texture if specified
+                    if (this.data.texture) {
+                        const loader = new this.THREE.TextureLoader();
+                        loader.load(this.data.texture, (texture) => {
+                            this.particleMaterial.map = texture;
+                            this.particleMaterial.needsUpdate = true;
+                        });
+                    } else {
+                        // Create a basic particle texture
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 32;
+                        canvas.height = 32;
+                        const context = canvas.getContext('2d');
+                        const gradient = context.createRadialGradient(16, 16, 0, 16, 16, 16);
+                        gradient.addColorStop(0, 'rgba(255,255,255,1)');
+                        gradient.addColorStop(1, 'rgba(255,255,255,0)');
+                        context.fillStyle = gradient;
+                        context.fillRect(0, 0, 32, 32);
+                        
+                        const texture = new this.THREE.CanvasTexture(canvas);
+                        this.particleMaterial.map = texture;
+                        this.particleMaterial.needsUpdate = true;
+                    }
+                    
+                    // Create geometry
+                    this.particleGeometry = new this.THREE.BufferGeometry();
+                    
+                    // Prepare arrays for particle attributes
+                    const positions = new Float32Array(this.data.particleCount * 3);
+                    const velocities = new Float32Array(this.data.particleCount * 3);
+                    const startTimes = new Float32Array(this.data.particleCount);
+                    const lifetimes = new Float32Array(this.data.particleCount);
+                    
+                    // Initialize particles
+                    for (let i = 0; i < this.data.particleCount; i++) {
+                        this.initParticle(i, positions, velocities, startTimes, lifetimes);
+                        
+                        // Track each particle data
+                        this.particles.push({
+                            position: new this.THREE.Vector3(
+                                positions[i * 3],
+                                positions[i * 3 + 1],
+                                positions[i * 3 + 2]
+                            ),
+                            velocity: new this.THREE.Vector3(
+                                velocities[i * 3],
+                                velocities[i * 3 + 1],
+                                velocities[i * 3 + 2]
+                            ),
+                            startTime: startTimes[i],
+                            lifetime: lifetimes[i]
+                        });
+                    }
+                    
+                    // Add attributes to geometry
+                    this.particleGeometry.setAttribute('position', 
+                        new this.THREE.BufferAttribute(positions, 3));
+                    this.particleGeometry.setAttribute('velocity', 
+                        new this.THREE.BufferAttribute(velocities, 3));
+                    this.particleGeometry.setAttribute('startTime', 
+                        new this.THREE.BufferAttribute(startTimes, 1));
+                    this.particleGeometry.setAttribute('lifetime', 
+                        new this.THREE.BufferAttribute(lifetimes, 1));
+                    
+                    // Create the particle system
+                    this.particleGroup = new this.THREE.Points(this.particleGeometry, this.particleMaterial);
+                    
+                    // Check that we have a valid Object3D
+                    if (!(this.particleGroup instanceof this.THREE.Object3D)) {
+                        console.error('Failed to create a valid THREE.Object3D for particles');
+                        return;
+                    }
+                    
+                    // Set the object onto the entity
+                    this.el.setObject3D('particle-system', this.particleGroup);
+                    
+                } catch (error) {
+                    console.error('Error setting up particle system:', error);
+                }
+            },
+            
+            initParticle: function(i, positions, velocities, startTimes, lifetimes) {
+                // Position: random dispersion according to preset
+                const posSpread = this.positionSpread || {x: 2, y: 0, z: 2};
+                positions[i * 3] = (Math.random() * 2 - 1) * posSpread.x;
+                positions[i * 3 + 1] = (Math.random() * 2 - 1) * posSpread.y;
+                positions[i * 3 + 2] = (Math.random() * 2 - 1) * posSpread.z;
+                
+                // Velocity: base direction with randomization
+                const velBase = this.data.velocity;
+                const velRandom = this.data.randomizeVelocity;
+                velocities[i * 3] = velBase.x + (Math.random() * 2 - 1) * velRandom.x;
+                velocities[i * 3 + 1] = velBase.y + (Math.random() * 2 - 1) * velRandom.y;
+                velocities[i * 3 + 2] = velBase.z + (Math.random() * 2 - 1) * velRandom.z;
+                
+                // Time values: stagger start times for continuous flow
+                startTimes[i] = this.time + Math.random() * this.data.maxAge;
+                lifetimes[i] = this.data.maxAge;
+            },
+            
+            applyPreset: function(preset) {
+                switch(preset) {
+                    case 'snow':
+                        this.data.particleCount = 1500;
+                        this.data.color = '#FFFFFF';
+                        this.data.size = 1.0;
+                        this.data.velocity = {x: 0, y: -0.2, z: 0};
+                        this.data.acceleration = {x: 0, y: 0, z: 0};
+                        this.data.randomizeVelocity = {x: 0.2, y: 0.1, z: 0.2};
+                        this.data.maxAge = 10;
+                        this.data.blending = 'additive';
+                        this.positionSpread = {x: 10, y: 5, z: 10};
+                        break;
+                    case 'dust':
+                        this.data.particleCount = 2000;
+                        this.data.color = '#FFCC33';
+                        this.data.size = 0.5;
+                        this.data.velocity = {x: 0.02, y: 0.05, z: 0.02};
+                        this.data.acceleration = {x: 0, y: 0.01, z: 0};
+                        this.data.randomizeVelocity = {x: 0.1, y: 0.1, z: 0.1};
+                        this.data.maxAge = 15;
+                        this.data.blending = 'normal';
+                        this.positionSpread = {x: 10, y: 5, z: 10};
+                        break;
+                    case 'rain':
+                        this.data.particleCount = 1000;
+                        this.data.color = '#AADDFF';
+                        this.data.size = 0.8;
+                        this.data.velocity = {x: 0, y: -2, z: 0.3};  // Angled rain
+                        this.data.acceleration = {x: 0, y: -1, z: 0};
+                        this.data.randomizeVelocity = {x: 0.1, y: 0.5, z: 0.1};
+                        this.data.maxAge = 2;
+                        this.data.blending = 'normal';
+                        this.positionSpread = {x: 10, y: 8, z: 10};
+                        break;
+                }
+            },
+            
+            update: function(oldData) {
+                try {
+                    const changed = Object.keys(this.data).some(key => oldData[key] !== this.data[key]);
+                    if (changed) {
+                        this.setupParticleSystem();
+                    }
+                    
+                    // Handle active state change
+                    if (oldData.active !== this.data.active) {
+                        if (this.data.active) {
+                            this.startParticles();
+                        } else {
+                            this.stopParticles();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error in particle update:', error);
+                }
+            },
+            
+            tick: function(time, delta) {
+                try {
+                    if (this.isPaused || !this.particleGeometry) return;
+                    
+                    // Update time
+                    this.time += delta / 1000;
+                    
+                    // Check that all required arrays exist
+                    if (!this.particleGeometry.attributes.position || 
+                        !this.particleGeometry.attributes.velocity ||
+                        !this.particleGeometry.attributes.startTime ||
+                        !this.particleGeometry.attributes.lifetime) {
+                        return;
+                    }
+                    
+                    // Get positions and update based on physics
+                    const positions = this.particleGeometry.attributes.position.array;
+                    const velocities = this.particleGeometry.attributes.velocity.array;
+                    const startTimes = this.particleGeometry.attributes.startTime.array;
+                    const lifetimes = this.particleGeometry.attributes.lifetime.array;
+                    
+                    const acceleration = this.data.acceleration;
+                    
+                    for (let i = 0; i < this.data.particleCount; i++) {
+                        // Calculate particle age
+                        const age = this.time - startTimes[i];
+                        
+                        // Respawn if too old
+                        if (age > lifetimes[i]) {
+                            this.initParticle(i, positions, velocities, startTimes, lifetimes);
+                            continue;
+                        }
+                        
+                        // Update velocity with acceleration
+                        velocities[i * 3] += acceleration.x * delta / 1000;
+                        velocities[i * 3 + 1] += acceleration.y * delta / 1000;
+                        velocities[i * 3 + 2] += acceleration.z * delta / 1000;
+                        
+                        // Update position with velocity
+                        positions[i * 3] += velocities[i * 3] * delta / 1000;
+                        positions[i * 3 + 1] += velocities[i * 3 + 1] * delta / 1000;
+                        positions[i * 3 + 2] += velocities[i * 3 + 2] * delta / 1000;
+                        
+                        // Update particle object for tracking if it exists
+                        if (this.particles[i]) {
+                            this.particles[i].position.set(
+                                positions[i * 3],
+                                positions[i * 3 + 1],
+                                positions[i * 3 + 2]
+                            );
+                            this.particles[i].velocity.set(
+                                velocities[i * 3],
+                                velocities[i * 3 + 1],
+                                velocities[i * 3 + 2]
+                            );
+                        }
+                    }
+                    
+                    // Update geometry
+                    this.particleGeometry.attributes.position.needsUpdate = true;
+                    this.particleGeometry.attributes.velocity.needsUpdate = true;
+                    this.particleGeometry.attributes.startTime.needsUpdate = true;
+                } catch (error) {
+                    console.error('Error in particle tick:', error);
+                    this.isPaused = true; // Stop on error to prevent console spam
+                }
+            },
+            
+            startParticles: function() {
+                try {
+                    // Use play method instead
+                    this.play();
+                    
+                    // If the component was just created and added, make sure system is set up
+                    if (!this.particleGroup) {
+                        this.setupParticleSystem();
+                    }
+                } catch (error) {
+                    console.error('Error starting particles:', error);
+                }
+            },
+            
+            stopParticles: function() {
+                try {
+                    // Use pause method instead
+                    this.pause();
+                } catch (error) {
+                    console.error('Error stopping particles:', error);
+                }
+            },
+            
+            remove: function() {
+                try {
+                    // First make sure animations are stopped
+                    this.isPaused = true;
+                    
+                    // Clean up when component is removed
+                    if (this.particleGroup) {
+                        this.el.removeObject3D('particle-system');
+                    }
+                    
+                    if (this.particleMaterial) {
+                        this.particleMaterial.dispose();
+                    }
+                    
+                    if (this.particleGeometry) {
+                        this.particleGeometry.dispose();
+                    }
+                    
+                    this.particles = [];
+                } catch (error) {
+                    console.error('Error removing particle system:', error);
+                }
+            }
+        });
+
+        // Toggle particle systems on/off individually
+        function toggleParticleSystem(preset) {
+            try {
+                // If this system is already active, remove it (toggle off)
+                if (activeParticleSystems[preset]) {
+                    // First pause the system to stop animations before removing
+                    const system = activeParticleSystems[preset];
+                    if (system.components && system.components['particle-system']) {
+                        system.components['particle-system'].pause();
+                    }
+                    
+                    // Small delay before removing to ensure pause completes
+                    setTimeout(() => {
+                        try {
+                            // Make sure the DOM is up to date
+                            flushAllEntitiesToDOM();
+                            
+                            // Check if the system is actually in the DOM and is a child of scene
+                            const elementInDOM = document.getElementById(system.id || `particle-effect-${preset}`);
+                            
+                            if (elementInDOM && scene.contains(elementInDOM)) {
+                                scene.removeChild(elementInDOM);
+                            } else if (system.parentNode) {
+                                // Fallback to the system reference if it has a parentNode
+                                system.parentNode.removeChild(system);
+                            } else {
+                                console.log(`Particle system ${preset} was already removed or not found in DOM`);
+                            }
+                            
+                            // Clear the reference regardless
+                            activeParticleSystems[preset] = null;
+                            
+                            // Update code panel
+                            flushAllEntitiesToDOM();
+                            updateCodePanel();
+                        } catch (e) {
+                            console.error('Error removing particle system:', e);
+                        }
+                    }, 50);
+                    
+                    // Update button to show inactive state
+                    document.getElementById(`${preset}-btn`).style.backgroundColor = '#2c2c2c';
+                    
+                    // Check if any systems are still active for the animation toggle button
+                    const anyActive = Object.values(activeParticleSystems).some(system => system !== null);
+                    document.getElementById('toggle-animation-btn').disabled = !anyActive;
+                    document.getElementById('toggle-animation-btn').style.opacity = anyActive ? 1 : 0.5;
+                    
+                    return;
+                }
+                
+                // Create new particle system entity (toggle on)
+                const particleEntity = document.createElement('a-entity');
+                particleEntity.setAttribute('position', '0 5 -5'); // Position appropriately above the scene
+                particleEntity.setAttribute('id', `particle-effect-${preset}`);
+                
+                // Store reference to the new system
+                activeParticleSystems[preset] = particleEntity;
+                
+                // Highlight active button
+                document.getElementById(`${preset}-btn`).style.backgroundColor = '#4c6ef5';
+                
+                // Add to scene
+                scene.appendChild(particleEntity);
+                
+                // Wait a frame for the entity to initialize
+                setTimeout(() => {
+                    // Now add the component
+                    particleEntity.setAttribute('particle-system', `preset: ${preset}`);
+                    
+                    // Enable toggle animation button
+                    document.getElementById('toggle-animation-btn').disabled = false;
+                    document.getElementById('toggle-animation-btn').style.opacity = 1;
+                    
+                    // Update code panel
+                    flushAllEntitiesToDOM();
+                    updateCodePanel();
+                }, 100);
+            } catch (error) {
+                console.error('Error in toggleParticleSystem:', error);
+            }
+        }
+
+        // Toggle animation state for all active particle systems
+        function toggleParticleAnimation() {
+            try {
+                // Get all active particle systems
+                const activeSystems = Object.values(activeParticleSystems).filter(system => system !== null);
+                if (activeSystems.length === 0) return;
+                
+                // Determine the action based on any active system's state
+                // If any system is paused, we'll start all systems
+                let shouldStart = false;
+                let allInitialized = true;
+                
+                for (const system of activeSystems) {
+                    if (!system.components['particle-system']) {
+                        allInitialized = false;
+                        break;
+                    }
+                    
+                    if (system.components['particle-system'].isPaused) {
+                        shouldStart = true;
+                    }
+                }
+                
+                // If not all systems are initialized, wait and try again
+                if (!allInitialized) {
+                    console.log('Waiting for particle systems to initialize...');
+                    setTimeout(toggleParticleAnimation, 100);
+                    return;
+                }
+                
+                // Apply the same action to all systems
+                for (const system of activeSystems) {
+                    const particleSystem = system.components['particle-system'];
+                    
+                    if (shouldStart) {
+                        particleSystem.play();
+                    } else {
+                        particleSystem.pause();
+                    }
+                }
+                
+                // Update button appearance
+                if (shouldStart) {
+                    document.getElementById('toggle-animation-btn').style.backgroundColor = '#4c6ef5';
+                    // Update button text and icon for "Stop" state
+                    document.getElementById('animation-text').textContent = 'Stop';
+                    document.getElementById('animation-icon').setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z'); // Pause icon
+                } else {
+                    document.getElementById('toggle-animation-btn').style.backgroundColor = '#2c2c2c';
+                    // Update button text and icon for "Start" state
+                    document.getElementById('animation-text').textContent = 'Start';
+                    document.getElementById('animation-icon').setAttribute('d', 'M8 5v14l11-7z'); // Play icon
+                }
+            } catch (error) {
+                console.error('Error in toggleParticleAnimation:', error);
+            }
+        }
+
+        // Add some CSS for particle buttons
+        document.head.insertAdjacentHTML('beforeend', `
+            <style>
+                .effect-btn {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 5px;
+                    background-color: #2c2c2c;
+                    color: white;
+                    border: 1px solid #3c3c3c;
+                    border-radius: 4px;
+                    padding: 8px 5px;
+                    cursor: pointer;
+                    transition: background-color 0.2s;
+                }
+                .effect-btn:hover:not(:disabled) {
+                    background-color: #3c3c3c;
+                }
+                .effect-btn:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+                .effect-btn svg {
+                    width: 24px;
+                    height: 24px;
+                    fill: white;
+                }
+            </style>
+        `);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Safely get the canvas element
+            const canvas = document.getElementById('scene');
+            
+            // Check if it's actually a canvas element before proceeding
+            let ctx;
+            if (canvas && canvas instanceof HTMLCanvasElement) {
+                ctx = canvas.getContext('2d');
+            } else {
+                console.warn('Canvas element not found or is not a proper canvas');
+                // Create a fallback canvas if needed to prevent errors
+                const fallbackCanvas = document.createElement('canvas');
+                fallbackCanvas.width = 1;
+                fallbackCanvas.height = 1;
+                ctx = fallbackCanvas.getContext('2d');
+            }
+            
+            let animationId;
+            let isAnimating = false;
+            let currentParticleType = 'rain'; // Default particle type
+            
+            // Set initial global animation state based on button text (with null check)
+            const animationText = document.getElementById('animation-text');
+            if (animationText) {
+                globalAnimationState = animationText.textContent.trim() === 'Stop';
+            }
+            
+            // Set canvas dimensions if we have a valid canvas
+            function resizeCanvas() {
+                if (canvas && canvas instanceof HTMLCanvasElement) {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
+            }
+            
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            
+            // Remaining initialization code...
+        });
     </script>
 </body>
 
