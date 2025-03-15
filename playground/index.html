@@ -374,11 +374,24 @@
                 newScene.addEventListener('loaded', () => {
                     scene = newScene;
                     setupInspectorListeners();
+                    syncAssetsWithSidebar(); // Sync assets after scene update
                     updateCodePanel();
                 });
             } catch (error) {
                 console.error('Error updating scene:', error);
             }
+        }
+
+        function syncAssetsWithSidebar() {
+            const assetContainer = document.getElementById('asset-container');
+            const sidebarAssets = document.querySelectorAll('.asset-container');
+
+            sidebarAssets.forEach(sidebarAsset => {
+                const assetId = sidebarAsset.dataset.assetId;
+                if (!assetContainer.querySelector(`#${assetId}`)) {
+                    sidebarAsset.remove();
+                }
+            });
         }
 
         function toggleInspector() {
@@ -555,37 +568,38 @@
                     assetEl = document.createElement('img');
                     assetEl.setAttribute('src', assetUrl);
                     assetEl.setAttribute('id', assetId);
-                    addToAssetLibrary(assetId, file.type);
+                    addToAssetLibrary(assetId, file.type, file);
                 } else if (file.type.startsWith('video/')) {
                     assetEl = document.createElement('video');
                     assetEl.setAttribute('src', assetUrl);
                     assetEl.setAttribute('id', assetId);
                     assetEl.setAttribute('loop', '');
                     assetEl.setAttribute('preload', 'auto');
-                    addToAssetLibrary(assetId, file.type);
+                    addToAssetLibrary(assetId, file.type, file);
                 } else if (file.name.endsWith('.gltf') || file.name.endsWith('.glb')) {
                     assetEl = document.createElement('a-asset-item');
                     assetEl.setAttribute('id', assetId);
                     assetEl.setAttribute('src', assetUrl);
                     assetEl.setAttribute('response-type', 'arraybuffer');
                     assetEl.addEventListener('loaded', () => {
-                        addToAssetLibrary(assetId, 'model/gltf-binary');
+                        addToAssetLibrary(assetId, 'model/gltf-binary', file);
                     });
                 }
 
                 assetContainer.appendChild(assetEl);
                 updateCodePanel();
+
+                // Reset file input to allow re-uploading the same file
+                fileInput.value = '';
             }
         }
 
-        function addToAssetLibrary(assetId, type) {
+        function addToAssetLibrary(assetId, type, file) {
             const library = document.getElementById('asset-library');
             const container = document.createElement('div');
             container.className = 'asset-container';
+            container.dataset.assetId = assetId;
 
-            // Get the original filename
-            const fileInput = document.getElementById('asset-upload');
-            const file = fileInput.files[0];
             const fileName = file.name;
 
             // Add preview based on type
@@ -624,11 +638,17 @@
             button.textContent = type.includes('gltf') ? 'Use 3D Model' : `Use ${type.split('/')[0]}`;
             button.onclick = () => useAsset(assetId, type);
 
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete Asset';
+            deleteButton.style.marginLeft = '5px';
+            deleteButton.onclick = () => deleteAsset(assetId);
+
             const label = document.createElement('span');
             label.textContent = ` - ${fileName}`;
             label.style.marginLeft = '5px';
 
             container.appendChild(button);
+            container.appendChild(deleteButton);
             container.appendChild(label);
             library.appendChild(container);
         }
@@ -1139,10 +1159,9 @@
                 }
 
                 // Switch to scene view and ensure it's visible
-                currentView = 'scene';
-                scene.style.display = 'block';
-                codePanel.style.display = 'none';
-
+                if (currentView !== 'scene') {
+                    scene.style.display = 'none';
+                }
                 // Wait for scene to load then update code panel
                 scene.addEventListener('loaded', () => {
                     updateCodePanel();
@@ -1434,6 +1453,27 @@
 
             // Switch to scene view to see the model
             switchToView('scene');
+        }
+
+        function deleteAsset(assetId) {
+            // Remove asset from <a-assets>
+            const assetEl = document.querySelector(`#${assetId}`);
+            if (assetEl) {
+                assetEl.parentNode.removeChild(assetEl);
+            }
+
+            // Remove asset preview from sidebar
+            const assetContainer = document.querySelector(`.asset-container[data-asset-id="${assetId}"]`);
+            if (assetContainer) {
+                assetContainer.remove();
+            }
+
+            // Remove all entities referencing this asset
+            const entitiesUsingAsset = document.querySelectorAll(`[src="#${assetId}"], [gltf-model="#${assetId}"]`);
+            entitiesUsingAsset.forEach(entity => entity.parentNode.removeChild(entity));
+
+            // Update code panel
+            updateCodePanel();
         }
     </script>
 </body>
