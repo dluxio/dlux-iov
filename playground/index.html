@@ -2052,21 +2052,72 @@
                 }
             });
 
-            // Update color when hex input changes
+            // Update color when hex input changes - handle partial inputs
+            skyColorHex.addEventListener('input', (e) => {
+                let color = e.target.value;
+                
+                // Ensure the color starts with #
+                if (!color.startsWith('#')) {
+                    color = '#' + color;
+                    skyColorHex.value = color;
+                }
+                
+                // Check if input contains valid hex characters
+                if (/^#[0-9A-Fa-f]*$/.test(color)) {
+                    // Create a valid color by padding if needed
+                    let validColor = color;
+                    
+                    // Get the hex part without #
+                    const hexPart = color.substring(1);
+                    
+                    // If we have some valid hex digits
+                    if (hexPart.length > 0 && hexPart.length < 6) {
+                        // Pad with appropriate characters to make a valid color
+                        // For 1-2 digits, repeat them to make 6
+                        // For 3+ digits, pad with zeros
+                        if (hexPart.length <= 2) {
+                            // Repeat the digits we have (e.g. "F" becomes "FFFFFF")
+                            validColor = '#' + hexPart.padEnd(6, hexPart);
+                        } else {
+                            // Pad with zeros (e.g. "F00" becomes "F00000")
+                            validColor = '#' + hexPart.padEnd(6, '0');
+                        }
+                    } else if (hexPart.length === 6) {
+                        // We have a complete color
+                        validColor = color;
+                    } else {
+                        // Empty or invalid, don't update
+                        return;
+                    }
+                    
+                    // Update color picker and sky
+                    skyColorPicker.value = validColor;
+                    const sky = document.querySelector('a-sky');
+                    if (sky) {
+                        sky.setAttribute('color', validColor);
+                        sky.setAttribute('material', { color: validColor });
+                        flushAllEntitiesToDOM();
+                        updateCodePanel();
+                    }
+                }
+            });
+
+            // Final validation on blur/enter to handle incomplete input
             skyColorHex.addEventListener('change', (e) => {
                 let color = e.target.value;
+                
                 // Ensure the color starts with #
                 if (!color.startsWith('#')) {
                     color = '#' + color;
                 }
-                // Validate hex color
-                if (/^#[0-9A-F]{6}$/i.test(color)) {
-                    skyColorPicker.value = color;
-                    skyColorHex.value = color.toUpperCase();
-                    updateSkyColor(color, true); // Flush to DOM for hex input changes
-                } else {
-                    // Reset to picker's value if invalid
+                
+                // Validate complete hex color
+                if (!/^#[0-9A-F]{6}$/i.test(color)) {
+                    // Invalid or incomplete - reset to color picker's value
                     skyColorHex.value = skyColorPicker.value;
+                } else {
+                    // Make sure it's uppercase for consistency
+                    skyColorHex.value = color.toUpperCase();
                 }
             });
 
