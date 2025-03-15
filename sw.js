@@ -1,4 +1,4 @@
-this.version = "2025.03.15.1";
+this.version = "2025.03.15.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -34,6 +34,7 @@ var urlsToCache = [
   `/honeyblocks/index.html`,
   `/honeyblocks/list/index.html`,
   `/hub/index.html`,
+  `/hub/vr.html`,
   `/img/FFmpeg_logo.svg`,
   `/img/US-UK_Add_to_Apple_Wallet_RGB_101421.svg`,
   `/img/abcd-file-type.svg`,
