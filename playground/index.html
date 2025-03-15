@@ -5,6 +5,7 @@
     <title>DLUX Scene Builder</title>
     <script src="/js/aframe.min.js"></script>
     <script src="/js/aframe-extras.min.js"></script>
+    <script src="/js/aframe-environment-component.min.js"></script>
     <link rel="stylesheet" href="/css/codemirror.min.css">
     <link rel="stylesheet" href="/css/codemirror-monokai.min.css">
     <script src="/js/codemirror.min.js"></script>
@@ -526,6 +527,33 @@
                     <button onclick="document.getElementById('skybox-input').click()">Add Skybox</button>
                 </div>
             </div>
+
+            <!-- Add environment presets section -->
+            <div class="panel-section">
+                <h3>Environment Presets</h3>
+                <div style="margin-bottom: 15px;">
+                    <select id="environment-preset" style="width: 100%; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 8px; border-radius: 4px;">
+                        <option value="none">None (Disable)</option>
+                        <option value="default">Default</option>
+                        <option value="forest">Forest</option>
+                        <option value="egypt">Egypt</option>
+                        <option value="checkerboard">Checkerboard</option>
+                        <option value="goaland">Goaland</option>
+                        <option value="yavapai">Yavapai</option>
+                        <option value="goldmine">Goldmine</option>
+                        <option value="threetowers">Three Towers</option>
+                        <option value="poison">Poison</option>
+                        <option value="arches">Arches</option>
+                        <option value="tron">Tron</option>
+                        <option value="japan">Japan</option>
+                        <option value="dream">Dream</option>
+                        <option value="volcano">Volcano</option>
+                        <option value="starry">Starry</option>
+                        <option value="osiris">Osiris</option>
+                        <option value="moon">Moon</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <div class="main-content">
@@ -598,12 +626,16 @@
                     codePanel.style.display = 'none';
                     if (previousView === 'code') {
                         updateSceneFromCode();
+                    } else {
+                        // Even when not coming from code view, sync environment dropdown
+                        syncEnvironmentPresetDropdown();
                     }
                     break;
 
                 case 'code':
                     scene.style.display = 'none';
                     codePanel.style.display = 'block';
+                    // Update code panel before switching to code view
                     updateCodePanel();
                     break;
 
@@ -623,20 +655,67 @@
         function updateSceneFromCode() {
             try {
                 const newContent = editor.getValue();
-
+                
+                // First check if we have an environment entity in the code
+                const hasEnvironmentInCode = newContent.includes('environment="') || newContent.includes('environment=\'');
+                
+                // Create temp container to parse the code
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = `<a-scene embedded>${newContent}</a-scene>`;
-
+                
+                // Check if we need to handle environment specially
+                if (hasEnvironmentInCode) {
+                    // Find the environment preset from the code
+                    const environmentEl = tempDiv.querySelector('a-entity[environment]');
+                    if (environmentEl) {
+                        const environmentAttrib = environmentEl.getAttribute('environment');
+                        const presetMatch = environmentAttrib.match(/preset:\s*([a-z0-9]+)/i);
+                        if (presetMatch && presetMatch[1]) {
+                            // Get the preset value
+                            const preset = presetMatch[1];
+                            
+                            // First remove environment from the temp scene to avoid duplication
+                            const tempEnvironmentEls = tempDiv.querySelectorAll('a-entity[environment], .environment');
+                            tempEnvironmentEls.forEach(el => el.remove());
+                            
+                            // Now replace the scene without the environment
+                            const currentScene = document.querySelector('a-scene');
+                            const newScene = tempDiv.querySelector('a-scene');
+                            currentScene.parentNode.replaceChild(newScene, currentScene);
+                            scene = newScene;
+                            
+                            // Once the new scene is loaded, add the environment properly
+                            scene.addEventListener('loaded', () => {
+                                // Update dropdown to match
+                                const environmentPreset = document.getElementById('environment-preset');
+                                if (environmentPreset) {
+                                    environmentPreset.value = preset;
+                                }
+                                
+                                // Add the environment properly through our function that handles all edge cases
+                                updateEnvironment(preset);
+                                
+                                // Set up inspector listeners
+                                setupInspectorListeners();
+                                syncAssetsWithSidebar();
+                            });
+                            
+                            return; // Exit early, we've handled this special case
+                        }
+                    }
+                }
+                
+                // Normal flow for non-environment updates
                 const newScene = tempDiv.querySelector('a-scene');
                 const currentScene = document.querySelector('a-scene');
                 currentScene.parentNode.replaceChild(newScene, currentScene);
-
                 scene = newScene;
 
                 newScene.addEventListener('loaded', () => {
                     scene = newScene;
                     setupInspectorListeners();
                     syncAssetsWithSidebar(); // Sync assets after scene update
+                    syncEnvironmentPresetDropdown();
                     updateCodePanel();
                 });
             } catch (error) {
@@ -1068,10 +1147,16 @@
                     scene.style.display = 'none';
                 }
 
+                // Reset environment preset selector
+                const environmentPreset = document.getElementById('environment-preset');
+                if (environmentPreset) {
+                    environmentPreset.value = 'none';
+                }
 
                 // Wait for scene to load then update code panel
                 scene.addEventListener('loaded', () => {
                     updateCodePanel();
+                    updateSkyColorPicker();
                 });
             }
         }
@@ -1443,6 +1528,7 @@
         window.addEventListener('load', () => {
             hideSyncButtonContainer();
             initSkyColorPicker();
+            initEnvironmentPresets();
         });
 
         function clearScene() {
@@ -1496,6 +1582,12 @@
                     delete AFRAME.INSPECTOR;
                 }
 
+                // Reset environment preset selector
+                const environmentPreset = document.getElementById('environment-preset');
+                if (environmentPreset) {
+                    environmentPreset.value = 'none';
+                }
+
                 // Switch to scene view and ensure it's visible
                 currentView = 'scene';
                 scene.style.display = 'block';
@@ -1504,6 +1596,7 @@
                 // Wait for scene to load then update code panel
                 scene.addEventListener('loaded', () => {
                     updateCodePanel();
+                    updateSkyColorPicker();
                 });
             }
         }
@@ -1586,82 +1679,37 @@
             previewDiv.click();
         });
 
-        function clearAssets() {
-            if (confirm('Are you sure you want to clear all models, images, and scene elements?')) {
-                // Close inspector if it's open
-                try {
-                    if (AFRAME.INSPECTOR && AFRAME.INSPECTOR.opened) {
-                        AFRAME.INSPECTOR.close();
-                    }
-                } catch (e) {
-                    console.warn('Inspector cleanup skipped:', e);
-                }
-
-                // Get the current scene and save all assets
-                let currentScene = document.querySelector('a-scene');
-                const currentAssets = Array.from(currentScene.querySelectorAll('a-assets > *')).map(asset => asset.cloneNode(true));
-
-                // Create new scene with same configuration
-                let newScene = document.createElement('a-scene');
-                newScene.setAttribute('embedded', '');
-                newScene.setAttribute('renderer', 'antialias: true; colorManagement: true; physicallyCorrectLights: true; sortObjects: true;');
-
-                // Set default content - just assets, camera, sky and lights
-                newScene.innerHTML = `
-                    <a-assets id="asset-container">
-                        <!-- Assets will be re-added here -->
-                    </a-assets>
-
-                    <a-camera position="0 1.6 0"></a-camera>
-                    <a-sky color="#ECECEC"></a-sky>
-
-                    <!-- Default lighting -->
-                    <a-entity light="color: #BBB; type: ambient" data-aframe-default-light="" aframe-injected=""></a-entity>
-                    <a-entity light="intensity: 0.6; castShadow: true" position="-0.5 1 1" data-aframe-default-light="" aframe-injected=""></a-entity>
-                `;
-
-                // Replace the old scene
-                currentScene.parentNode.replaceChild(newScene, currentScene);
-
-                // Update the scene reference
-                scene = document.querySelector('a-scene');
-
-                // Re-add all assets to the new scene
-                const newAssetContainer = scene.querySelector('#asset-container');
-                currentAssets.forEach(asset => {
-                    newAssetContainer.appendChild(asset);
-                });
-
-                // Clean up inspector reference
-                if (typeof AFRAME.INSPECTOR !== 'undefined') {
-                    delete AFRAME.INSPECTOR;
-                }
-
-                // Switch to scene view and ensure it's visible
-                currentView = 'scene';
-                scene.style.display = 'block';
-                codePanel.style.display = 'none';
-
-                // Wait for scene to load then update code panel
-                scene.addEventListener('loaded', () => {
-                    updateCodePanel();
-                });
-            }
-        }
-
         function formatSceneContent(sceneEl) {
             const assets = sceneEl.querySelector('a-assets');
             const camera = sceneEl.querySelector('a-camera');
             const sky = sceneEl.querySelector('a-sky');
             const lights = Array.from(sceneEl.querySelectorAll('[light]'));
 
-            // Get all other entities (excluding assets, camera, sky, lights)
-            const entities = Array.from(sceneEl.children).filter(el =>
-                el !== assets &&
-                el !== camera &&
-                el !== sky &&
-                !lights.includes(el)
-            );
+            // Get all entities (excluding assets, camera, sky, lights)
+            const entities = Array.from(sceneEl.children).filter(el => {
+                // Skip assets, camera and sky
+                if (el === assets || el === camera || el === sky) {
+                    return false;
+                }
+                
+                // Handle environment specially - include parent but skip children
+                if (el.hasAttribute('environment')) {
+                    return true;
+                }
+                
+                // Skip environment-generated child entities
+                if (el.classList.contains('environment')) {
+                    return false;
+                }
+                
+                // Skip default lighting if it's injected
+                if (el.hasAttribute('light') && el.hasAttribute('data-aframe-default-light')) {
+                    return false;
+                }
+                
+                // Include all other entities
+                return !lights.includes(el) || !el.hasAttribute('data-aframe-default-light');
+            });
 
             let content = '';
 
@@ -1685,22 +1733,36 @@
             if (entities.length > 0) {
                 content += '<!-- Scene Entities -->\n';
                 entities.forEach(entity => {
-                    content += entity.outerHTML + '\n';
+                    // For environment entities, only include the parent with its environment attribute
+                    if (entity.hasAttribute('environment')) {
+                        // Create a stripped-down version with only the environment attribute
+                        const environmentAttrib = entity.getAttribute('environment');
+                        content += `<a-entity environment="${environmentAttrib}"></a-entity>\n`;
+                    } else {
+                        content += entity.outerHTML + '\n';
+                    }
                 });
                 content += '\n';
             }
 
-            // Environment (Sky)
-            if (sky) {
+            // Environment (Sky) - only if not using environment component
+            if (sky && !document.querySelector('a-entity[environment]')) {
                 content += '<!-- Environment -->\n';
                 content += sky.outerHTML + '\n\n';
             }
 
-            // Lighting
-            if (lights.length > 0) {
+            // Lighting - only include lighting that's not part of environment
+            const nonEnvironmentLights = lights.filter(light => 
+                !light.classList.contains('environment') && 
+                !light.parentElement?.hasAttribute('environment'));
+                
+            if (nonEnvironmentLights.length > 0) {
                 content += '<!-- Lighting -->\n';
-                lights.forEach(light => {
-                    content += light.outerHTML + '\n';
+                nonEnvironmentLights.forEach(light => {
+                    // Skip environment's internal lights
+                    if (!light.classList.contains('environment')) {
+                        content += light.outerHTML + '\n';
+                    }
                 });
             }
 
@@ -1862,6 +1924,154 @@
                     sky.flushToDOM();
                 }
                 updateCodePanel();
+            }
+        }
+
+        // Initialize environment presets
+        function initEnvironmentPresets() {
+            const presetSelector = document.getElementById('environment-preset');
+            if (!presetSelector) return;
+            
+            presetSelector.addEventListener('change', (e) => {
+                updateEnvironment(e.target.value);
+            });
+        }
+
+        // Function to update the environment based on selected preset
+        function updateEnvironment(preset) {
+            console.log('Updating environment to:', preset);
+            
+            // Step 1: Thoroughly remove any existing environment entity and its children
+            const existingEnvironment = document.querySelector('a-entity[environment]');
+            if (existingEnvironment) {
+                existingEnvironment.parentNode.removeChild(existingEnvironment);
+            }
+            
+            // Also remove any environment-created elements that might be orphaned
+            document.querySelectorAll('.environment').forEach(el => {
+                if (el.parentNode) {
+                    el.parentNode.removeChild(el);
+                }
+            });
+            
+            // Step 2: Handle "none" preset specially
+            if (preset === 'none') {
+                // Restore default sky if it doesn't exist
+                let sky = document.querySelector('a-sky');
+                if (!sky) {
+                    sky = document.createElement('a-sky');
+                    sky.setAttribute('color', '#ECECEC');
+                    scene.appendChild(sky);
+                }
+                
+                // Restore default ambient light if needed
+                if (!document.querySelector('[light="type: ambient"]')) {
+                    const ambientLight = document.createElement('a-entity');
+                    ambientLight.setAttribute('light', 'color: #BBB; type: ambient');
+                    scene.appendChild(ambientLight);
+                }
+                
+                // Restore default directional light if needed
+                if (!document.querySelector('[light="intensity: 0.6"]')) {
+                    const directionalLight = document.createElement('a-entity');
+                    directionalLight.setAttribute('light', 'intensity: 0.6; castShadow: true');
+                    directionalLight.setAttribute('position', '-0.5 1 1');
+                    scene.appendChild(directionalLight);
+                }
+                
+                // Update color picker to match sky color
+                updateSkyColorPicker();
+            } 
+            // Step 3: Add new environment entity for selected preset
+            else {
+                // Remove any existing a-sky entity since environment adds its own
+                const existingSky = document.querySelector('a-sky');
+                if (existingSky) {
+                    existingSky.parentNode.removeChild(existingSky);
+                }
+                
+                // Remove default lighting which will conflict with environment lighting
+                document.querySelectorAll('[light][data-aframe-default-light]').forEach(light => {
+                    if (light.parentNode) {
+                        light.parentNode.removeChild(light);
+                    }
+                });
+                
+                // Create new environment entity with only the preset attribute
+                const environment = document.createElement('a-entity');
+                environment.setAttribute('environment', `preset: ${preset}`);
+                scene.appendChild(environment);
+                
+                // Disable sky color picker since environment handles sky
+                disableSkyColorPicker(true);
+            }
+            
+            // Step 4: Flush changes to DOM and update the code panel
+            flushAllEntitiesToDOM();
+            setTimeout(() => {
+                updateCodePanel();
+            }, 100); // Small delay to ensure environment component has time to initialize
+        }
+        
+        // Function to update sky color picker state
+        function updateSkyColorPicker() {
+            const skyColorPicker = document.getElementById('sky-color');
+            const skyColorHex = document.getElementById('sky-color-hex');
+            const skyboxElements = document.querySelectorAll('#skybox-container .asset-item');
+            
+            // Enable sky color picker
+            disableSkyColorPicker(false);
+            
+            // Update with current sky color
+            const sky = document.querySelector('a-sky');
+            if (sky) {
+                const currentColor = sky.getAttribute('color') || '#ECECEC';
+                skyColorPicker.value = currentColor;
+                skyColorHex.value = currentColor.toUpperCase();
+            }
+        }
+        
+        // Function to enable/disable sky color picker
+        function disableSkyColorPicker(disabled) {
+            const skyColorPicker = document.getElementById('sky-color');
+            const skyColorHex = document.getElementById('sky-color-hex');
+            const skyboxElements = document.querySelectorAll('#skybox-container .asset-item');
+            
+            skyColorPicker.disabled = disabled;
+            skyColorHex.disabled = disabled;
+            
+            if (disabled) {
+                skyColorPicker.style.opacity = '0.5';
+                skyColorHex.style.opacity = '0.5';
+                skyboxElements.forEach(el => {
+                    el.style.pointerEvents = 'none';
+                    el.style.opacity = '0.5';
+                });
+            } else {
+                skyColorPicker.style.opacity = '1';
+                skyColorHex.style.opacity = '1';
+                skyboxElements.forEach(el => {
+                    el.style.pointerEvents = 'auto';
+                    el.style.opacity = '1';
+                });
+            }
+        }
+
+        // Function to sync environment preset dropdown with scene
+        function syncEnvironmentPresetDropdown() {
+            const environmentPreset = document.getElementById('environment-preset');
+            if (!environmentPreset) return;
+            
+            const environmentEntity = document.querySelector('a-entity[environment]');
+            if (environmentEntity) {
+                const preset = environmentEntity.getAttribute('environment').preset || 
+                               environmentEntity.getAttribute('environment').split('preset:')[1]?.trim().split(' ')[0] ||
+                               'default';
+                environmentPreset.value = preset;
+                disableSkyColorPicker(true);
+            } else {
+                environmentPreset.value = 'none';
+                updateSkyColorPicker();
             }
         }
     </script>
