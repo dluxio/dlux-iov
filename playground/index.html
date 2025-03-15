@@ -361,8 +361,7 @@
                         points="256.42 71.01 266.04 87.37 265.75 87.54 248.48 118.39 248.48 119.03 211.76 119.03 211.76 118.76 230.02 118.48 256.42 71.01" />
                     <polygon class="cls-1"
                         points="83.85 119.57 102.39 151.26 102.16 151.4 92.7 135.78 38.4 136.96 47.66 120.4 47.95 120.56 83.29 119.89 83.85 119.57" />
-                    <polygon class="cls-3"
-                        points="175.83 150.85 184.59 135.97 329.46 134.96 320.41 150.21 175.83 150.85" />
+                    <polygon class="cls-3" points="175.83 150.85 184.59 135.97 329.46 134.96 320.41 150.21 175.83 150.85" />
                     <polygon class="cls-3"
                         points="129.63 166.16 148.19 166.21 148.38 166.53 78.48 292.56 60.3 293.15 129.63 166.16" />
                     <polygon class="cls-1"
@@ -629,6 +628,9 @@
                     } else {
                         // Even when not coming from code view, sync environment dropdown
                         syncEnvironmentPresetDropdown();
+                        
+                        // Also check for and fix default light duplication
+                        fixDefaultLightDuplication();
                     }
                     break;
 
@@ -644,6 +646,9 @@
                     codePanel.style.display = 'none';
                     if (previousView === 'code') {
                         updateSceneFromCode();
+                    } else {
+                        // Fix light duplication before opening inspector
+                        fixDefaultLightDuplication();
                     }
                     setTimeout(() => {
                         openInspector();
@@ -678,6 +683,10 @@
                             const tempEnvironmentEls = tempDiv.querySelectorAll('a-entity[environment], .environment');
                             tempEnvironmentEls.forEach(el => el.remove());
                             
+                            // Clean up existing lights in the new scene to avoid duplicates
+                            const defaultLightsInTemp = tempDiv.querySelectorAll('[light][data-aframe-default-light]');
+                            defaultLightsInTemp.forEach(light => light.remove());
+                            
                             // Now replace the scene without the environment
                             const currentScene = document.querySelector('a-scene');
                             const newScene = tempDiv.querySelector('a-scene');
@@ -705,6 +714,32 @@
                     }
                 }
                 
+                // Before applying new scene, remove default lights from tempDiv to avoid duplicates
+                const defaultLightsInTemp = tempDiv.querySelectorAll('[light][data-aframe-default-light]');
+                if (defaultLightsInTemp.length > 2) {
+                    console.log(`Found ${defaultLightsInTemp.length} default lights in code, normalizing...`);
+                    
+                    // Keep only one ambient and one directional light
+                    let ambientCount = 0;
+                    let directionalCount = 0;
+                    
+                    defaultLightsInTemp.forEach(light => {
+                        const lightType = light.getAttribute('light').type || 'directional';
+                        
+                        if (lightType === 'ambient') {
+                            ambientCount++;
+                            if (ambientCount > 1) {
+                                light.parentNode.removeChild(light);
+                            }
+                        } else {
+                            directionalCount++;
+                            if (directionalCount > 1) {
+                                light.parentNode.removeChild(light);
+                            }
+                        }
+                    });
+                }
+                
                 // Normal flow for non-environment updates
                 const newScene = tempDiv.querySelector('a-scene');
                 const currentScene = document.querySelector('a-scene');
@@ -716,6 +751,7 @@
                     setupInspectorListeners();
                     syncAssetsWithSidebar(); // Sync assets after scene update
                     syncEnvironmentPresetDropdown();
+                    fixDefaultLightDuplication(); // Fix any light duplication
                     updateCodePanel();
                 });
             } catch (error) {
@@ -799,6 +835,7 @@
         }
 
         function updateCodePanel() {
+            fixDefaultLightDuplication();
             const sceneClone = scene.cloneNode(true);
             cleanupSceneElement(sceneClone);
             const formattedContent = formatSceneContent(sceneClone);
@@ -954,14 +991,31 @@
 
         // Helper function to insert entities correctly
         function insertEntityInScene(entity) {
-            const sky = scene.querySelector('a-sky');
-            const firstLight = scene.querySelector('[light]');
-            if (sky) {
-                scene.insertBefore(entity, sky);
-            } else if (firstLight) {
-                scene.insertBefore(entity, firstLight);
+            // First check if we have an environment
+            const hasEnvironment = !!scene.querySelector('a-entity[environment]');
+            
+            if (hasEnvironment) {
+                // When environment is active, insert new entities at the beginning
+                // so they appear in front of the environment
+                const firstChild = scene.firstElementChild;
+                if (firstChild && firstChild !== entity) {
+                    scene.insertBefore(entity, firstChild);
+                } else {
+                    scene.appendChild(entity);
+                }
             } else {
-                scene.appendChild(entity);
+                // Normal insertion logic when no environment is active
+                const sky = scene.querySelector('a-sky');
+                const firstLight = scene.querySelector('[light]');
+                
+                // Make sure the elements are actually children of the scene before using insertBefore
+                if (sky && sky.parentNode === scene) {
+                    scene.insertBefore(entity, sky);
+                } else if (firstLight && firstLight.parentNode === scene) {
+                    scene.insertBefore(entity, firstLight);
+                } else {
+                    scene.appendChild(entity);
+                }
             }
 
             // Notify inspector of new entity
@@ -1096,68 +1150,122 @@
                     console.warn('Inspector cleanup skipped:', e);
                 }
 
-                // Get the current scene and save all assets
-                let currentScene = document.querySelector('a-scene');
-                const currentAssets = Array.from(currentScene.querySelectorAll('a-assets > *')).map(asset => asset.cloneNode(true));
-
-                // Create new scene with same configuration
-                let newScene = document.createElement('a-scene');
-                newScene.setAttribute('embedded', '');
-                newScene.setAttribute('renderer', 'antialias: true; colorManagement: true; physicallyCorrectLights: true; sortObjects: true;');
-
-
-                // Set default content
-                newScene.innerHTML = `
-                    <a-assets id="asset-container">
-                        <!-- Assets will be re-added here -->
-                    </a-assets>
+                try {
+                    // Get the current scene
+                    let currentScene = document.querySelector('a-scene');
                     
-                    <!-- Camera -->
-                    <a-camera position="0 1.6 0"></a-camera>
+                    // First, safely detach all Three.js objects from entities to prevent reference errors
+                    const allEntities = currentScene.querySelectorAll('a-entity, a-light');
+                    allEntities.forEach(entity => {
+                        if (entity.object3D && typeof entity.removeObject3D === 'function') {
+                            try {
+                                // Safely detach object3D instances
+                                const objectKeys = Object.keys(entity.object3D);
+                                objectKeys.forEach(key => {
+                                    if (key !== 'el') {
+                                        entity.removeObject3D(key);
+                                    }
+                                });
+                            } catch (err) {
+                                console.warn('Error detaching entity objects:', err);
+                            }
+                        }
+                    });
+                    
+                    // Save all assets
+                    const currentAssets = Array.from(currentScene.querySelectorAll('a-assets > *'))
+                        .map(asset => asset.cloneNode(true));
 
-                    <!-- Scene Entities -->
-                    <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
-                    <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
-                    <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
-                    <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+                    // Create new scene with same configuration
+                    let newScene = document.createElement('a-scene');
+                    newScene.setAttribute('embedded', '');
+                    newScene.setAttribute('renderer', 'antialias: true; colorManagement: true; physicallyCorrectLights: true; sortObjects: true;');
 
-                    <!-- Environment -->
-                    <a-sky color="#ECECEC"></a-sky>
-                `;
+                    // Set default content
+                    newScene.innerHTML = `
+                        <a-assets id="asset-container">
+                            <!-- Assets will be re-added here -->
+                        </a-assets>
+                        
+                        <!-- Camera -->
+                        <a-camera position="0 1.6 0"></a-camera>
 
-                // Replace the old scene
-                currentScene.parentNode.replaceChild(newScene, currentScene);
+                        <!-- Scene Entities -->
+                        <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+                        <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+                        <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+                        <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
 
-                // Update the scene reference
-                scene = document.querySelector('a-scene');
+                        <!-- Environment -->
+                        <a-sky color="#ECECEC"></a-sky>
+                    `;
 
-                // Re-add all assets to the new scene
-                const newAssetContainer = scene.querySelector('#asset-container');
-                currentAssets.forEach(asset => {
-                    newAssetContainer.appendChild(asset);
-                });
+                    // Replace the old scene
+                    currentScene.parentNode.replaceChild(newScene, currentScene);
 
-                // Clean up inspector reference
-                if (typeof AFRAME.INSPECTOR !== 'undefined') {
-                    delete AFRAME.INSPECTOR;
+                    // Update the scene reference
+                    scene = document.querySelector('a-scene');
+
+                    // Re-add all assets to the new scene
+                    const newAssetContainer = scene.querySelector('#asset-container');
+                    currentAssets.forEach(asset => {
+                        newAssetContainer.appendChild(asset);
+                    });
+
+                    // Clean up inspector reference
+                    if (typeof AFRAME.INSPECTOR !== 'undefined') {
+                        delete AFRAME.INSPECTOR;
+                    }
+
+                    // Reset environment preset selector
+                    const environmentPreset = document.getElementById('environment-preset');
+                    if (environmentPreset) {
+                        environmentPreset.value = 'none';
+                    }
+
+                    // Force the current view to 'scene' to ensure correct display
+                    currentView = 'scene';
+                    scene.style.display = 'block';
+                    codePanel.style.display = 'none';
+
+                    // Wait for scene to initialize
+                    setTimeout(() => {
+                        // Add default lights that match A-Frame's defaults
+                        const ambientLight = document.createElement('a-entity');
+                        ambientLight.setAttribute('light', 'type: ambient; color: #BBB;');
+                        ambientLight.setAttribute('data-aframe-default-light', '');
+                        ambientLight.setAttribute('aframe-injected', '');
+                        scene.appendChild(ambientLight);
+                        
+                        const directionalLight = document.createElement('a-entity');
+                        directionalLight.setAttribute('light', 'intensity: 0.6; castShadow: true');
+                        directionalLight.setAttribute('position', '-0.5 1 1');
+                        directionalLight.setAttribute('data-aframe-default-light', '');
+                        directionalLight.setAttribute('aframe-injected', '');
+                        scene.appendChild(directionalLight);
+                    }, 100);
+
+                    // Wait for scene to load then update code panel
+                    scene.addEventListener('loaded', () => {
+                        // Force a render to make sure everything is visible
+                        if (scene.renderer) {
+                            scene.renderer.render(scene.object3D, scene.camera);
+                        }
+                        updateCodePanel();
+                        updateSkyColorPicker();
+                    });
+
+                    // Force a reload of the scene if it seems stuck
+                    setTimeout(() => {
+                        if (scene && scene.hasLoaded) {
+                            // If already loaded, dispatch a fake loaded event
+                            scene.emit('loaded');
+                        }
+                    }, 500);
+                } catch (error) {
+                    console.error("Error during scene reset:", error);
+                    alert("There was a problem resetting the scene. Please refresh the page.");
                 }
-
-                // Switch to scene view and ensure it's visible
-                if (currentView != 'scene') {
-                    scene.style.display = 'none';
-                }
-
-                // Reset environment preset selector
-                const environmentPreset = document.getElementById('environment-preset');
-                if (environmentPreset) {
-                    environmentPreset.value = 'none';
-                }
-
-                // Wait for scene to load then update code panel
-                scene.addEventListener('loaded', () => {
-                    updateCodePanel();
-                    updateSkyColorPicker();
-                });
             }
         }
 
@@ -1702,13 +1810,13 @@
                     return false;
                 }
                 
-                // Skip default lighting if it's injected
-                if (el.hasAttribute('light') && el.hasAttribute('data-aframe-default-light')) {
+                // Skip light entities - they'll be handled separately
+                if (el.hasAttribute('light')) {
                     return false;
                 }
                 
                 // Include all other entities
-                return !lights.includes(el) || !el.hasAttribute('data-aframe-default-light');
+                return true;
             });
 
             let content = '';
@@ -1751,19 +1859,56 @@
                 content += sky.outerHTML + '\n\n';
             }
 
-            // Lighting - only include lighting that's not part of environment
-            const nonEnvironmentLights = lights.filter(light => 
-                !light.classList.contains('environment') && 
-                !light.parentElement?.hasAttribute('environment'));
+            // Handle lighting based on what's in the scene
+            const environmentActive = document.querySelector('a-entity[environment]');
+            
+            // If environment is active, no need to include default lights
+            if (environmentActive) {
+                const customLights = lights.filter(light => 
+                    !light.classList.contains('environment') && 
+                    !light.parentElement?.hasAttribute('environment') &&
+                    !light.hasAttribute('data-aframe-default-light')
+                );
                 
-            if (nonEnvironmentLights.length > 0) {
-                content += '<!-- Lighting -->\n';
-                nonEnvironmentLights.forEach(light => {
-                    // Skip environment's internal lights
-                    if (!light.classList.contains('environment')) {
+                if (customLights.length > 0) {
+                    content += '<!-- Lighting -->\n';
+                    customLights.forEach(light => {
                         content += light.outerHTML + '\n';
-                    }
-                });
+                    });
+                }
+            } 
+            // If no environment and we have default lights in inspector, show them in code
+            else {
+                // Always include default lighting in the output
+                content += '<!-- Lighting -->\n';
+                
+                // First include any non-default lights
+                const customLights = lights.filter(light => 
+                    !light.hasAttribute('data-aframe-default-light')
+                );
+                
+                if (customLights.length > 0) {
+                    customLights.forEach(light => {
+                        content += light.outerHTML + '\n';
+                    });
+                }
+                
+                // If there are default lights in the scene, include them
+                const defaultLights = lights.filter(light => 
+                    light.hasAttribute('data-aframe-default-light')
+                );
+                
+                if (defaultLights.length > 0) {
+                    // Include the actual default lights from the scene
+                    defaultLights.forEach(light => {
+                        content += light.outerHTML + '\n';
+                    });
+                } else {
+                    // If no default lights found but we have no custom lights either,
+                    // include standard default lights in the code
+                    content += '<a-entity light="type: ambient; color: #BBB;" data-aframe-default-light="" aframe-injected=""></a-entity>\n';
+                    content += '<a-entity light="intensity: 0.6; castShadow: true" position="-0.5 1 1" data-aframe-default-light="" aframe-injected=""></a-entity>\n';
+                }
             }
 
             return content;
@@ -1882,11 +2027,29 @@
             const skyColorPicker = document.getElementById('sky-color');
             const skyColorHex = document.getElementById('sky-color-hex');
 
-            // Update color when picker changes
+            // Update color preview when dragging
             skyColorPicker.addEventListener('input', (e) => {
                 const color = e.target.value;
                 skyColorHex.value = color.toUpperCase();
-                updateSkyColor(color);
+                const sky = document.querySelector('a-sky');
+                if (sky) {
+                    sky.setAttribute('color', color);
+                    sky.setAttribute('material', { color: color });
+                    flushAllEntitiesToDOM();
+                    updateCodePanel();
+                }
+            });
+
+            // Update color and flush to DOM when mouse is released
+            skyColorPicker.addEventListener('mouseup', (e) => {
+                const color = e.target.value;
+                const sky = document.querySelector('a-sky');
+                if (sky) {
+                    sky.setAttribute('color', color);
+                    sky.setAttribute('material', { color: color });
+                    sky.flushToDOM();
+                    updateCodePanel();
+                }
             });
 
             // Update color when hex input changes
@@ -1900,7 +2063,7 @@
                 if (/^#[0-9A-F]{6}$/i.test(color)) {
                     skyColorPicker.value = color;
                     skyColorHex.value = color.toUpperCase();
-                    updateSkyColor(color);
+                    updateSkyColor(color, true); // Flush to DOM for hex input changes
                 } else {
                     // Reset to picker's value if invalid
                     skyColorHex.value = skyColorPicker.value;
@@ -1916,14 +2079,17 @@
             }
         }
 
-        function updateSkyColor(color) {
+        function updateSkyColor(color, flushDOM = true) {
             const sky = document.querySelector('a-sky');
             if (sky) {
                 sky.setAttribute('color', color);
-                if (typeof sky.flushToDOM === 'function') {
+                sky.setAttribute('material', { color: color });
+                if (flushDOM && typeof sky.flushToDOM === 'function') {
                     sky.flushToDOM();
                 }
-                updateCodePanel();
+                if (flushDOM) {
+                    updateCodePanel();
+                }
             }
         }
 
@@ -1964,20 +2130,27 @@
                     scene.appendChild(sky);
                 }
                 
-                // Restore default ambient light if needed
-                if (!document.querySelector('[light="type: ambient"]')) {
-                    const ambientLight = document.createElement('a-entity');
-                    ambientLight.setAttribute('light', 'color: #BBB; type: ambient');
-                    scene.appendChild(ambientLight);
-                }
+                // First remove any existing default lights to prevent duplication
+                const existingDefaultLights = document.querySelectorAll('[light][data-aframe-default-light]');
+                existingDefaultLights.forEach(light => {
+                    if (light.parentNode) {
+                        light.parentNode.removeChild(light);
+                    }
+                });
                 
-                // Restore default directional light if needed
-                if (!document.querySelector('[light="intensity: 0.6"]')) {
-                    const directionalLight = document.createElement('a-entity');
-                    directionalLight.setAttribute('light', 'intensity: 0.6; castShadow: true');
-                    directionalLight.setAttribute('position', '-0.5 1 1');
-                    scene.appendChild(directionalLight);
-                }
+                // Create both default lights that match A-Frame's exact default configuration
+                const ambientLight = document.createElement('a-entity');
+                ambientLight.setAttribute('light', 'type: ambient; color: #BBB;');
+                ambientLight.setAttribute('data-aframe-default-light', '');
+                ambientLight.setAttribute('aframe-injected', '');
+                scene.appendChild(ambientLight);
+                
+                const directionalLight = document.createElement('a-entity');
+                directionalLight.setAttribute('light', 'intensity: 0.6; castShadow: true');
+                directionalLight.setAttribute('position', '-0.5 1 1');
+                directionalLight.setAttribute('data-aframe-default-light', '');
+                directionalLight.setAttribute('aframe-injected', '');
+                scene.appendChild(directionalLight);
                 
                 // Update color picker to match sky color
                 updateSkyColorPicker();
@@ -1990,8 +2163,9 @@
                     existingSky.parentNode.removeChild(existingSky);
                 }
                 
-                // Remove default lighting which will conflict with environment lighting
-                document.querySelectorAll('[light][data-aframe-default-light]').forEach(light => {
+                // First remove any existing default lights to prevent duplication
+                const existingDefaultLights = document.querySelectorAll('[light][data-aframe-default-light]');
+                existingDefaultLights.forEach(light => {
                     if (light.parentNode) {
                         light.parentNode.removeChild(light);
                     }
@@ -2072,6 +2246,67 @@
             } else {
                 environmentPreset.value = 'none';
                 updateSkyColorPicker();
+            }
+        }
+
+        // Add function to fix default light duplication
+        function fixDefaultLightDuplication() {
+            // Get all default lights
+            const defaultLights = document.querySelectorAll('[light][data-aframe-default-light]');
+            if (defaultLights.length > 2) {
+                console.log(`Found ${defaultLights.length} default lights, removing duplicates...`);
+                
+                // Keep track of which types we've seen
+                let ambientLight = null;
+                let directionalLight = null;
+                
+                // First pass - identify which lights to keep
+                defaultLights.forEach(light => {
+                    const lightType = light.getAttribute('light').type || 'directional';
+                    
+                    if (lightType === 'ambient') {
+                        if (!ambientLight) {
+                            ambientLight = light;
+                        }
+                    } else {
+                        // Assume it's a directional light
+                        if (!directionalLight) {
+                            directionalLight = light;
+                        }
+                    }
+                });
+                
+                // Second pass - safely remove duplicates
+                defaultLights.forEach(light => {
+                    const lightType = light.getAttribute('light').type || 'directional';
+                    
+                    // Skip the lights we want to keep
+                    if ((lightType === 'ambient' && light === ambientLight) || 
+                        (lightType !== 'ambient' && light === directionalLight)) {
+                        return;
+                    }
+                    
+                    // Safe removal with checks
+                    try {
+                        if (light.parentNode) {
+                            // Detach any Three.js objects first to prevent reference issues
+                            if (light.object3D && typeof light.removeObject3D === 'function') {
+                                const objectKeys = Object.keys(light.object3D);
+                                objectKeys.forEach(key => {
+                                    if (key !== 'el') {  // Don't remove the element reference
+                                        light.removeObject3D(key);
+                                    }
+                                });
+                            }
+                            
+                            // Now safely remove from parent
+                            light.parentNode.removeChild(light);
+                            console.log('Safely removed duplicate light');
+                        }
+                    } catch (e) {
+                        console.warn('Error removing light:', e);
+                    }
+                });
             }
         }
     </script>
