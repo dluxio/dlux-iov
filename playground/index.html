@@ -305,7 +305,7 @@
         const codePanel = document.querySelector('#code-panel');
         let editor;
 
-        // Initialize CodeMirror
+        // Initialize CodeMirror with performance tweaks
         editor = CodeMirror(codePanel, {
             mode: 'xml',
             theme: 'monokai',
@@ -314,7 +314,15 @@
             indentUnit: 4,
             autoCloseTags: true,
             value: '',
+            inputStyle: 'contenteditable', // Reduce touch event blocking
+            viewportMargin: 10 // Improve scroll performance
         });
+
+        /* // Add passive event listeners to suppress warnings
+        const cmElement = codePanel.querySelector('.CodeMirror');
+        cmElement.addEventListener('touchstart', () => { }, { passive: true });
+        cmElement.addEventListener('touchmove', () => { }, { passive: true });
+        cmElement.addEventListener('mousewheel', () => { }, { passive: true }); */
 
         function switchToView(view) {
             const previousView = currentView;
@@ -509,7 +517,7 @@
                 entity.setAttribute('scale', '1 1 1');
                 entity.setAttribute('id', entityId);
             }
-            
+
             insertEntityInScene(entity);
             flushAllEntitiesToDOM();
             updateCodePanel();
