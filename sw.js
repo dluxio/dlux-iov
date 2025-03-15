@@ -1,4 +1,4 @@
-this.version = "2025.03.14.6";
+this.version = "2025.03.15.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -13,6 +13,8 @@ var urlsToCache = [
   `/css/bootstrap/tests/jasmine.js`,
   `/css/bootstrap/tests/sass-true/register.js`,
   `/css/bootstrap/tests/sass-true/runner.js`,
+  `/css/codemirror-monokai.min.css`,
+  `/css/codemirror.min.css`,
   `/css/custom-old.css`,
   `/css/custom.css`,
   `/css/customaf.css`,
@@ -101,6 +103,9 @@ var urlsToCache = [
   `/index.html`,
   `/ipfs/current.html`,
   `/ipfs/index.html`,
+  `/js/aframe-environment-component.min.js`,
+  `/js/aframe-extras.min.js`,
+  `/js/aframe-inspector.min.js`,
   `/js/aframe.min.js`,
   `/js/appvue.js`,
   `/js/assets-min.js`,
@@ -113,6 +118,8 @@ var urlsToCache = [
   `/js/cardvue.js`,
   `/js/chatvue.js`,
   `/js/choices-vue.js`,
+  `/js/codemirror-xml.min.js`,
+  `/js/codemirror.min.js`,
   `/js/contractvue-old.js`,
   `/js/contractvue.js`,
   `/js/cryptojs.min.js`,
@@ -136,6 +143,7 @@ var urlsToCache = [
   `/js/mfi-vue.js`,
   `/js/modalvue-old.js`,
   `/js/modalvue.js`,
+  `/js/model-viewer.min.js`,
   `/js/nav.js`,
   `/js/navue-old.js`,
   `/js/navue.js`,

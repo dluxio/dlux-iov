@@ -129,9 +129,7 @@ export default {
                             <li>Enables voting</li>
                             <li>Instant Power Up | 4 Week Power Down
                             </li>
-                            <li>Grants BROCA at 1:1,000,000</li>
-                            <li>Your max BROCA:
-                                {{formatNumber((saccountapi.spk_power * 1000 ), 0, '', ',')}}</li>
+                            <li>Collateral to Secure the DEX</li>
                         </ul>
                     </div>
                     <div class="ms-auto text-end">
@@ -270,12 +268,12 @@ export default {
             <div v-if="saccountapi.spk_power"
                 class="d-flex flex-wrap align-items-center border-bottom border-secondary py-5">
                 <div class="text-start">
-                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA
+                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA KBs
                             <div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-warning text-black ms-1"
                                 style="font-size: xx-small;">TEST
                             </div>
                         </div>
-                    <p class="text-white-50">Resource Credits
+                    <p class="text-white-50">Storage Credits
                         for the SPK
                         network.</p>
                     <p class="text-white-50">BROCA stats:</p>
@@ -296,6 +294,7 @@ export default {
                     <h5>
                         {{formatNumber(broca_calc(saccountapi.broca), 0, '', ',')}} BROCA
                     </h5>
+                     <div class="mb-2"> <span class="small">{{(broca_calc(saccountapi.broca) * 6)}} KBs per Month</span></div>
 
                     <div class="btn-group" role="group"
                         aria-label="Power Actions">
