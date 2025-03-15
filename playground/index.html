@@ -4,13 +4,68 @@
 <head>
     <title>DLUX Scene Builder</title>
     <script src="/js/aframe.min.js"></script>
+    <script src="/js/aframe-extras.min.js"></script>
     <link rel="stylesheet" href="/css/codemirror.min.css">
     <link rel="stylesheet" href="/css/codemirror-monokai.min.css">
     <script src="/js/codemirror.min.js"></script>
     <script src="/js/codemirror-xml.min.js"></script>
     <script type="module" src="/js/model-viewer.min.js"></script>
 
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@300..700&display=swap"
+        rel="stylesheet">
+    <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
+
     <style>
+        .logotype {
+            font-size: 2.5em;
+            font-weight: 400;
+            font-family: "Audiowide", serif;
+            color: #fff;
+            margin: 0;
+        }
+
+        h3 {
+            font-family: 'Space Grotesk', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        button {
+            font-size: .85rem;
+            line-height: 1.3;
+            font-weight: 300;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+
+        .brand-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .nav-logo {
+            width: 40px;
+            height: 40px;
+            fill: #fff;
+        }
+
+        .nav-logo .cls-1 {
+            fill: #fff;
+        }
+
+        .nav-logo .cls-2 {
+            fill: #666;
+        }
+
+        .nav-logo .cls-3 {
+            fill: #999;
+        }
+
         /* Update CSS rules to use A-Frame's class */
         body.aframe-inspector-opened .sidebar,
         body.aframe-inspector-opened .toolbar {
@@ -235,17 +290,217 @@
         body:not(.aframe-inspector-opened) .sync-to-code-panel-container {
             display: none;
         }
+
+        .geometry-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .geometry-buttons button {
+            width: 100%;
+            padding: 8px 5px;
+            background: #2c2c2c;
+            border: 1px solid #3c3c3c;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .geometry-buttons button:hover {
+            background: #3c3c3c;
+            border-color: #4c4c4c;
+        }
+
+        .geometry-buttons svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .geometry-buttons .filled {
+            fill: currentColor;
+            fill-opacity: 0.2;
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <div class="sidebar">
+            <div class="brand-header">
+                <svg class="nav-logo" viewBox="0 0 333 333" xmlns="http://www.w3.org/2000/svg">
+                    <polygon class="cls-1"
+                        points="184.59 135.97 184.21 135.97 110.55 11.06 219.49 9.03 228.91 24.43 137.69 26.25 146.62 41 165.61 72.39 184.6 103.79 193.82 119.03 211.76 119.03 248.48 119.03 284.59 119.02 302.68 119.02 256.79 39.98 273.78 40.15 329.46 134.96 184.59 135.97" />
+                    <polygon class="cls-2"
+                        points="110.55 11.06 184.21 135.97 184.59 135.97 175.83 150.85 175.52 150.85 101.87 27.04 110.55 11.06" />
+                    <polygon class="cls-3"
+                        points="184.01 40.5 146.62 41 137.69 26.25 228.91 24.43 184.6 103.79 174.99 87.86 201.39 40.27 184.08 40.5 184.01 40.5" />
+                    <polygon class="cls-1" points="56.71 41.63 74.44 41.74 148.19 166.21 129.63 166.16 56.71 41.63" />
+                    <polygon class="cls-2"
+                        points="85.44 214.65 102.95 182.4 111.45 166.74 102.39 151.26 83.85 119.57 65.61 88.41 56.48 72.79 11.43 152.31 2.99 137.56 56.71 41.63 129.63 166.16 60.3 293.15 3.54 200.14 12.08 184.24 59.71 262.05 67.94 246.89 85.44 214.65" />
+                    <polygon class="cls-2"
+                        points="184.08 40.5 201.39 40.27 174.99 87.86 184.6 103.79 165.61 72.39 184.01 40.5 184.08 40.5" />
+                    <polygon class="cls-2"
+                        points="211.76 118.76 256.63 39.89 256.79 39.98 302.68 119.02 284.59 119.02 284.59 118.95 266.04 87.37 256.42 71.01 230.02 118.48 211.76 118.76" />
+                    <polygon class="cls-3"
+                        points="56.48 72.79 65.61 88.41 65.55 88.45 47.66 120.4 38.4 136.96 92.7 135.78 102.16 151.4 11.43 152.5 11.43 152.31 56.48 72.79" />
+                    <polygon class="cls-3"
+                        points="256.42 71.01 266.04 87.37 265.75 87.54 248.48 118.39 248.48 119.03 211.76 119.03 211.76 118.76 230.02 118.48 256.42 71.01" />
+                    <polygon class="cls-1"
+                        points="83.85 119.57 102.39 151.26 102.16 151.4 92.7 135.78 38.4 136.96 47.66 120.4 47.95 120.56 83.29 119.89 83.85 119.57" />
+                    <polygon class="cls-3"
+                        points="175.83 150.85 184.59 135.97 329.46 134.96 320.41 150.21 175.83 150.85" />
+                    <polygon class="cls-3"
+                        points="129.63 166.16 148.19 166.21 148.38 166.53 78.48 292.56 60.3 293.15 129.63 166.16" />
+                    <polygon class="cls-1"
+                        points="48.62 214.87 67.94 246.89 59.71 262.05 12.08 184.24 102.95 182.4 94.06 198.74 39.65 199.99 48.59 214.81 48.62 214.87" />
+                    <polygon class="cls-3"
+                        points="102.95 182.4 85.44 214.65 48.62 214.87 48.59 214.81 39.65 199.99 94.06 198.74 102.95 182.4" />
+                    <polygon class="cls-1"
+                        points="175.84 182.61 319.13 180.4 330.01 196.91 185.61 198.39 175.84 182.61 175.84 182.61" />
+                    <polygon class="cls-2"
+                        points="175.47 182.61 175.84 182.61 175.84 182.61 185.61 198.39 113.76 323.97 104.73 308.18 175.47 182.61" />
+                    <polygon class="cls-3"
+                        points="167.45 261.43 149.16 293.24 140.56 308.18 231.79 307.99 222.72 323.59 113.76 323.97 185.61 198.39 330.01 196.91 276.31 291.28 259.33 291.82 303.59 213.44 284.52 213.57 249.4 213.81 230.83 213.93 212.56 214.06 194.63 214.18 185.75 229.62 167.45 261.43" />
+                    <polygon class="cls-2"
+                        points="212.56 214.06 230.83 213.93 258.27 260.81 267.49 244.22 284.52 213.57 303.59 213.44 259.33 291.82 259.17 291.92 212.56 214.06" />
+                    <polygon class="cls-1"
+                        points="230.83 213.93 249.4 213.81 267.23 244.08 267.49 244.22 258.27 260.81 230.83 213.93" />
+                    <polygon class="cls-2"
+                        points="167.45 261.43 185.75 229.62 176.49 245.76 203.93 292.76 186.62 292.91 186.56 292.91 167.45 261.43" />
+                    <polygon class="cls-1"
+                        points="186.56 292.91 186.62 292.91 203.93 292.76 176.49 245.76 185.75 229.62 231.79 307.99 140.56 308.18 149.16 293.24 186.56 292.91" />
+                </svg>
+                <h1 class="logotype">DLUX</h1>
+            </div>
             <h3>Add Objects</h3>
-            <button onclick="addEntity('box')">Add Box</button>
-            <button onclick="addEntity('sphere')">Add Sphere</button>
-            <button onclick="addEntity('cylinder')">Add Cylinder</button>
-            <button onclick="addEntity('plane')">Add Plane</button>
+            <div class="geometry-buttons">
+                <!-- Basic Shapes -->
+                <button onclick="addEntity('box')">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="4" y="4" width="16" height="16" class="filled"/>
+                    </svg>
+                    Box
+                </button>
+                <button onclick="addEntity('sphere')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" class="filled"/>
+                        <ellipse cx="12" cy="12" rx="8" ry="3"/>
+                        <line x1="4" y1="12" x2="20" y2="12"/>
+                    </svg>
+                    Sphere
+                </button>
+                <button onclick="addEntity('cylinder')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 7 C6 7 6 17 6 17 C6 19 12 19 12 17 C12 17 12 7 12 7 C12 5 6 5 6 7" class="filled"/>
+                        <ellipse cx="9" cy="7" rx="3" ry="1"/>
+                        <ellipse cx="9" cy="17" rx="3" ry="1"/>
+                    </svg>
+                    Cylinder
+                </button>
+                <button onclick="addEntity('plane')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 12 L12 6 L20 12 L12 18 Z" class="filled"/>
+                    </svg>
+                    Plane
+                </button>
+                <button onclick="addEntity('cone')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L4 20 L20 20 Z" class="filled"/>
+                    </svg>
+                    Cone
+                </button>
+                <button onclick="addEntity('torus')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" class="filled"/>
+                        <circle cx="12" cy="12" r="4"/>
+                    </svg>
+                    Torus
+                </button>
+                <button onclick="addEntity('ring')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8"/>
+                        <circle cx="12" cy="12" r="4"/>
+                    </svg>
+                    Ring
+                </button>
+                <button onclick="addEntity('circle')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8"/>
+                    </svg>
+                    Circle
+                </button>
+                <button onclick="addEntity('dodecahedron')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L18 8 L18 16 L12 20 L6 16 L6 8 Z" class="filled"/>
+                        <line x1="12" y1="4" x2="12" y2="20"/>
+                        <line x1="6" y1="8" x2="18" y2="8"/>
+                        <line x1="6" y1="16" x2="18" y2="16"/>
+                    </svg>
+                    Dodecahedron
+                </button>
+                <button onclick="addEntity('octahedron')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L20 12 L12 20 L4 12 Z" class="filled"/>
+                    </svg>
+                    Octahedron
+                </button>
+                <button onclick="addEntity('tetrahedron')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L18 18 L6 18 Z" class="filled"/>
+                        <line x1="6" y1="18" x2="18" y2="18"/>
+                    </svg>
+                    Tetrahedron
+                </button>
+                <button onclick="addEntity('triangle')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L20 18 L4 18 Z"/>
+                    </svg>
+                    Triangle
+                </button>
+                <button onclick="addEntity('torusKnot')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 8 C16 8 16 16 12 16 C8 16 8 8 12 8" class="filled"/>
+                        <path d="M8 12 C8 8 16 8 16 12 C16 16 8 16 8 12"/>
+                    </svg>
+                    Torus Knot
+                </button>
+                <button onclick="addEntity('ocean')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 14 Q8 10 12 14 Q16 18 20 14" class="filled"/>
+                        <path d="M4 18 Q8 14 12 18 Q16 22 20 18"/>
+                    </svg>
+                    Ocean
+                </button>
+                <button onclick="addEntity('tube')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 12 C8 6 16 18 20 12" class="filled"/>
+                    </svg>
+                    Tube
+                </button>
+                <button onclick="addEntity('grid')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 4 L20 4 L20 20 L4 20 Z"/>
+                        <line x1="9" y1="4" x2="9" y2="20"/>
+                        <line x1="15" y1="4" x2="15" y2="20"/>
+                        <line x1="4" y1="9" x2="20" y2="9"/>
+                        <line x1="4" y1="15" x2="20" y2="15"/>
+                    </svg>
+                    Grid
+                </button>
+            </div>
 
             <h3>Assets</h3>
             <input type="file" id="asset-upload" accept="image/*,video/*,.gltf,.glb" onchange="handleFileUpload()">
@@ -256,6 +511,13 @@
 
             <div class="panel-section">
                 <h3>Skybox</h3>
+                <div class="sky-color-picker" style="margin-bottom: 15px;">
+                    <label for="sky-color" style="display: block; margin-bottom: 5px;">Sky Color:</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="color" id="sky-color" value="#ECECEC" style="width: 50px; height: 30px; padding: 0;">
+                        <input type="text" id="sky-color-hex" value="#ECECEC" style="width: 80px; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 5px;">
+                    </div>
+                </div>
                 <div id="skybox-container" class="asset-grid" style="margin-bottom: 10px;">
                     <!-- Skybox previews will be added here -->
                 </div>
@@ -497,12 +759,60 @@
         }
 
         function addEntity(type) {
-            const entity = document.createElement(`a-${type}`);
-            const randomColor = Math.floor(Math.random() * 16777215).toString(16);
-            entity.setAttribute('position', '0 1.5 -3');
-            entity.setAttribute('color', '#' + randomColor);
-            entity.setAttribute('material', 'color: #' + randomColor);
-            entity.setAttribute('geometry', 'primitive: ' + type);
+            let entity;
+            if (type === 'ocean') {
+                entity = document.createElement('a-ocean');
+                entity.setAttribute('color', '#92E2E2');
+                entity.setAttribute('width', '25');
+                entity.setAttribute('depth', '25');
+                entity.setAttribute('density', '15');
+                entity.setAttribute('speed', '2');
+                entity.setAttribute('position', '0 0 0');
+                entity.setAttribute('rotation', '-90 0 0');
+            } else if (type === 'torusKnot') {
+                entity = document.createElement('a-entity');
+                const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+                entity.setAttribute('position', '0 1.5 -3');
+                entity.setAttribute('geometry', {
+                    primitive: 'torusKnot',
+                    radius: 1,
+                    radiusTubular: 0.1,
+                    p: 2,
+                    q: 3
+                });
+                entity.setAttribute('material', {
+                    color: '#' + randomColor,
+                    metalness: 0.3,
+                    roughness: 0.6
+                });
+            } else if (type === 'tube') {
+                entity = document.createElement('a-tube');
+                const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+                entity.setAttribute('path', '5 0 5, 5 0 -5, -5 0 -5');
+                entity.setAttribute('radius', '0.5');
+                entity.setAttribute('material', {
+                    color: '#' + randomColor,
+                    metalness: 0.3,
+                    roughness: 0.6
+                });
+            } else if (type === 'grid') {
+                entity = document.createElement('a-grid');
+                entity.setAttribute('width', 20);
+                entity.setAttribute('height', 20);
+                entity.setAttribute('position', '0 0 0');
+                entity.setAttribute('rotation', '-90 0 0');
+                entity.setAttribute('material', {
+                    color: '#666666',
+                    opacity: 0.5
+                });
+            } else {
+                entity = document.createElement(`a-${type}`);
+                const randomColor = Math.floor(Math.random() * 16777215).toString(16);
+                entity.setAttribute('position', '0 1.5 -3');
+                entity.setAttribute('color', '#' + randomColor);
+                entity.setAttribute('material', 'color: #' + randomColor);
+                entity.setAttribute('geometry', 'primitive: ' + type);
+            }
 
             insertEntityInScene(entity);
             flushAllEntitiesToDOM();
@@ -512,17 +822,44 @@
         function useAsset(assetId, type) {
             let entity;
             const entityId = `${type.split('/')[0]}-${assetId}`; // Unique ID for the entity
+            const assetElement = document.getElementById(assetId);
 
             if (type.startsWith('image/')) {
+                // Calculate aspect ratio for images
+                const aspectRatio = assetElement.naturalWidth / assetElement.naturalHeight;
+                const baseWidth = 5; // Base width in meters
+                const height = baseWidth / aspectRatio;
+
                 entity = document.createElement('a-image');
                 entity.setAttribute('src', `#${assetId}`);
+                entity.setAttribute('width', baseWidth);
+                entity.setAttribute('height', height);
                 entity.setAttribute('position', '0 1.5 -3');
                 entity.setAttribute('id', entityId);
             } else if (type.startsWith('video/')) {
+                // For videos, we need to wait for metadata to load to get dimensions
+                const video = assetElement;
+                const setVideoDimensions = () => {
+                    const aspectRatio = video.videoWidth / video.videoHeight;
+                    const baseWidth = 8; // Base width in meters for videos
+                    const height = baseWidth / aspectRatio;
+
+                    entity.setAttribute('width', baseWidth);
+                    entity.setAttribute('height', height);
+                };
+
                 entity = document.createElement('a-video');
                 entity.setAttribute('src', `#${assetId}`);
                 entity.setAttribute('position', '0 1.5 -3');
                 entity.setAttribute('id', entityId);
+
+                // If video metadata is already loaded, set dimensions immediately
+                if (video.videoWidth) {
+                    setVideoDimensions();
+                } else {
+                    // Otherwise wait for metadata to load
+                    video.addEventListener('loadedmetadata', setVideoDimensions);
+                }
             } else if (type.includes('gltf')) {
                 entity = document.createElement('a-entity');
                 entity.setAttribute('gltf-model', `#${assetId}`);
@@ -573,8 +910,8 @@
                     assetEl = document.createElement('video');
                     assetEl.setAttribute('src', assetUrl);
                     assetEl.setAttribute('id', assetId);
-                    assetEl.setAttribute('loop', '');
-                    assetEl.setAttribute('preload', 'auto');
+                    assetEl.setAttribute('loop', 'true');
+                    assetEl.setAttribute('autoplay', 'auto');
                     addToAssetLibrary(assetId, file.type, file);
                 } else if (file.name.endsWith('.gltf') || file.name.endsWith('.glb')) {
                     assetEl = document.createElement('a-asset-item');
@@ -1105,6 +1442,7 @@
         // Make sure it's hidden when page loads
         window.addEventListener('load', () => {
             hideSyncButtonContainer();
+            initSkyColorPicker();
         });
 
         function clearScene() {
@@ -1159,9 +1497,10 @@
                 }
 
                 // Switch to scene view and ensure it's visible
-                if (currentView !== 'scene') {
-                    scene.style.display = 'none';
-                }
+                currentView = 'scene';
+                scene.style.display = 'block';
+                codePanel.style.display = 'none';
+
                 // Wait for scene to load then update code panel
                 scene.addEventListener('loaded', () => {
                     updateCodePanel();
@@ -1474,6 +1813,56 @@
 
             // Update code panel
             updateCodePanel();
+        }
+
+        // Add this new function
+        function initSkyColorPicker() {
+            const skyColorPicker = document.getElementById('sky-color');
+            const skyColorHex = document.getElementById('sky-color-hex');
+
+            // Update color when picker changes
+            skyColorPicker.addEventListener('input', (e) => {
+                const color = e.target.value;
+                skyColorHex.value = color.toUpperCase();
+                updateSkyColor(color);
+            });
+
+            // Update color when hex input changes
+            skyColorHex.addEventListener('change', (e) => {
+                let color = e.target.value;
+                // Ensure the color starts with #
+                if (!color.startsWith('#')) {
+                    color = '#' + color;
+                }
+                // Validate hex color
+                if (/^#[0-9A-F]{6}$/i.test(color)) {
+                    skyColorPicker.value = color;
+                    skyColorHex.value = color.toUpperCase();
+                    updateSkyColor(color);
+                } else {
+                    // Reset to picker's value if invalid
+                    skyColorHex.value = skyColorPicker.value;
+                }
+            });
+
+            // Initialize with current sky color
+            const sky = document.querySelector('a-sky');
+            if (sky) {
+                const currentColor = sky.getAttribute('color') || '#ECECEC';
+                skyColorPicker.value = currentColor;
+                skyColorHex.value = currentColor.toUpperCase();
+            }
+        }
+
+        function updateSkyColor(color) {
+            const sky = document.querySelector('a-sky');
+            if (sky) {
+                sky.setAttribute('color', color);
+                if (typeof sky.flushToDOM === 'function') {
+                    sky.flushToDOM();
+                }
+                updateCodePanel();
+            }
         }
     </script>
 </body>
