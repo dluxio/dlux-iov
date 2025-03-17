@@ -37,7 +37,8 @@
             line-height: 1.3;
         }
 
-        body, button {
+        body,
+        button {
             font-size: .85rem;
             line-height: 1.3;
             font-weight: 300;
@@ -379,7 +380,8 @@
                         points="256.42 71.01 266.04 87.37 265.75 87.54 248.48 118.39 248.48 119.03 211.76 119.03 211.76 118.76 230.02 118.48 256.42 71.01" />
                     <polygon class="cls-1"
                         points="83.85 119.57 102.39 151.26 102.16 151.4 92.7 135.78 38.4 136.96 47.66 120.4 47.95 120.56 83.29 119.89 83.85 119.57" />
-                    <polygon class="cls-3" points="175.83 150.85 184.59 135.97 329.46 134.96 320.41 150.21 175.83 150.85" />
+                    <polygon class="cls-3"
+                        points="175.83 150.85 184.59 135.97 329.46 134.96 320.41 150.21 175.83 150.85" />
                     <polygon class="cls-3"
                         points="129.63 166.16 148.19 166.21 148.38 166.53 78.48 292.56 60.3 293.15 129.63 166.16" />
                     <polygon class="cls-1"
@@ -403,125 +405,295 @@
                 </svg>
                 <h1 class="logotype">DLUX</h1>
             </div>
+            <!-- Add environment presets section -->
+            <div class="panel-section">
+                <h3>Environment</h3>
+                <div style="margin-bottom: 15px; position: relative;">
+                    <div style="position: relative; width: 100%;">
+                        <select id="environment-preset"
+                            style="width: 100%; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 100px 8px 8px 8px; border-radius: 4px; appearance: none; text-align: left;">
+                            <option value="none">None (Disable)</option>
+                            <option value="default">Default</option>
+                            <option value="contact">Contact</option>
+                            <option value="forest">Forest</option>
+                            <option value="egypt">Egypt</option>
+                            <option value="checkerboard">Checkerboard</option>
+                            <option value="goaland">Goaland</option>
+                            <option value="yavapai">Yavapai</option>
+                            <option value="goldmine">Goldmine</option>
+                            <option value="threetowers">Three Towers</option>
+                            <option value="poison">Poison</option>
+                            <option value="arches">Arches</option>
+                            <option value="tron">Tron</option>
+                            <option value="japan">Japan</option>
+                            <option value="dream">Dream</option>
+                            <option value="volcano">Volcano</option>
+                            <option value="starry">Starry</option>
+                            <option value="osiris">Osiris</option>
+                            <option value="moon">Moon</option>
+                        </select>
+                        <div id="environment-icon"
+                            style="position: absolute; left: 0; top: 0; width: 100%; height: 92px; pointer-events: none; overflow: hidden; border-radius: 4px 4px 0 0;">
+                            <img src="/playground/env_thumbs/none.png" alt="none environment"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <!-- Previous button -->
+                        <div id="prev-environment"
+                            style="position: absolute; left: 0; top: 0; width: 40px; height: 92px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: linear-gradient(to right, rgba(0,0,0,0.5), transparent);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M15 6l-6 6 6 6" />
+                            </svg>
+                        </div>
+                        <!-- Next button -->
+                        <div id="next-environment"
+                            style="position: absolute; right: 0; top: 0; width: 40px; height: 92px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: linear-gradient(to left, rgba(0,0,0,0.5), transparent);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 6l6 6-6 6" />
+                            </svg>
+                        </div>
+                        <div style="position: absolute; right: 8px; bottom: 8px; pointer-events: none;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M7 10l5 5 5-5z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    // Environment thumbnails mapping (to be populated with actual images)
+                    const environmentThumbnails = {
+                        none: '/playground/env_thumbs/none.png',
+                        default: '/playground/env_thumbs/default.png',
+                        contact: '/playground/env_thumbs/contact.png',
+                        forest: '/playground/env_thumbs/forest.png',
+                        egypt: '/playground/env_thumbs/egypt.png',
+                        checkerboard: '/playground/env_thumbs/checkerboard.png',
+                        goaland: '/playground/env_thumbs/goaland.png',
+                        yavapai: '/playground/env_thumbs/yavapai.png',
+                        goldmine: '/playground/env_thumbs/goldmine.png',
+                        threetowers: '/playground/env_thumbs/threetowers.png',
+                        poison: '/playground/env_thumbs/poison.png',
+                        arches: '/playground/env_thumbs/arches.png',
+                        tron: '/playground/env_thumbs/tron.png',
+                        japan: '/playground/env_thumbs/japan.png',
+                        dream: '/playground/env_thumbs/dream.png',
+                        volcano: '/playground/env_thumbs/volcano.png',
+                        starry: '/playground/env_thumbs/starry.png',
+                        osiris: '/playground/env_thumbs/osiris.png',
+                        moon: '/playground/env_thumbs/moon.png'
+                    };
+
+                    const select = document.getElementById('environment-preset');
+                    const iconContainer = document.getElementById('environment-icon');
+
+                    // Get ordered list of environments
+                    const environments = Array.from(select.options).map(option => option.value);
+
+                    // Update thumbnail when environment changes
+                    function updateEnvironmentDisplay(value) {
+                        const thumbnailPath = environmentThumbnails[value];
+                        if (thumbnailPath) {
+                            iconContainer.innerHTML = `<img src="${thumbnailPath}" alt="${value} environment" style="width: 100%; height: 100%; object-fit: cover;">`;
+                        } else {
+                            iconContainer.innerHTML = `<div style="width: 100%; height: 100%; background: #1c1c1c; display: flex; align-items: center; justify-content: center; color: #666;">Environment Preview</div>`;
+                        }
+                    }
+
+                    // Handle environment changes
+                    select.addEventListener('change', function (e) {
+                        updateEnvironmentDisplay(e.target.value);
+                    });
+
+                    // Navigate to previous environment
+                    document.getElementById('prev-environment').addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        const currentIndex = environments.indexOf(select.value);
+                        const prevIndex = (currentIndex - 1 + environments.length) % environments.length;
+                        select.value = environments[prevIndex];
+                        select.dispatchEvent(new Event('change'));
+                    });
+
+                    // Navigate to next environment
+                    document.getElementById('next-environment').addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        const currentIndex = environments.indexOf(select.value);
+                        const nextIndex = (currentIndex + 1) % environments.length;
+                        select.value = environments[nextIndex];
+                        select.dispatchEvent(new Event('change'));
+                    });
+                </script>
+                <div class="background-color-picker" style="margin-bottom: 15px;">
+                    <label for="background-color" style="display: block; margin-bottom: 5px;">Background Color</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="color" id="background-color" value="#ECECEC"
+                            style="width: 50px; height: 30px; padding: 0;">
+                        <input type="text" id="background-color-hex" value="#ECECEC"
+                            style="width: 80px; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 5px;">
+                    </div>
+                </div>
+            </div>
+            <div class="fog-controls" style="margin-bottom: 15px;">
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 5px;">Fog Color</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="color" id="fog-color" value="#ffffff"
+                            style="width: 50px; height: 30px; padding: 0;">
+                        <input type="text" id="fog-color-hex" value="#FFFFFF"
+                            style="width: 80px; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 5px;">
+                    </div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 5px;">Fog Type</label>
+                    <div
+                        style="display: flex; gap: 10px; align-items: center; background: #2c2c2c; padding: 5px; border-radius: 4px;">
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                            <input type="radio" name="fog-type" value="linear" checked style="margin: 0;">
+                            <span style="color: #fff;">Linear</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                            <input type="radio" name="fog-type" value="exponential" style="margin: 0;">
+                            <span style="color: #fff;">Exponential</span>
+                        </label>
+                    </div>
+                </div>
+                <div id="fog-linear-controls" style="margin-bottom: 10px;">
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px;">Near Distance</label>
+                        <input type="range" id="fog-near" min="0" max="100" step="0.1" value="1" style="width: 100%;">
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px;">Far Distance</label>
+                        <input type="range" id="fog-far" min="0" max="250" step="0.1" value="50" style="width: 100%;">
+                    </div>
+                </div>
+                <div id="fog-exponential-controls" style="margin-bottom: 10px; display: none;">
+                    <label style="display: block; margin-bottom: 5px;">Density</label>
+                    <input type="range" id="fog-intensity" min="0" max="1" step="0.01" value="0.25"
+                        style="width: 100%;">
+                </div>
+                <button id="toggle-fog-btn" onclick="toggleFog()" class="effect-btn" style="width: 100%;">
+                    <span>Add Fog</span>
+                </button>
+            </div>
             <h3>Add Objects</h3>
             <div class="geometry-buttons">
                 <!-- Basic Shapes -->
                 <button onclick="addEntity('box')">
                     <svg viewBox="0 0 24 24">
-                        <rect x="4" y="4" width="16" height="16" class="filled"/>
+                        <rect x="4" y="4" width="16" height="16" class="filled" />
                     </svg>
                     Box
                 </button>
                 <button onclick="addEntity('sphere')">
                     <svg viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="8" class="filled"/>
-                        <ellipse cx="12" cy="12" rx="8" ry="3"/>
-                        <line x1="4" y1="12" x2="20" y2="12"/>
+                        <circle cx="12" cy="12" r="8" class="filled" />
+                        <ellipse cx="12" cy="12" rx="8" ry="3" />
+                        <line x1="4" y1="12" x2="20" y2="12" />
                     </svg>
                     Sphere
                 </button>
                 <button onclick="addEntity('cylinder')">
                     <svg viewBox="0 0 24 24">
-                        <path d="M6 7 C6 7 6 17 6 17 C6 19 12 19 12 17 C12 17 12 7 12 7 C12 5 6 5 6 7" class="filled"/>
-                        <ellipse cx="9" cy="7" rx="3" ry="1"/>
-                        <ellipse cx="9" cy="17" rx="3" ry="1"/>
+                        <path d="M6 7 C6 7 6 17 6 17 C6 19 12 19 12 17 C12 17 12 7 12 7 C12 5 6 5 6 7" class="filled" />
+                        <ellipse cx="9" cy="7" rx="3" ry="1" />
+                        <ellipse cx="9" cy="17" rx="3" ry="1" />
                     </svg>
                     Cylinder
                 </button>
                 <button onclick="addEntity('plane')">
                     <svg viewBox="0 0 24 24">
-                        <path d="M4 12 L12 6 L20 12 L12 18 Z" class="filled"/>
+                        <path d="M4 12 L12 6 L20 12 L12 18 Z" class="filled" />
                     </svg>
                     Plane
                 </button>
                 <button onclick="addEntity('cone')">
                     <svg viewBox="0 0 24 24">
-                        <path d="M12 4 L4 20 L20 20 Z" class="filled"/>
+                        <path d="M12 4 L4 20 L20 20 Z" class="filled" />
                     </svg>
                     Cone
                 </button>
                 <button onclick="addEntity('torus')">
                     <svg viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="8" class="filled"/>
-                        <circle cx="12" cy="12" r="4"/>
+                        <circle cx="12" cy="12" r="8" class="filled" />
+                        <circle cx="12" cy="12" r="4" />
                     </svg>
                     Torus
                 </button>
                 <button onclick="addEntity('ring')">
                     <svg viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="8"/>
-                        <circle cx="12" cy="12" r="4"/>
+                        <circle cx="12" cy="12" r="8" />
+                        <circle cx="12" cy="12" r="4" />
                     </svg>
                     Ring
                 </button>
                 <button onclick="addEntity('circle')">
                     <svg viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="8"/>
+                        <circle cx="12" cy="12" r="8" />
                     </svg>
                     Circle
                 </button>
                 <button onclick="addEntity('dodecahedron')">
                     <svg viewBox="0 0 24 24">
-                        <path d="M12 4 L18 8 L18 16 L12 20 L6 16 L6 8 Z" class="filled"/>
-                        <line x1="12" y1="4" x2="12" y2="20"/>
-                        <line x1="6" y1="8" x2="18" y2="8"/>
-                        <line x1="6" y1="16" x2="18" y2="16"/>
+                        <path d="M12 4 L18 8 L18 16 L12 20 L6 16 L6 8 Z" class="filled" />
+                        <line x1="12" y1="4" x2="12" y2="20" />
+                        <line x1="6" y1="8" x2="18" y2="8" />
+                        <line x1="6" y1="16" x2="18" y2="16" />
                     </svg>
                     Dodecahedron
                 </button>
                 <button onclick="addEntity('octahedron')">
                     <svg viewBox="0 0 24 24">
-                        <path d="M12 4 L20 12 L12 20 L4 12 Z" class="filled"/>
+                        <path d="M12 4 L20 12 L12 20 L4 12 Z" class="filled" />
                     </svg>
                     Octahedron
                 </button>
                 <button onclick="addEntity('tetrahedron')">
                     <svg viewBox="0 0 24 24">
-                        <path d="M12 4 L18 18 L6 18 Z" class="filled"/>
-                        <line x1="6" y1="18" x2="18" y2="18"/>
+                        <path d="M12 4 L18 18 L6 18 Z" class="filled" />
+                        <line x1="6" y1="18" x2="18" y2="18" />
                     </svg>
                     Tetrahedron
                 </button>
                 <button onclick="addEntity('triangle')">
                     <svg viewBox="0 0 24 24">
-                        <path d="M12 4 L20 18 L4 18 Z"/>
+                        <path d="M12 4 L20 18 L4 18 Z" />
                     </svg>
                     Triangle
                 </button>
                 <button onclick="addEntity('torusKnot')">
                     <svg viewBox="0 0 24 24">
-                        <path d="M12 8 C16 8 16 16 12 16 C8 16 8 8 12 8" class="filled"/>
-                        <path d="M8 12 C8 8 16 8 16 12 C16 16 8 16 8 12"/>
+                        <path d="M12 8 C16 8 16 16 12 16 C8 16 8 8 12 8" class="filled" />
+                        <path d="M8 12 C8 8 16 8 16 12 C16 16 8 16 8 12" />
                     </svg>
                     Torus Knot
                 </button>
                 <button onclick="addEntity('ocean')">
                     <svg viewBox="0 0 24 24">
-                        <path d="M4 14 Q8 10 12 14 Q16 18 20 14" class="filled"/>
-                        <path d="M4 18 Q8 14 12 18 Q16 22 20 18"/>
+                        <path d="M4 14 Q8 10 12 14 Q16 18 20 14" class="filled" />
+                        <path d="M4 18 Q8 14 12 18 Q16 22 20 18" />
                     </svg>
                     Ocean
                 </button>
                 <button onclick="addEntity('tube')">
                     <svg viewBox="0 0 24 24">
-                        <path d="M4 12 C8 6 16 18 20 12" class="filled"/>
+                        <path d="M4 12 C8 6 16 18 20 12" class="filled" />
                     </svg>
                     Tube
                 </button>
                 <button onclick="addEntity('grid')">
                     <svg viewBox="0 0 24 24">
-                        <path d="M4 4 L20 4 L20 20 L4 20 Z"/>
-                        <line x1="9" y1="4" x2="9" y2="20"/>
-                        <line x1="15" y1="4" x2="15" y2="20"/>
-                        <line x1="4" y1="9" x2="20" y2="9"/>
-                        <line x1="4" y1="15" x2="20" y2="15"/>
+                        <path d="M4 4 L20 4 L20 20 L4 20 Z" />
+                        <line x1="9" y1="4" x2="9" y2="20" />
+                        <line x1="15" y1="4" x2="15" y2="20" />
+                        <line x1="4" y1="9" x2="20" y2="9" />
+                        <line x1="4" y1="15" x2="20" y2="15" />
                     </svg>
                     Grid
                 </button>
             </div>
 
             <h3>Particle Effects</h3>
-            <div class="particle-buttons" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 15px;">
+            <div class="particle-buttons"
+                style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 15px;">
                 <button id="snow-btn" onclick="toggleParticleSystem('snow')" class="effect-btn">
                     <svg viewBox="0 0 24 24">
                         <circle cx="6" cy="6" r="1" />
@@ -553,10 +725,10 @@
                 <button id="rain-btn" onclick="toggleParticleSystem('rain')" class="effect-btn">
                     <svg viewBox="0 0 24 24">
                         <!-- Simplified rain drops icon - just vertical lines -->
-                        <path d="M6,8L6,20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        <path d="M10,4L10,18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        <path d="M14,6L14,19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        <path d="M18,5L18,16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M6,8L6,20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M10,4L10,18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M14,6L14,19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M18,5L18,16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                     </svg>
                     Rain
                 </button>
@@ -568,26 +740,17 @@
                 </button>
             </div>
 
-            <h3>Fog Controls</h3>
-            <div class="fog-controls" style="margin-bottom: 15px;">
-                <div style="margin-bottom: 10px;">
-                    <label style="display: block; margin-bottom: 5px;">Color</label>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <input type="color" id="fog-color" value="#ffffff" style="width: 50px; height: 30px; padding: 0;">
-                        <input type="text" id="fog-color-hex" value="#FFFFFF" style="width: 80px; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 5px;">
-                    </div>
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <label style="display: block; margin-bottom: 5px;">Density</label>
-                    <input type="range" id="fog-intensity" min="0" max="1" step="0.01" value="0.25" style="width: 100%;">
-                </div>
-                <button id="toggle-fog-btn" onclick="toggleFog()" class="effect-btn" style="width: 100%;">
-                    <span>Add Fog</span>
-                </button>
-            </div>
+
 
             <h3>Assets</h3>
-            <input type="file" id="asset-upload" accept="image/*,video/*,.gltf,.glb" onchange="handleFileUpload()">
+            <div style="margin-bottom: 15px;">
+                <input type="file" id="asset-upload" accept="image/*,video/*,.gltf,.glb" onchange="handleFileUpload()"
+                    style="display: none;">
+                <button onclick="document.getElementById('asset-upload').click()" class="effect-btn"
+                    style="width: 100%;">
+                    <span>Load File</span>
+                </button>
+            </div>
             <div id="asset-preview"></div>
 
             <h3>Asset Library</h3>
@@ -595,48 +758,21 @@
 
             <div class="panel-section">
                 <h3>Skybox</h3>
-                <div class="sky-color-picker" style="margin-bottom: 15px;">
-                    <label for="sky-color" style="display: block; margin-bottom: 5px;">Sky Color:</label>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <input type="color" id="sky-color" value="#ECECEC" style="width: 50px; height: 30px; padding: 0;">
-                        <input type="text" id="sky-color-hex" value="#ECECEC" style="width: 80px; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 5px;">
-                    </div>
-                </div>
+
                 <div id="skybox-container" class="asset-grid" style="margin-bottom: 10px;">
                     <!-- Skybox previews will be added here -->
                 </div>
-                <div class="button-container">
+                <div style="margin-bottom: 15px;">
                     <input type="file" id="skybox-input" accept="image/*,video/*" style="display: none;">
-                    <button onclick="document.getElementById('skybox-input').click()">Add Skybox</button>
+                    <button onclick="document.getElementById('skybox-input').click()" class="effect-btn"
+                        style="width: 100%;">
+                        <span>Add Skybox</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Add environment presets section -->
-            <div class="panel-section">
-                <h3>Environment Presets</h3>
-                <div style="margin-bottom: 15px;">
-                    <select id="environment-preset" style="width: 100%; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 8px; border-radius: 4px;">
-                        <option value="none">None (Disable)</option>
-                        <option value="default">Default</option>
-                        <option value="forest">Forest</option>
-                        <option value="egypt">Egypt</option>
-                        <option value="checkerboard">Checkerboard</option>
-                        <option value="goaland">Goaland</option>
-                        <option value="yavapai">Yavapai</option>
-                        <option value="goldmine">Goldmine</option>
-                        <option value="threetowers">Three Towers</option>
-                        <option value="poison">Poison</option>
-                        <option value="arches">Arches</option>
-                        <option value="tron">Tron</option>
-                        <option value="japan">Japan</option>
-                        <option value="dream">Dream</option>
-                        <option value="volcano">Volcano</option>
-                        <option value="starry">Starry</option>
-                        <option value="osiris">Osiris</option>
-                        <option value="moon">Moon</option>
-                    </select>
-                </div>
-            </div>
+
+
         </div>
 
         <div class="main-content">
@@ -647,10 +783,11 @@
                 <button onclick="saveScene()">Save Scene</button>
                 <button onclick="resetScene()">Reset Scene</button>
                 <button onclick="clearScene()">Clear Scene</button>
+                <button onclick="clearEntities()">Clear Entities</button>
             </div>
 
             <div class="scene-container">
-                <a-scene embedded id="scene">
+                <a-scene embedded id="scene" background="color: #ECECEC">
                     <a-assets id="asset-container">
                         <!-- Uploaded assets will be added here -->
                     </a-assets>
@@ -660,7 +797,6 @@
                     <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
                     <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
                     <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
-                    <a-sky color="#ECECEC"></a-sky>
                     <a-camera position="0 1.6 0"></a-camera>
                 </a-scene>
                 <div id="code-panel"></div>
@@ -712,7 +848,7 @@
                     } else {
                         // Even when not coming from code view, sync environment dropdown
                         syncEnvironmentPresetDropdown();
-                        
+
                         // Also check for and fix default light duplication
                         fixDefaultLightDuplication();
                     }
@@ -749,13 +885,13 @@
             // Extract content between a-scene tags if present
             let content = code;
             let sceneAttributes = {};
-            
+
             // Parse scene attributes from the code
             const sceneMatch = code.match(/<a-scene([^>]*)>([\s\S]*?)<\/a-scene>/);
             if (sceneMatch) {
                 const attrs = sceneMatch[1];
                 content = sceneMatch[2];
-                
+
                 // Parse all attributes from the scene tag
                 const attrRegex = /(\w+)=["']([^"']*)["']/g;
                 let match;
@@ -773,27 +909,30 @@
             environmentEntities.forEach(entity => {
                 const preset = entity.getAttribute('environment').split(':')[1].trim();
                 if (preset !== 'none') {
+                    // Remove any existing environment entities
+                    const existingEnvironments = tempContainer.querySelectorAll('[environment]');
+                    existingEnvironments.forEach(env => {
+                        if (env !== entity && env.parentNode) {
+                            env.parentNode.removeChild(env);
+                        }
+                    });
+
                     // Remove any existing a-sky entity since environment adds its own
-                    const existingSky = document.querySelector('a-sky');
-                    if (existingSky) {
+                    const existingSky = tempContainer.querySelector('a-sky');
+                    if (existingSky && existingSky.parentNode) {
                         existingSky.parentNode.removeChild(existingSky);
                     }
-                    
-                    // First remove any existing default lights to prevent duplication
-                    const existingDefaultLights = document.querySelectorAll('[light][data-aframe-default-light]');
+
+                    // Remove any existing default lights to prevent duplication
+                    const existingDefaultLights = tempContainer.querySelectorAll('[light][data-aframe-default-light]');
                     existingDefaultLights.forEach(light => {
                         if (light.parentNode) {
                             light.parentNode.removeChild(light);
                         }
                     });
-                    
-                    // Create new environment entity with only the preset attribute
-                    const environment = document.createElement('a-entity');
-                    environment.setAttribute('environment', `preset: ${preset}`);
-                    scene.appendChild(environment);
-                    
-                    // Disable sky color picker since environment handles sky
-                    disableSkyColorPicker(true);
+
+                    // Keep only the environment entity with its preset attribute
+                    entity.setAttribute('environment', `preset: ${preset}`);
                 }
             });
 
@@ -807,10 +946,10 @@
 
             // Create new scene
             const newScene = document.createElement('a-scene');
-            
+
             // Always ensure embedded attribute is set
             newScene.setAttribute('embedded', '');
-            
+
             // Set scene attributes from the code
             Object.entries(sceneAttributes).forEach(([name, value]) => {
                 if (name !== 'embedded') { // Skip embedded as we've already set it
@@ -829,19 +968,25 @@
 
             // Wait for scene to initialize
             setTimeout(() => {
-                // Add default lights that match A-Frame's defaults
-                const ambientLight = document.createElement('a-entity');
-                ambientLight.setAttribute('light', 'type: ambient; color: #BBB;');
-                ambientLight.setAttribute('data-aframe-default-light', '');
-                ambientLight.setAttribute('aframe-injected', '');
-                scene.appendChild(ambientLight);
-                
-                const directionalLight = document.createElement('a-entity');
-                directionalLight.setAttribute('light', 'intensity: 0.6; castShadow: true');
-                directionalLight.setAttribute('position', '-0.5 1 1');
-                directionalLight.setAttribute('data-aframe-default-light', '');
-                directionalLight.setAttribute('aframe-injected', '');
-                scene.appendChild(directionalLight);
+                // Check if we have an environment
+                const hasEnvironment = scene.querySelector('a-entity[environment]');
+
+                // Only add default lights if there's no environment
+                if (!hasEnvironment) {
+                    // Add default lights that match A-Frame's defaults
+                    const ambientLight = document.createElement('a-entity');
+                    ambientLight.setAttribute('light', 'type: ambient; color: #BBB;');
+                    ambientLight.setAttribute('data-aframe-default-light', '');
+                    ambientLight.setAttribute('aframe-injected', '');
+                    scene.appendChild(ambientLight);
+
+                    const directionalLight = document.createElement('a-entity');
+                    directionalLight.setAttribute('light', 'intensity: 0.6; castShadow: true');
+                    directionalLight.setAttribute('position', '-0.5 1 1');
+                    directionalLight.setAttribute('data-aframe-default-light', '');
+                    directionalLight.setAttribute('aframe-injected', '');
+                    scene.appendChild(directionalLight);
+                }
             }, 100);
 
             // Wait for scene to load then update code panel
@@ -850,8 +995,24 @@
                 if (scene.renderer) {
                     scene.renderer.render(scene.object3D, scene.camera);
                 }
-                updateCodePanel();
+
+                // Check if we have an environment or custom skybox
+                const hasEnvironment = scene.querySelector('a-entity[environment]');
+                const hasCustomSky = scene.querySelector('a-sky[src]');
+
+                // Always enable sky color picker for overriding background
+                disableSkyColorPicker(false);
+
+                // If no background attribute is set, add the default one
+                if (!scene.hasAttribute('background')) {
+                    scene.setAttribute('background', 'color: #ECECEC');
+                }
+
+                // Update the sky color picker with the current background color
                 updateSkyColorPicker();
+
+                // Update code panel
+                updateCodePanel();
             });
 
             // Force a reload of the scene if it seems stuck
@@ -942,19 +1103,45 @@
             fixDefaultLightDuplication();
             const sceneClone = scene.cloneNode(true);
             cleanupSceneElement(sceneClone);
-            
+
             // Start with the scene tag and its attributes
             let content = '<a-scene';
             if (scene.hasAttribute('embedded')) content += ' embedded';
-            if (scene.hasAttribute('fog')) {
-                const fog = scene.getAttribute('fog');
-                // Get current values from the controls
+
+            // Always include background color if present
+            if (scene.hasAttribute('background')) {
+                const background = scene.getAttribute('background');
+                // Format the background attribute properly
+                if (typeof background === 'string') {
+                    // New format (string)
+                    // Extract color and ensure it's uppercase
+                    const match = background.match(/color:\s*(#[0-9A-Fa-f]{6})/i);
+                    if (match) {
+                        const color = match[1].toUpperCase();
+                        content += ` background="color: ${color}"`;
+                    } else {
+                        content += ` background="${background}"`;
+                    }
+                } else {
+                    // Old format (object)
+                    const color = background.color || '#ECECEC';
+                    content += ` background="color: ${color.toUpperCase()}"`;
+                }
+            }
+
+            // Add fog if active
+            if (fogActive && scene.hasAttribute('fog')) {
                 const fogColor = document.getElementById('fog-color').value.toUpperCase();
-                const fogIntensity = document.getElementById('fog-intensity').value;
-                // Use the current values from controls if fog is active
-                const fogString = fogActive ? 
-                    `type: exponential; color: ${fogColor}; density: ${fogIntensity}` : 
-                    fog;
+                const fogType = document.querySelector('input[name="fog-type"]:checked').value;
+                let fogString;
+                if (fogType === 'linear') {
+                    const fogNear = document.getElementById('fog-near').value;
+                    const fogFar = document.getElementById('fog-far').value;
+                    fogString = `type: linear; color: ${fogColor}; near: ${fogNear}; far: ${fogFar}`;
+                } else {
+                    const fogIntensity = document.getElementById('fog-intensity').value;
+                    fogString = `type: exponential; color: ${fogColor}; density: ${fogIntensity}`;
+                }
                 content += ` fog="${fogString}"`;
             }
             content += '>\n';
@@ -1120,7 +1307,7 @@
         function insertEntityInScene(entity) {
             // First check if we have an environment
             const hasEnvironment = !!scene.querySelector('a-entity[environment]');
-            
+
             if (hasEnvironment) {
                 // When environment is active, insert new entities at the beginning
                 // so they appear in front of the environment
@@ -1134,7 +1321,7 @@
                 // Normal insertion logic when no environment is active
                 const sky = scene.querySelector('a-sky');
                 const firstLight = scene.querySelector('[light]');
-                
+
                 // Make sure the elements are actually children of the scene before using insertBefore
                 if (sky && sky.parentNode === scene) {
                     scene.insertBefore(entity, sky);
@@ -1280,7 +1467,7 @@
                 try {
                     // Get the current scene
                     let currentScene = document.querySelector('a-scene');
-                    
+
                     // First, safely detach all Three.js objects from entities to prevent reference errors
                     const allEntities = currentScene.querySelectorAll('a-entity, a-light');
                     allEntities.forEach(entity => {
@@ -1298,7 +1485,7 @@
                             }
                         }
                     });
-                    
+
                     // Save all assets
                     const currentAssets = Array.from(currentScene.querySelectorAll('a-assets > *'))
                         .map(asset => asset.cloneNode(true));
@@ -1350,10 +1537,42 @@
                         environmentPreset.value = 'none';
                     }
 
-                    // Force the current view to 'scene' to ensure correct display
-                    currentView = 'scene';
-                    scene.style.display = 'block';
-                    codePanel.style.display = 'none';
+                    // Reset fog button state
+                    const fogBtn = document.getElementById('toggle-fog-btn');
+                    if (fogBtn) {
+                        fogBtn.style.backgroundColor = '#2c2c2c';
+                        fogBtn.textContent = 'Add Fog';
+                    }
+                    fogActive = false;
+
+                    // Reset particle effect buttons
+                    const particleButtons = ['snow', 'dust', 'rain'];
+                    particleButtons.forEach(preset => {
+                        const btn = document.getElementById(`${preset}-btn`);
+                        if (btn) {
+                            btn.style.backgroundColor = '#2c2c2c';
+                        }
+                    });
+
+                    // Reset animation button
+                    const animationBtn = document.getElementById('toggle-animation-btn');
+                    if (animationBtn) {
+                        animationBtn.style.backgroundColor = '#2c2c2c';
+                        animationBtn.style.opacity = 0.5;
+                        animationBtn.disabled = true;
+                        document.getElementById('animation-text').textContent = 'Start';
+                        document.getElementById('animation-icon').setAttribute('d', 'M8 5v14l11-7z');
+                    }
+
+                    // Clear active particle systems
+                    Object.keys(activeParticleSystems).forEach(preset => {
+                        activeParticleSystems[preset] = null;
+                    });
+
+                    // Hide the scene if it's not the current view
+                    if (currentView != 'scene') {
+                        scene.style.display = 'none';
+                    }
 
                     // Wait for scene to initialize
                     setTimeout(() => {
@@ -1363,7 +1582,7 @@
                         ambientLight.setAttribute('data-aframe-default-light', '');
                         ambientLight.setAttribute('aframe-injected', '');
                         scene.appendChild(ambientLight);
-                        
+
                         const directionalLight = document.createElement('a-entity');
                         directionalLight.setAttribute('light', 'intensity: 0.6; castShadow: true');
                         directionalLight.setAttribute('position', '-0.5 1 1');
@@ -1823,10 +2042,42 @@
                     environmentPreset.value = 'none';
                 }
 
-                // Switch to scene view and ensure it's visible
-                currentView = 'scene';
-                scene.style.display = 'block';
-                codePanel.style.display = 'none';
+                // Reset fog button state
+                const fogBtn = document.getElementById('toggle-fog-btn');
+                if (fogBtn) {
+                    fogBtn.style.backgroundColor = '#2c2c2c';
+                    fogBtn.textContent = 'Add Fog';
+                }
+                fogActive = false;
+
+                // Reset particle effect buttons
+                const particleButtons = ['snow', 'dust', 'rain'];
+                particleButtons.forEach(preset => {
+                    const btn = document.getElementById(`${preset}-btn`);
+                    if (btn) {
+                        btn.style.backgroundColor = '#2c2c2c';
+                    }
+                });
+
+                // Reset animation button
+                const animationBtn = document.getElementById('toggle-animation-btn');
+                if (animationBtn) {
+                    animationBtn.style.backgroundColor = '#2c2c2c';
+                    animationBtn.style.opacity = 0.5;
+                    animationBtn.disabled = true;
+                    document.getElementById('animation-text').textContent = 'Start';
+                    document.getElementById('animation-icon').setAttribute('d', 'M8 5v14l11-7z');
+                }
+
+                // Clear active particle systems
+                Object.keys(activeParticleSystems).forEach(preset => {
+                    activeParticleSystems[preset] = null;
+                });
+
+                // Hide the scene if it's not the current view
+                if (currentView != 'scene') {
+                    scene.style.display = 'none';
+                }
 
                 // Wait for scene to load then update code panel
                 scene.addEventListener('loaded', () => {
@@ -1864,10 +2115,22 @@
 
             // Add click handler to set as active skybox
             previewDiv.addEventListener('click', () => {
+                const scene = document.querySelector('a-scene');
+
+                // Get current background color before potentially changing it
+                let currentBackground = scene.getAttribute('background') || 'color: #ECECEC';
+
                 // Remove existing sky/videosphere
-                const existingSky = document.querySelector('a-sky, a-videosphere');
+                const existingSky = scene.querySelector('a-sky, a-videosphere');
                 if (existingSky) {
                     existingSky.remove();
+                }
+
+                // Remove any existing environment entity
+                const existingEnvironment = scene.querySelector('a-entity[environment]');
+                if (existingEnvironment && existingEnvironment.parentElement) {
+                    existingEnvironment.removeAttribute('environment');
+                    existingEnvironment.parentElement.removeChild(existingEnvironment);
                 }
 
                 // Create new sky element
@@ -1875,8 +2138,10 @@
                 skyEl.setAttribute('src', `#${assetId}`);
 
                 // Add to scene
-                const scene = document.querySelector('a-scene');
                 scene.appendChild(skyEl);
+
+                // Preserve the background attribute even with skybox
+                scene.setAttribute('background', currentBackground);
 
                 // If it's a video, ensure it's playing
                 if (isVideo) {
@@ -1889,6 +2154,9 @@
                     item.classList.remove('active');
                 });
                 previewDiv.classList.add('active');
+
+                // Update code panel
+                updateCodePanel();
             });
 
             // Add to skybox container
@@ -1926,22 +2194,22 @@
                 if (el === assets || el === camera || el === sky) {
                     return false;
                 }
-                
+
                 // Handle environment specially - include parent but skip children
                 if (el.hasAttribute('environment')) {
                     return true;
                 }
-                
+
                 // Skip environment-generated child entities
                 if (el.classList.contains('environment')) {
                     return false;
                 }
-                
+
                 // Skip light entities - they'll be handled separately
                 if (el.hasAttribute('light')) {
                     return false;
                 }
-                
+
                 // Include all other entities
                 return true;
             });
@@ -1980,8 +2248,11 @@
                 content += '\n';
             }
 
-            // Environment (Sky) - only if not using environment component
-            if (sky && !document.querySelector('a-entity[environment]')) {
+            // Environment (Sky) - only if not using environment component and no background attribute
+            const hasEnvironment = document.querySelector('a-entity[environment]');
+            const hasBackground = sceneEl.hasAttribute('background');
+
+            if (sky && !hasEnvironment) {
                 content += '<!-- Environment -->\n';
                 // Format sky color to uppercase hex
                 const skyEl = sky.cloneNode(true);
@@ -1996,43 +2267,43 @@
 
             // Handle lighting based on what's in the scene
             const environmentActive = document.querySelector('a-entity[environment]');
-            
+
             // If environment is active, no need to include default lights
             if (environmentActive) {
-                const customLights = lights.filter(light => 
-                    !light.classList.contains('environment') && 
+                const customLights = lights.filter(light =>
+                    !light.classList.contains('environment') &&
                     !light.parentElement?.hasAttribute('environment') &&
                     !light.hasAttribute('data-aframe-default-light')
                 );
-                
+
                 if (customLights.length > 0) {
                     content += '<!-- Lighting -->\n';
                     customLights.forEach(light => {
                         content += light.outerHTML + '\n';
                     });
                 }
-            } 
+            }
             // If no environment and we have default lights in inspector, show them in code
             else {
                 // Always include default lighting in the output
                 content += '<!-- Lighting -->\n';
-                
+
                 // First include any non-default lights
-                const customLights = lights.filter(light => 
+                const customLights = lights.filter(light =>
                     !light.hasAttribute('data-aframe-default-light')
                 );
-                
+
                 if (customLights.length > 0) {
                     customLights.forEach(light => {
                         content += light.outerHTML + '\n';
                     });
                 }
-                
+
                 // If there are default lights in the scene, include them
-                const defaultLights = lights.filter(light => 
+                const defaultLights = lights.filter(light =>
                     light.hasAttribute('data-aframe-default-light')
                 );
-                
+
                 if (defaultLights.length > 0) {
                     // Include the actual default lights from the scene
                     defaultLights.forEach(light => {
@@ -2159,63 +2430,65 @@
 
         // Add this new function
         function initSkyColorPicker() {
-            const skyColorPicker = document.getElementById('sky-color');
-            const skyColorHex = document.getElementById('sky-color-hex');
+            const skyColorPicker = document.getElementById('background-color');
+            const skyColorHex = document.getElementById('background-color-hex');
 
-            // Update color preview when dragging
-            skyColorPicker.addEventListener('input', (e) => {
-                const color = e.target.value;
-                skyColorHex.value = color.toUpperCase();
-                const sky = document.querySelector('a-sky');
-                if (sky) {
-                    sky.setAttribute('color', color);
-                    sky.setAttribute('material', `color: ${color.toUpperCase()}`);
-                    flushAllEntitiesToDOM();
-                    updateCodePanel();
+            // Get the current background color from the scene
+            let currentColor = scene.getAttribute('background');
+            let colorValue = '#ECECEC'; // Default color
+
+            if (currentColor) {
+                if (typeof currentColor === 'string') {
+                    // Extract the color value from the attribute string
+                    const match = currentColor.match(/color:\s*(#[0-9A-Fa-f]{6})/i);
+                    if (match) {
+                        colorValue = match[1];
+                    }
+                } else if (currentColor.color) {
+                    // It's an object with a color property
+                    colorValue = currentColor.color;
                 }
+            }
+
+            // Set the color picker values
+            skyColorPicker.value = colorValue;
+            skyColorHex.value = colorValue.toUpperCase();
+
+            // Add event listener for color changes
+            skyColorPicker.addEventListener('input', function (e) {
+                const color = e.target.value.toUpperCase();
+                skyColorHex.value = color;
+                updateSceneBackground(color);
             });
 
-            // Update color and flush to DOM when mouse is released
-            skyColorPicker.addEventListener('mouseup', (e) => {
-                const color = e.target.value;
-                const sky = document.querySelector('a-sky');
-                if (sky) {
-                    sky.setAttribute('color', color);
-                    sky.setAttribute('material', `color: ${color.toUpperCase()}`);
-                    sky.flushToDOM();
-                    updateCodePanel();
-                }
-            });
+            // Update color when hex input changes
+            skyColorHex.addEventListener('input', function (e) {
+                let color = e.target.value.toUpperCase();
+                e.target.value = color;
 
-            // Update color when hex input changes - handle partial inputs
-            skyColorHex.addEventListener('input', (e) => {
-                let color = e.target.value;
-                
                 // Ensure the color starts with #
                 if (!color.startsWith('#')) {
                     color = '#' + color;
                     skyColorHex.value = color;
                 }
-                
+
                 // Check if input contains valid hex characters
-                if (/^#[0-9A-Fa-f]*$/.test(color)) {
+                if (/^#[0-9A-F]*$/.test(color)) {
                     // Create a valid color by padding if needed
                     let validColor = color;
-                    
+
                     // Get the hex part without #
                     const hexPart = color.substring(1);
-                    
+
                     // If we have some valid hex digits
                     if (hexPart.length > 0 && hexPart.length < 6) {
                         // Pad with appropriate characters to make a valid color
-                        // For 1-2 digits, repeat them to make 6
-                        // For 3+ digits, pad with zeros
                         if (hexPart.length <= 2) {
                             // Repeat the digits we have (e.g. "F" becomes "FFFFFF")
-                            validColor = '#' + hexPart.padEnd(6, hexPart);
+                            validColor = '#' + hexPart.padEnd(6, hexPart).toUpperCase();
                         } else {
                             // Pad with zeros (e.g. "F00" becomes "F00000")
-                            validColor = '#' + hexPart.padEnd(6, '0');
+                            validColor = '#' + hexPart.padEnd(6, '0').toUpperCase();
                         }
                     } else if (hexPart.length === 6) {
                         // We have a complete color
@@ -2224,67 +2497,63 @@
                         // Empty or invalid, don't update
                         return;
                     }
-                    
-                    // Update color picker and sky
+
+                    // Update color picker and scene background
                     skyColorPicker.value = validColor;
-                    const sky = document.querySelector('a-sky');
-                    if (sky) {
-                        sky.setAttribute('color', validColor);
-                        sky.setAttribute('material', `color: ${validColor.toUpperCase()}`);
-                        flushAllEntitiesToDOM();
-                        updateCodePanel();
-                    }
+                    updateSceneBackground(validColor);
                 }
             });
 
             // Final validation on blur/enter to handle incomplete input
-            skyColorHex.addEventListener('change', (e) => {
-                let color = e.target.value;
-                
+            skyColorHex.addEventListener('change', function (e) {
+                let color = e.target.value.toUpperCase();
+                e.target.value = color;  // Force uppercase immediately
+
                 // Ensure the color starts with #
                 if (!color.startsWith('#')) {
                     color = '#' + color;
                 }
-                
+
                 // Validate complete hex color
                 if (!/^#[0-9A-F]{6}$/i.test(color)) {
-                    // Invalid or incomplete - reset to color picker's value
-                    skyColorHex.value = skyColorPicker.value;
-                } else {
-                    // Make sure it's uppercase for consistency
-                    skyColorHex.value = color.toUpperCase();
+                    // For incomplete input, pad appropriately
+                    const hexPart = color.substring(1);
+                    if (hexPart.length > 0 && hexPart.length < 6) {
+                        if (hexPart.length <= 2) {
+                            // Repeat the digits for 1-2 characters
+                            color = '#' + hexPart.padEnd(6, hexPart).toUpperCase();
+                        } else {
+                            // Pad with zeros for 3+ characters
+                            color = '#' + hexPart.padEnd(6, '0').toUpperCase();
+                        }
+                    } else {
+                        // Invalid or empty - reset to color picker's value
+                        color = skyColorPicker.value.toUpperCase();
+                    }
                 }
-            });
 
-            // Initialize with current sky color
-            const sky = document.querySelector('a-sky');
-            if (sky) {
-                const currentColor = sky.getAttribute('color') || '#ECECEC';
-                skyColorPicker.value = currentColor;
-                skyColorHex.value = currentColor.toUpperCase();
-            }
+                // Update the input and scene with the final color
+                skyColorHex.value = color;
+                skyColorPicker.value = color;
+                updateSceneBackground(color);
+            });
         }
 
-        function updateSkyColor(color, flushDOM = true) {
-            const sky = document.querySelector('a-sky');
-            if (sky) {
-                const upperColor = color.toUpperCase();
-                sky.setAttribute('color', upperColor);
-                sky.setAttribute('material', `color: ${upperColor}`);
-                if (flushDOM && typeof sky.flushToDOM === 'function') {
-                    sky.flushToDOM();
-                }
-                if (flushDOM) {
-                    updateCodePanel();
-                }
-            }
+        function updateSceneBackground(color) {
+            // Always update the scene's background color
+            scene.setAttribute('background', { color: color });
+            updateCodePanel();
+        }
+
+        function updateSkyColor(color) {
+            updateSceneBackground(color.toUpperCase());
         }
 
         // Initialize environment presets
         function initEnvironmentPresets() {
             const presetSelector = document.getElementById('environment-preset');
             if (!presetSelector) return;
-            
+
             presetSelector.addEventListener('change', (e) => {
                 updateEnvironment(e.target.value);
             });
@@ -2293,55 +2562,69 @@
         // Function to update the environment based on selected preset
         function updateEnvironment(preset) {
             console.log('Updating environment to:', preset);
-            
+
+            // Store current fog state if it exists
+            let currentFog = null;
+            if (fogActive) {
+                const fogColor = document.getElementById('fog-color').value;
+                const fogIntensity = document.getElementById('fog-intensity').value;
+                const fogType = document.querySelector('input[name="fog-type"]:checked').value;
+                currentFog = `type: ${fogType}; color: ${fogColor.toUpperCase()}; density: ${fogIntensity}`;
+            }
+
             // Step 1: Thoroughly remove any existing environment entity and its children
             const existingEnvironment = document.querySelector('a-entity[environment]');
             if (existingEnvironment) {
                 existingEnvironment.parentNode.removeChild(existingEnvironment);
             }
-            
+
             // Also remove any environment-created elements that might be orphaned
             document.querySelectorAll('.environment').forEach(el => {
                 if (el.parentNode) {
                     el.parentNode.removeChild(el);
                 }
             });
-            
+
             // Step 2: Handle "none" preset specially
             if (preset === 'none') {
-                // Restore default sky if it doesn't exist
-                let sky = document.querySelector('a-sky');
-                if (!sky) {
-                    sky = document.createElement('a-sky');
-                    sky.setAttribute('color', '#ECECEC');
-                    scene.appendChild(sky);
+                // First update the code panel without fog
+                const sceneClone = scene.cloneNode(true);
+                cleanupSceneElement(sceneClone);
+
+                // Generate clean scene code without fog
+                let content = '<a-scene embedded>\n';
+                content += formatSceneContent(sceneClone);
+                content += '</a-scene>';
+
+                // Update the editor with clean code
+                editor.setValue(content);
+                editor.refresh();
+
+                // Now rebuild the scene from the clean code
+                updateSceneFromCode();
+
+                // Update state and UI
+                fogActive = false;
+                const fogBtn = document.getElementById('toggle-fog-btn');
+                fogBtn.style.backgroundColor = '#2c2c2c';
+                fogBtn.textContent = 'Add Fog';
+
+                // Update fog controls to match default sky color but keep current fog type
+                const defaultFogColor = '#ECECEC';
+                document.getElementById('fog-color').value = defaultFogColor;
+                document.getElementById('fog-color-hex').value = defaultFogColor.toUpperCase();
+                document.getElementById('fog-intensity').value = '0.25';
+
+                // Keep the current fog type selected and show/hide controls accordingly
+                const currentFogType = document.querySelector('input[name="fog-type"]:checked').value;
+                if (currentFogType === 'linear') {
+                    document.getElementById('fog-linear-controls').style.display = 'block';
+                    document.getElementById('fog-exponential-controls').style.display = 'none';
+                } else {
+                    document.getElementById('fog-linear-controls').style.display = 'none';
+                    document.getElementById('fog-exponential-controls').style.display = 'block';
                 }
-                
-                // First remove any existing default lights to prevent duplication
-                const existingDefaultLights = document.querySelectorAll('[light][data-aframe-default-light]');
-                existingDefaultLights.forEach(light => {
-                    if (light.parentNode) {
-                        light.parentNode.removeChild(light);
-                    }
-                });
-                
-                // Create both default lights that match A-Frame's exact default configuration
-                const ambientLight = document.createElement('a-entity');
-                ambientLight.setAttribute('light', 'type: ambient; color: #BBB;');
-                ambientLight.setAttribute('data-aframe-default-light', '');
-                ambientLight.setAttribute('aframe-injected', '');
-                scene.appendChild(ambientLight);
-                
-                const directionalLight = document.createElement('a-entity');
-                directionalLight.setAttribute('light', 'intensity: 0.6; castShadow: true');
-                directionalLight.setAttribute('position', '-0.5 1 1');
-                directionalLight.setAttribute('data-aframe-default-light', '');
-                directionalLight.setAttribute('aframe-injected', '');
-                scene.appendChild(directionalLight);
-                
-                // Update color picker to match sky color
-                updateSkyColorPicker();
-            } 
+            }
             // Step 3: Add new environment entity for selected preset
             else {
                 // Remove any existing a-sky entity since environment adds its own
@@ -2349,7 +2632,7 @@
                 if (existingSky) {
                     existingSky.parentNode.removeChild(existingSky);
                 }
-                
+
                 // First remove any existing default lights to prevent duplication
                 const existingDefaultLights = document.querySelectorAll('[light][data-aframe-default-light]');
                 existingDefaultLights.forEach(light => {
@@ -2357,60 +2640,195 @@
                         light.parentNode.removeChild(light);
                     }
                 });
-                
+
                 // Create new environment entity with only the preset attribute
                 const environment = document.createElement('a-entity');
                 environment.setAttribute('environment', `preset: ${preset}`);
                 scene.appendChild(environment);
-                
+
                 // Disable sky color picker since environment handles sky
                 disableSkyColorPicker(true);
+
+                // Update fog controls based on the environment preset
+                let defaultFogColor;
+                let defaultFogFar;
+
+                // Set default fog settings based on environment preset
+                switch (preset) {
+                    case 'forest':
+                        defaultFogColor = '#B0AF83';
+                        defaultFogFar = 84;
+                        break;
+                    case 'contact':
+                        defaultFogColor = '#8C7190';
+                        defaultFogFar = 84;
+                        break;
+                    case 'egypt':
+                        defaultFogColor = '#A9855A';
+                        defaultFogFar = 104;
+                        break;
+                    case 'checkerboard':
+                        defaultFogColor = '#423B38';
+                        defaultFogFar = 80;
+                        break;
+                    case 'goaland':
+                        defaultFogColor = '#809C84';
+                        defaultFogFar = 112;
+                        break;
+                    case 'yavapai':
+                        defaultFogColor = '#9CA07E';
+                        defaultFogFar = 84;
+                        break;
+                    case 'goldmine':
+                        defaultFogColor = '#725F4F';
+                        defaultFogFar = 232;
+                        break;
+                    case 'threetowers':
+                        defaultFogColor = '#B4A056';
+                        defaultFogFar = 84;
+                        break;
+                    case 'poison':
+                        defaultFogColor = '#285A2F';
+                        defaultFogFar = 84;
+                        break;
+                    case 'arches':
+                        defaultFogColor = '#62717A';
+                        defaultFogFar = 136;
+                        break;
+                    case 'tron':
+                        defaultFogColor = '#334173';
+                        defaultFogFar = 84;
+                        break;
+                    case 'japan':
+                        defaultFogColor = '#8B8099';
+                        defaultFogFar = 44;
+                        break;
+                    case 'dream':
+                        defaultFogColor = '#8A3B6D';
+                        defaultFogFar = 84;
+                        break;
+                    case 'volcano':
+                        defaultFogColor = '#B42910';
+                        defaultFogFar = 56;
+                        break;
+                    case 'starry':
+                        defaultFogColor = '#000000';
+                        defaultFogFar = 124;
+                        break;
+                    case 'osiris':
+                        // No fog for Osiris
+                        fogActive = false;
+                        const fogBtn = document.getElementById('toggle-fog-btn');
+                        fogBtn.style.backgroundColor = '#2c2c2c';
+                        fogBtn.textContent = 'Add Fog';
+                        return;
+                    case 'moon':
+                        defaultFogColor = '#1A1310';
+                        defaultFogFar = 84;
+                        break;
+                    default:
+                        defaultFogColor = '#8E9292';
+                        defaultFogFar = 92;
+                }
+
+                // Update fog controls
+                document.getElementById('fog-color').value = defaultFogColor;
+                document.getElementById('fog-color-hex').value = defaultFogColor;
+                // Always use linear fog for environment presets
+                document.querySelector('input[name="fog-type"][value="linear"]').checked = true;
+                // Show linear controls, hide exponential controls
+                document.getElementById('fog-linear-controls').style.display = 'block';
+                document.getElementById('fog-exponential-controls').style.display = 'none';
+                // Update distance values
+                document.getElementById('fog-near').value = 0;  // All presets use near: 0
+                document.getElementById('fog-far').value = defaultFogFar;
+
+                // Enable fog and update button state
+                fogActive = true;
+                const fogBtn = document.getElementById('toggle-fog-btn');
+                fogBtn.style.backgroundColor = '#4c6ef5';
+                fogBtn.textContent = 'Remove Fog';
+
+                // Set current fog with the default settings (near is always 0)
+                currentFog = `type: linear; color: ${defaultFogColor}; near: 0; far: ${defaultFogFar}`;
             }
-            
+
             // Step 4: Flush changes to DOM and update the code panel
             flushAllEntitiesToDOM();
-            setTimeout(() => {
-                updateCodePanel();
-            }, 100); // Small delay to ensure environment component has time to initialize
-        }
-        
-        // Function to update sky color picker state
-        function updateSkyColorPicker() {
-            const skyColorPicker = document.getElementById('sky-color');
-            const skyColorHex = document.getElementById('sky-color-hex');
-            const skyboxElements = document.querySelectorAll('#skybox-container .asset-item');
-            
-            // Enable sky color picker
-            disableSkyColorPicker(false);
-            
-            // Update with current sky color
-            const sky = document.querySelector('a-sky');
-            if (sky) {
-                const currentColor = sky.getAttribute('color') || '#ECECEC';
-                skyColorPicker.value = currentColor;
-                skyColorHex.value = currentColor.toUpperCase();
+
+            // Step 5: Apply fog settings
+            if (currentFog) {
+                setTimeout(() => {
+                    scene.setAttribute('fog', currentFog);
+                    if (scene.renderer) {
+                        scene.renderer.render(scene.object3D, scene.camera);
+                    }
+                    updateCodePanel();
+                }, 100); // Small delay to ensure environment component has time to initialize
+            } else {
+                setTimeout(() => {
+                    updateCodePanel();
+                }, 100);
             }
         }
-        
+
+        // Function to update sky color picker state
+        function updateSkyColorPicker() {
+            const skyColorPicker = document.getElementById('background-color');
+            const skyColorHex = document.getElementById('background-color-hex');
+            const skyboxElements = document.querySelectorAll('#skybox-container .asset-item');
+
+            // Enable sky color picker
+            disableSkyColorPicker(false);
+
+            // Update with current background color
+            const background = scene.getAttribute('background');
+            // Ensure we have a valid color value with proper format
+            let colorValue = '#ECECEC'; // Default color
+
+            if (background) {
+                // Check if background is a string (new format) or object (old format)
+                if (typeof background === 'string') {
+                    // Extract the color value from the attribute string
+                    const match = background.match(/color:\s*(#[0-9A-Fa-f]{6})/i);
+                    if (match) {
+                        colorValue = match[1];
+                    }
+                } else if (background.color) {
+                    // Old format with object
+                    // Make sure it's a valid hex color
+                    if (typeof background.color === 'string' &&
+                        background.color.startsWith('#') &&
+                        /^#[0-9A-Fa-f]{6}$/i.test(background.color)) {
+                        colorValue = background.color;
+                    }
+                }
+            }
+
+            skyColorPicker.value = colorValue;
+            skyColorHex.value = colorValue.toUpperCase();
+        }
+
         // Function to enable/disable sky color picker
         function disableSkyColorPicker(disabled) {
-            const skyColorPicker = document.getElementById('sky-color');
-            const skyColorHex = document.getElementById('sky-color-hex');
+            const skyColorPicker = document.getElementById('background-color');
+            const skyColorHex = document.getElementById('background-color-hex');
             const skyboxElements = document.querySelectorAll('#skybox-container .asset-item');
-            
-            skyColorPicker.disabled = disabled;
-            skyColorHex.disabled = disabled;
-            
+
+            // Always enable the sky color picker regardless of environment
+            // This allows users to override the environment background color
+            skyColorPicker.disabled = false;
+            skyColorHex.disabled = false;
+            skyColorPicker.style.opacity = '1';
+            skyColorHex.style.opacity = '1';
+
+            // Only disable skybox elements if needed
             if (disabled) {
-                skyColorPicker.style.opacity = '0.5';
-                skyColorHex.style.opacity = '0.5';
                 skyboxElements.forEach(el => {
                     el.style.pointerEvents = 'none';
                     el.style.opacity = '0.5';
                 });
             } else {
-                skyColorPicker.style.opacity = '1';
-                skyColorHex.style.opacity = '1';
                 skyboxElements.forEach(el => {
                     el.style.pointerEvents = 'auto';
                     el.style.opacity = '1';
@@ -2422,17 +2840,29 @@
         function syncEnvironmentPresetDropdown() {
             const environmentPreset = document.getElementById('environment-preset');
             if (!environmentPreset) return;
-            
+
             const environmentEntity = document.querySelector('a-entity[environment]');
             if (environmentEntity) {
-                const preset = environmentEntity.getAttribute('environment').preset || 
-                               environmentEntity.getAttribute('environment').split('preset:')[1]?.trim().split(' ')[0] ||
-                               'default';
+                const preset = environmentEntity.getAttribute('environment').preset ||
+                    environmentEntity.getAttribute('environment').split('preset:')[1]?.trim().split(' ')[0] ||
+                    'default';
                 environmentPreset.value = preset;
-                disableSkyColorPicker(true);
+
+                // Keep sky color picker enabled for all environments
+                disableSkyColorPicker(false);
+                updateSkyColorPicker();
             } else {
                 environmentPreset.value = 'none';
-                updateSkyColorPicker();
+
+                // Check if we have a custom skybox
+                const customSky = document.querySelector('a-sky[src]');
+                if (customSky) {
+                    disableSkyColorPicker(true);
+                } else {
+                    // Enable sky color picker for the default background
+                    disableSkyColorPicker(false);
+                    updateSkyColorPicker();
+                }
             }
         }
 
@@ -2442,15 +2872,15 @@
             const defaultLights = document.querySelectorAll('[light][data-aframe-default-light]');
             if (defaultLights.length > 2) {
                 console.log(`Found ${defaultLights.length} default lights, removing duplicates...`);
-                
+
                 // Keep track of which types we've seen
                 let ambientLight = null;
                 let directionalLight = null;
-                
+
                 // First pass - identify which lights to keep
                 defaultLights.forEach(light => {
                     const lightType = light.getAttribute('light').type || 'directional';
-                    
+
                     if (lightType === 'ambient') {
                         if (!ambientLight) {
                             ambientLight = light;
@@ -2462,17 +2892,17 @@
                         }
                     }
                 });
-                
+
                 // Second pass - safely remove duplicates
                 defaultLights.forEach(light => {
                     const lightType = light.getAttribute('light').type || 'directional';
-                    
+
                     // Skip the lights we want to keep
-                    if ((lightType === 'ambient' && light === ambientLight) || 
+                    if ((lightType === 'ambient' && light === ambientLight) ||
                         (lightType !== 'ambient' && light === directionalLight)) {
                         return;
                     }
-                    
+
                     // Safe removal with checks
                     try {
                         if (light.parentNode) {
@@ -2485,7 +2915,7 @@
                                     }
                                 });
                             }
-                            
+
                             // Now safely remove from parent
                             light.parentNode.removeChild(light);
                             console.log('Safely removed duplicate light');
@@ -2507,36 +2937,36 @@
         // Custom simplified particle system component
         AFRAME.registerComponent('particle-system', {
             schema: {
-                preset: {type: 'string', default: 'snow'},
-                particleCount: {type: 'number', default: 1000},
-                texture: {type: 'string', default: ''},
-                color: {type: 'color', default: '#FFFFFF'},
-                size: {type: 'number', default: 1.0},
-                velocity: {type: 'vec3', default: {x: 0, y: -1, z: 0}},
-                acceleration: {type: 'vec3', default: {x: 0, y: 0, z: 0}},
-                randomizeVelocity: {type: 'vec3', default: {x: 0.2, y: 0.1, z: 0.2}},
-                maxAge: {type: 'number', default: 6},
-                blending: {type: 'string', default: 'additive'},
-                active: {type: 'boolean', default: true}
+                preset: { type: 'string', default: 'snow' },
+                particleCount: { type: 'number', default: 1000 },
+                texture: { type: 'string', default: '' },
+                color: { type: 'color', default: '#FFFFFF' },
+                size: { type: 'number', default: 1.0 },
+                velocity: { type: 'vec3', default: { x: 0, y: -1, z: 0 } },
+                acceleration: { type: 'vec3', default: { x: 0, y: 0, z: 0 } },
+                randomizeVelocity: { type: 'vec3', default: { x: 0.2, y: 0.1, z: 0.2 } },
+                maxAge: { type: 'number', default: 6 },
+                blending: { type: 'string', default: 'additive' },
+                active: { type: 'boolean', default: true }
             },
 
-            init: function() {
+            init: function () {
                 // Access THREE through A-Frame to ensure compatibility
                 this.THREE = AFRAME.THREE;
-                
+
                 // Initialize the arrays and clock first
                 this.particles = [];
                 this.time = 0;
-                
+
                 // Use A-Frame's built-in THREE reference
                 this.clock = new this.THREE.Clock();
-                
+
                 // Use a paused property instead of pause to avoid conflicts
                 this.isPaused = false;
-                
+
                 // Create Three.js particle system
                 this.setupParticleSystem();
-                
+
                 // Only start if active is true
                 if (this.data.active) {
                     this.startParticles();
@@ -2546,16 +2976,16 @@
             },
 
             // Add proper A-Frame lifecycle methods
-            pause: function() {
+            pause: function () {
                 this.isPaused = true;
                 // Remove these lines that modify the animation button
                 // document.getElementById('animation-text').textContent = 'Start';
                 // document.getElementById('animation-icon').setAttribute('d', 'M8 5v14l11-7z'); // Play icon
             },
-            
-            play: function() {
+
+            play: function () {
                 this.isPaused = false;
-                
+
                 // Reset the clock if needed
                 if (this.clock && typeof this.clock.getElapsedTime === 'function') {
                     this.time = this.clock.getElapsedTime();
@@ -2563,35 +2993,35 @@
                     this.time = Date.now() / 1000;
                     this.clock = new this.THREE.Clock();
                 }
-                
+
                 // Remove these lines that modify the animation button
                 // document.getElementById('animation-text').textContent = 'Stop';
                 // document.getElementById('animation-icon').setAttribute('d', 'M6 19h4V5H6v14zm8-14v14h4V5h-4z'); // Pause icon
             },
 
-            setupParticleSystem: function() {
+            setupParticleSystem: function () {
                 try {
                     // Reset any existing system
                     if (this.particleGroup) {
                         this.el.removeObject3D('particle-system');
-                        
+
                         // Clear particles array when rebuilding the system
                         this.particles = [];
                     }
-                    
+
                     // Configure based on preset
                     this.applyPreset(this.data.preset);
-                    
+
                     // Create material based on preset settings
                     this.particleMaterial = new this.THREE.PointsMaterial({
                         color: new this.THREE.Color(this.data.color),
                         size: this.data.size * 0.1,
                         transparent: true,
-                        blending: this.data.blending === 'additive' ? 
+                        blending: this.data.blending === 'additive' ?
                             this.THREE.AdditiveBlending : this.THREE.NormalBlending,
                         depthWrite: false
                     });
-                    
+
                     // Use texture if specified
                     if (this.data.texture) {
                         const loader = new this.THREE.TextureLoader();
@@ -2610,25 +3040,25 @@
                         gradient.addColorStop(1, 'rgba(255,255,255,0)');
                         context.fillStyle = gradient;
                         context.fillRect(0, 0, 32, 32);
-                        
+
                         const texture = new this.THREE.CanvasTexture(canvas);
                         this.particleMaterial.map = texture;
                         this.particleMaterial.needsUpdate = true;
                     }
-                    
+
                     // Create geometry
                     this.particleGeometry = new this.THREE.BufferGeometry();
-                    
+
                     // Prepare arrays for particle attributes
                     const positions = new Float32Array(this.data.particleCount * 3);
                     const velocities = new Float32Array(this.data.particleCount * 3);
                     const startTimes = new Float32Array(this.data.particleCount);
                     const lifetimes = new Float32Array(this.data.particleCount);
-                    
+
                     // Initialize particles
                     for (let i = 0; i < this.data.particleCount; i++) {
                         this.initParticle(i, positions, velocities, startTimes, lifetimes);
-                        
+
                         // Track each particle data
                         this.particles.push({
                             position: new this.THREE.Vector3(
@@ -2645,98 +3075,98 @@
                             lifetime: lifetimes[i]
                         });
                     }
-                    
+
                     // Add attributes to geometry
-                    this.particleGeometry.setAttribute('position', 
+                    this.particleGeometry.setAttribute('position',
                         new this.THREE.BufferAttribute(positions, 3));
-                    this.particleGeometry.setAttribute('velocity', 
+                    this.particleGeometry.setAttribute('velocity',
                         new this.THREE.BufferAttribute(velocities, 3));
-                    this.particleGeometry.setAttribute('startTime', 
+                    this.particleGeometry.setAttribute('startTime',
                         new this.THREE.BufferAttribute(startTimes, 1));
-                    this.particleGeometry.setAttribute('lifetime', 
+                    this.particleGeometry.setAttribute('lifetime',
                         new this.THREE.BufferAttribute(lifetimes, 1));
-                    
+
                     // Create the particle system
                     this.particleGroup = new this.THREE.Points(this.particleGeometry, this.particleMaterial);
-                    
+
                     // Check that we have a valid Object3D
                     if (!(this.particleGroup instanceof this.THREE.Object3D)) {
                         console.error('Failed to create a valid THREE.Object3D for particles');
                         return;
                     }
-                    
+
                     // Set the object onto the entity
                     this.el.setObject3D('particle-system', this.particleGroup);
-                    
+
                 } catch (error) {
                     console.error('Error setting up particle system:', error);
                 }
             },
-            
-            initParticle: function(i, positions, velocities, startTimes, lifetimes) {
+
+            initParticle: function (i, positions, velocities, startTimes, lifetimes) {
                 // Position: random dispersion according to preset
-                const posSpread = this.positionSpread || {x: 2, y: 0, z: 2};
+                const posSpread = this.positionSpread || { x: 2, y: 0, z: 2 };
                 positions[i * 3] = (Math.random() * 2 - 1) * posSpread.x;
                 positions[i * 3 + 1] = (Math.random() * 2 - 1) * posSpread.y;
                 positions[i * 3 + 2] = (Math.random() * 2 - 1) * posSpread.z;
-                
+
                 // Velocity: base direction with randomization
                 const velBase = this.data.velocity;
                 const velRandom = this.data.randomizeVelocity;
                 velocities[i * 3] = velBase.x + (Math.random() * 2 - 1) * velRandom.x;
                 velocities[i * 3 + 1] = velBase.y + (Math.random() * 2 - 1) * velRandom.y;
                 velocities[i * 3 + 2] = velBase.z + (Math.random() * 2 - 1) * velRandom.z;
-                
+
                 // Time values: stagger start times for continuous flow
                 startTimes[i] = this.time + Math.random() * this.data.maxAge;
                 lifetimes[i] = this.data.maxAge;
             },
-            
-            applyPreset: function(preset) {
-                switch(preset) {
+
+            applyPreset: function (preset) {
+                switch (preset) {
                     case 'snow':
                         this.data.particleCount = 1500;
                         this.data.color = '#FFFFFF';
                         this.data.size = 1.0;
-                        this.data.velocity = {x: 0, y: -0.2, z: 0};
-                        this.data.acceleration = {x: 0, y: 0, z: 0};
-                        this.data.randomizeVelocity = {x: 0.2, y: 0.1, z: 0.2};
+                        this.data.velocity = { x: 0, y: -0.2, z: 0 };
+                        this.data.acceleration = { x: 0, y: 0, z: 0 };
+                        this.data.randomizeVelocity = { x: 0.2, y: 0.1, z: 0.2 };
                         this.data.maxAge = 10;
                         this.data.blending = 'additive';
-                        this.positionSpread = {x: 10, y: 5, z: 10};
+                        this.positionSpread = { x: 10, y: 5, z: 10 };
                         break;
                     case 'dust':
                         this.data.particleCount = 2000;
                         this.data.color = '#FFCC33';
                         this.data.size = 0.5;
-                        this.data.velocity = {x: 0.02, y: 0.05, z: 0.02};
-                        this.data.acceleration = {x: 0, y: 0.01, z: 0};
-                        this.data.randomizeVelocity = {x: 0.1, y: 0.1, z: 0.1};
+                        this.data.velocity = { x: 0.02, y: 0.05, z: 0.02 };
+                        this.data.acceleration = { x: 0, y: 0.01, z: 0 };
+                        this.data.randomizeVelocity = { x: 0.1, y: 0.1, z: 0.1 };
                         this.data.maxAge = 15;
                         this.data.blending = 'normal';
-                        this.positionSpread = {x: 10, y: 5, z: 10};
+                        this.positionSpread = { x: 10, y: 5, z: 10 };
                         break;
                     case 'rain':
                         this.data.particleCount = 1000;
                         this.data.color = '#AADDFF';
                         this.data.size = 0.8;
-                        this.data.velocity = {x: 0, y: -2, z: 0.3};  // Angled rain
-                        this.data.acceleration = {x: 0, y: -1, z: 0};
-                        this.data.randomizeVelocity = {x: 0.1, y: 0.5, z: 0.1};
+                        this.data.velocity = { x: 0, y: -2, z: 0.3 };  // Angled rain
+                        this.data.acceleration = { x: 0, y: -1, z: 0 };
+                        this.data.randomizeVelocity = { x: 0.1, y: 0.5, z: 0.1 };
                         this.data.maxAge = 2;
                         this.data.blending = 'normal';
-                        this.positionSpread = {x: 10, y: 8, z: 10};
+                        this.positionSpread = { x: 10, y: 8, z: 10 };
                         break;
                 }
             },
-            
-            update: function(oldData) {
+
+            update: function (oldData) {
                 try {
                     const changed = Object.keys(this.data).some(key => oldData[key] !== this.data[key]);
                     if (changed) {
                         this.setupParticleSystem();
                     }
-                    
+
                     // Handle active state change
                     if (oldData.active !== this.data.active) {
                         if (this.data.active) {
@@ -2749,50 +3179,50 @@
                     console.error('Error in particle update:', error);
                 }
             },
-            
-            tick: function(time, delta) {
+
+            tick: function (time, delta) {
                 try {
                     if (this.isPaused || !this.particleGeometry) return;
-                    
+
                     // Update time
                     this.time += delta / 1000;
-                    
+
                     // Check that all required arrays exist
-                    if (!this.particleGeometry.attributes.position || 
+                    if (!this.particleGeometry.attributes.position ||
                         !this.particleGeometry.attributes.velocity ||
                         !this.particleGeometry.attributes.startTime ||
                         !this.particleGeometry.attributes.lifetime) {
                         return;
                     }
-                    
+
                     // Get positions and update based on physics
                     const positions = this.particleGeometry.attributes.position.array;
                     const velocities = this.particleGeometry.attributes.velocity.array;
                     const startTimes = this.particleGeometry.attributes.startTime.array;
                     const lifetimes = this.particleGeometry.attributes.lifetime.array;
-                    
+
                     const acceleration = this.data.acceleration;
-                    
+
                     for (let i = 0; i < this.data.particleCount; i++) {
                         // Calculate particle age
                         const age = this.time - startTimes[i];
-                        
+
                         // Respawn if too old
                         if (age > lifetimes[i]) {
                             this.initParticle(i, positions, velocities, startTimes, lifetimes);
                             continue;
                         }
-                        
+
                         // Update velocity with acceleration
                         velocities[i * 3] += acceleration.x * delta / 1000;
                         velocities[i * 3 + 1] += acceleration.y * delta / 1000;
                         velocities[i * 3 + 2] += acceleration.z * delta / 1000;
-                        
+
                         // Update position with velocity
                         positions[i * 3] += velocities[i * 3] * delta / 1000;
                         positions[i * 3 + 1] += velocities[i * 3 + 1] * delta / 1000;
                         positions[i * 3 + 2] += velocities[i * 3 + 2] * delta / 1000;
-                        
+
                         // Update particle object for tracking if it exists
                         if (this.particles[i]) {
                             this.particles[i].position.set(
@@ -2807,7 +3237,7 @@
                             );
                         }
                     }
-                    
+
                     // Update geometry
                     this.particleGeometry.attributes.position.needsUpdate = true;
                     this.particleGeometry.attributes.velocity.needsUpdate = true;
@@ -2817,12 +3247,12 @@
                     this.isPaused = true; // Stop on error to prevent console spam
                 }
             },
-            
-            startParticles: function() {
+
+            startParticles: function () {
                 try {
                     // Use play method instead
                     this.play();
-                    
+
                     // If the component was just created and added, make sure system is set up
                     if (!this.particleGroup) {
                         this.setupParticleSystem();
@@ -2831,8 +3261,8 @@
                     console.error('Error starting particles:', error);
                 }
             },
-            
-            stopParticles: function() {
+
+            stopParticles: function () {
                 try {
                     // Use pause method instead
                     this.pause();
@@ -2840,25 +3270,25 @@
                     console.error('Error stopping particles:', error);
                 }
             },
-            
-            remove: function() {
+
+            remove: function () {
                 try {
                     // First make sure animations are stopped
                     this.isPaused = true;
-                    
+
                     // Clean up when component is removed
                     if (this.particleGroup) {
                         this.el.removeObject3D('particle-system');
                     }
-                    
+
                     if (this.particleMaterial) {
                         this.particleMaterial.dispose();
                     }
-                    
+
                     if (this.particleGeometry) {
                         this.particleGeometry.dispose();
                     }
-                    
+
                     this.particles = [];
                 } catch (error) {
                     console.error('Error removing particle system:', error);
@@ -2876,16 +3306,16 @@
                     if (system.components && system.components['particle-system']) {
                         system.components['particle-system'].pause();
                     }
-                    
+
                     // Small delay before removing to ensure pause completes
                     setTimeout(() => {
                         try {
                             // Make sure the DOM is up to date
                             flushAllEntitiesToDOM();
-                            
+
                             // Check if the system is actually in the DOM and is a child of scene
                             const elementInDOM = document.getElementById(system.id || `particle-effect-${preset}`);
-                            
+
                             if (elementInDOM && scene.contains(elementInDOM)) {
                                 scene.removeChild(elementInDOM);
                             } else if (system.parentNode) {
@@ -2894,10 +3324,10 @@
                             } else {
                                 console.log(`Particle system ${preset} was already removed or not found in DOM`);
                             }
-                            
+
                             // Clear the reference regardless
                             activeParticleSystems[preset] = null;
-                            
+
                             // Update code panel
                             flushAllEntitiesToDOM();
                             updateCodePanel();
@@ -2905,41 +3335,41 @@
                             console.error('Error removing particle system:', e);
                         }
                     }, 50);
-                    
+
                     // Update button to show inactive state
                     document.getElementById(`${preset}-btn`).style.backgroundColor = '#2c2c2c';
-                    
+
                     // Check if any systems are still active for the animation toggle button
                     const anyActive = Object.values(activeParticleSystems).some(system => system !== null);
                     document.getElementById('toggle-animation-btn').disabled = !anyActive;
                     document.getElementById('toggle-animation-btn').style.opacity = anyActive ? 1 : 0.5;
-                    
+
                     return;
                 }
-                
+
                 // Create new particle system entity (toggle on)
                 const particleEntity = document.createElement('a-entity');
                 particleEntity.setAttribute('position', '0 5 -5'); // Position appropriately above the scene
                 particleEntity.setAttribute('id', `particle-effect-${preset}`);
-                
+
                 // Store reference to the new system
                 activeParticleSystems[preset] = particleEntity;
-                
+
                 // Highlight active button
                 document.getElementById(`${preset}-btn`).style.backgroundColor = '#4c6ef5';
-                
+
                 // Add to scene
                 scene.appendChild(particleEntity);
-                
+
                 // Wait a frame for the entity to initialize
                 setTimeout(() => {
                     // Now add the component
                     particleEntity.setAttribute('particle-system', `preset: ${preset}`);
-                    
+
                     // Enable toggle animation button
                     document.getElementById('toggle-animation-btn').disabled = false;
                     document.getElementById('toggle-animation-btn').style.opacity = 1;
-                    
+
                     // Update code panel
                     flushAllEntitiesToDOM();
                     updateCodePanel();
@@ -2955,41 +3385,41 @@
                 // Get all active particle systems
                 const activeSystems = Object.values(activeParticleSystems).filter(system => system !== null);
                 if (activeSystems.length === 0) return;
-                
+
                 // Determine the action based on any active system's state
                 // If any system is paused, we'll start all systems
                 let shouldStart = false;
                 let allInitialized = true;
-                
+
                 for (const system of activeSystems) {
                     if (!system.components['particle-system']) {
                         allInitialized = false;
                         break;
                     }
-                    
+
                     if (system.components['particle-system'].isPaused) {
                         shouldStart = true;
                     }
                 }
-                
+
                 // If not all systems are initialized, wait and try again
                 if (!allInitialized) {
                     console.log('Waiting for particle systems to initialize...');
                     setTimeout(toggleParticleAnimation, 100);
                     return;
                 }
-                
+
                 // Apply the same action to all systems
                 for (const system of activeSystems) {
                     const particleSystem = system.components['particle-system'];
-                    
+
                     if (shouldStart) {
                         particleSystem.play();
                     } else {
                         particleSystem.pause();
                     }
                 }
-                
+
                 // Update button appearance
                 if (shouldStart) {
                     document.getElementById('toggle-animation-btn').style.backgroundColor = '#4c6ef5';
@@ -3039,10 +3469,10 @@
             </style>
         `);
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Safely get the canvas element
             const canvas = document.getElementById('scene');
-            
+
             // Check if it's actually a canvas element before proceeding
             let ctx;
             if (canvas && canvas instanceof HTMLCanvasElement) {
@@ -3055,17 +3485,17 @@
                 fallbackCanvas.height = 1;
                 ctx = fallbackCanvas.getContext('2d');
             }
-            
+
             let animationId;
             let isAnimating = false;
             let currentParticleType = 'rain'; // Default particle type
-            
+
             // Set initial global animation state based on button text (with null check)
             const animationText = document.getElementById('animation-text');
             if (animationText) {
                 globalAnimationState = animationText.textContent.trim() === 'Stop';
             }
-            
+
             // Set canvas dimensions if we have a valid canvas
             function resizeCanvas() {
                 if (canvas && canvas instanceof HTMLCanvasElement) {
@@ -3073,10 +3503,10 @@
                     canvas.height = window.innerHeight;
                 }
             }
-            
+
             window.addEventListener('resize', resizeCanvas);
             resizeCanvas();
-            
+
             // Remaining initialization code...
         });
 
@@ -3087,79 +3517,102 @@
         function toggleFog() {
             const fogBtn = document.getElementById('toggle-fog-btn');
             const fogColor = document.getElementById('fog-color').value;
-            const fogIntensity = document.getElementById('fog-intensity').value;
-            
+            const fogType = document.querySelector('input[name="fog-type"]:checked').value;
+            let fogString;
+
             if (!fogActive) {
-                // Format fog attributes as a string
-                const fogString = `type: exponential; color: ${fogColor}; density: ${fogIntensity}`;
-                
+                // Format fog attributes based on type
+                if (fogType === 'linear') {
+                    const fogNear = document.getElementById('fog-near').value;
+                    const fogFar = document.getElementById('fog-far').value;
+                    fogString = `type: linear; color: ${fogColor.toUpperCase()}; near: ${fogNear}; far: ${fogFar}`;
+                } else {
+                    const fogIntensity = document.getElementById('fog-intensity').value;
+                    fogString = `type: exponential; color: ${fogColor.toUpperCase()}; density: ${fogIntensity}`;
+                }
+
                 // Set the fog attribute with the properly formatted string
                 scene.setAttribute('fog', fogString);
-                
+
                 // Update button appearance
                 fogBtn.style.backgroundColor = '#4c6ef5';
                 fogBtn.textContent = 'Remove Fog';
-                
+
                 // Update fog state
                 fogActive = true;
-                
+
                 // Force a scene update
                 if (scene.renderer) {
                     scene.renderer.render(scene.object3D, scene.camera);
                 }
             } else {
-                // Remove fog attribute
+                // Properly remove fog component
+                if (scene.components.fog) {
+                    // Remove the component instance
+                    scene.components.fog.remove();
+                    // Delete the component reference
+                    delete scene.components.fog;
+                }
+
+                // Remove from the systems
+                if (scene.systems.fog) {
+                    scene.systems.fog.remove();
+                    delete scene.systems.fog;
+                }
+
+                // Remove the attribute
                 scene.removeAttribute('fog');
-                
+
+                // Clear Three.js fog
+                if (scene.object3D) {
+                    scene.object3D.fog = null;
+                }
+
                 // Update button appearance
                 fogBtn.style.backgroundColor = '#2c2c2c';
                 fogBtn.textContent = 'Add Fog';
-                
+
                 // Update fog state
                 fogActive = false;
             }
-            
+
+            // Force scene to update
+            scene.flushToDOM();
+            if (scene.renderer) {
+                scene.renderer.render(scene.object3D, scene.camera);
+            }
+
             // Update code panel to reflect changes
             updateCodePanel();
         }
 
         // Add event listeners for fog controls
-        document.getElementById('fog-color').addEventListener('input', function() {
+        document.getElementById('fog-color').addEventListener('input', function () {
             const hexValue = this.value.toUpperCase();
             document.getElementById('fog-color-hex').value = hexValue;
-            
+
             if (fogActive) {
-                const fogIntensity = document.getElementById('fog-intensity').value;
-                const fogString = `type: exponential; color: ${hexValue}; density: ${fogIntensity}`;
-                scene.setAttribute('fog', fogString);
-                
-                // Force a scene update
-                if (scene.renderer) {
-                    scene.renderer.render(scene.object3D, scene.camera);
-                }
-                
-                // Update code panel
-                updateCodePanel();
+                updateFog();
             }
         });
 
-        document.getElementById('fog-color-hex').addEventListener('input', function() {
+        document.getElementById('fog-color-hex').addEventListener('input', function () {
             let color = this.value;
-            
+
             // Ensure the color starts with #
             if (!color.startsWith('#')) {
                 color = '#' + color;
                 this.value = color;
             }
-            
+
             // Check if input contains valid hex characters
             if (/^#[0-9A-Fa-f]*$/.test(color)) {
                 // Create a valid color by padding if needed
                 let validColor = color;
-                
+
                 // Get the hex part without #
                 const hexPart = color.substring(1);
-                
+
                 // If we have some valid hex digits
                 if (hexPart.length > 0 && hexPart.length < 6) {
                     // Pad with appropriate characters to make a valid color
@@ -3167,10 +3620,10 @@
                     // For 3+ digits, pad with zeros
                     if (hexPart.length <= 2) {
                         // Repeat the digits we have (e.g. "F" becomes "FFFFFF")
-                        validColor = '#' + hexPart.padEnd(6, hexPart);
+                        validColor = '#' + hexPart.padEnd(6, hexPart).toUpperCase();
                     } else {
                         // Pad with zeros (e.g. "F00" becomes "F00000")
-                        validColor = '#' + hexPart.padEnd(6, '0');
+                        validColor = '#' + hexPart.padEnd(6, '0').toUpperCase();
                     }
                 } else if (hexPart.length === 6) {
                     // We have a complete color
@@ -3179,41 +3632,422 @@
                     // Empty or invalid, don't update
                     return;
                 }
-                
+
                 // Update color picker and fog
                 document.getElementById('fog-color').value = validColor;
                 this.value = validColor.toUpperCase();
-                
+
                 if (fogActive) {
-                    const fogIntensity = document.getElementById('fog-intensity').value;
-                    const fogString = `type: exponential; color: ${validColor}; density: ${fogIntensity}`;
-                    scene.setAttribute('fog', fogString);
-                    
-                    // Force a scene update
-                    if (scene.renderer) {
-                        scene.renderer.render(scene.object3D, scene.camera);
-                    }
-                    
-                    // Update code panel
-                    updateCodePanel();
+                    updateFog();
                 }
             }
         });
 
-        document.getElementById('fog-intensity').addEventListener('input', function() {
-            if (fogActive) {
-                const fogColor = document.getElementById('fog-color').value;
-                const fogIntensity = this.value;
-                const fogString = `type: exponential; color: ${fogColor}; density: ${fogIntensity}`;
-                scene.setAttribute('fog', fogString);
-                
-                // Force a scene update
-                if (scene.renderer) {
-                    scene.renderer.render(scene.object3D, scene.camera);
+        // Function to update fog based on current control values
+        function updateFog() {
+            const fogColor = document.getElementById('fog-color').value;
+            const fogType = document.querySelector('input[name="fog-type"]:checked').value;
+            let fogString;
+
+            if (fogType === 'linear') {
+                const fogNear = document.getElementById('fog-near').value;
+                const fogFar = document.getElementById('fog-far').value;
+                fogString = `type: linear; color: ${fogColor.toUpperCase()}; near: ${fogNear}; far: ${fogFar}`;
+            } else {
+                const fogIntensity = document.getElementById('fog-intensity').value;
+                fogString = `type: exponential; color: ${fogColor.toUpperCase()}; density: ${fogIntensity}`;
+            }
+
+            scene.setAttribute('fog', fogString);
+
+            // Force a scene update
+            if (scene.renderer) {
+                scene.renderer.render(scene.object3D, scene.camera);
+            }
+
+            // Update code panel
+            updateCodePanel();
+        }
+
+        // Add event listeners for fog type radio buttons
+        document.querySelectorAll('input[name="fog-type"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                // Show/hide appropriate controls
+                const linearControls = document.getElementById('fog-linear-controls');
+                const exponentialControls = document.getElementById('fog-exponential-controls');
+
+                if (this.value === 'linear') {
+                    linearControls.style.display = 'block';
+                    exponentialControls.style.display = 'none';
+                } else {
+                    linearControls.style.display = 'none';
+                    exponentialControls.style.display = 'block';
                 }
-                
+
+                if (fogActive) {
+                    updateFog();
+                }
+            });
+        });
+
+        // Add event listeners for fog distance controls
+        document.getElementById('fog-near').addEventListener('input', function () {
+            if (fogActive) {
+                updateFog();
+            }
+        });
+
+        document.getElementById('fog-far').addEventListener('input', function () {
+            if (fogActive) {
+                updateFog();
+            }
+        });
+
+        document.getElementById('fog-intensity').addEventListener('input', function () {
+            if (fogActive) {
+                updateFog();
+            }
+        });
+
+        function clearEntities() {
+            // Check if we're in the current view
+            if (currentView === 'scene') {
+                // Store current environment preset if it exists
+                const existingEnvironment = document.querySelector('a-entity[environment]');
+                let currentPreset = null;
+                if (existingEnvironment) {
+                    const envAttr = existingEnvironment.getAttribute('environment');
+                    // Handle both string and object attribute values
+                    if (typeof envAttr === 'string') {
+                        currentPreset = envAttr.split(':')[1].trim();
+                    } else if (typeof envAttr === 'object') {
+                        currentPreset = envAttr.preset;
+                    }
+                    // Remove the old environment entity
+                    existingEnvironment.parentNode.removeChild(existingEnvironment);
+                }
+
+                // Force a flush to DOM first
+                flushAllEntitiesToDOM();
+
+                // Get all entities except environment-related ones
+                const entities = scene.querySelectorAll('a-entity, a-box, a-sphere, a-cylinder, a-plane, a-obj-model, a-gltf-model, a-asset-item, a-video, a-image, a-text, a-curve, a-ring, a-torus, a-torus-knot, a-dodecahedron, a-octahedron, a-tetrahedron, a-icosahedron, a-cone, a-circle, a-ellipse, a-line, a-triangle, a-videosphere, a-videocylinder, a-videoplane');
+
+                // Remove each entity
+                entities.forEach(entity => {
+                    // Skip environment-related entities
+                    if (!entity.hasAttribute('environment') &&
+                        !entity.hasAttribute('fog') &&
+                        !entity.hasAttribute('particle-system') &&
+                        !entity.hasAttribute('animation') &&
+                        entity.tagName !== 'a-sky' &&
+                        entity.tagName !== 'a-camera' &&
+                        entity.tagName !== 'a-assets') {
+                        if (entity.parentNode) {
+                            entity.parentNode.removeChild(entity);
+                        }
+                    }
+                });
+
+                // Force another flush to DOM after removals
+                flushAllEntitiesToDOM();
+
+                // If we had an environment, reinitialize it
+                if (currentPreset) {
+                    // Create new environment entity with only the preset attribute
+                    const environment = document.createElement('a-entity');
+                    environment.setAttribute('environment', `preset: ${currentPreset}`);
+                    scene.appendChild(environment);
+
+                    // Wait for scene to initialize
+                    setTimeout(() => {
+                        // Force a render to make sure everything is visible
+                        if (scene.renderer) {
+                            scene.renderer.render(scene.object3D, scene.camera);
+                        }
+                        flushAllEntitiesToDOM();
+                    }, 100);
+                }
+            }
+        }
+
+        // Handle environment preset changes
+        document.getElementById('environment-preset').addEventListener('change', function (e) {
+            const preset = e.target.value;
+
+            // Update environment icon
+            const environmentIcon = document.querySelector('#environment-icon img');
+            if (environmentThumbnails[preset]) {
+                environmentIcon.src = environmentThumbnails[preset];
+            }
+
+            // Remove any existing environment entity
+            const existingEnvironment = scene.querySelector('a-entity[environment]');
+            if (existingEnvironment && existingEnvironment.parentElement) {
+                existingEnvironment.removeAttribute('environment');
+                existingEnvironment.parentElement.removeChild(existingEnvironment);
+            }
+
+            // Get current background color
+            let backgroundColor = '#ECECEC';
+            const background = scene.getAttribute('background');
+            if (background) {
+                if (typeof background === 'string' && background.startsWith('color: ')) {
+                    backgroundColor = background.substring(7);
+                } else if (background.color) {
+                    backgroundColor = background.color;
+                }
+            }
+
+            if (preset === 'none') {
+                // Clean up fog if it exists
+                if (fogActive) {
+                    scene.removeAttribute('fog');
+                    const fogBtn = document.getElementById('toggle-fog-btn');
+                    fogBtn.style.backgroundColor = '#2c2c2c';
+                    fogBtn.textContent = 'Add Fog';
+                    fogActive = false;
+                }
+            } else {
+                // Create new environment entity
+                const envEntity = document.createElement('a-entity');
+                envEntity.setAttribute('environment', `preset: ${preset}`);
+                scene.appendChild(envEntity);
+            }
+
+            // Always update the background color
+            scene.setAttribute('background', { color: backgroundColor });
+            updateBackgroundColorPicker();
+
+            // Update code panel
+            updateCodePanel();
+        });
+
+        // Function to handle skybox file input
+        document.getElementById('skybox-input').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                // Remove any existing environment
+                const existingEnvironment = scene.querySelector('a-entity[environment]');
+                if (existingEnvironment && existingEnvironment.parentElement) {
+                    existingEnvironment.removeAttribute('environment');
+                    existingEnvironment.parentElement.removeChild(existingEnvironment);
+                }
+
+                // Remove existing sky if present
+                const existingSky = scene.querySelector('a-sky');
+                if (existingSky && existingSky.parentElement) {
+                    existingSky.parentElement.removeChild(existingSky);
+                }
+
+                // Create new sky with the uploaded image/video
+                const sky = document.createElement('a-sky');
+                if (file.type.startsWith('video/')) {
+                    sky.setAttribute('src', '#skybox-video');
+                    const video = document.createElement('video');
+                    video.id = 'skybox-video';
+                    video.src = e.target.result;
+                    video.setAttribute('preload', 'auto');
+                    video.setAttribute('loop', '');
+                    video.setAttribute('crossorigin', 'anonymous');
+                    const assets = scene.querySelector('a-assets') || document.createElement('a-assets');
+                    if (!assets.parentNode) scene.appendChild(assets);
+                    assets.appendChild(video);
+                    video.play();
+                } else {
+                    sky.setAttribute('src', e.target.result);
+                }
+                scene.appendChild(sky);
+
+                // Update environment preset to none since we're using a custom skybox
+                document.getElementById('environment-preset').value = 'none';
+                const environmentIcon = document.querySelector('#environment-icon img');
+                if (environmentThumbnails['none']) {
+                    environmentIcon.src = environmentThumbnails['none'];
+                }
+
                 // Update code panel
                 updateCodePanel();
+            };
+
+            if (file.type.startsWith('video/')) {
+                reader.readAsDataURL(file);
+            } else {
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Initialize everything once the scene is loaded
+        scene.addEventListener('loaded', () => {
+            // Ensure the scene has a valid background color
+            if (!scene.hasAttribute('background')) {
+                scene.setAttribute('background', 'color: #ECECEC');
+            } else {
+                // Validate the existing background color
+                const background = scene.getAttribute('background');
+                if (!background || !background.color ||
+                    typeof background.color !== 'string' ||
+                    !background.color.startsWith('#') ||
+                    !/^#[0-9A-Fa-f]{6}$/i.test(background.color)) {
+                    scene.setAttribute('background', 'color: #ECECEC');
+                }
+            }
+
+            initSkyColorPicker();
+            initEnvironmentPresets();
+            // Remove the call to initFogControls since it doesn't exist yet
+            updateCodePanel();
+        });
+
+        // Also initialize immediately in case the scene is already loaded
+        if (scene.hasLoaded) {
+            // Ensure the scene has a valid background color
+            if (!scene.hasAttribute('background')) {
+                scene.setAttribute('background', 'color: #ECECEC');
+            } else {
+                // Validate the existing background color
+                const background = scene.getAttribute('background');
+                if (!background || !background.color ||
+                    typeof background.color !== 'string' ||
+                    !background.color.startsWith('#') ||
+                    !/^#[0-9A-Fa-f]{6}$/i.test(background.color)) {
+                    scene.setAttribute('background', 'color: #ECECEC');
+                }
+            }
+
+            initSkyColorPicker();
+            initEnvironmentPresets();
+            // Remove the call to initFogControls since it doesn't exist yet
+            updateCodePanel();
+        } else {
+            // Initialize with default values until scene loads
+            const skyColorPicker = document.getElementById('background-color');
+            const skyColorHex = document.getElementById('background-color-hex');
+            if (skyColorPicker && skyColorHex) {
+                skyColorPicker.value = '#ECECEC';
+                skyColorHex.value = '#ECECEC';
+            }
+        }
+
+        function initBackgroundColorPicker() {
+            const backgroundColorPicker = document.getElementById('background-color');
+            const backgroundColorHex = document.getElementById('background-color-hex');
+
+            // Get the current background color from the scene
+            let colorValue = '#ECECEC';
+            const background = scene.getAttribute('background');
+            if (background) {
+                if (typeof background === 'string' && background.startsWith('color: ')) {
+                    colorValue = background.substring(7);
+                } else if (background.color) {
+                    colorValue = background.color;
+                }
+            }
+
+            backgroundColorPicker.value = colorValue;
+            backgroundColorHex.value = colorValue.toUpperCase();
+
+            backgroundColorPicker.addEventListener('input', function (e) {
+                const color = e.target.value.toUpperCase();
+                backgroundColorHex.value = color;
+                updateBackgroundColor(color);
+            });
+
+            backgroundColorHex.addEventListener('input', function (e) {
+                let color = e.target.value;
+                if (!color.startsWith('#')) {
+                    color = '#' + color;
+                }
+                updateBackgroundColor(color);
+            });
+
+            backgroundColorHex.addEventListener('change', function (e) {
+                let color = e.target.value;
+                if (!color.startsWith('#')) {
+                    color = '#' + color;
+                }
+                // Validate hex color
+                const validColor = validateHexColor(color);
+                if (validColor) {
+                    updateBackgroundColor(validColor);
+                    backgroundColorPicker.value = validColor;
+                    backgroundColorHex.value = validColor;
+                }
+            });
+        }
+
+        function updateBackgroundColor(color) {
+            scene.setAttribute('background', { color: color });
+            updateCodePanel();
+        }
+
+        function updateBackgroundColorPicker() {
+            const backgroundColorPicker = document.getElementById('background-color');
+            const backgroundColorHex = document.getElementById('background-color-hex');
+
+            // Get current background color
+            let colorValue = '#ECECEC';
+            const background = scene.getAttribute('background');
+            if (background) {
+                if (typeof background === 'string' && background.startsWith('color: ')) {
+                    colorValue = background.substring(7);
+                } else if (background.color) {
+                    colorValue = background.color;
+                }
+            }
+
+            backgroundColorPicker.value = colorValue;
+            backgroundColorHex.value = colorValue.toUpperCase();
+        }
+
+        // Initialize color pickers
+        initBackgroundColorPicker();
+
+        // Initialize with default values
+        if (scene.hasLoaded) {
+            updateBackgroundColorPicker();
+        } else {
+            // Initialize with default values until scene loads
+            const backgroundColorPicker = document.getElementById('background-color');
+            const backgroundColorHex = document.getElementById('background-color-hex');
+            if (backgroundColorPicker && backgroundColorHex) {
+                backgroundColorPicker.value = '#ECECEC';
+                backgroundColorHex.value = '#ECECEC';
+            }
+        }
+
+        // Listen for scene loaded event
+        scene.addEventListener('loaded', function () {
+            updateBackgroundColorPicker();
+        });
+
+        // Initialize scene
+        if (scene.hasLoaded) {
+            updateBackgroundColorPicker();
+        } else {
+            scene.addEventListener('loaded', function () {
+                updateBackgroundColorPicker();
+            });
+        }
+
+        // Initialize color pickers
+        initBackgroundColorPicker();
+
+        // Handle view changes
+        document.getElementById('view-selector').addEventListener('change', function (e) {
+            const view = e.target.value;
+            currentView = view;
+
+            // Update UI based on view
+            document.getElementById('scene-container').style.display = view === 'scene' ? 'block' : 'none';
+            document.getElementById('code-container').style.display = view === 'code' ? 'block' : 'none';
+
+            if (view === 'scene') {
+                // Update background color picker when switching back to scene view
+                updateBackgroundColorPicker();
             }
         });
     </script>
