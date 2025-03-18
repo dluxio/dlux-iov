@@ -532,48 +532,64 @@
                 </div>
 
             </div>
-            <div class="fog-controls" style="margin-bottom: 15px;">
-                <div style="margin-bottom: 10px;">
-                    <label style="display: block; margin-bottom: 5px;">Fog Color</label>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <input type="color" id="fog-color" value="#ffffff"
-                            style="width: 50px; height: 30px; padding: 0;">
-                        <input type="text" id="fog-color-hex" value="#FFFFFF"
-                            style="width: 80px; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 5px;">
+            <div class="fog-controls"
+                style="margin-bottom: 15px; border: 1px solid #3c3c3c; border-radius: 4px; overflow: hidden;">
+                <div class="collapsible-button"
+                    style="background: #3c3c3c; padding: 8px 12px; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; transition: background-color 0.2s;"
+                    onclick="toggleFogControls()" onmouseover="this.style.background='#4a4a4a'"
+                    onmouseout="this.style.background='#3c3c3c'">
+                    <h3 style="margin: 0; padding: 0; color: #fff; font-size: 16px;">Fog</h3>
+                    <span id="fog-collapse-icon"
+                        style="font-size: 12px; transition: transform 0.3s; transform: rotate(0deg); color: #fff;">▼</span>
+                </div>
+                <div id="fog-collapse-content"
+                    style="overflow: hidden; transition: max-height 0.3s ease-out; max-height: 0px; background: #2c2c2c; border-top: 1px solid #3c3c3c;">
+                    <div style="padding: 10px;">
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; margin-bottom: 5px;">Fog Color</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="color" id="fog-color" value="#ffffff"
+                                    style="width: 50px; height: 30px; padding: 0;">
+                                <input type="text" id="fog-color-hex" value="#ECECEC"
+                                    style="width: 80px; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 5px;">
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; margin-bottom: 5px;">Fog Type</label>
+                            <div
+                                style="display: flex; gap: 10px; align-items: center; background: #2c2c2c; padding: 5px; border-radius: 4px; border: 1px solid #3c3c3c;">
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="radio" name="fog-type" value="linear" style="margin: 0;">
+                                    <span style="color: #fff;">Linear</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="radio" name="fog-type" value="exponential" checked style="margin: 0;">
+                                    <span style="color: #fff;">Exponential</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div id="fog-linear-controls" style="margin-bottom: 10px; display: none;">
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; margin-bottom: 5px;">Near Distance</label>
+                                <input type="range" id="fog-near" min="0" max="100" step="0.1" value="1"
+                                    style="width: 100%;">
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; margin-bottom: 5px;">Far Distance</label>
+                                <input type="range" id="fog-far" min="0" max="250" step="0.1" value="50"
+                                    style="width: 100%;">
+                            </div>
+                        </div>
+                        <div id="fog-exponential-controls" style="margin-bottom: 10px; display: block;">
+                            <label style="display: block; margin-bottom: 5px;">Density</label>
+                            <input type="range" id="fog-intensity" min="0" max="1" step="0.01" value="0.25"
+                                style="width: 100%;">
+                        </div>
+                        <button id="toggle-fog-btn" onclick="toggleFog()" class="effect-btn" style="width: 100%;">
+                            <span>Add Fog</span>
+                        </button>
                     </div>
                 </div>
-                <div style="margin-bottom: 10px;">
-                    <label style="display: block; margin-bottom: 5px;">Fog Type</label>
-                    <div
-                        style="display: flex; gap: 10px; align-items: center; background: #2c2c2c; padding: 5px; border-radius: 4px;">
-                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-                            <input type="radio" name="fog-type" value="linear" checked style="margin: 0;">
-                            <span style="color: #fff;">Linear</span>
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
-                            <input type="radio" name="fog-type" value="exponential" style="margin: 0;">
-                            <span style="color: #fff;">Exponential</span>
-                        </label>
-                    </div>
-                </div>
-                <div id="fog-linear-controls" style="margin-bottom: 10px;">
-                    <div style="margin-bottom: 10px;">
-                        <label style="display: block; margin-bottom: 5px;">Near Distance</label>
-                        <input type="range" id="fog-near" min="0" max="100" step="0.1" value="1" style="width: 100%;">
-                    </div>
-                    <div style="margin-bottom: 10px;">
-                        <label style="display: block; margin-bottom: 5px;">Far Distance</label>
-                        <input type="range" id="fog-far" min="0" max="250" step="0.1" value="50" style="width: 100%;">
-                    </div>
-                </div>
-                <div id="fog-exponential-controls" style="margin-bottom: 10px; display: none;">
-                    <label style="display: block; margin-bottom: 5px;">Density</label>
-                    <input type="range" id="fog-intensity" min="0" max="1" step="0.01" value="0.25"
-                        style="width: 100%;">
-                </div>
-                <button id="toggle-fog-btn" onclick="toggleFog()" class="effect-btn" style="width: 100%;">
-                    <span>Add Fog</span>
-                </button>
             </div>
             <h3>Add Objects</h3>
             <div class="geometry-buttons">
@@ -740,21 +756,19 @@
                     <span id="animation-text">Start</span>
                 </button>
             </div>
-
-
-
-            <h3>Assets</h3>
+            <h3>Asset Library</h3>
             <div style="margin-bottom: 15px;">
                 <input type="file" id="asset-upload" accept="image/*,video/*,.gltf,.glb" onchange="handleFileUpload()"
                     style="display: none;">
                 <button onclick="document.getElementById('asset-upload').click()" class="effect-btn"
                     style="width: 100%;">
-                    <span>Load File</span>
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12,4L12,20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M4,12L20,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    <span>Add File</span>
                 </button>
             </div>
-            <div id="asset-preview"></div>
-
-            <h3>Asset Library</h3>
             <div id="asset-library"></div>
 
             <div class="panel-section">
@@ -767,6 +781,10 @@
                     <input type="file" id="skybox-input" accept="image/*,video/*" style="display: none;">
                     <button onclick="document.getElementById('skybox-input').click()" class="effect-btn"
                         style="width: 100%;">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12,4L12,20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                            <path d="M4,12L20,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        </svg>
                         <span>Add Skybox</span>
                     </button>
                 </div>
@@ -2462,11 +2480,12 @@
 
             // Store current fog state if it exists
             let currentFog = null;
+            const scene = document.querySelector('a-scene');
+            // Define environment variable
+            let environment = scene.querySelector('a-entity[environment]');
+
             if (fogActive) {
-                const fogColor = document.getElementById('fog-color').value;
-                const fogIntensity = document.getElementById('fog-intensity').value;
-                const fogType = document.querySelector('input[name="fog-type"]:checked').value;
-                currentFog = `type: ${fogType}; color: ${fogColor.toUpperCase()}; density: ${fogIntensity}`;
+                currentFog = scene.getAttribute('fog');
             }
 
             // Step 1: Thoroughly remove any existing environment entity and its children
@@ -2486,12 +2505,68 @@
             if (preset === 'none') {
                 // Clean up fog if it exists
                 if (scene.hasAttribute('fog')) {
+                    // Properly remove fog component
+                    if (scene.components.fog) {
+                        // Remove the component instance
+                        scene.components.fog.remove();
+                        // Delete the component reference
+                        delete scene.components.fog;
+                    }
+                    
+                    // Remove from the systems
+                    if (scene.systems.fog) {
+                        scene.systems.fog.remove();
+                        delete scene.systems.fog;
+                    }
+                    
+                    // Remove the attribute
                     scene.removeAttribute('fog');
+                    
+                    // Clear Three.js fog
+                    if (scene.object3D) {
+                        scene.object3D.fog = null;
+                    }
+                }
+                
+                // Set fogActive to false
+                fogActive = false;
+                
+                // Update fog controls for the 'none' preset
+                // 1. Set the fog color to match background color
+                const bgColor = document.getElementById('background-color').value;
+                const fogColorInput = document.getElementById('fog-color');
+                const fogColorHexInput = document.getElementById('fog-color-hex');
+                if (fogColorInput) fogColorInput.value = bgColor;
+                if (fogColorHexInput) fogColorHexInput.value = bgColor.toUpperCase();
+                
+                // 2. Set fog type to exponential
+                const exponentialRadio = document.querySelector('input[name="fog-type"][value="exponential"]');
+                if (exponentialRadio) {
+                    exponentialRadio.checked = true;
+                    // Update visibility of controls
+                    const linearControls = document.getElementById('fog-linear-controls');
+                    const exponentialControls = document.getElementById('fog-exponential-controls');
+                    if (linearControls) linearControls.style.display = 'none';
+                    if (exponentialControls) exponentialControls.style.display = 'block';
+                }
+                
+                // Also update the toggle fog button to show "Add Fog"
+                const fogBtn = document.getElementById('toggle-fog-btn');
+                if (fogBtn) {
+                    fogBtn.style.backgroundColor = '#2c2c2c';
+                    // Check if the button has a span child before updating its text
+                    const span = fogBtn.querySelector('span');
+                    if (span) {
+                        span.textContent = 'Add Fog';
+                    } else {
+                        fogBtn.textContent = 'Add Fog';
+                    }
                 }
 
-
-
-
+                // Remove environment if it exists
+                if (environment) {
+                    environment.parentNode.removeChild(environment);
+                }
             }
             // Step 3: Add new environment entity for selected preset
             else {
@@ -2587,8 +2662,16 @@
                         // No fog for Osiris
                         fogActive = false;
                         const fogBtn = document.getElementById('toggle-fog-btn');
-                        fogBtn.style.backgroundColor = '#2c2c2c';
-                        fogBtn.textContent = 'Add Fog';
+                        if (fogBtn) {
+                            fogBtn.style.backgroundColor = '#2c2c2c';
+                            // Check if the button has a span child before updating its text
+                            const span = fogBtn.querySelector('span');
+                            if (span) {
+                                span.textContent = 'Add Fog';
+                            } else {
+                                fogBtn.textContent = 'Add Fog';
+                            }
+                        }
                         return;
                     case 'moon':
                         defaultFogColor = '#1A1310';
@@ -2615,7 +2698,13 @@
                 fogActive = true;
                 const fogBtn = document.getElementById('toggle-fog-btn');
                 fogBtn.style.backgroundColor = '#4c6ef5';
-                fogBtn.textContent = 'Remove Fog';
+                // Check if the button has a span child before updating its text
+                const span = fogBtn.querySelector('span');
+                if (span) {
+                    span.textContent = 'Remove Fog';
+                } else {
+                    fogBtn.textContent = 'Remove Fog';
+                }
 
                 // Set current fog with the default settings (near is always 0)
                 currentFog = `type: linear; color: ${defaultFogColor}; near: 0; far: ${defaultFogFar}`;
@@ -3384,6 +3473,9 @@
         // Function to toggle fog on/off
         function toggleFog() {
             const fogBtn = document.getElementById('toggle-fog-btn');
+            // If the button doesn't exist, we can't proceed
+            if (!fogBtn) return;
+            
             const fogColor = document.getElementById('fog-color').value;
             const fogType = document.querySelector('input[name="fog-type"]:checked').value;
             let fogString;
@@ -3404,7 +3496,12 @@
 
                 // Update button appearance
                 fogBtn.style.backgroundColor = '#4c6ef5';
-                fogBtn.textContent = 'Remove Fog';
+                const addSpan = fogBtn.querySelector('span');
+                if (addSpan) {
+                    addSpan.textContent = 'Remove Fog';
+                } else {
+                    fogBtn.textContent = 'Remove Fog';
+                }
 
                 // Update fog state
                 fogActive = true;
@@ -3438,7 +3535,13 @@
 
                 // Update button appearance
                 fogBtn.style.backgroundColor = '#2c2c2c';
-                fogBtn.textContent = 'Add Fog';
+                // Check if the button has a span child before updating its text
+                const spanRemove = fogBtn.querySelector('span');
+                if (spanRemove) {
+                    spanRemove.textContent = 'Add Fog';
+                } else {
+                    fogBtn.textContent = 'Add Fog';
+                }
 
                 // Update fog state
                 fogActive = false;
@@ -3639,114 +3742,104 @@
             }
         }
 
-        // Handle environment preset changes
         document.getElementById('environment-preset').addEventListener('change', function (e) {
             const preset = e.target.value;
-
-            // Update environment icon
-            const environmentIcon = document.querySelector('#environment-icon img');
-            if (environmentThumbnails[preset]) {
-                environmentIcon.src = environmentThumbnails[preset];
-            }
-
-            // Remove any existing environment entity
-            const existingEnvironment = scene.querySelector('a-entity[environment]');
-            if (existingEnvironment && existingEnvironment.parentElement) {
-                existingEnvironment.removeAttribute('environment');
-                existingEnvironment.parentElement.removeChild(existingEnvironment);
-            }
-
-            // Get current background color
-            let backgroundColor = '#ECECEC';
-            const background = scene.getAttribute('background');
-            if (background) {
-                if (typeof background === 'string' && background.startsWith('color: ')) {
-                    backgroundColor = background.substring(7);
-                } else if (background.color) {
-                    backgroundColor = background.color;
-                }
-            }
+            const scene = document.querySelector('a-scene');
+            let environment = scene.querySelector('a-entity[environment]');
 
             if (preset === 'none') {
                 // Clean up fog if it exists
-                if (fogActive) {
+                if (scene.hasAttribute('fog')) {
+                    // Properly remove fog component
+                    if (scene.components.fog) {
+                        // Remove the component instance
+                        scene.components.fog.remove();
+                        // Delete the component reference
+                        delete scene.components.fog;
+                    }
+                    
+                    // Remove from the systems
+                    if (scene.systems.fog) {
+                        scene.systems.fog.remove();
+                        delete scene.systems.fog;
+                    }
+                    
+                    // Remove the attribute
                     scene.removeAttribute('fog');
-                    const fogBtn = document.getElementById('toggle-fog-btn');
-                    fogBtn.style.backgroundColor = '#2c2c2c';
-                    fogBtn.textContent = 'Add Fog';
-                    fogActive = false;
+                    
+                    // Clear Three.js fog
+                    if (scene.object3D) {
+                        scene.object3D.fog = null;
+                    }
                 }
+                
+                // Set fogActive to false
+                fogActive = false;
+                
+                // Update fog controls for the 'none' preset
+                // 1. Set the fog color to match background color
+                const bgColor = document.getElementById('background-color').value;
+                const fogColorInput = document.getElementById('fog-color');
+                const fogColorHexInput = document.getElementById('fog-color-hex');
+                if (fogColorInput) fogColorInput.value = bgColor;
+                if (fogColorHexInput) fogColorHexInput.value = bgColor.toUpperCase();
+                
+                // 2. Set fog type to exponential
+                const exponentialRadio = document.querySelector('input[name="fog-type"][value="exponential"]');
+                if (exponentialRadio) {
+                    exponentialRadio.checked = true;
+                    // Update visibility of controls
+                    const linearControls = document.getElementById('fog-linear-controls');
+                    const exponentialControls = document.getElementById('fog-exponential-controls');
+                    if (linearControls) linearControls.style.display = 'none';
+                    if (exponentialControls) exponentialControls.style.display = 'block';
+                }
+                
+                // Also update the toggle fog button to show "Add Fog"
+                const fogBtn = document.getElementById('toggle-fog-btn');
+                fogBtn.style.backgroundColor = '#2c2c2c';
+                fogBtn.textContent = 'Add Fog';
+
+                // Remove environment if it exists
+                if (environment) {
+                    environment.parentNode.removeChild(environment);
+                }
+
+                // Add default lights that match A-Frame's defaults
+                const ambientLight = document.createElement('a-entity');
+                ambientLight.setAttribute('light', 'type: ambient; color: #BBB;');
+                ambientLight.setAttribute('data-aframe-default-light', '');
+                ambientLight.setAttribute('aframe-injected', '');
+                scene.appendChild(ambientLight);
+
+                const directionalLight = document.createElement('a-entity');
+                directionalLight.setAttribute('light', 'color: #FFF; intensity: 1.884; castShadow: true');
+                directionalLight.setAttribute('position', '-0.5 1 1');
+                directionalLight.setAttribute('data-aframe-default-light', '');
+                directionalLight.setAttribute('aframe-injected', '');
+                scene.appendChild(directionalLight);
             } else {
-                // Create new environment entity
-                const envEntity = document.createElement('a-entity');
-                envEntity.setAttribute('environment', `preset: ${preset}`);
-                scene.appendChild(envEntity);
+                // Create or update environment entity
+                if (!environment) {
+                    environment = document.createElement('a-entity');
+                    environment.setAttribute('environment', '');
+                    scene.appendChild(environment);
+                }
+
+                // Update environment entity
+                environment.setAttribute('environment', preset);
+                environment.flushToDOM();
             }
 
-            // Always update the background color
-            scene.setAttribute('background', { color: backgroundColor });
-            updateBackgroundColorPicker();
+            // Force a scene update and flush all entities
+            scene.flushToDOM();
+            flushAllEntitiesToDOM();
 
-            // Update code panel
+            // Update code panel to show actual state
             updateCodePanel();
         });
 
-        // Function to handle skybox file input
-        document.getElementById('skybox-input').addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                // Remove any existing environment
-                const existingEnvironment = scene.querySelector('a-entity[environment]');
-                if (existingEnvironment && existingEnvironment.parentElement) {
-                    existingEnvironment.removeAttribute('environment');
-                    existingEnvironment.parentElement.removeChild(existingEnvironment);
-                }
-
-                // Remove existing sky if present
-                const existingSky = scene.querySelector('a-sky');
-                if (existingSky && existingSky.parentElement) {
-                    existingSky.parentElement.removeChild(existingSky);
-                }
-
-                // Create new sky with the uploaded image/video
-                const sky = document.createElement('a-sky');
-                if (file.type.startsWith('video/')) {
-                    sky.setAttribute('src', '#skybox-video');
-                    const video = document.createElement('video');
-                    video.id = 'skybox-video';
-                    video.src = e.target.result;
-                    video.setAttribute('preload', 'auto');
-                    video.setAttribute('loop', '');
-                    video.setAttribute('crossorigin', 'anonymous');
-                    const assets = scene.querySelector('a-assets') || document.createElement('a-assets');
-                    if (!assets.parentNode) scene.appendChild(assets);
-                    assets.appendChild(video);
-                    video.play();
-                } else {
-                    sky.setAttribute('src', e.target.result);
-                }
-                scene.appendChild(sky);
-
-                // Update environment preset to none since we're using a custom skybox
-                document.getElementById('environment-preset').value = 'none';
-                const environmentIcon = document.querySelector('#environment-icon img');
-                if (environmentThumbnails['none']) {
-                    environmentIcon.src = environmentThumbnails['none'];
-                }
-
-                // Update code panel
-                updateCodePanel();
-            };
-
-            if (file.type.startsWith('video/')) {
-                reader.readAsDataURL(file);
-            } else {
-                reader.readAsDataURL(file);
-            }
-        });
 
         // Initialize everything once the scene is loaded
         scene.addEventListener('loaded', () => {
@@ -3921,8 +4014,16 @@
 
         // Add event listeners for color inputs
         document.getElementById('background-color').addEventListener('input', function (e) {
-            updateSceneBackground(e.target.value);
-            document.getElementById('background-color-hex').value = e.target.value;
+            const newColor = e.target.value;
+            updateSceneBackground(newColor);
+            document.getElementById('background-color-hex').value = newColor;
+
+            // Update fog color if environment preset is 'none'
+            const environmentPreset = document.getElementById('environment-preset').value;
+            if (environmentPreset === 'none') {
+                document.getElementById('fog-color').value = newColor;
+                document.getElementById('fog-color-hex').value = newColor.toUpperCase();
+            }
         });
 
         document.getElementById('background-color-hex').addEventListener('input', function (e) {
@@ -3930,131 +4031,34 @@
             if (color.match(/^#[0-9A-Fa-f]{6}$/)) {
                 document.getElementById('background-color').value = color;
                 updateSceneBackground(color);
+
+                // Update fog color if environment preset is 'none'
+                const environmentPreset = document.getElementById('environment-preset').value;
+                if (environmentPreset === 'none') {
+                    document.getElementById('fog-color').value = color;
+                    document.getElementById('fog-color-hex').value = color.toUpperCase();
+                }
             }
         });
 
+        // Function to toggle the fog controls visibility
+        function toggleFogControls() {
+            const content = document.getElementById('fog-collapse-content');
+            const icon = document.getElementById('fog-collapse-icon');
 
+            // Check if the content is currently visible
+            const isVisible = content.style.maxHeight !== '0px';
 
-
-
-
-
-        // Add event listener for environment preset changes
-        document.getElementById('environment-preset').addEventListener('change', function (e) {
-            const preset = e.target.value;
-            const scene = document.querySelector('a-scene');
-
-            // Remove any existing environment entity
-            const existingEnvironment = scene.querySelector('a-entity[environment]');
-            if (existingEnvironment && existingEnvironment.parentElement) {
-                existingEnvironment.removeAttribute('environment');
-                existingEnvironment.parentElement.removeChild(existingEnvironment);
-            }
-
-            // Get current background color
-            let currentBackground = scene.getAttribute('background') || 'color: #ECECEC';
-
-            if (preset === 'none') {
-                // Clean up fog if it exists
-                if (scene.hasAttribute('fog')) {
-                    scene.removeAttribute('fog');
-                }
-
-                // Create new environment entity with no preset
-                const environment = document.createElement('a-entity');
-                environment.setAttribute('environment', {
-                    preset: 'none',
-                    background: currentBackground,
-                    topColor: '#87CEEB',
-                    bottomColor: '#E0F6FF'
-                });
-                scene.appendChild(environment);
-
-                // Create sky element with gradient shader
-                const sky = document.createElement('a-sky');
-                sky.setAttribute('class', 'environment');
-                sky.setAttribute('material', {
-                    shader: 'gradientshader',
-                    topColor: '#87CEEB',
-                    bottomColor: '#E0F6FF'
-                });
-                scene.appendChild(sky);
+            if (isVisible) {
+                // Hide the content
+                content.style.maxHeight = '0px';
+                icon.style.transform = 'rotate(0deg)'; // Down arrow when collapsed
             } else {
-                // Create new environment entity with selected preset
-                const environment = document.createElement('a-entity');
-                environment.setAttribute('environment', {
-                    preset: preset,
-                    background: currentBackground
-                });
-                scene.appendChild(environment);
-
-
+                // Show the content
+                content.style.maxHeight = '500px';
+                icon.style.transform = 'rotate(180deg)'; // Up arrow when expanded
             }
-
-            // Always update the background color
-            scene.setAttribute('background', currentBackground);
-
-            // Force a scene update
-            scene.flushToDOM();
-            if (scene.renderer) {
-                scene.renderer.render(scene.object3D, scene.camera);
-            }
-
-            // Update code panel
-            updateCodePanel();
-        });
-
-        // ... existing code ...
-        // Handle environment presets
-        document.getElementById('environment-preset').addEventListener('change', function (e) {
-            const preset = e.target.value;
-            const sceneEl = document.querySelector('a-scene');
-            let environment = sceneEl.querySelector('a-entity[environment]');
-
-            // Clean up fog if it exists
-            const fog = sceneEl.querySelector('a-entity[fog]');
-            if (fog) fog.parentNode.removeChild(fog);
-
-            if (preset === 'none') {
-                // Remove environment if it exists
-                if (environment) {
-                    environment.parentNode.removeChild(environment);
-                }
-
-                // Add default lights that match A-Frame's defaults
-                const ambientLight = document.createElement('a-entity');
-                ambientLight.setAttribute('light', 'type: ambient; color: #BBB;');
-                ambientLight.setAttribute('data-aframe-default-light', '');
-                ambientLight.setAttribute('aframe-injected', '');
-                scene.appendChild(ambientLight);
-
-                const directionalLight = document.createElement('a-entity');
-                directionalLight.setAttribute('light', 'color: #FFF; intensity: 1.884; castShadow: true');
-                directionalLight.setAttribute('position', '-0.5 1 1');
-                directionalLight.setAttribute('data-aframe-default-light', '');
-                directionalLight.setAttribute('aframe-injected', '');
-                scene.appendChild(directionalLight);
-            } else {
-                // Create or update environment entity
-                if (!environment) {
-                    environment = document.createElement('a-entity');
-                    environment.setAttribute('environment', '');
-                    sceneEl.appendChild(environment);
-                }
-
-                // Update environment entity
-                environment.setAttribute('environment', preset);
-                environment.flushToDOM();
-            }
-
-            // Force a scene update and flush all entities
-            sceneEl.flushToDOM();
-            flushAllEntitiesToDOM();
-
-            // Update code panel to show actual state
-            updateCodePanel();
-        });
-        // ... existing code ...
+        }
     </script>
 </body>
 
