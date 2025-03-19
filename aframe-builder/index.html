@@ -934,63 +934,44 @@
                 },
                 
                 // Update camera state from DOM (separated for reuse)
-                updateCameraState: function() {
-                    const cameraEl = document.getElementById('user-camera');
-                    if (!cameraEl || !cameraEl.object3D) return;
+                updateCameraState: function(newState, source) {
+                    // 1. Update the state (single source of truth)
+                    const oldState = JSON.parse(JSON.stringify(this.cameraState)); // Deep clone for comparison
                     
-                    // Get position directly from object3D
-                    const position = {
-                        x: cameraEl.object3D.position.x,
-                        y: cameraEl.object3D.position.y,
-                        z: cameraEl.object3D.position.z
-                    };
+                    // Apply changes
+                    Object.assign(this.cameraState, newState);
+                    this.cameraState.timestamp = new Date().toISOString();
+                    this.cameraState.source = source || 'manual-update';
                     
-                    // Get rotation - use look-controls if available for better accuracy
-                    let rotation = {x: 0, y: 0, z: 0};
+                    // 2. Calculate if there are meaningful changes (to avoid unnecessary renders)
+                    const positionChanged = !this.cameraState.position || !oldState.position ||
+                        this.cameraState.position.x !== oldState.position.x ||
+                        this.cameraState.position.y !== oldState.position.y ||
+                        this.cameraState.position.z !== oldState.position.z;
                     
-                    if (cameraEl.components && cameraEl.components['look-controls']) {
-                        const lookControls = cameraEl.components['look-controls'];
-                        
-                        // Get pitch and yaw from look-controls
-                        if (lookControls.pitchObject) {
-                            rotation.x = THREE.MathUtils.radToDeg(lookControls.pitchObject.rotation.x);
-                        }
-                        
-                        if (lookControls.yawObject) {
-                            rotation.y = THREE.MathUtils.radToDeg(lookControls.yawObject.rotation.y);
-                        }
-                    } else {
-                        // Fall back to object3D rotation
-                        rotation = {
-                            x: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.x),
-                            y: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.y),
-                            z: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.z)
-                        };
+                    const rotationChanged = !this.cameraState.rotation || !oldState.rotation ||
+                        this.cameraState.rotation.x !== oldState.rotation.x ||
+                        this.cameraState.rotation.y !== oldState.rotation.y ||
+                        this.cameraState.rotation.z !== oldState.rotation.z;
+                    
+                    const modeChanged = this.cameraState.mode !== oldState.mode;
+                    
+                    // 3. Render UI changes if needed (one-way data binding)
+                    if (positionChanged || rotationChanged) {
+                        this.renderCameraPosition();
                     }
                     
-                    // Update our camera state models
-                    this.camera = {
-                        position: position,
-                        rotation: rotation
-                    };
-                    
-                    // Update the scene model camera too
-                    if (!this.scene.camera) {
-                        this.scene.camera = {};
-                    }
-                    this.scene.camera.position = Object.assign({}, position);
-                    this.scene.camera.rotation = Object.assign({}, rotation);
-                    
-                    // Update the main debug panel displays (not the detailed ones)
-                    const posDisplay = document.getElementById('camera-position');
-                    if (posDisplay) {
-                        posDisplay.textContent = `${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}`;
+                    if (modeChanged) {
+                        this.renderCameraMode();
                     }
                     
-                    const rotDisplay = document.getElementById('camera-rotation');
-                    if (rotDisplay) {
-                        rotDisplay.textContent = `${rotation.x.toFixed(2)}, ${rotation.y.toFixed(2)}, ${rotation.z.toFixed(2)}`;
-                    }
+                    // 4. Network sync (throttled)
+                    this.throttledNetworkSync();
+                    
+                    // 5. Update debug display if enabled
+                    this.updateDebugDisplay();
+                    
+                    return this.cameraState;
                 },
                 
                 // Setup camera position tracking to continuously update stored camera position
@@ -5680,6 +5661,193 @@
                     };
                     
                     // Removed logging here
+                },
+                // Single source of truth for camera state
+                cameraState: {
+                    position: { x: 0, y: 1.6, z: 0 },
+                    rotation: { x: 0, y: 0, z: 0 },
+                    mode: 'build', // 'build' or 'scene'
+                    sceneId: null, // ID of selected scene camera if any
+                    timestamp: new Date().toISOString(),
+                    source: 'initialization',
+                    networkId: null, // For networked sync
+                    lastNetworkUpdate: null
+                },
+                renderCameraPosition: function() {
+                    // Get current state (source of truth)
+                    const pos = this.cameraState.position;
+                    const rot = this.cameraState.rotation;
+                    
+                    // Skip render if elements are missing
+                    const cameraEl = document.getElementById('user-camera');
+                    if (!cameraEl || !cameraEl.object3D) return;
+                    
+                    // Prevent circular updates by temporarily disabling listeners if needed
+                    this.preventCircularUpdates = true;
+                    
+                    try {
+                        // Update THREE.js object (most important for visual rendering)
+                        cameraEl.object3D.position.set(pos.x, pos.y, pos.z);
+                        
+                        // Convert rotation format if needed and set rotation
+                        const rotX = THREE.MathUtils.degToRad(rot.x);
+                        const rotY = THREE.MathUtils.degToRad(rot.y);
+                        const rotZ = THREE.MathUtils.degToRad(rot.z);
+                        
+                        // Handle look-controls specifically for user camera
+                        if (cameraEl.components && cameraEl.components['look-controls']) {
+                            const lookControls = cameraEl.components['look-controls'];
+                            
+                            if (lookControls.pitchObject) {
+                                lookControls.pitchObject.rotation.x = rotX;
+                                lookControls.pitchObject.updateMatrix();
+                            }
+                            
+                            if (lookControls.yawObject) {
+                                lookControls.yawObject.rotation.y = rotY;
+                                lookControls.yawObject.updateMatrix();
+                            }
+                        } else {
+                            // Fall back to direct object3D rotation
+                            cameraEl.object3D.rotation.set(rotX, rotY, rotZ);
+                        }
+                        
+                        // Update DOM attributes for A-Frame component access
+                        cameraEl.setAttribute('position', `${pos.x} ${pos.y} ${pos.z}`);
+                        cameraEl.setAttribute('rotation', `${rot.x} ${rot.y} ${rot.z}`);
+                        
+                        // Update any UI displaying the camera position
+                        this.updateCameraUI();
+                    } finally {
+                        // Re-enable updates
+                        this.preventCircularUpdates = false;
+                    }
+                },
+                setupCameraEventListeners: function() {
+                    const scene = document.querySelector('a-scene');
+                    const cameraEl = document.getElementById('user-camera');
+                    if (!scene || !cameraEl) return;
+                    
+                    // Use a ticker to regularly check for changes from THREE.js
+                    scene.addEventListener('tick', () => {
+                        // Skip if we're preventing circular updates
+                        if (this.preventCircularUpdates) return;
+                        
+                        // Only update state if we're in build mode
+                        if (this.cameraState.mode !== 'build') return;
+                        
+                        // Get current THREE.js values
+                        const position = cameraEl.object3D.position;
+                        const rotation = cameraEl.object3D.rotation;
+                        
+                        // Check if there's been a significant change from current state
+                        if (!this.cameraState.position) return;
+                        
+                        const oldPos = this.cameraState.position;
+                        const distance = Math.sqrt(
+                            Math.pow(position.x - oldPos.x, 2) + 
+                            Math.pow(position.y - oldPos.y, 2) + 
+                            Math.pow(position.z - oldPos.z, 2)
+                        );
+                        
+                        // Only update state if the change is significant
+                        if (distance > 0.001) {
+                            // Convert rotation to degrees for consistency
+                            const rotDeg = {
+                                x: THREE.MathUtils.radToDeg(rotation.x),
+                                y: THREE.MathUtils.radToDeg(rotation.y),
+                                z: THREE.MathUtils.radToDeg(rotation.z)
+                            };
+                            
+                            // Update the state
+                            this.updateCameraState({
+                                position: {
+                                    x: position.x,
+                                    y: position.y,
+                                    z: position.z
+                                },
+                                rotation: rotDeg
+                            }, 'camera-motion-tick');
+                        }
+                    });
+                    
+                    console.log("Camera event listeners set up for unidirectional data flow");
+                },
+                // Throttled network sync to avoid flooding the network
+                throttledNetworkSync: function() {
+                    // Skip if network sync is disabled
+                    if (!this.nafEnabled || !window.NAF || !window.NAF.connection.isConnected()) return;
+                    
+                    // Check if we should throttle
+                    const now = Date.now();
+                    if (this.lastNetworkSync && now - this.lastNetworkSync < 100) { // Max 10 updates/second
+                        // Schedule a sync for later if we haven't already
+                        if (!this.pendingNetworkSync) {
+                            this.pendingNetworkSync = setTimeout(() => {
+                                this.syncCameraToNetwork();
+                                this.pendingNetworkSync = null;
+                            }, 100 - (now - this.lastNetworkSync));
+                        }
+                        return;
+                    }
+                    
+                    // Perform the sync now
+                    this.syncCameraToNetwork();
+                    this.lastNetworkSync = now;
+                },
+
+                // Actual network sync function
+                syncCameraToNetwork: function() {
+                    if (!this.nafEnabled || !window.NAF || !window.NAF.connection.isConnected()) return;
+                    
+                    const cameraEl = document.getElementById('user-camera');
+                    if (!cameraEl) return;
+                    
+                    // Use the networked component if available
+                    if (cameraEl.components.networked) {
+                        // Get current state
+                        const state = this.cameraState;
+                        
+                        // Create network message
+                        const cameraData = {
+                            position: state.position,
+                            rotation: state.rotation,
+                            mode: state.mode,
+                            timestamp: state.timestamp
+                        };
+                        
+                        // Send camera update to network
+                        NAF.connection.broadcastData('camera-update', cameraData);
+                        
+                        console.log("Camera state synced to network");
+                    }
+                },
+
+                // Setup network listeners
+                setupNetworkListeners: function() {
+                    if (!window.NAF) return;
+                    
+                    // Listen for camera updates from network
+                    NAF.connection.subscribeToDataChannel('camera-update', (senderId, dataType, data) => {
+                        // Only process if it's not our own data
+                        if (senderId !== NAF.clientId) {
+                            console.log(`Received camera update from ${senderId}`);
+                            
+                            // Update remote user camera if needed
+                            // Or store this data for your application's needs
+                        }
+                    });
+                },
+                updateDebugDisplay: function() {
+                    // Use existing debug update function if available
+                    if (typeof this.updateDebugInfo === 'function') {
+                        this.updateDebugInfo();
+                    }
+                    
+                    // Use direct debug panel update if available
+                    if (typeof this.updateDebugPanelDirectly === 'function') {
+                        this.updateDebugPanelDirectly();
+                    }
                 }
             };
             
