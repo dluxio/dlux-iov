@@ -6140,6 +6140,435 @@
                             this.createRemoteCameraRepresentation(senderId, data);
                         }
                     }
+                },
+                optimizeAssetLoading: function() {
+                    // Preload critical assets first
+                    const criticalAssets = document.querySelectorAll('a-assets > img[critical], a-assets > audio[critical]');
+                    
+                    // Track loading progress
+                    let loaded = 0;
+                    const total = criticalAssets.length;
+                    
+                    // Create a loading indicator
+                    const loadingIndicator = document.createElement('div');
+                    loadingIndicator.className = 'loading-indicator';
+                    loadingIndicator.innerHTML = `<div class="loading-progress"></div><div class="loading-text">Loading assets (0/${total})</div>`;
+                    document.body.appendChild(loadingIndicator);
+                    
+                    // Update progress function
+                    const updateProgress = () => {
+                        loaded++;
+                        const progress = document.querySelector('.loading-progress');
+                        const text = document.querySelector('.loading-text');
+                        
+                        if (progress && text) {
+                            progress.style.width = `${(loaded/total) * 100}%`;
+                            text.textContent = `Loading assets (${loaded}/${total})`;
+                        }
+                        
+                        if (loaded >= total) {
+                            loadingIndicator.classList.add('complete');
+                            setTimeout(() => loadingIndicator.remove(), 1000);
+                        }
+                    };
+                    
+                    // Load non-critical assets after scene initialization
+                    const lazyLoadAssets = () => {
+                        const nonCriticalAssets = document.querySelectorAll('a-assets > *:not([critical])');
+                        nonCriticalAssets.forEach(asset => {
+                            if (asset.tagName === 'IMG' || asset.tagName === 'AUDIO' || asset.tagName === 'VIDEO') {
+                                // Force asset to load if it hasn't already
+                                if (!asset.hasAttribute('src') && asset.hasAttribute('data-src')) {
+                                    asset.setAttribute('src', asset.getAttribute('data-src'));
+                                }
+                            }
+                        });
+                    };
+                    
+                    // Add event listeners for critical assets
+                    criticalAssets.forEach(asset => {
+                        if (asset.complete) {
+                            updateProgress();
+                        } else {
+                            asset.addEventListener('load', updateProgress);
+                            asset.addEventListener('error', updateProgress);
+                        }
+                    });
+                    
+                    // Lazy load non-critical assets
+                    document.querySelector('a-scene').addEventListener('loaded', lazyLoadAssets);
+                },
+                initializeEntityPooling: function() {
+                    // Create pools for frequently used entities
+                    this.entityPools = {
+                        box: [],
+                        sphere: [],
+                        cylinder: []
+                    };
+                    
+                    // Pool size per entity type
+                    const poolSize = 20;
+                    
+                    // Pre-create entities
+                    Object.keys(this.entityPools).forEach(type => {
+                        const pool = this.entityPools[type];
+                        const scene = document.querySelector('a-scene');
+                        
+                        for (let i = 0; i < poolSize; i++) {
+                            const entity = document.createElement(`a-${type}`);
+                            entity.setAttribute('visible', false);
+                            entity.setAttribute('pool-entity', '');
+                            scene.appendChild(entity);
+                            pool.push(entity);
+                        }
+                    });
+                    
+                    console.log("Entity pooling initialized");
+                },
+
+                getPooledEntity: function(type) {
+                    if (!this.entityPools || !this.entityPools[type]) return null;
+                    
+                    // Find an available entity in the pool
+                    const pool = this.entityPools[type];
+                    let entity = pool.find(e => !e.getAttribute('visible'));
+                    
+                    if (entity) {
+                        // Reset entity to default state
+                        entity.setAttribute('visible', true);
+                        return entity;
+                    }
+                    
+                    // If no entities available, create a new one
+                    console.warn(`Entity pool for ${type} exhausted, creating new entity`);
+                    entity = document.createElement(`a-${type}`);
+                    entity.setAttribute('pool-entity', '');
+                    document.querySelector('a-scene').appendChild(entity);
+                    pool.push(entity);
+                    return entity;
+                },
+
+                returnToPool: function(entity) {
+                    if (!entity || !entity.hasAttribute('pool-entity')) return;
+                    
+                    // Reset entity and hide it
+                    entity.setAttribute('visible', false);
+                    
+                    // Remove any dynamic components/attributes
+                    Array.from(entity.attributes).forEach(attr => {
+                        if (!['id', 'pool-entity', 'visible'].includes(attr.name)) {
+                            entity.removeAttribute(attr.name);
+                        }
+                    });
+                },
+                enhanceNAFIntegration: function() {
+                    // Check if NAF is available
+                    if (!window.NAF) {
+                        console.warn("NAF not available for integration enhancement");
+                        return;
+                    }
+                    
+                    // Add custom NAF schemas for camera sync
+                    NAF.schemas.add({
+                        template: '#camera-template',
+                        components: [
+                            'position',
+                            'rotation',
+                            {
+                                component: 'camera-state',
+                                property: 'mode'
+                            }
+                        ]
+                    });
+                    
+                    // Create a camera template if needed
+                    if (!document.getElementById('camera-template')) {
+                        const templateEl = document.createElement('template');
+                        templateEl.id = 'camera-template';
+                        templateEl.innerHTML = `
+                            <a-entity class="remote-camera">
+                                <a-box class="camera-avatar" color="#00AAFF" scale="0.2 0.2 0.4" position="0 0 -0.25"></a-box>
+                                <a-text value="Remote User" position="0 0.25 0" align="center" color="#FFFFFF"></a-text>
+                            </a-entity>
+                        `;
+                        
+                        // Add to assets
+                        const assets = document.querySelector('a-assets');
+                        if (assets) {
+                            assets.appendChild(templateEl);
+                        } else {
+                            document.querySelector('a-scene').insertAdjacentElement('afterbegin', templateEl);
+                        }
+                    }
+                    
+                    // Setup network event handling
+                    NAF.connection.subscribeToDataChannel('camera-state-update', (senderId, dataType, data) => {
+                        // Skip own data
+                        if (senderId === NAF.clientId) return;
+                        
+                        // Handle remote camera state update
+                        const remoteAvatar = document.querySelector(`[data-owner-id="${senderId}"]`);
+                        if (remoteAvatar && data.cameraState) {
+                            console.log(`Received camera state from ${senderId}:`, data.cameraState);
+                            
+                            // Update remote avatar with camera state
+                            if (data.cameraState.mode === 'build') {
+                                remoteAvatar.setAttribute('color', '#00FF00'); // Green for build mode
+                            } else {
+                                remoteAvatar.setAttribute('color', '#0088FF'); // Blue for scene mode
+                            }
+                        }
+                    });
+                    
+                    // Enable periodic camera state sharing
+                    setInterval(() => {
+                        if (this.nafEnabled && NAF.connection.isConnected() && this.cameraState) {
+                            NAF.connection.broadcastData('camera-state-update', {
+                                cameraState: this.cameraState
+                            });
+                        }
+                    }, 1000); // Send update every second
+                    
+                    console.log("Enhanced NAF integration completed");
+                },
+                setupEnhancedNAF: function() {
+                    // Skip if NAF isn't available
+                    if (!window.NAF) {
+                        console.warn("NAF not available for enhanced setup");
+                        return;
+                    }
+                    
+                    // Register custom camera schema for better synchronization
+                    NAF.schemas.add({
+                        template: '#remote-camera-template',
+                        components: [
+                            'position',
+                            'rotation',
+                            {
+                                component: 'camera-state',
+                                property: 'mode'
+                            }
+                        ]
+                    });
+                    
+                    console.log("Enhanced NAF schemas registered");
+                },
+                addRemoteCameraTemplate: function() {
+                    // Skip if template already exists
+                    if (document.getElementById('remote-camera-template')) {
+                        return;
+                    }
+                    
+                    // Create template for remote cameras
+                    const template = document.createElement('template');
+                    template.id = 'remote-camera-template';
+                    template.innerHTML = `
+                        <a-entity class="remote-user-camera">
+                            <a-box class="avatar-head" color="#00AAFF" scale="0.2 0.2 0.4" position="0 0 -0.25"></a-box>
+                            <a-text value="Remote User" position="0 0.3 0" align="center" scale="0.5 0.5 0.5" color="#FFFFFF"></a-text>
+                        </a-entity>
+                    `;
+                    
+                    // Add template to assets
+                    const assets = document.querySelector('a-assets');
+                    if (assets) {
+                        assets.appendChild(template);
+                    } else {
+                        // If no assets container, add to scene
+                        document.querySelector('a-scene').insertAdjacentElement('afterbegin', template);
+                    }
+                    
+                    console.log("Added remote camera template to scene");
+                },
+                createCameraStateComponent: function() {
+                    // Skip if already registered
+                    if (AFRAME.components['camera-state']) {
+                        return;
+                    }
+                    
+                    // Register custom component for camera state
+                    AFRAME.registerComponent('camera-state', {
+                        schema: {
+                            mode: {type: 'string', default: 'build'}
+                        },
+                        
+                        init: function() {
+                            this.el.classList.add('networked-camera');
+                            
+                            // Apply visual indicator based on mode
+                            this.updateVisualMode();
+                        },
+                        
+                        update: function() {
+                            // Update visual representation when properties change
+                            this.updateVisualMode();
+                        },
+                        
+                        updateVisualMode: function() {
+                            // Find avatar head box
+                            const avatarHead = this.el.querySelector('.avatar-head');
+                            if (!avatarHead) return;
+                            
+                            // Set color based on mode
+                            if (this.data.mode === 'build') {
+                                avatarHead.setAttribute('color', '#00FF00'); // Green for build mode
+                            } else if (this.data.mode === 'scene') {
+                                avatarHead.setAttribute('color', '#0088FF'); // Blue for scene mode
+                            } else {
+                                avatarHead.setAttribute('color', '#FF8800'); // Orange for unknown modes
+                            }
+                            
+                            // Update text label if present
+                            const label = this.el.querySelector('a-text');
+                            if (label) {
+                                label.setAttribute('value', `Remote User (${this.data.mode} mode)`);
+                            }
+                        }
+                    });
+                    
+                    console.log("Registered camera-state A-Frame component");
+                },
+                setupCameraDataChannel: function() {
+                    // Skip if NAF isn't available or already connected
+                    if (!window.NAF || !NAF.connection) {
+                        return;
+                    }
+                    
+                    // When NAF connects
+                    NAF.connection.onConnect(() => {
+                        // Subscribe to camera updates channel
+                        NAF.connection.subscribeToDataChannel('camera-state-update', (senderId, dataType, data) => {
+                            // Skip our own updates
+                            if (senderId === NAF.clientId) return;
+                            
+                            console.log(`Received camera update from ${senderId}:`, data);
+                            
+                            // Find the remote user's camera entity
+                            const remoteEntity = document.querySelector(`[data-owner="${senderId}"]`);
+                            if (remoteEntity) {
+                                // Update remote user's entity with additional state
+                                if (data.cameraState) {
+                                    // Update camera state component
+                                    remoteEntity.setAttribute('camera-state', {
+                                        mode: data.cameraState.mode
+                                    });
+                                    
+                                    // You could update other properties here
+                                    if (data.cameraState.source) {
+                                        // This is optional - adds a data attribute to show what triggered the update
+                                        remoteEntity.setAttribute('data-source', data.cameraState.source);
+                                    }
+                                }
+                            }
+                        });
+                        
+                        console.log("Subscribed to camera-state-update data channel");
+                    });
+                },
+                startCameraStateSharing: function() {
+                    // Make sure we only set up one interval
+                    if (this.cameraStateSharingInterval) {
+                        clearInterval(this.cameraStateSharingInterval);
+                    }
+                    
+                    // Set up periodic sharing (every 500ms)
+                    this.cameraStateSharingInterval = setInterval(() => {
+                        // Only send if NAF is connected and we have camera state
+                        if (window.NAF && 
+                            NAF.connection && 
+                            NAF.connection.isConnected() &&
+                            this.cameraState) {
+                            
+                            // Send current camera state to all clients
+                            NAF.connection.broadcastDataGuaranteed('camera-state-update', {
+                                cameraState: {
+                                    position: this.cameraState.position,
+                                    rotation: this.cameraState.rotation,
+                                    mode: this.cameraState.mode,
+                                    source: this.cameraState.source,
+                                    timestamp: this.cameraState.timestamp
+                                }
+                            });
+                        }
+                    }, 500); // Update twice per second
+                    
+                    console.log("Started camera state sharing over network");
+                },
+                setupUserCameraForNetworking: function() {
+                    const userCamera = document.getElementById('user-camera');
+                    if (!userCamera) {
+                        console.warn("Cannot find user-camera for network setup");
+                        return;
+                    }
+                    
+                    // Add networked component to user camera
+                    if (!userCamera.hasAttribute('networked')) {
+                        userCamera.setAttribute('networked', {
+                            template: '#remote-camera-template',
+                            attachTemplateToLocal: false
+                        });
+                    }
+                    
+                    // Add camera-state component to sync mode
+                    if (!userCamera.hasAttribute('camera-state')) {
+                        userCamera.setAttribute('camera-state', {
+                            mode: this.cameraState.mode || 'build'
+                        });
+                    }
+                    
+                    // Update camera-state when camera mode changes
+                    this.updateCameraStateForNetworking = (newState) => {
+                        if (newState.mode && userCamera.hasAttribute('camera-state')) {
+                            userCamera.setAttribute('camera-state', 'mode', newState.mode);
+                        }
+                    };
+                    
+                    console.log("User camera configured for networking");
+                },
+                initializeNetworkedCamera: function() {
+                    // Only proceed if NAF is available
+                    if (!window.NAF) {
+                        console.log("NAF not available, skipping networked camera setup");
+                        return;
+                    }
+                    
+                    // Set up all NAF camera components
+                    this.addRemoteCameraTemplate();
+                    this.createCameraStateComponent();
+                    this.setupEnhancedNAF();
+                    this.setupCameraDataChannel();
+                    this.setupUserCameraForNetworking();
+                    
+                    // Start sharing camera state
+                    this.startCameraStateSharing();
+                    
+                    // Hook into camera state updates
+                    const originalUpdateCameraState = this.updateCameraState;
+                    this.updateCameraState = function(newState, source) {
+                        // Call original function
+                        const result = originalUpdateCameraState.call(this, newState, source);
+                        
+                        // Update networking components
+                        if (this.updateCameraStateForNetworking) {
+                            this.updateCameraStateForNetworking(newState);
+                        }
+                        
+                        return result;
+                    };
+                    
+                    console.log("Networked camera system fully initialized");
+                },
+                // Find in your code where you connect to NAF
+                connectToNetworked: function() {
+                    this.nafEnabled = true;
+                    
+                    // Add this before connecting
+                    this.initializeNetworkedCamera();
+                    
+                    // Then connect
+                    if (window.NAF && NAF.connection) {
+                        NAF.connection.connect(this.roomName, this.getClientOptions());
+                    }
                 }
             };
             
