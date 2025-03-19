@@ -1412,14 +1412,10 @@
                 
                 // Apply model changes to the preview scene
                 applyChangesToPreview: function(html) {
-                    // Only save camera state if we're not in a component add operation
-                    if (!this.preventCameraReset) {
-                        this.saveCameraState('Before preview update');
-                    } else {
-                        console.log("Skipping camera state save due to preventCameraReset flag");
-                }
-                
-                try {
+                    // Always save camera state before any change
+                    this.saveCameraState('Before preview update');
+                    
+                    try {
                         const previewScene = document.getElementById('preview-scene');
                         if (!previewScene) return;
                         
@@ -1449,40 +1445,6 @@
                         return;
                     }
                     
-                        // Remember camera position before we make any changes
-                        const cameraEl = document.getElementById('user-camera');
-                        let originalCameraPos = null;
-                        let originalCameraRot = null;
-                        
-                        // Save exact camera state for restoration if we're in component add mode
-                        if (this.preventCameraReset && cameraEl && cameraEl.object3D) {
-                            originalCameraPos = {
-                                x: cameraEl.object3D.position.x,
-                                y: cameraEl.object3D.position.y,
-                                z: cameraEl.object3D.position.z
-                            };
-                            
-                            // Save look-controls rotation if available 
-                            if (cameraEl.components && cameraEl.components['look-controls']) {
-                                const lookControls = cameraEl.components['look-controls'];
-                                
-                                originalCameraRot = {
-                                    x: lookControls.pitchObject ? THREE.MathUtils.radToDeg(lookControls.pitchObject.rotation.x) : 0,
-                                    y: lookControls.yawObject ? THREE.MathUtils.radToDeg(lookControls.yawObject.rotation.y) : 0,
-                                    z: 0
-                                };
-                            } else {
-                                // Fallback to object3D rotation
-                                originalCameraRot = {
-                                    x: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.x),
-                                    y: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.y),
-                                    z: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.z)
-                                };
-                            }
-                            
-                            console.log("🔒 Preserved camera position during update:", originalCameraPos);
-                        }
-                        
                         // Get all non-camera entities in the current scene
                         const currentEntities = Array.from(previewScene.children).filter(el => 
                             el.tagName && 
@@ -1526,60 +1488,12 @@
                         // Use our centralized method to flush all entities to DOM
                         this.flushAllEntitiesToDOM();
                         
-                        // If we're in component add mode, restore camera position immediately
-                        if (this.preventCameraReset && originalCameraPos && cameraEl) {
-                            console.log("🔄 Directly restoring camera during preview update");
-                            
-                            // Set position 
-                            cameraEl.object3D.position.set(
-                                originalCameraPos.x,
-                                originalCameraPos.y,
-                                originalCameraPos.z
-                            );
-                            
-                            // Set rotation
-                            if (originalCameraRot) {
-                                const rotX = THREE.MathUtils.degToRad(originalCameraRot.x);
-                                const rotY = THREE.MathUtils.degToRad(originalCameraRot.y);
-                                const rotZ = THREE.MathUtils.degToRad(originalCameraRot.z);
-                                cameraEl.object3D.rotation.set(rotX, rotY, rotZ);
-                            }
-                            
-                            // Update look-controls to match
-                            if (cameraEl.components && cameraEl.components['look-controls']) {
-                                const lookControls = cameraEl.components['look-controls'];
-                                
-                                if (lookControls.pitchObject && originalCameraRot) {
-                                    lookControls.pitchObject.rotation.x = THREE.MathUtils.degToRad(originalCameraRot.x);
-                                    lookControls.pitchObject.updateMatrix();
-                                }
-                                
-                                if (lookControls.yawObject && originalCameraRot) {
-                                    lookControls.yawObject.rotation.y = THREE.MathUtils.degToRad(originalCameraRot.y);
-                                    lookControls.yawObject.updateMatrix();
-                                }
-                            }
-                            
-                            // Update DOM attributes
-                            cameraEl.setAttribute('position', originalCameraPos);
-                            if (originalCameraRot) {
-                                cameraEl.setAttribute('rotation', originalCameraRot);
-                            }
-                            
-                            // Force synchronization
-                            if (AFRAME && AFRAME.scenes && AFRAME.scenes.length > 0) {
-                                AFRAME.scenes[0].tick();
-                            }
-                        }
-                        
                         // Reset update flag after DOM updates are complete
                         setTimeout(() => {
                             this.isUpdatingFromState = false;
                             
-                            // Only restore camera if we're not in component add mode
-                            if (!this.preventCameraReset) {
-                                this.restoreCameraState('After preview update');
-                            }
+                            // Restore camera state after changes are applied
+                            this.restoreCameraState('After preview update');
                         }, 100);
                         
                     } catch (error) {
@@ -1975,46 +1889,22 @@
                     this.logCameraEvent(`Adding ${componentType} component`, true);
                     
                     try {
-                        // Set a flag to prevent camera reset during the process
-                        this.preventCameraReset = true;
-                        
-                        // Capture exact DOM camera position before any changes
+                        // Capture DOM camera position before any changes
                         const cameraEl = document.getElementById('user-camera');
                         let savedCameraPosition = null;
                         let savedCameraRotation = null;
-                        let savedLookControlsState = null;
                         
                         if (cameraEl && cameraEl.object3D) {
-                            // Get current position directly from object3D (most accurate)
+                            // Save exact current position and rotation
                             savedCameraPosition = {
                                 x: cameraEl.object3D.position.x,
                                 y: cameraEl.object3D.position.y,
                                 z: cameraEl.object3D.position.z
                             };
                             
-                            // Check for NaN values and fix them
-                            if (isNaN(savedCameraPosition.x)) savedCameraPosition.x = 0;
-                            if (isNaN(savedCameraPosition.y)) savedCameraPosition.y = 1.6;
-                            if (isNaN(savedCameraPosition.z)) savedCameraPosition.z = 5;
-                            
-                            // Save exact look-controls state for more accurate rotation
+                            // Save rotation from the best source
                             if (cameraEl.components && cameraEl.components['look-controls']) {
                                 const lookControls = cameraEl.components['look-controls'];
-                                savedLookControlsState = {};
-                                
-                                if (lookControls.pitchObject) {
-                                    savedLookControlsState.pitchX = lookControls.pitchObject.rotation.x;
-                                    // Fix NaN
-                                    if (isNaN(savedLookControlsState.pitchX)) savedLookControlsState.pitchX = 0;
-                                }
-                                
-                                if (lookControls.yawObject) {
-                                    savedLookControlsState.yawY = lookControls.yawObject.rotation.y; 
-                                    // Fix NaN
-                                    if (isNaN(savedLookControlsState.yawY)) savedLookControlsState.yawY = 0;
-                                }
-                                
-                                // Save rotation from look-controls
                                 savedCameraRotation = {
                                     // Store in degrees for easier debugging
                                     x: lookControls.pitchObject ? THREE.MathUtils.radToDeg(lookControls.pitchObject.rotation.x) : 0,
@@ -2030,13 +1920,7 @@
                                 };
                             }
                             
-                            // Check for NaN values in rotation
-                            if (isNaN(savedCameraRotation.x)) savedCameraRotation.x = 0;
-                            if (isNaN(savedCameraRotation.y)) savedCameraRotation.y = 0;
-                            if (isNaN(savedCameraRotation.z)) savedCameraRotation.z = 0;
-                            
                             console.log("Saved camera position before adding component:", savedCameraPosition);
-                            console.log("Saved camera rotation before adding component:", savedCameraRotation);
                         }
                         
                         // Parse the component HTML
@@ -2052,30 +1936,6 @@
                                 const id = `${componentType}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
                                 componentEl.setAttribute('id', id);
                                 
-                                // CRITICAL: Save the state to our model BEFORE touching DOM
-                                // This ensures the camera position is preserved in our data model
-                                if (savedCameraPosition && savedCameraRotation) {
-                                    // Store camera state before any DOM changes
-                                    if (!this.scene.camera) {
-                                        this.scene.camera = {};
-                                    }
-                                    
-                                    this.scene.camera.position = Object.assign({}, savedCameraPosition);
-                                    this.scene.camera.rotation = Object.assign({}, savedCameraRotation);
-                                    
-                                    // Also update the main app camera reference
-                                    this.camera = {
-                                        position: Object.assign({}, savedCameraPosition),
-                                        rotation: Object.assign({}, savedCameraRotation)
-                                    };
-                                    
-                                    console.log("📝 Stored camera state in model:", this.camera);
-                                }
-                                
-                                // Set flag to disable auto camera updates during the add operation
-                                const isUpdatingEntitiesBefore = this.isUpdatingEntities;
-                                this.isUpdatingEntities = true;
-                                
                                 // Add to scene
                                 previewScene.appendChild(componentEl);
                                 
@@ -2088,192 +1948,68 @@
                                     this.flushAllEntitiesToDOM();
                                 }
                                 
-                                // Use a custom version of parseSceneFromDOM that preserves camera
-                                const originalParseMethod = this.parseSceneFromDOM;
-                                
-                                this.parseSceneFromDOM = function() {
-                                    console.log("Using camera-preserving parseSceneFromDOM");
-                                    const timestamp = new Date().toISOString();
-                                    const previewScene = document.getElementById('preview-scene');
-                                    if (!previewScene) return;
-                                    
-                                    // Update last parse time in debug
-                                    const lastParseTimeEl = document.getElementById('debug-last-parse-time');
-                                    if (lastParseTimeEl) {
-                                        lastParseTimeEl.textContent = timestamp;
-                                    }
-                                    
-                                    // Preserve our camera data exactly as it was before
-                                    const oldCamera = this.camera ? Object.assign({}, this.camera) : null;
-                                    
-                                    // Reset scene data
-                                    this.scene.entities = [];
-                                    this.scene.assets = [];
-                                    
-                                    // Parse assets if they exist
-                                    const assetsEl = previewScene.querySelector('a-assets');
-                                    if (assetsEl) {
-                                        Array.from(assetsEl.children).forEach(asset => {
-                                            this.scene.assets.push({
-                                                tag: asset.tagName.toLowerCase(),
-                                                attributes: this.extractAttributes(asset)
-                                            });
-                                        });
-                                    }
-                                    
-                                    // Parse all entities EXCEPT camera
-                                    Array.from(previewScene.children).forEach(child => {
-                                        if (child.tagName && 
-                                            child.tagName.toLowerCase().startsWith('a-') && 
-                                            !child.hasAttribute('aframe-injected') &&
-                                            child.tagName.toLowerCase() !== 'a-assets' &&
-                                            child.id !== 'user-camera') {
-                                            
-                                            // Process entity and children
-                                            const entityData = this.serializeEntityRecursive(child);
-                                            this.scene.entities.push(entityData);
-                                        }
-                                    });
-                                    
-                                    // Restore camera data EXACTLY as it was
-                                    if (oldCamera) {
-                                        // Update both references to ensure consistency
-                                        this.camera = oldCamera;
-                                        if (!this.scene.camera) {
-                                            this.scene.camera = {};
-                                        }
-                                        this.scene.camera.position = Object.assign({}, oldCamera.position);
-                                        this.scene.camera.rotation = Object.assign({}, oldCamera.rotation);
-                                    }
-                                    
-                                    console.log(`[${timestamp}] Parsed ${this.scene.entities.length} entities from DOM, preserving camera:`, this.camera);
-                                }.bind(this);
-                                
-                                // Use our custom implementation to update the model, but not the DOM
+                                // *** KEY CHANGE: Only update the model, not the entire scene ***
+                                // Just add the new entity to the existing model
                                 this.parseSceneFromDOM();
                                 
-                                // Restore original implementation
-                                this.parseSceneFromDOM = originalParseMethod;
-                                
-                                // Disable the editor update during component addition to prevent cycles
-                                // We'll manually update it with our preserved camera state
-                                const originalUpdateEditorMethod = this.updateEditor;
-                                
-                                this.updateEditor = function() {
-                                    console.log("Using camera-safe updateEditor");
-                                    const previewScene = document.getElementById('preview-scene');
-                                    if (!previewScene) return;
-                                    
-                                    // We'll generate the HTML manually to ensure camera position is preserved
-                                    let html = "<a-scene embedded>\n";
-                                    
-                                    // Add camera with preserved position
-                                    if (this.camera && this.camera.position) {
-                                        const pos = this.camera.position;
-                                        const rot = this.camera.rotation;
-                                        html += `  <a-entity id="user-camera" position="${pos.x} ${pos.y} ${pos.z}" `;
-                                        html += `rotation="${rot.x} ${rot.y} ${rot.z}" `;
-                                        html += `camera look-controls wasd-controls></a-entity>\n`;
-                                    }
-                                    
-                                    // Add all other entities except camera
-                                    const cleanHTML = this.getCleanSceneHTML(previewScene);
-                                    html += cleanHTML;
-                                    html += "</a-scene>";
-                                    
-                                    // Update the editor value, but only if it's changed
-                                    const currentValue = this.editor.getValue();
-                                    if (currentValue !== html) {
-                                        console.log("Updating editor with preserved camera");
-                                        this.editor.setValue(html);
-                                    } else {
-                                        console.log("Editor content unchanged, preserving state");
-                                    }
-                                }.bind(this);
-                                
-                                // Update the editor text with our preserved camera model
+                                // Update the editor text with the new model
                                 this.updateEditor();
                                 
-                                // Restore the original editor update method
-                                this.updateEditor = originalUpdateEditorMethod;
-                                
-                                // Now explicitly restore the camera position in the DOM
-                                if (savedCameraPosition && cameraEl) {
-                                    console.log("Directly restoring saved camera position:", savedCameraPosition);
+                                // Explicitly restore the camera position that we saved
+                                if (savedCameraPosition && savedCameraRotation && cameraEl) {
+                                    console.log("Restoring camera position after adding component:", savedCameraPosition);
                                     
-                                    // First check if position values are valid
-                                    if (isNaN(savedCameraPosition.x) || isNaN(savedCameraPosition.y) || isNaN(savedCameraPosition.z)) {
-                                        console.warn("NaN detected in saved position, using defaults");
-                                        savedCameraPosition = { x: 0, y: 1.6, z: 5 };
-                                    }
-                                    
-                                    // Update object3D directly (most reliable)
+                                    // Set position directly on object3D
                                     cameraEl.object3D.position.set(
                                         savedCameraPosition.x,
                                         savedCameraPosition.y,
                                         savedCameraPosition.z
                                     );
                                     
-                                    // Update rotation if available
-                                    if (savedCameraRotation) {
-                                        // Check for NaN values
-                                        if (isNaN(savedCameraRotation.x)) savedCameraRotation.x = 0;
-                                        if (isNaN(savedCameraRotation.y)) savedCameraRotation.y = 0;
-                                        if (isNaN(savedCameraRotation.z)) savedCameraRotation.z = 0;
-                                        
-                                        const rotX = THREE.MathUtils.degToRad(savedCameraRotation.x);
-                                        const rotY = THREE.MathUtils.degToRad(savedCameraRotation.y);
-                                        const rotZ = THREE.MathUtils.degToRad(savedCameraRotation.z);
-                                        cameraEl.object3D.rotation.set(rotX, rotY, rotZ);
-                                    }
+                                    // Set rotation directly
+                                    const rotX = THREE.MathUtils.degToRad(savedCameraRotation.x);
+                                    const rotY = THREE.MathUtils.degToRad(savedCameraRotation.y);
+                                    const rotZ = THREE.MathUtils.degToRad(savedCameraRotation.z);
+                                    cameraEl.object3D.rotation.set(rotX, rotY, rotZ);
                                     
-                                    // Restore precise look-controls state if we have it
-                                    if (savedLookControlsState && cameraEl.components && cameraEl.components['look-controls']) {
+                                    // Update matrices
+                                    cameraEl.object3D.updateMatrix();
+                                    cameraEl.object3D.updateMatrixWorld(true);
+                                    
+                                    // Update look-controls if present
+                                    if (cameraEl.components && cameraEl.components['look-controls']) {
                                         const lookControls = cameraEl.components['look-controls'];
-                                        
-                                        // Restore exact pitch and yaw values
-                                        if (lookControls.pitchObject && savedLookControlsState.pitchX !== undefined) {
-                                            if (!isNaN(savedLookControlsState.pitchX)) {
-                                                lookControls.pitchObject.rotation.x = savedLookControlsState.pitchX;
-                                                lookControls.pitchObject.updateMatrix();
-                                            }
+                                        if (lookControls.pitchObject) {
+                                            lookControls.pitchObject.rotation.x = rotX;
+                                            lookControls.pitchObject.updateMatrix();
                                         }
-                                        
-                                        if (lookControls.yawObject && savedLookControlsState.yawY !== undefined) {
-                                            if (!isNaN(savedLookControlsState.yawY)) {
-                                                lookControls.yawObject.rotation.y = savedLookControlsState.yawY;
-                                                lookControls.yawObject.updateMatrix();
-                                            }
+                                        if (lookControls.yawObject) {
+                                            lookControls.yawObject.rotation.y = rotY;
+                                            lookControls.yawObject.updateMatrix();
                                         }
                                     }
                                     
-                                    // Reset WASD controls velocity
-                                    if (cameraEl.components && cameraEl.components['wasd-controls']) {
-                                        const wasdControls = cameraEl.components['wasd-controls'];
-                                        if (wasdControls.velocity) {
-                                            wasdControls.velocity.set(0, 0, 0);
-                                        }
+                                    // Also update our model's camera position to match
+                                    if (!this.scene.camera) {
+                                        this.scene.camera = {};
                                     }
+                                    this.scene.camera.position = Object.assign({}, savedCameraPosition);
+                                    this.scene.camera.rotation = Object.assign({}, savedCameraRotation);
                                     
-                                    // Update the DOM attributes to match the object3D
+                                    // Update the main app camera reference
+                                    this.camera = {
+                                        position: Object.assign({}, savedCameraPosition),
+                                        rotation: Object.assign({}, savedCameraRotation)
+                                    };
+                                    
+                                    // Set DOM attributes to match
                                     cameraEl.setAttribute('position', savedCameraPosition);
-                                    
-                                    if (savedCameraRotation) {
-                                        cameraEl.setAttribute('rotation', {
-                                            x: savedCameraRotation.x,
-                                            y: savedCameraRotation.y,
-                                            z: savedCameraRotation.z
-                                        });
-                                    }
-                                    
-                                    // Force A-Frame to synchronize
-                                    if (AFRAME && AFRAME.scenes && AFRAME.scenes.length > 0) {
-                                        AFRAME.scenes[0].tick();
-                                    }
+                                    cameraEl.setAttribute('rotation', {
+                                        x: savedCameraRotation.x,
+                                        y: savedCameraRotation.y,
+                                        z: savedCameraRotation.z
+                                    });
                                 }
-                                
-                                // Restore the flags
-                                this.isUpdatingEntities = isUpdatingEntitiesBefore;
                                 
                                 // Update debug info
                                 this.updateDebugInfo();
@@ -2289,9 +2025,6 @@
                         console.error('Error adding component:', error);
                         this.logCameraEvent(`Error adding component: ${error.message}`, true);
                         this.showSaveIndicator('error');
-                    } finally {
-                        // Always clear the prevention flag
-                        this.preventCameraReset = false;
                     }
                 },
                 
@@ -2600,14 +2333,7 @@
                     let cameraPosition = null;
                     let cameraRotation = null;
                     
-                    // If we're preventing camera reset, use the stored values
-                    if (this.preventCameraReset && this.camera && this.camera.position) {
-                        console.log("Using stored camera position due to preventCameraReset flag:", this.camera.position);
-                        cameraPosition = Object.assign({}, this.camera.position);
-                        cameraRotation = Object.assign({}, this.camera.rotation);
-                    } 
-                    // Otherwise get from DOM
-                    else if (cameraEl && cameraEl.object3D) {
+                    if (cameraEl && cameraEl.object3D) {
                         // Save current camera position and rotation
                         cameraPosition = {
                             x: cameraEl.object3D.position.x,
@@ -3347,9 +3073,6 @@
                             this.initialize();
                         });
                     }
-                    
-                    // Set up camera position monitoring
-                    this.startCameraMonitoring();
                 },
                 
                 flushAllEntitiesToDOM: function() {
@@ -3878,290 +3601,101 @@
                 
                 // Fix common camera issues
                 fixCameraIssues: function() {
-                    // Get camera element
+                    console.log("Fixing camera issues");
+                    
                     const cameraEl = document.getElementById('user-camera');
-                    if (!cameraEl || !cameraEl.object3D) return;
-                    
-                    // Fix NaN position values
-                    const pos = cameraEl.object3D.position;
-                    if (isNaN(pos.x) || isNaN(pos.y) || isNaN(pos.z)) {
-                        console.warn("Fixing NaN position values in camera");
-                        
-                        // Get a valid position, trying different sources
-                        let validPos = { x: 0, y: 1.6, z: 5 };
-                        
-                        // Try from model
-                        if (this.camera && this.camera.position) {
-                            const modelPos = this.camera.position;
-                            if (!isNaN(modelPos.x) && !isNaN(modelPos.y) && !isNaN(modelPos.z)) {
-                                validPos = modelPos;
-                            }
-                        }
-                        
-                        // Apply fix
-                        pos.set(validPos.x, validPos.y, validPos.z);
-                        cameraEl.setAttribute('position', validPos);
-                        
-                        // Log the fix
-                        this.logCameraEvent(`Fixed NaN camera position: (${validPos.x.toFixed(2)}, ${validPos.y.toFixed(2)}, ${validPos.z.toFixed(2)})`, true);
+                    if (!cameraEl) {
+                        console.warn("No camera entity found");
+                        this.logCameraEvent('No camera found to fix', true);
+                        return;
                     }
-                    
-                    // Fix NaN rotation values
-                    const rot = cameraEl.object3D.rotation;
-                    if (isNaN(rot.x) || isNaN(rot.y) || isNaN(rot.z)) {
-                        console.warn("Fixing NaN rotation values in camera");
-                        
-                        // Get valid rotation
-                        let validRot = { x: 0, y: 0, z: 0 };
-                        
-                        // Try from model
-                        if (this.camera && this.camera.rotation) {
-                            const modelRot = this.camera.rotation;
-                            if (!isNaN(modelRot.x) && !isNaN(modelRot.y) && !isNaN(modelRot.z)) {
-                                validRot = {
-                                    x: THREE.MathUtils.degToRad(modelRot.x),
-                                    y: THREE.MathUtils.degToRad(modelRot.y),
-                                    z: THREE.MathUtils.degToRad(modelRot.z)
-                                };
-                            }
-                        }
-                        
-                        // Apply fix
-                        rot.set(validRot.x, validRot.y, validRot.z);
-                        cameraEl.setAttribute('rotation', {
-                            x: THREE.MathUtils.radToDeg(validRot.x),
-                            y: THREE.MathUtils.radToDeg(validRot.y),
-                            z: THREE.MathUtils.radToDeg(validRot.z)
-                        });
-                        
-                        // Log the fix
-                        this.logCameraEvent(`Fixed NaN camera rotation`, true);
-                    }
-                    
-                    // Fix look-controls
-                    if (cameraEl.components && cameraEl.components['look-controls']) {
-                        const lookControls = cameraEl.components['look-controls'];
-                        
-                        if (lookControls.pitchObject && isNaN(lookControls.pitchObject.rotation.x)) {
-                            console.warn("Fixing NaN pitch rotation in look-controls");
-                            lookControls.pitchObject.rotation.x = 0;
-                            lookControls.pitchObject.updateMatrix();
-                        }
-                        
-                        if (lookControls.yawObject && isNaN(lookControls.yawObject.rotation.y)) {
-                            console.warn("Fixing NaN yaw rotation in look-controls");
-                            lookControls.yawObject.rotation.y = 0;
-                            lookControls.yawObject.updateMatrix();
-                        }
-                    }
-                    
-                    // Fix wasd-controls
-                    if (cameraEl.components && cameraEl.components['wasd-controls']) {
-                        const wasdControls = cameraEl.components['wasd-controls'];
-                        
-                        if (wasdControls.velocity) {
-                            if (isNaN(wasdControls.velocity.x) || isNaN(wasdControls.velocity.y) || isNaN(wasdControls.velocity.z)) {
-                                console.warn("Fixing NaN velocity in wasd-controls");
-                                wasdControls.velocity.set(0, 0, 0);
-                                
-                                // Try to reset component
-                                if (wasdControls.updateVelocity) {
-                                    wasdControls.updateVelocity();
-                                }
-                            }
-                        }
-                    }
-                    
-                    // Update our model to match the fixed camera
-                    this.updateCameraInModel();
-                },
-                
-                // Update the camera position in our model from DOM
-                updateCameraInModel: function() {
-                    const cameraEl = document.getElementById('user-camera');
-                    if (!cameraEl || !cameraEl.object3D) return;
-                    
-                    // Get the current position and rotation
-                    const pos = cameraEl.object3D.position;
-                    let rot = { x: 0, y: 0, z: 0 };
-                    
-                    // Get rotation from look-controls if available
-                    if (cameraEl.components && cameraEl.components['look-controls']) {
-                        const lookControls = cameraEl.components['look-controls'];
-                        
-                        if (lookControls.pitchObject && !isNaN(lookControls.pitchObject.rotation.x)) {
-                            rot.x = THREE.MathUtils.radToDeg(lookControls.pitchObject.rotation.x);
-                        }
-                        
-                        if (lookControls.yawObject && !isNaN(lookControls.yawObject.rotation.y)) {
-                            rot.y = THREE.MathUtils.radToDeg(lookControls.yawObject.rotation.y);
-                        }
-                    } else {
-                        // Fallback to object3D rotation
-                        rot.x = THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.x);
-                        rot.y = THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.y);
-                        rot.z = THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.z);
-                    }
-                    
-                    // Update our model
-                    if (!this.scene.camera) {
-                        this.scene.camera = {};
-                    }
-                    
-                    this.scene.camera.position = {
-                        x: pos.x,
-                        y: pos.y,
-                        z: pos.z
-                    };
-                    
-                    this.scene.camera.rotation = {
-                        x: rot.x,
-                        y: rot.y,
-                        z: rot.z
-                    };
-                    
-                    // Also update main app camera reference
-                    this.camera = {
-                        position: Object.assign({}, this.scene.camera.position),
-                        rotation: Object.assign({}, this.scene.camera.rotation)
-                    };
-                },
-                
-                // Start monitoring camera position for NaN values
-                startCameraMonitoring: function() {
-                    // Avoid duplicate monitors
-                    if (this._cameraMonitorInterval) {
-                        clearInterval(this._cameraMonitorInterval);
-                    }
-                    
-                    // Check camera position every 200ms
-                    this._cameraMonitorInterval = setInterval(() => {
-                        const cameraEl = document.getElementById('user-camera');
-                        if (!cameraEl || !cameraEl.object3D) return;
-                        
-                        const pos = cameraEl.object3D.position;
-                        
-                        // Check for NaN values
-                        if (isNaN(pos.x) || isNaN(pos.y) || isNaN(pos.z)) {
-                            console.warn("NaN detected in camera position during monitoring");
-                            this.fixCameraIssues();
-                            this.logCameraEvent("Fixed NaN camera position during movement", true);
-                        }
-                        
-                        // Also check wasd-controls for NaN velocity
-                        if (cameraEl.components && cameraEl.components['wasd-controls']) {
-                            const wasdControls = cameraEl.components['wasd-controls'];
-                            if (wasdControls.velocity) {
-                                if (isNaN(wasdControls.velocity.x) || 
-                                    isNaN(wasdControls.velocity.y) || 
-                                    isNaN(wasdControls.velocity.z)) {
-                                    console.warn("NaN detected in wasd-controls velocity");
-                                    wasdControls.velocity.set(0, 0, 0);
-                                    
-                                    if (wasdControls.updateVelocity) {
-                                        wasdControls.updateVelocity();
-                                    }
-                                }
-                            }
-                        }
-                    }, 200);
-                },
-                
-                // Initialize the editor field
-                initEditor: function() {
-                    console.log("Initializing editor...");
-                    const editorContainer = document.getElementById('editor-container');
-                    if (!editorContainer) return;
                     
                     try {
-                        // Create Monaco editor
-                        this.editor = monaco.editor.create(editorContainer, {
-                            value: '<a-scene>\n  <!-- Your A-Frame scene here -->\n</a-scene>',
-                            language: 'html',
-                            minimap: { enabled: false },
-                            theme: 'vs-dark',
-                            automaticLayout: true,
-                            wordWrap: 'on',
-                            lineNumbers: 'on',
-                            tabSize: 2,
-                            scrollBeyondLastLine: false
-                        });
+                        // Get current position and rotation
+                        const currentPos = cameraEl.getAttribute('position');
+                        const currentRot = cameraEl.getAttribute('rotation');
                         
-                        // Set up change listener with debounce
-                        let lastValue = this.editor.getValue();
-                        let timeout = null;
+                        // Check for NaN values
+                        const hasNaN = 
+                            (currentPos && (isNaN(currentPos.x) || isNaN(currentPos.y) || isNaN(currentPos.z))) ||
+                            (currentRot && (isNaN(currentRot.x) || isNaN(currentRot.y) || isNaN(currentRot.z)));
                         
-                        this.editor.onDidChangeModelContent(() => {
-                            clearTimeout(timeout);
+                        if (hasNaN) {
+                            console.warn("NaN values detected in camera position/rotation, fixing");
+                            this.logCameraEvent('NaN values detected in camera, fixing', true);
                             
-                            timeout = setTimeout(() => {
-                                // Only apply if content actually changed
-                                const newValue = this.editor.getValue();
-                                if (newValue !== lastValue) {
-                                    console.log("Editor content changed, applying to preview...");
-                                    
-                                    lastValue = newValue;
-                                    
-                                    // IMPORTANT: When editing HTML, we need to ensure camera state is preserved
-                                    const cameraEl = document.getElementById('user-camera');
-                                    let savedCameraPosition = null;
-                                    let savedCameraRotation = null;
-                                    
-                                    // Save current camera state before applying HTML changes
-                                    if (cameraEl && cameraEl.object3D) {
-                                        // Get position directly from object3D
-                                        savedCameraPosition = {
-                                            x: cameraEl.object3D.position.x,
-                                            y: cameraEl.object3D.position.y,
-                                            z: cameraEl.object3D.position.z
-                                        };
-                                        
-                                        // Get rotation from look-controls if available
-                                        if (cameraEl.components && cameraEl.components['look-controls']) {
-                                            const lookControls = cameraEl.components['look-controls'];
-                                            savedCameraRotation = {
-                                                x: lookControls.pitchObject ? THREE.MathUtils.radToDeg(lookControls.pitchObject.rotation.x) : 0,
-                                                y: lookControls.yawObject ? THREE.MathUtils.radToDeg(lookControls.yawObject.rotation.y) : 0,
-                                                z: 0
-                                            };
-                                        } else {
-                                            // Fallback to object3D rotation
-                                            savedCameraRotation = {
-                                                x: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.x),
-                                                y: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.y),
-                                                z: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.z)
-                                            };
-                                        }
-                                        
-                                        // Store the position and rotation for use in applyChangesToPreview
-                                        if (!this.scene.camera) {
-                                            this.scene.camera = {};
-                                        }
-                                        
-                                        // Update both data models
-                                        this.scene.camera.position = Object.assign({}, savedCameraPosition);
-                                        this.scene.camera.rotation = Object.assign({}, savedCameraRotation);
-                                        
-                                        this.camera = {
-                                            position: Object.assign({}, savedCameraPosition),
-                                            rotation: Object.assign({}, savedCameraRotation)
-                                        };
-                                        
-                                        console.log("Preserved camera position from editor change:", savedCameraPosition);
-                                    }
-                                    
-                                    // Show saving indicator
-                                    this.showSaveIndicator('saving');
-                                    
-                                    // Apply changes to the preview scene
-                                    this.applyChangesToPreview(newValue);
+                            // Use fixed default values
+                            const fixedPos = {x: 0, y: 1.6, z: 5};
+                            const fixedRot = {x: 0, y: 0, z: 0};
+                            
+                            // Fix object3D directly
+                            if (cameraEl.object3D) {
+                                cameraEl.object3D.position.set(fixedPos.x, fixedPos.y, fixedPos.z);
+                                cameraEl.object3D.rotation.set(0, 0, 0);
+                                cameraEl.object3D.updateMatrix();
+                                cameraEl.object3D.updateMatrixWorld(true);
+                            }
+                            
+                            // Fix camera attributes
+                            cameraEl.setAttribute('position', fixedPos);
+                            cameraEl.setAttribute('rotation', fixedRot);
+                            
+                            // Fix look-controls
+                            if (cameraEl.components && cameraEl.components['look-controls']) {
+                                const lookControls = cameraEl.components['look-controls'];
+                                
+                                // Reset all rotation objects
+                                if (lookControls.pitchObject) {
+                                    lookControls.pitchObject.rotation.x = 0;
+                                    lookControls.pitchObject.updateMatrix();
                                 }
-                            }, 500); // 500ms debounce
-                        });
+                                
+                                if (lookControls.yawObject) {
+                                    lookControls.yawObject.rotation.y = 0;
+                                    lookControls.yawObject.updateMatrix();
+                                }
+                            }
+                        }
                         
-                        console.log("Editor initialized successfully");
+                        // Always reset wasd-controls velocity to prevent NaN propagation
+                        if (cameraEl.components && cameraEl.components['wasd-controls']) {
+                            const wasdControls = cameraEl.components['wasd-controls'];
+                            
+                            // Reset velocity to zero
+                            if (wasdControls.velocity) {
+                                wasdControls.velocity.set(0, 0, 0);
+                            }
+                            
+                            // Force controls to reinitialize if needed
+                            if (typeof wasdControls.updateVelocity === 'function') {
+                                wasdControls.updateVelocity();
+                            }
+                        }
+                        
+                        // Store fixed camera state
+                        this.camera = {
+                            position: {
+                                x: cameraEl.object3D.position.x,
+                                y: cameraEl.object3D.position.y,
+                                z: cameraEl.object3D.position.z
+                            },
+                            rotation: {
+                                x: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.x || 0),
+                                y: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.y || 0),
+                                z: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.z || 0)
+                            }
+                        };
+                        
+                        // Force a camera tick
+                        if (AFRAME.scenes[0]) {
+                            AFRAME.scenes[0].tick();
+                        }
+                        
+                        this.logCameraEvent('Camera issues fixed', true);
+                        this.updateDebugInfo();
                     } catch (error) {
-                        console.error("Error initializing editor:", error);
+                        console.error("Error fixing camera:", error);
+                        this.logCameraEvent(`Error fixing camera: ${error.message}`, true);
                     }
                 }
             };
