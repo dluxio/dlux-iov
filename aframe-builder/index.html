@@ -1417,9 +1417,9 @@
                         this.saveCameraState('Before preview update');
                     } else {
                         console.log("Skipping camera state save due to preventCameraReset flag");
-                    }
-                    
-                    try {
+                }
+                
+                try {
                         const previewScene = document.getElementById('preview-scene');
                         if (!previewScene) return;
                         
@@ -1434,9 +1434,9 @@
                             console.error('Empty HTML content, not applying changes');
                             this.isUpdatingFromState = false;
                             this.showSaveIndicator('error');
-                            return;
-                        }
-                        
+                        return;
+                    }
+                    
                         // Process the HTML to get the scene content
                         const template = document.createElement('template');
                         template.innerHTML = html.trim();
@@ -1446,9 +1446,9 @@
                             console.error('Empty scene content, not applying changes');
                             this.isUpdatingFromState = false;
                             this.showSaveIndicator('error');
-                            return;
-                        }
-                        
+                        return;
+                    }
+                    
                         // Remember camera position before we make any changes
                         const cameraEl = document.getElementById('user-camera');
                         let originalCameraPos = null;
