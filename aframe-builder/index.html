@@ -613,11 +613,8 @@
                     // Initialize Monaco editor
                     this.initMonaco();
                     
-                    // Start camera position tracking using A-Frame's systems
+                    // Start continuous camera position tracking
                     this.startCameraTracking();
-                    
-                    // Setup debug updates at a lower frequency
-                    this.setupDebugUpdates();
                     
                     // Setup A-Frame event listeners and inspector integration
                     this.setupInspectorSync();
@@ -643,87 +640,8 @@
                     this.logCameraEvent('A-Frame Builder initialized', true);
                 },
                 
-                // Setup less-frequent updates for detailed debug info
-                setupDebugUpdates: function() {
-                    const debugPanel = document.querySelector('.debug-panel');
-                    if (!debugPanel) return;
-                    
-                    // Only update detailed debug when the panel is visible
-                    let isDebugVisible = debugPanel.classList.contains('visible');
-                    
-                    // Watch for visibility changes
-                    const observer = new MutationObserver((mutations) => {
-                        mutations.forEach((mutation) => {
-                            if (mutation.attributeName === 'class') {
-                                isDebugVisible = debugPanel.classList.contains('visible');
-                            }
-                        });
-                    });
-                    
-                    observer.observe(debugPanel, { attributes: true });
-                    
-                    // Set up an interval for updating detailed debug info
-                    // This is much less frequent than the camera state updates
-                    setInterval(() => {
-                        if (isDebugVisible) {
-                            this.updateCameraDebug();
-                        }
-                    }, 500); // Update every 500ms (2 times per second) when visible
-                },
-                
-                // Start camera position tracking using A-Frame's built-in systems
+                // Start continuous camera position tracking
                 startCameraTracking: function() {
-                    console.log("Setting up optimized camera tracking");
-                    
-                    // Use A-Frame's tick event which is already optimized
-                    // This avoids creating our own requestAnimationFrame loop
-                    const scene = document.querySelector('a-scene');
-                    if (!scene) {
-                        console.error("Can't find A-Frame scene for camera tracking");
-                        return this.startLegacyCameraTracking(); // Fall back to the original method
-                    }
-                    
-                    // Track last update time to limit updates (no need to update every frame)
-                    let lastUpdateTime = 0;
-                    const updateInterval = 100; // milliseconds between updates (10 updates/second)
-                    
-                    // Store a reference to this app instance for the component to use
-                    const self = this;
-                    
-                    // Create an actual AFrame component for camera tracking to ensure it's properly registered
-                    if (!AFRAME.components['camera-tracker']) {
-                        AFRAME.registerComponent('camera-tracker', {
-                            init: function() {
-                                console.log("Camera tracker component initialized");
-                                this.lastUpdateTime = 0;
-                                
-                                // Store reference to the app through closure
-                                this.appRef = self;
-                            },
-                            tick: function(time, deltaTime) {
-                                // Only update at fixed intervals for performance
-                                if (time - this.lastUpdateTime < updateInterval) return;
-                                this.lastUpdateTime = time;
-                                
-                                // Update the application camera state
-                                if (this.appRef && typeof this.appRef.updateCameraState === 'function') {
-                                    this.appRef.updateCameraState();
-                                }
-                            }
-                        });
-                    }
-                    
-                    // Add the tracker component to the scene
-                    scene.setAttribute('camera-tracker', '');
-                    
-                    // Also use legacy method as backup to ensure UI updates work correctly
-                    this.startLegacyCameraTracking();
-                    
-                    console.log("Camera tracking set up with A-Frame's tick event");
-                },
-                
-                // The original camera tracking method - kept for compatibility
-                startLegacyCameraTracking: function() {
                     console.log("Starting continuous camera position tracking");
                     
                     // Track in every frame to ensure we always have current position
@@ -796,66 +714,6 @@
                     
                     // Start the tracking loop
                     requestAnimationFrame(trackCamera);
-                },
-                
-                // Update camera state from DOM (separated for reuse)
-                updateCameraState: function() {
-                    const cameraEl = document.getElementById('user-camera');
-                    if (!cameraEl || !cameraEl.object3D) return;
-                    
-                    // Get position directly from object3D
-                    const position = {
-                        x: cameraEl.object3D.position.x,
-                        y: cameraEl.object3D.position.y,
-                        z: cameraEl.object3D.position.z
-                    };
-                    
-                    // Get rotation - use look-controls if available for better accuracy
-                    let rotation = {x: 0, y: 0, z: 0};
-                    
-                    if (cameraEl.components && cameraEl.components['look-controls']) {
-                        const lookControls = cameraEl.components['look-controls'];
-                        
-                        // Get pitch and yaw from look-controls
-                        if (lookControls.pitchObject) {
-                            rotation.x = THREE.MathUtils.radToDeg(lookControls.pitchObject.rotation.x);
-                        }
-                        
-                        if (lookControls.yawObject) {
-                            rotation.y = THREE.MathUtils.radToDeg(lookControls.yawObject.rotation.y);
-                        }
-                    } else {
-                        // Fall back to object3D rotation
-                        rotation = {
-                            x: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.x),
-                            y: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.y),
-                            z: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.z)
-                        };
-                    }
-                    
-                    // Update our camera state models
-                    this.camera = {
-                        position: position,
-                        rotation: rotation
-                    };
-                    
-                    // Update the scene model camera too
-                    if (!this.scene.camera) {
-                        this.scene.camera = {};
-                    }
-                    this.scene.camera.position = Object.assign({}, position);
-                    this.scene.camera.rotation = Object.assign({}, rotation);
-                    
-                    // Update the main debug panel displays (not the detailed ones)
-                    const posDisplay = document.getElementById('camera-position');
-                    if (posDisplay) {
-                        posDisplay.textContent = `${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}`;
-                    }
-                    
-                    const rotDisplay = document.getElementById('camera-rotation');
-                    if (rotDisplay) {
-                        rotDisplay.textContent = `${rotation.x.toFixed(2)}, ${rotation.y.toFixed(2)}, ${rotation.z.toFixed(2)}`;
-                    }
                 },
                 
                 // Setup camera position tracking to continuously update stored camera position
@@ -2517,10 +2375,7 @@
                         refreshCameraDebugButton.onclick = () => {
                             console.log("Refreshing camera debug info");
                             
-                            // Update camera state first
-                            this.updateCameraState();
-                            
-                            // Then update detailed debug info
+                            // Update all debug information
                             this.updateCameraDebug();
                             this.updateDebugInfo();
                             
