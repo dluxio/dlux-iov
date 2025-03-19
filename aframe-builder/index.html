@@ -33,7 +33,7 @@
     </script> -->
     
     <!-- A-Frame -->
-    <script src="/js/aframe.min.js"></script>
+    <script src="aframe.min.js"></script>
     
     <!-- Load Socket.io -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.5.0/socket.io.slim.js"></script>
@@ -391,6 +391,76 @@
         .debug-button:hover {
             background-color: #444;
         }
+        
+        .camera-switcher {
+            position: relative;
+            margin-left: 10px;
+        }
+        
+        #camera-switch-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px;
+            width: 32px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        
+        #camera-switch-btn:hover {
+            background-color: #555;
+        }
+        
+        .camera-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 180px;
+            background-color: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            display: none;
+        }
+        
+        .camera-menu.active {
+            display: block;
+        }
+        
+        .camera-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #444;
+            transition: background-color 0.2s;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .camera-option:hover {
+            background-color: #555;
+        }
+        
+        .camera-option.active {
+            background-color: #4c6ef5;
+            font-weight: bold;
+        }
+        
+        .camera-option .camera-info {
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 3px;
+        }
+        
+        .camera-option.default-camera {
+            color: #7bff00;
+        }
+        
+        .camera-option.default-camera .camera-info {
+            color: #aaffaa;
+        }
     </style>
 </head>
 <body>
@@ -408,6 +478,17 @@
             <div class="save-indicator hidden">
                 <div class="save-indicator-dot"></div>
                 <span class="save-indicator-text">Changes saved</span>
+            </div>
+        </div>
+        <div class="toolbar-button camera-switcher">
+            <button id="camera-switch-btn" class="btn btn-sm btn-light" title="Switch Camera View">
+                <i class="fas fa-video"></i>
+            </button>
+            <div class="camera-menu" id="camera-menu">
+                <div class="camera-option" data-camera="builder">Builder Camera</div>
+                <div id="scene-cameras-list">
+                    <!-- Scene cameras will be populated here dynamically -->
+                </div>
             </div>
         </div>
     </div>
@@ -535,10 +616,10 @@
                 scene: {
                     entities: [],
                     assets: [],
-                    camera: null  // Representative camera from scene HTML
+                    defaultCamera: null  // Renamed from camera to defaultCamera for clarity
                 },
-                camera: null,      // Current camera state for app
-                editorCamera: null, // Editor-only camera state (for building)
+                activeCamera: null,      // Current camera state for app (renamed from camera)
+                buildCamera: null,       // Renamed from editorCamera for consistency
                 
                 // Current active view
                 currentView: 'preview',
@@ -618,7 +699,7 @@
                         position: { x: 0, y: 1.6, z: 0 },
                         rotation: { x: 0, y: 0, z: 0 },
                         timestamp: new Date().toISOString(),
-                        source: 'initial'
+                        source: 'initialization'
                     };
                     
                     // Parse scene from DOM
@@ -655,15 +736,46 @@
                     this.initDebugTools();
                     
                     // Make debug panel visible by default (with animation)
-                    const debugPanel = document.querySelector('.debug-panel');
+                    /* const debugPanel = document.querySelector('.debug-panel');
                     if (debugPanel) {
                         setTimeout(() => {
                             debugPanel.classList.add('visible');
                         }, 500);
-                    }
+                    } */
                     
                     console.log("Application initialized successfully");
                     this.logCameraEvent('A-Frame Builder initialized', true);
+                    
+                    // Initialize camera controller
+                    this.initCameraController();
+                    
+                    // Setup build camera continuous updates
+                    this.setupBuildCameraUpdater();
+                    
+                    // Start direct debug panel updates
+                    setTimeout(() => this.updateDebugPanelDirectly(), 500);
+                    
+                    // Enforce builder camera mode
+                    this.currentCameraMode = 'build';
+                    console.log("Enforcing builder camera as active camera mode");
+                    
+                    // Start continuous build camera updating
+                    this.startContinuousBuildCameraUpdate();
+                    
+                    // Add direct camera debug overlay
+                    this.addCameraDebugOverlay();
+                    
+                    // Add this to the initialization function after the camera controller initialization
+                    this.syncCameraMotionToBuilder();
+                    
+                    // Also add an animation frame loop to align cameras
+                    const alignLoop = () => {
+                        if (this.currentCameraMode === 'build') {
+                            this.alignAllCameraRepresentations();
+                        }
+                        requestAnimationFrame(alignLoop);
+                    };
+                    requestAnimationFrame(alignLoop);
                 },
                 
                 // Setup less-frequent updates for detailed debug info
@@ -2517,7 +2629,7 @@
                 },
                 
                 // Save the current camera state
-                saveCameraState: function(reason) {
+                saveCameraState: function(reason, targetState = 'active') {
                     const previewScene = document.getElementById('preview-scene');
                     if (!previewScene) return;
                     
@@ -2527,35 +2639,32 @@
                         const rotation = cameraEl.getAttribute('rotation');
                         
                         if (position && rotation) {
-                            // Store in our primary camera reference
-                            this.camera = {
+                            const cameraState = {
                                 position: { x: position.x, y: position.y, z: position.z },
                                 rotation: { x: rotation.x, y: rotation.y, z: rotation.z }
                             };
                             
-                            // Also update scene camera for compatibility
-                            if (this.scene && this.scene.camera) {
-                                this.scene.camera.position.x = position.x;
-                                this.scene.camera.position.y = position.y;
-                                this.scene.camera.position.z = position.z;
-                                this.scene.camera.rotation.x = rotation.x;
-                                this.scene.camera.rotation.y = rotation.y;
-                                this.scene.camera.rotation.z = rotation.z;
+                            // Update the correct camera state based on the targetState parameter
+                            if (targetState === 'build') {
+                                this.buildCamera = Object.assign({}, cameraState);
+                                console.log(`[Build Camera State Saved] ${reason || ''}`);
+                            } else if (targetState === 'default') {
+                                if (!this.scene.defaultCamera) {
+                                    this.scene.defaultCamera = {};
+                                }
+                                this.scene.defaultCamera = Object.assign({}, cameraState);
+                                console.log(`[Default Camera State Saved] ${reason || ''}`);
+                            } else {
+                                // 'active' is the default
+                                this.activeCamera = Object.assign({}, cameraState);
+                                console.log(`[Active Camera State Saved] ${reason || ''}`);
                             }
-                            
-                            console.log(`[Camera State Saved] ${reason || ''}: Position (${position.x.toFixed(2)}, ${position.y.toFixed(2)}, ${position.z.toFixed(2)}), Rotation (${rotation.x.toFixed(2)}, ${rotation.y.toFixed(2)}, ${rotation.z.toFixed(2)})`);
                             
                             // Log to camera history
                             if (reason) {
-                                this.logCameraEvent(`State saved: ${reason} - Pos: ${position.x.toFixed(1)},${position.y.toFixed(1)},${position.z.toFixed(1)}`, true);
+                                this.logCameraEvent(`${targetState} camera state saved: ${reason}`, true);
                             }
-                        } else {
-                            console.warn('Could not save camera state: position or rotation is null');
-                            this.logCameraEvent(`Warning: Could not save camera state (${reason || 'unspecified reason'})`, true);
                         }
-                    } else {
-                        console.warn('Could not save camera state: camera entity not found');
-                        this.logCameraEvent(`Warning: No camera entity found when saving state (${reason || ''})`, true);
                     }
                 },
                 
@@ -2672,7 +2781,18 @@
                 },
                 
                 // Parse the scene directly from the DOM
-                parseSceneFromDOM: function(preserveCamera) {
+                parseSceneFromDOM: function(options) {
+                    // Handle different parameter formats
+                    let preserveCamera = true;  // Default to preserving camera
+                    
+                    if (typeof options === 'boolean') {
+                        // Legacy call with just boolean
+                        preserveCamera = options;
+                    } else if (options && typeof options === 'object') {
+                        // New format with options object
+                        preserveCamera = options.preserveCamera !== false;
+                    }
+                    
                     console.log("Parsing scene from DOM" + (preserveCamera ? " (preserving camera)" : ""));
                     const previewScene = document.getElementById('preview-scene');
                     if (!previewScene) return;
@@ -2680,12 +2800,41 @@
                     // Save current camera state if we're preserving it
                     let currentCameraState = null;
                     if (preserveCamera) {
-                        // Store current camera state
-                        currentCameraState = {
-                            position: this.camera ? Object.assign({}, this.camera.position) : null,
-                            rotation: this.camera ? Object.assign({}, this.camera.rotation) : null
-                        };
-                        console.log("Preserving camera state during parse:", currentCameraState);
+                        // First check if we have a build camera state
+                        if (this.buildCamera && this.buildCamera.position) {
+                            currentCameraState = {
+                                position: Object.assign({}, this.buildCamera.position),
+                                rotation: Object.assign({}, this.buildCamera.rotation)
+                            };
+                            console.log("Preserving build camera state during parse:", currentCameraState);
+                        }
+                        // If no build camera, try regular camera
+                        else if (this.camera) {
+                            currentCameraState = {
+                                position: Object.assign({}, this.camera.position),
+                                rotation: Object.assign({}, this.camera.rotation)
+                            };
+                            console.log("Preserving scene camera state during parse:", currentCameraState);
+                        }
+                        // Otherwise capture directly from DOM
+                        else {
+                            const cameraEl = document.getElementById('user-camera');
+                            if (cameraEl && cameraEl.object3D) {
+                                currentCameraState = {
+                                    position: {
+                                        x: cameraEl.object3D.position.x,
+                                        y: cameraEl.object3D.position.y,
+                                        z: cameraEl.object3D.position.z
+                                    },
+                                    rotation: {
+                                        x: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.x),
+                                        y: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.y),
+                                        z: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.z)
+                                    }
+                                };
+                                console.log("Captured DOM camera state during parse:", currentCameraState);
+                            }
+                        }
                     }
                     
                     // Reset scene data
@@ -2732,7 +2881,16 @@
                             rotation: Object.assign({}, currentCameraState.rotation)
                         };
                         
-                        console.log("Restored camera values in scene model");
+                        // Most importantly, also update buildCamera to match
+                        if (!this.buildCamera) {
+                            this.buildCamera = {};
+                        }
+                        this.buildCamera.position = Object.assign({}, currentCameraState.position);
+                        this.buildCamera.rotation = Object.assign({}, currentCameraState.rotation);
+                        this.buildCamera.timestamp = new Date().toISOString();
+                        this.buildCamera.source = 'parse-scene-camera-restore';
+                        
+                        console.log("Restored camera values in all models");
                     }
                     
                     console.log(`Parsed ${this.scene.entities.length} entities from DOM`);
@@ -2977,30 +3135,48 @@
                     
                     if (!pos || !rot) return;
                     
-                    // Check if position or rotation has changed significantly
-                    const positionChanged = !this.lastCameraPosition || 
-                        Math.abs(pos.x - this.lastCameraPosition.x) > 0.1 ||
-                        Math.abs(pos.y - this.lastCameraPosition.y) > 0.1 ||
-                        Math.abs(pos.z - this.lastCameraPosition.z) > 0.1;
-                        
-                    const rotationChanged = !this.lastCameraRotation || 
-                        Math.abs(rot.x - this.lastCameraRotation.x) > 2 ||
-                        Math.abs(rot.y - this.lastCameraRotation.y) > 2 ||
-                        Math.abs(rot.z - this.lastCameraRotation.z) > 2;
+                    // Always update the active camera regardless of mode
+                    this.activeCamera = {
+                        position: { x: pos.x, y: pos.y, z: pos.z },
+                        rotation: { x: rot.x, y: rot.y, z: rot.z }
+                    };
                     
-                    // If there's a significant change, log it
-                    if (positionChanged || rotationChanged) {
-                        const posStr = `${pos.x.toFixed(1)},${pos.y.toFixed(1)},${pos.z.toFixed(1)}`;
-                        const rotStr = `${rot.x.toFixed(1)},${rot.y.toFixed(1)},${rot.z.toFixed(1)}`;
-                        
-                        this.lastCameraPosition = { x: pos.x, y: pos.y, z: pos.z };
-                        this.lastCameraRotation = { x: rot.x, y: rot.y, z: rot.z };
-                        
-                        // Only log if there's a significant change to avoid spamming
-                        if (Math.abs(positionChanged) > 0.2 || Math.abs(rotationChanged) > 5) {
-                            this.logCameraEvent(`Camera moved to pos:${posStr} rot:${rotStr}`, true);
+                    // When in build mode, update the build camera state
+                    if (this.currentCameraMode === 'build' || !this.currentCameraMode) {
+                        if (!this.buildCamera) {
+                            this.buildCamera = {};
                         }
+                        
+                        // Important: Create new objects to avoid reference issues
+                        this.buildCamera.position = { 
+                            x: pos.x, 
+                            y: pos.y, 
+                            z: pos.z 
+                        };
+                        
+                        this.buildCamera.rotation = { 
+                            x: rot.x, 
+                            y: rot.y, 
+                            z: rot.z 
+                        };
+                        
+                        this.buildCamera.timestamp = new Date().toISOString();
+                        this.buildCamera.source = 'tracking';
+                        
+                        // Update menu if open
+                        const cameraMenu = document.getElementById('camera-menu');
+                        if (cameraMenu && cameraMenu.classList.contains('active')) {
+                            this.updateBuilderCameraInfo();
+                        }
+                        
+                        // Debug output to verify builder camera state is updating
+                        console.log("Builder camera updated:", 
+                            `pos(${this.buildCamera.position.x.toFixed(2)}, ${this.buildCamera.position.y.toFixed(2)}, ${this.buildCamera.position.z.toFixed(2)})`);
                     }
+                    
+                    // Store for comparison in next update
+                    this.lastCameraPosition = { x: pos.x, y: pos.y, z: pos.z };
+                    this.lastCameraRotation = { x: rot.x, y: rot.y, z: rot.z };
                 },
                 
                 // Log camera event with timestamp
@@ -3145,77 +3321,100 @@
                 
                 // Update detailed camera debug information
                 updateCameraDebug: function() {
-                    // Update editor camera debug info
-                    const editorCameraEl = document.getElementById('debug-editor-camera');
-                    if (editorCameraEl) {
-                        if (this.editorCamera) {
-                            const pos = this.editorCamera.position;
-                            const rot = this.editorCamera.rotation;
-                            editorCameraEl.innerHTML = `<span style="color:#5f5">pos:(${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})</span> <span style="color:#5f5">rot:(${rot.x.toFixed(2)}, ${rot.y.toFixed(2)}, ${rot.z.toFixed(2)})</span>`;
-                        } else {
-                            editorCameraEl.textContent = 'null';
-                        }
-                    }
+                    // Update basic camera info in debug panel
+                    const cameraPositionDisplay = document.getElementById('camera-position');
+                    const cameraRotationDisplay = document.getElementById('camera-rotation');
+                    const cameraEntityDisplay = document.getElementById('camera-entity');
+                    const storedStateDisplay = document.getElementById('stored-camera-state');
                     
-                    // Update this.camera debug info
-                    const appCameraEl = document.getElementById('debug-app-camera');
-                    if (appCameraEl) {
-                        if (this.camera) {
-                            const pos = this.camera.position;
-                            const rot = this.camera.rotation;
-                            appCameraEl.innerHTML = `<span style="color:#8af">pos:(${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})</span> <span style="color:#fa8">rot:(${rot.x.toFixed(2)}, ${rot.y.toFixed(2)}, ${rot.z.toFixed(2)})</span>`;
-                        } else {
-                            appCameraEl.textContent = 'null';
-                        }
-                    }
+                    // Get user camera
+                    const userCamera = document.getElementById('user-camera');
                     
-                    // Update this.scene.camera debug info
-                    const sceneCameraEl = document.getElementById('debug-scene-camera');
-                    if (sceneCameraEl) {
-                        if (this.scene && this.scene.camera) {
-                            const pos = this.scene.camera.position;
-                            const rot = this.scene.camera.rotation;
-                            sceneCameraEl.innerHTML = `<span style="color:#8af">pos:(${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})</span> <span style="color:#fa8">rot:(${rot.x.toFixed(2)}, ${rot.y.toFixed(2)}, ${rot.z.toFixed(2)})</span>`;
-                        } else {
-                            sceneCameraEl.textContent = 'null';
+                    if (userCamera) {
+                        const pos = userCamera.getAttribute('position');
+                        const rot = userCamera.getAttribute('rotation');
+                        
+                        // Update position display
+                        if (cameraPositionDisplay && pos) {
+                            cameraPositionDisplay.textContent = `${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)}`;
                         }
-                    }
-                    
-                    // Get DOM camera position directly
-                    const domCameraEl = document.getElementById('debug-dom-camera');
-                    if (domCameraEl) {
-                        const cameraEl = document.getElementById('user-camera');
-                        if (cameraEl && cameraEl.object3D) {
-                            const pos = cameraEl.object3D.position;
-                            const rot = cameraEl.object3D.rotation;
+                        
+                        // Update rotation display
+                        if (cameraRotationDisplay && rot) {
+                            cameraRotationDisplay.textContent = `${rot.x.toFixed(2)}, ${rot.y.toFixed(2)}, ${rot.z.toFixed(2)}`;
+                        }
+                        
+                        // Update entity info display
+                        if (cameraEntityDisplay) {
+                            const hasLook = userCamera.hasAttribute('look-controls') ? 'yes' : 'no';
+                            const hasWASD = userCamera.hasAttribute('wasd-controls') ? 'yes' : 'no';
+                            const attrPos = pos ? `(${pos.x.toFixed(2)},${pos.y.toFixed(2)},${pos.z.toFixed(2)})` : 'unknown';
+                            const obj3dPos = userCamera.object3D ? 
+                                `(${userCamera.object3D.position.x.toFixed(2)},${userCamera.object3D.position.y.toFixed(2)},${userCamera.object3D.position.z.toFixed(2)})` : 
+                                'unknown';
+                                
+                            cameraEntityDisplay.textContent = `user-camera look:${hasLook} wasd:${hasWASD} attr:${attrPos} obj3d:${obj3dPos}`;
+                        }
+                        
+                        // Update stored state display
+                        if (storedStateDisplay) {
+                            const buildCameraInfo = this.buildCamera?.position ? 
+                                `(${this.buildCamera.position.x.toFixed(2)},${this.buildCamera.position.y.toFixed(2)},${this.buildCamera.position.z.toFixed(2)})` : 
+                                'null';
+                                
+                            const activeCameraInfo = this.activeCamera?.position ? 
+                                `(${this.activeCamera.position.x.toFixed(2)},${this.activeCamera.position.y.toFixed(2)},${this.activeCamera.position.z.toFixed(2)})` : 
+                                'null';
+                                
+                            const sceneCameraInfo = this.scene.camera?.position ? 
+                                `(${this.scene.camera.position.x.toFixed(2)},${this.scene.camera.position.y.toFixed(2)},${this.scene.camera.position.z.toFixed(2)})` : 
+                                'null';
+                                
+                            const modeText = this.currentCameraMode || 'unknown';
                             
-                            // Also get position from attribute for comparison
-                            const posAttr = cameraEl.getAttribute('position');
-                            const posAttrStr = posAttr ? 
-                                `attr:(${posAttr.x.toFixed(2)}, ${posAttr.y.toFixed(2)}, ${posAttr.z.toFixed(2)})` : 
-                                'attr:none';
-                            
-                            // Get look-controls data if available
-                            let lookStr = '';
-                            if (cameraEl.components && cameraEl.components['look-controls']) {
-                                const lc = cameraEl.components['look-controls'];
-                                if (lc.pitchObject && lc.yawObject) {
-                                    const pitchX = THREE.MathUtils.radToDeg(lc.pitchObject.rotation.x).toFixed(2);
-                                    const yawY = THREE.MathUtils.radToDeg(lc.yawObject.rotation.y).toFixed(2);
-                                    lookStr = ` <span style="color:#8f8">look:(${pitchX}, ${yawY})</span>`;
-                                }
-                            }
-                            
-                            domCameraEl.innerHTML = `<span style="color:#8af">obj3d:(${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)})</span> <span style="color:#fa8">rot:(${THREE.MathUtils.radToDeg(rot.x).toFixed(2)}, ${THREE.MathUtils.radToDeg(rot.y).toFixed(2)}, ${THREE.MathUtils.radToDeg(rot.z).toFixed(2)})</span> ${posAttrStr}${lookStr}`;
-                        } else {
-                            domCameraEl.textContent = 'camera element not found';
+                            storedStateDisplay.innerHTML = 
+                                `<b>Mode:</b> ${modeText.toUpperCase()} | ` +
+                                `<b>Build:</b> ${buildCameraInfo} | ` +
+                                `<b>Active:</b> ${activeCameraInfo} | ` +
+                                `<b>Scene:</b> ${sceneCameraInfo}`;
                         }
-                    }
-                    
-                    // Update the last parse time if needed
-                    const lastParseTimeEl = document.getElementById('debug-last-parse-time');
-                    if (lastParseTimeEl && (!lastParseTimeEl.textContent || lastParseTimeEl.textContent === 'never')) {
-                        lastParseTimeEl.textContent = 'not updated yet';
+                        
+                        // Update detailed camera debug info
+                        const editorCameraDisplay = document.getElementById('editor-camera');
+                        const appCameraDisplay = document.getElementById('app-camera');
+                        const sceneCameraDisplay = document.getElementById('scene-camera');
+                        const domCameraDisplay = document.getElementById('dom-camera');
+                        
+                        if (editorCameraDisplay) {
+                            editorCameraDisplay.textContent = JSON.stringify(this.buildCamera || null, null, 2);
+                        }
+                        
+                        if (appCameraDisplay) {
+                            appCameraDisplay.textContent = JSON.stringify(this.activeCamera || null, null, 2);
+                        }
+                        
+                        if (sceneCameraDisplay) {
+                            sceneCameraDisplay.textContent = JSON.stringify(this.scene.camera || null, null, 2);
+                        }
+                        
+                        if (domCameraDisplay) {
+                            const cameraData = {
+                                position: pos,
+                                rotation: rot,
+                                el: userCamera ? userCamera.id : null,
+                                parent: userCamera && userCamera.parentElement ? userCamera.parentElement.id : null
+                            };
+                            domCameraDisplay.textContent = JSON.stringify(cameraData, null, 2);
+                        }
+                    } else {
+                        // No camera found
+                        if (cameraEntityDisplay) {
+                            cameraEntityDisplay.textContent = 'None';
+                        }
+                        
+                        if (storedStateDisplay) {
+                            storedStateDisplay.textContent = 'Not available';
+                        }
                     }
                 },
                 
@@ -4417,6 +4616,1070 @@
                     }
                     
                     return false;
+                },
+                
+                saveBuildCameraState: function(source) {
+                    const cameraEl = document.getElementById('user-camera');
+                    if (!cameraEl || !cameraEl.object3D) return null;
+                    
+                    // Get position directly from object3D for accuracy
+                    const position = {
+                        x: cameraEl.object3D.position.x,
+                        y: cameraEl.object3D.position.y,
+                        z: cameraEl.object3D.position.z
+                    };
+                    
+                    // Get rotation - prefer look-controls for user camera
+                    let rotation = {x: 0, y: 0, z: 0};
+                    
+                    if (cameraEl.components && cameraEl.components['look-controls']) {
+                        const lookControls = cameraEl.components['look-controls'];
+                        
+                        rotation = {
+                            x: lookControls.pitchObject ? THREE.MathUtils.radToDeg(lookControls.pitchObject.rotation.x) : 0,
+                            y: lookControls.yawObject ? THREE.MathUtils.radToDeg(lookControls.yawObject.rotation.y) : 0,
+                            z: 0
+                        };
+                    } else {
+                        // Fall back to object3D rotation
+                        rotation = {
+                            x: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.x),
+                            y: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.y),
+                            z: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.z)
+                        };
+                    }
+                    
+                    // Save to build camera state
+                    this.buildCamera = {
+                        position: Object.assign({}, position),
+                        rotation: Object.assign({}, rotation),
+                        timestamp: new Date().toISOString(),
+                        source: source || 'manual'
+                    };
+                    
+                    console.log("Saved build camera state:", this.buildCamera);
+                    
+                    return this.buildCamera;
+                },
+                
+                restoreBuildCameraState: function(source) {
+                    const cameraEl = document.getElementById('user-camera');
+                    if (!cameraEl || !this.buildCamera || !this.buildCamera.position) {
+                        console.warn("Cannot restore build camera - missing camera element or saved state");
+                        return false;
+                    }
+                    
+                    const pos = this.buildCamera.position;
+                    const rot = this.buildCamera.rotation || { x: 0, y: 0, z: 0 };
+                    
+                    console.log(`Restoring build camera to: pos(${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)}) rot(${rot.x.toFixed(2)}, ${rot.y.toFixed(2)}, ${rot.z.toFixed(2)})`);
+                    
+                    // Set position directly
+                    cameraEl.object3D.position.set(pos.x, pos.y, pos.z);
+                    
+                    // Convert numeric rotation if needed
+                    const rotX = typeof rot.x === 'number' ? rot.x : parseFloat(rot.x) || 0;
+                    const rotY = typeof rot.y === 'number' ? rot.y : parseFloat(rot.y) || 0;
+                    const rotZ = typeof rot.z === 'number' ? rot.z : parseFloat(rot.z) || 0;
+                    
+                    // Set rotation - handle radians vs degrees properly
+                    if (cameraEl.components && cameraEl.components['look-controls']) {
+                        const lookControls = cameraEl.components['look-controls'];
+                        
+                        if (lookControls.pitchObject) {
+                            lookControls.pitchObject.rotation.x = THREE.MathUtils.degToRad(rotX);
+                            lookControls.pitchObject.updateMatrix();
+                        }
+                        
+                        if (lookControls.yawObject) {
+                            lookControls.yawObject.rotation.y = THREE.MathUtils.degToRad(rotY);
+                            lookControls.yawObject.updateMatrix();
+                        }
+                    } else {
+                        // Fall back to object3D rotation
+                        cameraEl.object3D.rotation.set(
+                            THREE.MathUtils.degToRad(rotX),
+                            THREE.MathUtils.degToRad(rotY),
+                            THREE.MathUtils.degToRad(rotZ)
+                        );
+                    }
+                    
+                    // Update DOM attributes
+                    cameraEl.setAttribute('position', `${pos.x} ${pos.y} ${pos.z}`);
+                    cameraEl.setAttribute('rotation', `${rotX} ${rotY} ${rotZ}`);
+                    
+                    // Update current active camera state
+                    this.activeCamera = {
+                        position: { x: pos.x, y: pos.y, z: pos.z },
+                        rotation: { x: rotX, y: rotY, z: rotZ }
+                    };
+                    
+                    // Log the operation
+                    this.logCameraEvent(`Build camera restored from ${source || 'unknown'}`, true);
+                    
+                    return true;
+                },
+                
+                resetBuildCameraToDefault: function() {
+                    // Get the default camera state
+                    const defaultCamera = this.scene.defaultCamera;
+                    
+                    if (defaultCamera && defaultCamera.position) {
+                        // Use default camera position
+                        this.buildCamera = {
+                            position: Object.assign({}, defaultCamera.position),
+                            rotation: Object.assign({}, defaultCamera.rotation || { x: 0, y: 0, z: 0 }),
+                            timestamp: new Date().toISOString(),
+                            source: 'default-reset'
+                        };
+                    } else {
+                        // Use fallback default camera position
+                        this.buildCamera = {
+                            position: { x: 0, y: 1.6, z: 0 },
+                            rotation: { x: 0, y: 0, z: 0 },
+                            timestamp: new Date().toISOString(),
+                            source: 'fallback-reset'
+                        };
+                    }
+                    
+                    // Restore the build camera
+                    this.restoreBuildCameraState('reset-to-default');
+                    
+                    // Log to history
+                    this.logCameraEvent("Build camera reset to match default camera", true);
+                },
+                
+                switchToBuildCamera: function() {
+                    // Only restore if we have a saved build camera state
+                    if (!this.buildCamera || !this.buildCamera.position) {
+                        console.warn("No build camera state to restore");
+                        return;
+                    }
+                    
+                    // Restore the build camera
+                    this.restoreBuildCameraState('camera-menu-switch');
+                    
+                    // Set the current camera mode
+                    this.currentCameraMode = 'build';
+                    this.currentSceneCameraId = null;
+                    
+                    // Begin continuous build camera updating
+                    this.startContinuousBuildCameraUpdate();
+                    
+                    // Log the camera switch
+                    this.logCameraEvent("Switched to builder camera", true);
+                },
+                
+                switchToDefaultCamera: function() {
+                    if (this.scene.defaultCamera) {
+                        const cameraEl = document.getElementById('user-camera');
+                        if (cameraEl) {
+                            const pos = this.scene.defaultCamera.position;
+                            const rot = this.scene.defaultCamera.rotation || { x: 0, y: 0, z: 0 };
+                            
+                            // Set camera position and rotation
+                            cameraEl.object3D.position.set(pos.x, pos.y, pos.z);
+                            
+                            // Update look-controls if applicable
+                            if (cameraEl.components && cameraEl.components['look-controls']) {
+                                const lookControls = cameraEl.components['look-controls'];
+                                
+                                if (lookControls.pitchObject) {
+                                    lookControls.pitchObject.rotation.x = THREE.MathUtils.degToRad(rot.x);
+                                    lookControls.pitchObject.updateMatrix();
+                                }
+                                
+                                if (lookControls.yawObject) {
+                                    lookControls.yawObject.rotation.y = THREE.MathUtils.degToRad(rot.y);
+                                    lookControls.yawObject.updateMatrix();
+                                }
+                            } else {
+                                // Fall back to object3D rotation
+                                const rotX = THREE.MathUtils.degToRad(rot.x);
+                                const rotY = THREE.MathUtils.degToRad(rot.y);
+                                const rotZ = THREE.MathUtils.degToRad(rot.z);
+                                cameraEl.object3D.rotation.set(rotX, rotY, rotZ);
+                            }
+                            
+                            // Update attributes
+                            cameraEl.setAttribute('position', `${pos.x} ${pos.y} ${pos.z}`);
+                            cameraEl.setAttribute('rotation', `${rot.x} ${rot.y} ${rot.z}`);
+                            
+                            // Update active camera
+                            this.activeCamera = {
+                                position: Object.assign({}, pos),
+                                rotation: Object.assign({}, rot)
+                            };
+                            
+                            // Log the change
+                            this.logCameraEvent("Switched to default camera", true);
+                        }
+                    } else {
+                        console.warn("No default camera state available");
+                    }
+                },
+                
+                findSceneCameras: function() {
+                    const sceneCameras = [];
+                    const sceneEl = document.getElementById('preview-scene');
+                    if (!sceneEl) return sceneCameras;
+                    
+                    // Find all camera entities (a-camera) in the scene
+                    const cameraEls = sceneEl.querySelectorAll('a-camera, [camera]');
+                    
+                    // Process each camera
+                    cameraEls.forEach((cameraEl, index) => {
+                        // Include the user-camera but mark it specially
+                        const isUserCamera = cameraEl.id === 'user-camera';
+                        
+                        const cameraId = cameraEl.id || `scene-camera-${index}`;
+                        const position = cameraEl.getAttribute('position');
+                        const rotation = cameraEl.getAttribute('rotation');
+                        
+                        // Get camera name from data-name attribute or generate one
+                        let cameraName = cameraEl.getAttribute('data-name') || 
+                                         cameraEl.getAttribute('name') || 
+                                         (isUserCamera ? 'Default Camera' : `Camera ${index + 1}`);
+                        
+                        sceneCameras.push({
+                            id: cameraId,
+                            el: cameraEl,
+                            name: cameraName,
+                            isUserCamera: isUserCamera,
+                            position: position ? {
+                                x: position.x || 0,
+                                y: position.y || 0,
+                                z: position.z || 0
+                            } : { x: 0, y: 1.6, z: 0 },
+                            rotation: rotation ? {
+                                x: rotation.x || 0,
+                                y: rotation.y || 0,
+                                z: rotation.z || 0
+                            } : { x: 0, y: 0, z: 0 }
+                        });
+                    });
+                    
+                    return sceneCameras;
+                },
+                
+                updateCameraMenu: function() {
+                    const sceneCamerasList = document.getElementById('scene-cameras-list');
+                    if (!sceneCamerasList) return;
+                    
+                    // Clear existing camera list
+                    sceneCamerasList.innerHTML = '';
+                    
+                    // Get all scene cameras
+                    const sceneCameras = this.findSceneCameras();
+                    
+                    // No scene cameras found
+                    if (sceneCameras.length === 0) {
+                        const noCamerasEl = document.createElement('div');
+                        noCamerasEl.className = 'camera-option';
+                        noCamerasEl.textContent = 'No scene cameras found';
+                        noCamerasEl.style.fontStyle = 'italic';
+                        noCamerasEl.style.color = '#999';
+                        sceneCamerasList.appendChild(noCamerasEl);
+                        return;
+                    }
+                    
+                    // Add each scene camera to the menu
+                    sceneCameras.forEach(camera => {
+                        const cameraOptionEl = document.createElement('div');
+                        cameraOptionEl.className = 'camera-option';
+                        cameraOptionEl.setAttribute('data-camera-id', camera.id);
+                        
+                        // Set active state if this is the current camera
+                        if (this.currentCameraMode === 'scene' && this.currentSceneCameraId === camera.id) {
+                            cameraOptionEl.classList.add('active');
+                        } else if (this.currentCameraMode === 'default' && camera.isUserCamera) {
+                            cameraOptionEl.classList.add('active');
+                        }
+                        
+                        // Main camera name
+                        const cameraNameEl = document.createElement('div');
+                        
+                        // For the user camera, show it as "Default Camera" with special styling
+                        if (camera.isUserCamera) {
+                            cameraNameEl.textContent = `${camera.name} [Default]`;
+                            cameraOptionEl.classList.add('default-camera');
+                        } else {
+                            cameraNameEl.textContent = camera.name;
+                        }
+                        
+                        cameraOptionEl.appendChild(cameraNameEl);
+                        
+                        // Camera position info
+                        const cameraInfoEl = document.createElement('div');
+                        cameraInfoEl.className = 'camera-info';
+                        const pos = camera.position;
+                        cameraInfoEl.textContent = `Pos: ${pos.x.toFixed(1)}, ${pos.y.toFixed(1)}, ${pos.z.toFixed(1)}`;
+                        cameraOptionEl.appendChild(cameraInfoEl);
+                        
+                        // Add click handler
+                        cameraOptionEl.addEventListener('click', () => {
+                            // For user camera, we restore the original scene default camera state
+                            if (camera.isUserCamera) {
+                                this.resetToDefaultCamera();
+                            } else {
+                                this.switchToSceneCamera(camera.id);
+                            }
+                            this.toggleCameraMenu(false);
+                        });
+                        
+                        sceneCamerasList.appendChild(cameraOptionEl);
+                    });
+                    
+                    // Update active state
+                    this.updateCameraMenuActiveState();
+                },
+                
+                toggleCameraMenu: function(show) {
+                    const cameraMenu = document.getElementById('camera-menu');
+                    if (!cameraMenu) return;
+                    
+                    if (show === undefined) {
+                        // Toggle if no specific state provided
+                        cameraMenu.classList.toggle('active');
+                    } else {
+                        // Set to specific state
+                        if (show) {
+                            cameraMenu.classList.add('active');
+                        } else {
+                            cameraMenu.classList.remove('active');
+                        }
+                    }
+                    
+                    // Update the camera list when opening
+                    if (cameraMenu.classList.contains('active')) {
+                        this.updateCameraMenu();
+                        this.updateBuilderCameraInfo(); // Update builder camera position
+                    }
+                },
+                
+                switchToSceneCamera: function(cameraId) {
+                    const sceneCameras = this.findSceneCameras();
+                    const camera = sceneCameras.find(cam => cam.id === cameraId);
+                    
+                    if (!camera) {
+                        console.warn(`Camera with ID ${cameraId} not found`);
+                        return;
+                    }
+                    
+                    console.log(`Switching to scene camera: ${camera.name}`);
+                    
+                    // Save builder camera state first if needed
+                    this.saveBuildCameraState('before-camera-switch');
+                    
+                    // Get user camera (our controllable camera)
+                    const userCameraEl = document.getElementById('user-camera');
+                    
+                    if (userCameraEl) {
+                        // Set position and rotation to match scene camera
+                        userCameraEl.setAttribute('position', camera.position);
+                        userCameraEl.setAttribute('rotation', camera.rotation);
+                        
+                        // Update camera controls if they exist
+                        if (userCameraEl.components && userCameraEl.components['look-controls']) {
+                            const lookControls = userCameraEl.components['look-controls'];
+                            
+                            if (lookControls.pitchObject) {
+                                lookControls.pitchObject.rotation.x = THREE.MathUtils.degToRad(camera.rotation.x);
+                                lookControls.pitchObject.updateMatrix();
+                            }
+                            
+                            if (lookControls.yawObject) {
+                                lookControls.yawObject.rotation.y = THREE.MathUtils.degToRad(camera.rotation.y);
+                                lookControls.yawObject.updateMatrix();
+                            }
+                        }
+                        
+                        // Update the active camera state
+                        this.activeCamera = {
+                            position: Object.assign({}, camera.position),
+                            rotation: Object.assign({}, camera.rotation)
+                        };
+                        
+                        // Set the current camera mode
+                        this.currentCameraMode = 'scene';
+                        this.currentSceneCameraId = cameraId;
+                        
+                        // Log the camera switch
+                        this.logCameraEvent(`Switched to scene camera: ${camera.name}`, true);
+                    }
+                },
+                
+                switchToBuildCamera: function() {
+                    // Only restore if we have a saved build camera state
+                    if (!this.buildCamera || !this.buildCamera.position) {
+                        console.warn("No build camera state to restore");
+                        return;
+                    }
+                    
+                    // Restore the build camera
+                    this.restoreBuildCameraState('camera-menu-switch');
+                    
+                    // Set the current camera mode
+                    this.currentCameraMode = 'build';
+                    this.currentSceneCameraId = null;
+                    
+                    // Begin continuous build camera updating
+                    this.startContinuousBuildCameraUpdate();
+                    
+                    // Log the camera switch
+                    this.logCameraEvent("Switched to builder camera", true);
+                },
+                
+                initCameraController: function() {
+                    // Make sure we have a build camera state initialized
+                    if (!this.buildCamera || !this.buildCamera.position) {
+                        const cameraEl = document.getElementById('user-camera');
+                        if (cameraEl) {
+                            // Use direct position for accuracy
+                            this.buildCamera = {
+                                position: {
+                                    x: cameraEl.object3D.position.x,
+                                    y: cameraEl.object3D.position.y,
+                                    z: cameraEl.object3D.position.z
+                                },
+                                rotation: {
+                                    x: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.x),
+                                    y: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.y),
+                                    z: THREE.MathUtils.radToDeg(cameraEl.object3D.rotation.z)
+                                },
+                                timestamp: new Date().toISOString(),
+                                source: 'initialization'
+                            };
+                            
+                            // Force log to verify initial position
+                            console.log("Initial builder camera position set:", 
+                                `(${this.buildCamera.position.x.toFixed(2)}, ${this.buildCamera.position.y.toFixed(2)}, ${this.buildCamera.position.z.toFixed(2)})`);
+                        } else {
+                            this.buildCamera = {
+                                position: { x: 0, y: 1.6, z: 0 },
+                                rotation: { x: 0, y: 0, z: 0 },
+                                timestamp: new Date().toISOString(),
+                                source: 'initialization'
+                            };
+                        }
+                    }
+                    
+                    // Set initial camera mode to build
+                    this.currentCameraMode = 'build';
+                    this.currentSceneCameraId = null;
+                    
+                    // Set up camera switch button
+                    const cameraSwitchBtn = document.getElementById('camera-switch-btn');
+                    if (cameraSwitchBtn) {
+                        cameraSwitchBtn.addEventListener('click', () => {
+                            this.toggleCameraMenu();
+                        });
+                    }
+                    
+                    // Set up builder camera option
+                    const builderCameraOption = document.querySelector('.camera-option[data-camera="builder"]');
+                    if (builderCameraOption) {
+                        // Mark builder camera as active by default
+                        builderCameraOption.classList.add('active');
+                        
+                        // Add position info
+                        const infoEl = document.createElement('div');
+                        infoEl.className = 'camera-info';
+                        const pos = this.buildCamera.position;
+                        infoEl.textContent = `Pos: ${pos.x.toFixed(1)}, ${pos.y.toFixed(1)}, ${pos.z.toFixed(1)}`;
+                        builderCameraOption.appendChild(infoEl);
+                        
+                        builderCameraOption.addEventListener('click', () => {
+                            this.switchToBuildCamera();
+                            this.toggleCameraMenu(false);
+                        });
+                    }
+                    
+                    // Close menu if clicking outside
+                    document.addEventListener('click', (event) => {
+                        const cameraMenu = document.getElementById('camera-menu');
+                        const cameraSwitchBtn = document.getElementById('camera-switch-btn');
+                        
+                        if (cameraMenu && cameraSwitchBtn) {
+                            if (!cameraMenu.contains(event.target) && !cameraSwitchBtn.contains(event.target)) {
+                                this.toggleCameraMenu(false);
+                            }
+                        }
+                    });
+                    
+                    // Initial camera menu update
+                    this.updateCameraMenu();
+                    
+                    console.log("Camera controller initialized");
+                    
+                    // Start continuous build camera updating
+                    this.startContinuousBuildCameraUpdate();
+                },
+                
+                resetToDefaultCamera: function() {
+                    // The user-camera is our default scene camera
+                    const userCameraEl = document.getElementById('user-camera');
+                    
+                    if (userCameraEl) {
+                        // If we have a saved default position in scene.defaultCamera, use that
+                        if (this.scene.defaultCamera && this.scene.defaultCamera.position) {
+                            // Set position and rotation to match default
+                            userCameraEl.setAttribute('position', this.scene.defaultCamera.position);
+                            userCameraEl.setAttribute('rotation', this.scene.defaultCamera.rotation || {x: 0, y: 0, z: 0});
+                            
+                            // Update look-controls if they exist
+                            if (userCameraEl.components && userCameraEl.components['look-controls']) {
+                                const lookControls = userCameraEl.components['look-controls'];
+                                const rot = this.scene.defaultCamera.rotation || {x: 0, y: 0, z: 0};
+                                
+                                if (lookControls.pitchObject) {
+                                    lookControls.pitchObject.rotation.x = THREE.MathUtils.degToRad(rot.x);
+                                    lookControls.pitchObject.updateMatrix();
+                                }
+                                
+                                if (lookControls.yawObject) {
+                                    lookControls.yawObject.rotation.y = THREE.MathUtils.degToRad(rot.y);
+                                    lookControls.yawObject.updateMatrix();
+                                }
+                            }
+                            
+                            // Update active camera state
+                            this.activeCamera = {
+                                position: Object.assign({}, this.scene.defaultCamera.position),
+                                rotation: Object.assign({}, this.scene.defaultCamera.rotation || {x: 0, y: 0, z: 0})
+                            };
+                        } else {
+                            // Reset to initial default camera position
+                            userCameraEl.setAttribute('position', '0 1.6 0');
+                            userCameraEl.setAttribute('rotation', '0 0 0');
+                            
+                            // Update look-controls
+                            if (userCameraEl.components && userCameraEl.components['look-controls']) {
+                                const lookControls = userCameraEl.components['look-controls'];
+                                
+                                if (lookControls.pitchObject) {
+                                    lookControls.pitchObject.rotation.x = 0;
+                                    lookControls.pitchObject.updateMatrix();
+                                }
+                                
+                                if (lookControls.yawObject) {
+                                    lookControls.yawObject.rotation.y = 0;
+                                    lookControls.yawObject.updateMatrix();
+                                }
+                            }
+                            
+                            // Update active camera state
+                            this.activeCamera = {
+                                position: {x: 0, y: 1.6, z: 0},
+                                rotation: {x: 0, y: 0, z: 0}
+                            };
+                        }
+                        
+                        // Set current mode
+                        this.currentCameraMode = 'default';
+                        this.currentSceneCameraId = 'user-camera';
+                        
+                        // Log camera change
+                        this.logCameraEvent("Reset to default camera position", true);
+                    }
+                },
+                
+                updateCameraMenuActiveState: function() {
+                    // Clear active state from all options
+                    document.querySelectorAll('.camera-option').forEach(option => {
+                        option.classList.remove('active');
+                    });
+                    
+                    // Set active state based on current mode
+                    if (this.currentCameraMode === 'build' || !this.currentCameraMode) {
+                        const builderOption = document.querySelector('.camera-option[data-camera="builder"]');
+                        if (builderOption) {
+                            builderOption.classList.add('active');
+                        }
+                    } else if (this.currentCameraMode === 'default' || this.currentCameraMode === 'scene') {
+                        const activeOption = document.querySelector(`.camera-option[data-camera-id="${this.currentSceneCameraId}"]`);
+                        if (activeOption) {
+                            activeOption.classList.add('active');
+                        }
+                    }
+                },
+                
+                updateBuilderCameraInfo: function() {
+                    const builderOption = document.querySelector('.camera-option[data-camera="builder"]');
+                    if (!builderOption || !this.buildCamera) return;
+                    
+                    // Find or create the info element
+                    let infoEl = builderOption.querySelector('.camera-info');
+                    if (!infoEl) {
+                        infoEl = document.createElement('div');
+                        infoEl.className = 'camera-info';
+                        builderOption.appendChild(infoEl);
+                    }
+                    
+                    // Update position display
+                    const pos = this.buildCamera.position;
+                    if (pos) {
+                        // Format with more precision
+                        infoEl.innerHTML = `Pos: <b>${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)}</b>`;
+                        
+                        // Add a timestamp to verify it's updating
+                        const timeStr = new Date().toLocaleTimeString();
+                        infoEl.innerHTML += `<br><span style="color:#999;font-size:9px;">Updated: ${timeStr}</span>`;
+                    }
+                },
+                
+                getCurrentCameraPosition: function() {
+                    const cameraEl = document.getElementById('user-camera');
+                    if (!cameraEl) return null;
+                    
+                    // Position is straightforward from object3D
+                    const position = {
+                        x: cameraEl.object3D.position.x,
+                        y: cameraEl.object3D.position.y,
+                        z: cameraEl.object3D.position.z
+                    };
+                    
+                    // For rotation, try to use look-controls if available
+                    // as they provide more accurate camera orientation
+                    let rotation;
+                    
+                    if (cameraEl.components && cameraEl.components['look-controls']) {
+                        const lookControls = cameraEl.components['look-controls'];
+                        
+                        rotation = {
+                            x: lookControls.pitchObject ? lookControls.pitchObject.rotation.x : cameraEl.object3D.rotation.x,
+                            y: lookControls.yawObject ? lookControls.yawObject.rotation.y : cameraEl.object3D.rotation.y,
+                            z: cameraEl.object3D.rotation.z
+                        };
+                    } else {
+                        // Fall back to object3D rotation
+                        rotation = {
+                            x: cameraEl.object3D.rotation.x,
+                            y: cameraEl.object3D.rotation.y,
+                            z: cameraEl.object3D.rotation.z
+                        };
+                    }
+                    
+                    return { position, rotation };
+                },
+                
+                updateBuildCameraPosition: function() {
+                    // Get the current camera position and rotation
+                    const currentCamera = this.getCurrentCameraPosition();
+                    if (!currentCamera) return;
+                    
+                    // Convert rotations from radians to degrees for storage
+                    const convertedRotation = {
+                        x: THREE.MathUtils.radToDeg(currentCamera.rotation.x),
+                        y: THREE.MathUtils.radToDeg(currentCamera.rotation.y),
+                        z: THREE.MathUtils.radToDeg(currentCamera.rotation.z)
+                    };
+                    
+                    // Create a completely new object to prevent reference issues
+                    this.buildCamera = {
+                        position: {
+                            x: currentCamera.position.x,
+                            y: currentCamera.position.y,
+                            z: currentCamera.position.z
+                        },
+                        rotation: convertedRotation,
+                        timestamp: new Date().toISOString(),
+                        source: 'live-update'
+                    };
+                    
+                    // Force update the builder camera info in the menu if it's open
+                    const cameraMenu = document.getElementById('camera-menu');
+                    if (cameraMenu && cameraMenu.classList.contains('active')) {
+                        this.updateBuilderCameraInfo();
+                    }
+                    
+                    // Removed logging here
+                },
+                
+                setupBuildCameraUpdater: function() {
+                    // Update the build camera position multiple times per second
+                    // when in build mode to ensure it's always current
+                    this.buildCameraUpdateInterval = setInterval(() => {
+                        if (this.currentCameraMode === 'build') {
+                            this.updateBuildCameraPosition();
+                        }
+                    }, 100); // Update 10 times per second
+                    
+                    console.log("Build camera live updating enabled");
+                },
+                
+                updateDebugPanelDirectly: function() {
+                    // Get the camera element
+                    const cameraEl = document.getElementById('user-camera');
+                    if (!cameraEl) {
+                        console.warn("Cannot update debug panel - user-camera not found");
+                        return;
+                    }
+                    
+                    // Get position and rotation
+                    const pos = cameraEl.getAttribute('position');
+                    const rot = cameraEl.getAttribute('rotation');
+                    
+                    // Update debug panel directly with querySelector
+                    const debugPanel = document.querySelector('.debug-panel');
+                    if (!debugPanel) return;
+                    
+                    // Position
+                    const positionEl = debugPanel.querySelector('#camera-position') || 
+                                       debugPanel.querySelector('.camera-position');
+                    if (positionEl && pos) {
+                        positionEl.textContent = `${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)}`;
+                    }
+                    
+                    // Rotation
+                    const rotationEl = debugPanel.querySelector('#camera-rotation') || 
+                                       debugPanel.querySelector('.camera-rotation');
+                    if (rotationEl && rot) {
+                        rotationEl.textContent = `${rot.x.toFixed(2)}, ${rot.y.toFixed(2)}, ${rot.z.toFixed(2)}`;
+                    }
+                    
+                    // Camera entity info
+                    const entityEl = debugPanel.querySelector('#camera-entity') || 
+                                     debugPanel.querySelector('.camera-entity');
+                    if (entityEl) {
+                        const hasLook = cameraEl.hasAttribute('look-controls') ? 'yes' : 'no';
+                        const hasWASD = cameraEl.hasAttribute('wasd-controls') ? 'yes' : 'no';
+                        entityEl.textContent = `user-camera look:${hasLook} wasd:${hasWASD}`;
+                    }
+                    
+                    // Stored states
+                    const statesEl = debugPanel.querySelector('#stored-camera-state') || 
+                                     debugPanel.querySelector('.stored-camera-state');
+                    if (statesEl) {
+                        const buildPos = this.buildCamera && this.buildCamera.position 
+                            ? `build:(${this.buildCamera.position.x.toFixed(2)},${this.buildCamera.position.y.toFixed(2)},${this.buildCamera.position.z.toFixed(2)})`
+                            : 'build:null';
+                            
+                        const activePos = this.activeCamera && this.activeCamera.position
+                            ? `active:(${this.activeCamera.position.x.toFixed(2)},${this.activeCamera.position.y.toFixed(2)},${this.activeCamera.position.z.toFixed(2)})`
+                            : 'active:null';
+                            
+                        statesEl.textContent = `${buildPos} ${activePos}`;
+                    }
+                    
+                    // Force update the debug panel more often
+                    setTimeout(() => this.updateDebugPanelDirectly(), 200);
+                },
+                addCameraDebugOverlay: function() {
+                    // Create a direct overlay that shows camera positions
+                    const overlay = document.createElement('div');
+                    overlay.style.position = 'fixed';
+                    overlay.style.bottom = '10px';
+                    overlay.style.right = '10px';
+                    overlay.style.backgroundColor = 'rgba(0,0,0,0.7)';
+                    overlay.style.color = 'white';
+                    overlay.style.padding = '10px';
+                    overlay.style.borderRadius = '4px';
+                    overlay.style.fontFamily = 'monospace';
+                    overlay.style.fontSize = '12px';
+                    overlay.style.zIndex = '9999';
+                    overlay.id = 'camera-debug-overlay';
+                    
+                    document.body.appendChild(overlay);
+                    
+                    // Update function
+                    const updateOverlay = () => {
+                        const cameraEl = document.getElementById('user-camera');
+                        if (!cameraEl) {
+                            overlay.textContent = 'Camera not found';
+                            return;
+                        }
+                        
+                        const pos = cameraEl.getAttribute('position');
+                        const rot = cameraEl.getAttribute('rotation');
+                        const buildPos = this.buildCamera && this.buildCamera.position;
+                        const buildRot = this.buildCamera && this.buildCamera.rotation;
+                        
+                        // Get direct object3D values which are used for the actual position
+                        const obj3dPos = cameraEl.object3D.position;
+                        const obj3dRot = cameraEl.object3D.rotation;
+                        
+                        // Calculate difference between live and saved positions
+                        let buildConfidence = "N/A";
+                        let buildConfidenceStyle = "";
+                        if (pos && buildPos) {
+                            const diff = Math.sqrt(
+                                Math.pow(pos.x - buildPos.x, 2) + 
+                                Math.pow(pos.y - buildPos.y, 2) + 
+                                Math.pow(pos.z - buildPos.z, 2)
+                            );
+                            buildConfidence = diff.toFixed(3);
+                            // Color code based on difference (green = good, red = bad)
+                            if (diff < 0.01) {
+                                buildConfidenceStyle = "color: #00FF00; font-weight: bold;"; // Perfect match
+                            } else if (diff < 0.1) {
+                                buildConfidenceStyle = "color: #88FF00;"; // Very close
+                            } else if (diff < 0.5) {
+                                buildConfidenceStyle = "color: #FFFF00;"; // Warning
+                            } else {
+                                buildConfidenceStyle = "color: #FF0000;"; // Error - significant difference
+                            }
+                        }
+                        
+                        // Format the timestamp to be more readable
+                        let buildTimestamp = "N/A";
+                        let timeSinceUpdate = "N/A";
+                        if (this.buildCamera && this.buildCamera.timestamp) {
+                            const updateTime = new Date(this.buildCamera.timestamp);
+                            buildTimestamp = updateTime.toLocaleTimeString();
+                            
+                            // Calculate time since last update
+                            const now = new Date();
+                            const diffMs = now - updateTime;
+                            if (diffMs < 1000) {
+                                timeSinceUpdate = `${diffMs}ms ago`;
+                            } else if (diffMs < 60000) {
+                                timeSinceUpdate = `${Math.round(diffMs/1000)}s ago`;
+                            } else {
+                                timeSinceUpdate = `${Math.round(diffMs/60000)}m ago`;
+                            }
+                        }
+                        
+                        // Style definitions
+                        const headerStyle = "font-weight: bold; margin-top: 10px; border-bottom: 1px solid #ccc;";
+                        const sectionStyle = "margin-left: 10px;";
+                        
+                        overlay.innerHTML = `
+                            <div style="${headerStyle}">CAMERA STATE INFO</div>
+                            <div style="${sectionStyle}">
+                                <div><b>Mode:</b> ${this.currentCameraMode || 'unknown'}</div>
+                                <div><b>Scene Camera ID:</b> ${this.currentSceneCameraId || 'none'}</div>
+                            </div>
+                            
+                            <div style="${headerStyle}">LIVE CAMERA POSITIONS</div>
+                            <div style="${sectionStyle}">
+                                <div><b>getAttribute() Position:</b> ${pos ? `${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)}` : 'null'}</div>
+                                <div><b>getAttribute() Rotation:</b> ${rot ? `${rot.x.toFixed(2)}, ${rot.y.toFixed(2)}, ${rot.z.toFixed(2)}` : 'null'}</div>
+                                <div><b>object3D.position:</b> ${obj3dPos ? `${obj3dPos.x.toFixed(2)}, ${obj3dPos.y.toFixed(2)}, ${obj3dPos.z.toFixed(2)}` : 'null'}</div>
+                                <div><b>object3D.rotation:</b> ${obj3dRot ? `${THREE.MathUtils.radToDeg(obj3dRot.x).toFixed(2)}, ${THREE.MathUtils.radToDeg(obj3dRot.y).toFixed(2)}, ${THREE.MathUtils.radToDeg(obj3dRot.z).toFixed(2)}` : 'null'}</div>
+                            </div>
+                            
+                            <div style="${headerStyle}">SAVED BUILD CAMERA STATE</div>
+                            <div style="${sectionStyle}">
+                                <div><b>Position:</b> ${buildPos ? `${buildPos.x.toFixed(2)}, ${buildPos.y.toFixed(2)}, ${buildPos.z.toFixed(2)}` : 'null'}</div>
+                                <div><b>Rotation:</b> ${buildRot ? `${buildRot.x.toFixed(2)}, ${buildRot.y.toFixed(2)}, ${buildRot.z.toFixed(2)}` : 'null'}</div>
+                                <div><b>Last update source:</b> ${this.buildCamera ? this.buildCamera.source || 'unknown' : 'none'}</div>
+                                <div><b>Last update time:</b> ${buildTimestamp} (${timeSinceUpdate})</div>
+                                <div><b>Build confidence:</b> <span style="${buildConfidenceStyle}">Diff: ${buildConfidence}</span></div>
+                            </div>
+                            
+                            <div style="${headerStyle}">ACTIVE UPDATE METHODS</div>
+                            <div style="${sectionStyle}">
+                                <div><b>Continuous updater:</b> ${this.continuousBuildUpdateInterval ? 'RUNNING' : 'STOPPED'}</div>
+                                <div><b>Build camera updater:</b> ${this.buildCameraUpdateInterval ? 'RUNNING' : 'STOPPED'}</div>
+                            </div>
+                            
+                            <div style="${headerStyle}">UPDATE SOURCES EXPLAINED</div>
+                            <div style="${sectionStyle}">
+                                <div><b>camera-menu-switch:</b> Camera position when button was clicked</div>
+                                <div><b>continuous-update:</b> Uses getAttribute() at 20Hz (DOM values)</div>
+                                <div><b>live-update:</b> Uses object3D directly at 10Hz (THREE.js values)</div>
+                                <div><b>initialization:</b> Initial camera position at startup</div>
+                            </div>
+                        `;
+                    };
+                    
+                    // Update regularly
+                    setInterval(updateOverlay, 200);
+                    
+                    console.log("Added camera debug overlay");
+                },
+                startContinuousBuildCameraUpdate: function() {
+                    // Clear any existing update interval
+                    if (this.continuousBuildUpdateInterval) {
+                        clearInterval(this.continuousBuildUpdateInterval);
+                    }
+                    
+                    // Cancel any existing animation frame
+                    if (this.continuousBuildUpdateAnimFrame) {
+                        cancelAnimationFrame(this.continuousBuildUpdateAnimFrame);
+                    }
+                    
+                    // Create a function that directly syncs from THREE.js object3D
+                    const syncFromObject3D = () => {
+                        if (this.currentCameraMode !== 'build') return;
+                        
+                        const cameraEl = document.getElementById('user-camera');
+                        if (!cameraEl || !cameraEl.object3D) return;
+                        
+                        // Get position and rotation directly from the THREE.js object
+                        const position = cameraEl.object3D.position;
+                        const rotation = cameraEl.object3D.rotation;
+                        
+                        // Update the build camera state
+                        this.buildCamera = {
+                            position: {
+                                x: position.x,
+                                y: position.y,
+                                z: position.z
+                            },
+                            rotation: {
+                                x: THREE.MathUtils.radToDeg(rotation.x),
+                                y: THREE.MathUtils.radToDeg(rotation.y),
+                                z: THREE.MathUtils.radToDeg(rotation.z)
+                            },
+                            timestamp: new Date().toISOString(),
+                            source: 'direct-three-update'
+                        };
+                        
+                        // Very important: also update the DOM attributes to match
+                        // This ensures consistency between object3D and getAttribute() values
+                        cameraEl.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
+                        cameraEl.setAttribute('rotation', 
+                            `${THREE.MathUtils.radToDeg(rotation.x)} ${THREE.MathUtils.radToDeg(rotation.y)} ${THREE.MathUtils.radToDeg(rotation.z)}`);
+                        
+                        // Removed logging here
+                    };
+                    
+                    // Set up direct sync on animation frame which is better than interval
+                    // This aligns with the render loop for smoother results
+                    const animFrameSync = () => {
+                        syncFromObject3D();
+                        this.continuousBuildUpdateAnimFrame = requestAnimationFrame(animFrameSync);
+                    };
+                    
+                    // Start the sync process
+                    this.continuousBuildUpdateAnimFrame = requestAnimationFrame(animFrameSync);
+                    
+                    // Also set an interval as a backup to ensure it runs even if animation frames are paused
+                    this.continuousBuildUpdateInterval = setInterval(syncFromObject3D, 50);
+                    
+                    // Log once at setup, but not during operation
+                    console.log("Started enhanced continuous build camera updating");
+                },
+                setupCameraMovementTracking: function() {
+                    const camera = document.getElementById('user-camera');
+                    if (!camera) return;
+                    
+                    // Save the initial state
+                    this.saveBuildCameraState('camera-movement-tracking-setup');
+                    
+                    // Track position changes using a MutationObserver
+                    const observer = new MutationObserver((mutations) => {
+                        mutations.forEach((mutation) => {
+                            if (mutation.attributeName === 'position' || mutation.attributeName === 'rotation') {
+                                if (this.currentCameraMode === 'build') {
+                                    // Save camera state when position or rotation attributes change
+                                    this.saveBuildCameraState('camera-movement-detected');
+                                }
+                            }
+                        });
+                    });
+                    
+                    // Observe position and rotation attribute changes
+                    observer.observe(camera, { attributes: true, attributeFilter: ['position', 'rotation'] });
+                    
+                    console.log("Camera movement tracking enabled");
+                },
+                syncCameraMotionToBuilder: function() {
+                    // Add a camera movement listener directly on the scene
+                    const scene = document.querySelector('a-scene');
+                    if (!scene) return;
+                    
+                    // Add a tick handler to constantly save camera position during motion
+                    scene.addEventListener('tick', () => {
+                        if (this.currentCameraMode === 'build') {
+                            // Get current camera position
+                            const userCamera = document.getElementById('user-camera');
+                            if (userCamera && userCamera.object3D) {
+                                // Only update if position has changed significantly to avoid spam
+                                const position = userCamera.object3D.position;
+                                const rotation = userCamera.object3D.rotation;
+                                
+                                // Check if we already have a saved position to compare against
+                                if (this.buildCamera && this.buildCamera.position) {
+                                    const oldPos = this.buildCamera.position;
+                                    // Calculate movement distance
+                                    const distance = Math.sqrt(
+                                        Math.pow(position.x - oldPos.x, 2) + 
+                                        Math.pow(position.y - oldPos.y, 2) + 
+                                        Math.pow(position.z - oldPos.z, 2)
+                                    );
+                                    
+                                    // Only update if moved more than a small threshold
+                                    if (distance > 0.001) {
+                                        // Store current position in build camera
+                                        this.buildCamera = {
+                                            position: {
+                                                x: position.x,
+                                                y: position.y,
+                                                z: position.z
+                                            },
+                                            rotation: {
+                                                x: THREE.MathUtils.radToDeg(rotation.x),
+                                                y: THREE.MathUtils.radToDeg(rotation.y),
+                                                z: THREE.MathUtils.radToDeg(rotation.z)
+                                            },
+                                            timestamp: new Date().toISOString(),
+                                            source: 'camera-motion-tick'
+                                        };
+                                        
+                                        // Removed logging here
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Log once at setup, but not during operation
+                    console.log("Camera motion sync to builder camera enabled");
+                },
+                alignAllCameraRepresentations: function() {
+                    const cameraEl = document.getElementById('user-camera');
+                    if (!cameraEl || !cameraEl.object3D) return;
+                    
+                    // Get current object3D position which is the most accurate
+                    const position = cameraEl.object3D.position;
+                    const rotation = cameraEl.object3D.rotation;
+                    
+                    // Convert rotation to degrees for A-Frame attributes
+                    const rotDeg = {
+                        x: THREE.MathUtils.radToDeg(rotation.x),
+                        y: THREE.MathUtils.radToDeg(rotation.y),
+                        z: THREE.MathUtils.radToDeg(rotation.z)
+                    };
+                    
+                    // 1. Update the element attributes in the DOM
+                    cameraEl.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
+                    cameraEl.setAttribute('rotation', `${rotDeg.x} ${rotDeg.y} ${rotDeg.z}`);
+                    
+                    // 2. Update the build camera state
+                    this.buildCamera = {
+                        position: {
+                            x: position.x,
+                            y: position.y,
+                            z: position.z
+                        },
+                        rotation: rotDeg,
+                        timestamp: new Date().toISOString(),
+                        source: 'alignment-sync'
+                    };
+                    
+                    // 3. Also update the scene model camera
+                    if (!this.scene.camera) {
+                        this.scene.camera = {};
+                    }
+                    this.scene.camera.position = { x: position.x, y: position.y, z: position.z };
+                    this.scene.camera.rotation = rotDeg;
+                    
+                    // 4. Update the general camera reference
+                    this.camera = {
+                        position: { x: position.x, y: position.y, z: position.z },
+                        rotation: rotDeg
+                    };
+                    
+                    // 5. Update the active camera reference
+                    this.activeCamera = {
+                        position: { x: position.x, y: position.y, z: position.z },
+                        rotation: rotDeg
+                    };
+                    
+                    // Removed logging here
                 }
             };
             
@@ -4426,6 +5689,38 @@
             // Expose the BUILDER object globally
             window.AFRAME.BUILDER = state;
         };
+    </script>
+    <script>
+        // Find all debug panel elements and log their IDs
+        document.getElementById('toggle-debug').addEventListener('click', function() {
+            console.log("Debug panel elements:");
+            const debugPanel = document.querySelector('.debug-panel');
+            if (debugPanel) {
+                const elements = debugPanel.querySelectorAll('*[id]');
+                elements.forEach(el => {
+                    console.log(`ID: ${el.id}, Content: ${el.textContent.substring(0, 30)}`);
+                });
+            } else {
+                console.log("Debug panel not found");
+            }
+        });
+    </script>
+    <script>
+        // Find the debug panel toggle button and add a refresh button next to it
+        const toggleDebugBtn = document.getElementById('toggle-debug');
+        if (toggleDebugBtn) {
+            const refreshBtn = document.createElement('button');
+            refreshBtn.className = 'component-button';
+            refreshBtn.id = 'refresh-debug';
+            refreshBtn.textContent = 'Refresh Debug';
+            refreshBtn.style.marginLeft = '5px';
+            refreshBtn.addEventListener('click', () => {
+                console.log("Manually refreshing debug panel");
+                this.updateDebugPanelDirectly();
+            });
+            
+            toggleDebugBtn.parentNode.insertBefore(refreshBtn, toggleDebugBtn.nextSibling);
+        }
     </script>
 </body>
 </html>
