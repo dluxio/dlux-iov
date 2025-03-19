@@ -776,6 +776,100 @@
                         requestAnimationFrame(alignLoop);
                     };
                     requestAnimationFrame(alignLoop);
+                    
+                    // Initialize state immutability
+                    this.cameraState = Object.freeze({
+                        position: { x: 0, y: 1.6, z: 0 },
+                        rotation: { x: 0, y: 0, z: 0 },
+                        mode: 'build',
+                        timestamp: new Date().toISOString(),
+                        source: 'initialization'
+                    });
+                    
+                    // Initialize state history
+                    this.cameraStateHistory = [];
+                    this.cameraStateHistoryIndex = -1;
+                    this.maxHistoryStates = 50;
+                    
+                    // Initialize throttling/debouncing
+                    this.lastStateUpdate = 0;
+                    this.pendingStateUpdate = null;
+                    this.updateThrottleTime = 50; // ms
+                    
+                    // Initialize render loop optimization
+                    this.setupCameraEventListeners();
+                    
+                    // Initialize debug tools
+                    this.setupDebugKeyboardShortcuts();
+                    
+                    // Initialize state persistence
+                    this.loadCameraStates();
+                    
+                    // Initialize networked camera sync
+                    this.setupNetworkedCameraSync();
+                    
+                    // Initialize public API
+                    AFRAME.BUILDER.CameraAPI = {
+                        // Get current camera information
+                        getCurrentPosition: function() {
+                            return JSON.parse(JSON.stringify(state.cameraState.position));
+                        },
+                        
+                        getCurrentRotation: function() {
+                            return JSON.parse(JSON.stringify(state.cameraState.rotation));
+                        },
+                        
+                        getMode: function() {
+                            return state.cameraState.mode;
+                        },
+                        
+                        // Camera operations
+                        switchToBuildCamera: function() {
+                            state.switchToBuildCamera();
+                        },
+                        
+                        switchToSceneCamera: function(cameraId) {
+                            state.switchToSceneCamera(cameraId);
+                        },
+                        
+                        resetCamera: function() {
+                            state.resetCameraPosition();
+                        },
+                        
+                        // Named position management
+                        saveCurrentPositionAs: function(name) {
+                            if (!state.savedCameraPositions) {
+                                state.savedCameraPositions = {};
+                            }
+                            
+                            state.savedCameraPositions[name] = {
+                                position: JSON.parse(JSON.stringify(state.cameraState.position)),
+                                rotation: JSON.parse(JSON.stringify(state.cameraState.rotation)),
+                                timestamp: new Date().toISOString()
+                            };
+                            
+                            state.saveCameraStates();
+                            return true;
+                        },
+                        
+                        goToSavedPosition: function(name) {
+                            if (!state.savedCameraPositions || !state.savedCameraPositions[name]) {
+                                return false;
+                            }
+                            
+                            const savedPos = state.savedCameraPositions[name];
+                            state.updateCameraState({
+                                position: savedPos.position,
+                                rotation: savedPos.rotation
+                            }, `goto-saved-position-${name}`);
+                            
+                            return true;
+                        },
+                        
+                        listSavedPositions: function() {
+                            return Object.keys(state.savedCameraPositions || {});
+                        }
+                    };
                 },
                 
                 // Setup less-frequent updates for detailed debug info
@@ -934,44 +1028,38 @@
                 },
                 
                 // Update camera state from DOM (separated for reuse)
-                updateCameraState: function(newState, source) {
-                    // 1. Update the state (single source of truth)
-                    const oldState = JSON.parse(JSON.stringify(this.cameraState)); // Deep clone for comparison
+                updateCameraState: function(newState, source, recordHistory = true) {
+                    // Create new state
+                    const updatedState = {
+                        ...this.cameraState,
+                        ...newState,
+                        timestamp: new Date().toISOString(),
+                        source: source || 'manual-update'
+                    };
                     
-                    // Apply changes
-                    Object.assign(this.cameraState, newState);
-                    this.cameraState.timestamp = new Date().toISOString();
-                    this.cameraState.source = source || 'manual-update';
-                    
-                    // 2. Calculate if there are meaningful changes (to avoid unnecessary renders)
-                    const positionChanged = !this.cameraState.position || !oldState.position ||
-                        this.cameraState.position.x !== oldState.position.x ||
-                        this.cameraState.position.y !== oldState.position.y ||
-                        this.cameraState.position.z !== oldState.position.z;
-                    
-                    const rotationChanged = !this.cameraState.rotation || !oldState.rotation ||
-                        this.cameraState.rotation.x !== oldState.rotation.x ||
-                        this.cameraState.rotation.y !== oldState.rotation.y ||
-                        this.cameraState.rotation.z !== oldState.rotation.z;
-                    
-                    const modeChanged = this.cameraState.mode !== oldState.mode;
-                    
-                    // 3. Render UI changes if needed (one-way data binding)
-                    if (positionChanged || rotationChanged) {
-                        this.renderCameraPosition();
+                    // Record in history if significant change and recordHistory flag is true
+                    if (recordHistory && this.isSignificantStateChange(this.cameraState, updatedState)) {
+                        // If we're not at the end of the history, truncate 
+                        if (this.cameraStateHistoryIndex < this.cameraStateHistory.length - 1) {
+                            this.cameraStateHistory = this.cameraStateHistory.slice(0, this.cameraStateHistoryIndex + 1);
+                        }
+                        
+                        // Add current state to history
+                        this.cameraStateHistory.push(JSON.parse(JSON.stringify(updatedState)));
+                        
+                        // Limit history size
+                        if (this.cameraStateHistory.length > this.maxHistoryStates) {
+                            this.cameraStateHistory.shift();
+                        }
+                        
+                        // Update index to point to current state
+                        this.cameraStateHistoryIndex = this.cameraStateHistory.length - 1;
                     }
                     
-                    if (modeChanged) {
-                        this.renderCameraMode();
-                    }
+                    // Update current state
+                    this.cameraState = Object.freeze(updatedState);
                     
-                    // 4. Network sync (throttled)
-                    this.throttledNetworkSync();
-                    
-                    // 5. Update debug display if enabled
-                    this.updateDebugDisplay();
-                    
-                    return this.cameraState;
+                    // Continue with rendering...
                 },
                 
                 // Setup camera position tracking to continuously update stored camera position
@@ -5728,39 +5816,43 @@
                     const cameraEl = document.getElementById('user-camera');
                     if (!scene || !cameraEl) return;
                     
-                    // Use a ticker to regularly check for changes from THREE.js
-                    scene.addEventListener('tick', () => {
+                    // Track last position to detect changes
+                    let lastPos = { x: 0, y: 0, z: 0 };
+                    let lastUpdate = 0;
+                    const updateInterval = 50; // ms
+                    
+                    scene.addEventListener('tick', (e) => {
                         // Skip if we're preventing circular updates
                         if (this.preventCircularUpdates) return;
                         
                         // Only update state if we're in build mode
                         if (this.cameraState.mode !== 'build') return;
                         
+                        // Throttle updates
+                        const now = performance.now();
+                        if (now - lastUpdate < updateInterval) return;
+                        
                         // Get current THREE.js values
                         const position = cameraEl.object3D.position;
-                        const rotation = cameraEl.object3D.rotation;
                         
-                        // Check if there's been a significant change from current state
-                        if (!this.cameraState.position) return;
-                        
-                        const oldPos = this.cameraState.position;
+                        // Calculate distance moved
                         const distance = Math.sqrt(
-                            Math.pow(position.x - oldPos.x, 2) + 
-                            Math.pow(position.y - oldPos.y, 2) + 
-                            Math.pow(position.z - oldPos.z, 2)
+                            Math.pow(position.x - lastPos.x, 2) + 
+                            Math.pow(position.y - lastPos.y, 2) + 
+                            Math.pow(position.z - lastPos.z, 2)
                         );
                         
-                        // Only update state if the change is significant
+                        // Only update if moved significantly
                         if (distance > 0.001) {
-                            // Convert rotation to degrees for consistency
+                            const rotation = cameraEl.object3D.rotation;
                             const rotDeg = {
                                 x: THREE.MathUtils.radToDeg(rotation.x),
                                 y: THREE.MathUtils.radToDeg(rotation.y),
                                 z: THREE.MathUtils.radToDeg(rotation.z)
                             };
                             
-                            // Update the state
-                            this.updateCameraState({
+                            // Update state via throttled method
+                            this.throttledUpdateCameraState({
                                 position: {
                                     x: position.x,
                                     y: position.y,
@@ -5768,10 +5860,12 @@
                                 },
                                 rotation: rotDeg
                             }, 'camera-motion-tick');
+                            
+                            // Store last position
+                            lastPos = { x: position.x, y: position.y, z: position.z };
+                            lastUpdate = now;
                         }
                     });
-                    
-                    console.log("Camera event listeners set up for unidirectional data flow");
                 },
                 // Throttled network sync to avoid flooding the network
                 throttledNetworkSync: function() {
@@ -5847,6 +5941,204 @@
                     // Use direct debug panel update if available
                     if (typeof this.updateDebugPanelDirectly === 'function') {
                         this.updateDebugPanelDirectly();
+                    }
+                },
+                // Initialize state history
+                cameraStateHistory: [],
+                cameraStateHistoryIndex: -1,
+                maxHistoryStates: 50,
+
+                // Helper to determine if a change is significant enough for history
+                isSignificantStateChange: function(oldState, newState) {
+                    if (!oldState || !newState) return true;
+                    
+                    // Check position change
+                    const positionChange = 
+                        Math.abs(oldState.position.x - newState.position.x) > 0.1 ||
+                        Math.abs(oldState.position.y - newState.position.y) > 0.1 ||
+                        Math.abs(oldState.position.z - newState.position.z) > 0.1;
+                        
+                    // Check rotation change (with wrap-around handling)
+                    const rotationChange =
+                        Math.abs(oldState.rotation.x - newState.rotation.x) > 5 ||
+                        Math.abs(oldState.rotation.y - newState.rotation.y) > 5 ||
+                        Math.abs(oldState.rotation.z - newState.rotation.z) > 5;
+                        
+                    // Check mode change
+                    const modeChange = oldState.mode !== newState.mode;
+                    
+                    return positionChange || rotationChange || modeChange;
+                },
+
+                // Add undo/redo functions
+                undoCameraState: function() {
+                    if (this.cameraStateHistoryIndex > 0) {
+                        this.cameraStateHistoryIndex--;
+                        const previousState = this.cameraStateHistory[this.cameraStateHistoryIndex];
+                        this.updateCameraState(previousState, 'undo-operation', false);
+                    }
+                },
+
+                redoCameraState: function() {
+                    if (this.cameraStateHistoryIndex < this.cameraStateHistory.length - 1) {
+                        this.cameraStateHistoryIndex++;
+                        const nextState = this.cameraStateHistory[this.cameraStateHistoryIndex];
+                        this.updateCameraState(nextState, 'redo-operation', false);
+                    }
+                },
+
+                // Add at initialization
+                lastStateUpdate: 0,
+                pendingStateUpdate: null,
+                updateThrottleTime: 50, // ms
+
+                // Throttled state update
+                throttledUpdateCameraState: function(newState, source) {
+                    const now = Date.now();
+                    
+                    // If we recently updated, schedule an update
+                    if (now - this.lastStateUpdate < this.updateThrottleTime) {
+                        // Clear any existing pending update
+                        if (this.pendingStateUpdate) {
+                            clearTimeout(this.pendingStateUpdate);
+                        }
+                        
+                        // Set a timeout to ensure the update happens after throttle time
+                        this.pendingStateUpdate = setTimeout(() => {
+                            this.updateCameraState(newState, source);
+                            this.pendingStateUpdate = null;
+                            this.lastStateUpdate = Date.now();
+                        }, this.updateThrottleTime);
+                    } else {
+                        // Update immediately
+                        this.updateCameraState(newState, source);
+                        this.lastStateUpdate = now;
+                    }
+                },
+                // Add keyboard shortcuts for camera state debugging
+                setupDebugKeyboardShortcuts: function() {
+                    document.addEventListener('keydown', (e) => {
+                        // Only activate if Alt+D is pressed (customize as needed)
+                        if (e.altKey && e.key === 'd') {
+                            console.group('Camera State Debug');
+                            console.log('Current State:', JSON.parse(JSON.stringify(this.cameraState)));
+                            console.log('History Size:', this.cameraStateHistory?.length || 0);
+                            console.log('Current Mode:', this.cameraState.mode);
+                            console.log('DOM Position:', document.getElementById('user-camera')?.getAttribute('position'));
+                            console.log('THREE.js Position:', document.getElementById('user-camera')?.object3D.position);
+                            console.groupEnd();
+                        }
+                        
+                        // Undo/Redo shortcuts
+                        if (e.ctrlKey && e.key === 'z') {
+                            this.undoCameraState();
+                        }
+                        if (e.ctrlKey && e.key === 'y') {
+                            this.redoCameraState();
+                        }
+                    });
+                },
+                // Save camera states to localStorage
+                saveCameraStates: function() {
+                    // Save current state
+                    try {
+                        const stateToSave = {
+                            currentState: this.cameraState,
+                            savedPositions: this.savedCameraPositions || {}
+                        };
+                        localStorage.setItem('aframe-builder-camera-states', JSON.stringify(stateToSave));
+                        console.log('Camera states saved to localStorage');
+                    } catch (e) {
+                        console.warn('Failed to save camera states:', e);
+                    }
+                },
+
+                // Load camera states from localStorage
+                loadCameraStates: function() {
+                    try {
+                        const savedData = localStorage.getItem('aframe-builder-camera-states');
+                        if (savedData) {
+                            const parsedData = JSON.parse(savedData);
+                            
+                            // Restore current state if valid
+                            if (parsedData.currentState && parsedData.currentState.position) {
+                                this.updateCameraState(parsedData.currentState, 'localStorage-restore');
+                            }
+                            
+                            // Restore saved positions
+                            if (parsedData.savedPositions) {
+                                this.savedCameraPositions = parsedData.savedPositions;
+                            }
+                            
+                            console.log('Camera states loaded from localStorage');
+                        }
+                    } catch (e) {
+                        console.warn('Failed to load camera states:', e);
+                    }
+                },
+
+                setupNetworkedCameraSync: function() {
+                    if (!window.NAF || !this.nafEnabled) return;
+                    
+                    // Register schema for camera data
+                    NAF.schemas.add({
+                        template: '#camera-template',
+                        components: [
+                            {
+                                component: 'position',
+                                requiresNetworkUpdate: true
+                            },
+                            {
+                                component: 'rotation',
+                                requiresNetworkUpdate: true
+                            }
+                        ]
+                    });
+                    
+                    // Set up throttled network updates
+                    this.lastNetworkUpdate = 0;
+                    this.networkUpdateInterval = 100; // ms
+                    
+                    // Add NAF tick callback
+                    const tickHandler = () => {
+                        if (!this.nafEnabled || !NAF.connection.isConnected()) return;
+                        
+                        const now = Date.now();
+                        if (now - this.lastNetworkUpdate < this.networkUpdateInterval) return;
+                        
+                        // Only sync if we own the camera
+                        const cameraEl = document.getElementById('user-camera');
+                        if (cameraEl && NAF.utils.isMine(cameraEl)) {
+                            NAF.utils.takeOwnership(cameraEl);
+                            this.lastNetworkUpdate = now;
+                        }
+                    };
+                    
+                    // Register tick handler with NAF
+                    NAF.connection.onConnect(() => {
+                        NAF.connection.subscribeToDataChannel('camera-updates', this.handleNetworkCameraUpdate.bind(this));
+                        document.querySelector('a-scene').addEventListener('tick', tickHandler);
+                        console.log('Networked camera sync enabled');
+                    });
+                },
+
+                handleNetworkCameraUpdate: function(senderId, dataType, data) {
+                    // Ignore our own updates
+                    if (senderId === NAF.clientId) return;
+                    
+                    console.log(`Received camera update from ${senderId}`);
+                    
+                    // Only process if in 'networked' mode
+                    if (this.cameraState.mode === 'networked') {
+                        // Update remote user camera position
+                        const remoteCamera = document.getElementById(`remote-camera-${senderId}`);
+                        if (remoteCamera) {
+                            remoteCamera.setAttribute('position', data.position);
+                            remoteCamera.setAttribute('rotation', data.rotation);
+                        } else {
+                            // Create remote camera representation if it doesn't exist
+                            this.createRemoteCameraRepresentation(senderId, data);
+                        }
                     }
                 }
             };
