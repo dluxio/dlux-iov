@@ -6,41 +6,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A-Frame Builder</title>
 
-    <!-- THREE.Math polyfill to fix NAF errors -->
-    <!-- <script>
-        // Immediately execute to ensure THREE.Math is defined before any scripts load
-        (function() {
-            // Make sure THREE exists
-            if (typeof window.THREE === 'undefined') {
-                window.THREE = {};
-            }
-            
-            // Add Math if it doesn't exist
-            if (!window.THREE.Math) {
-                window.THREE.Math = {
-                    DEG2RAD: Math.PI / 180,
-                    RAD2DEG: 180 / Math.PI,
-                    generateUUID: function() {
-                        // Simple UUID generator
-                        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                            var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-                            return v.toString(16);
-                        });
-                    }
-                };
-                console.log("THREE.Math polyfill added immediately");
-            }
-        })();
-    </script> -->
-
     <!-- A-Frame -->
     <script src="aframe.min.js"></script>
 
     <!-- Load Socket.io -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.5.0/socket.io.slim.js"></script>
 
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@300..700&display=swap"
+        rel="stylesheet">
+    <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
+
     <!-- Deferred NAF loading -->
     <script>
+        /**
+* AFRAME-Builder
+* 
+* This application has two APIs:
+* 
+* 1. Legacy API: window.AFRAME.BUILDER.*
+* 2. Modular API: window.AFRAME_BUILDER.* (with module segmentation)
+* 
+* The modular API is recommended for new code, while the legacy API
+* remains fully supported for backward compatibility.
+* 
+* Modular API Examples:
+* - AFRAME_BUILDER.camera.switchToBuildCamera()
+* - AFRAME_BUILDER.entities.create('box', { position: '0 1 -3' })
+* - AFRAME_BUILDER.monaco.getValue()
+* - AFRAME_BUILDER.network.connect('my-room')
+*/
         // Load NAF after A-Frame is fully initialized
         document.addEventListener('DOMContentLoaded', function () {
             AFRAME.registerComponent('load-naf', {
@@ -607,6 +604,15 @@
     </div>
 
     <script>
+        // Global initialization - should come before any module definitions
+        window.AFRAME_BUILDER = {
+            core: {},
+            ui: {},
+            camera: {},
+            entities: {},
+            network: {},
+            monaco: {}
+        };
         // Wait for A-Frame to load before any app initialization
         window.onload = function () {
             // Ensure the preview scene exists and is set up correctly
@@ -6584,6 +6590,7 @@
             // Expose the BUILDER object globally
             window.AFRAME.BUILDER = state;
         };
+
         // Find all debug panel elements and log their IDs
         document.getElementById('toggle-debug').addEventListener('click', function () {
             console.log("Debug panel elements:");
@@ -6605,75 +6612,211 @@
             refreshBtn.className = 'component-button';
             refreshBtn.id = 'refresh-debug';
             refreshBtn.textContent = 'Refresh Debug';
-            refreshBtn.style.marginLeft = '5px';
             refreshBtn.addEventListener('click', () => {
                 console.log("Manually refreshing debug panel");
-                this.updateDebugPanelDirectly();
+                window.AFRAME.BUILDER.updateDebugPanelDirectly();
             });
 
             toggleDebugBtn.parentNode.insertBefore(refreshBtn, toggleDebugBtn.nextSibling);
         }
-    </script>
-    <script>
-        // Initialize AFRAME_BUILDER if it doesn't exist
-        if (typeof window.AFRAME_BUILDER === 'undefined') {
-            window.AFRAME_BUILDER = {};
-        }
 
         // Create the main API
-        window.AFRAME_BUILDER.core = {
+        Object.assign(window.AFRAME_BUILDER.core, {
             /**
-             * Gets the version of the builder
-             * @returns {string} Version string
+             * Version information
              */
-            version: "1.0.0",
-
-            /**
-             * Gets the underlying state object (use with caution)
-             * @returns {Object} The internal state
-             */
-            getState: function () {
-                return window.AFRAME && window.AFRAME.BUILDER ? window.AFRAME.BUILDER : null;
+            version: {
+                major: 1,
+                minor: 0,
+                patch: 0,
+                toString: function () { return `${this.major}.${this.minor}.${this.patch}`; },
+                isCompatibleWith: function (requiredVersion) {
+                    if (!requiredVersion) return true;
+                    const parts = requiredVersion.split('.').map(p => parseInt(p, 10));
+                    // Major version must match exactly
+                    return this.major === parts[0] &&
+                        (this.minor > parts[1] ||
+                            (this.minor === parts[1] && this.patch >= (parts[2] || 0)));
+                }
             },
 
             /**
-             * Initialize the modular API
+             * Debug functionality
+             */
+            debug: {
+                enabled: false,
+                enable: function () {
+                    this.enabled = true;
+                    console.log("[AFRAME_BUILDER] Debug mode enabled");
+                },
+                disable: function () {
+                    this.enabled = false;
+                },
+                log: function (...args) {
+                    if (this.enabled) console.log('[AFRAME_BUILDER]', ...args);
+                }
+            },
+
+            /**
+             * Event system for cross-module communication
+             */
+            events: {
+                listeners: {},
+                on: function (event, callback) {
+                    if (!this.listeners[event]) {
+                        this.listeners[event] = [];
+                    }
+                    this.listeners[event].push(callback);
+                    return () => this.off(event, callback);
+                },
+                off: function (event, callback) {
+                    if (!this.listeners[event]) return;
+                    const index = this.listeners[event].indexOf(callback);
+                    if (index !== -1) {
+                        this.listeners[event].splice(index, 1);
+                    }
+                },
+                emit: function (event, data) {
+                    if (!this.listeners[event]) return;
+                    this.listeners[event].forEach(callback => {
+                        try {
+                            callback(data);
+                        } catch (e) {
+                            console.error('Error in event listener for', event, e);
+                        }
+                    });
+                }
+            },
+
+            /**
+             * Module initialization status tracking
+             */
+            modulesReady: {
+                core: false,
+                ui: false,
+                camera: false,
+                entities: false,
+                network: false,
+                monaco: false,
+                isModuleReady: function (module) {
+                    return !!this[module];
+                },
+                setModuleReady: function (module) {
+                    this[module] = true;
+                    window.AFRAME_BUILDER.core.events.emit('module:ready', { module });
+
+                    // Check if all required modules are ready
+                    const allReady = ['core', 'ui', 'camera', 'entities', 'network', 'monaco']
+                        .every(m => this[m]);
+
+                    if (allReady) {
+                        window.AFRAME_BUILDER.core.events.emit('all:ready');
+                    }
+                }
+            },
+
+            /**
+             * API Map for legacy bridge
+             */
+            apiMap: {
+                // Map of old method names to new module methods
+
+                // Camera methods
+                'switchToBuildCamera': 'camera.switchToBuildCamera',
+                'switchToSceneCamera': 'camera.switchToSceneCamera',
+                'startContinuousBuildCameraUpdate': 'camera.startContinuousBuildCameraUpdate',
+                'syncCameraMotionToBuilder': 'camera.syncCameraMotionToBuilder',
+                'alignAllCameraRepresentations': 'camera.alignAllCameraRepresentations',
+
+                // Entity methods
+                'addEntity': 'entities.create',
+                'updateEntity': 'entities.update',
+                'deleteEntity': 'entities.delete',
+                'findEntityById': 'entities.findById',
+                'getAllEntities': 'entities.getAll',
+
+                // UI methods
+                'showNotification': 'ui.notify',
+                'updateDebugPanel': 'ui.updateDebug',
+                'toggleDebugPanel': 'ui.toggleDebug',
+
+                // Network methods
+                'connectToRoom': 'network.connect',
+                'disconnectFromRoom': 'network.disconnect',
+                'isNetworkConnected': 'network.isConnected',
+                'getNetworkClientId': 'network.getClientId',
+
+                // Monaco editor methods
+                'getEditorValue': 'monaco.getValue',
+                'setEditorValue': 'monaco.setValue',
+                'setEditorLanguage': 'monaco.setLanguage',
+                'formatEditorCode': 'monaco.formatCode',
+
+                // Core API methods
+                'on': 'core.events.on',
+                'off': 'core.events.off',
+                'emit': 'core.events.emit',
+                'getModule': 'core.getModule',
+                'enableDebug': 'core.debug.enable',
+                'disableDebug': 'core.debug.disable',
+                'getVersion': 'core.version.toString'
+            },
+
+            /**
+             * Initialization function
              */
             init: function () {
-                console.log("AFRAME_BUILDER API initialized");
+                // Initialize the API
+                this.initApi();
 
-                // If we have access to the original init, call it
-                if (window.AFRAME && window.AFRAME.BUILDER &&
-                    typeof window.AFRAME.BUILDER.init === 'function' &&
-                    !window.AFRAME.BUILDER._initialized) {
-                    window.AFRAME.BUILDER.init();
-                    window.AFRAME.BUILDER._initialized = true;
+                // Setup legacy bridge
+                this.setupLegacyBridge();
+
+                // Mark core as ready
+                this.modulesReady.setModuleReady('core');
+
+                console.log("AFRAME_BUILDER Core module initialized");
+            },
+
+            /**
+             * Sets up bridges between legacy API events and modular API
+             */
+            setupLegacyBridge: function () {
+                // Only setup if legacy API exists
+                if (!window.AFRAME || !window.AFRAME.BUILDER) return;
+
+                const legacyAPI = window.AFRAME.BUILDER;
+                const modularAPI = window.AFRAME_BUILDER;
+
+                // Monitor camera state changes in legacy API
+                const originalUpdateCameraState = legacyAPI.updateCameraState;
+                if (typeof originalUpdateCameraState === 'function') {
+                    legacyAPI.updateCameraState = function (newState, source) {
+                        // Call original function
+                        const result = originalUpdateCameraState.call(this, newState, source);
+
+                        // Emit event to modular API
+                        if (modularAPI.core && modularAPI.core.events) {
+                            modularAPI.core.events.emit('camera:stateChanged', {
+                                newState: newState,
+                                source: source
+                            });
+                        }
+
+                        return result;
+                    };
                 }
-            }
-        };
 
-        // Call init automatically if the original hasn't been initialized yet
-        if (window.AFRAME && window.AFRAME.BUILDER && !window.AFRAME.BUILDER._initialized) {
-            // Wait for document to be ready
-            if (document.readyState === 'complete' || document.readyState === 'interactive') {
-                window.AFRAME_BUILDER.core.init();
-            } else {
-                document.addEventListener('DOMContentLoaded', function () {
-                    window.AFRAME_BUILDER.core.init();
-                });
+                // More bridges can be added here for other parts of the API
             }
-        }
+        });
+
+
 
         console.log("AFRAME_BUILDER Core module initialized");
-    </script>
-    <script>
-        // Initialize AFRAME_BUILDER if it doesn't exist
-        if (typeof window.AFRAME_BUILDER === 'undefined') {
-            window.AFRAME_BUILDER = {};
-        }
 
         // Create the UI module
-        window.AFRAME_BUILDER.ui = {
+        Object.assign(window.AFRAME_BUILDER.ui, {
             /**
              * Shows a notification message
              * @param {string} message - Message text
@@ -6742,19 +6885,17 @@
                     toggleBtn.textContent = debugPanel.classList.contains('visible') ?
                         'Hide Debug Info' : 'Show Debug Info';
                 }
-            }
-        };
+            },
+
+
+        });
+
+
 
         console.log("AFRAME_BUILDER UI module initialized");
-    </script>
-    <script>
-        // Initialize AFRAME_BUILDER if it doesn't exist
-        if (typeof window.AFRAME_BUILDER === 'undefined') {
-            window.AFRAME_BUILDER = {};
-        }
 
         // Document Monaco editor functions
-        window.AFRAME_BUILDER.monaco = {
+        Object.assign(window.AFRAME_BUILDER.monaco, {
             /**
              * Gets the value from the Monaco editor
              * @returns {string} Current editor content
@@ -6768,7 +6909,7 @@
 
             /**
              * Sets the value in the Monaco editor
-             * @param {string} content - Content to set
+             * @param {string} Content to set
              */
             setValue: function (content) {
                 if (window.AFRAME && window.AFRAME.BUILDER && window.AFRAME.BUILDER.editor) {
@@ -6784,24 +6925,26 @@
                 if (window.AFRAME && window.AFRAME.BUILDER && window.AFRAME.BUILDER.editor) {
                     monaco.editor.setModelLanguage(window.AFRAME.BUILDER.editor.getModel(), language);
                 }
-            }
-        };
+            },
 
-        // Add to global AFRAME.BUILDER object for backward compatibility
-        if (window.AFRAME && window.AFRAME.BUILDER) {
-            window.AFRAME.BUILDER.monaco = window.AFRAME_BUILDER.monaco;
-        }
+            /**
+             * Formats the code in the editor
+             */
+            formatCode: function () {
+                if (window.AFRAME && window.AFRAME.BUILDER && window.AFRAME.BUILDER.editor) {
+                    window.AFRAME.BUILDER.editor.getAction('editor.action.formatDocument').run();
+                }
+            },
+
+
+        });
+
+
 
         console.log("AFRAME_BUILDER Monaco interface initialized");
-    </script>
-    <script>
-        // Initialize AFRAME_BUILDER if it doesn't exist
-        if (typeof window.AFRAME_BUILDER === 'undefined') {
-            window.AFRAME_BUILDER = {};
-        }
 
         // Create the camera module
-        window.AFRAME_BUILDER.camera = {
+        Object.assign(window.AFRAME_BUILDER.camera, {
             /**
              * Gets the current camera position
              * @returns {Object} Position with x,y,z properties
@@ -6831,6 +6974,13 @@
                 if (window.AFRAME && window.AFRAME.BUILDER &&
                     typeof window.AFRAME.BUILDER.switchToBuildCamera === 'function') {
                     window.AFRAME.BUILDER.switchToBuildCamera();
+
+                    // Emit event
+                    if (window.AFRAME_BUILDER && window.AFRAME_BUILDER.core && window.AFRAME_BUILDER.core.events) {
+                        window.AFRAME_BUILDER.core.events.emit('camera:modeChanged', {
+                            mode: 'build'
+                        });
+                    }
                 }
             },
 
@@ -6842,20 +6992,94 @@
                 if (window.AFRAME && window.AFRAME.BUILDER &&
                     typeof window.AFRAME.BUILDER.switchToSceneCamera === 'function') {
                     window.AFRAME.BUILDER.switchToSceneCamera(cameraId);
-                }
-            }
-        };
 
-        console.log("AFRAME_BUILDER Camera module initialized");
-    </script>
-    <script>
-        // Initialize AFRAME_BUILDER if it doesn't exist
-        if (typeof window.AFRAME_BUILDER === 'undefined') {
-            window.AFRAME_BUILDER = {};
-        }
+                    // Emit event
+                    if (window.AFRAME_BUILDER && window.AFRAME_BUILDER.core && window.AFRAME_BUILDER.core.events) {
+                        window.AFRAME_BUILDER.core.events.emit('camera:modeChanged', {
+                            mode: 'scene',
+                            cameraId: cameraId
+                        });
+                    }
+                }
+            },
+
+            /**
+             * Starts continuous updates of the builder camera
+             * This ensures the editor camera state is continuously tracked
+             */
+            startContinuousBuildCameraUpdate: function () {
+                if (window.AFRAME && window.AFRAME.BUILDER &&
+                    typeof window.AFRAME.BUILDER.startContinuousBuildCameraUpdate === 'function') {
+                    window.AFRAME.BUILDER.startContinuousBuildCameraUpdate();
+
+                    // Emit event
+                    if (window.AFRAME_BUILDER && window.AFRAME_BUILDER.core && window.AFRAME_BUILDER.core.events) {
+                        window.AFRAME_BUILDER.core.events.emit('camera:continuousUpdateStarted');
+                    }
+                }
+            },
+
+            /**
+             * Syncs camera motion to the builder environment
+             * Ensures camera movements are properly captured
+             */
+            syncCameraMotionToBuilder: function () {
+                if (window.AFRAME && window.AFRAME.BUILDER &&
+                    typeof window.AFRAME.BUILDER.syncCameraMotionToBuilder === 'function') {
+                    window.AFRAME.BUILDER.syncCameraMotionToBuilder();
+                }
+            },
+
+            /**
+             * Aligns all camera representations
+             * Keeps different camera views consistent
+             */
+            alignAllCameraRepresentations: function () {
+                if (window.AFRAME && window.AFRAME.BUILDER &&
+                    typeof window.AFRAME.BUILDER.alignAllCameraRepresentations === 'function') {
+                    window.AFRAME.BUILDER.alignAllCameraRepresentations();
+                }
+            },
+
+            /**
+             * Initializes the camera module
+             */
+            init: function () {
+                // Set up event listeners
+                window.AFRAME_BUILDER.core.events.on('all:ready', () => {
+                    // Additional initialization when all modules are ready
+                    this.startContinuousBuildCameraUpdate();
+                });
+
+                // Mark module as ready
+                window.AFRAME_BUILDER.core.modulesReady.setModuleReady('camera');
+                console.log("AFRAME_BUILDER Camera module initialized");
+            }
+        });
+
+        // Document ready initialization for camera module
+        document.addEventListener('DOMContentLoaded', function () {
+            // Wait for the core to be ready
+            if (window.AFRAME_BUILDER && window.AFRAME_BUILDER.core &&
+                window.AFRAME_BUILDER.core.modulesReady &&
+                window.AFRAME_BUILDER.core.modulesReady.isModuleReady('core')) {
+                // Initialize the camera module
+                window.AFRAME_BUILDER.camera.init();
+            } else {
+                // Wait for core to initialize
+                window.AFRAME_BUILDER.core.events.on('module:ready', function (data) {
+                    if (data.module === 'core') {
+                        // Initialize the camera module
+                        window.AFRAME_BUILDER.camera.init();
+                    }
+                });
+            }
+        });
+
+        console.log("AFRAME_BUILDER Camera module defined");
 
         // Create the entities module
-        window.AFRAME_BUILDER.entities = {
+        Object.assign(window.AFRAME_BUILDER.entities, {
             /**
              * Gets all entities in the scene
              * @returns {Array} Array of entity objects
@@ -6889,7 +7113,19 @@
             create: function (type, attributes) {
                 if (window.AFRAME && window.AFRAME.BUILDER &&
                     typeof window.AFRAME.BUILDER.addEntity === 'function') {
-                    return window.AFRAME.BUILDER.addEntity(type, attributes);
+
+                    const id = window.AFRAME.BUILDER.addEntity(type, attributes);
+
+                    // Emit an event if successful
+                    if (id && window.AFRAME_BUILDER.core && window.AFRAME_BUILDER.core.events) {
+                        window.AFRAME_BUILDER.core.events.emit('entity:created', {
+                            id: id,
+                            type: type,
+                            attributes: attributes
+                        });
+                    }
+
+                    return id;
                 }
                 return null;
             },
@@ -6903,7 +7139,18 @@
             update: function (id, attributes) {
                 if (window.AFRAME && window.AFRAME.BUILDER &&
                     typeof window.AFRAME.BUILDER.updateEntity === 'function') {
-                    return window.AFRAME.BUILDER.updateEntity(id, attributes);
+
+                    const success = window.AFRAME.BUILDER.updateEntity(id, attributes);
+
+                    // Emit an event if successful
+                    if (success && window.AFRAME_BUILDER.core && window.AFRAME_BUILDER.core.events) {
+                        window.AFRAME_BUILDER.core.events.emit('entity:updated', {
+                            id: id,
+                            attributes: attributes
+                        });
+                    }
+
+                    return success;
                 }
                 return false;
             },
@@ -6916,22 +7163,29 @@
             delete: function (id) {
                 if (window.AFRAME && window.AFRAME.BUILDER &&
                     typeof window.AFRAME.BUILDER.deleteEntity === 'function') {
-                    return window.AFRAME.BUILDER.deleteEntity(id);
+
+                    const success = window.AFRAME.BUILDER.deleteEntity(id);
+
+                    // Emit an event if successful
+                    if (success && window.AFRAME_BUILDER.core && window.AFRAME_BUILDER.core.events) {
+                        window.AFRAME_BUILDER.core.events.emit('entity:deleted', {
+                            id: id
+                        });
+                    }
+
+                    return success;
                 }
                 return false;
-            }
-        };
+            },
+
+
+        });
+
 
         console.log("AFRAME_BUILDER Entities module initialized");
-    </script>
-    <script>
-        // Initialize AFRAME_BUILDER if it doesn't exist
-        if (typeof window.AFRAME_BUILDER === 'undefined') {
-            window.AFRAME_BUILDER = {};
-        }
 
         // Create the network module
-        window.AFRAME_BUILDER.network = {
+        Object.assign(window.AFRAME_BUILDER.network, {
             /**
              * Checks if NAF is available
              * @returns {boolean} Whether NAF is available
@@ -6978,10 +7232,30 @@
                     const options = window.AFRAME.BUILDER.getClientOptions ?
                         window.AFRAME.BUILDER.getClientOptions() : {};
 
-                    return window.NAF.connection.connect(
+                    const connectionPromise = window.NAF.connection.connect(
                         window.AFRAME.BUILDER.roomName || 'default',
                         options
                     );
+
+                    // Emit events when connection is successful
+                    connectionPromise.then(clientId => {
+                        if (window.AFRAME_BUILDER.core && window.AFRAME_BUILDER.core.events) {
+                            window.AFRAME_BUILDER.core.events.emit('network:connected', {
+                                clientId: clientId,
+                                roomName: window.AFRAME.BUILDER.roomName || 'default'
+                            });
+                        }
+                        return clientId;
+                    }).catch(err => {
+                        if (window.AFRAME_BUILDER.core && window.AFRAME_BUILDER.core.events) {
+                            window.AFRAME_BUILDER.core.events.emit('network:error', {
+                                error: err
+                            });
+                        }
+                        throw err;
+                    });
+
+                    return connectionPromise;
                 }
 
                 return Promise.reject(new Error("NAF connection unavailable"));
@@ -6992,10 +7266,18 @@
              */
             disconnect: function () {
                 if (this.isConnected()) {
+                    const clientId = window.NAF.clientId;
                     window.NAF.connection.disconnect();
 
                     if (window.AFRAME && window.AFRAME.BUILDER) {
                         window.AFRAME.BUILDER.nafEnabled = false;
+                    }
+
+                    // Emit disconnect event
+                    if (window.AFRAME_BUILDER.core && window.AFRAME_BUILDER.core.events) {
+                        window.AFRAME_BUILDER.core.events.emit('network:disconnected', {
+                            clientId: clientId
+                        });
                     }
 
                     console.log("Disconnected from NAF");
@@ -7008,31 +7290,33 @@
              */
             getClientId: function () {
                 return this.isConnected() ? window.NAF.clientId : null;
-            }
-        };
+            },
+
+
+        });
+
+
 
         console.log("AFRAME_BUILDER Network module initialized");
-    </script>
-    <script>
-        // Initialize AFRAME_BUILDER if it doesn't exist
-        if (typeof window.AFRAME_BUILDER === 'undefined') {
-            window.AFRAME_BUILDER = {};
-        }
-        // Make sure core exists
-        if (typeof window.AFRAME_BUILDER.core === 'undefined') {
-            window.AFRAME_BUILDER.core = {};
-        }
 
-        // Add to the core module
-        window.AFRAME_BUILDER.core.apiMap = {
-            // Map of old method names to new module methods
-            'switchToBuildCamera': 'camera.switchToBuildCamera',
-            'switchToSceneCamera': 'camera.switchToSceneCamera',
-            'addEntity': 'entities.create',
-            'updateEntity': 'entities.update',
-            'deleteEntity': 'entities.delete',
-            // Add more mappings as needed
-        };
+        // Document ready initialization
+        document.addEventListener('DOMContentLoaded', function () {
+            // Wait for the core to be ready
+            if (window.AFRAME_BUILDER && window.AFRAME_BUILDER.core &&
+                window.AFRAME_BUILDER.core.modulesReady &&
+                window.AFRAME_BUILDER.core.modulesReady.isModuleReady('core')) {
+                // Initialize the network module
+                window.AFRAME_BUILDER.network.init();
+            } else {
+                // Wait for core to initialize
+                window.AFRAME_BUILDER.core.events.on('module:ready', function (data) {
+                    if (data.module === 'core') {
+                        // Initialize the network module
+                        window.AFRAME_BUILDER.network.init();
+                    }
+                });
+            }
+        });
     </script>
 
 
