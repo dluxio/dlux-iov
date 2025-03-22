@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Collaborative A-Frame Scene Builder</title>
+    <meta name="description" content="A collaborative 3D scene builder using A-Frame and Networked A-Frame">
+    <script src="/aframe/aframe.min.js"></script>
+    <!-- Removed automatic loading of inspector -->
+    
+    <script src="https://unpkg.com/networked-aframe@^0.10.0/dist/networked-aframe.min.js"></script>
+    <!-- Move Monaco loader to the end of body for better initialization -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="app-container">
+        <div id="scene-container">
+            <a-scene embedded networked-scene="
+                app: myCollaborativeApp;
+                room: defaultRoom;
+                debug: true;
+                adapter: wseasyrtc;
+                audio: false;
+                connectOnLoad: false;
+            ">
+                <!-- Assets -->
+                <a-assets>
+                    <template id="avatar-template">
+                        <a-entity class="avatar">
+                            <a-sphere class="head" color="#5985ff" scale="0.45 0.5 0.4"></a-sphere>
+                            <a-entity class="face" position="0 0.05 0.25">
+                                <a-sphere class="eye" color="#efefef" position="-0.16 0.1 0"></a-sphere>
+                                <a-sphere class="eye" color="#efefef" position="0.16 0.1 0"></a-sphere>
+                            </a-entity>
+                        </a-entity>
+                    </template>
+                    <template id="state-template">
+                        <a-entity class="state-container">
+                            <a-entity state-data></a-entity>
+                        </a-entity>
+                    </template>
+                </a-assets>
+
+                <!-- Builder Camera (persistent) -->
+                <a-entity id="builder-camera" camera position="0 1.6 3" look-controls wasd-controls>
+                    <a-cursor></a-cursor>
+                </a-entity>
+
+                <!-- Default Environment -->
+                <a-sky color="#ECECEC"></a-sky>
+                <a-entity id="default-light" light="type: ambient; color: #BBB"></a-entity>
+                <a-entity id="directional-light" light="type: directional; color: #FFF; intensity: 0.6" position="-0.5 1 1"></a-entity>
+            </a-scene>
+        </div>
+
+        <div id="ui-container">
+            <div id="ui-panel">
+                <h2>Add Entity</h2>
+                <div class="entity-buttons">
+                    <button id="add-box" class="entity-btn">Box</button>
+                    <button id="add-sphere" class="entity-btn">Sphere</button>
+                    <button id="add-cylinder" class="entity-btn">Cylinder</button>
+                    <button id="add-plane" class="entity-btn">Plane</button>
+                    <button id="add-light" class="entity-btn">Light</button>
+                    <button id="add-torus" class="entity-btn">Torus</button>
+                    <button id="add-dodecahedron" class="entity-btn">Dodecahedron</button>
+                </div>
+                <div class="tool-buttons">
+                    <button id="open-inspector" class="tool-btn">Open Inspector</button>
+                    <button id="create-random-scene" class="tool-btn">Create Random Scene</button>
+                    <select id="camera-select">
+                        <option value="builder-camera">Builder Camera</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="editor-container">
+                <h2>Scene Code</h2>
+                <div class="editor-controls">
+                    <button id="save-code-btn" class="tool-btn">Apply Changes</button>
+                    <span id="editor-status" class="status-saved"></span>
+                </div>
+                <div id="monaco-editor"></div>
+            </div>
+
+            <div id="debug-panel">
+                <h2>Debug Info</h2>
+                <div id="camera-info">
+                    <div>Camera: <span id="active-camera">Builder Camera</span></div>
+                    <div>Position: <span id="camera-position">0 1.6 3</span></div>
+                    <div>Camera State: <span id="camera-state-saved">Saved</span></div>
+                </div>
+                <div id="network-info">
+                    <div>Network Status: <span id="network-status">Disconnected</span></div>
+                    <div class="network-connect">
+                        <input type="text" id="server-url" placeholder="WebSocket URL">
+                        <button id="connect-btn">Connect</button>
+                    </div>
+                </div>
+                <div id="action-history">
+                    <h3>Action History</h3>
+                    <div id="actions"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/main.js"></script>
+    
+    <!-- Monaco Editor Setup - moved to end of body for better loading sequence -->
+    <script src="/monaco-editor/vs/loader.js"></script>
+    <script>
+        // Set up the Monaco environment to correctly locate web workers
+        window.MonacoEnvironment = {
+            getWorkerUrl: function(moduleId, label) {
+                console.log('Monaco requesting worker for:', moduleId, label);
+                // Adjust the worker path to match your server structure
+                return '/monaco-editor/vs/base/worker/workerMain.js';
+            }
+        };
+        
+        // Pre-load the monaco modules without disrupting the current flow
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Setting up Monaco loader...');
+            if (typeof require !== 'undefined') {
+                require.config({ 
+                    paths: { 'vs': '/monaco-editor/vs' },
+                    waitSeconds: 30
+                });
+                
+                // Just preload but don't create editor instance yet
+                // This approach allows the existing initialization to proceed quickly
+                if (typeof monaco === 'undefined') {
+                    try {
+                        require(['vs/editor/editor.main'], function() {
+                            console.log('Monaco modules pre-loaded successfully');
+                            // Signal that Monaco is ready to be used
+                            window.dispatchEvent(new CustomEvent('monaco-ready'));
+                        });
+                    } catch (e) {
+                        console.error('Error pre-loading Monaco:', e);
+                    }
+                } else {
+                    // Monaco already loaded, dispatch event immediately
+                    window.dispatchEvent(new CustomEvent('monaco-ready'));
+                }
+            } else {
+                console.error('Monaco require function not available');
+            }
+        });
+        
+        // Add global error handler to catch worker loading issues
+        window.addEventListener('error', function(event) {
+            console.error('Global error event:', event.message, event.filename);
+            // Check if it's a worker loading error
+            if (event.filename && event.filename.includes('worker')) {
+                console.error('Worker loading error detected!', event);
+            }
+        });
+    </script>
+</body>
+</html>
