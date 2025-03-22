@@ -3,7 +3,7 @@
  */
 
 import { initApp } from './core.js';
-import { initDebugPanel, initDebug } from './debug.js';
+import { initDebug } from './debug.js';
 import { getUrlParams } from './utils.js';
 import { initState, subscribe } from './state.js';
 import { initUI } from './ui.js';
@@ -12,6 +12,7 @@ import { initMonacoEditor, updateMonacoEditor, isEditorInitialized } from './mon
 import { initCamera } from './camera.js';
 import { initNetwork } from './network.js';
 import { waitForDependencies } from './utils.js';
+import { initInspectorWatcher } from './inspector-watcher.js';
 
 // Add global error handler to catch any uncaught errors
 window.addEventListener('error', function(event) {
@@ -25,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
         // Initialize the debug panel first
         console.log('Initializing debug panel...');
-        initDebugPanel();
         initDebug();
         console.log('Debug panel initialized');
         
@@ -475,6 +475,9 @@ export async function init() {
         // Initialize entities
         initEntities();
         
+        // Initialize inspector watcher
+        initInspectorWatcher();
+        
         // Register example custom primitives
         import('./entities.js').then(entities => {
             // Example: Register a custom torus primitive
@@ -498,7 +501,6 @@ export async function init() {
         });
         
         // Initialize debug panel and debug helpers
-        initDebugPanel();
         initDebug();
         
         // Initialize camera
@@ -584,8 +586,23 @@ async function initializeEditor() {
                 if (success) {
                     console.log(`Monaco editor successfully initialized (attempt ${attempt})`);
                     editorReady = true;
-                    // Subscribe to state changes to update editor when scene changes
-                    setupStateToEditorSync().then(resolve);
+                    
+                    // Set up synchronization between state changes and the Monaco editor
+                    import('./monaco.js').then(monaco => {
+                        // Set up improved state-to-editor sync if available
+                        if (monaco.setupStateToEditorSync) {
+                            monaco.setupStateToEditorSync();
+                            console.log('Set up improved state-to-editor synchronization');
+                        } else {
+                            console.warn('Improved state-to-editor sync function not available');
+                            // Fall back to old method
+                            setupStateToEditorSync();
+                        }
+                        resolve();
+                    }).catch(err => {
+                        console.error('Error importing monaco module for sync setup:', err);
+                        setupStateToEditorSync().then(resolve);
+                    });
                 } else {
                     console.error(`Monaco editor initialization failed on attempt ${attempt}:`, error);
                     
@@ -647,8 +664,7 @@ function loadMonacoLoader() {
 }
 
 /**
- * Setup synchronization between state and editor
- * @returns {Promise} Promise that resolves when setup is complete
+ * Set up synchronization between state changes and the Monaco editor
  */
 async function setupStateToEditorSync() {
     return new Promise((resolve) => {
@@ -656,8 +672,9 @@ async function setupStateToEditorSync() {
         subscribe((newState, changes) => {
             // Only update editor if entities changed
             if (changes.entities && initialized && editorReady) {
-                console.log('State changed, updating editor...');
-                updateMonacoEditor();
+                console.log('State entities changed, forcing editor update...');
+                // Force update to ensure UUID data is reflected
+                updateMonacoEditor(true);
             }
         });
         resolve();
@@ -668,25 +685,20 @@ async function setupStateToEditorSync() {
  * Set up general event listeners for the application
  */
 function setupEventListeners() {
+    // Get the current state before inspector opens to track changes
+    let preInspectorState = null;
+    
     // Listen for A-Frame inspector events
     document.addEventListener('inspector-loaded', () => {
         console.log('A-Frame Inspector loaded');
         // Make sure the body has the inspector class
         document.body.classList.add('aframe-inspector-opened');
-    });
-    
-    document.addEventListener('inspector-closed', () => {
-        console.log('A-Frame Inspector closed, updating state and editor');
-        // Make sure the inspector class is removed when closed
-        document.body.classList.remove('aframe-inspector-opened');
         
-        // Update the editor with the latest scene content
-        if (editorReady) {
-            // Add a small delay to let layout changes complete
-            setTimeout(() => {
-                updateMonacoEditor();
-            }, 100);
-        }
+        // Store current state to compare changes later
+        import('./state.js').then(stateModule => {
+            preInspectorState = stateModule.getState();
+            console.log('[DEBUG] Stored pre-inspector state:', preInspectorState);
+        });
     });
     
     // Create a MutationObserver to watch for inspector class changes

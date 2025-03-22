@@ -229,20 +229,21 @@ function setupInspectorHook() {
                     
                     // Listen for inspector opened event
                     window.addEventListener('inspector-opened', () => {
-                        console.log('Inspector opened event received');
+                        console.log('[DEBUG] Inspector opened event received');
                         // Save the current state when inspector opens
                         originalState = getState();
-                        console.log('Saved original state for when inspector closes');
+                        console.log('[DEBUG] Saved original state for when inspector closes:', originalState);
                     });
                     
                     // Listen for inspector closed event
                     window.addEventListener('inspector-closed', () => {
-                        console.log('Inspector closed event received');
+                        console.log('[DEBUG] Inspector closed event received in inspector-hook component');
                         // Capture entity changes made in inspector
                         if (originalState) {
+                            console.log('[DEBUG] Calling captureInspectorChanges with stored state');
                             captureInspectorChanges(originalState);
                         } else {
-                            console.warn('No original state found, cannot compare changes');
+                            console.warn('[DEBUG] No original state found, cannot compare changes');
                             // Still try to capture current state
                             captureInspectorChanges({});
                         }
@@ -256,6 +257,19 @@ function setupInspectorHook() {
                                 AFRAME.INSPECTOR.open();
                             }
                         }
+                    });
+                    
+                    // Backup event listener at the document level in case component event doesn't fire
+                    document.addEventListener('inspector-closed', () => {
+                        console.log('[DEBUG] Inspector closed event captured at document level');
+                        // Check if we should process this or if component already handled it
+                        setTimeout(() => {
+                            const currentEntities = Object.keys(getState().entities).length;
+                            if (originalState && currentEntities === Object.keys(originalState.entities).length) {
+                                console.log('[DEBUG] State appears unchanged, processing inspector-closed event at document level');
+                                captureInspectorChanges(originalState);
+                            }
+                        }, 100);
                     });
                 }
             });
@@ -278,49 +292,116 @@ function setupInspectorHook() {
  */
 function captureInspectorChanges(originalState) {
     console.log('Capturing changes from Inspector...');
+    console.log('[DEBUG] Original state before inspector opened:', originalState);
     
-    // Get current scene entities
-    const currentEntities = {};
+    // Need to manually remove the inspector class to ensure UI displays properly
+    document.body.classList.remove('aframe-inspector-opened');
     
-    // Find all entities (excluding the persistent camera and other system entities)
-    const entities = scene.querySelectorAll('[id]');
-    entities.forEach(entity => {
-        const id = entity.id;
+    // Import UUID generator from state
+    import('./state.js').then(stateModule => {
+        const generateEntityUUID = stateModule.generateEntityUUID;
+        const setState = stateModule.setState;
         
-        // Skip system entities
-        if (id === 'builder-camera' || 
-            id === 'default-light' || 
-            id === 'directional-light') {
-            return;
-        }
+        // Get current scene entities
+        const currentEntities = {};
+        const currentEntityMapping = {};
         
-        // Get the entity tag name to determine type
-        const tagName = entity.tagName.toLowerCase();
-        const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
+        // Find all entities (excluding the persistent camera and other system entities)
+        const entities = scene.querySelectorAll('a-entity, a-box, a-sphere, a-cylinder, a-plane, a-sky');
+        let entityCount = 0;
         
-        // Get entity component data
-        const entityData = getEntityData(entity);
+        entities.forEach(entity => {
+            // Skip system entities
+            if (['builder-camera', 'default-light', 'directional-light'].includes(entity.id)) {
+                return;
+            }
+            
+            entityCount++;
+            
+            // Get or generate UUID
+            let uuid = entity.dataset.entityUuid;
+            
+            // If no UUID exists, generate one and assign it
+            if (!uuid) {
+                uuid = generateEntityUUID();
+                entity.dataset.entityUuid = uuid;
+                console.log(`Generated new UUID ${uuid} for entity:`, entity);
+            }
+            
+            // Get the entity tag name to determine type
+            const tagName = entity.tagName.toLowerCase();
+            const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
+            
+            // Get entity component data
+            const entityData = getEntityData(entity);
+            
+            // Add type to entity data
+            entityData.type = type;
+            
+            // Store entity data in current entities
+            currentEntities[uuid] = entityData;
+            
+            // Update entity mapping if entity has an ID
+            if (entity.id) {
+                currentEntityMapping[entity.id] = uuid;
+            }
+        });
         
-        // Add type to entity data
-        entityData.type = type;
+        console.log(`[DEBUG] Found ${entityCount} entities to capture from inspector`);
+        console.log('[DEBUG] Current entities after inspector:', currentEntities);
+        console.log('[DEBUG] Entity mapping after inspector:', currentEntityMapping);
         
-        // Store entity data in current entities
-        currentEntities[id] = entityData;
-    });
-    
-    console.log('Inspector changes detected:', currentEntities);
-    
-    // Update state with new entities
-    setState({ entities: currentEntities });
-    
-    // Show notification with import to avoid circular dependency
-    import('./utils.js').then(utils => {
-        utils.showNotification('Inspector changes synced with editor');
+        // Update state with new entities and mapping
+        setState({ 
+            entities: currentEntities,
+            entityMapping: currentEntityMapping
+        });
+        
+        // Verify state was updated properly
+        const newState = stateModule.getState();
+        console.log('[DEBUG] State after update:', newState);
+        
+        // Dispatch a custom event to notify that inspector changes have been applied
+        // This helps coordinate state updates with the monaco editor
+        const event = new CustomEvent('inspector-changes-applied', { 
+            detail: { 
+                originalState, 
+                newState 
+            } 
+        });
+        document.dispatchEvent(event);
+        
+        // Force update the Monaco editor to reflect these changes
+        import('./monaco.js').then(monaco => {
+            if (monaco.updateMonacoEditor) {
+                console.log('Updating Monaco editor to reflect inspector changes');
+                // Use a longer delay to ensure state update is complete
+                setTimeout(() => {
+                    try {
+                        monaco.updateMonacoEditor(true); // Force update
+                        console.log('[DEBUG] Monaco editor update completed');
+                    } catch (err) {
+                        console.error('Error updating Monaco editor:', err);
+                    }
+                }, 500); // Increased delay to ensure state is ready
+            } else {
+                console.warn('Monaco editor update function not available');
+            }
+        }).catch(err => {
+            console.error('Error importing monaco module:', err);
+        });
+        
+        // Show notification
+        import('./utils.js').then(utils => {
+            utils.showNotification('Inspector changes synced with editor');
+        }).catch(err => {
+            console.error('Error importing utils module:', err);
+        });
+        
+        logAction('Updated state from inspector changes');
     }).catch(err => {
-        console.error('Error importing utils module:', err);
+        console.error('Error importing state module:', err);
     });
-    
-    logAction('Updated state from inspector changes');
 }
 
 /**
@@ -333,10 +414,15 @@ function getEntityData(entity) {
     
     // Get all component names
     const componentNames = entity.getAttributeNames()
-        .filter(name => name !== 'id');
+        .filter(name => name !== 'id' && name !== 'data-entity-uuid');
     
     // Get component data for each component
     componentNames.forEach(name => {
+        // Skip aframe-injected attribute and class
+        if (name === 'aframe-injected' || name === 'class') {
+            return;
+        }
+        
         // Normalize component name (handle dot notation)
         const normalizedName = name.replace('.', '__');
         data[normalizedName] = entity.getAttribute(name);
@@ -428,5 +514,5 @@ function initMonacoWithCheck(callback) {
     }
 }
 
-// Export functions that might be needed by other modules
-export { onStateChange, updateSceneFromState, getEntityData }; 
+// Export core functions for other modules
+export { captureInspectorChanges }; 

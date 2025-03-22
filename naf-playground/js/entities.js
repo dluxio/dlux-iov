@@ -30,6 +30,38 @@ import { getState, setState } from './state.js';
 import { updateMonacoEditor } from './monaco.js';
 import { logAction } from './debug.js';
 
+// Store default properties for custom primitives
+const customPrimitiveDefaults = {};
+
+/**
+ * Generate a UUID for entity identification (local implementation to avoid circular imports)
+ * @returns {string} UUID
+ */
+function generateLocalEntityUUID() {
+    return 'entity-' + Date.now() + '-' + Math.floor(Math.random() * 1000000);
+}
+
+/**
+ * Setup custom primitives and their default properties
+ * This allows for extending the system with new entity types
+ */
+function setupCustomPrimitives() {
+    console.log('Setting up custom primitives...');
+    
+    // Example: Register a custom primitive for a chair
+    customPrimitiveDefaults['chair'] = {
+        position: { x: 0, y: 0.5, z: -3 },
+        color: '#8B4513',  // Brown
+        height: 0.8,
+        width: 0.5,
+        depth: 0.5
+    };
+    
+    // Add more custom primitives as needed
+    
+    console.log('Custom primitives setup complete:', Object.keys(customPrimitiveDefaults));
+}
+
 /**
  * Initialize the entities module
  * @returns {Promise} A promise that resolves when initialization is complete
@@ -37,32 +69,44 @@ import { logAction } from './debug.js';
 export function initEntities() {
     console.log('Initializing entities module...');
     
-    // Check if A-Frame scene exists
-    const scene = document.querySelector('a-scene');
-    if (!scene) {
-        console.error('A-Scene not found during entities initialization');
-        return Promise.reject(new Error('A-Scene not found'));
+    try {
+        // Set up custom primitive defaults
+        setupCustomPrimitives();
+        
+        // Ensure all entities have UUIDs during initialization
+        setTimeout(() => {
+            ensureEntityUUIDs();
+        }, 1000); // Short delay to ensure scene is loaded
+        
+        return Promise.resolve();
+    } catch (error) {
+        console.error('Error initializing entities module:', error);
+        return Promise.resolve();
     }
-    
-    // Initialize any module-level variables or setup
-    
-    console.log('Entities module initialization complete');
-    return Promise.resolve();
 }
 
 /**
  * Create a new entity and add it to the scene
- * @param {string} id - Unique ID for the entity
  * @param {string} type - Type of entity (box, sphere, etc.)
  * @param {Object} properties - Entity properties
+ * @returns {Object} Object containing the entity element and its UUID
  */
-export function createEntity(id, type, properties) {
-    console.log(`Creating entity: ${type} with ID: ${id}`, properties);
+export function createEntity(type, properties) {
+    console.log(`Creating entity: ${type}`, properties);
     
     try {
+        // Generate a unique UUID for this entity locally (instead of requiring from state.js)
+        const uuid = generateLocalEntityUUID();
+        
         // Create the element
         const entityElement = document.createElement(`a-${type}`);
-        entityElement.id = id;
+        
+        // Set UUID in dataset for DOM-state mapping
+        entityElement.dataset.entityUuid = uuid;
+        
+        // Also set an ID for backward compatibility, but we won't rely on it
+        const tempId = `${type}-${Date.now()}`;
+        entityElement.id = tempId;
         
         // Set attributes based on properties
         setEntityAttributes(entityElement, properties);
@@ -71,12 +115,12 @@ export function createEntity(id, type, properties) {
         const scene = document.querySelector('a-scene');
         if (!scene) {
             console.error('A-Scene not found when trying to add entity');
-            return null;
+            return { element: null, uuid: null };
         }
         console.log('Found a-scene:', scene);
         
         scene.appendChild(entityElement);
-        console.log(`Entity ${id} added to scene`, entityElement);
+        console.log(`Entity with UUID ${uuid} added to scene`, entityElement);
         
         // Use flushToDOM to ensure all attributes are properly set
         // This forces A-Frame to write all component data to the DOM
@@ -85,24 +129,31 @@ export function createEntity(id, type, properties) {
         // Now extract attributes from the DOM element to ensure we have all the defaults
         const finalProperties = extractEntityAttributes(entityElement, type);
         
-        // Update state with the new entity
+        // Update state with the new entity - using imported functions 
         const currentState = getState();
         const newEntities = { ...currentState.entities };
+        const newEntityMapping = { ...currentState.entityMapping };
         
         // Store the complete properties for state storage
-        newEntities[id] = finalProperties;
+        newEntities[uuid] = finalProperties;
+        
+        // Update the entity mapping
+        newEntityMapping[tempId] = uuid;
         
         // Update state
-        setState({ entities: newEntities });
+        setState({ 
+            entities: newEntities,
+            entityMapping: newEntityMapping
+        });
         
         // Update code editor using dynamic import to avoid circular dependencies
         // Use a more robust method with retry logic
         updateMonacoSafely();
         
-        return entityElement;
+        return { element: entityElement, uuid };
     } catch (error) {
         console.error('Error creating entity:', error);
-        return null;
+        return { element: null, uuid: null };
     }
 }
 
@@ -287,81 +338,147 @@ function formatPropertiesForState(type, properties) {
 
 /**
  * Delete an entity
- * @param {string} id - Entity ID to delete
+ * @param {string} uuid - Entity UUID to delete
+ * @returns {boolean} Success status
  */
-export function deleteEntity(id) {
-    console.log(`Deleting entity with ID: ${id}`);
+export function deleteEntity(uuid) {
+    console.log(`Deleting entity with UUID: ${uuid}`);
     
-    // Find the entity
-    const entity = document.getElementById(id);
-    if (!entity) {
-        console.error(`Entity with ID ${id} not found`);
+    try {
+        // Find the entity by UUID
+        const entity = findEntityElementByUUID(uuid);
+        if (!entity) {
+            console.error(`Entity with UUID ${uuid} not found in DOM`);
+            
+            // Even if the DOM element is missing, we should still remove it from state
+            const currentState = getState();
+            if (currentState.entities[uuid]) {
+                const newEntities = { ...currentState.entities };
+                delete newEntities[uuid];
+                
+                // Also clean up any mapping references
+                const newEntityMapping = { ...currentState.entityMapping };
+                for (const id in newEntityMapping) {
+                    if (newEntityMapping[id] === uuid) {
+                        delete newEntityMapping[id];
+                    }
+                }
+                
+                setState({ 
+                    entities: newEntities,
+                    entityMapping: newEntityMapping
+                });
+                
+                updateMonacoSafely();
+                logAction(`Deleted entity from state: ${uuid}`);
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // Store the ID for mapping cleanup
+        const elementId = entity.id;
+        
+        // Remove from DOM
+        entity.parentNode.removeChild(entity);
+        
+        // Update state
+        const currentState = getState();
+        const newEntities = { ...currentState.entities };
+        const newEntityMapping = { ...currentState.entityMapping };
+        
+        // Remove from entities object
+        delete newEntities[uuid];
+        
+        // Remove from entity mapping if exists
+        if (elementId && newEntityMapping[elementId]) {
+            delete newEntityMapping[elementId];
+        }
+        
+        // Update state
+        setState({ 
+            entities: newEntities,
+            entityMapping: newEntityMapping
+        });
+        
+        // Update code editor
+        updateMonacoSafely();
+        
+        logAction(`Deleted entity: ${uuid}`);
+        
+        return true;
+    } catch (error) {
+        console.error(`Error deleting entity ${uuid}:`, error);
         return false;
     }
-    
-    // Remove from DOM
-    entity.parentNode.removeChild(entity);
-    
-    // Update state
-    const currentState = getState();
-    const newEntities = { ...currentState.entities };
-    
-    // Remove from entities object
-    delete newEntities[id];
-    
-    // Update state
-    setState({ entities: newEntities });
-    
-    // Update code editor
-    updateMonacoSafely();
-    
-    logAction(`Deleted entity: ${id}`);
-    
-    return true;
 }
 
 /**
  * Update an entity's attributes
- * @param {string} id - Entity ID
+ * @param {string} uuid - Entity UUID
  * @param {Object} updates - Attribute updates
+ * @returns {boolean} Success status
  */
-export function updateEntity(id, updates) {
-    console.log(`Updating entity with ID: ${id}`, updates);
+export function updateEntity(uuid, updates) {
+    console.log(`Updating entity with UUID: ${uuid}`, updates);
     
-    // Find the entity
-    const entity = document.getElementById(id);
-    if (!entity) {
-        console.error(`Entity with ID ${id} not found`);
+    try {
+        // Get current state
+        const currentState = getState();
+        
+        // Check if entity exists in state
+        if (!currentState.entities[uuid]) {
+            console.error(`Entity with UUID ${uuid} not found in state`);
+            return false;
+        }
+        
+        // Find the DOM element for this UUID
+        const entityElement = findEntityElementByUUID(uuid);
+        if (!entityElement) {
+            console.error(`DOM element for entity UUID ${uuid} not found`);
+            return false;
+        }
+        
+        // Apply updates to DOM element
+        setEntityAttributes(entityElement, updates);
+        
+        // Flush changes to DOM to ensure A-Frame's internal state is updated
+        entityElement.flushToDOM();
+        
+        // Extract the full set of attributes post-update
+        const tagName = entityElement.tagName.toLowerCase();
+        const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
+        const finalProperties = extractEntityAttributes(entityElement, type);
+        
+        // Update state
+        const newEntities = { ...currentState.entities };
+        
+        // Update entity in state with complete property set
+        newEntities[uuid] = finalProperties;
+        
+        // Update state
+        setState({ entities: newEntities });
+        
+        // Update code editor
+        updateMonacoSafely();
+        
+        logAction(`Updated entity: ${uuid}`);
+        
+        return true;
+    } catch (error) {
+        console.error(`Error updating entity ${uuid}:`, error);
         return false;
     }
-    
-    // Apply updates
-    setEntityAttributes(entity, updates);
-    
-    // Flush changes to DOM to ensure A-Frame's internal state is updated
-    entity.flushToDOM();
-    
-    // Extract the full set of attributes post-update
-    const tagName = entity.tagName.toLowerCase();
-    const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
-    const finalProperties = extractEntityAttributes(entity, type);
-    
-    // Update state
-    const currentState = getState();
-    const newEntities = { ...currentState.entities };
-    
-    // Update entity in state with complete property set
-    newEntities[id] = finalProperties;
-    
-    // Update state
-    setState({ entities: newEntities });
-    
-    // Update code editor
-    updateMonacoSafely();
-    
-    logAction(`Updated entity: ${id}`);
-    
-    return true;
+}
+
+/**
+ * Find a DOM element by entity UUID
+ * @param {string} uuid - Entity UUID to find
+ * @returns {Element|null} The DOM element or null if not found
+ */
+function findEntityElementByUUID(uuid) {
+    return document.querySelector(`[data-entity-uuid="${uuid}"]`);
 }
 
 /**
@@ -386,12 +503,18 @@ export function recreateEntitiesFromState(entitiesState = null) {
     }
     
     try {
-        // First, handle special case for sky
-        const skyId = 'sky';
-        const skyData = entitiesState[skyId];
+        // First, handle special case for sky (look it up by UUID prefix and type)
+        let skyUUID = null;
+        for (const uuid in entitiesState) {
+            if (entitiesState[uuid].type === 'sky') {
+                skyUUID = uuid;
+                break;
+            }
+        }
         
-        // Check if sky exists in state
-        if (skyData) {
+        // Handle sky entity
+        if (skyUUID && entitiesState[skyUUID]) {
+            const skyData = entitiesState[skyUUID];
             console.log('Handling sky element from state:', skyData);
             
             // Find existing sky or create a new one
@@ -400,11 +523,13 @@ export function recreateEntitiesFromState(entitiesState = null) {
             if (!skyElement) {
                 console.log('Creating new sky element');
                 skyElement = document.createElement('a-sky');
-                skyElement.id = skyId;
                 scene.appendChild(skyElement);
             } else {
                 console.log('Using existing sky element:', skyElement.outerHTML);
             }
+            
+            // Set the UUID in dataset
+            skyElement.dataset.entityUuid = skyUUID;
             
             // Set the color attribute (this is a special case for sky)
             if (skyData.color) {
@@ -420,7 +545,9 @@ export function recreateEntitiesFromState(entitiesState = null) {
             skyElement.flushToDOM();
             
             // Remove sky from entities to prevent double processing
-            delete entitiesState[skyId];
+            const processedEntities = { ...entitiesState };
+            delete processedEntities[skyUUID];
+            entitiesState = processedEntities;
         } else {
             console.log('No sky data in state, ensuring default sky exists');
             
@@ -430,7 +557,7 @@ export function recreateEntitiesFromState(entitiesState = null) {
             if (!skyElement) {
                 console.log('Creating default sky element');
                 skyElement = document.createElement('a-sky');
-                skyElement.id = skyId;
+                skyElement.dataset.entityUuid = generateLocalEntityUUID();
                 skyElement.setAttribute('color', '#ECECEC');
                 scene.appendChild(skyElement);
                 skyElement.flushToDOM();
@@ -439,25 +566,34 @@ export function recreateEntitiesFromState(entitiesState = null) {
                 console.log('Adding default color to existing sky element');
                 skyElement.setAttribute('color', '#ECECEC');
                 skyElement.flushToDOM();
+                
+                // Ensure sky element has UUID
+                if (!skyElement.dataset.entityUuid) {
+                    skyElement.dataset.entityUuid = generateLocalEntityUUID();
+                }
             }
         }
         
-        // Remove current entities (except system entities like camera and lights)
-        const currentEntities = Array.from(scene.querySelectorAll('[id]')).filter(entity => {
-            // Skip elements with empty/null/undefined id
-            if (!entity.id) {
-                return false;
-            }
-            
+        // Remove current user entities (except system entities like camera and lights)
+        const currentEntities = Array.from(scene.querySelectorAll('[data-entity-uuid]')).filter(entity => {
             // Skip system entities
-            if (['builder-camera', 'default-light', 'directional-light', 'sky'].includes(entity.id)) {
+            const tagName = entity.tagName.toLowerCase();
+            if (['a-scene', 'a-assets'].includes(tagName)) {
                 return false;
             }
             
-            // Skip assets and other special elements
-            if (entity.closest('a-assets') || 
-                entity.tagName.toLowerCase() === 'a-assets' ||
-                entity.tagName.toLowerCase() === 'a-sky') {
+            // Keep system entities 
+            if (['builder-camera', 'default-light', 'directional-light'].includes(entity.id)) {
+                return false;
+            }
+            
+            // Skip the sky as we've already handled it
+            if (tagName === 'a-sky') {
+                return false;
+            }
+            
+            // Skip assets and templates
+            if (entity.closest('a-assets') || tagName === 'template') {
                 return false;
             }
             
@@ -471,32 +607,37 @@ export function recreateEntitiesFromState(entitiesState = null) {
             try {
                 // Only remove if it's a direct child of the scene
                 if (entity.parentNode === scene) {
-                    console.log(`Removing entity: ${entity.id}`);
+                    console.log(`Removing entity: ${entity.dataset.entityUuid}`);
                     scene.removeChild(entity);
                 } else {
-                    console.log(`Skipping entity not directly in scene: ${entity.id} (parent: ${entity.parentNode?.tagName || 'unknown'})`);
+                    console.log(`Skipping entity not directly in scene: ${entity.dataset.entityUuid} (parent: ${entity.parentNode?.tagName || 'unknown'})`);
                 }
             } catch (err) {
-                console.warn(`Error removing entity ${entity.id}:`, err);
+                console.warn(`Error removing entity ${entity.dataset.entityUuid}:`, err);
             }
         });
         
         // Create entities from state
-        Object.keys(entitiesState).forEach(id => {
+        Object.keys(entitiesState).forEach(uuid => {
             try {
-                const entityData = entitiesState[id];
+                const entityData = entitiesState[uuid];
                 const type = entityData.type;
                 
                 // Skip if no type (should not happen)
                 if (!type) {
-                    console.error(`Entity ${id} has no type`, entityData);
+                    console.error(`Entity ${uuid} has no type`, entityData);
                     return;
                 }
                 
-                // Check if entity already exists (in case removal failed)
-                const existingEntity = document.getElementById(id);
+                // Skip the sky (already handled)
+                if (type === 'sky') {
+                    return;
+                }
+                
+                // Check if entity already exists by UUID
+                const existingEntity = findEntityElementByUUID(uuid);
                 if (existingEntity) {
-                    console.log(`Entity ${id} already exists, updating instead of recreating`);
+                    console.log(`Entity ${uuid} already exists, updating instead of recreating`);
                     // Update existing entity attributes instead
                     const properties = { ...entityData };
                     delete properties.type;
@@ -507,7 +648,12 @@ export function recreateEntitiesFromState(entitiesState = null) {
                 
                 // Create entity without updating state
                 const entityElement = document.createElement(`a-${type}`);
-                entityElement.id = id;
+                
+                // Set UUID in dataset
+                entityElement.dataset.entityUuid = uuid;
+                
+                // Give it an ID for backward compatibility
+                entityElement.id = `${type}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
                 
                 // Copy entity data except 'type'
                 const properties = { ...entityData };
@@ -517,13 +663,20 @@ export function recreateEntitiesFromState(entitiesState = null) {
                 setEntityAttributes(entityElement, properties);
                 
                 // Add to scene
-                console.log(`Adding entity to scene: ${id}`);
+                console.log(`Adding entity to scene: ${uuid}`);
                 scene.appendChild(entityElement);
                 
                 // Flush to DOM to ensure all attributes are properly set
                 entityElement.flushToDOM();
+                
+                // Update entity mapping with the new ID
+                const currentState = getState();
+                const newEntityMapping = { ...currentState.entityMapping };
+                newEntityMapping[entityElement.id] = uuid;
+                setState({ entityMapping: newEntityMapping }, false);
+                
             } catch (err) {
-                console.error(`Error creating entity ${id}:`, err);
+                console.error(`Error creating entity ${uuid}:`, err);
             }
         });
         
@@ -544,12 +697,35 @@ export function generateEntitiesHTML() {
     let html = '';
     
     // Add each entity as HTML
-    Object.keys(entities).forEach(id => {
-        const entityData = entities[id];
+    Object.keys(entities).forEach(uuid => {
+        const entityData = entities[uuid];
         const type = entityData.type;
         
+        // Skip if type is missing (should not happen)
+        if (!type) {
+            console.warn(`Entity ${uuid} has no type, skipping HTML generation`);
+            return;
+        }
+        
         // Start tag
-        html += `  <a-${type} id="${id}"`;
+        html += `  <a-${type}`;
+        
+        // If we have an ID mapping for this UUID, include the ID
+        let entityId = null;
+        if (state.entityMapping) {
+            // Look for an ID mapping for this UUID
+            for (const id in state.entityMapping) {
+                if (state.entityMapping[id] === uuid) {
+                    entityId = id;
+                    break;
+                }
+            }
+        }
+        
+        // Add ID if found
+        if (entityId) {
+            html += ` id="${entityId}"`;
+        }
         
         // Add attributes
         Object.keys(entityData).forEach(key => {
@@ -558,13 +734,34 @@ export function generateEntitiesHTML() {
                 
                 // Format object values (position, rotation, scale)
                 if (typeof value === 'object' && value !== null) {
-                    const vectorStr = objectToVectorString(value);
-                    html += ` ${key}="${vectorStr}"`;
+                    // Handle vector properties
+                    if ('x' in value && 'y' in value && 'z' in value) {
+                        const vectorStr = objectToVectorString(value);
+                        html += ` ${key}="${vectorStr}"`;
+                    }
+                    // Handle color objects
+                    else if ('r' in value && 'g' in value && 'b' in value) {
+                        const colorStr = `rgb(${value.r}, ${value.g}, ${value.b})`;
+                        html += ` ${key}="${colorStr}"`;
+                    }
+                    // Handle other objects
+                    else {
+                        try {
+                            const jsonStr = JSON.stringify(value);
+                            html += ` ${key}='${jsonStr}'`;
+                        } catch (e) {
+                            console.warn(`Could not stringify object value for ${key}`, e);
+                            html += ` ${key}="${value}"`;
+                        }
+                    }
                 } else {
                     html += ` ${key}="${value}"`;
                 }
             }
         });
+        
+        // Always add the UUID as a data attribute - this is crucial for entity tracking
+        html += ` data-entity-uuid="${uuid}"`;
         
         // Close tag
         html += '></a-' + type + '>\n';
@@ -689,12 +886,6 @@ export function addMultipleEntities(primitiveType, count, options = {}) {
     return entityIds;
 }
 
-// Store custom primitive types and their default properties
-const customPrimitiveDefaults = {};
-
-// Export for access from other modules
-export { customPrimitiveDefaults };
-
 /**
  * Register a custom primitive type with default properties
  * @param {string} primitiveType - The type of primitive (e.g., 'custom-cube')
@@ -706,14 +897,100 @@ export function registerPrimitiveType(primitiveType, defaultProps) {
 }
 
 /**
+ * Ensure all entities in the scene have UUIDs
+ * This should be called after scene load and after any direct DOM manipulation
+ * @returns {Object} Object containing UUID mapping updates
+ */
+export function ensureEntityUUIDs() {
+    console.log('Ensuring all entities have UUIDs...');
+    
+    const state = getState();
+    const updatedEntities = { ...state.entities };
+    const updatedMapping = { ...state.entityMapping };
+    let hasChanges = false;
+    
+    // Find all entity elements in the scene
+    const scene = document.querySelector('a-scene');
+    if (!scene) {
+        console.error('No A-Frame scene found');
+        return { entities: updatedEntities, entityMapping: updatedMapping, changes: false };
+    }
+    
+    // Check all entity elements, including system entities
+    const entityElements = scene.querySelectorAll('a-entity, a-box, a-sphere, a-cylinder, a-plane, a-sky');
+    entityElements.forEach(element => {
+        // Skip certain system entities
+        if (['builder-camera', 'default-light', 'directional-light'].includes(element.id)) {
+            return;
+        }
+        
+        // Get existing UUID if any
+        let uuid = element.dataset.entityUuid;
+        const id = element.id;
+        
+        // If the element has no UUID, generate one
+        if (!uuid) {
+            uuid = generateLocalEntityUUID();
+            element.dataset.entityUuid = uuid;
+            console.log(`Generated UUID ${uuid} for entity ${id || element.tagName.toLowerCase()}`);
+            hasChanges = true;
+            
+            // Extract entity data and update state
+            const tagName = element.tagName.toLowerCase();
+            const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
+            const entityData = extractEntityAttributes(element, type);
+            
+            // Update state
+            updatedEntities[uuid] = entityData;
+            
+            // Update mapping if ID exists
+            if (id) {
+                updatedMapping[id] = uuid;
+            }
+        }
+        // If the element has UUID but no corresponding state entry, add it
+        else if (!state.entities[uuid]) {
+            const tagName = element.tagName.toLowerCase();
+            const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
+            const entityData = extractEntityAttributes(element, type);
+            
+            // Update state
+            updatedEntities[uuid] = entityData;
+            hasChanges = true;
+            
+            // Update mapping if ID exists
+            if (id && !updatedMapping[id]) {
+                updatedMapping[id] = uuid;
+            }
+        }
+    });
+    
+    // Update state if changes were made
+    if (hasChanges) {
+        setState({ 
+            entities: updatedEntities,
+            entityMapping: updatedMapping
+        });
+        
+        // Update Monaco editor to reflect changes
+        updateMonacoSafely();
+    }
+    
+    return { 
+        entities: updatedEntities, 
+        entityMapping: updatedMapping, 
+        changes: hasChanges 
+    };
+}
+
+/**
  * Add an entity to the scene with customized default properties based on primitive type
  * @param {string} primitiveType - Type of primitive (box, sphere, cylinder, plane, etc.)
  * @param {Object} properties - Optional properties to override defaults
  * @param {boolean} [updateEditor=true] - Whether to update the editor after adding
- * @returns {string} The ID of the created entity
+ * @returns {string} The UUID of the created entity
  */
 export function addEntity(primitiveType, properties = {}, updateEditor = true) {
-    const id = `${primitiveType}-${Date.now()}`;
     let defaultProps = {};
     
     // Check if we have a custom primitive type registered
@@ -804,7 +1081,10 @@ export function addEntity(primitiveType, properties = {}, updateEditor = true) {
     const combinedProps = { ...defaultProps, ...properties };
     
     // Create entity
-    createEntity(id, primitiveType, combinedProps);
+    const { element, uuid } = createEntity(primitiveType, combinedProps);
+    
+    // Ensure all UUIDs are present (including this new one)
+    ensureEntityUUIDs();
     
     // Force update the editor if requested
     if (updateEditor) {
@@ -812,7 +1092,7 @@ export function addEntity(primitiveType, properties = {}, updateEditor = true) {
         forceEditorUpdate(50, 1);
     }
     
-    return id;
+    return uuid;
 }
 
 /**
@@ -1066,5 +1346,87 @@ function updateMonacoWithRetry(attempt = 0, maxRetries = 2) {
             console.log('Retrying after import error...');
             setTimeout(() => updateMonacoWithRetry(currentAttempt, maxRetries), 200);
         }
+    });
+}
+
+/**
+ * Get entity UUID by DOM ID (for backward compatibility)
+ * @param {string} domId - The DOM ID to look up
+ * @returns {string|null} The UUID or null if not found
+ */
+export function getEntityUUIDById(domId) {
+    const state = getState();
+    return state.entityMapping[domId] || null;
+}
+
+/**
+ * Get entity DOM element by UUID
+ * @param {string} uuid - Entity UUID
+ * @returns {Element|null} DOM element or null if not found
+ */
+export function getEntityElementByUUID(uuid) {
+    return findEntityElementByUUID(uuid);
+}
+
+/**
+ * Get entity data from state by UUID
+ * @param {string} uuid - Entity UUID
+ * @returns {Object|null} Entity data or null if not found
+ */
+export function getEntityDataByUUID(uuid) {
+    const state = getState();
+    return state.entities[uuid] || null;
+}
+
+/**
+ * Get all entity UUIDs in the scene
+ * @returns {Array<string>} Array of entity UUIDs
+ */
+export function getAllEntityUUIDs() {
+    const state = getState();
+    return Object.keys(state.entities);
+}
+
+/**
+ * Find entities by type
+ * @param {string} type - Entity type to find
+ * @returns {Array<string>} Array of matching entity UUIDs
+ */
+export function findEntitiesByType(type) {
+    const state = getState();
+    return Object.keys(state.entities).filter(uuid => 
+        state.entities[uuid].type === type
+    );
+}
+
+/**
+ * Find entities by property value
+ * @param {string} property - Property name to match
+ * @param {any} value - Value to match
+ * @returns {Array<string>} Array of matching entity UUIDs
+ */
+export function findEntitiesByProperty(property, value) {
+    const state = getState();
+    return Object.keys(state.entities).filter(uuid => {
+        const entityData = state.entities[uuid];
+        
+        // Handle deep property paths (e.g., 'position.x')
+        if (property.includes('.')) {
+            const parts = property.split('.');
+            let current = entityData;
+            
+            // Navigate the property path
+            for (let i = 0; i < parts.length; i++) {
+                if (current === undefined || current === null) {
+                    return false;
+                }
+                current = current[parts[i]];
+            }
+            
+            return current === value;
+        }
+        
+        // Simple property match
+        return entityData[property] === value;
     });
 } 

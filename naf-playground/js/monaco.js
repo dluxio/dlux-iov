@@ -499,26 +499,41 @@ export function applyEditorContent(content) {
             return { success: false, error: 'Empty content' };
         }
         
-        // Parse the HTML content
+        // Import state module to ensure we have the latest state
+        import('./state.js').then(stateModule => {
+            // Initialize state if needed
+            const currentState = stateModule.getState();
+            if (!currentState.entities) {
+                console.log('Initializing state before parsing editor content');
+                stateModule.setState({
+                    entities: {},
+                    entityMapping: {}
+                });
+            }
+            
+            // Parse and apply the HTML content
         const result = parseSceneHTML(htmlContent);
         
-        if (result.success) {
-            updateEditorStatus('ready', 'Changes applied');
-            return { success: true };
-        } else if (result.partialSuccess) {
-            // If some updates worked but there were issues
-            updateEditorStatus('ready', 'Changes applied with warnings');
-            return { 
-                success: true, 
-                warning: result.warning || 'Some changes applied with warnings'
-            };
-        } else {
-            updateEditorStatus('error', result.error || 'Failed to apply changes');
+            // Ensure all entities have UUIDs after parsing
+            import('./entities.js').then(entitiesModule => {
+                if (entitiesModule.ensureEntityUUIDs) {
+                    console.log('Ensuring all entities have UUIDs after applying editor content');
+                    entitiesModule.ensureEntityUUIDs();
+                }
+            }).catch(err => {
+                console.error('Error importing entities module for UUID check:', err);
+            });
+        }).catch(err => {
+            console.error('Error importing state module:', err);
+            updateEditorStatus('error', 'Error initializing state: ' + err.message);
             return { 
                 success: false, 
-                error: result.error || 'Failed to apply changes'
+                error: 'Error initializing state: ' + err.message
             };
-        }
+        });
+        
+        updateEditorStatus('ready', 'Changes applied');
+        return { success: true };
     } catch (error) {
         console.error('Error applying editor content:', error);
         updateEditorStatus('error', error.message);
@@ -530,47 +545,55 @@ export function applyEditorContent(content) {
 }
 
 /**
- * Update the Monaco editor with the current scene
- * @param {boolean} [force=false] Force update even if isUpdating flag is set
- * @returns {boolean} Whether the update was successful
+ * Update the Monaco editor with the current state
+ * @param {boolean} [force=false] - Whether to force update even if no changes detected
  */
 export function updateMonacoEditor(force = false) {
-    try {
-        console.log('Updating Monaco editor with current scene...');
-        
         if (!editor) {
-            console.error('Monaco editor not initialized yet');
-            return false;
+        console.error('Cannot update editor: editor not initialized');
+        return;
+    }
+    
+    console.log('[DEBUG] Updating Monaco editor, force =', force);
+    
+    try {
+        // Get current state
+        const state = getState();
+        console.log('[DEBUG] Current state for editor update:', state);
+        
+        // Generate HTML from state
+        const html = generateHTMLFromState(state);
+        
+        // Update model only if content has changed or force is true
+        const currentValue = editor.getValue();
+        if (force || currentValue !== html) {
+            console.log('[DEBUG] Editor content will be updated');
+            
+            // Save current cursor position
+            const position = editor.getPosition();
+            
+            // Update content
+            editor.setValue(html);
+            
+            // Restore cursor position if possible
+            if (position) {
+                editor.setPosition(position);
+            }
+            
+            // Set editor status
+            setEditorStatus('Synced with scene');
+            
+            console.log('[DEBUG] Editor updated successfully');
+        } else {
+            console.log('[DEBUG] No changes detected in editor content, skipping update');
+            // Still update the status
+            setEditorStatus('Synced with scene');
         }
         
-        // Skip update if already updating, unless forced
-        if (isUpdating && !force) {
-            console.log('Skipping editor update - already updating');
-            return false;
-        }
-        
-        // Set flag to prevent circular updates
-        isUpdating = true;
-        
-        // Get HTML from the current scene
-        const sceneHTML = getSceneHTML();
-        console.log('Scene HTML for editor update:', sceneHTML);
-        
-        // Update the editor content
-        editor.setValue(sceneHTML);
-        
-        // Clear the updating flag after a short delay
-        setTimeout(() => {
-            isUpdating = false;
-            updateEditorStatus('ready');
-        }, 100);
-        
-        return true;
+        return html; // Return the generated HTML
     } catch (error) {
         console.error('Error updating Monaco editor:', error);
-        isUpdating = false;
-        updateEditorStatus('error', 'Failed to update editor');
-        return false;
+        setEditorStatus('Error: Failed to update editor');
     }
 }
 
@@ -615,19 +638,96 @@ export function getEditorInstance() {
 }
 
 /**
- * Get the current HTML from the A-Frame scene
+ * Clean entity HTML for display in editor
+ * @param {Element} entity - Entity element
+ * @returns {string} - Clean HTML for the entity
+ */
+function cleanEntityHTML(entity) {
+    if (!entity) return '';
+    
+    const tag = entity.tagName.toLowerCase();
+    
+    // Start with the opening tag
+    let html = `<${tag}`;
+    
+    // Add all attributes except for those that are internal/redundant
+    const excludeAttrs = ['aframe-injected', 'class', 'style', 'data-aframe-inspector', 'data-aframe-inspector-original-camera'];
+    
+    // Specifically *include* data-entity-uuid even if it would normally be excluded
+    // as a data attribute, since we need it for entity tracking
+    const includeDataAttrs = ['data-entity-uuid'];
+    
+    Array.from(entity.attributes).forEach(attr => {
+        const name = attr.name;
+        
+        // Skip certain attributes
+        if (excludeAttrs.includes(name)) return;
+        
+        // By default, skip data-* attributes unless specifically included
+        if (name.startsWith('data-') && !includeDataAttrs.includes(name)) return;
+        
+        // Add the attribute to the HTML
+        let value = attr.value;
+        
+        // Use single quotes if the value contains double quotes
+        const quoteChar = value.includes('"') ? "'" : '"';
+        
+        html += ` ${name}=${quoteChar}${value}${quoteChar}`;
+    });
+    
+    // Check if it's a self-closing tag
+    const selfClosing = ['a-asset-item', 'a-image', 'a-mixin'].includes(tag);
+    
+    if (selfClosing) {
+        html += ' />';
+        return html;
+    }
+    
+    // Close the opening tag
+    html += '>';
+    
+    // Add any children
+    if (entity.childElementCount > 0) {
+        // Add newlines around children for readability
+        html += '\n';
+        
+        Array.from(entity.children).forEach(child => {
+            // Recursively clean children
+            const childHtml = cleanEntityHTML(child);
+            if (childHtml) {
+                // Indent children
+                html += childHtml.split('\n').map(line => `  ${line}`).join('\n');
+                html += '\n';
+            }
+        });
+        
+        // Close tag on new line
+        html += `</${tag}>`;
+    } else {
+        // Empty element, close tag immediately
+        html += `</${tag}>`;
+    }
+    
+    return html;
+}
+
+/**
+ * Get the current HTML from the state model rather than the DOM
  * @returns {string} HTML representation of the scene
  */
 function getSceneHTML() {
     try {
-        console.log('Generating clean scene HTML...');
+        console.log('Generating scene HTML directly from state...');
         
-        // Get the scene element
-        const scene = document.querySelector('a-scene');
-        if (!scene) {
-            console.warn('No a-scene element found for HTML generation');
+        // Get state
+        const state = getState();
+        if (!state || !state.entities) {
+            console.warn('No state data available for HTML generation');
             return generateDefaultSceneHTML();
         }
+        
+        // Generate entities HTML from state
+        const entitiesHTML = generateEntitiesHTML();
         
         // Start with the basic scene structure
         let sceneHTML = '<a-scene>\n';
@@ -635,118 +735,52 @@ function getSceneHTML() {
         // Add assets section
         sceneHTML += '  <!-- Assets -->\n';
         sceneHTML += '  <a-assets>\n';
-        
-        // System templates that should be in the assets section but hidden from user
-        const systemTemplates = ['avatar-template', 'state-template'];
-        
-        const assets = scene.querySelector('a-assets');
-        if (assets) {
-            // Get all templates, but filter out system templates
-            const templates = assets.querySelectorAll('template');
-            templates.forEach(template => {
-                // Skip system templates - they exist but are not shown to the user
-                if (systemTemplates.includes(template.id)) {
-                    return;
-                }
-                
-                // Add user-defined templates
-                sceneHTML += `    ${template.outerHTML}\n`;
-            });
-        }
-        
-        // Close assets section
+        sceneHTML += '    <!-- System templates are maintained internally but not shown in editor -->\n';
         sceneHTML += '  </a-assets>\n\n';
         
-        // Add builder camera - handle special case to avoid duplicate camera attributes
-        const camera = scene.querySelector('#builder-camera');
-        if (camera) {
-            // We'll manually handle the camera attribute to prevent duplication
-            const cameraAttrs = attributesToString(camera, ['camera']);
-            
-            sceneHTML += '  <!-- Builder Camera (persistent) -->\n';
-            sceneHTML += `  <a-entity id="builder-camera" camera${cameraAttrs}>\n`;
-            sceneHTML += '    <a-cursor></a-cursor>\n';
-            sceneHTML += '  </a-entity>\n\n';
-        } else {
-            // Add default camera if none exists
+        // Add builder camera (static definition, not managed by entity system)
             sceneHTML += '  <!-- Builder Camera (persistent) -->\n';
             sceneHTML += '  <a-entity id="builder-camera" camera position="0 1.6 3" look-controls wasd-controls>\n';
             sceneHTML += '    <a-cursor></a-cursor>\n';
             sceneHTML += '  </a-entity>\n\n';
-        }
         
         // Add environment section
         sceneHTML += '  <!-- Environment -->\n';
         
-        // Handle Sky - use cleanEntityHTML for consistency
-        const sky = scene.querySelector('a-sky');
-        if (sky) {
-            // Ensure sky has an ID
-            const skyId = sky.id || 'sky';
-            
-            // If sky doesn't have an ID in the DOM, add one to ensure consistency
-            if (!sky.id) {
-                sky.id = skyId;
+        // Sky element - look it up in state by type
+        let skyUUID = null;
+        let skyProps = {};
+        
+        // Find the sky in the state
+        for (const uuid in state.entities) {
+            if (state.entities[uuid].type === 'sky') {
+                skyUUID = uuid;
+                skyProps = state.entities[uuid];
+                break;
             }
-            
-            // Use the same clean entity approach for the sky as for other entities
-            sceneHTML += `  ${cleanEntityHTML(sky)}\n`;
-        } else {
-            sceneHTML += '  <a-sky id="sky" color="#ECECEC"></a-sky>\n';
         }
         
-        // Add lighting
-        const defaultLight = scene.querySelector('#default-light');
-        if (defaultLight) {
-            sceneHTML += `  ${cleanEntityHTML(defaultLight)}\n`;
+        // Add sky with UUID
+        if (skyUUID) {
+            sceneHTML += `  <a-sky id="sky" color="${skyProps.color || '#ECECEC'}" data-entity-uuid="${skyUUID}"></a-sky>\n`;
         } else {
-            sceneHTML += '  <a-entity id="default-light" light="type: ambient; color: #BBB"></a-entity>\n';
+            // Default sky with generated UUID
+            sceneHTML += `  <a-sky id="sky" color="#ECECEC" data-entity-uuid="${getSkyUUID()}"></a-sky>\n`;
         }
         
-        const directionalLight = scene.querySelector('#directional-light');
-        if (directionalLight) {
-            sceneHTML += `  ${cleanEntityHTML(directionalLight)}\n`;
-        } else {
+        // Add standard lighting (not managed as entities in state)
+        sceneHTML += '  <a-entity id="default-light" light="type: ambient; color: #BBB"></a-entity>\n';
             sceneHTML += '  <a-entity id="directional-light" light="type: directional; color: #FFF; intensity: 0.6" position="-0.5 1 1"></a-entity>\n';
-        }
         
+        // Add user entities
         sceneHTML += '\n  <!-- User Entities -->\n';
-        
-        // Get all user-created entities (exclude system entities, sky, and templates)
-        const systemEntityIds = ['builder-camera', 'default-light', 'directional-light', 'sky'];
-        const entities = Array.from(scene.querySelectorAll('[id]')).filter(entity => {
-            // Skip elements with null/undefined/empty ID (shouldn't happen but just in case)
-            if (!entity.id) return false;
-            
-            // Skip system entities
-            if (systemEntityIds.includes(entity.id)) return false;
-            
-            // Skip the sky if it was already handled
-            if (entity.tagName.toLowerCase() === 'a-sky') return false;
-            
-            // Skip template elements
-            if (entity.tagName.toLowerCase() === 'template') return false;
-            
-            // Skip A-Frame's injected elements
-            if (entity.hasAttribute('aframe-injected')) return false;
-            
-            // Skip the canvas and assets section 
-            if (entity.tagName.toLowerCase() === 'canvas' || 
-                entity.tagName.toLowerCase() === 'a-assets') return false;
-            
-            return true;
-        });
-        
-        // Add the remaining user entities
-        entities.forEach(entity => {
-            sceneHTML += `  ${cleanEntityHTML(entity)}\n`;
-        });
+        sceneHTML += entitiesHTML;
         
         sceneHTML += '</a-scene>';
         
         return sceneHTML;
     } catch (error) {
-        console.error('Error getting scene HTML:', error);
+        console.error('Error generating scene HTML from state:', error);
         return generateDefaultSceneHTML();
     }
 }
@@ -829,42 +863,34 @@ function attributesToString(element, skipAttrs = [], compactOutput = true) {
 }
 
 /**
- * Clean an entity's HTML by removing unnecessary attributes
- * @param {Element} entity - The entity element
- * @returns {string} - Clean HTML representation of the entity
- */
-function cleanEntityHTML(entity) {
-    const tagName = entity.tagName.toLowerCase();
-    const id = entity.id;
-    
-    // Special handling for sky element to ensure color is included
-    if (tagName === 'a-sky') {
-        // Get color attribute or use default
-        const color = entity.getAttribute('color') || '#ECECEC';
-        return `<a-sky id="${id}" color="${color}"></a-sky>`;
-    }
-    
-    // Standard handling for other entities
-    const attrs = attributesToString(entity);
-    return `<${tagName} id="${id}"${attrs}></${tagName}>`;
-}
-
-/**
- * Generate default scene HTML when the actual scene isn't available
+ * Generate default scene HTML when the state isn't available
  * @returns {string} Default scene HTML
  */
 function generateDefaultSceneHTML() {
+    // Generate a default sky UUID
+    const skyUuid = 'sky-' + Date.now() + '-' + Math.floor(Math.random() * 1000000);
+    
     return `<a-scene>
-  <!-- Default scene content -->
+  <!-- Assets -->
+  <a-assets>
+    <!-- System templates are maintained internally but not shown in editor -->
+  </a-assets>
+
+  <!-- Builder Camera (persistent) -->
+  <a-entity id="builder-camera" camera position="0 1.6 3" look-controls wasd-controls>
+    <a-cursor></a-cursor>
+  </a-entity>
+
+  <!-- Environment -->
   <a-entity id="default-light" light="type: ambient; color: #BBB"></a-entity>
   <a-entity id="directional-light" light="type: directional; color: #FFF; intensity: 0.6" position="-0.5 1 1"></a-entity>
-  <a-sky id="sky" color="#ECECEC"></a-sky>
+  <a-sky id="sky" color="#ECECEC" data-entity-uuid="${skyUuid}"></a-sky>
 </a-scene>`;
 }
 
 /**
- * Generate the full scene HTML from the current state
- * @returns {string} - HTML representation of the scene
+ * Generate HTML string for the full scene
+ * @returns {string} HTML for the scene
  */
 function generateSceneHTML() {
     const state = getState();
@@ -885,7 +911,7 @@ function generateSceneHTML() {
   </a-entity>
 
   <!-- Default Environment -->
-  <a-sky id="sky" color="#ECECEC"></a-sky>
+  <a-sky id="sky" color="#ECECEC" data-entity-uuid="${getSkyUUID()}"></a-sky>
   <a-entity id="default-light" light="type: ambient; color: #BBB"></a-entity>
   <a-entity id="directional-light" light="type: directional; color: #FFF; intensity: 0.6" position="-0.5 1 1"></a-entity>
 
@@ -896,7 +922,32 @@ ${entitiesHTML}</a-scene>`;
 }
 
 /**
- * Parse scene HTML and update the state
+ * Get the UUID for the sky element
+ * @returns {string} UUID for the sky element
+ */
+function getSkyUUID() {
+    // First try to get it from the DOM
+    const skyElement = document.querySelector('a-sky');
+    if (skyElement && skyElement.dataset.entityUuid) {
+        return skyElement.dataset.entityUuid;
+    }
+    
+    // If not found in DOM, try to find it in state
+    const state = getState();
+    if (state && state.entities) {
+        for (const uuid in state.entities) {
+            if (state.entities[uuid].type === 'sky') {
+                return uuid;
+            }
+        }
+    }
+    
+    // As a fallback, generate a new one
+    return 'sky-' + Date.now() + '-' + Math.floor(Math.random() * 1000000);
+}
+
+/**
+ * Parse scene HTML from editor and update the state model
  * @param {string} html - Scene HTML to parse
  * @returns {Object} - Success status and any error
  */
@@ -904,6 +955,10 @@ function parseSceneHTML(html) {
     console.log('Parsing scene HTML from editor...');
     
     try {
+        // Dynamic imports to avoid circular dependencies
+        import('./state.js').then(stateModule => {
+            const generateEntityUUID = stateModule.generateEntityUUID;
+            
         // Import utils for warnings
         import('./utils.js').then(utils => {
             if (utils.showWarning) {
@@ -926,92 +981,117 @@ function parseSceneHTML(html) {
             };
         }
         
-        // Check specifically for sky element
-        const skyElement = sceneEl.querySelector('a-sky');
-        if (skyElement) {
-            console.log('Found sky element in editor HTML:', 
-                        skyElement.outerHTML, 
-                        'with color:', 
-                        skyElement.getAttribute('color'));
-            // Ensure sky has an ID
-            if (!skyElement.id) {
-                skyElement.id = 'sky';
-                console.log('Added ID to sky element:', skyElement.outerHTML);
-            }
-        } else {
-            console.warn('No sky element found in editor HTML, will need to create one');
-        }
+            // Ensure scene has default camera and lights
+            ensureSceneDefaults(sceneEl);
         
         // Track warnings for partial success
         const warnings = [];
         
-        // Check for entities that might fall through the floor (y=0 or very low)
-        const potentialFallingEntities = Array.from(sceneEl.querySelectorAll('[position]')).filter(el => {
-            if (el.tagName.toLowerCase() === 'a-plane') return false; // Planes are usually at y=0
-            if (el.tagName.toLowerCase() === 'a-sky') return false; // Sky doesn't need position
+            // Get current state to compare changes
+            const currentState = stateModule.getState();
+            const currentEntities = currentState.entities || {};
+            const currentEntityMapping = currentState.entityMapping || {};
             
-            const position = el.getAttribute('position');
-            if (!position) return false;
+            // Extract user-defined entities (exclude system entities)
+            const newEntities = {};
+            const newEntityMapping = {};
+            const systemEntityIds = ['builder-camera', 'default-light', 'directional-light'];
             
-            try {
-                // Parse position
-                const posStr = position.trim().split(/\s+/);
-                const y = parseFloat(posStr[1]);
+            // Process all a-* primitives and a-entity elements
+            const primitives = sceneEl.querySelectorAll('a-box, a-sphere, a-cylinder, a-plane, a-sky, a-entity');
+            primitives.forEach(el => {
+                // Skip system entities
+                if (systemEntityIds.includes(el.id)) return;
                 
-                // Check if y is very low (might fall through floor)
-                return !isNaN(y) && y < 0.1;
-            } catch (e) {
-                return false;
-            }
-        });
-        
-        if (potentialFallingEntities.length > 0) {
-            const warningMsg = `${potentialFallingEntities.length} entities have very low Y position values and might fall through the floor.`;
-            warnings.push(warningMsg);
+                // Skip entities inside assets
+                if (el.closest('a-assets')) return;
+                
+                // Get entity UUID - from data attribute or ID mapping
+                let uuid = el.getAttribute('data-entity-uuid');
+                
+                // If no UUID in data attribute, see if we can find one from ID mapping
+                if (!uuid && el.id && currentEntityMapping[el.id]) {
+                    uuid = currentEntityMapping[el.id];
+                    console.log(`Found UUID ${uuid} for entity with ID ${el.id} via mapping`);
+                }
+                
+                // If still no UUID, generate one
+                if (!uuid) {
+                    uuid = generateEntityUUID();
+                    console.log(`Generated new UUID ${uuid} for entity:`, el.outerHTML);
+                }
+                
+                // Ensure the element has the UUID in its dataset
+                el.setAttribute('data-entity-uuid', uuid);
+                
+                // Get the entity type from the tag name
+                const tagName = el.tagName.toLowerCase();
+                const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
+                
+                // Create entity data object starting with type
+                const entityData = { type };
+                
+                // Get all attributes except id, class, and data-entity-uuid
+                Array.from(el.attributes).forEach(attr => {
+                    const name = attr.name;
+                    if (['id', 'class', 'data-entity-uuid'].includes(name)) return;
+                    
+                    // Parse value appropriately based on attribute name
+                    let value = attr.value;
+                    
+                    // Convert position, rotation, scale to objects for consistent state storage
+                    if (['position', 'rotation', 'scale'].includes(name)) {
+                        value = parseVectorAttribute(value);
+                    }
+                    
+                    // Store the attribute in entity data
+                    entityData[name] = value;
+                });
+                
+                // Add entity to new state
+                newEntities[uuid] = entityData;
+                
+                // Also update ID mapping if ID exists
+                if (el.id) {
+                    newEntityMapping[el.id] = uuid;
+                }
+            });
             
-            // Show warning to user if helper is available
-            if (window.showSceneWarning) {
-                window.showSceneWarning(warningMsg);
-            }
+            console.log('Parsed entities from editor:', newEntities);
+            console.log('Entity ID to UUID mapping:', newEntityMapping);
             
-            console.warn(warningMsg, potentialFallingEntities);
-        }
-        
-        // Ensure system templates are preserved in the assets section
-        ensureSystemTemplates(sceneEl);
-        
-        // Extract user-defined entities (exclude system entities)
-        const entities = {};
-        const systemEntityIds = ['builder-camera', 'default-light', 'directional-light', 'sky'];
-        
-        // Process ALL a-* primitives (including a-sky, a-box, etc.)
-        processAllPrimitives(sceneEl, entities, warnings, systemEntityIds);
-        
-        console.log('Parsed entities from editor:', entities);
-        
-        // Check if sky was processed
-        if (entities['sky']) {
-            console.log('Sky entity was successfully processed:', entities['sky']);
-        } else {
-            console.warn('Sky entity not found in processed entities!');
-            if (skyElement) {
-                console.warn('This is unexpected since a sky element was found in the HTML!');
-            }
-        }
-        
-        if (Object.keys(entities).length === 0) {
+            if (Object.keys(newEntities).length === 0) {
             console.warn('No entities found in editor HTML');
             warnings.push('No entities found in editor HTML');
         }
         
-        // Update state with new entities
-        setState({ entities });
+            // Update state with merged entity mappings (preserve mappings for entities not in editor)
+            // but use the new entities data (editor is source of truth for entity data)
+            const mergedMapping = { ...currentEntityMapping };
+            
+            // Add new mappings
+            for (const id in newEntityMapping) {
+                mergedMapping[id] = newEntityMapping[id];
+            }
+            
+            // Update state
+            stateModule.setState({ 
+                entities: newEntities,
+                entityMapping: mergedMapping
+            });
         
         // Recreate entities in the scene
         try {
             import('./entities.js').then(entitiesModule => {
                 console.log('Recreating entities in scene from editor changes');
-                entitiesModule.recreateEntitiesFromState(entities);
+                    
+                    // First ensure all entities have valid UUIDs
+                    if (entitiesModule.ensureEntityUUIDs) {
+                        entitiesModule.ensureEntityUUIDs();
+                    }
+                    
+                    // Recreate all entities from the state
+                    entitiesModule.recreateEntitiesFromState(newEntities);
                 
                 // Update the editor status to show success
                 if (warnings.length > 0) {
@@ -1021,7 +1101,7 @@ function parseSceneHTML(html) {
                     updateEditorStatus('ready', 'Changes applied successfully');
                 }
                 
-                // Force editor content to refresh
+                    // Force editor content to refresh with updated UUIDs after a delay
                 setTimeout(() => updateMonacoEditor(true), 500);
             }).catch(err => {
                 console.error('Error importing entities module:', err);
@@ -1039,64 +1119,71 @@ function parseSceneHTML(html) {
                 error: 'Failed to update scene with editor changes: ' + error.message
             };
         }
-        
-        return warnings.length > 0 
-            ? {
-                partialSuccess: true,
+        }).catch(err => {
+            console.error('Error importing state module:', err);
+            return {
                 success: false,
-                warning: warnings.join('; ')
-              }
-            : {
-                success: true
+                error: 'Failed to import state module: ' + err.message
               };
+        });
+        
+        return { success: true };
     } catch (error) {
         console.error('Error parsing scene HTML:', error);
         return {
             success: false,
-            error: 'Error parsing scene HTML: ' + error.message
+            error: error.message
         };
     }
 }
 
 /**
- * Ensure system templates are present in the scene
+ * Convert object to vector string (e.g. {x: 1, y: 2, z: 3} to "1 2 3")
+ * @param {Object} obj - Vector object
+ * @returns {string} Vector string
+ */
+function objectToVectorString(obj) {
+    if (!obj || typeof obj !== 'object') return '0 0 0';
+    return `${obj.x || 0} ${obj.y || 0} ${obj.z || 0}`;
+}
+
+/**
+ * Ensure scene has a default camera and lights
+ * Helper function to make sure basic scene elements always exist
  * @param {Element} sceneEl - Scene element
  */
-function ensureSystemTemplates(sceneEl) {
-    // List of system templates that should always be present
-    const requiredTemplates = {
-        'avatar-template': `<template id="avatar-template">
-      <a-entity class="avatar">
-        <a-sphere class="head" color="#5985ff" scale="0.45 0.5 0.4"></a-sphere>
-        <a-entity class="face" position="0 0.05 0.25">
-          <a-sphere class="eye" color="#efefef" position="-0.16 0.1 0"></a-sphere>
-          <a-sphere class="eye" color="#efefef" position="0.16 0.1 0"></a-sphere>
-        </a-entity>
-      </a-entity>
-    </template>`,
-        'state-template': `<template id="state-template">
-      <a-entity class="state-container">
-        <a-entity state-data=""></a-entity>
-      </a-entity>
-    </template>`
-    };
-    
-    // Get or create assets section
-    let assetsEl = sceneEl.querySelector('a-assets');
-    if (!assetsEl) {
-        assetsEl = document.createElement('a-assets');
-        sceneEl.prepend(assetsEl);
+function ensureSceneDefaults(sceneEl) {
+    // Get or create a camera
+    if (!sceneEl.querySelector('#builder-camera')) {
+        const camera = document.createElement('a-entity');
+        camera.id = 'builder-camera';
+        camera.setAttribute('camera', '');
+        camera.setAttribute('position', '0 1.6 3');
+        camera.setAttribute('look-controls', '');
+        camera.setAttribute('wasd-controls', '');
+        
+        // Add cursor as child
+        const cursor = document.createElement('a-cursor');
+        camera.appendChild(cursor);
+        
+        sceneEl.appendChild(camera);
     }
     
-    // Ensure each required template exists
-    Object.entries(requiredTemplates).forEach(([id, html]) => {
-        if (!assetsEl.querySelector(`#${id}`)) {
-            console.log(`Adding missing system template: ${id}`);
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html.trim();
-            assetsEl.appendChild(tempDiv.firstChild);
-        }
-    });
+    // Ensure default lighting exists
+    if (!sceneEl.querySelector('#default-light')) {
+        const ambientLight = document.createElement('a-entity');
+        ambientLight.id = 'default-light';
+        ambientLight.setAttribute('light', 'type: ambient; color: #BBB');
+        sceneEl.appendChild(ambientLight);
+    }
+    
+    if (!sceneEl.querySelector('#directional-light')) {
+        const dirLight = document.createElement('a-entity');
+        dirLight.id = 'directional-light';
+        dirLight.setAttribute('light', 'type: directional; color: #FFF; intensity: 0.6');
+        dirLight.setAttribute('position', '-0.5 1 1');
+        sceneEl.appendChild(dirLight);
+    }
 }
 
 /**
@@ -1160,187 +1247,104 @@ function setupEditorEvents() {
 }
 
 /**
- * Process all A-Frame primitives in the scene and add them to the entities object
- * @param {Element} sceneEl - Scene element
- * @param {Object} entities - Entities object to populate
- * @param {Array} warnings - Array to collect warnings
- * @param {Array} systemEntityIds - IDs of system entities to skip
+ * Set the editor status display
+ * @param {string} status - The status text to display
  */
-function processAllPrimitives(sceneEl, entities, warnings, systemEntityIds) {
-    // Find all a-* elements (primitives) in the scene
-    const primitives = sceneEl.querySelectorAll('[id]');
-    const processedIds = new Set();
+function setEditorStatus(status) {
+    const statusEl = document.getElementById('editor-status');
+    if (!statusEl) return;
     
-    // First, handle sky element specially to ensure it's included
-    const skyElement = sceneEl.querySelector('a-sky');
-    if (skyElement) {
-        try {
-            // If sky doesn't have an ID, give it one
-            if (!skyElement.id) {
-                skyElement.id = 'sky';
-            }
-            
-            // Process the sky element, even though it's a system entity
-            processPrimitive(skyElement, entities, processedIds);
-            
-            console.log(`Sky element processed with ID: ${skyElement.id}`);
-        } catch (error) {
-            console.warn('Error processing sky element:', error);
-            warnings.push(`Error processing sky element: ${error.message}`);
-        }
+    // Update the status text
+    statusEl.textContent = status;
+    
+    // Set appropriate class based on content
+    if (status.toLowerCase().includes('error')) {
+        statusEl.className = 'status-error';
+    } else if (status.toLowerCase().includes('synced')) {
+        statusEl.className = 'status-saved';
     } else {
-        console.log('No sky element found in the scene');
+        statusEl.className = '';
     }
-    
-    // Process other primitives with IDs
-    primitives.forEach(primitive => {
-        const id = primitive.id;
-        
-        // Skip if already processed
-        if (processedIds.has(id)) return;
-        
-        // Skip system entities (except sky which was handled above)
-        if (systemEntityIds.includes(id) && id !== 'sky') return;
-        
-        // Skip template elements
-        if (primitive.tagName.toLowerCase() === 'template') return;
-        
-        // Skip elements inside a-assets
-        if (primitive.closest('a-assets')) return;
-        
-        // Skip A-Frame's injected elements
-        if (primitive.hasAttribute('aframe-injected')) return;
-        
-        // Skip special elements like canvas
-        if (primitive.tagName.toLowerCase() === 'canvas') return;
-        
-        // Only process A-Frame primitives (elements with a- prefix)
-        if (!primitive.tagName.toLowerCase().startsWith('a-')) return;
-        
-        // Try to process this primitive
-        try {
-            processPrimitive(primitive, entities, processedIds);
-        } catch (error) {
-            console.warn(`Error processing primitive ${id}:`, error);
-            warnings.push(`Error processing primitive ${id}: ${error.message}`);
-        }
-    });
-    
-    // Now look for primitives without IDs and generate IDs for them
-    // This ensures any other primitives without IDs are still processed
-    
-    // Get all elements in the scene
-    const allElements = sceneEl.querySelectorAll('*');
-    const primitivesWithoutIds = Array.from(allElements).filter(el => {
-        // Only include elements with a- prefix
-        if (!el.tagName.toLowerCase().startsWith('a-')) return false;
-        
-        // Skip elements with IDs (already processed)
-        if (el.id) return false;
-        
-        // Skip elements inside a-assets
-        if (el.closest('a-assets')) return false;
-        
-        // Skip A-Frame's injected elements
-        if (el.hasAttribute('aframe-injected')) return false;
-        
-        // Skip template elements and canvas and assets
-        const tagName = el.tagName.toLowerCase();
-        return tagName !== 'template' && tagName !== 'canvas' && tagName !== 'a-assets';
-    });
-    
-    primitivesWithoutIds.forEach(primitive => {
-        try {
-            // Generate a stable ID based on the primitive type
-            const tagName = primitive.tagName.toLowerCase();
-            const type = tagName.replace('a-', '');
-            const generatedId = `${type}-${Math.floor(Math.random() * 10000000)}`;
-            
-            // Set the ID on the element
-            primitive.id = generatedId;
-            
-            // Process the primitive
-            processPrimitive(primitive, entities, processedIds);
-        } catch (error) {
-            console.warn(`Error processing primitive without ID:`, error);
-            warnings.push(`Error processing primitive without ID: ${error.message}`);
-        }
-    });
 }
 
 /**
- * Process a single primitive element and add it to the entities object
- * @param {Element} primitive - Primitive element to process
- * @param {Object} entities - Entities object to populate
- * @param {Set} processedIds - Set of already processed IDs
+ * Generate HTML representation of the current state
+ * @param {Object} state - The application state
+ * @returns {string} HTML representation of the scene
  */
-function processPrimitive(primitive, entities, processedIds) {
-    const id = primitive.id;
-    const tagName = primitive.tagName.toLowerCase();
+function generateHTMLFromState(state) {
+    // Use the existing function to get the HTML from the state
+    return getSceneHTML();
+}
+
+/**
+ * Set up synchronization from inspector to editor
+ * This ensures that inspector changes are properly reflected in the editor
+ */
+export function setupStateToEditorSync() {
+    console.log('[DEBUG] Setting up improved state-to-editor synchronization');
     
-    // Extract type from tag name (remove a- prefix)
-    const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
+    // Store pre-inspector state to detect real changes
+    let preInspectorState = null;
     
-    console.log(`Processing primitive: ${id} (${tagName})`);
-    
-    // Create attributes object with correct type
-    const attributes = { type };
-    
-    // Special handling for sky element - always include color attribute
-    if (tagName === 'a-sky') {
-        // Get color from element or use default
-        const color = primitive.getAttribute('color') || '#ECECEC';
-        attributes.color = color;
-    }
-    
-    // Get all attributes
-    Array.from(primitive.attributes).forEach(attr => {
-        // Skip id attribute (handled separately)
-        if (attr.name === 'id') return;
-        
-        // Skip empty values
-        if (attr.value === '') return;
-        
-        // Skip A-Frame's auto-generated attributes
-        if (attr.name.startsWith('data-') || 
-            attr.name === 'geometry' || 
-            attr.name === 'material' ||
-            (attr.name === 'class' && attr.value === '')) {
-            return;
-        }
-        
-        try {
-            // Special handling for vector attributes
-            if (['position', 'rotation', 'scale'].includes(attr.name)) {
-                attributes[attr.name] = parseVectorAttribute(attr.value);
-            } 
-            // Skip default values (for compact output)
-            else if (attr.name === 'scale' && attr.value === '1 1 1') {
-                return;
-            }
-            else if (attr.name === 'rotation' && attr.value === '0 0 0') {
-                return;
-            }
-            else if (attr.name === 'position' && attr.value === '0 0 0') {
-                return;
-            }
-            // We already handled the color attribute for sky above, so skip it here
-            else if (tagName === 'a-sky' && attr.name === 'color') {
-                return;
-            }
-            // For all other attributes, just add them
-            else {
-                attributes[attr.name] = attr.value;
-            }
-        } catch (err) {
-            console.warn(`Error parsing attribute ${attr.name} for entity ${id}:`, err);
-        }
+    // Listen for inspector events at the document level
+    document.addEventListener('inspector-opened', () => {
+        console.log('[DEBUG] Inspector opened event captured in monaco sync');
+        // Save current state
+        preInspectorState = getState();
+        console.log('[DEBUG] Saved pre-inspector state for comparison:', preInspectorState);
     });
     
-    // Add to entities
-    entities[id] = attributes;
-    processedIds.add(id);
-    return id;
+    document.addEventListener('inspector-closed', () => {
+        console.log('[DEBUG] Inspector closed event captured in monaco sync');
+        
+        // Add a delay to ensure state has been updated by the time we check
+        setTimeout(() => {
+            const currentState = getState();
+            console.log('[DEBUG] Current state after inspector closed:', currentState);
+            
+            // Force update the Monaco editor
+            updateMonacoEditor(true);
+            
+            // Log the action for tracking
+            import('./debug.js').then(debug => {
+                debug.logAction('Monaco editor updated from inspector changes');
+            });
+        }, 500);
+    });
+    
+    // Listen for the custom event that signals inspector changes have been applied
+    document.addEventListener('inspector-changes-applied', (event) => {
+        console.log('[DEBUG] Inspector changes applied event received:', event.detail);
+        
+        // Immediately force an update to the Monaco editor
+        setTimeout(() => {
+            updateMonacoEditor(true);
+            console.log('[DEBUG] Monaco editor updated from inspector-changes-applied event');
+        }, 300);
+    });
+    
+    // Listen for watcher updates
+    document.addEventListener('watcher-changes-saved', (event) => {
+        console.log('[DEBUG] Watcher changes saved event received');
+        
+        // Force update the Monaco editor with the latest state
+        setTimeout(() => {
+            updateMonacoEditor(true);
+            console.log('[DEBUG] Monaco editor updated from watcher-changes-saved event');
+        }, 300);
+    });
+    
+    // Also subscribe to state changes to update Monaco when entities change
+    subscribe((newState, changes) => {
+        if (changes.entities) {
+            console.log('[DEBUG] Entity changes detected in state, updating Monaco editor');
+            // Use slight delay to ensure all state updates are complete
+            setTimeout(() => {
+                updateMonacoEditor(true);
+            }, 200);
+        }
+    });
 }
 
 // Export for use in other modules

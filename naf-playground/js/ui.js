@@ -297,17 +297,29 @@ function addEntityHandler(entityType) {
             const properties = getDefaultProperties(entityType);
             
             // Use the generalized addEntity function
-            const entityId = entities.addEntity(entityType, properties);
+            const entityUUID = entities.addEntity(entityType, properties);
             
-            logAction(`Added ${entityType} entity: ${entityId}`);
-            return entityId;
+            // Log action
+            logAction(`Added ${entityType} entity (UUID: ${entityUUID})`);
+            console.log(`Created ${entityType} with UUID: ${entityUUID}`, properties);
+            
+            // Show notification
+            import('./utils.js').then(utils => {
+                utils.showNotification(`Added ${entityType} to scene`);
+            }).catch(err => {
+                console.error('Error importing utils:', err);
+            });
         } catch (error) {
-            console.error(`Error adding ${entityType} entity:`, error);
-            return null;
+            console.error(`Error adding ${entityType}:`, error);
+            // Show error notification
+            import('./utils.js').then(utils => {
+                utils.showNotification(`Error adding ${entityType}: ${error.message}`, 'error');
+            }).catch(err => {
+                console.error('Error importing utils:', err);
+            });
         }
     }).catch(err => {
         console.error('Error importing entities module:', err);
-        return null;
     });
 }
 

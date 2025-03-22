@@ -8,7 +8,8 @@ import { showNotification } from './utils.js';
 
 // The application state
 let state = {
-    entities: {},     // All entities in the scene with their attributes
+    entities: {},     // All entities in the scene with their attributes and UUIDs
+    entityMapping: {}, // Maps DOM elements to entity UUIDs
     selectedEntity: null,
     camera: {
         position: { x: 0, y: 1.6, z: 5 },
@@ -32,8 +33,19 @@ let state = {
     }
 };
 
+// Counter for generating entity IDs
+let entityIdCounter = 1;
+
 // Subscribers to state changes
 const subscribers = [];
+
+/**
+ * Generate a UUID for entity identification
+ * @returns {string} UUID
+ */
+export function generateEntityUUID() {
+    return 'entity-' + Date.now() + '-' + Math.floor(Math.random() * 1000000);
+}
 
 /**
  * Initialize the state with the current scene
@@ -55,43 +67,63 @@ export function initState(scene) {
             // Initialize with empty entities instead of failing
             state = {
                 ...state,
-                entities: {}
+                entities: {},
+                entityMapping: {}
             };
             console.log('State initialized with empty entities', state);
             return Promise.resolve();
         }
         
         // Initialize entities from the current scene
-        const entities = scene.querySelectorAll('[id]');
+        const entities = scene.querySelectorAll('a-entity, a-box, a-sphere, a-cylinder, a-plane, a-sky');
         const entityState = {};
+        const entityMapping = {};
         
         entities.forEach(entity => {
-            const id = entity.id;
-            
             // Skip the persistent entities that we manage separately
-            if (id === 'builder-camera' || 
-                id === 'default-light' || 
-                id === 'directional-light') {
+            if (entity.id === 'builder-camera' || 
+                entity.id === 'default-light' || 
+                entity.id === 'directional-light') {
                 return;
             }
             
+            // Generate UUID for this entity
+            const uuid = entity.dataset.entityUuid || generateEntityUUID();
+            
+            // Ensure the entity has the UUID in its dataset
+            entity.dataset.entityUuid = uuid;
+            
             // Get entity attributes
             const attributes = {};
+            
+            // Get the entity type from its tag name
+            const tagName = entity.tagName.toLowerCase();
+            const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
+            attributes.type = type;
+            
+            // Get all other attributes
             entity.getAttributeNames().forEach(attr => {
-                if (attr !== 'id') {
+                if (attr !== 'id' && attr !== 'data-entity-uuid') {
                     // Normalize component name (handle dot notation)
                     const normalizedName = attr.replace('.', '__');
                     attributes[normalizedName] = entity.getAttribute(attr);
                 }
             });
             
-            entityState[id] = attributes;
+            // Store in entity state
+            entityState[uuid] = attributes;
+            
+            // Map DOM element to UUID (using WeakMap would be better but we need serialization)
+            if (entity.id) {
+                entityMapping[entity.id] = uuid;
+            }
         });
         
         // Set initial state
         state = {
             ...state,
-            entities: entityState
+            entities: entityState,
+            entityMapping: entityMapping
         };
         
         console.log('State initialized with scene entities', state);
@@ -101,7 +133,8 @@ export function initState(scene) {
         // Initialize with empty entities instead of failing
         state = {
             ...state,
-            entities: {}
+            entities: {},
+            entityMapping: {}
         };
         console.log('State initialized with empty entities due to error', state);
         return Promise.resolve();

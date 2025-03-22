@@ -558,3 +558,8 @@ body:not(.aframe-inspector-opened) #ui-container {
     /* Normal UI container styling */
     display: flex;
 } 
+
+body:not(.aframe-inspector-opened) .toggle-edit {
+    /* Normal UI container styling */
+    display: none;
+} 
