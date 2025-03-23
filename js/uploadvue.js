@@ -468,7 +468,7 @@ export default {
           }
         }
 
-        if (newAccounts.length) fetch('https://api.hive.blog', {
+        if (newAccounts.length) fetch('https://hive-api.dlux.io', {
           method: 'POST',
           body: JSON.stringify({
             "jsonrpc": "2.0",
@@ -1005,7 +1005,6 @@ export default {
       for (var i = 0; i < cids.length; i++) {
         meta += this.meta[cids[i]]
       }
-      console.log({ cids }, meta)
       var files = []
       for (var name in this.FileInfo) {
         for (var i = 0; i < cids.length; i++) {
@@ -1020,7 +1019,6 @@ export default {
           }
         }
       }
-      console.log({ cids }, files, meta)
       const ENDPOINTS = {
         UPLOAD: `${this.contract.api}/upload`,
         UPLOAD_STATUS: `${this.contract.api}/upload-check`,

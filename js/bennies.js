@@ -123,7 +123,7 @@ export default {
                     if(old != amount)this.finalize()
                 }
             }
-            if(!found)fetch('https://api.hive.blog', {
+            if(!found)fetch('https://hive-api.dlux.io', {
                 method: 'POST',
                 body: JSON.stringify({  
                     "jsonrpc": "2.0",

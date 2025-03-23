@@ -51,7 +51,7 @@ if (
   //window.history.replaceState(null, null, "dex");
 }
 let user = localStorage.getItem("user") || "GUEST";
-let hapi = localStorage.getItem("hapi") || "https://api.hive.blog";
+let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
 console.log({
   lapi,
 });
@@ -2035,7 +2035,7 @@ createApp({
       }
     },
     checkAccount(name, key) {
-      fetch("https://api.hive.blog", {
+      fetch("https://hive-api.dlux.io", {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",

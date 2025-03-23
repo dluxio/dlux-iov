@@ -456,7 +456,7 @@ export default {
           }
         }
 
-        if (newAccounts.length) fetch('https://api.hive.blog', {
+        if (newAccounts.length) fetch('https://hive-api.dlux.io', {
           method: 'POST',
           body: JSON.stringify({
             "jsonrpc": "2.0",
