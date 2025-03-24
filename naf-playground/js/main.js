@@ -13,6 +13,7 @@ import { initCamera } from './camera.js';
 import { initNetwork } from './network.js';
 import { waitForDependencies } from './utils.js';
 import { generateEntityId } from './utils.js';
+import { initEntityAPI } from './entity-api.js';
 // import { initInspectorWatcher } from './inspector-watcher.js'; // Removed - using watcher.js instead
 
 // Add global error handler to catch any uncaught errors
@@ -130,18 +131,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!currentState.entities || Object.keys(currentState.entities).length === 0) {
                     console.log('No entities in state, adding a test entity');
                     
-                    // First try the standard way through entities.js
-                    import('./entities.js').then(entities => {
-                        if (typeof entities.createEntity === 'function') {
-                            // Create test entity using the standard method
-                            entities.createEntity('test-entity', 'box', {
+                    // Use entity-api.js instead of direct entities.js call
+                    import('./entity-api.js').then(entityApi => {
+                        if (typeof entityApi.createEntity === 'function') {
+                            // Create test entity using the entity API
+                            entityApi.createEntity('box', {
                                 position: { x: 0, y: 1, z: -3 },
                                 color: '#4CC3D9'
                             });
-                            console.log('Test entity created via entities.js');
+                            console.log('Test entity created via entity-api.js');
                         }
                     }).catch(err => {
-                        console.error('Error importing entities module:', err);
+                        console.error('Error importing entity-api module:', err);
                     });
                 }
                 
@@ -308,9 +309,8 @@ window.sceneBuilder.testAddBox = () => {
     try {
         console.log('Manual test: Adding a box entity');
         
-        // Import to avoid circular dependencies
-        import('./entities.js').then(entities => {
-            const entityId = generateEntityId('box');
+        // Import entity-api instead of entities.js
+        import('./entity-api.js').then(entityApi => {
             const properties = {
                 position: { x: 0, y: 1, z: -3 },
                 width: 1,
@@ -319,23 +319,24 @@ window.sceneBuilder.testAddBox = () => {
                 color: '#4CC3D9'
             };
             
-            // Create entity
-            const result = entities.createEntity(entityId, 'box', properties);
-            console.log('Box entity created:', result);
-            
-            // Force Monaco update
-            import('./monaco.js').then(monaco => {
-                if (typeof monaco.updateMonacoEditor === 'function') {
-                    console.log('Forcing Monaco update after box creation');
-                    monaco.updateMonacoEditor();
-                }
-            }).catch(err => {
-                console.error('Error importing monaco module:', err);
+            // Create entity using entity API
+            entityApi.createEntity('box', properties).then(result => {
+                console.log('Box entity created:', result);
+                
+                // Force Monaco update
+                import('./monaco.js').then(monaco => {
+                    if (typeof monaco.updateMonacoEditor === 'function') {
+                        console.log('Forcing Monaco update after box creation');
+                        monaco.updateMonacoEditor();
+                    }
+                }).catch(err => {
+                    console.error('Error importing monaco module:', err);
+                });
+                
+                return `Box entity created with ID: ${result.uuid}`;
             });
-            
-            return `Box entity created with ID: ${entityId}`;
         }).catch(err => {
-            console.error('Error importing entities module:', err);
+            console.error('Error importing entity-api module:', err);
             return 'Error creating box entity. See console for details.';
         });
     } catch (error) {
@@ -408,19 +409,19 @@ window.sceneBuilder = {
             console.log('Re-adding event listener to box button');
             const addBoxBtn = document.getElementById('add-box');
             addBoxBtn.addEventListener('click', () => {
-                import('./entities.js').then(entities => {
-                    const boxId = generateEntityId('box', { userId: 'test-box' });
-                    const position = { x: 0, y: 1.5, z: -3 };
+                import('./entity-api.js').then(entityApi => {
                     const properties = {
-                        position,
+                        position: { x: 0, y: 1.5, z: -3 },
                         width: 1,
                         height: 1,
                         depth: 1,
                         color: '#4CC3D9'
                     };
                     
-                    entities.createEntity(boxId, 'box', properties);
-                }).catch(err => console.error('Error in box creation:', err));
+                    entityApi.createEntity('box', properties).catch(err => 
+                        console.error('Error in box creation:', err)
+                    );
+                }).catch(err => console.error('Error importing entity-api module:', err));
             });
         }
         
@@ -475,6 +476,9 @@ export async function init() {
         
         // Initialize entities
         initEntities();
+        
+        // Initialize Entity API
+        initEntityAPI();
         
         // Initialize Monaco editor last
         await initializeEditor();
@@ -777,94 +781,105 @@ function showEditorError() {
 }
 
 /**
- * Create a random scene with multiple entities
- * This demonstrates the use of the generalized entity system
+ * Creates a random scene with various entities
  */
 export function createRandomScene() {
     console.log('Creating random scene...');
     
-    import('./entities.js').then(entities => {
+    // Use entity-api instead of entities.js
+    import('./entity-api.js').then(async entityApi => {
         // Track created entities for debugging
         const createdEntities = [];
         
-        // Add a plane as the floor
-        createdEntities.push(
-            entities.addEntity('plane', {
+        try {
+            // Add a plane as the floor
+            const planeResult = await entityApi.createEntity('plane', {
                 position: { x: 0, y: 0, z: -4 },
                 rotation: { x: -90, y: 0, z: 0 },
                 width: 20,
                 height: 20,
                 color: '#7BC8A4'
-            })
-        );
-        
-        // Add multiple boxes with updateEditor=false to batch the updates
-        createdEntities.push(...entities.addMultipleEntities('box', 5, {
-            positionOptions: {
-                minX: -8, maxX: 8,
-                minY: 0.5, maxY: 3,
-                minZ: -10, maxZ: -2
-            },
-            baseProperties: {
-                width: 1,
-                height: 1,
-                depth: 1
-            },
-            updateEditor: false // Don't update yet
-        }));
-        
-        // Add multiple spheres
-        createdEntities.push(...entities.addMultipleEntities('sphere', 3, {
-            positionOptions: {
-                minX: -8, maxX: 8,
-                minY: 1, maxY: 3,
-                minZ: -10, maxZ: -2
-            },
-            baseProperties: {
-                radius: 0.75
-            },
-            updateEditor: false // Don't update yet
-        }));
-        
-        // Add cylinders
-        createdEntities.push(...entities.addMultipleEntities('cylinder', 3, {
-            positionOptions: {
-                minX: -8, maxX: 8,
-                minY: 0.75, maxY: 2,
-                minZ: -10, maxZ: -2
-            },
-            updateEditor: false // Don't update yet
-        }));
-        
-        // Add custom primitives if registered
-        if (entities.customPrimitiveDefaults && entities.customPrimitiveDefaults['torus']) {
-            createdEntities.push(...entities.addMultipleEntities('torus', 2, {
+            });
+            
+            if (planeResult && planeResult.uuid) {
+                createdEntities.push(planeResult.uuid);
+            }
+            
+            // Add multiple boxes
+            const boxResults = await entityApi.addMultipleEntities('box', 5, {
+                positionOptions: {
+                    minX: -8, maxX: 8,
+                    minY: 0.5, maxY: 3,
+                    minZ: -10, maxZ: -2
+                },
+                baseProperties: {
+                    width: 1,
+                    height: 1,
+                    depth: 1
+                }
+            });
+            
+            if (boxResults && boxResults.length) {
+                createdEntities.push(...boxResults);
+            }
+            
+            // Add multiple spheres
+            const sphereResults = await entityApi.addMultipleEntities('sphere', 3, {
                 positionOptions: {
                     minX: -8, maxX: 8,
                     minY: 1, maxY: 3,
                     minZ: -10, maxZ: -2
                 },
-                updateEditor: false // Don't update yet
-            }));
-        }
-        
-        // Add a light
-        createdEntities.push(
-            entities.addEntity('light', {
+                baseProperties: {
+                    radius: 0.75
+                }
+            });
+            
+            if (sphereResults && sphereResults.length) {
+                createdEntities.push(...sphereResults);
+            }
+            
+            // Add cylinders
+            const cylinderResults = await entityApi.addMultipleEntities('cylinder', 3, {
+                positionOptions: {
+                    minX: -8, maxX: 8,
+                    minY: 0.75, maxY: 2,
+                    minZ: -10, maxZ: -2
+                }
+            });
+            
+            if (cylinderResults && cylinderResults.length) {
+                createdEntities.push(...cylinderResults);
+            }
+            
+            // Add a light
+            const lightResult = await entityApi.createEntity('light', {
                 type: 'point',
                 position: { x: 0, y: 5, z: -5 },
                 intensity: 1,
                 distance: 50
-            })
-        );
-        
-        console.log(`Random scene created with ${createdEntities.length} entities`);
-        
-        // Use our new helper function to force update the editor with retry capability
-        entities.forceEditorUpdate(200, 3);
-        
+            });
+            
+            if (lightResult && lightResult.uuid) {
+                createdEntities.push(lightResult.uuid);
+            }
+            
+            console.log(`Random scene created with ${createdEntities.length} entities`);
+            
+            // Force update the monaco editor
+            import('./monaco.js').then(monaco => {
+                if (typeof monaco.updateMonacoEditor === 'function') {
+                    monaco.updateMonacoEditor();
+                }
+            }).catch(err => {
+                console.error('Error updating monaco editor:', err);
+            });
+            
+        } catch (error) {
+            console.error('Error creating random scene:', error);
+        }
     }).catch(err => {
-        console.error('Error creating random scene:', err);
+        console.error('Error importing entity-api module:', err);
     });
 }
 

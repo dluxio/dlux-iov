@@ -3,10 +3,11 @@
  */
 
 import { getState, setState, subscribe } from './state.js';
-import { recreateEntitiesFromState } from './entities.js';
 import { generateEntitiesHTML } from './entities.js';
 import { logAction } from './debug.js';
-import { generateEntityId } from './utils.js';
+import { generateEntityId, positionToString } from './utils.js';
+// Import recreateAllEntities function from entity-api.js instead
+import { recreateAllEntities } from './entity-api.js';
 
 // Monaco editor instance
 let editor = null;
@@ -483,11 +484,11 @@ export function getEditorContent() {
 }
 
 /**
- * Apply editor content to the scene
- * @param {string} content - Optional content to use instead of current editor content
- * @returns {Object} Result object with success status, warning, and error messages
+ * Apply the content from Monaco editor to the scene
+ * @param {string} content - HTML content from the editor
+ * @returns {Promise<Object>} Status object
  */
-export function applyEditorContent(content) {
+export async function applyEditorContent(content) {
     console.log('Applying editor content to scene...');
     
     try {
@@ -501,37 +502,31 @@ export function applyEditorContent(content) {
         }
         
         // Import state module to ensure we have the latest state
-        import('./state.js').then(stateModule => {
-            // Initialize state if needed
-            const currentState = stateModule.getState();
-            if (!currentState.entities) {
-                console.log('Initializing state before parsing editor content');
-                stateModule.setState({
-                    entities: {},
-                    entityMapping: {}
-                });
-            }
-            
-            // Parse and apply the HTML content
-        const result = parseSceneHTML(htmlContent);
+        const stateModule = await import('./state.js');
         
-            // Ensure all entities have UUIDs after parsing
-            import('./entities.js').then(entitiesModule => {
-                if (entitiesModule.ensureEntityUUIDs) {
-                    console.log('Ensuring all entities have UUIDs after applying editor content');
-                    entitiesModule.ensureEntityUUIDs();
-                }
-            }).catch(err => {
-                console.error('Error importing entities module for UUID check:', err);
+        // Initialize state if needed
+        const currentState = stateModule.getState();
+        if (!currentState.entities) {
+            console.log('Initializing state before parsing editor content');
+            stateModule.setState({
+                entities: {},
+                entityMapping: {}
             });
-        }).catch(err => {
-            console.error('Error importing state module:', err);
-            updateEditorStatus('error', 'Error initializing state: ' + err.message);
-            return { 
-                success: false, 
-                error: 'Error initializing state: ' + err.message
-            };
-        });
+        }
+        
+        // Parse and apply the HTML content
+        const result = await parseSceneHTML(htmlContent);
+        
+        // Ensure all entities have UUIDs after parsing
+        try {
+            const entityApi = await import('./entity-api.js');
+            if (entityApi.ensureEntityUUIDs) {
+                console.log('Ensuring all entities have UUIDs after applying editor content');
+                await entityApi.ensureEntityUUIDs();
+            }
+        } catch (err) {
+            console.error('Error importing entity-api module for UUID check:', err);
+        }
         
         updateEditorStatus('ready', 'Changes applied');
         return { success: true };
@@ -845,10 +840,8 @@ function attributesToString(element, skipAttrs = [], compactOutput = true) {
             try {
                 const parsedValue = parseVectorAttribute(attr.value);
                 // Format with consistent precision
-                const formattedValue = `${parsedValue.x.toFixed(3)} ${parsedValue.y.toFixed(3)} ${parsedValue.z.toFixed(3)}`;
-                // Remove trailing zeros
-                const cleanValue = formattedValue.replace(/\.?0+(\s|$)/g, '$1').trim();
-                attrString += ` ${attr.name}="${cleanValue}"`;
+                const formattedValue = positionToString(parsedValue);
+                attrString += ` ${attr.name}="${formattedValue}"`;
                 return;
             } catch (e) {
                 console.warn(`Error formatting ${attr.name} attribute:`, e);
@@ -950,9 +943,9 @@ function getSkyUUID() {
 /**
  * Parse scene HTML from editor and update the state model
  * @param {string} html - Scene HTML to parse
- * @returns {Object} - Success status and any error
+ * @returns {Promise<Object>} - Success status and any error
  */
-function parseSceneHTML(html) {
+async function parseSceneHTML(html) {
     console.log('Parsing scene HTML from editor...');
     
     try {
@@ -979,293 +972,201 @@ function parseSceneHTML(html) {
         const preservedIds = [];
         
         // Dynamic imports to avoid circular dependencies
-        return Promise.all([
+        const [stateModule, entitiesModule] = await Promise.all([
             import('./state.js'),
             import('./entities.js')
-        ]).then(([stateModule, entitiesModule]) => {
-            const generateEntityUUID = stateModule.generateEntityUUID;
-            const setState = stateModule.setState;
+        ]);
             
-            // Get current state to compare changes
-            const currentState = stateModule.getState();
-            const currentEntities = currentState.entities || {};
-            const currentEntityMapping = currentState.entityMapping || {};
+        const generateEntityUUID = stateModule.generateEntityUUID;
+        const setState = stateModule.setState;
+        
+        // Get current state to compare changes
+        const currentState = stateModule.getState();
+        const currentEntities = currentState.entities || {};
+        const currentEntityMapping = currentState.entityMapping || {};
+        
+        // Extract user-defined entities (exclude system entities)
+        const newEntities = {};
+        const newEntityMapping = {};
+        const systemEntityIds = ['builder-camera', 'default-light', 'directional-light'];
+        
+        // Track used entity IDs to avoid duplicates
+        const usedIds = new Set(systemEntityIds);
+        
+        // Process all a-* primitives and a-entity elements
+        const primitives = sceneEl.querySelectorAll('a-box, a-sphere, a-cylinder, a-plane, a-sky, a-entity, a-cone, a-ring, a-torus');
+        primitives.forEach(el => {
+            // Skip system entities
+            if (systemEntityIds.includes(el.id)) return;
             
-            // Extract user-defined entities (exclude system entities)
-            const newEntities = {};
-            const newEntityMapping = {};
-            const systemEntityIds = ['builder-camera', 'default-light', 'directional-light'];
+            // Skip entities inside assets
+            if (el.closest('a-assets')) return;
             
-            // Track used entity IDs to avoid duplicates
-            const usedIds = new Set(systemEntityIds);
+            // First, handle the entity UUID (for state tracking)
+            let uuid = el.getAttribute('data-entity-uuid');
             
-            // Process all a-* primitives and a-entity elements
-            const primitives = sceneEl.querySelectorAll('a-box, a-sphere, a-cylinder, a-plane, a-sky, a-entity, a-cone, a-ring, a-torus');
-            primitives.forEach(el => {
-                // Skip system entities
-                if (systemEntityIds.includes(el.id)) return;
+            // Next, handle the ID attribute (user-visible identifier)
+            let id = el.id;
+            const hasUserDefinedId = !!id && id !== ""; // Check if user provided an ID
+            
+            // Look for UUID mappings in three ways:
+            // 1. From data-entity-uuid attribute
+            // 2. From existing ID to UUID mapping if the ID exists
+            // 3. From UUID to ID reverse lookup if no data attribute but ID matches pattern
+            
+            if (!uuid && id && currentEntityMapping[id]) {
+                // Case 2: Found UUID from ID mapping
+                uuid = currentEntityMapping[id];
+                console.log(`Found UUID ${uuid} for entity with ID ${id} via mapping`);
                 
-                // Skip entities inside assets
-                if (el.closest('a-assets')) return;
+                // Track that this ID was preserved from user input
+                if (hasUserDefinedId) {
+                    preservedIds.push(id);
+                }
+            } else if (!uuid) {
+                // Case 3: Look for existing entity with similar properties to reuse UUID
+                const tagName = el.tagName.toLowerCase();
+                const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
                 
-                // First, handle the entity UUID (for state tracking)
-                let uuid = el.getAttribute('data-entity-uuid');
-                
-                // Next, handle the ID attribute (user-visible identifier)
-                let id = el.id;
-                const hasUserDefinedId = !!id && id !== ""; // Check if user provided an ID
-                
-                // Look for UUID mappings in three ways:
-                // 1. From data-entity-uuid attribute
-                // 2. From existing ID to UUID mapping if the ID exists
-                // 3. From UUID to ID reverse lookup if no data attribute but ID matches pattern
-                
-                if (!uuid && id && currentEntityMapping[id]) {
-                    // Case 2: Found UUID from ID mapping
-                    uuid = currentEntityMapping[id];
-                    console.log(`Found UUID ${uuid} for entity with ID ${id} via mapping`);
-                    
-                    // Track that this ID was preserved from user input
-                    if (hasUserDefinedId) {
-                        preservedIds.push(id);
-                    }
-                } else if (!uuid) {
-                    // Case 3: Look for existing entity with similar properties to reuse UUID
-                    const tagName = el.tagName.toLowerCase();
-                    const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
-                    
-                    // If we have an existing entity with this ID, prefer keeping its UUID
-                    for (const existingId in currentEntityMapping) {
-                        if (existingId === id) {
-                            const existingUuid = currentEntityMapping[existingId];
-                            const existingEntity = currentEntities[existingUuid];
-                            if (existingEntity && existingEntity.type === type) {
-                                uuid = existingUuid;
-                                console.log(`Reusing UUID ${uuid} for entity with ID ${id} based on type match`);
-                                
-                                // Track that this ID was preserved from user input
-                                if (hasUserDefinedId) {
-                                    preservedIds.push(id);
-                                }
-                                break;
+                // If we have an existing entity with this ID, prefer keeping its UUID
+                for (const existingId in currentEntityMapping) {
+                    if (existingId === id) {
+                        const existingUuid = currentEntityMapping[existingId];
+                        const existingEntity = currentEntities[existingUuid];
+                        if (existingEntity && existingEntity.type === type) {
+                            uuid = existingUuid;
+                            console.log(`Reusing UUID ${uuid} for entity with ID ${id} based on type match`);
+                            
+                            // Track that this ID was preserved from user input
+                            if (hasUserDefinedId) {
+                                preservedIds.push(id);
                             }
-                        }
-                    }
-                    
-                    // If still no UUID, generate a new one
-                    if (!uuid) {
-                        uuid = generateEntityUUID();
-                        console.log(`Generated new UUID ${uuid} for entity:`, el.outerHTML);
-                    }
-                } else if (hasUserDefinedId) {
-                    // Track entities with user-defined IDs that were preserved
-                    for (const existingId in currentEntityMapping) {
-                        if (existingId === id && currentEntityMapping[existingId] === uuid) {
-                            preservedIds.push(id);
                             break;
                         }
                     }
                 }
                 
-                // Ensure the element has the UUID in its dataset
-                el.setAttribute('data-entity-uuid', uuid);
-                
-                // If user provided an ID, make sure it's tracked and mark as used
-                if (hasUserDefinedId) {
-                    usedIds.add(id);
-                    newEntityMapping[id] = uuid;
+                // If still no UUID, generate a new one
+                if (!uuid) {
+                    uuid = generateEntityUUID();
+                    console.log(`Generated new UUID ${uuid} for entity:`, el.outerHTML);
                 }
+            } else if (hasUserDefinedId) {
+                // Track entities with user-defined IDs that were preserved
+                for (const existingId in currentEntityMapping) {
+                    if (existingId === id && currentEntityMapping[existingId] === uuid) {
+                        preservedIds.push(id);
+                        break;
+                    }
+                }
+            }
+            
+            // Ensure the element has the UUID in its dataset
+            el.setAttribute('data-entity-uuid', uuid);
+            
+            // If user provided an ID, make sure it's tracked and mark as used
+            if (hasUserDefinedId) {
+                usedIds.add(id);
+                newEntityMapping[id] = uuid;
+            }
+            
+            // Get the entity type from the tag name
+            const tagName = el.tagName.toLowerCase();
+            const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
+            
+            // Create entity data object starting with type
+            const entityData = { type };
+            
+            // Get all attributes except class and data-entity-uuid
+            Array.from(el.attributes).forEach(attr => {
+                const name = attr.name;
+                // Keep id in entityData for potential reference, but don't process it specially
+                if (['class', 'data-entity-uuid'].includes(name)) return;
                 
-                // Get the entity type from the tag name
-                const tagName = el.tagName.toLowerCase();
-                const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
+                // Parse value appropriately based on attribute name
+                let value = attr.value;
                 
-                // Create entity data object starting with type
-                const entityData = { type };
-                
-                // Get all attributes except class and data-entity-uuid
-                Array.from(el.attributes).forEach(attr => {
-                    const name = attr.name;
-                    // Keep id in entityData for potential reference, but don't process it specially
-                    if (['class', 'data-entity-uuid'].includes(name)) return;
-                    
-                    // Parse value appropriately based on attribute name
-                    let value = attr.value;
-                    
-                    // Convert position, rotation, scale to objects for consistent state storage
-                    if (['position', 'rotation', 'scale'].includes(name)) {
-                        value = parseVectorAttribute(value);
-                    } 
-                    // Handle JSON attributes (geometry, material, etc)
-                    else if (value && typeof value === 'string') {
-                        // First try to parse directly
+                // Convert position, rotation, scale to objects for consistent state storage
+                if (['position', 'rotation', 'scale'].includes(name)) {
+                    value = parseVectorAttribute(value);
+                } 
+                // Handle JSON attributes (geometry, material, etc)
+                else if (value && typeof value === 'string') {
+                    // First try to parse directly
+                    try {
+                        if (value.startsWith('{') || value.startsWith('[')) {
+                            value = JSON.parse(value);
+                        }
+                    } catch (e) {
+                        // If direct parsing fails, try to handle nested JSON strings
+                        // This handles the case where JSON strings have become over-escaped
                         try {
-                            if (value.startsWith('{') || value.startsWith('[')) {
-                                value = JSON.parse(value);
-                            }
-                        } catch (e) {
-                            // If direct parsing fails, try to handle nested JSON strings
-                            // This handles the case where JSON strings have become over-escaped
-                            try {
-                                // If it looks like an over-escaped JSON string, try to de-nest it
-                                if (value.includes('\\"') || value.includes('\\\\"')) {
-                                    // Handle the deeply nested case by gradually unescaping and parsing
-                                    let attempts = 0;
-                                    let currentValue = value;
-                                    let lastParsed = null;
-                                    
-                                    // Try progressively parsing deeper
-                                    while (attempts < 5 && typeof currentValue === 'string') {
-                                        try {
-                                            currentValue = JSON.parse(currentValue);
-                                            lastParsed = currentValue;
-                                            attempts++;
-                                        } catch (innerError) {
-                                            break;
-                                        }
-                                    }
-                                    
-                                    // Use the deepest successfully parsed value
-                                    if (lastParsed !== null) {
-                                        value = lastParsed;
-                                        console.log(`Successfully de-nested JSON for ${name}`);
+                            // If it looks like an over-escaped JSON string, try to de-nest it
+                            if (value.includes('\\"') || value.includes('\\\\"')) {
+                                // Handle the deeply nested case by gradually unescaping and parsing
+                                let attempts = 0;
+                                let currentValue = value;
+                                let lastParsed = null;
+                                
+                                // Try progressively parsing deeper
+                                while (attempts < 5 && typeof currentValue === 'string') {
+                                    try {
+                                        currentValue = JSON.parse(currentValue);
+                                        lastParsed = currentValue;
+                                        attempts++;
+                                    } catch (innerError) {
+                                        break;
                                     }
                                 }
-                            } catch (nestedError) {
-                                console.warn(`Failed to parse nested JSON for ${name}:`, nestedError);
+                                
+                                // Use the deepest successfully parsed value
+                                if (lastParsed !== null) {
+                                    value = lastParsed;
+                                    console.log(`Successfully de-nested JSON for ${name}`);
+                                }
                             }
+                        } catch (nestedError) {
+                            console.warn(`Failed to parse nested JSON for ${name}:`, nestedError);
                         }
                     }
-                    
-                    // Store the attribute in entity data
-                    entityData[name] = value;
-                });
+                }
                 
-                // Add entity to new state
-                newEntities[uuid] = entityData;
+                // Store the attribute in entity data
+                entityData[name] = value;
             });
             
-            console.log('Parsed entities from editor:', newEntities);
-            console.log('Entity ID to UUID mapping:', newEntityMapping);
-            console.log('Preserved user-defined IDs:', preservedIds);
-            
-            if (Object.keys(newEntities).length === 0) {
-                console.warn('No entities found in editor HTML');
-                warnings.push('No entities found in editor HTML');
-            }
-            
-            // Update state with merged entity mappings (preserve mappings for entities not in editor)
-            // but use the new entities data (editor is source of truth for entity data)
-            const mergedMapping = { ...currentEntityMapping };
-            
-            // Add new mappings
-            for (const id in newEntityMapping) {
-                mergedMapping[id] = newEntityMapping[id];
-            }
-            
-            // Intermediate step: Update the real DOM with entities from the parsed HTML
-            // This is needed because the watcher relies on the DOM to capture state
-            const realScene = document.querySelector('a-scene');
-            if (!realScene) {
-                console.error('Real A-Frame scene not found when updating from editor');
-                return {
-                    success: false,
-                    error: 'Real A-Frame scene not found'
-                };
-            }
-            
-            // First, update the state directly with the parsed entities
-            // This creates a temporary state that recreateEntitiesFromState can use
-            stateModule.setState({ 
-                entities: newEntities,
-                entityMapping: mergedMapping
-            }, false); // Don't notify subscribers yet - we'll do that after DOM update
-            
-            // Now update the DOM from the parsed state data
-            // This creates/updates real entities in the scene
-            try {
-                // First ensure all entities have valid UUIDs
-                if (entitiesModule.ensureEntityUUIDs) {
-                    entitiesModule.ensureEntityUUIDs();
-                }
-                
-                // Recreate all entities from the new state
-                entitiesModule.recreateEntitiesFromState(newEntities);
-                
-                // Now use the watcher to capture the final state from the updated DOM
-                // This ensures consistency between the DOM and state
-                if (window.watcher && typeof window.watcher.saveEntitiesToState === 'function') {
-                    console.log('Using watcher to finalize state from editor changes');
-                    // Short delay to allow entities to be fully processed by A-Frame
-                    setTimeout(() => {
-                        window.watcher.saveEntitiesToState('monaco-editor');
-                        
-                        // Update the editor status to show success
-                        if (warnings.length > 0) {
-                            console.warn('Applied changes with warnings:', warnings);
-                            updateEditorStatus('ready', 'Changes applied with warnings');
-                        } else if (preservedIds.length > 0) {
-                            // Provide feedback about preserved IDs
-                            const idStr = preservedIds.length > 3 
-                                ? `${preservedIds.slice(0, 3).join(', ')}... (${preservedIds.length} total)`
-                                : preservedIds.join(', ');
-                            updateEditorStatus('ready', `Changes applied, IDs preserved: ${idStr}`);
-                            
-                            // Show a more detailed notification
-                            import('./utils.js').then(utils => {
-                                if (utils.showNotification) {
-                                    utils.showNotification(
-                                        `Custom IDs preserved: ${preservedIds.join(', ')}`,
-                                        'success'
-                                    );
-                                }
-                            }).catch(err => console.error('Error showing notification:', err));
-                        } else {
-                            updateEditorStatus('ready', 'Changes applied successfully');
-                        }
-                        
-                        // Force editor content to refresh with updated UUIDs after a delay
-                        setTimeout(() => updateMonacoEditor(true), 500);
-                    }, 300);
-                } else {
-                    // Fallback if watcher is not available
-                    console.warn('Watcher not available for Monaco editor updates, using direct state update');
-                    
-                    // Update the editor status to show success
-                    if (warnings.length > 0) {
-                        console.warn('Applied changes with warnings:', warnings);
-                        updateEditorStatus('ready', 'Changes applied with warnings');
-                    } else if (preservedIds.length > 0) {
-                        // Provide feedback about preserved IDs
-                        const idStr = preservedIds.length > 3 
-                            ? `${preservedIds.slice(0, 3).join(', ')}... (${preservedIds.length} total)`
-                            : preservedIds.join(', ');
-                        updateEditorStatus('ready', `Changes applied, IDs preserved: ${idStr}`);
-                    } else {
-                        updateEditorStatus('ready', 'Changes applied successfully');
-                    }
-                    
-                    // Force editor content to refresh with updated UUIDs after a delay
-                    setTimeout(() => updateMonacoEditor(true), 500);
-                }
-                
-                return { success: true };
-            } catch (error) {
-                console.error('Error recreating entities from editor:', error);
-                updateEditorStatus('error', 'Error recreating entities: ' + error.message);
-                return {
-                    success: false,
-                    error: 'Failed to update scene with editor changes: ' + error.message
-                };
-            }
-        }).catch(err => {
-            console.error('Error importing modules:', err);
-            return {
-                success: false,
-                error: 'Failed to import modules: ' + err.message
-            };
+            // Add entity to new state
+            newEntities[uuid] = entityData;
         });
         
+        console.log('Parsed entities from editor:', newEntities);
+        console.log('Entity ID to UUID mapping:', newEntityMapping);
+        console.log('Preserved user-defined IDs:', preservedIds);
+        
+        if (Object.keys(newEntities).length === 0) {
+            console.warn('No entities found in editor HTML');
+            warnings.push('No entities found in editor HTML');
+        }
+        
+        // Update state with merged entity mappings (preserve mappings for entities not in editor)
+        // but use the new entities data (editor is source of truth for entity data)
+        const mergedMapping = { ...currentEntityMapping };
+        
+        // Add new mappings
+        for (const id in newEntityMapping) {
+            mergedMapping[id] = newEntityMapping[id];
+        }
+        
+        // First, update the state directly with the parsed entities
+        // This creates a temporary state that processParsedEntities can use
+        setState({ 
+            entities: newEntities,
+            entityMapping: mergedMapping
+        }, false); // Don't notify subscribers yet - we'll do that after DOM update
+        
+        // Use our centralized function to process and apply the parsed entities
+        const parsedEntities = { entities: newEntities };
+        return processParsedEntities(parsedEntities, warnings, preservedIds);
     } catch (error) {
         console.error('Error parsing scene HTML:', error);
         return {
@@ -1273,16 +1174,6 @@ function parseSceneHTML(html) {
             error: error.message
         };
     }
-}
-
-/**
- * Convert object to vector string (e.g. {x: 1, y: 2, z: 3} to "1 2 3")
- * @param {Object} obj - Vector object
- * @returns {string} Vector string
- */
-function objectToVectorString(obj) {
-    if (!obj || typeof obj !== 'object') return '0 0 0';
-    return `${obj.x || 0} ${obj.y || 0} ${obj.z || 0}`;
 }
 
 /**
@@ -1483,6 +1374,81 @@ export function setupStateToEditorSync() {
             }, 200);
         }
     });
+}
+
+/**
+ * Process parsed entities from editor
+ * @param {Object} parsedEntities - Parsed entities
+ * @param {Array} warnings - Warnings array
+ * @param {Array} preservedIds - Array of preserved IDs
+ * @returns {Promise<Object>} Result object
+ */
+async function processParsedEntities(parsedEntities, warnings, preservedIds) {
+    try {
+        // Get the entity-api module for recreation
+        const entityApi = await import('./entity-api.js');
+        
+        // Recreate entities from the new state
+        const newEntities = parsedEntities.entities;
+        console.log('Recreating entities from parsed state:', newEntities);
+        
+        // Use recreateAllEntities from entity-api.js
+        const success = await entityApi.recreateAllEntities(newEntities);
+        
+        if (success) {
+            // If we have a watcher, use it to get the final state from the updated DOM
+            if (window.watcher) {
+                // Load utils now so it's available in the timeout
+                const utils = await import('./utils.js');
+                
+                // Short delay to allow entities to be fully processed by A-Frame
+                setTimeout(() => {
+                    window.watcher.saveEntitiesToState('monaco-editor');
+                    
+                    // Update the editor status to show success
+                    if (warnings.length > 0) {
+                        console.warn('Applied changes with warnings:', warnings);
+                        updateEditorStatus('ready', 'Changes applied with warnings');
+                    } else if (preservedIds.length > 0) {
+                        // Provide feedback about preserved IDs
+                        const idStr = preservedIds.length > 3 
+                            ? `${preservedIds.slice(0, 3).join(', ')}... (${preservedIds.length} total)`
+                            : preservedIds.join(', ');
+                        updateEditorStatus('ready', `Changes applied, IDs preserved: ${idStr}`);
+                        
+                        // Show a notification - utils is already loaded
+                        if (utils.showNotification) {
+                            utils.showNotification(
+                                `Custom IDs preserved: ${preservedIds.join(', ')}`,
+                                'success'
+                            );
+                        }
+                    } else {
+                        updateEditorStatus('ready', 'Changes applied successfully');
+                    }
+                    
+                    // Force editor content to refresh with updated UUIDs after a delay
+                    setTimeout(() => updateMonacoEditor(true), 500);
+                }, 300);
+            } else {
+                // Watcher is required - no fallback
+                const error = new Error('Watcher is required but not available for Monaco editor updates');
+                console.error(error);
+                updateEditorStatus('error', 'Error: Watcher not available');
+                throw error;
+            }
+        } else {
+            console.error('Failed to recreate entities from state');
+            updateEditorStatus('error', 'Error: Recreation failed');
+            return { success: false, error: 'Entity recreation failed' };
+        }
+        
+        return { success: true };
+    } catch (error) {
+        console.error('Error processing parsed entities:', error);
+        updateEditorStatus('error', 'Error: ' + error.message);
+        return { success: false, error: error.message };
+    }
 }
 
 // Export for use in other modules

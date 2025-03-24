@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entity API Test</title>
+  <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .control-panel {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      width: 300px;
+      max-height: 90vh;
+      overflow-y: auto;
+      z-index: 100;
+    }
+    button {
+      background: #4e5bb6;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      margin: 5px 0;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      display: block;
+      width: 100%;
+    }
+    button:hover {
+      background: #2a3279;
+    }
+    h3 {
+      margin-top: 15px;
+      margin-bottom: 5px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      padding-bottom: 5px;
+    }
+    .log {
+      max-height: 200px;
+      overflow-y: auto;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 8px;
+      margin-top: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .log-entry {
+      margin-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 6px;
+    }
+    .success {
+      color: #4caf50;
+    }
+    .error {
+      color: #f44336;
+    }
+    .pending {
+      color: #ffeb3b;
+    }
+  </style>
+</head>
+<body>
+  <a-scene>
+    <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+    <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+    <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+    <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+    <a-sky color="#ECECEC"></a-sky>
+  </a-scene>
+
+  <div class="control-panel">
+    <h2>Entity API Test</h2>
+    
+    <h3>Create Entities</h3>
+    <button id="create-box">Create Box</button>
+    <button id="create-sphere">Create Sphere</button>
+    <button id="create-custom">Create Custom Entity</button>
+    
+    <h3>Update Entities</h3>
+    <button id="update-color">Update Random Entity Color</button>
+    <button id="update-position">Update Random Entity Position</button>
+    
+    <h3>Query Entities</h3>
+    <button id="find-boxes">Find All Boxes</button>
+    <button id="find-red">Find Red Entities</button>
+    
+    <h3>Delete Entities</h3>
+    <button id="delete-random">Delete Random Entity</button>
+    <button id="delete-all-boxes">Delete All Boxes</button>
+    
+    <h3>Advanced Operations</h3>
+    <button id="duplicate-entity">Duplicate Random Entity</button>
+    <button id="recreate-all">Recreate All from State</button>
+    
+    <h3>Log</h3>
+    <div class="log" id="log"></div>
+  </div>
+
+  <script type="module">
+    import { initEntityAPI, createEntity, updateEntity, deleteEntity, findEntitiesByType, 
+             findEntitiesByProperty, getAllEntities, duplicateEntity, 
+             recreateAllEntities, getEntityData } from './js/entity-api.js';
+    
+    // Wait for scene to be loaded
+    document.querySelector('a-scene').addEventListener('loaded', async () => {
+      // Initialize the entity API
+      await initEntityAPI();
+      logMessage('Entity API initialized', 'success');
+      
+      // Setup event listeners
+      document.getElementById('create-box').addEventListener('click', createBoxEntity);
+      document.getElementById('create-sphere').addEventListener('click', createSphereEntity);
+      document.getElementById('create-custom').addEventListener('click', createCustomEntity);
+      document.getElementById('update-color').addEventListener('click', updateRandomEntityColor);
+      document.getElementById('update-position').addEventListener('click', updateRandomEntityPosition);
+      document.getElementById('find-boxes').addEventListener('click', findAllBoxes);
+      document.getElementById('find-red').addEventListener('click', findRedEntities);
+      document.getElementById('delete-random').addEventListener('click', deleteRandomEntity);
+      document.getElementById('delete-all-boxes').addEventListener('click', deleteAllBoxes);
+      document.getElementById('duplicate-entity').addEventListener('click', duplicateRandomEntity);
+      document.getElementById('recreate-all').addEventListener('click', recreateEntities);
+    });
+    
+    // Helper functions
+    function getRandomColor() {
+      const colors = ['#FF5733', '#33FF57', '#3357FF', '#F033FF', '#FF33A8', '#33FFF9', '#FCFF33'];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+    
+    function getRandomPosition() {
+      return {
+        x: (Math.random() * 6) - 3,
+        y: Math.random() * 2 + 0.5,
+        z: (Math.random() * 4) - 6
+      };
+    }
+    
+    function logMessage(message, type = 'info') {
+      const logEl = document.getElementById('log');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+      logEl.prepend(entry);
+      
+      // Limit log entries
+      if (logEl.children.length > 20) {
+        logEl.removeChild(logEl.lastChild);
+      }
+    }
+    
+    // Action functions
+    async function createBoxEntity() {
+      logMessage('Creating box entity...', 'pending');
+      try {
+        const result = await createEntity('box', {
+          position: getRandomPosition(),
+          color: getRandomColor(),
+          width: Math.random() * 0.5 + 0.5,
+          height: Math.random() * 0.5 + 0.5,
+          depth: Math.random() * 0.5 + 0.5
+        });
+        
+        if (result && result.uuid) {
+          logMessage(`Created box: ${result.uuid}`, 'success');
+        } else {
+          logMessage('Failed to create box', 'error');
+        }
+      } catch (error) {
+        logMessage(`Error: ${error.message}`, 'error');
+      }
+    }
+    
+    async function createSphereEntity() {
+      logMessage('Creating sphere entity...', 'pending');
+      try {
+        const result = await createEntity('sphere', {
+          position: getRandomPosition(),
+          color: getRandomColor(),
+          radius: Math.random() * 0.5 + 0.5
+        });
+        
+        if (result && result.uuid) {
+          logMessage(`Created sphere: ${result.uuid}`, 'success');
+        } else {
+          logMessage('Failed to create sphere', 'error');
+        }
+      } catch (error) {
+        logMessage(`Error: ${error.message}`, 'error');
+      }
+    }
+    
+    async function createCustomEntity() {
+      logMessage('Creating custom entity...', 'pending');
+      try {
+        const result = await createEntity('entity', {
+          position: getRandomPosition(),
+          geometry: {
+            primitive: 'dodecahedron',
+            radius: Math.random() * 0.5 + 0.5
+          },
+          material: {
+            color: getRandomColor(),
+            metalness: 0.5,
+            roughness: 0.2
+          }
+        }, 'dodecahedron');
+        
+        if (result && result.uuid) {
+          logMessage(`Created custom entity: ${result.uuid}`, 'success');
+        } else {
+          logMessage('Failed to create custom entity', 'error');
+        }
+      } catch (error) {
+        logMessage(`Error: ${error.message}`, 'error');
+      }
+    }
+    
+    async function updateRandomEntityColor() {
+      // Get all entities
+      const entities = getAllEntities();
+      const uuids = Object.keys(entities);
+      
+      if (uuids.length === 0) {
+        logMessage('No entities to update', 'error');
+        return;
+      }
+      
+      // Select a random entity
+      const randomUuid = uuids[Math.floor(Math.random() * uuids.length)];
+      
+      // Update its color
+      const newColor = getRandomColor();
+      logMessage(`Updating ${randomUuid} color to ${newColor}...`, 'pending');
+      
+      try {
+        const success = await updateEntity(randomUuid, { color: newColor });
+        if (success) {
+          logMessage(`Updated entity color: ${randomUuid}`, 'success');
+        } else {
+          logMessage(`Failed to update entity: ${randomUuid}`, 'error');
+        }
+      } catch (error) {
+        logMessage(`Error: ${error.message}`, 'error');
+      }
+    }
+    
+    async function updateRandomEntityPosition() {
+      // Get all entities
+      const entities = getAllEntities();
+      const uuids = Object.keys(entities);
+      
+      if (uuids.length === 0) {
+        logMessage('No entities to update', 'error');
+        return;
+      }
+      
+      // Select a random entity
+      const randomUuid = uuids[Math.floor(Math.random() * uuids.length)];
+      
+      // Update its position
+      const newPosition = getRandomPosition();
+      logMessage(`Updating ${randomUuid} position...`, 'pending');
+      
+      try {
+        const success = await updateEntity(randomUuid, { position: newPosition });
+        if (success) {
+          logMessage(`Updated entity position: ${randomUuid}`, 'success');
+        } else {
+          logMessage(`Failed to update entity: ${randomUuid}`, 'error');
+        }
+      } catch (error) {
+        logMessage(`Error: ${error.message}`, 'error');
+      }
+    }
+    
+    async function findAllBoxes() {
+      logMessage('Finding all box entities...', 'pending');
+      try {
+        const boxes = findEntitiesByType('box');
+        logMessage(`Found ${boxes.length} boxes: ${boxes.join(', ')}`, 'success');
+      } catch (error) {
+        logMessage(`Error: ${error.message}`, 'error');
+      }
+    }
+    
+    async function findRedEntities() {
+      logMessage('Finding entities with red color...', 'pending');
+      try {
+        // Note: This is a simplification as colors could be in different formats
+        const redEntities = findEntitiesByProperty('color', '#EF2D5E');
+        logMessage(`Found ${redEntities.length} red entities: ${redEntities.join(', ')}`, 'success');
+      } catch (error) {
+        logMessage(`Error: ${error.message}`, 'error');
+      }
+    }
+    
+    async function deleteRandomEntity() {
+      // Get all entities
+      const entities = getAllEntities();
+      const uuids = Object.keys(entities);
+      
+      if (uuids.length === 0) {
+        logMessage('No entities to delete', 'error');
+        return;
+      }
+      
+      // Select a random entity
+      const randomUuid = uuids[Math.floor(Math.random() * uuids.length)];
+      
+      // Delete it
+      logMessage(`Deleting entity ${randomUuid}...`, 'pending');
+      
+      try {
+        const success = await deleteEntity(randomUuid);
+        if (success) {
+          logMessage(`Deleted entity: ${randomUuid}`, 'success');
+        } else {
+          logMessage(`Failed to delete entity: ${randomUuid}`, 'error');
+        }
+      } catch (error) {
+        logMessage(`Error: ${error.message}`, 'error');
+      }
+    }
+    
+    async function deleteAllBoxes() {
+      logMessage('Deleting all box entities...', 'pending');
+      try {
+        const boxes = findEntitiesByType('box');
+        if (boxes.length === 0) {
+          logMessage('No boxes to delete', 'warning');
+          return;
+        }
+        
+        const deletionPromises = boxes.map(uuid => deleteEntity(uuid));
+        await Promise.all(deletionPromises);
+        logMessage(`Deleted ${boxes.length} boxes`, 'success');
+      } catch (error) {
+        logMessage(`Error: ${error.message}`, 'error');
+      }
+    }
+    
+    async function duplicateRandomEntity() {
+      // Get all entities
+      const entities = getAllEntities();
+      const uuids = Object.keys(entities);
+      
+      if (uuids.length === 0) {
+        logMessage('No entities to duplicate', 'error');
+        return;
+      }
+      
+      // Select a random entity
+      const randomUuid = uuids[Math.floor(Math.random() * uuids.length)];
+      
+      // Duplicate it
+      logMessage(`Duplicating entity ${randomUuid}...`, 'pending');
+      
+      try {
+        const newUuid = await duplicateEntity(randomUuid);
+        if (newUuid) {
+          logMessage(`Duplicated entity: ${randomUuid} → ${newUuid}`, 'success');
+        } else {
+          logMessage(`Failed to duplicate entity: ${randomUuid}`, 'error');
+        }
+      } catch (error) {
+        logMessage(`Error: ${error.message}`, 'error');
+      }
+    }
+    
+    async function recreateEntities() {
+      logMessage('Recreating all entities from state...', 'pending');
+      try {
+        const success = await recreateAllEntities();
+        if (success) {
+          logMessage('Recreated all entities from state', 'success');
+        } else {
+          logMessage('Failed to recreate entities', 'error');
+        }
+      } catch (error) {
+        logMessage(`Error: ${error.message}`, 'error');
+      }
+    }
+  </script>
+</body>
+</html> 

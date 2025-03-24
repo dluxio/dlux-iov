@@ -17,6 +17,7 @@ let actionHistory = [];
 // Debug panel element
 let debugPanel = null;
 let isDebugPanelVisible = false;
+let refreshInterval = null;
 
 /**
  * Initialize the debug panel
@@ -39,40 +40,28 @@ export function initDebugPanel() {
 export function initDebug() {
     console.log('Initializing debug tools...');
     
-    // Create a button to toggle the debug panel
-    const debugButton = document.createElement('button');
-    debugButton.id = 'debug-panel-toggle';
-    debugButton.textContent = 'Debug State';
-    debugButton.className = 'scene-builder-button';
-    debugButton.style.position = 'fixed';
-    debugButton.style.bottom = '10px';
-    debugButton.style.right = '10px';
-    debugButton.style.zIndex = '1000';
-    
-    // Add event listener to toggle debug panel
-    debugButton.addEventListener('click', toggleDebugPanel);
-    
-    // Add to document
-    document.body.appendChild(debugButton);
-    
     // Create the debug panel container
     debugPanel = document.createElement('div');
     debugPanel.id = 'state-debug-panel';
     debugPanel.className = 'debug-panel';
     debugPanel.style.display = 'none';
     debugPanel.style.position = 'fixed';
-    debugPanel.style.bottom = '50px';
-    debugPanel.style.right = '10px';
-    debugPanel.style.width = '400px';
-    debugPanel.style.maxHeight = '500px';
+    debugPanel.style.top = '50%';
+    debugPanel.style.left = '50%';
+    debugPanel.style.transform = 'translate(-50%, -50%)';
+    debugPanel.style.width = '80%';
+    debugPanel.style.maxWidth = '300px';
+    debugPanel.style.maxHeight = '80vh';
     debugPanel.style.overflow = 'auto';
-    debugPanel.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    debugPanel.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
     debugPanel.style.color = '#fff';
-    debugPanel.style.padding = '10px';
-    debugPanel.style.borderRadius = '5px';
+    debugPanel.style.padding = '20px';
+    debugPanel.style.borderRadius = '8px';
     debugPanel.style.zIndex = '999';
     debugPanel.style.fontFamily = 'monospace';
-    debugPanel.style.fontSize = '12px';
+    debugPanel.style.fontSize = '14px';
+    debugPanel.style.boxShadow = '0 0 20px rgba(0, 0, 0, 0.5)';
+    debugPanel.style.border = '1px solid rgba(255, 255, 255, 0.1)';
     
     // Add to document
     document.body.appendChild(debugPanel);
@@ -98,57 +87,69 @@ export function initDebug() {
     // Add custom CSS for styling
     const style = document.createElement('style');
     style.textContent = `
-        .debug-panel h3 {
-            margin: 5px 0;
-            color: #88f;
-        }
-        .debug-panel .section {
-            margin-bottom: 10px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 5px;
-        }
-        .debug-panel .entity {
-            margin: 5px 0;
-            padding: 5px;
-            background-color: rgba(50, 50, 50, 0.5);
-            border-radius: 3px;
-        }
-        .debug-panel .entity-id {
-            color: #8f8;
-            font-weight: bold;
-        }
-        .debug-panel .entity-type {
-            color: #f88;
-        }
-        .debug-panel .actions {
-            max-height: 150px;
+        .debug-panel {
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            border-radius: 4px;
+            max-height: 80vh;
             overflow-y: auto;
-            margin-top: 10px;
+            z-index: 9999;
+        }
+        .debug-panel pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
         .debug-panel .action {
-            padding: 2px 5px;
-            margin: 2px 0;
-            border-radius: 3px;
-            background-color: rgba(30, 30, 30, 0.7);
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 2px solid #666;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .debug-panel .action:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
         .debug-panel .timestamp {
-            color: #aaa;
+            color: #888;
             font-size: 10px;
         }
-        .debug-panel .refresh-button {
-            margin-top: 10px;
-            background-color: #446;
+        .debug-panel .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
             border: none;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 3px;
+            color: #fff;
             cursor: pointer;
+            font-size: 20px;
+            padding: 5px;
         }
-        .debug-panel .refresh-button:hover {
-            background-color: #557;
+        .debug-panel .close-button:hover {
+            color: #ff4444;
+        }
+        .debug-panel .refresh-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #888;
+            font-size: 10px;
         }
     `;
     document.head.appendChild(style);
+    
+    // Add event listener for manual refresh
+    document.addEventListener('refresh-debug-panel', () => {
+        updateDebugPanel();
+    }, { once: true });
+    
+    // Add event listener for debug panel toggle
+    document.addEventListener('toggle-debug-panel', () => {
+        toggleDebugPanel();
+    });
     
     console.log('Debug tools initialized');
 }
@@ -166,7 +167,45 @@ export function toggleDebugPanel() {
     debugPanel.style.display = isDebugPanelVisible ? 'block' : 'none';
     
     if (isDebugPanelVisible) {
+        startContinuousRefresh();
         updateDebugPanel();
+    } else {
+        stopContinuousRefresh();
+    }
+}
+
+/**
+ * Start continuous refresh of the debug panel
+ */
+function startContinuousRefresh() {
+    // Clear any existing interval
+    stopContinuousRefresh();
+    
+    // Add refresh indicator
+    let refreshIndicator = document.createElement('div');
+    refreshIndicator.className = 'refresh-indicator';
+    refreshIndicator.textContent = 'Auto-refreshing...';
+    debugPanel.appendChild(refreshIndicator);
+    
+    // Update every 500ms
+    refreshInterval = setInterval(() => {
+        updateDebugPanel();
+    }, 500);
+}
+
+/**
+ * Stop continuous refresh of the debug panel
+ */
+function stopContinuousRefresh() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+    }
+    
+    // Remove refresh indicator if it exists
+    const refreshIndicator = debugPanel.querySelector('.refresh-indicator');
+    if (refreshIndicator) {
+        refreshIndicator.remove();
     }
 }
 

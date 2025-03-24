@@ -275,51 +275,33 @@ export function getEntities() {
 }
 
 /**
- * Get a specific entity by ID
- * @param {string} id - Entity ID
- * @returns {Object|null} Entity object or null if not found
+ * Get entity data by UUID
+ * @param {string} id - Entity UUID
+ * @returns {Object|null} Entity data or null if not found
  */
 export function getEntity(id) {
     return state.entities[id] ? {...state.entities[id]} : null;
 }
 
 /**
- * Remove an entity from the state
+ * REMOVED: This function has been completely removed
  * @param {string} id - Entity ID to remove
+ * @returns {boolean} Whether the operation was successful
+ * @deprecated Use deleteEntity() from entities.js or watcher.saveEntitiesToState() instead
  */
 export function removeEntity(id) {
-    console.log('Removing entity from state:', id);
-    
-    if (state.entities[id]) {
-        const newEntities = {...state.entities};
-        delete newEntities[id];
-        
-        setState({ entities: newEntities });
-        
-        return true;
-    }
-    
-    return false;
+    throw new Error('removeEntity() has been removed. Use deleteEntity() from entities.js or watcher.saveEntitiesToState() instead.');
 }
 
 /**
- * Update a specific entity in the state
+ * REMOVED: This function has been completely removed
  * @param {string} id - Entity ID to update
  * @param {Object} attributes - New attributes to apply
+ * @returns {boolean} Whether the operation was successful
+ * @deprecated Use updateEntity() from entities.js or watcher.saveEntitiesToState() instead
  */
 export function updateEntity(id, attributes) {
-    console.log('Updating entity in state:', id, attributes);
-    
-    if (state.entities[id]) {
-        const entity = {...state.entities[id], ...attributes};
-        const entities = {...state.entities, [id]: entity};
-        
-        setState({ entities });
-        
-        return true;
-    }
-    
-    return false;
+    throw new Error('updateEntity() has been removed. Use updateEntity() from entities.js or watcher.saveEntitiesToState() instead.');
 }
 
 /**

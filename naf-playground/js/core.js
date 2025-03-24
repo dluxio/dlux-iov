@@ -190,12 +190,16 @@ function onStateChange(newState, changes) {
 function updateSceneFromState(state) {
     console.log('Updating scene from state...');
     
-    // Use dynamic import to avoid circular dependencies
-    import('./entities.js').then(entities => {
-        console.log('Recreating entities from state in scene');
-        entities.recreateEntitiesFromState(state.entities);
+    // Use dynamic import of entity-api.js instead of entities.js
+    import('./entity-api.js').then(entityApi => {
+        console.log('Recreating entities from state in scene using Entity API');
+        entityApi.recreateAllEntities(state.entities).then(() => {
+            console.log('Successfully recreated entities from state');
+        }).catch(err => {
+            console.error('Error recreating entities from state:', err);
+        });
     }).catch(err => {
-        console.error('Error importing entities module:', err);
+        console.error('Error importing entity-api module:', err);
     });
 }
 

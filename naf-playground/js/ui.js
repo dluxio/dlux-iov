@@ -290,24 +290,31 @@ function clearExistingListeners() {
  * @param {string} entityType - Type of entity to add
  */
 function addEntityHandler(entityType) {
-    // Import entities module dynamically to avoid circular dependencies
-    import('./entities.js').then(entities => {
+    // Import entity-api module to use the unified API
+    import('./entity-api.js').then(entityApi => {
         try {
-            // Get default properties with position based on camera
-            const properties = getDefaultProperties(entityType);
-            
-            // Use the generalized addEntity function
-            const entityUUID = entities.addEntity(entityType, properties);
-            
-            // Log action
-            logAction(`Added ${entityType} entity (UUID: ${entityUUID})`);
-            console.log(`Created ${entityType} with UUID: ${entityUUID}`, properties);
-            
-            // Show notification
-            import('./utils.js').then(utils => {
-                utils.showNotification(`Added ${entityType} to scene`);
-            }).catch(err => {
-                console.error('Error importing utils:', err);
+            // Use the createEntity function from entity-api with minimal properties
+            // The entity API will handle default position, color, etc.
+            entityApi.createEntity(entityType).then(result => {
+                // Log action
+                const entityUUID = result.uuid;
+                logAction(`Added ${entityType} entity (UUID: ${entityUUID})`);
+                console.log(`Created ${entityType} with UUID: ${entityUUID}`);
+                
+                // Show notification
+                import('./utils.js').then(utils => {
+                    utils.showNotification(`Added ${entityType} to scene`);
+                }).catch(err => {
+                    console.error('Error importing utils:', err);
+                });
+            }).catch(error => {
+                console.error(`Error creating ${entityType}:`, error);
+                // Show error notification
+                import('./utils.js').then(utils => {
+                    utils.showNotification(`Error adding ${entityType}: ${error.message}`, 'error');
+                }).catch(err => {
+                    console.error('Error importing utils:', err);
+                });
             });
         } catch (error) {
             console.error(`Error adding ${entityType}:`, error);
@@ -319,40 +326,8 @@ function addEntityHandler(entityType) {
             });
         }
     }).catch(err => {
-        console.error('Error importing entities module:', err);
+        console.error('Error importing entity-api module:', err);
     });
-}
-
-/**
- * Get default properties for entities based on camera position
- * @param {string} entityType - Type of entity (used to determine height)
- * @returns {Object} - Default properties
- */
-function getDefaultProperties(entityType) {
-    // Default position in front of the camera
-    const state = getState();
-    const cameraPos = state.camera.position;
-    const cameraRot = state.camera.rotation;
-    
-    // Calculate position 3 units in front of the camera
-    const radians = cameraRot.y * (Math.PI / 180);
-    const x = cameraPos.x - Math.sin(radians) * 3;
-    const z = cameraPos.z - Math.cos(radians) * 3;
-    
-    // For plane, we want it on the ground, for everything else use camera height
-    if (entityType === 'plane') {
-        return {
-            position: { x, y: 0, z }
-        };
-    } else if (entityType === 'light') {
-        return {
-            position: { x, y: cameraPos.y + 1, z }
-        };
-    } else {
-        return {
-            position: { x, y: cameraPos.y, z }
-        };
-    }
 }
 
 /**

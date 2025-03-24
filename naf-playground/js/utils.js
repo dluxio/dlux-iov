@@ -16,31 +16,60 @@ export function generateUniqueId(prefix = 'entity') {
 
 /**
  * Convert a position object to a string
+ * This is the centralized utility for converting vector objects to strings
  * @param {Object} position - Position object with x, y, z properties
  * @returns {string} - Position string in the format "x y z"
  */
 export function positionToString(position) {
     if (!position) return '0 0 0';
-    const x = position.x || 0;
-    const y = position.y || 0;
-    const z = position.z || 0;
+    if (typeof position === 'string') return position; // If already a string, return it
+    
+    const x = position.x !== undefined ? position.x : 0;
+    const y = position.y !== undefined ? position.y : 0;
+    const z = position.z !== undefined ? position.z : 0;
+    
     return `${x} ${y} ${z}`;
 }
 
 /**
  * Convert a position string to an object
- * @param {string} positionString - Position string in the format "x y z"
+ * This is the centralized utility for converting vector strings to objects
+ * @param {string|Object} positionString - Position string in the format "x y z" or position object
  * @returns {Object} - Position object with x, y, z properties
  */
 export function stringToPosition(positionString) {
-    if (!positionString) return { x: 0, y: 0, z: 0 };
+    // If already an object with x, y, z, return a copy
+    if (positionString !== null && typeof positionString === 'object' && 
+        'x' in positionString && 'y' in positionString && 'z' in positionString) {
+        return {
+            x: typeof positionString.x === 'number' ? positionString.x : parseFloat(positionString.x) || 0,
+            y: typeof positionString.y === 'number' ? positionString.y : parseFloat(positionString.y) || 0,
+            z: typeof positionString.z === 'number' ? positionString.z : parseFloat(positionString.z) || 0
+        };
+    }
     
-    const [x, y, z] = positionString.split(' ').map(parseFloat);
-    return {
-        x: isNaN(x) ? 0 : x,
-        y: isNaN(y) ? 0 : y,
-        z: isNaN(z) ? 0 : z
-    };
+    // Handle empty or invalid inputs
+    if (!positionString || typeof positionString !== 'string') {
+        return { x: 0, y: 0, z: 0 };
+    }
+    
+    try {
+        // Split by whitespace and parse as numbers
+        const parts = positionString.trim().split(/\s+/).map(v => {
+            const parsed = parseFloat(v);
+            return isNaN(parsed) ? 0 : parsed;
+        });
+        
+        // Create vector object with defaults for missing components
+        return { 
+            x: parts[0] !== undefined ? parts[0] : 0, 
+            y: parts[1] !== undefined ? parts[1] : 0, 
+            z: parts[2] !== undefined ? parts[2] : 0 
+        };
+    } catch (error) {
+        console.warn(`Error parsing vector string: ${positionString}`, error);
+        return { x: 0, y: 0, z: 0 };
+    }
 }
 
 /**
@@ -320,4 +349,21 @@ export function generateEntityId(type, options = {}) {
     
     // If no type is provided, fall back to a short timestamp-based ID
     return `entity-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
+}
+
+/**
+ * Log a deprecation warning for a function, suggesting the unified API equivalent
+ * @param {string} oldFunction - The legacy function name that is deprecated
+ * @param {string} newFunction - The new unified API function to use instead
+ * @param {string} [module='entity-api.js'] - The module containing the new function
+ */
+export function logDeprecationWarning(oldFunction, newFunction, module = 'entity-api.js') {
+  console.warn(
+    `%c${oldFunction} is deprecated!%c\n` +
+    `Please use %c${newFunction}%c from %c${module}%c instead.\n` +
+    `This will ensure all entity operations go through the centralized watcher.`,
+    'color: red; font-weight: bold;', 'color: inherit;',
+    'color: green; font-weight: bold;', 'color: inherit;',
+    'color: blue; font-style: italic;', 'color: inherit;'
+  );
 } 

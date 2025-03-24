@@ -25,7 +25,7 @@
 import { getState, setState } from './state.js';
 import { updateMonacoEditor } from './monaco.js';
 import { logAction } from './debug.js';
-import { generateEntityId } from './utils.js';
+import { generateEntityId, positionToString, stringToPosition, logDeprecationWarning } from './utils.js';
 
 // Store default properties for custom primitives
 const customPrimitiveDefaults = {};
@@ -83,8 +83,10 @@ export function initEntities() {
  * @param {Object} properties - Entity properties
  * @param {string} [semanticType] - Semantic entity type for ID generation (e.g., "dodecahedron")
  * @returns {Object} Object containing the entity element and its UUID
+ * @deprecated Use createEntity from entity-api.js instead
  */
 export function createEntity(type, properties, semanticType) {
+    logDeprecationWarning('createEntity', 'createEntity', 'entity-api.js');
     console.log(`Creating entity: ${type}${semanticType ? ` (${semanticType})` : ''}`, properties);
     
     try {
@@ -162,8 +164,7 @@ function setEntityAttributes(entity, properties) {
         const position = properties.position;
         
         // Format position as a string for A-Frame
-        const posStr = typeof position === 'object' ? 
-            `${position.x} ${position.y} ${position.z}` : position;
+        const posStr = positionToString(position);
         
         // Set position attribute
         console.log(`Setting position for ${id} to ${posStr}`);
@@ -172,9 +173,7 @@ function setEntityAttributes(entity, properties) {
     
     if (properties.rotation) {
         // Format rotation as a string for A-Frame
-        const rotation = properties.rotation;
-        const rotStr = typeof rotation === 'object' ? 
-            `${rotation.x} ${rotation.y} ${rotation.z}` : rotation;
+        const rotStr = positionToString(properties.rotation);
         
         // Set rotation attribute
         entity.setAttribute('rotation', rotStr);
@@ -182,9 +181,7 @@ function setEntityAttributes(entity, properties) {
     
     if (properties.scale) {
         // Format scale as a string for A-Frame
-        const scale = properties.scale;
-        const scaleStr = typeof scale === 'object' ? 
-            `${scale.x} ${scale.y} ${scale.z}` : scale;
+        const scaleStr = positionToString(properties.scale);
         
         // Set scale attribute
         entity.setAttribute('scale', scaleStr);
@@ -212,7 +209,7 @@ function setEntityAttributes(entity, properties) {
         // Handle conversion of value if it's an object with x,y,z properties (vector-like)
         if (value !== null && typeof value === 'object' && 'x' in value && 'y' in value && 'z' in value) {
             // Convert vector-like object to string format
-            const vectorStr = `${value.x} ${value.y} ${value.z}`;
+            const vectorStr = positionToString(value);
             console.log(`Converting object value for ${key} to vector string: ${vectorStr}`);
             entity.setAttribute(key, vectorStr);
         } 
@@ -272,55 +269,6 @@ function setEntityAttributes(entity, properties) {
 }
 
 /**
- * Convert a position/rotation/scale object to A-Frame vector string
- * @param {Object} obj - Object with x, y, z properties
- * @returns {string} - A-Frame vector string
- */
-function objectToVectorString(obj) {
-    return `${obj.x} ${obj.y} ${obj.z}`;
-}
-
-/**
- * Convert A-Frame vector string to object
- * @param {string|Object} str - A-Frame vector string or vector object
- * @returns {Object} - Object with x, y, z properties
- */
-function vectorStringToObject(str) {
-    // If str is already an object with x, y, z properties, return it directly
-    if (str !== null && typeof str === 'object' && 'x' in str && 'y' in str && 'z' in str) {
-        return {
-            x: typeof str.x === 'number' ? str.x : parseFloat(str.x) || 0,
-            y: typeof str.y === 'number' ? str.y : parseFloat(str.y) || 0,
-            z: typeof str.z === 'number' ? str.z : parseFloat(str.z) || 0
-        };
-    }
-    
-    // Handle edge cases
-    if (!str || typeof str !== 'string') {
-        console.warn(`Invalid vector string: ${str}, using default values`);
-        return { x: 0, y: 0, z: 0 };
-    }
-    
-    try {
-        // Split by whitespace and parse as numbers
-        const parts = str.trim().split(/\s+/).map(v => {
-            const parsed = parseFloat(v);
-            return isNaN(parsed) ? 0 : parsed;
-        });
-        
-        // Create vector object with defaults for missing components
-        return { 
-            x: parts[0] !== undefined ? parts[0] : 0, 
-            y: parts[1] !== undefined ? parts[1] : 0, 
-            z: parts[2] !== undefined ? parts[2] : 0 
-        };
-    } catch (error) {
-        console.warn(`Error parsing vector string: ${str}`, error);
-        return { x: 0, y: 0, z: 0 };
-    }
-}
-
-/**
  * Format properties for storage in state
  * @param {string} type - Entity type
  * @param {Object} properties - Entity properties
@@ -339,8 +287,10 @@ function formatPropertiesForState(type, properties) {
  * Delete an entity from the scene
  * @param {string} uuid - UUID of the entity to delete
  * @returns {boolean} Whether the deletion was successful
+ * @deprecated Use deleteEntity from entity-api.js instead
  */
 export function deleteEntity(uuid) {
+    logDeprecationWarning('deleteEntity', 'deleteEntity', 'entity-api.js');
     try {
         console.log(`Deleting entity with UUID: ${uuid}`);
         
@@ -378,34 +328,15 @@ export function deleteEntity(uuid) {
  * @param {string} uuid - Entity UUID
  */
 function updateStateAfterEntityChange(operation, uuid) {
-    // Use the watcher to update state if available
+    // Require the watcher to update state
     if (window.watcher && typeof window.watcher.saveEntitiesToState === 'function') {
         console.log(`Using watcher to update state after ${operation} for entity ${uuid}`);
         window.watcher.saveEntitiesToState(`entity-${operation}`);
         return;
     }
     
-    // Legacy fallback if watcher is not available
-    console.warn(`Watcher not available, using direct setState for ${operation} of entity ${uuid}`);
-    
-    // Get current state
-    const currentState = getState();
-    const newEntities = {...currentState.entities};
-    
-    if (operation === 'delete') {
-        // Remove from state
-        if (newEntities[uuid]) {
-            delete newEntities[uuid];
-            setState({ entities: newEntities });
-            console.log(`Entity ${uuid} removed from state`);
-        } else {
-            console.warn(`Entity ${uuid} not found in state for deletion`);
-        }
-    } else if (operation === 'update') {
-        // Update the entity in state - this would need more parameters
-        // This is handled by the watcher now, this is just a stub for legacy fallback
-        setState({ entities: newEntities });
-    }
+    // Throw error if watcher is not available - it's now required
+    throw new Error(`Watcher is required but not available for ${operation} of entity ${uuid}`);
 }
 
 /**
@@ -413,54 +344,53 @@ function updateStateAfterEntityChange(operation, uuid) {
  * @param {string} uuid - Entity UUID
  * @param {Object} updates - Attribute updates
  * @returns {boolean} Success status
+ * @deprecated Use updateEntity from entity-api.js instead
  */
 export function updateEntity(uuid, updates) {
-    console.log(`Updating entity with UUID: ${uuid}`, updates);
-    
+    logDeprecationWarning('updateEntity', 'updateEntity', 'entity-api.js');
     try {
-        // Get current state
-        const currentState = getState();
+        console.log(`Updating entity with UUID: ${uuid}`, updates);
         
-        // Check if entity exists in state
-        if (!currentState.entities[uuid]) {
-            console.error(`Entity with UUID ${uuid} not found in state`);
+        // Check if entity exists
+        const entity = findEntityElementByUUID(uuid);
+        if (!entity) {
+            console.error(`Entity with UUID ${uuid} not found for update`);
             return false;
         }
         
-        // Find the DOM element for this UUID
-        const entityElement = findEntityElementByUUID(uuid);
-        if (!entityElement) {
-            console.error(`DOM element for entity UUID ${uuid} not found`);
-            return false;
+        // Update entity attributes
+        setEntityAttributes(entity, updates);
+        
+        // If entity is an A-Frame entity, update A-Frame specific properties
+        if (entity.tagName.toLowerCase().startsWith('a-')) {
+            // If specific attributes need A-Frame specific handling, do it here
+            // For example, if setting material color
+            if (updates.color) {
+                entity.setAttribute('color', updates.color);
+            }
+            
+            // If updating position, rotation, scale
+            if (updates.position) {
+                entity.setAttribute('position', positionToString(updates.position));
+            }
+            if (updates.rotation) {
+                entity.setAttribute('rotation', positionToString(updates.rotation));
+            }
+            if (updates.scale) {
+                entity.setAttribute('scale', positionToString(updates.scale));
+            }
+            
+            // Get the tag name to determine entity type
+            const tagName = entity.tagName.toLowerCase();
+            const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
+            const finalProperties = extractEntityAttributes(entity, type);
         }
         
-        // Apply updates to DOM element
-        setEntityAttributes(entityElement, updates);
-        
-        // Flush changes to DOM to ensure A-Frame's internal state is updated
-        entityElement.flushToDOM();
-        
-        // Update state using watcher if available
+        // Update state using watcher
         if (window.watcher && typeof window.watcher.saveEntitiesToState === 'function') {
-            console.log(`Using watcher to update state after updating entity ${uuid}`);
             window.watcher.saveEntitiesToState('entity-update');
         } else {
-            // Legacy fallback - only if watcher is not available
-            console.warn(`Watcher not available, using direct setState for entity update ${uuid}`);
-            
-            // Extract the full set of attributes post-update
-            const tagName = entityElement.tagName.toLowerCase();
-            const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
-            const finalProperties = extractEntityAttributes(entityElement, type);
-            
-            // Update state
-            const newEntities = { ...currentState.entities };
-            
-            // Update entity in state with complete property set
-            newEntities[uuid] = finalProperties;
-            
-            // Update state
-            setState({ entities: newEntities });
+            throw new Error('Watcher is required but not available for entity update');
         }
         
         // Update code editor
@@ -476,12 +406,14 @@ export function updateEntity(uuid, updates) {
 }
 
 /**
- * Find a DOM element by entity UUID
- * @param {string} uuid - Entity UUID to find
- * @returns {Element|null} The DOM element or null if not found
+ * Find entity element by UUID
+ * @param {string} uuid - Entity UUID
+ * @returns {Element|null} DOM element or null if not found
+ * @deprecated Use getEntityElement from entity-api.js instead
  */
-function findEntityElementByUUID(uuid) {
-    return document.querySelector(`[data-entity-uuid="${uuid}"]`);
+export function findEntityElementByUUID(uuid) {
+    logDeprecationWarning('findEntityElementByUUID', 'getEntityElement', 'entity-api.js');
+    return getEntityElement(uuid);
 }
 
 /**
@@ -492,8 +424,11 @@ function findEntityElementByUUID(uuid) {
  * - Entities are assigned consistent IDs in the format `type-entity-N` (e.g., box-entity-1, sphere-entity-2)
  * - User-provided IDs from the code panel are preserved
  * - IDs remain consistent across scene recreation, enabling reliable selection and manipulation
+ * 
+ * @deprecated Use recreateAllEntities from entity-api.js instead
  */
 export function recreateEntitiesFromState(entitiesState) {
+    logDeprecationWarning('recreateEntitiesFromState', 'recreateAllEntities', 'entity-api.js');
     // If no specific state provided, use current state
     if (!entitiesState) {
         const state = getState();
@@ -700,12 +635,7 @@ export function recreateEntitiesFromState(entitiesState) {
                     entityElement.setAttribute('entity-watcher', '');
                 }
                 
-                // Update entity mapping with the new ID
-                const currentState = getState();
-                const newEntityMapping = { ...currentState.entityMapping };
-                newEntityMapping[entityElement.id] = uuid;
-                setState({ entityMapping: newEntityMapping }, false);
-                
+                // No longer directly update entity mapping here, let watcher handle it
             } catch (err) {
                 console.error(`Error creating entity ${uuid}:`, err);
             }
@@ -716,11 +646,50 @@ export function recreateEntitiesFromState(entitiesState) {
             setTimeout(() => {
                 window.watcher.saveEntitiesToState('recreate-from-state');
             }, 300); // Small delay to allow A-Frame to process all entity creations
+        } else {
+            throw new Error('Watcher is required but not available for recreating entities from state');
         }
         
         logAction('Recreated entities from state');
     } catch (error) {
         console.error('Error recreating entities from state:', error);
+    }
+}
+
+/**
+ * Format an attribute-value pair for HTML output
+ * This is a centralized utility for formatting entity attributes as HTML
+ * @param {string} key - The attribute name
+ * @param {any} value - The attribute value
+ * @returns {string} Formatted HTML attribute string
+ */
+function formatAttributeHTML(key, value) {
+    // Format object values appropriately
+    if (typeof value === 'object' && value !== null) {
+        // Handle vector properties (position, rotation, scale)
+        if ('x' in value && 'y' in value && 'z' in value) {
+            const vectorStr = positionToString(value);
+            return ` ${key}="${vectorStr}"`;
+        }
+        // Handle color objects
+        else if ('r' in value && 'g' in value && 'b' in value) {
+            const colorStr = `rgb(${value.r}, ${value.g}, ${value.b})`;
+            return ` ${key}="${colorStr}"`;
+        }
+        // Handle other objects - use single quotes to prevent HTML attribute parsing issues
+        else {
+            try {
+                const jsonStr = JSON.stringify(value);
+                return ` ${key}='${jsonStr}'`;
+            } catch (e) {
+                console.warn(`Could not stringify object value for ${key}`, e);
+                return ` ${key}="${value}"`;
+            }
+        }
+    } 
+    // Handle simple values
+    else {
+        return ` ${key}="${value}"`;
     }
 }
 
@@ -856,42 +825,6 @@ export function generateEntitiesHTML() {
 }
 
 /**
- * Format an attribute-value pair for HTML output
- * @param {string} key - The attribute name
- * @param {any} value - The attribute value
- * @returns {string} Formatted HTML attribute string
- */
-function formatAttributeHTML(key, value) {
-    // Format object values appropriately
-    if (typeof value === 'object' && value !== null) {
-        // Handle vector properties (position, rotation, scale)
-        if ('x' in value && 'y' in value && 'z' in value) {
-            const vectorStr = `${value.x || 0} ${value.y || 0} ${value.z || 0}`;
-            return ` ${key}="${vectorStr}"`;
-        }
-        // Handle color objects
-        else if ('r' in value && 'g' in value && 'b' in value) {
-            const colorStr = `rgb(${value.r}, ${value.g}, ${value.b})`;
-            return ` ${key}="${colorStr}"`;
-        }
-        // Handle other objects - use single quotes to prevent HTML attribute parsing issues
-        else {
-            try {
-                const jsonStr = JSON.stringify(value);
-                return ` ${key}='${jsonStr}'`;
-            } catch (e) {
-                console.warn(`Could not stringify object value for ${key}`, e);
-                return ` ${key}="${value}"`;
-            }
-        }
-    } 
-    // Handle simple values
-    else {
-        return ` ${key}="${value}"`;
-    }
-}
-
-/**
  * Update the Monaco editor safely using a retry mechanism
  */
 function updateMonacoSafely(retryCount = 0, maxRetries = 3) {
@@ -934,51 +867,46 @@ function updateMonacoSafely(retryCount = 0, maxRetries = 3) {
 }
 
 /**
- * Generate a random color in hex format
- * @returns {string} Random hex color
- */
-function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
-
-/**
- * Generate a random position within defined limits
- * @param {Object} options - Configuration options
- * @param {number} [options.minX=-5] - Minimum X coordinate
- * @param {number} [options.maxX=5] - Maximum X coordinate
- * @param {number} [options.minY=0.5] - Minimum Y coordinate (usually above floor)
- * @param {number} [options.maxY=3] - Maximum Y coordinate
- * @param {number} [options.minZ=-5] - Minimum Z coordinate
- * @param {number} [options.maxZ=0] - Maximum Z coordinate
- * @returns {Object} Random position {x, y, z}
+ * Get a random position within the scene bounds
+ * @param {Object} options - Position options
+ * @returns {Object} Random position object
+ * @deprecated Use getRandomPosition from entity-api.js instead
  */
 export function getRandomPosition(options = {}) {
-    const {
-        minX = -5, maxX = 5,
-        minY = 0.5, maxY = 3,
-        minZ = -5, maxZ = 0
-    } = options;
-    
-    return {
-        x: minX + Math.random() * (maxX - minX),
-        y: minY + Math.random() * (maxY - minY),
-        z: minZ + Math.random() * (maxZ - minZ)
-    };
+    logDeprecationWarning('getRandomPosition', 'getRandomPosition', 'entity-api.js');
+    return getRandomPosition(options);
 }
 
 /**
- * Add multiple entities at once with random positions and colors
- * @param {string} primitiveType - Type of primitive to add
+ * Register a new primitive type with default properties
+ * @param {string} primitiveType - Type of primitive to register
+ * @param {Object} defaultProps - Default properties for the primitive
+ * @deprecated Use registerPrimitiveType from entity-api.js instead
+ */
+export function registerPrimitiveType(primitiveType, defaultProps) {
+    logDeprecationWarning('registerPrimitiveType', 'registerPrimitiveType', 'entity-api.js');
+    return registerPrimitiveType(primitiveType, defaultProps);
+}
+
+/**
+ * Log all entity positions to the console
+ * @deprecated Use logEntityPositions from entity-api.js instead
+ */
+export function logEntityPositions() {
+    logDeprecationWarning('logEntityPositions', 'logEntityPositions', 'entity-api.js');
+    return logEntityPositions();
+}
+
+/**
+ * Add multiple entities of the same type with randomized properties
+ * @param {string} primitiveType - Type of primitive to add (box, sphere, etc.)
  * @param {number} count - Number of entities to add
- * @param {Object} options - Options for positioning and properties
- * @returns {Array} Array of created entity IDs
+ * @param {Object} options - Configuration options
+ * @returns {Array} Array of created entity UUIDs
+ * @deprecated Use addMultipleEntities from entity-api.js instead
  */
 export function addMultipleEntities(primitiveType, count, options = {}) {
+    logDeprecationWarning('addMultipleEntities', 'addMultipleEntities', 'entity-api.js');
     const entityIds = [];
     const {
         positionOptions = {},
@@ -1005,16 +933,6 @@ export function addMultipleEntities(primitiveType, count, options = {}) {
     }
     
     return entityIds;
-}
-
-/**
- * Register a custom primitive type with default properties
- * @param {string} primitiveType - The type of primitive (e.g., 'custom-cube')
- * @param {Object} defaultProps - Default properties for this primitive type
- */
-export function registerPrimitiveType(primitiveType, defaultProps) {
-    console.log(`Registering custom primitive type: ${primitiveType}`);
-    customPrimitiveDefaults[primitiveType] = defaultProps;
 }
 
 /**
@@ -1126,13 +1044,15 @@ export function ensureEntityUUIDs() {
 }
 
 /**
- * Add an entity to the scene with customized default properties based on primitive type
- * @param {string} primitiveType - Type of primitive (box, sphere, cylinder, plane, etc.)
- * @param {Object} properties - Optional properties to override defaults
- * @param {boolean} [updateEditor=true] - Whether to update the editor after adding
- * @returns {string} The UUID of the created entity
+ * Add an entity to the scene and update state
+ * @param {string} primitiveType - Type of entity to add (box, sphere, etc.)
+ * @param {Object} properties - Entity properties
+ * @param {boolean} updateEditor - Whether to update the monaco editor
+ * @returns {string} UUID of the created entity
+ * @deprecated Use createEntity from entity-api.js instead
  */
 export function addEntity(primitiveType, properties = {}, updateEditor = true) {
+    logDeprecationWarning('addEntity', 'createEntity', 'entity-api.js');
     let defaultProps = {};
     
     // Check if we have a custom primitive type registered
@@ -1230,9 +1150,9 @@ export function addEntity(primitiveType, properties = {}, updateEditor = true) {
         }
     }
     
-    // Add a random color for all entities except lights
+    // Add a default color for all entities except lights
     if (primitiveType !== 'light' && !properties.color) {
-        defaultProps.color = getRandomColor();
+        defaultProps.color = '#4CC3D9'; // Default A-Frame blue
     }
     
     // Combine default properties with provided properties
@@ -1319,7 +1239,7 @@ function extractEntityAttributes(entity, type) {
         const value = entity.getAttribute(attr);
         if (value) {
             // Store as object since that's our internal format
-            properties[attr] = vectorStringToObject(value);
+            properties[attr] = stringToPosition(value);
         } else {
             // If missing, use A-Frame defaults
             switch (attr) {
@@ -1405,42 +1325,6 @@ function extractAttribute(entity, properties, attrName) {
 }
 
 /**
- * Debug helper to log the position of all entities
- * Useful for debugging positioning issues
- */
-export function logEntityPositions() {
-    const scene = document.querySelector('a-scene');
-    if (!scene) {
-        console.error('No scene found');
-        return;
-    }
-    
-    const entities = Array.from(scene.querySelectorAll('[id]'));
-    
-    console.group('Entity Positions');
-    entities.forEach(entity => {
-        const id = entity.id;
-        if (!id) return;
-        
-        const position = entity.getAttribute('position');
-        const domPosition = entity.getAttribute('position');
-        const component = entity.components?.position?.data;
-        
-        console.log(`Entity #${id}:`, {
-            positionAttr: position,
-            domPosition: domPosition,
-            component: component,
-            object3D: entity.object3D?.position ? {
-                x: entity.object3D.position.x,
-                y: entity.object3D.position.y,
-                z: entity.object3D.position.z
-            } : 'N/A'
-        });
-    });
-    console.groupEnd();
-}
-
-/**
  * Force update the Monaco editor with retry mechanism
  * @param {number} [delay=100] - Delay in ms before updating
  * @param {number} [retries=2] - Number of retries if update fails
@@ -1518,29 +1402,33 @@ function updateMonacoWithRetry(attempt = 0, maxRetries = 2) {
  * Get entity UUID by DOM ID (for backward compatibility)
  * @param {string} domId - The DOM ID to look up
  * @returns {string|null} The UUID or null if not found
+ * @deprecated Use getEntityUUIDById from entity-api.js instead
  */
 export function getEntityUUIDById(domId) {
-    const state = getState();
-    return state.entityMapping[domId] || null;
+    logDeprecationWarning('getEntityUUIDById', 'getEntityUUIDById', 'entity-api.js');
+    return getEntityUUIDById(domId);
 }
 
 /**
  * Get entity DOM element by UUID
  * @param {string} uuid - Entity UUID
  * @returns {Element|null} DOM element or null if not found
+ * @deprecated Use getEntityElement from entity-api.js instead
  */
 export function getEntityElementByUUID(uuid) {
-    return findEntityElementByUUID(uuid);
+    logDeprecationWarning('getEntityElementByUUID', 'getEntityElement', 'entity-api.js');
+    return getEntityElement(uuid);
 }
 
 /**
  * Get entity data from state by UUID
  * @param {string} uuid - Entity UUID
  * @returns {Object|null} Entity data or null if not found
+ * @deprecated Use getEntityData from entity-api.js instead
  */
 export function getEntityDataByUUID(uuid) {
-    const state = getState();
-    return state.entities[uuid] || null;
+    logDeprecationWarning('getEntityDataByUUID', 'getEntityData', 'entity-api.js');
+    return getEntityData(uuid);
 }
 
 /**
@@ -1553,45 +1441,52 @@ export function getAllEntityUUIDs() {
 }
 
 /**
- * Find entities by type
+ * Find all entities of a specific type
  * @param {string} type - Entity type to find
- * @returns {Array<string>} Array of matching entity UUIDs
+ * @returns {Array} Array of entity UUIDs that match the type
+ * @deprecated Use findEntitiesByType from entity-api.js instead
  */
 export function findEntitiesByType(type) {
-    const state = getState();
-    return Object.keys(state.entities).filter(uuid => 
-        state.entities[uuid].type === type
-    );
+    logDeprecationWarning('findEntitiesByType', 'findEntitiesByType', 'entity-api.js');
+    try {
+        const state = getState();
+        const results = [];
+        
+        Object.entries(state.entities).forEach(([uuid, data]) => {
+            if (data.type === type) {
+                results.push(uuid);
+            }
+        });
+        
+        return results;
+    } catch (error) {
+        console.error(`Error finding entities of type ${type}:`, error);
+        return [];
+    }
 }
 
 /**
- * Find entities by property value
- * @param {string} property - Property name to match
+ * Find entities that have a specific property matching a value
+ * @param {string} property - Property name to check
  * @param {any} value - Value to match
- * @returns {Array<string>} Array of matching entity UUIDs
+ * @returns {Array} Array of entity UUIDs that match the criteria
+ * @deprecated Use findEntitiesByProperty from entity-api.js instead
  */
 export function findEntitiesByProperty(property, value) {
-    const state = getState();
-    return Object.keys(state.entities).filter(uuid => {
-        const entityData = state.entities[uuid];
+    logDeprecationWarning('findEntitiesByProperty', 'findEntitiesByProperty', 'entity-api.js');
+    try {
+        const state = getState();
+        const results = [];
         
-        // Handle deep property paths (e.g., 'position.x')
-        if (property.includes('.')) {
-            const parts = property.split('.');
-            let current = entityData;
-            
-            // Navigate the property path
-            for (let i = 0; i < parts.length; i++) {
-                if (current === undefined || current === null) {
-                    return false;
-                }
-                current = current[parts[i]];
+        Object.entries(state.entities).forEach(([uuid, data]) => {
+            if (data[property] === value) {
+                results.push(uuid);
             }
-            
-            return current === value;
-        }
+        });
         
-        // Simple property match
-        return entityData[property] === value;
-    });
+        return results;
+    } catch (error) {
+        console.error(`Error finding entities with ${property}=${value}:`, error);
+        return [];
+    }
 } 

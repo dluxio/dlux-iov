@@ -448,6 +448,7 @@ function createWatcherPanel() {
       </div>
       <div class="watcher-row" style="justify-content: center; margin-top: 4px;">
         <button id="watcher-save-button" class="watcher-save-button">Save Now</button>
+        <button id="debug-panel-toggle" class="watcher-save-button" style="margin-left: 8px;">Debug State</button>
       </div>
     </div>
   `;
@@ -463,6 +464,12 @@ function createWatcherPanel() {
   
   // Add event listener to save button
   saveButton.addEventListener('click', onSaveButtonClick);
+  
+  // Add event listener for debug panel toggle
+  const debugToggleButton = document.getElementById('debug-panel-toggle');
+  debugToggleButton.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent('toggle-debug-panel'));
+  });
   
   console.log('[Watcher] Panel created');
   
@@ -1503,8 +1510,9 @@ function captureEntityData(entity) {
     }
   }
   
-  // Define standard primitives that should not have redundant geometry components
-  const standardPrimitives = ['box', 'sphere', 'cylinder', 'plane', 'cone', 'ring', 'torus'];
+  // Initialize material and geometry objects if needed
+  data.material = {};
+  data.geometry = { primitive: data.type };
   
   // Get all other attributes that are explicitly set
   Array.from(entity.attributes).forEach(attr => {
@@ -1517,43 +1525,36 @@ function captureEntityData(entity) {
       return;
     }
     
-    // Skip geometry for standard primitives - avoid redundancy
-    if (name === 'geometry' && standardPrimitives.includes(data.type)) {
-      return;
-    }
-    
-    // Skip material if it only contains color that's already set directly
-    if (name === 'material') {
-      const materialAttr = entity.getDOMAttribute('material');
-      
-      // If material is just a string or only contains color property
-      if (typeof materialAttr === 'string' || 
-          (materialAttr && Object.keys(materialAttr).length === 1 && materialAttr.color)) {
-        
-        // Check if color is already set directly
-        if (entity.hasAttribute('color')) {
-          return; // Skip this material attribute to avoid redundancy
-        }
-      }
-      
-      // If we reached here, it's a material with multiple properties, so keep it
-      const value = entity.getDOMAttribute(name);
-      if (value !== undefined && value !== null) {
-        data[name] = value;
-      }
-      return;
-    }
-    
-    // For color, make sure to get the explicit value
+    // Handle color - always store in material
     if (name === 'color') {
       const colorAttr = entity.getDOMAttribute('color');
       if (colorAttr) {
-        data.color = colorAttr;
+        data.material.color = colorAttr;
       }
       return;
     }
     
-    // For primitive-specific attributes, get the explicit values
+    // Handle material attributes
+    if (name === 'material') {
+      const materialAttr = entity.getDOMAttribute('material');
+      if (materialAttr) {
+        // Merge with existing material properties
+        data.material = { ...data.material, ...materialAttr };
+      }
+      return;
+    }
+    
+    // Handle geometry attributes
+    if (name === 'geometry') {
+      const geometryAttr = entity.getDOMAttribute('geometry');
+      if (geometryAttr) {
+        // Merge with existing geometry properties
+        data.geometry = { ...data.geometry, ...geometryAttr };
+      }
+      return;
+    }
+    
+    // Handle primitive-specific attributes - store in geometry
     const primitiveAttrs = {
       'box': ['width', 'height', 'depth'],
       'sphere': ['radius'],
@@ -1565,34 +1566,28 @@ function captureEntityData(entity) {
       'icosahedron': ['radius']
     };
     
-    // If this is a primitive-specific attribute, get it from the DOM
+    // If this is a primitive-specific attribute, store it in geometry
     if (data.type in primitiveAttrs && primitiveAttrs[data.type].includes(name)) {
       const attrValue = entity.getDOMAttribute(name);
       if (attrValue !== undefined && attrValue !== null) {
-        data[name] = attrValue;
+        data.geometry[name] = attrValue;
       }
       return;
     }
     
     // For other attributes, get the DOM attribute value directly
-    // This only returns values explicitly set on the element
     const value = entity.getDOMAttribute(name);
     if (value !== undefined && value !== null) {
       data[name] = value;
     }
   });
   
-  // For non-standard primitives, we need to capture the geometry component
-  // This ensures specialized geometries like dodecahedron work correctly
-  if (['dodecahedron', 'octahedron', 'tetrahedron', 'icosahedron'].includes(data.type)) {
-    // Ensure we capture at least the primitive type in geometry
-    const geometryData = entity.getDOMAttribute('geometry');
-    if (!geometryData) {
-      // If no explicit geometry, at least set the primitive type
-      data.geometry = { primitive: data.type };
-    } else {
-      data.geometry = geometryData;
-    }
+  // Clean up empty objects
+  if (Object.keys(data.material).length === 0) {
+    delete data.material;
+  }
+  if (Object.keys(data.geometry).length === 1 && data.geometry.primitive) {
+    delete data.geometry;
   }
   
   return data;
