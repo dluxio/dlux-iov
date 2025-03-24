@@ -200,23 +200,32 @@ function updateDebugPanel() {
             content += `<div><span class="entity-uuid">UUID: ${uuid}</span></div>`;
             content += `<div><span class="entity-type">Type: ${entity.type || 'unknown'}</span></div>`;
             
-            // Try to find corresponding DOM entity
+            // Check if entity exists in DOM (both ways for debugging)
             const domEntity = document.querySelector(`[data-entity-uuid="${uuid}"]`);
-            if (domEntity) {
-                content += `<div><span class="dom-status">DOM: ✓</span>`;
-                if (domEntity.id) {
+            const inDomByState = entity.DOM === true;
+            const inDomByQuery = !!domEntity;
+            
+            // Use the DOM property from the entity state
+            if (inDomByState) {
+                content += `<div><span class="dom-status found">DOM: ✓</span>`;
+                if (domEntity && domEntity.id) {
                     content += ` <span class="entity-id">ID: ${domEntity.id}</span>`;
                 }
                 content += `</div>`;
             } else {
-                content += `<div><span class="dom-status">DOM: ✗</span></div>`;
+                content += `<div><span class="dom-status missing">DOM: ✗</span></div>`;
+            }
+            
+            // For debugging: if there's a mismatch, show it
+            if (inDomByState !== inDomByQuery) {
+                content += `<div><span style="color: red; font-weight: bold">⚠️ DOM Status Mismatch: state=${inDomByState}, query=${inDomByQuery}</span></div>`;
             }
             
             // Add properties
             content += `<div class="entity-props">`;
             content += `<h6>Properties:</h6>`;
             for (const prop in entity) {
-                if (prop === 'type') continue; // Already shown
+                if (prop === 'type' || prop === 'DOM') continue; // Already shown or internal
                 content += `<div><span class="property-name">${prop}:</span> `;
                 
                 // Format based on type

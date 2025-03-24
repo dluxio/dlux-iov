@@ -6,11 +6,12 @@
  * Generate a unique ID
  * @param {string} prefix - Optional prefix for the ID
  * @returns {string} - Unique ID
+ * @deprecated Use generateEntityId instead for entity IDs
  */
 export function generateUniqueId(prefix = 'entity') {
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 1000000);
-    return `${prefix}-${timestamp}-${random}`;
+    // Redirect to generateEntityId for backward compatibility
+    console.warn('generateUniqueId is deprecated, use generateEntityId instead');
+    return generateEntityId(prefix);
 }
 
 /**
@@ -282,4 +283,41 @@ export function parseVector(vectorStr) {
  */
 export function isEmptyObject(obj) {
     return Object.keys(obj).length === 0;
+}
+
+/**
+ * Generate a consistent entity ID/UUID based on type
+ * @param {string} [type] - Entity type (box, sphere, etc.)
+ * @param {Object} [options] - Additional options
+ * @param {boolean} [options.preserveUserIds=true] - Whether to preserve user-provided IDs
+ * @param {string} [options.userId] - User-provided ID to preserve
+ * @returns {string} Generated entity ID in format 'type-entity-N'
+ */
+export function generateEntityId(type, options = {}) {
+    const { preserveUserIds = true, userId = null } = options;
+    
+    // If user provided an ID and we should preserve it, use that
+    if (preserveUserIds && userId) {
+        return userId;
+    }
+    
+    // If we have a type, use the type-entity-N pattern
+    if (type) {
+        // Use a static counter for each type to ensure sequential IDs
+        if (!window.entityTypeCounters) {
+            window.entityTypeCounters = {};
+        }
+        
+        // Initialize counter for this type if it doesn't exist
+        if (window.entityTypeCounters[type] === undefined) {
+            window.entityTypeCounters[type] = 0;
+        }
+        
+        // Increment counter and use it for the ID
+        window.entityTypeCounters[type]++;
+        return `${type}-entity-${window.entityTypeCounters[type]}`;
+    }
+    
+    // If no type is provided, fall back to a short timestamp-based ID
+    return `entity-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`;
 } 

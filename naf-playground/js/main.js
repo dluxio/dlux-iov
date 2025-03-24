@@ -12,7 +12,8 @@ import { initMonacoEditor, updateMonacoEditor, isEditorInitialized } from './mon
 import { initCamera } from './camera.js';
 import { initNetwork } from './network.js';
 import { waitForDependencies } from './utils.js';
-import { initInspectorWatcher } from './inspector-watcher.js';
+import { generateEntityId } from './utils.js';
+// import { initInspectorWatcher } from './inspector-watcher.js'; // Removed - using watcher.js instead
 
 // Add global error handler to catch any uncaught errors
 window.addEventListener('error', function(event) {
@@ -309,7 +310,7 @@ window.sceneBuilder.testAddBox = () => {
         
         // Import to avoid circular dependencies
         import('./entities.js').then(entities => {
-            const entityId = `box-${Date.now()}`;
+            const entityId = generateEntityId('box');
             const properties = {
                 position: { x: 0, y: 1, z: -3 },
                 width: 1,
@@ -408,7 +409,7 @@ window.sceneBuilder = {
             const addBoxBtn = document.getElementById('add-box');
             addBoxBtn.addEventListener('click', () => {
                 import('./entities.js').then(entities => {
-                    const boxId = 'test-box-' + Date.now();
+                    const boxId = generateEntityId('box', { userId: 'test-box' });
                     const position = { x: 0, y: 1.5, z: -3 };
                     const properties = {
                         position,
@@ -474,40 +475,6 @@ export async function init() {
         
         // Initialize entities
         initEntities();
-        
-        // Initialize inspector watcher
-        initInspectorWatcher();
-        
-        // Register example custom primitives
-        import('./entities.js').then(entities => {
-            // Example: Register a custom torus primitive
-            entities.registerPrimitiveType('torus', {
-                position: { x: 0, y: 1.5, z: -3 },
-                'radius': 1,
-                'radius-tubular': 0.1,
-                'segments-radial': 36,
-                'segments-tubular': 32
-            });
-            
-            // Example: Register a custom dodecahedron primitive
-            entities.registerPrimitiveType('dodecahedron', {
-                position: { x: 0, y: 1.5, z: -3 },
-                'radius': 1
-            });
-            
-            console.log('Custom primitives registered');
-        }).catch(err => {
-            console.error('Error registering custom primitives:', err);
-        });
-        
-        // Initialize debug panel and debug helpers
-        initDebug();
-        
-        // Initialize camera
-        initCamera();
-        
-        // Initialize network
-        initNetwork();
         
         // Initialize Monaco editor last
         await initializeEditor();

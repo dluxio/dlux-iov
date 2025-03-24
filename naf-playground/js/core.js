@@ -238,14 +238,22 @@ function setupInspectorHook() {
                     // Listen for inspector closed event
                     window.addEventListener('inspector-closed', () => {
                         console.log('[DEBUG] Inspector closed event received in inspector-hook component');
-                        // Capture entity changes made in inspector
-                        if (originalState) {
-                            console.log('[DEBUG] Calling captureInspectorChanges with stored state');
-                            captureInspectorChanges(originalState);
+                        
+                        // Use the watcher to save entities to state if available
+                        if (window.watcher && typeof window.watcher.saveEntitiesToState === 'function') {
+                            console.log('[DEBUG] Using watcher.saveEntitiesToState to capture inspector changes');
+                            window.watcher.saveEntitiesToState('inspector-closed');
                         } else {
-                            console.warn('[DEBUG] No original state found, cannot compare changes');
-                            // Still try to capture current state
-                            captureInspectorChanges({});
+                            // Fallback to old method if watcher is not available
+                            console.warn('[DEBUG] Watcher not available, using legacy captureInspectorChanges');
+                            if (originalState) {
+                                console.log('[DEBUG] Calling captureInspectorChanges with stored state');
+                                captureInspectorChanges(originalState);
+                            } else {
+                                console.warn('[DEBUG] No original state found, cannot compare changes');
+                                // Still try to capture current state
+                                captureInspectorChanges({});
+                            }
                         }
                     });
                     
@@ -262,14 +270,21 @@ function setupInspectorHook() {
                     // Backup event listener at the document level in case component event doesn't fire
                     document.addEventListener('inspector-closed', () => {
                         console.log('[DEBUG] Inspector closed event captured at document level');
-                        // Check if we should process this or if component already handled it
-                        setTimeout(() => {
-                            const currentEntities = Object.keys(getState().entities).length;
-                            if (originalState && currentEntities === Object.keys(originalState.entities).length) {
-                                console.log('[DEBUG] State appears unchanged, processing inspector-closed event at document level');
-                                captureInspectorChanges(originalState);
-                            }
-                        }, 100);
+                        // Use the watcher if available
+                        if (window.watcher && typeof window.watcher.saveEntitiesToState === 'function') {
+                            console.log('[DEBUG] Using watcher from document level inspector-closed event');
+                            window.watcher.saveEntitiesToState('inspector-closed-document');
+                        } else {
+                            // Fallback to old behavior
+                            // Check if we should process this or if component already handled it
+                            setTimeout(() => {
+                                const currentEntities = Object.keys(getState().entities).length;
+                                if (originalState && currentEntities === Object.keys(originalState.entities).length) {
+                                    console.log('[DEBUG] State appears unchanged, processing inspector-closed event at document level');
+                                    captureInspectorChanges(originalState);
+                                }
+                            }, 100);
+                        }
                     });
                 }
             });
@@ -288,15 +303,24 @@ function setupInspectorHook() {
 
 /**
  * Capture changes made in the inspector and update the state
+ * @deprecated Use watcher.saveEntitiesToState instead
  * @param {Object} originalState - The state before inspector opened
  */
 function captureInspectorChanges(originalState) {
-    console.log('Capturing changes from Inspector...');
+    console.log('Capturing changes from Inspector... (DEPRECATED - use watcher.saveEntitiesToState)');
     console.log('[DEBUG] Original state before inspector opened:', originalState);
     
     // Need to manually remove the inspector class to ensure UI displays properly
     document.body.classList.remove('aframe-inspector-opened');
     
+    // Check if watcher is available - prefer to use it
+    if (window.watcher && typeof window.watcher.saveEntitiesToState === 'function') {
+        console.log('[DEBUG] Redirecting to watcher.saveEntitiesToState from deprecated captureInspectorChanges');
+        window.watcher.saveEntitiesToState('inspector-changes-legacy');
+        return;
+    }
+    
+    // Rest of the legacy implementation
     // Import UUID generator from state
     import('./state.js').then(stateModule => {
         const generateEntityUUID = stateModule.generateEntityUUID;

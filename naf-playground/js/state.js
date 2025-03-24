@@ -4,7 +4,7 @@
  */
 
 import { broadcastStateUpdate } from './network.js';
-import { showNotification } from './utils.js';
+import { showNotification, generateEntityId } from './utils.js';
 
 // The application state
 let state = {
@@ -33,9 +33,6 @@ let state = {
     }
 };
 
-// Counter for generating entity IDs
-let entityIdCounter = 1;
-
 // Subscribers to state changes
 const subscribers = [];
 
@@ -44,7 +41,7 @@ const subscribers = [];
  * @returns {string} UUID
  */
 export function generateEntityUUID() {
-    return 'entity-' + Date.now() + '-' + Math.floor(Math.random() * 1000000);
+    return generateEntityId();
 }
 
 /**
