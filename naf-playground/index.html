@@ -4,32 +4,172 @@
     <meta charset="utf-8">
     <title>Collaborative A-Frame Scene Builder</title>
     <meta name="description" content="A collaborative 3D scene builder using A-Frame and Networked A-Frame">
-    <script src="/aframe/aframe.min.js"></script>
-    <!-- Removed automatic loading of inspector -->
-    
-    <script src="https://unpkg.com/networked-aframe@^0.10.0/dist/networked-aframe.min.js"></script>
+    <script src="aframe/aframe.min.js"></script>
+    <script src="aframe/networked-aframe.min.js"></script>
+    <script type="module" src="js/config.js"></script>
+    <script type="module" src="js/state.js"></script>
+    <script type="module" src="js/avatar-system.js"></script>
+    <script type="module" src="js/ui.js"></script>
+    <script type="module" src="js/debug.js"></script>
+    <script type="module" src="js/main.js"></script>
     <!-- Move Monaco loader to the end of body for better initialization -->
     <link rel="stylesheet" href="css/styles.css">
+    <script src="monaco-editor/vs/loader.js"></script>
+    <script>
+        require.config({ paths: { 'vs': '/monaco-editor/vs' }});
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #app-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        #scene-container {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+        #ui-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 400px;
+            height: 600px;
+            z-index: 1000;
+            pointer-events: none;
+            background: rgba(30, 30, 30, 0.95);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+        #ui-container.maximized {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+        }
+        #ui-container .window-content {
+            pointer-events: auto;
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .window-header {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            pointer-events: auto;
+            border-bottom: 1px solid #333;
+        }
+        #ui-container.maximized .window-header {
+            border-radius: 0;
+        }
+        .window-controls {
+            display: flex;
+            gap: 5px;
+        }
+        .window-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 3px;
+            color: #fff;
+        }
+        .window-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        #editor-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            margin-top: 20px;
+            background: #1e1e1e;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        #monaco-editor {
+            width: 100%;
+            height: 100%;
+        }
+        .error-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            z-index: 2000;
+        }
+        .error-message button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .resize-handle {
+            position: absolute;
+            background: transparent;
+            pointer-events: auto;
+        }
+        .resize-handle.right {
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            cursor: ew-resize;
+        }
+        .resize-handle.bottom {
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            cursor: ns-resize;
+        }
+        .resize-handle.corner {
+            right: 0;
+            bottom: 0;
+            width: 15px;
+            height: 15px;
+            cursor: nwse-resize;
+            z-index: 1001;
+        }
+        #ui-container.maximized .resize-handle {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <div id="app-container">
         <div id="scene-container">
-            <a-scene embedded networked-scene="
-                app: myCollaborativeApp;
-                room: defaultRoom;
-                debug: true;
-                adapter: wseasyrtc;
-                audio: false;
-                connectOnLoad: false;
-            ">
+            <a-scene networked-scene="room: naf-playground; connectOnLoad: false; debug: true; debugLevel: warn;" inspector="enabled: false;">
                 <!-- Assets -->
                 <a-assets>
                     <template id="avatar-template">
-                        <a-entity class="avatar">
-                            <a-sphere class="head" color="#5985ff" scale="0.45 0.5 0.4"></a-sphere>
-                            <a-entity class="face" position="0 0.05 0.25">
-                                <a-sphere class="eye" color="#efefef" position="-0.16 0.1 0"></a-sphere>
-                                <a-sphere class="eye" color="#efefef" position="0.16 0.1 0"></a-sphere>
+                        <a-entity id="avatar-rig">
+                            <a-entity id="avatar-camera" 
+                                camera="active: true"
+                                look-controls="enabled: true; magicWindowTrackingEnabled: true; pointerLockEnabled: false; reverseMouseDrag: false; reverseTouchDrag: false; touchEnabled: true; mouseEnabled: true"
+                                wasd-controls="acceleration: 65; adAxis: x; adEnabled: true; adInverted: false; enabled: true; fly: false; wsAxis: z; wsEnabled: true; wsInverted: false"
+                                position="0 1.6 0">
                             </a-entity>
                         </a-entity>
                     </template>
@@ -40,76 +180,86 @@
                     </template>
                 </a-assets>
 
-                <!-- Builder Camera (persistent) -->
-                <a-entity id="builder-camera" camera position="0 1.6 3" look-controls wasd-controls>
-                    <a-cursor></a-cursor>
+                <!-- Networked A-Frame -->
+                <a-entity id="local-avatar" 
+                    networked="template: #avatar-template; attachTemplateToLocal: true;"
+                    position="0 0 3">
                 </a-entity>
 
-                <!-- Default Environment -->
-                <a-sky color="#ECECEC"></a-sky>
-                <a-entity id="default-light" light="type: ambient; color: #BBB"></a-entity>
-                <a-entity id="directional-light" light="type: directional; color: #FFF; intensity: 0.6" position="-0.5 1 1"></a-entity>
+                <!-- Environment will be created by state initialization -->
             </a-scene>
         </div>
 
-        <div id="ui-container">
-            <div id="ui-panel">
-                <h2>Add Entity</h2>
-                <div class="entity-buttons">
-                    <button id="add-box" class="entity-btn">Box</button>
-                    <button id="add-sphere" class="entity-btn">Sphere</button>
-                    <button id="add-cylinder" class="entity-btn">Cylinder</button>
-                    <button id="add-plane" class="entity-btn">Plane</button>
-                    <button id="add-light" class="entity-btn">Light</button>
-                    <button id="add-torus" class="entity-btn">Torus</button>
-                    <button id="add-dodecahedron" class="entity-btn">Dodecahedron</button>
-                </div>
-                <div class="tool-buttons">
-                    <button id="open-inspector" class="tool-btn">Open Inspector</button>
-                    <button id="create-random-scene" class="tool-btn">Create Random Scene</button>
-                    <select id="camera-select">
-                        <option value="builder-camera">Builder Camera</option>
-                    </select>
+        <div id="ui-container" class="draggable">
+            <div class="window-header">
+                <span>Scene Controls</span>
+                <div class="window-controls">
+                    <button class="window-btn minimize-btn" title="Minimize">_</button>
+                    <button class="window-btn maximize-btn" title="Maximize">□</button>
                 </div>
             </div>
-
-            <div id="editor-container">
-                <h2>Scene Code</h2>
-                <div class="editor-controls">
-                    <button id="save-code-btn" class="tool-btn">Apply Changes</button>
-                    <span id="editor-status" class="status-saved"></span>
-                </div>
-                <div id="monaco-editor"></div>
-            </div>
-
-            <div id="debug-panel">
-                <h2>Debug Info</h2>
-                <div id="camera-info">
-                    <div>Camera: <span id="active-camera">Builder Camera</span></div>
-                    <div>Position: <span id="camera-position">0 1.6 3</span></div>
-                    <div>Camera State: <span id="camera-state-saved">Saved</span></div>
-                </div>
-                <div id="network-info">
-                    <div>Network Status: <span id="network-status">Disconnected</span></div>
-                    <div class="network-connect">
-                        <input type="text" id="server-url" placeholder="WebSocket URL">
-                        <button id="connect-btn">Connect</button>
+            <div class="window-content">
+                <div id="ui-panel">
+                    <h2>Add Entity</h2>
+                    <div class="entity-buttons">
+                        <button id="add-box" class="entity-btn">Box</button>
+                        <button id="add-sphere" class="entity-btn">Sphere</button>
+                        <button id="add-cylinder" class="entity-btn">Cylinder</button>
+                        <button id="add-plane" class="entity-btn">Plane</button>
+                        <button id="add-light" class="entity-btn">Light</button>
+                        <button id="add-torus" class="entity-btn">Torus</button>
+                        <button id="add-dodecahedron" class="entity-btn">Dodecahedron</button>
+                    </div>
+                    <div class="tool-buttons">
+                        <button id="open-inspector" class="tool-btn">Open Inspector</button>
+                        <button id="create-random-scene" class="tool-btn">Create Random Scene</button>
+                        <select id="camera-selector" class="camera-selector">
+                            <option value="avatar-rig">Avatar Rig</option>
+                        </select>
                     </div>
                 </div>
-                <div id="action-history">
-                    <h3>Action History</h3>
-                    <div id="actions"></div>
+
+                <div id="editor-container">
+                    <h2>Scene Code</h2>
+                    <div class="editor-controls">
+                        <button id="save-code-btn" class="tool-btn">Apply Changes</button>
+                        <span id="editor-status" class="status-saved"></span>
+                    </div>
+                    <div id="monaco-editor"></div>
+                </div>
+
+                <div id="debug-panel">
+                    <h2>Debug Info</h2>
+                    <div id="camera-info">
+                        <div>Camera: <span id="active-camera">Avatar Rig</span></div>
+                        <div>Position: <span id="camera-position">0 1.6 3</span></div>
+                        <div>Camera State: <span id="camera-state-saved">Saved</span></div>
+                    </div>
+                    <div id="network-info">
+                        <div>Network Status: <span id="network-status">Disconnected</span></div>
+                        <div class="network-connect">
+                            <input type="text" id="server-url" placeholder="WebSocket URL">
+                            <button id="connect-btn">Connect</button>
+                        </div>
+                    </div>
+                    <div id="action-history">
+                        <h3>Action History</h3>
+                        <div id="actions"></div>
+                    </div>
                 </div>
             </div>
+            <div class="resize-handle right"></div>
+            <div class="resize-handle bottom"></div>
+            <div class="resize-handle corner"></div>
         </div>
     </div>
 
     <!-- Scripts -->
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/watcher.js"></script>
+    <script type="module" src="js/draggable.js"></script>
     
     <!-- Monaco Editor Setup - moved to end of body for better loading sequence -->
-    <script src="/monaco-editor/vs/loader.js"></script>
     <script>
         // Set up the Monaco environment to correctly locate web workers
         window.MonacoEnvironment = {
@@ -157,6 +307,25 @@
             if (event.filename && event.filename.includes('worker')) {
                 console.error('Worker loading error detected!', event);
             }
+        });
+    </script>
+    <script type="module">
+        import { initApp } from './js/app.js';
+        
+        // Start initialization when the DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+    </script>
+    <!-- Load inspector after A-Frame is ready -->
+    <script>
+        window.addEventListener('aframe-loaded', function() {
+            const script = document.createElement('script');
+            script.src = 'aframe/aframe-inspector.min.js';
+            script.async = true;
+            document.head.appendChild(script);
         });
     </script>
 </body>

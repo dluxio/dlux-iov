@@ -2,151 +2,131 @@
  * Utils.js - Utility functions
  */
 
+import { parseVector, vectorToString } from './entity-utils.js';
+import { 
+    VECTOR_ATTRIBUTES,
+    COMPONENT_BASED_TYPES,
+    VECTOR_DEFAULTS,
+    GEOMETRY_DEFAULTS,
+    LIGHT_DEFAULTS,
+    UI_CONFIG
+} from './config.js';
+
 /**
  * Generate a unique ID
+ * @deprecated Use generateEntityId instead for entity IDs
  * @param {string} prefix - Optional prefix for the ID
  * @returns {string} - Unique ID
- * @deprecated Use generateEntityId instead for entity IDs
  */
 export function generateUniqueId(prefix = 'entity') {
-    // Redirect to generateEntityId for backward compatibility
-    console.warn('generateUniqueId is deprecated, use generateEntityId instead');
+    console.warn('generateUniqueId is deprecated. Use generateEntityId instead');
     return generateEntityId(prefix);
 }
 
 /**
  * Convert a position object to a string
- * This is the centralized utility for converting vector objects to strings
+ * @deprecated Use vectorToString from entity-utils.js instead
  * @param {Object} position - Position object with x, y, z properties
  * @returns {string} - Position string in the format "x y z"
  */
 export function positionToString(position) {
-    if (!position) return '0 0 0';
-    if (typeof position === 'string') return position; // If already a string, return it
-    
-    const x = position.x !== undefined ? position.x : 0;
-    const y = position.y !== undefined ? position.y : 0;
-    const z = position.z !== undefined ? position.z : 0;
-    
-    return `${x} ${y} ${z}`;
+    console.warn('positionToString is deprecated. Use vectorToString from entity-utils.js instead');
+    return vectorToString(position);
 }
 
 /**
  * Convert a position string to an object
- * This is the centralized utility for converting vector strings to objects
+ * @deprecated Use parseVector from entity-utils.js instead
  * @param {string|Object} positionString - Position string in the format "x y z" or position object
  * @returns {Object} - Position object with x, y, z properties
  */
 export function stringToPosition(positionString) {
-    // If already an object with x, y, z, return a copy
-    if (positionString !== null && typeof positionString === 'object' && 
-        'x' in positionString && 'y' in positionString && 'z' in positionString) {
-        return {
-            x: typeof positionString.x === 'number' ? positionString.x : parseFloat(positionString.x) || 0,
-            y: typeof positionString.y === 'number' ? positionString.y : parseFloat(positionString.y) || 0,
-            z: typeof positionString.z === 'number' ? positionString.z : parseFloat(positionString.z) || 0
-        };
-    }
-    
-    // Handle empty or invalid inputs
-    if (!positionString || typeof positionString !== 'string') {
-        return { x: 0, y: 0, z: 0 };
-    }
-    
-    try {
-        // Split by whitespace and parse as numbers
-        const parts = positionString.trim().split(/\s+/).map(v => {
-            const parsed = parseFloat(v);
-            return isNaN(parsed) ? 0 : parsed;
-        });
-        
-        // Create vector object with defaults for missing components
-        return { 
-            x: parts[0] !== undefined ? parts[0] : 0, 
-            y: parts[1] !== undefined ? parts[1] : 0, 
-            z: parts[2] !== undefined ? parts[2] : 0 
-        };
-    } catch (error) {
-        console.warn(`Error parsing vector string: ${positionString}`, error);
-        return { x: 0, y: 0, z: 0 };
-    }
+    console.warn('stringToPosition is deprecated. Use parseVector from entity-utils.js instead');
+    return parseVector(positionString);
 }
 
 /**
  * Show a notification to the user
  * @param {string} message - Message to display
- * @param {string} type - Notification type (success, error, warning)
- * @param {number} duration - Duration in milliseconds to show the notification
+ * @param {Object} options - Notification options
+ * @param {string} [options.type='success'] - Notification type (success, error, warning)
+ * @param {number} [options.duration=3000] - Duration in milliseconds to show the notification
+ * @param {boolean} [options.showCloseButton=false] - Whether to show a close button
+ * @param {string} [options.icon] - Optional icon to display (emoji or icon class)
  */
-export function showNotification(message, type = 'success', duration = 3000) {
+export function showNotification(message, options = {}) {
+    const {
+        type = 'success',
+        duration = UI_CONFIG.NOTIFICATION_DURATION,
+        showCloseButton = false,
+        icon = null
+    } = options;
+
     // Create notification element
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
-    notification.textContent = message;
+    
+    // Build notification content
+    let content = '';
+    if (icon) {
+        content += `<div class="notification-icon">${icon}</div>`;
+    }
+    content += `<div class="notification-message">${message}</div>`;
+    if (showCloseButton) {
+        content += '<div class="notification-close">&times;</div>';
+    }
+    
+    notification.innerHTML = `
+        <div class="notification-content">
+            ${content}
+        </div>
+    `;
     
     // Append to body
     document.body.appendChild(notification);
     
+    // Add close button handler if enabled
+    if (showCloseButton) {
+        const closeBtn = notification.querySelector('.notification-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                notification.classList.remove('visible');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            });
+        }
+    }
+    
     // Show with animation
     setTimeout(() => {
-        notification.classList.add('show');
+        notification.classList.add('visible');
     }, 10);
     
     // Hide after duration
     setTimeout(() => {
-        notification.classList.remove('show');
+        notification.classList.remove('visible');
         setTimeout(() => {
-            notification.remove();
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
         }, 300);
     }, duration);
 }
 
 /**
- * Show a warning notification to the user
- * @param {string} message - Warning message to display
- * @param {number} [duration=5000] - How long to show the warning in ms
+ * @deprecated Use showNotification with options instead
  */
 export function showWarning(message, duration = 5000) {
-    console.warn('WARNING:', message);
-    
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = 'notification warning';
-    notification.innerHTML = `
-        <div class="notification-content">
-            <div class="notification-icon">⚠️</div>
-            <div class="notification-message">${message}</div>
-        </div>
-        <div class="notification-close">&times;</div>
-    `;
-    
-    // Add to document
-    document.body.appendChild(notification);
-    
-    // Add close button handler
-    const closeBtn = notification.querySelector('.notification-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            document.body.removeChild(notification);
-        });
-    }
-    
-    // Show notification with animation
-    setTimeout(() => {
-        notification.classList.add('visible');
-    }, 10);
-    
-    // Auto-hide after duration
-    setTimeout(() => {
-        notification.classList.remove('visible');
-        
-        // Remove from DOM after animation completes
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 500);
-    }, duration);
+    logDeprecationWarning('showWarning', 'showNotification', 'utils.js');
+    showNotification(message, {
+        type: 'warning',
+        duration,
+        icon: '⚠️',
+        showCloseButton: true
+    });
 }
 
 /**
@@ -296,22 +276,19 @@ export function formatVector(vector) {
 }
 
 /**
- * Parse a vector string into an object
- * @param {string} vectorStr - Vector string like "1 2 3"
- * @returns {Object} - Vector object with x, y, z properties
- */
-export function parseVector(vectorStr) {
-    const [x, y, z] = vectorStr.split(' ').map(parseFloat);
-    return { x, y, z };
-}
-
-/**
  * Check if an object is empty
  * @param {Object} obj - Object to check
  * @returns {boolean} - True if empty
  */
 export function isEmptyObject(obj) {
     return Object.keys(obj).length === 0;
+}
+
+// Reset entity type counters when the page loads
+if (typeof window !== 'undefined') {
+    window.addEventListener('load', () => {
+        window.entityTypeCounters = {};
+    });
 }
 
 /**
@@ -366,4 +343,110 @@ export function logDeprecationWarning(oldFunction, newFunction, module = 'entity
     'color: green; font-weight: bold;', 'color: inherit;',
     'color: blue; font-style: italic;', 'color: inherit;'
   );
+}
+
+/**
+ * Standard error types for the application
+ */
+export const ErrorTypes = {
+  STATE: 'STATE_ERROR',
+  NETWORK: 'NETWORK_ERROR',
+  VALIDATION: 'VALIDATION_ERROR',
+  ENTITY: 'ENTITY_ERROR',
+  SYSTEM: 'SYSTEM_ERROR'
+};
+
+/**
+ * Custom error class for application-specific errors
+ */
+export class AppError extends Error {
+  constructor(type, message, details = {}) {
+    super(message);
+    this.name = 'AppError';
+    this.type = type;
+    this.details = details;
+    this.timestamp = new Date().toISOString();
+  }
+}
+
+/**
+ * Standardized error handling function
+ * @param {Error|AppError} error - The error to handle
+ * @param {string} context - Context where the error occurred
+ */
+export function handleError(error, context) {
+  const errorMessage = error instanceof AppError 
+    ? `[${error.type}] ${error.message}`
+    : `[${ErrorTypes.SYSTEM}] ${error.message}`;
+    
+  logAction(`${context}: ${errorMessage}`, 'error');
+  
+  // Show user notification for non-system errors
+  if (!(error instanceof AppError) || error.type !== ErrorTypes.SYSTEM) {
+    showNotification(errorMessage, 'error');
+  }
+}
+
+/**
+ * Base class for event management
+ * Provides standardized event handling and cleanup
+ */
+export class EventManager {
+  constructor() {
+    this.listeners = new Map();
+    this.boundHandlers = new Map();
+  }
+
+  /**
+   * Add an event listener with automatic cleanup
+   * @param {string} event - Event name
+   * @param {Function} handler - Event handler
+   * @param {Object} [options] - Event options
+   */
+  addEventListener(event, handler, options = {}) {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set());
+    }
+    
+    // Bind the handler to this instance if it's a method
+    const boundHandler = handler.bind(this);
+    this.boundHandlers.set(handler, boundHandler);
+    
+    this.listeners.get(event).add(boundHandler);
+    window.addEventListener(event, boundHandler, options);
+  }
+
+  /**
+   * Remove an event listener
+   * @param {string} event - Event name
+   * @param {Function} handler - Event handler
+   */
+  removeEventListener(event, handler) {
+    const boundHandler = this.boundHandlers.get(handler);
+    if (boundHandler) {
+      window.removeEventListener(event, boundHandler);
+      this.boundHandlers.delete(handler);
+    }
+    
+    const eventListeners = this.listeners.get(event);
+    if (eventListeners) {
+      eventListeners.delete(boundHandler);
+      if (eventListeners.size === 0) {
+        this.listeners.delete(event);
+      }
+    }
+  }
+
+  /**
+   * Remove all event listeners
+   */
+  removeAllListeners() {
+    for (const [event, handlers] of this.listeners.entries()) {
+      for (const handler of handlers) {
+        window.removeEventListener(event, handler);
+      }
+      this.listeners.delete(event);
+    }
+    this.boundHandlers.clear();
+  }
 } 

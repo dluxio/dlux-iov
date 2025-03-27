@@ -23,15 +23,32 @@
  */
 
 import { getState, setState } from './state.js';
-import { updateMonacoEditor } from './monaco.js';
 import { logAction } from './debug.js';
-import { generateEntityId, positionToString, stringToPosition, logDeprecationWarning } from './utils.js';
+import { generateEntityId, logDeprecationWarning } from './utils.js';
+import { skyManager } from './sky-manager.js';
+import {
+  shouldSkipAttribute,
+  parseVector,
+  vectorToString,
+  extractGeometryData,
+  applyGeometryData,
+  cleanEntityData,
+  extractEntityAttributes
+} from './entity-utils.js';
+
+import {
+  VECTOR_ATTRIBUTES,
+  GEOMETRY_ATTRIBUTES,
+  COMPONENT_BASED_TYPES,
+  VECTOR_DEFAULTS,
+  GEOMETRY_DEFAULTS,
+  DEFAULT_SKY_COLOR,
+  LIGHT_DEFAULTS,
+  DEFAULT_ENTITY_COLOR
+} from './config.js';
 
 // Store default properties for custom primitives
 const customPrimitiveDefaults = {};
-
-// Entity types that are implemented through components rather than dedicated tags
-const COMPONENT_BASED_TYPES = ['dodecahedron', 'octahedron', 'tetrahedron', 'icosahedron'];
 
 /**
  * Setup custom primitives and their default properties
@@ -158,114 +175,31 @@ function setEntityAttributes(entity, properties) {
     
     console.log(`Setting attributes for ${tagName} id=${id}`, properties);
     
-    // Special handling for vector properties - set these first to ensure proper positioning
-    if (properties.position) {
-        // Ensure position is set properly to avoid falling through floor
-        const position = properties.position;
-        
-        // Format position as a string for A-Frame
-        const posStr = positionToString(position);
-        
-        // Set position attribute
-        console.log(`Setting position for ${id} to ${posStr}`);
-        entity.setAttribute('position', posStr);
-    }
-    
-    if (properties.rotation) {
-        // Format rotation as a string for A-Frame
-        const rotStr = positionToString(properties.rotation);
-        
-        // Set rotation attribute
-        entity.setAttribute('rotation', rotStr);
-    }
-    
-    if (properties.scale) {
-        // Format scale as a string for A-Frame
-        const scaleStr = positionToString(properties.scale);
-        
-        // Set scale attribute
-        entity.setAttribute('scale', scaleStr);
-    }
-    
-    // Ensure color is set first for sky elements
-    if (tagName === 'a-sky' && properties.color) {
-        console.log(`Setting sky color to ${properties.color}`);
-        entity.setAttribute('color', properties.color);
+    // Handle geometry data first
+    if (properties.geometry || GEOMETRY_ATTRIBUTES.some(attr => attr in properties)) {
+        applyGeometryData(entity, properties.geometry || properties, properties.type);
     }
     
     // Set all other properties
-    Object.keys(properties).forEach(key => {
-        // Skip position, rotation, scale as they're already handled
-        if (['position', 'rotation', 'scale'].includes(key)) return;
-        
-        // Skip color for sky as we've already handled it
-        if (tagName === 'a-sky' && key === 'color') return;
+    Object.entries(properties).forEach(([key, value]) => {
+        // Skip geometry properties as they're already handled
+        if (key === 'geometry' || GEOMETRY_ATTRIBUTES.includes(key)) return;
         
         // Skip type property as it's not an actual attribute
         if (key === 'type') return;
         
-        const value = properties[key];
+        // Skip null/undefined values
+        if (value === null || value === undefined) return;
         
-        // Handle conversion of value if it's an object with x,y,z properties (vector-like)
-        if (value !== null && typeof value === 'object' && 'x' in value && 'y' in value && 'z' in value) {
-            // Convert vector-like object to string format
-            const vectorStr = positionToString(value);
-            console.log(`Converting object value for ${key} to vector string: ${vectorStr}`);
-            entity.setAttribute(key, vectorStr);
-        } 
-        // Handle other object values that might need conversion (like colors)
-        else if (value !== null && typeof value === 'object' && Object.keys(value).length > 0) {
-            // For general objects, convert to string format that A-Frame might expect
-            if ('r' in value && 'g' in value && 'b' in value) {
-                // Convert RGB object to color string
-                const colorStr = `rgb(${value.r}, ${value.g}, ${value.b})`;
-                console.log(`Converting object value for ${key} to color string: ${colorStr}`);
-                entity.setAttribute(key, colorStr);
-            } else {
-                // Special handling for geometry and material components
-                if (key === 'geometry' || key === 'material') {
-                    console.log(`Setting ${key} component directly with object:`, value);
-                    // A-Frame handles these components by passing the object directly
-                    entity.setAttribute(key, value);
-                } else {
-                    // For other objects, set directly - A-Frame handles object attributes
-                    console.log(`Setting object attribute for ${key}:`, value);
-                    try {
-                        entity.setAttribute(key, value);
-                    } catch (error) {
-                        console.error(`Error setting object value for ${key}:`, error);
-                        // If that fails, try as a string as last resort
-                        try {
-                            const stringValue = JSON.stringify(value);
-                            console.warn(`Falling back to string for ${key} due to error`);
-                            entity.setAttribute(key, stringValue);
-                        } catch (stringError) {
-                            console.error(`Failed string fallback for ${key}:`, stringError);
-                        }
-                    }
-                }
-            }
+        // Format vector attributes
+        if (VECTOR_ATTRIBUTES.includes(key)) {
+            entity.setAttribute(key, vectorToString(value));
+        } else if (typeof value === 'object') {
+            entity.setAttribute(key, JSON.stringify(value));
         } else {
-            // Set regular attribute
             entity.setAttribute(key, value);
         }
     });
-    
-    // Double-check position after all attributes are set
-    if (!entity.hasAttribute('position') && tagName !== 'a-sky') {
-        console.warn(`Entity ${id} has no position attribute, setting default`);
-        entity.setAttribute('position', '0 0 0');
-    }
-    
-    // Double-check sky color after setting all attributes
-    if (tagName === 'a-sky') {
-        const color = entity.getAttribute('color');
-        console.log(`Final sky color: ${color || 'not set'}`);
-        if (!color) {
-            console.log('Sky color missing, setting default #ECECEC');
-            entity.setAttribute('color', '#ECECEC');
-        }
-    }
 }
 
 /**
@@ -371,13 +305,13 @@ export function updateEntity(uuid, updates) {
             
             // If updating position, rotation, scale
             if (updates.position) {
-                entity.setAttribute('position', positionToString(updates.position));
+                entity.setAttribute('position', vectorToString(updates.position));
             }
             if (updates.rotation) {
-                entity.setAttribute('rotation', positionToString(updates.rotation));
+                entity.setAttribute('rotation', vectorToString(updates.rotation));
             }
             if (updates.scale) {
-                entity.setAttribute('scale', positionToString(updates.scale));
+                entity.setAttribute('scale', vectorToString(updates.scale));
             }
             
             // Get the tag name to determine entity type
@@ -498,13 +432,13 @@ export function recreateEntitiesFromState(entitiesState) {
                 console.log('Creating default sky element');
                 skyElement = document.createElement('a-sky');
                 skyElement.dataset.entityUuid = generateEntityId();
-                skyElement.setAttribute('color', '#ECECEC');
+                skyElement.setAttribute('color', DEFAULT_SKY_COLOR);
                 scene.appendChild(skyElement);
                 skyElement.flushToDOM();
             } else if (!skyElement.getAttribute('color')) {
                 // Ensure sky has color if it exists
                 console.log('Adding default color to existing sky element');
-                skyElement.setAttribute('color', '#ECECEC');
+                skyElement.setAttribute('color', DEFAULT_SKY_COLOR);
                 skyElement.flushToDOM();
             }
         }
@@ -517,8 +451,8 @@ export function recreateEntitiesFromState(entitiesState) {
                 return false;
             }
             
-            // Keep system entities 
-            if (['builder-camera', 'default-light', 'directional-light'].includes(entity.id)) {
+            // Skip system entities
+            if (['default-light', 'directional-light', 'sky', 'naf-template'].includes(entity.id)) {
                 return false;
             }
             
@@ -664,164 +598,101 @@ export function recreateEntitiesFromState(entitiesState) {
  * @returns {string} Formatted HTML attribute string
  */
 function formatAttributeHTML(key, value) {
-    // Format object values appropriately
-    if (typeof value === 'object' && value !== null) {
-        // Handle vector properties (position, rotation, scale)
-        if ('x' in value && 'y' in value && 'z' in value) {
-            const vectorStr = positionToString(value);
-            return ` ${key}="${vectorStr}"`;
+    // Skip null/undefined values
+    if (value === null || value === undefined) return '';
+    
+    let formattedValue;
+    
+    // Format vector attributes
+    if (VECTOR_ATTRIBUTES.includes(key)) {
+        formattedValue = vectorToString(value);
+    }
+    // Handle objects
+    else if (typeof value === 'object') {
+        try {
+            formattedValue = JSON.stringify(value);
+        } catch (e) {
+            console.warn(`Could not stringify object value for ${key}`, e);
+            formattedValue = value.toString();
         }
-        // Handle color objects
-        else if ('r' in value && 'g' in value && 'b' in value) {
-            const colorStr = `rgb(${value.r}, ${value.g}, ${value.b})`;
-            return ` ${key}="${colorStr}"`;
-        }
-        // Handle other objects - use single quotes to prevent HTML attribute parsing issues
-        else {
-            try {
-                const jsonStr = JSON.stringify(value);
-                return ` ${key}='${jsonStr}'`;
-            } catch (e) {
-                console.warn(`Could not stringify object value for ${key}`, e);
-                return ` ${key}="${value}"`;
-            }
-        }
-    } 
+    }
     // Handle simple values
     else {
-        return ` ${key}="${value}"`;
+        formattedValue = value.toString();
     }
+    
+    // Use appropriate quotes based on value content
+    const quoteChar = formattedValue.includes('"') ? "'" : '"';
+    return ` ${key}=${quoteChar}${formattedValue}${quoteChar}`;
 }
 
 /**
- * Generate HTML representation of all entities
- * @returns {string} - HTML string
+ * Generate HTML representation of all entities in state
+ * @returns {string} HTML string representing all entities in state
  */
 export function generateEntitiesHTML() {
     const state = getState();
     const entities = state.entities;
-    
     let html = '';
     
-    // Add each entity as HTML
     Object.keys(entities).forEach(uuid => {
         const entityData = entities[uuid];
-        const type = entityData.type;
+        if (!entityData || !entityData.type) return;
         
-        // Skip if type is missing (should not happen)
-        if (!type) {
-            console.warn(`Entity ${uuid} has no type, skipping HTML generation`);
-            return;
+        // Clean and standardize the data
+        const cleanedData = cleanEntityData(entityData);
+        const type = cleanedData.type;
+        
+        // Determine if this is a component-based type
+        const isComponentBased = COMPONENT_BASED_TYPES.includes(type);
+        const hasExplicitGeometry = cleanedData.geometry && Object.keys(cleanedData.geometry).length > 0;
+        
+        // Determine tag name
+        const tagName = (isComponentBased || hasExplicitGeometry) ? 'a-entity' : `a-${type}`;
+        
+        // Start tag
+        html += `  <${tagName}`;
+        
+        // Add ID if we have a mapping
+        if (state.entityMapping) {
+            for (const id in state.entityMapping) {
+                if (state.entityMapping[id] === uuid) {
+                    html += ` id="${id}"`;
+                    break;
+                }
+            }
         }
         
-        // Define standard primitives that have their own tags
-        const standardPrimitives = ['box', 'sphere', 'cylinder', 'plane', 'cone', 'ring', 'torus'];
+        // Add UUID and DOM attributes
+        html += ` data-entity-uuid="${uuid}"`;
+        html += ` DOM="true"`;
         
-        // Special handling for non-standard primitives that need geometry component
-        if (COMPONENT_BASED_TYPES.includes(type)) {
-            // Create as a regular entity
-            html += `  <a-entity`;
+        // Add all other attributes
+        Object.entries(cleanedData).forEach(([key, value]) => {
+            // Skip special attributes
+            if (key === 'type' || key === 'id' || shouldSkipAttribute(key)) return;
             
-            // If we have an ID mapping for this UUID, include the ID
-            let entityId = null;
-            if (state.entityMapping) {
-                // Look for an ID mapping for this UUID
-                for (const id in state.entityMapping) {
-                    if (state.entityMapping[id] === uuid) {
-                        entityId = id;
-                        break;
+            // Handle geometry specially for component-based types
+            if (key === 'geometry') {
+                if (isComponentBased || hasExplicitGeometry) {
+                    const geometryData = { ...value };
+                    if (isComponentBased) {
+                        geometryData.primitive = type;
                     }
+                    html += formatAttributeHTML('geometry', geometryData);
                 }
+                return;
             }
             
-            // Add ID if found
-            if (entityId) {
-                html += ` id="${entityId}"`;
-            }
-            
-            // Prepare geometry component
-            let geometryData = entityData.geometry || {};
-            if (typeof geometryData === 'string') {
-                try {
-                    geometryData = JSON.parse(geometryData);
-                } catch (e) {
-                    console.warn(`Could not parse geometry data for ${uuid}`, e);
-                }
-            }
-            
-            // Ensure it has the right primitive type
-            if (!geometryData.primitive || geometryData.primitive !== type) {
-                geometryData.primitive = type;
-            }
-            
-            // Add attributes
-            Object.keys(entityData).forEach(key => {
-                if (key !== 'type' && key !== 'geometry') {
-                    const value = entityData[key];
-                    html += formatAttributeHTML(key, value);
-                }
-            });
-            
-            // Add geometry attribute
-            html += formatAttributeHTML('geometry', geometryData);
-            
-            // Always add the UUID as a data attribute - this is crucial for entity tracking
-            html += ` data-entity-uuid="${uuid}"`;
-            
-            // Close tag
-            html += '></a-entity>\n';
-        }
-        else {
-            // Standard primitives
-            // Start tag
-            html += `  <a-${type}`;
-            
-            // If we have an ID mapping for this UUID, include the ID
-            let entityId = null;
-            if (state.entityMapping) {
-                // Look for an ID mapping for this UUID
-                for (const id in state.entityMapping) {
-                    if (state.entityMapping[id] === uuid) {
-                        entityId = id;
-                        break;
-                    }
-                }
-            }
-            
-            // Add ID if found
-            if (entityId) {
-                html += ` id="${entityId}"`;
-            }
-            
-            // Add attributes, but skip geometry for standard primitives
-            Object.keys(entityData).forEach(key => {
-                if (key !== 'type' && 
-                    !(key === 'geometry' && standardPrimitives.includes(type))) {
-                    
-                    // Skip material if it only contains color that is already set directly
-                    if (key === 'material' && 
-                        entityData.color && 
-                        ((typeof entityData.material === 'object' && 
-                         Object.keys(entityData.material).length === 1 && 
-                         entityData.material.color) || 
-                         typeof entityData.material === 'string')) {
-                        return;
-                    }
-                    
-                    const value = entityData[key];
-                    html += formatAttributeHTML(key, value);
-                }
-            });
-            
-            // Always add the UUID as a data attribute - this is crucial for entity tracking
-            html += ` data-entity-uuid="${uuid}"`;
-            
-            // Close tag
-            html += `></a-${type}>\n`;
-        }
+            // Format and add other attributes
+            html += formatAttributeHTML(key, value);
+        });
+        
+        // Close tag
+        html += `></${tagName}>\n`;
     });
     
-    return html;
+    return html || '\n';
 }
 
 /**
@@ -958,8 +829,8 @@ export function ensureEntityUUIDs() {
     // Check all entity elements, including system entities
     const entityElements = scene.querySelectorAll('a-entity, a-box, a-sphere, a-cylinder, a-plane, a-sky');
     entityElements.forEach(element => {
-        // Skip certain system entities
-        if (['builder-camera', 'default-light', 'directional-light'].includes(element.id)) {
+        // Skip system entities
+        if (['default-light', 'directional-light', 'sky', 'naf-template'].includes(element.id)) {
             return;
         }
         
@@ -1053,108 +924,88 @@ export function ensureEntityUUIDs() {
  */
 export function addEntity(primitiveType, properties = {}, updateEditor = true) {
     logDeprecationWarning('addEntity', 'createEntity', 'entity-api.js');
+    
+    // Get default properties for this type
     let defaultProps = {};
     
-    // Check if we have a custom primitive type registered
-    if (customPrimitiveDefaults[primitiveType]) {
-        defaultProps = { ...customPrimitiveDefaults[primitiveType] };
-    } else {
-        // Set default properties based on primitive type
-        switch(primitiveType) {
-            case 'box':
-                defaultProps = {
-                    position: { x: 0, y: 1, z: -3 },
-                    width: 1,
-                    height: 1,
-                    depth: 1
-                };
-                
-                // Ensure position.y is at least 0.5 to prevent falling through floor
-                if (properties.position && typeof properties.position === 'object') {
-                    properties.position.y = Math.max(0.5, properties.position.y || 0);
-                }
-                break;
-                
-            case 'sphere':
-                defaultProps = {
-                    position: { x: 0, y: 1.5, z: -3 }, // Higher Y to account for radius
-                    radius: 0.5
-                };
-                
-                // Ensure position.y is at least radius (or 0.5) to prevent falling through floor
-                if (properties.position && typeof properties.position === 'object') {
-                    const radius = properties.radius || defaultProps.radius;
-                    properties.position.y = Math.max(radius, properties.position.y || 0);
-                }
-                break;
-                
-            case 'cylinder':
-                defaultProps = {
-                    position: { x: 0, y: 0.75, z: -3 }, // Y is half height by default
-                    radius: 0.5,
-                    height: 1.5
-                };
-                
-                // Ensure position.y is at least half height to prevent falling through floor
-                if (properties.position && typeof properties.position === 'object') {
-                    const height = properties.height || defaultProps.height;
-                    properties.position.y = Math.max(height / 2, properties.position.y || 0);
-                }
-                break;
-                
-            case 'plane':
-                defaultProps = {
-                    position: { x: 0, y: 0, z: -4 },
-                    rotation: { x: -90, y: 0, z: 0 }, // Flat on the ground
-                    width: 4,
-                    height: 4
-                };
-                
-                // For planes, we usually want y=0 but add a tiny offset to prevent z-fighting
-                if (properties.position && typeof properties.position === 'object' && !properties.position.y) {
-                    properties.position.y = 0.01;
-                }
-                break;
-                
-            case 'dodecahedron':
-            case 'octahedron':
-            case 'tetrahedron':
-            case 'icosahedron':
-                defaultProps = {
-                    position: { x: 0, y: 1, z: -3 },
-                    radius: 1
-                };
-                
-                // Ensure position.y is at least radius to prevent falling through floor
-                if (properties.position && typeof properties.position === 'object') {
-                    const radius = properties.radius || defaultProps.radius;
-                    properties.position.y = Math.max(radius, properties.position.y || 0);
-                }
-                break;
-                
-            case 'light':
-                defaultProps = {
-                    position: { x: 0, y: 2, z: -3 },
-                    type: 'point',
-                    intensity: 0.75,
-                    distance: 50,
-                    color: '#FFFFFF' // Lights should be white by default
-                };
-                break;
-                
-            default:
-                // Generic entity defaults
-                defaultProps = {
-                    position: { x: 0, y: 1, z: -3 }
-                };
-        }
+    // Set entity-specific defaults using standardized constants
+    if (GEOMETRY_DEFAULTS[primitiveType]) {
+        defaultProps = { ...GEOMETRY_DEFAULTS[primitiveType] };
+    }
+    
+    // Add default position and rotation
+    defaultProps.position = { ...VECTOR_DEFAULTS.position };
+    defaultProps.rotation = { ...VECTOR_DEFAULTS.rotation };
+    defaultProps.scale = { ...VECTOR_DEFAULTS.scale };
+    
+    // Special cases for entities that need additional defaults
+    switch (primitiveType) {
+        case 'plane':
+            defaultProps.rotation = { ...VECTOR_DEFAULTS.rotation, x: -90 };
+            break;
+        case 'light':
+            const lightDefaults = LIGHT_DEFAULTS.point;
+            defaultProps.type = 'point';
+            defaultProps.intensity = lightDefaults.intensity;
+            defaultProps.distance = lightDefaults.distance;
+            defaultProps.color = lightDefaults.color;
+            break;
     }
     
     // Add a default color for all entities except lights
     if (primitiveType !== 'light' && !properties.color) {
-        defaultProps.color = '#4CC3D9'; // Default A-Frame blue
+        defaultProps.color = DEFAULT_ENTITY_COLOR;
     }
     
+    // Set default properties using standardized constants
+    if (!defaultProps.position) {
+        defaultProps.position = { ...VECTOR_DEFAULTS.position };
+    }
+    if (!defaultProps.rotation) {
+        defaultProps.rotation = { ...VECTOR_DEFAULTS.rotation };
+    }
+    if (!defaultProps.scale) {
+        defaultProps.scale = { ...VECTOR_DEFAULTS.scale };
+    }
+
+    // Set entity-specific defaults using standardized constants
+    if (GEOMETRY_DEFAULTS[primitiveType]) {
+        Object.assign(defaultProps, GEOMETRY_DEFAULTS[primitiveType]);
+    }
+
+    // Special cases for entities that need additional defaults
+    switch (primitiveType) {
+        case 'plane':
+            // For planes, we want it on the ground
+            defaultProps.position.y = 0;
+            defaultProps.rotation.x = -90;
+            
+            // For planes, we usually want y=0 but add a tiny offset to prevent z-fighting
+            if (properties.position && typeof properties.position === 'object' && !properties.position.y) {
+                properties.position.y = 0.01;
+            }
+            break;
+            
+        case 'dodecahedron':
+        case 'octahedron':
+        case 'tetrahedron':
+        case 'icosahedron':
+            // Ensure position.y is at least radius to prevent falling through floor
+            if (properties.position && typeof properties.position === 'object') {
+                const radius = properties.radius || defaultProps.radius;
+                properties.position.y = Math.max(radius, properties.position.y || 0);
+            }
+            break;
+            
+        case 'light':
+            const lightDefaults = LIGHT_DEFAULTS.point;
+            defaultProps.type = 'point';
+            defaultProps.intensity = lightDefaults.intensity;
+            defaultProps.distance = lightDefaults.distance;
+            defaultProps.color = lightDefaults.color;
+            break;
+    }
+
     // Combine default properties with provided properties
     const combinedProps = { ...defaultProps, ...properties };
     
@@ -1203,128 +1054,6 @@ export function addEntity(primitiveType, properties = {}, updateEditor = true) {
 }
 
 /**
- * Extract all relevant attributes from an entity after flushToDOM
- * @param {Element} entity - The A-Frame entity element
- * @param {string} type - The entity type (box, sphere, etc.)
- * @returns {Object} - Complete entity properties
- */
-function extractEntityAttributes(entity, type) {
-    console.log(`Extracting attributes for ${type} entity:`, entity);
-    
-    // Check if this is a component-based entity
-    if (type === 'entity') {
-        // Try to get actual semantic type from geometry component
-        const geometry = entity.getAttribute('geometry');
-        if (geometry && geometry.primitive) {
-            if (COMPONENT_BASED_TYPES.includes(geometry.primitive)) {
-                console.log(`Using semantic type: ${geometry.primitive} instead of generic entity`);
-                type = geometry.primitive;
-            }
-        }
-        
-        // Also check data attribute as fallback
-        if (entity.dataset.entityType) {
-            type = entity.dataset.entityType;
-            console.log(`Using semantic type from dataset: ${type}`);
-        }
-    }
-    
-    // Start with the entity type
-    const properties = { type };
-    
-    // Get position, rotation, scale (these are crucial for proper positioning)
-    const vectorAttributes = ['position', 'rotation', 'scale'];
-    vectorAttributes.forEach(attr => {
-        // Get the attribute directly from the element
-        const value = entity.getAttribute(attr);
-        if (value) {
-            // Store as object since that's our internal format
-            properties[attr] = stringToPosition(value);
-        } else {
-            // If missing, use A-Frame defaults
-            switch (attr) {
-                case 'position':
-                    properties[attr] = { x: 0, y: 0, z: 0 };
-                    break;
-                case 'rotation': 
-                    properties[attr] = { x: 0, y: 0, z: 0 };
-                    break;
-                case 'scale':
-                    properties[attr] = { x: 1, y: 1, z: 1 };
-                    break;
-            }
-        }
-    });
-    
-    // Get other common attributes based on entity type
-    switch (type) {
-        case 'box':
-            extractAttribute(entity, properties, 'width');
-            extractAttribute(entity, properties, 'height');
-            extractAttribute(entity, properties, 'depth');
-            extractAttribute(entity, properties, 'color');
-            break;
-        case 'sphere':
-            extractAttribute(entity, properties, 'radius');
-            extractAttribute(entity, properties, 'color');
-            break;
-        case 'cylinder':
-            extractAttribute(entity, properties, 'radius');
-            extractAttribute(entity, properties, 'height');
-            extractAttribute(entity, properties, 'color');
-            break;
-        case 'plane':
-            extractAttribute(entity, properties, 'width');
-            extractAttribute(entity, properties, 'height');
-            extractAttribute(entity, properties, 'color');
-            break;
-        case 'sky':
-            extractAttribute(entity, properties, 'color');
-            break;
-    }
-    
-    // For primitives with light components, get those attributes too
-    if (entity.hasAttribute('light')) {
-        const light = entity.getAttribute('light');
-        properties.light = light;
-    }
-    
-    // Get any other attributes
-    Array.from(entity.attributes).forEach(attr => {
-        const name = attr.name;
-        
-        // Skip attributes we've already processed and those that start with data-
-        if (vectorAttributes.includes(name) || 
-            ['id', 'class', 'mixin'].includes(name) || 
-            name.startsWith('data-') ||
-            name === 'type' ||
-            name === 'aframe-injected' ||
-            properties[name] !== undefined) {
-            return;
-        }
-        
-        // Add the attribute to properties
-        properties[name] = attr.value;
-    });
-    
-    console.log(`Extracted properties for ${type}:`, properties);
-    return properties;
-}
-
-/**
- * Helper to extract a single attribute
- * @param {Element} entity - The entity element
- * @param {Object} properties - Properties object to update
- * @param {string} attrName - Name of the attribute to extract
- */
-function extractAttribute(entity, properties, attrName) {
-    const value = entity.getAttribute(attrName);
-    if (value !== null && value !== undefined) {
-        properties[attrName] = value;
-    }
-}
-
-/**
  * Force update the Monaco editor with retry mechanism
  * @param {number} [delay=100] - Delay in ms before updating
  * @param {number} [retries=2] - Number of retries if update fails
@@ -1333,69 +1062,8 @@ export function forceEditorUpdate(delay = 100, retries = 2) {
     console.log(`Scheduling Monaco editor update in ${delay}ms with ${retries} retries if needed`);
     
     setTimeout(() => {
-        updateMonacoWithRetry(0, retries);
+        updateMonacoSafely(0, retries);
     }, delay);
-}
-
-/**
- * Update the Monaco editor with retry mechanism
- * @param {number} attempt - Current attempt number
- * @param {number} maxRetries - Maximum number of retries
- */
-function updateMonacoWithRetry(attempt = 0, maxRetries = 2) {
-    const currentAttempt = attempt + 1;
-    console.log(`Updating Monaco editor (attempt ${currentAttempt}/${maxRetries + 1})`);
-    
-    import('./monaco.js').then(monaco => {
-        try {
-            if (typeof monaco.updateMonacoEditor === 'function') {
-                monaco.updateMonacoEditor();
-                
-                // Success, no need to retry
-                console.log('Monaco editor updated successfully');
-            } else {
-                // Editor function not available
-                console.error('Monaco updateMonacoEditor function not found');
-                
-                // Try fallback editor if available
-                if (window._fallbackMonacoEditor && window._fallbackMonacoEditor.setValue) {
-                    // This is a last resort direct approach
-                    console.log('Attempting update with fallback editor');
-                    
-                    // Generate HTML directly if possible
-                    try {
-                        const html = generateEntitiesHTML();
-                        window._fallbackMonacoEditor.setValue(html);
-                        console.log('Fallback editor updated successfully');
-                    } catch (genError) {
-                        console.error('Error generating HTML for fallback editor:', genError);
-                    }
-                }
-                
-                // Try again if we have retries left
-                if (attempt < maxRetries) {
-                    console.log('Retrying editor update...');
-                    setTimeout(() => updateMonacoWithRetry(currentAttempt, maxRetries), 200);
-                }
-            }
-        } catch (error) {
-            console.error('Error during Monaco update:', error);
-            
-            // Retry if we haven't exceeded max attempts
-            if (attempt < maxRetries) {
-                console.log('Retrying after error...');
-                setTimeout(() => updateMonacoWithRetry(currentAttempt, maxRetries), 200);
-            }
-        }
-    }).catch(err => {
-        console.error('Error importing monaco module:', err);
-        
-        // Retry if we haven't exceeded max attempts
-        if (attempt < maxRetries) {
-            console.log('Retrying after import error...');
-            setTimeout(() => updateMonacoWithRetry(currentAttempt, maxRetries), 200);
-        }
-    });
 }
 
 /**

@@ -37,42 +37,138 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--theme-background-color);
     color: var(--theme-text-color);
+    overflow: hidden;
 }
 
 #app-container {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    grid-template-rows: 1fr;
+    position: relative;
+    width: 100vw;
     height: 100vh;
+    overflow: hidden;
 }
 
 #scene-container {
-    grid-column: 1;
-    grid-row: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     overflow: hidden;
-    flex: 1;
-    min-height: 300px;
-    position: relative;
-    background-color: #1a1a1a; /* Match the sky color */
+    background-color: #1a1a1a;
 }
 
 #ui-container {
-    grid-column: 2;
-    grid-row: 1;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    height: 80vh;
+    min-width: 200px;
+    min-height: 40px; /* Reduced to allow collapsing to just header */
+    background-color: var(--theme-panel-background);
+    border: 1px solid var(--theme-border-color);
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    border-left: 1px solid var(--theme-border-color);
-    background-color: var(--theme-panel-background);
+    z-index: 1000;
+    overflow: hidden;
+    resize: both;
+}
+
+#ui-container.collapsed {
+    resize: none;
+}
+
+#ui-container.collapsed .resize-handle {
+    display: none;
+}
+
+.window-header {
+    padding: 8px 12px;
+    background-color: var(--theme-secondary-color);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+    user-select: none;
+    position: relative;
+}
+
+.window-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.window-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0 8px;
+    font-size: 16px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.window-btn:hover {
+    opacity: 1;
+}
+
+.window-content {
+    flex: 1;
     overflow-y: auto;
+    padding: 15px;
+    transition: all 0.3s ease;
+    max-height: calc(100% - 40px); /* Account for header height */
+}
+
+.window-content.collapsed {
+    max-height: 0;
+    padding: 0;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Resize handles */
+.resize-handle {
+    position: absolute;
+    background: transparent;
+    z-index: 1001;
+}
+
+.resize-handle.right {
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    cursor: ew-resize;
+}
+
+.resize-handle.bottom {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    cursor: ns-resize;
+}
+
+.resize-handle.corner {
+    right: 0;
+    bottom: 0;
+    width: 16px;
+    height: 16px;
+    cursor: nwse-resize;
 }
 
 /* UI Panel */
 #ui-panel, #editor-container, #debug-panel {
     padding: 15px;
     border-bottom: 1px solid var(--theme-border-color);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 h2 {
@@ -217,22 +313,11 @@ button:disabled {
 
 /* Responsive Styles */
 @media (max-width: 768px) {
-    #app-container {
-        grid-template-columns: 1fr;
-        grid-template-rows: 60vh auto;
-    }
-    
-    #scene-container {
-        grid-column: 1;
-        grid-row: 1;
-    }
-    
     #ui-container {
-        grid-column: 1;
-        grid-row: 2;
-        height: auto;
-        border-left: none;
-        border-top: 1px solid var(--theme-border-color);
+        width: 100%;
+        height: 100%;
+        top: 0;
+        right: 0;
     }
 }
 
@@ -431,17 +516,20 @@ input:focus, select:focus, textarea:focus {
 .notification-content {
     display: flex;
     align-items: flex-start;
+    flex: 1;
 }
 
 .notification-icon {
     margin-right: 10px;
     font-size: 18px;
+    flex-shrink: 0;
 }
 
 .notification-message {
     font-size: 14px;
     color: #333;
     flex: 1;
+    line-height: 1.4;
 }
 
 .notification-close {
@@ -449,6 +537,12 @@ input:focus, select:focus, textarea:focus {
     font-size: 18px;
     margin-left: 10px;
     color: #999;
+    flex-shrink: 0;
+    padding: 0 5px;
+}
+
+.notification-close:hover {
+    color: #666;
 }
 
 .notification.warning {

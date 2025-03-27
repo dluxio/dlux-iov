@@ -3,222 +3,494 @@
  * Serves as the single source of truth for the application
  */
 
-import { broadcastStateUpdate } from './network.js';
 import { showNotification, generateEntityId } from './utils.js';
+import {
+  shouldSkipAttribute,
+  parseVector,
+  vectorToString,
+  extractGeometryData,
+  cleanEntityData,
+  extractEntityAttributes
+} from './entity-utils.js';
 
-// The application state
-let state = {
-    entities: {},     // All entities in the scene with their attributes and UUIDs
-    entityMapping: {}, // Maps DOM elements to entity UUIDs
-    selectedEntity: null,
-    camera: {
-        position: { x: 0, y: 1.6, z: 5 },
-        rotation: { x: 0, y: 0, z: 0 },
-        active: 'builder-camera',
-        saved: true
-    },
-    metadata: {
-        title: 'Untitled Scene',
-        description: '',
-        created: Date.now(),
-        modified: Date.now()
-    },
-    network: {
-        status: 'disconnected',
-        room: 'defaultRoom',
-        url: ''
-    },
-    userSettings: {
-        darkMode: true
+import {
+  VECTOR_ATTRIBUTES,
+  COMPONENT_BASED_TYPES,
+  GEOMETRY_ATTRIBUTES,
+  VECTOR_DEFAULTS,
+  GEOMETRY_DEFAULTS,
+  DEFAULT_SKY_COLOR,
+  LIGHT_DEFAULTS,
+  UI_CONFIG,
+  generateInitialState
+} from './config.js';
+
+export class StateManager {
+  constructor() {
+    this.state = generateInitialState();
+    this.history = [];
+    this.isApplyingState = false;
+    this.lastUpdateSource = null;
+    this.listeners = new Set();
+
+    // Add validation state
+    this.validationState = {
+      errors: [],
+      warnings: []
+    };
+  }
+
+  /**
+   * Record a state change in history
+   * @private
+   */
+  recordChange() {
+    const change = {
+      timestamp: Date.now(),
+      source: this.lastUpdateSource,
+      state: { ...this.state }
+    };
+
+    this.history.push(change);
+
+    // Trim history if it gets too long
+    if (this.history.length > 1000) {
+      this.history = this.history.slice(-1000);
     }
-};
+  }
 
-// Subscribers to state changes
-const subscribers = [];
+  /**
+   * Update state without triggering DOM updates
+   * @param {Object} updates - Updates to apply
+   * @param {string} source - Source of the update
+   */
+  updateState(updates, source = 'unknown') {
+    if (this.isApplyingState) {
+        console.warn('Preventing circular state update from:', source);
+        return;
+    }
 
-/**
- * Generate a UUID for entity identification
- * @returns {string} UUID
- */
-export function generateEntityUUID() {
-    return generateEntityId();
-}
+    this.isApplyingState = true;
+    this.lastUpdateSource = source;
 
-/**
- * Initialize the state with the current scene
- * @param {Element} [scene] - The A-Frame scene element (optional)
- * @returns {Promise} - A promise that resolves when the state is initialized
- */
-export function initState(scene) {
-    console.log('Initializing state...');
-    
-    try {
-        // If no scene provided, try to find it
-        if (!scene) {
-            scene = document.querySelector('a-scene');
-        }
-        
-        // If scene is still not available, return a rejected promise
-        if (!scene) {
-            console.warn('A-Frame scene not found during state initialization');
-            // Initialize with empty entities instead of failing
-            state = {
-                ...state,
-                entities: {},
-                entityMapping: {}
-            };
-            console.log('State initialized with empty entities', state);
-            return Promise.resolve();
-        }
-        
-        // Initialize entities from the current scene
-        const entities = scene.querySelectorAll('a-entity, a-box, a-sphere, a-cylinder, a-plane, a-sky');
-        const entityState = {};
-        const entityMapping = {};
-        
-        entities.forEach(entity => {
-            // Skip the persistent entities that we manage separately
-            if (entity.id === 'builder-camera' || 
-                entity.id === 'default-light' || 
-                entity.id === 'directional-light') {
+    // Handle entity updates
+    if (updates.entities) {
+        Object.entries(updates.entities).forEach(([uuid, entityData]) => {
+            // Skip networked entities
+            if (uuid.startsWith('entity-entity-') || 
+                (entityData && entityData.networked) || 
+                uuid === 'naf-template' || 
+                uuid === 'naf-avatar' || 
+                uuid === 'naf-camera') {
                 return;
             }
-            
-            // Generate UUID for this entity
-            const uuid = entity.dataset.entityUuid || generateEntityUUID();
-            
-            // Ensure the entity has the UUID in its dataset
-            entity.dataset.entityUuid = uuid;
-            
-            // Get entity attributes
-            const attributes = {};
-            
-            // Get the entity type from its tag name
-            const tagName = entity.tagName.toLowerCase();
-            const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
-            attributes.type = type;
-            
-            // Get all other attributes
-            entity.getAttributeNames().forEach(attr => {
-                if (attr !== 'id' && attr !== 'data-entity-uuid') {
-                    // Normalize component name (handle dot notation)
-                    const normalizedName = attr.replace('.', '__');
-                    attributes[normalizedName] = entity.getAttribute(attr);
-                }
-            });
-            
-            // Store in entity state
-            entityState[uuid] = attributes;
-            
-            // Map DOM element to UUID (using WeakMap would be better but we need serialization)
-            if (entity.id) {
-                entityMapping[entity.id] = uuid;
+
+            if (!this.state.entities[uuid]) {
+                this.state.entities[uuid] = {};
             }
+            this.state.entities[uuid] = {
+                ...this.state.entities[uuid],
+                ...entityData
+            };
         });
-        
-        // Set initial state
-        state = {
-            ...state,
-            entities: entityState,
-            entityMapping: entityMapping
-        };
-        
-        console.log('State initialized with scene entities', state);
-        return Promise.resolve();
-    } catch (error) {
-        console.error('Error initializing state:', error);
-        // Initialize with empty entities instead of failing
-        state = {
-            ...state,
-            entities: {},
-            entityMapping: {}
-        };
-        console.log('State initialized with empty entities due to error', state);
-        return Promise.resolve();
+        delete updates.entities;
     }
-}
 
-/**
- * Get the current state
- * @returns {Object} - The current state
- */
-export function getState() {
-    return JSON.parse(JSON.stringify(state)); // Return a copy to prevent direct mutation
-}
+    // Merge remaining updates
+    this.state = {
+        ...this.state,
+        ...updates
+    };
 
-/**
- * Set the application state
- * @param {Object} newState - New state to merge
- * @param {boolean} [notifySubscribers=true] - Whether to notify subscribers
- */
-export function setState(newState, shouldNotify = true) {
-    console.log('Setting state:', newState);
-    
-    // Store original state for diff
-    const originalState = JSON.parse(JSON.stringify(state));
-    
-    // Track what changed
-    const changes = {};
-    
-    // Merge the new state with the current state
+    // Update modified timestamp
+    this.state.metadata.modified = Date.now();
+
+    // Record change in history
+    this.recordChange();
+
+    // Notify listeners
+    this.notifyListeners();
+
+    this.isApplyingState = false;
+
+    // Dispatch state change event for network sync
+    if (source !== 'network') {
+        document.dispatchEvent(new CustomEvent('state-changed', {
+            detail: {
+                type: 'update',
+                data: this.state,
+                source
+            }
+        }));
+    }
+  }
+
+  /**
+   * Apply state changes to DOM
+   * @param {Array} changes - Array of changes to apply
+   * @param {boolean} batch - Whether to batch changes
+   */
+  applyToDOM(changes, batch = true) {
+    if (batch) {
+      requestAnimationFrame(() => this._applyChanges(changes));
+    } else {
+      this._applyChanges(changes);
+    }
+  }
+
+  /**
+   * Internal method to apply changes to DOM
+   * @private
+   */
+  _applyChanges(changes) {
+    this.isApplyingState = true;
+    try {
+      changes.forEach(change => {
+        const entity = document.querySelector(`[data-entity-uuid="${change.uuid}"]`);
+        if (!entity) return;
+
+        // Apply changes based on type
+        switch (change.type) {
+          case 'update':
+            this._applyEntityUpdate(entity, change.data);
+            break;
+          case 'delete':
+            entity.remove();
+            break;
+          case 'create':
+            // Handle entity creation
+            break;
+        }
+      });
+    } finally {
+      this.isApplyingState = false;
+    }
+  }
+
+  /**
+   * Apply updates to an entity
+   * @private
+   */
+  _applyEntityUpdate(entity, data) {
+    // Handle geometry data first
+    if (data.geometry || GEOMETRY_ATTRIBUTES.some(attr => attr in data)) {
+        applyGeometryData(entity, data.geometry || data, data.type);
+        
+        // Remove geometry properties since they're handled
+        if (data.geometry) delete data.geometry;
+        GEOMETRY_ATTRIBUTES.forEach(attr => delete data[attr]);
+    }
+
+    // Apply all other attributes
+    Object.entries(data).forEach(([key, value]) => {
+        if (key === 'type') return; // Don't set type attribute
+        
+        if (value === null || value === undefined) {
+            entity.removeAttribute(key);
+        } else {
+            // Format vector attributes
+            if (VECTOR_ATTRIBUTES.includes(key)) {
+                entity.setAttribute(key, vectorToString(value));
+            } else if (typeof value === 'object') {
+                entity.setAttribute(key, JSON.stringify(value));
+            } else {
+                entity.setAttribute(key, value);
+            }
+        }
+    });
+  }
+
+  /**
+   * Add state change listener
+   * @param {Function} listener - Callback function
+   */
+  addListener(listener) {
+    this.listeners.add(listener);
+  }
+
+  /**
+   * Remove state change listener
+   * @param {Function} listener - Callback function
+   */
+  removeListener(listener) {
+    this.listeners.delete(listener);
+  }
+
+  /**
+   * Notify all listeners of state change
+   * @private
+   */
+  notifyListeners() {
+    this.listeners.forEach(listener => {
+      try {
+        listener(this.state, this.lastUpdateSource);
+      } catch (error) {
+        console.error('Error in state listener:', error);
+      }
+    });
+  }
+
+  /**
+   * Get current state
+   * @returns {Object} Current state
+   */
+  getState() {
+    return {
+      ...this.state,
+      validation: { ...this.validationState }
+    };
+  }
+
+  /**
+   * Set state with source tracking
+   * @param {Object} newState - New state to set
+   * @param {string} source - Source of the state update
+   */
+  setState(newState, source = 'unknown') {
+    if (this.isApplyingState) {
+      console.warn('Preventing circular state update from:', source);
+      return;
+    }
+
+    this.isApplyingState = true;
+    this.lastUpdateSource = source;
+
+    // Validate new state
+    const validation = this.validateState(newState);
+    this.validationState.errors = validation.errors;
+    this.validationState.warnings = validation.warnings;
+
+    // Handle entity updates
     if (newState.entities) {
-        // Special handling for entities to detect specific entity changes
-        const originalEntities = {...state.entities};
-        state.entities = {...state.entities, ...newState.entities};
-        
-        // Identify which entities changed (added, modified, or removed)
-        const changedEntityIds = new Set();
-        
-        // Check for added or modified entities
-        for (const id in state.entities) {
-            if (!originalEntities[id] || JSON.stringify(originalEntities[id]) !== JSON.stringify(state.entities[id])) {
-                changedEntityIds.add(id);
-            }
+      const filteredEntities = Object.entries(newState.entities).reduce((acc, [uuid, entityData]) => {
+        // Skip networked entities
+        if (uuid.startsWith('entity-entity-') || 
+            (entityData && entityData.networked) || 
+            uuid === 'naf-template' || 
+            uuid === 'naf-avatar' || 
+            uuid === 'naf-camera') {
+          return acc;
         }
         
-        // Check for removed entities
-        for (const id in originalEntities) {
-            if (!state.entities[id]) {
-                changedEntityIds.add(id);
-            }
+        acc[uuid] = {
+          ...(this.state.entities[uuid] || {}),
+          ...entityData
+        };
+        return acc;
+      }, {});
+      
+      this.state.entities = {
+        ...this.state.entities,
+        ...filteredEntities
+      };
+      delete newState.entities;
+    }
+
+    // Merge remaining state changes
+    this.state = {
+      ...this.state,
+      ...newState
+    };
+
+    // Update modified timestamp
+    this.state.metadata.modified = Date.now();
+
+    // Notify listeners
+    this.notifyListeners();
+
+    this.isApplyingState = false;
+
+    // Dispatch state change event for network sync
+    if (source !== 'network') {
+      document.dispatchEvent(new CustomEvent('state-changed', {
+        detail: {
+          type: 'update',
+          data: this.state,
+          source
         }
+      }));
+    }
+  }
+
+  /**
+   * Reset state to default
+   */
+  resetState() {
+    this.setState({
+      entities: {},
+      selectedEntity: null,
+      camera: {
+        position: { ...VECTOR_DEFAULTS.position },
+        rotation: { ...VECTOR_DEFAULTS.rotation }
+      },
+      userSettings: {
+        darkMode: true
+      }
+    }, 'reset');
+  }
+
+  /**
+   * Check if state is properly initialized
+   * @returns {boolean} True if state is ready
+   */
+  isStateInitialized() {
+    return this.state && typeof this.state.entities === 'object';
+  }
+
+  /**
+   * Validates state updates
+   * @param {Object} newState - The new state to validate
+   * @returns {Object} Validation result
+   */
+  validateState(newState) {
+    const errors = [];
+    const warnings = [];
+
+    // Validate entities if present
+    if (newState.entities) {
+      Object.entries(newState.entities).forEach(([uuid, entity]) => {
+        if (!entity) {
+          warnings.push(`Entity ${uuid} has no data`);
+          return;
+        }
+        if (!entity.type && !entity.geometry?.primitive) {
+          warnings.push(`Entity ${uuid} missing type or geometry primitive`);
+        }
+      });
+    }
+
+    return { errors, warnings };
+  }
+
+  /**
+   * Initialize the state with the current scene
+   * @param {HTMLElement} scene - The A-Frame scene element
+   */
+  initState(scene) {
+    console.log('Initializing state with scene...');
+    
+    if (!scene) {
+      console.error('No scene found during state initialization');
+      return this.state;
+    }
+    
+    // Get all entities with data-entity-uuid
+    const entityElements = scene.querySelectorAll('[data-entity-uuid]');
+    
+    // If no entities found, create default scene
+    if (entityElements.length === 0) {
+      console.log('No entities found, creating default scene');
+      const defaultState = generateInitialState();
+      
+      // Create DOM elements for default entities
+      Object.entries(defaultState.entities).forEach(([uuid, entityData]) => {
+        const element = this.createEntityElement(entityData);
+        if (element) {
+          scene.appendChild(element);
+          entityData.DOM = true;
+        }
+      });
+      
+      // Update state with default entities
+      this.state.entities = defaultState.entities;
+      this.state.entityMapping = defaultState.entityMapping;
+    } else {
+      // Process existing entities
+      const entities = {};
+      const entityMapping = {};
+      
+      entityElements.forEach(element => {
+        const uuid = element.getAttribute('data-entity-uuid');
+        if (!uuid) return;
         
-        if (changedEntityIds.size > 0) {
-            changes.entities = Array.from(changedEntityIds);
-            console.log('Entity changes detected:', changes.entities);
-        }
+        const id = element.id;
+        if (!id) return;
+        
+        // Update mapping
+        entityMapping[id] = uuid;
+        
+        // Extract entity data
+        const type = element.tagName.toLowerCase().replace('a-', '');
+        const properties = extractEntityAttributes(element, type);
+        
+        // Add to entities object with DOM flag
+        entities[uuid] = {
+          type,
+          ...properties,
+          uuid,
+          DOM: true
+        };
+      });
+      
+      // Update state with found entities
+      this.state.entities = entities;
+      this.state.entityMapping = entityMapping;
     }
     
-    // Handle other state properties
-    if (newState.selectedEntity !== undefined) {
-        state.selectedEntity = newState.selectedEntity;
-        changes.selectedEntity = true;
-    }
+    // Log the state for debugging
+    console.log('Initialized state:', this.state);
     
-    if (newState.camera) {
-        state.camera = {...state.camera, ...newState.camera};
-        changes.camera = true;
-    }
+    return this.state;
+  }
+
+  /**
+   * Create a DOM element for an entity
+   * @private
+   */
+  createEntityElement(entityData) {
+    const element = document.createElement(`a-${entityData.type}`);
+    element.id = entityData.id;
+    element.setAttribute('data-entity-uuid', entityData.uuid);
     
-    if (newState.userSettings) {
-        state.userSettings = {...state.userSettings, ...newState.userSettings};
-        changes.userSettings = true;
-    }
+    // Set all attributes
+    Object.entries(entityData).forEach(([key, value]) => {
+      if (key === 'type' || key === 'uuid' || key === 'id' || key === 'DOM') return;
+      
+      if (typeof value === 'object') {
+        element.setAttribute(key, JSON.stringify(value));
+      } else {
+        element.setAttribute(key, value);
+      }
+    });
     
-    // Notify subscribers if there are changes and notification is enabled
-    if (shouldNotify && Object.keys(changes).length > 0) {
-        notifySubscribersFunc(changes);
-    }
-    
-    return state;
+    return element;
+  }
 }
 
-/**
- * Apply state updates received from the network
- * @param {Object} updates - Partial state updates from the network
- */
-export function applyNetworkStateUpdate(updates) {
-    setState(updates, true);
+// Create singleton instance
+const entityState = new StateManager();
+
+// Export functions that use the singleton
+export function getState() {
+  return entityState.getState();
+}
+
+export function setState(newState, source) {
+  return entityState.setState(newState, source);
+}
+
+export function updateEntityState(uuid, data, source) {
+  return entityState.updateState(uuid, data, source);
+}
+
+export function addStateListener(listener) {
+  entityState.addListener(listener);
+}
+
+export function removeStateListener(listener) {
+  entityState.removeListener(listener);
+}
+
+export function applyStateToDOM(changes, batch = true) {
+  return entityState.applyToDOM(changes, batch);
+}
+
+export function resetState() {
+  return entityState.resetState();
+}
+
+export function isStateInitialized() {
+  return entityState.isStateInitialized();
 }
 
 /**
@@ -227,109 +499,34 @@ export function applyNetworkStateUpdate(updates) {
  * @returns {Function} Unsubscribe function
  */
 export function subscribe(callback) {
-    console.log('New subscriber added to state');
-    subscribers.push(callback);
-    
-    // Return unsubscribe function
-    return () => {
-        const index = subscribers.indexOf(callback);
-        if (index !== -1) {
-            subscribers.splice(index, 1);
-            console.log('Subscriber removed from state');
-        }
-    };
+  console.log('New subscriber added to state');
+  entityState.addListener(callback);
+  
+  // Return unsubscribe function
+  return () => {
+    entityState.removeListener(callback);
+    console.log('Subscriber removed from state');
+  };
 }
 
 /**
- * Notify all subscribers of state changes
- * @param {Object} changes - Object indicating which parts of the state changed
+ * Apply state updates received from the network
+ * @param {Object} updates - Partial state updates from the network
  */
-function notifySubscribersFunc(changes) {
-    console.log('Notifying subscribers of state changes:', changes);
-    
-    subscribers.forEach(callback => {
-        try {
-            callback(state, changes);
-        } catch (error) {
-            console.error('Error in state subscriber callback:', error);
-        }
-    });
+export function applyNetworkStateUpdate(updates) {
+  // Use setState with 'network' as the source
+  entityState.setState(updates, 'network');
 }
 
-/**
- * Export state schema for external use
- */
-export const stateSchema = {
-    entities: 'Object containing all scene entities',
-    camera: 'Current camera state',
-    metadata: 'Scene metadata',
-    network: 'Network connection status'
-};
-
-/**
- * Get all entities from the state
- * @returns {Object} Entities object
- */
-export function getEntities() {
-    return {...state.entities};
+// Export the initState function that uses the singleton
+export function initState(scene) {
+  return entityState.initState(scene);
 }
 
-/**
- * Get entity data by UUID
- * @param {string} id - Entity UUID
- * @returns {Object|null} Entity data or null if not found
- */
-export function getEntity(id) {
-    return state.entities[id] ? {...state.entities[id]} : null;
-}
-
-/**
- * REMOVED: This function has been completely removed
- * @param {string} id - Entity ID to remove
- * @returns {boolean} Whether the operation was successful
- * @deprecated Use deleteEntity() from entities.js or watcher.saveEntitiesToState() instead
- */
-export function removeEntity(id) {
-    throw new Error('removeEntity() has been removed. Use deleteEntity() from entities.js or watcher.saveEntitiesToState() instead.');
-}
-
-/**
- * REMOVED: This function has been completely removed
- * @param {string} id - Entity ID to update
- * @param {Object} attributes - New attributes to apply
- * @returns {boolean} Whether the operation was successful
- * @deprecated Use updateEntity() from entities.js or watcher.saveEntitiesToState() instead
- */
-export function updateEntity(id, attributes) {
-    throw new Error('updateEntity() has been removed. Use updateEntity() from entities.js or watcher.saveEntitiesToState() instead.');
-}
-
-/**
- * Reset the application state to default
- */
-export function resetState() {
-    console.log('Resetting application state');
-    
-    setState({
-        entities: {},
-        selectedEntity: null,
-        camera: {
-            position: { x: 0, y: 1.6, z: 5 },
-            rotation: { x: 0, y: 0, z: 0 }
-        },
-        userSettings: {
-            darkMode: true
-        }
-    });
-}
-
-/**
- * Check if the state is properly initialized
- * @returns {boolean} True if state is ready
- */
-export function isStateInitialized() {
-    return state && typeof state.entities === 'object';
-}
-
-// Initialize with some default entities if needed
-// resetState(); 
+// Export the singleton instance with default values
+export default {
+  ...entityState,
+  position: { ...VECTOR_DEFAULTS.position },
+  rotation: { ...VECTOR_DEFAULTS.rotation },
+  scale: { ...VECTOR_DEFAULTS.scale }
+}; 

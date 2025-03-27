@@ -7,19 +7,47 @@
  */
 
 import { getState } from './state.js';
-import { positionToString, stringToPosition, generateEntityId, showNotification } from './utils.js';
+import { generateEntityId, showNotification } from './utils.js';
 import { logAction } from './debug.js';
+import {
+  shouldSkipAttribute,
+  parseVector,
+  vectorToString,
+  extractGeometryData,
+  applyGeometryData,
+  cleanEntityData,
+  extractEntityAttributes
+} from './entity-utils.js';
+
+import {
+  STANDARD_PRIMITIVES,
+  VECTOR_ATTRIBUTES,
+  GEOMETRY_ATTRIBUTES,
+  COMPONENT_BASED_TYPES,
+  VECTOR_DEFAULTS,
+  GEOMETRY_DEFAULTS,
+  LIGHT_DEFAULTS,
+  SYSTEM_ENTITY_TYPES,
+  SYSTEM_ENTITY_IDS,
+  SYSTEM_COMPONENTS,
+  SYSTEM_DATA_ATTRIBUTES,
+  FILTERED_ENTITY_TYPES,
+  FILTERED_ENTITY_IDS,
+  FILTERED_COMPONENTS,
+  FILTERED_DATA_ATTRIBUTES,
+  UI_CONFIG
+} from './config.js';
 
 // Local references to functions that will be imported dynamically
 // to avoid circular dependencies
 let _entitiesModule = null;
 let _watcherModule = null;
 
-// Entity types that are implemented through components rather than dedicated tags
-const COMPONENT_BASED_TYPES = ['torus', 'dodecahedron', 'octahedron', 'tetrahedron', 'cone', 'ring'];
-
 // Store default properties for custom primitives
 const customPrimitiveDefaults = {};
+
+// Use standardized system entity IDs
+const systemEntityIds = [...SYSTEM_ENTITY_IDS];
 
 /**
  * Initialize the entity API by loading required modules
@@ -50,9 +78,33 @@ export async function initEntityAPI() {
  * @throws {Error} Throws error if watcher is not available
  */
 function _ensureWatcher() {
-  if (!window.watcher || typeof window.watcher.saveEntitiesToState !== 'function') {
-    throw new Error('Watcher is required but not available for entity operations');
-  }
+    // Check if watcher exists
+    if (!window.watcher) {
+        console.error('[Entity API] Watcher not found, attempting to initialize...');
+        // Try to initialize the watcher system
+        import('./watcher.js').then(watcherModule => {
+            if (watcherModule.startWatcher) {
+                watcherModule.startWatcher();
+            }
+        }).catch(err => {
+            console.error('[Entity API] Failed to initialize watcher:', err);
+        });
+        throw new Error('Watcher is not initialized. Please try again in a moment.');
+    }
+
+    // Check if watcher has required methods
+    if (typeof window.watcher.saveEntitiesToState !== 'function') {
+        console.error('[Entity API] Watcher missing required methods');
+        throw new Error('Watcher is not properly initialized');
+    }
+
+    // Check if watcher is started
+    if (window.watcher.start && !window.watcher.isStarted) {
+        console.log('[Entity API] Starting inactive watcher');
+        window.watcher.start();
+    }
+
+    return true;
 }
 
 /**
@@ -80,9 +132,9 @@ function _getDefaultProperties(entityType, baseProperties = {}) {
   const properties = { ...baseProperties };
   
   try {
-    // Get state for camera position if available
-    const cameraPos = { x: 0, y: 1.6, z: -3 }; // Default fallback position
-    const cameraRot = { y: 0 }; // Default fallback rotation
+    // Replace camera position/rotation references with default values
+    const cameraPos = { ...VECTOR_DEFAULTS.position }; // Use default position
+    const cameraRot = { ...VECTOR_DEFAULTS.rotation }; // Use default rotation
     
     // Try to get camera data from state
     const state = getState();
@@ -106,11 +158,11 @@ function _getDefaultProperties(entityType, baseProperties = {}) {
       
       // For plane, we want it on the ground
       if (entityType === 'plane') {
-        properties.position = { x, y: 0, z };
+        properties.position = { ...VECTOR_DEFAULTS.position, x, y: 0, z };
       } else if (entityType === 'light') {
-        properties.position = { x, y: cameraPos.y + 1, z };
+        properties.position = { ...VECTOR_DEFAULTS.position, x, y: cameraPos.y + 1, z };
       } else {
-        properties.position = { x, y: cameraPos.y, z };
+        properties.position = { ...VECTOR_DEFAULTS.position, x, y: cameraPos.y, z };
       }
     }
     
@@ -119,36 +171,22 @@ function _getDefaultProperties(entityType, baseProperties = {}) {
       properties.color = _getRandomColor();
     }
     
-    // Set entity-specific defaults
+    // Set entity-specific defaults using standardized constants
+    if (GEOMETRY_DEFAULTS[entityType]) {
+      Object.assign(properties, GEOMETRY_DEFAULTS[entityType]);
+    }
+    
+    // Special cases for entities that need additional defaults
     switch (entityType) {
-      case 'box':
-        properties.width = properties.width || 1;
-        properties.height = properties.height || 1;
-        properties.depth = properties.depth || 1;
-        break;
-      case 'sphere':
-        properties.radius = properties.radius || 0.5;
-        break;
-      case 'cylinder':
-        properties.radius = properties.radius || 0.5;
-        properties.height = properties.height || 1.5;
-        break;
       case 'plane':
-        properties.width = properties.width || 4;
-        properties.height = properties.height || 4;
-        properties.rotation = properties.rotation || { x: -90, y: 0, z: 0 };
+        properties.rotation = properties.rotation || { ...VECTOR_DEFAULTS.rotation, x: -90 };
         break;
       case 'light':
+        const lightDefaults = LIGHT_DEFAULTS.point;
         properties.type = properties.type || 'point';
-        properties.intensity = properties.intensity || 1;
-        properties.distance = properties.distance || 20;
-        break;
-      case 'torus':
-        properties.radius = properties.radius || 0.5;
-        properties.radiusTubular = properties.radiusTubular || 0.1;
-        break;
-      case 'dodecahedron':
-        properties.radius = properties.radius || 0.5;
+        properties.intensity = properties.intensity || lightDefaults.intensity;
+        properties.distance = properties.distance || lightDefaults.distance;
+        properties.color = properties.color || lightDefaults.color;
         break;
     }
   } catch (error) {
@@ -164,178 +202,134 @@ function _getDefaultProperties(entityType, baseProperties = {}) {
  * @param {string} type - Entity type
  * @param {Object} properties - Entity properties
  * @param {string} [semanticType] - Optional semantic type
- * @returns {Object} Object with the created entity and UUID
+ * @returns {Object} Object with the created element and UUID
  */
 async function _createEntityDirectly(type, properties, semanticType = null) {
   // Extract properties to avoid modifying the original
   const propsToApply = { ...properties };
   
-  // Check if we should preserve UUID (used when recreating from state)
-  let uuid;
-  if (propsToApply._preserveUuid) {
-    uuid = propsToApply._preserveUuid;
-    delete propsToApply._preserveUuid; // Remove from properties to avoid applying it as an attribute
-  } else {
-    // Generate UUID for the entity
-    uuid = await import('./utils.js').then(utils => {
-      return utils.generateEntityId(type);
-    });
-  }
-  
-  // Determine the element type based on the entity type
-  let elementType = 'a-entity';
-  
-  // Component-based types need special handling
-  const componentBasedTypes = ['torus', 'dodecahedron', 'octahedron', 'tetrahedron', 'cone', 'ring'];
-  
-  if (componentBasedTypes.includes(type)) {
-    // These are created as a-entity with geometry component
-    elementType = 'a-entity';
-  } else if (type !== 'entity') {
-    // Standard primitives use a-{type} format
-    elementType = `a-${type}`;
-  }
+  // Generate UUID using semantic type if provided, otherwise use type
+  const uuid = propsToApply._preserveUuid || generateEntityId(semanticType || type);
   
   // Create the element
-  const element = document.createElement(elementType);
+  const element = document.createElement(type.startsWith('a-') ? type : `a-${type}`);
   
-  // Set UUID as data attribute
-  element.setAttribute('data-entity-uuid', uuid);
+  // Set UUID in dataset
+  element.dataset.entityUuid = uuid;
   
-  // Handle entity ID
-  if (propsToApply.id) {
-    // If ID is provided, use it directly
-    element.id = propsToApply.id;
-    delete propsToApply.id; // Remove from properties as we've already applied it
-  } else {
-    // Generate an ID based on the UUID, keeping the format consistent with data-entity-uuid
-    // This ensures the ID uses the same pattern as the UUID
+  // Set ID if not already set
+  if (!element.id) {
     element.id = uuid;
   }
   
-  // For component-based types, set up the geometry component
-  if (componentBasedTypes.includes(type)) {
-    element.setAttribute('geometry', `primitive: ${type}`);
+  // Handle geometry data first
+  if (propsToApply.geometry || GEOMETRY_ATTRIBUTES.some(attr => attr in propsToApply)) {
+    applyGeometryData(element, propsToApply.geometry || propsToApply, type);
+    
+    // Remove geometry properties since they're handled
+    if (propsToApply.geometry) delete propsToApply.geometry;
+    GEOMETRY_ATTRIBUTES.forEach(attr => delete propsToApply[attr]);
   }
   
-  // Apply all properties to the element
-  for (const [key, value] of Object.entries(propsToApply)) {
-    // Skip null or undefined values
-    if (value === null || value === undefined) continue;
+  // Apply remaining properties
+  Object.entries(propsToApply).forEach(([key, value]) => {
+    // Skip null/undefined values and internal properties
+    if (value === null || value === undefined || key === '_preserveUuid') return;
     
-    // Handle special cases like position, rotation, scale
-    if (['position', 'rotation', 'scale'].includes(key) && typeof value === 'object') {
-      const stringValue = positionToString(value);
-      element.setAttribute(key, stringValue);
-    } else if (key === 'geometry' && typeof value === 'object') {
-      // For custom geometry components
-      const geomParts = [];
-      for (const [geomKey, geomValue] of Object.entries(value)) {
-        geomParts.push(`${geomKey}: ${geomValue}`);
-      }
-      element.setAttribute('geometry', geomParts.join('; '));
-    } else if (key === 'material' && typeof value === 'object') {
-      // For custom material components
-      const matParts = [];
-      for (const [matKey, matValue] of Object.entries(value)) {
-        matParts.push(`${matKey}: ${matValue}`);
-      }
-      element.setAttribute('material', matParts.join('; '));
+    // Format vector attributes
+    if (VECTOR_ATTRIBUTES.includes(key)) {
+      element.setAttribute(key, vectorToString(value));
+    } else if (typeof value === 'object') {
+      element.setAttribute(key, JSON.stringify(value));
     } else {
-      // Standard attribute
       element.setAttribute(key, value);
     }
-  }
+  });
   
   // Add to scene
   const scene = document.querySelector('a-scene');
   if (!scene) {
-    throw new Error('No A-Frame scene found');
+    throw new Error('Scene not found');
   }
-  
-  // Check for duplicate IDs before adding to scene
-  if (element.id) {
-    const existingWithId = document.getElementById(element.id);
-    if (existingWithId) {
-      console.warn(`[Entity API] Entity with ID ${element.id} already exists, generating unique ID`);
-      // Generate a new unique ID while maintaining the original entity-type pattern
-      // Add a timestamp suffix to make it unique
-      element.id = `${element.id}-${Date.now().toString(36)}`;
-    }
-  }
-  
   scene.appendChild(element);
   
   return { element, uuid };
 }
 
 /**
- * Create a new entity with the specified type and properties
- * @param {string} type - Entity type (box, sphere, cylinder, etc.)
- * @param {Object} properties - Entity properties (position, color, etc.)
- * @param {string} [semanticType] - Optional semantic type for specialized entities
- * @returns {Object} Object containing the entity element and UUID
+ * Create a new entity
+ * @param {string} type - Entity type (box, sphere, etc.)
+ * @param {Object} properties - Entity properties
+ * @param {string} [semanticType] - Optional semantic type
+ * @returns {Promise<Object>} Created entity data
  */
 export async function createEntity(type, properties = {}, semanticType) {
-  // Generate a UUID first to use for both the data-entity-uuid and id
-  let entityUuid;
-  try {
-    entityUuid = await import('./utils.js').then(utils => {
-      return utils.generateEntityId(type);
-    });
-  } catch (error) {
-    console.error('[Entity API] Error generating entity UUID:', error);
-    return null;
-  }
-  
-  // Check if an explicit ID is provided and validate it
-  if (properties.id && typeof properties.id === 'string') {
-    // Check if ID exists already to prevent duplicates
-    if (document.getElementById(properties.id)) {
-      console.warn(`[Entity API] Entity with ID ${properties.id} already exists, will use UUID as ID instead`);
-      // Use the UUID as ID instead
-      properties.id = entityUuid;
+    // Skip creation of cursor entities as they are managed by A-Frame
+    if (type === 'cursor') {
+        console.warn(`Skipping creation of ${type} entity as it is managed by A-Frame`);
+        return null;
     }
     
-    // Ensure id follows valid pattern
-    if (!/^[A-Za-z][\w-]*$/.test(properties.id)) {
-      console.warn(`[Entity API] Invalid entity ID format: ${properties.id}, must start with a letter and contain only letters, numbers, underscores, and hyphens`);
-      // Use the UUID as ID instead
-      properties.id = entityUuid;
+    console.log(`[Entity API] Creating entity of type: ${type}`);
+    
+    try {
+        // Ensure watcher is available
+        _ensureWatcher();
+        
+        // Get default properties
+        const finalProperties = _getDefaultProperties(type, properties);
+        
+        // Create the entity directly
+        const { element, uuid } = await _createEntityDirectly(type, finalProperties, semanticType);
+        
+        if (!element) {
+            throw new Error('Failed to create entity element');
+        }
+        
+        // Wait for entity to be initialized by A-Frame
+        await new Promise((resolve, reject) => {
+            // If element is already loaded, resolve immediately
+            if (element.hasLoaded || element.components) {
+                resolve();
+                return;
+            }
+            
+            // Otherwise wait for loaded event with timeout
+            const timeout = setTimeout(() => {
+                console.log(`[Entity API] Entity load timeout for ${uuid}, continuing anyway`);
+                resolve();
+            }, 1000);
+            
+            element.addEventListener('loaded', () => {
+                clearTimeout(timeout);
+                resolve();
+            }, { once: true });
+        });
+
+        // Flush all components to the DOM to ensure default values are captured
+        if (element.components) {
+            Object.values(element.components).forEach(component => {
+                if (component.flushToDOM) {
+                    component.flushToDOM();
+                }
+            });
+        }
+        
+        // Explicitly save state after entity creation
+        console.log(`[Entity API] Saving state after creating entity ${uuid}`);
+        await window.watcher.saveEntitiesToState('entity-api-create');
+        
+        // Return the created entity data
+        return {
+            uuid,
+            element,
+            type,
+            properties: finalProperties
+        };
+    } catch (error) {
+        console.error('[Entity API] Error creating entity:', error);
+        throw error;
     }
-  } else {
-    // Set the ID to be the same as the UUID for consistency
-    properties.id = entityUuid;
-  }
-  
-  // Apply default properties based on entity type
-  const enrichedProperties = _getDefaultProperties(type, properties);
-  
-  // Force _preserveUuid to use our pre-generated UUID
-  enrichedProperties._preserveUuid = entityUuid;
-  
-  console.log(`[Entity API] Creating ${semanticType || type} entity`, enrichedProperties);
-  
-  try {
-    // Use our direct creation method
-    const result = await _createEntityDirectly(type, enrichedProperties, semanticType);
-    
-    // Ensure entity was created
-    if (!result || !result.uuid) {
-      console.error(`[Entity API] Failed to create ${type} entity`);
-      return null;
-    }
-    
-    // Save changes to state via watcher
-    _ensureWatcher();
-    window.watcher.saveEntitiesToState('entity-api-create');
-    
-    logAction(`Created ${type} entity: ${result.uuid} with ID: ${result.element.id}`);
-    return result;
-  } catch (error) {
-    console.error(`[Entity API] Error creating ${type} entity:`, error);
-    return null;
-  }
 }
 
 /**
@@ -345,44 +339,57 @@ export async function createEntity(type, properties = {}, semanticType) {
  * @returns {boolean} Success status
  */
 export async function updateEntity(uuid, properties) {
-  console.log(`[Entity API] Updating entity ${uuid}`, properties);
-  
-  // Ensure modules are loaded
-  if (!_entitiesModule) await initEntityAPI();
-  
-  try {
-    // Check if entity exists
-    const entity = document.querySelector(`[data-entity-uuid="${uuid}"]`);
-    if (!entity) {
-      console.error(`[Entity API] Entity ${uuid} not found`);
-      return false;
+    // Skip updates to cursor entities
+    const entity = getState().entities[uuid];
+    if (entity && entity.type === 'cursor') {
+        console.warn(`Skipping update of ${entity.type} entity as it is managed by A-Frame`);
+        return null;
     }
     
-    // Apply property updates to the DOM element
-    if (_entitiesModule.setEntityAttributes) {
-      _entitiesModule.setEntityAttributes(entity, properties);
-    } else {
-      // Fallback to manual attribute setting
-      Object.entries(properties).forEach(([key, value]) => {
-        // Special handling for vectors
-        if (['position', 'rotation', 'scale'].includes(key) && typeof value === 'object') {
-          entity.setAttribute(key, positionToString(value));
-        } else {
-          entity.setAttribute(key, value);
+    console.log(`[Entity API] Updating entity ${uuid}`, properties);
+    
+    try {
+        // Check if entity exists
+        const entityElement = document.querySelector(`[data-entity-uuid="${uuid}"]`);
+        if (!entityElement) {
+            console.error(`[Entity API] Entity ${uuid} not found`);
+            return false;
         }
-      });
+        
+        // Handle geometry data first
+        if (properties.geometry || GEOMETRY_ATTRIBUTES.some(attr => attr in properties)) {
+            applyGeometryData(entityElement, properties.geometry || properties, properties.type);
+            
+            // Remove geometry properties since they're handled
+            if (properties.geometry) delete properties.geometry;
+            GEOMETRY_ATTRIBUTES.forEach(attr => delete properties[attr]);
+        }
+        
+        // Apply remaining properties
+        Object.entries(properties).forEach(([key, value]) => {
+            // Skip null/undefined values and type property
+            if (value === null || value === undefined || key === 'type') return;
+            
+            // Format vector attributes
+            if (VECTOR_ATTRIBUTES.includes(key)) {
+                entityElement.setAttribute(key, vectorToString(value));
+            } else if (typeof value === 'object') {
+                entityElement.setAttribute(key, JSON.stringify(value));
+            } else {
+                entityElement.setAttribute(key, value);
+            }
+        });
+        
+        // Save changes to state via watcher
+        _ensureWatcher();
+        window.watcher.saveEntitiesToState('entity-api-update');
+        
+        logAction(`Updated entity ${uuid}`);
+        return true;
+    } catch (error) {
+        console.error(`[Entity API] Error updating entity ${uuid}:`, error);
+        return false;
     }
-    
-    // Save changes to state via watcher
-    _ensureWatcher();
-    window.watcher.saveEntitiesToState('entity-api-update');
-    
-    logAction(`Updated entity ${uuid}`);
-    return true;
-  } catch (error) {
-    console.error(`[Entity API] Error updating entity ${uuid}:`, error);
-    return false;
-  }
 }
 
 /**
@@ -391,32 +398,39 @@ export async function updateEntity(uuid, properties) {
  * @returns {boolean} Success status
  */
 export async function deleteEntity(uuid) {
-  console.log(`[Entity API] Deleting entity ${uuid}`);
-  
-  // Ensure modules are loaded
-  if (!_entitiesModule) await initEntityAPI();
-  
-  try {
-    // Find the entity in the DOM
-    const entity = document.querySelector(`[data-entity-uuid="${uuid}"]`);
-    
-    // Remove from DOM if found
-    if (entity && entity.parentNode) {
-      entity.parentNode.removeChild(entity);
-    } else {
-      console.warn(`[Entity API] Entity ${uuid} not found in DOM for deletion`);
+    // Skip deletion of cursor entities
+    const entity = getState().entities[uuid];
+    if (entity && entity.type === 'cursor') {
+        console.warn(`Skipping deletion of ${entity.type} entity as it is managed by A-Frame`);
+        return false;
     }
     
-    // Save changes to state via watcher
-    _ensureWatcher();
-    window.watcher.saveEntitiesToState('entity-api-delete');
+    console.log(`[Entity API] Deleting entity ${uuid}`);
     
-    logAction(`Deleted entity ${uuid}`);
-    return true;
-  } catch (error) {
-    console.error(`[Entity API] Error deleting entity ${uuid}:`, error);
-    return false;
-  }
+    // Ensure modules are loaded
+    if (!_entitiesModule) await initEntityAPI();
+    
+    try {
+        // Find the entity in the DOM
+        const entityElement = document.querySelector(`[data-entity-uuid="${uuid}"]`);
+        
+        // Remove from DOM if found
+        if (entityElement && entityElement.parentNode) {
+            entityElement.parentNode.removeChild(entityElement);
+        } else {
+            console.warn(`[Entity API] Entity ${uuid} not found in DOM for deletion`);
+        }
+        
+        // Save changes to state via watcher
+        _ensureWatcher();
+        window.watcher.saveEntitiesToState('entity-api-delete');
+        
+        logAction(`Deleted entity ${uuid}`);
+        return true;
+    } catch (error) {
+        console.error(`[Entity API] Error deleting entity ${uuid}:`, error);
+        return false;
+    }
 }
 
 /**
@@ -593,7 +607,10 @@ export async function recreateAllEntities(entitiesState = null) {
       if (entity.id) {
         existingIds.add(entity.id);
       }
-      entity.parentNode.removeChild(entity);
+      // Only remove non-system entities using standardized filters
+      if (!SYSTEM_ENTITY_IDS.includes(entity.id)) {
+        entity.parentNode.removeChild(entity);
+      }
     });
     
     // Recreate each entity from state
@@ -634,6 +651,18 @@ export async function recreateAllEntities(entitiesState = null) {
     
     // Wait for all entities to be created
     await Promise.all(creationPromises);
+
+    // Flush all entity components to the DOM before saving state
+    const allEntities = scene.querySelectorAll('[data-entity-uuid]');
+    allEntities.forEach(entity => {
+      if (entity.components) {
+        Object.values(entity.components).forEach(component => {
+          if (component.flushToDOM) {
+            component.flushToDOM();
+          }
+        });
+      }
+    });
     
     // Save to state via watcher
     _ensureWatcher();
@@ -838,8 +867,13 @@ export async function ensureEntityUUIDs() {
       return { entities: updatedEntities, entityMapping: updatedMapping, changes: false };
     }
     
-    // Find all entities
-    const entityElements = scene.querySelectorAll('a-entity, a-box, a-sphere, a-cylinder, a-plane, a-sky');
+    // Find all entities using standardized selectors
+    const entitySelectors = [
+        'a-entity',
+        ...STANDARD_PRIMITIVES.map(type => `a-${type}`),
+        'a-sky'
+    ].join(', ');
+    const entityElements = scene.querySelectorAll(entitySelectors);
     
     // Process each entity
     entityElements.forEach(element => {
@@ -872,7 +906,7 @@ export async function ensureEntityUUIDs() {
         updatedMapping[id] = newUuid;
         
         // Extract entity data
-        const entityData = _extractEntityAttributes(element, type);
+        const entityData = extractEntityAttributes(element, type);
         updatedEntities[newUuid] = entityData;
         hasChanges = true;
       } else {
@@ -881,7 +915,7 @@ export async function ensureEntityUUIDs() {
           console.log(`[Entity API] Found entity with UUID ${uuid} but missing from state, adding it`);
           const tagName = element.tagName.toLowerCase();
           const type = tagName.startsWith('a-') ? tagName.substring(2) : tagName;
-          const entityData = _extractEntityAttributes(element, type);
+          const entityData = extractEntityAttributes(element, type);
           updatedEntities[uuid] = entityData;
           hasChanges = true;
         }
@@ -906,170 +940,106 @@ export async function ensureEntityUUIDs() {
 }
 
 /**
- * Extract attributes from entity element to use in state
- * @private
- * @param {Element} entity - Entity DOM element
- * @param {string} type - Entity type
- * @returns {Object} Entity properties for state
+ * Check if an entity is a system entity
+ * @param {Object} entity - Entity data from state
+ * @param {string} uuid - Entity UUID
+ * @returns {boolean} True if entity is a system entity
  */
-function _extractEntityAttributes(entity, type) {
-  try {
-    // Get geometry attributes if available
-    const geometry = entity.getAttribute('geometry');
+function isSystemEntity(entity, uuid) {
+    if (!entity) return false;
     
-    // Start with basic properties including type
-    const properties = { type };
-    
-    // Handle vector attributes (position, rotation, scale)
-    const vectorAttributes = ['position', 'rotation', 'scale'];
-    vectorAttributes.forEach(attr => {
-      const value = entity.getAttribute(attr);
-      if (value) {
-        properties[attr] = typeof value === 'string' ? stringToPosition(value) : value;
-      }
-    });
-    
-    // Handle geometry properties for component-based entities
-    if (geometry && typeof geometry === 'object') {
-      properties.geometry = geometry;
+    // Check if entity type is in systemEntityIds
+    if (systemEntityIds.includes(entity.type)) {
+        return true;
     }
     
-    // Add all other attributes
-    Array.from(entity.attributes).forEach(attr => {
-      const name = attr.name;
-      
-      // Skip attributes we've already processed or that aren't relevant for state
-      if (vectorAttributes.includes(name) || 
-          name === 'geometry' || 
-          name === 'id' || 
-          name === 'class' || 
-          name === 'data-entity-uuid') {
-        return;
-      }
-      
-      properties[name] = attr.value;
-    });
+    // Check if entity is the sky entity from state
+    const state = getState();
+    if (state.sky && (uuid === state.sky.uuid || entity.type === SYSTEM_ENTITY_TYPES.SKY)) {
+        return true;
+    }
     
-    return properties;
-  } catch (error) {
-    console.error('[Entity API] Error extracting entity attributes:', error);
-    return { type };
-  }
+    // Check if entity is a networked or auto-generated entity
+    if (uuid.startsWith('entity-entity-') || entity.networked) {
+        return true;
+    }
+    
+    return false;
 }
 
 /**
- * Generate HTML representation of all entities in state
- * Useful for Monaco editor and state visualization
- * @returns {string} HTML string representing all entities in state
+ * Generate HTML for a single entity
+ * @param {Object} entity - Entity data from state
+ * @param {string} uuid - Entity UUID
+ * @returns {string} HTML string
  */
-export function generateEntitiesHTML() {
-  const state = getState();
-  const entities = state.entities;
-  let html = '';
-  
-  // Process each entity
-  for (const uuid in entities) {
-    // Skip missing entity data
-    if (!entities[uuid]) continue;
-    
-    const entityData = entities[uuid];
-    const type = entityData.type;
-    
-    // Skip entities without a type
-    if (!type) continue;
-    
-    // Determine tag name based on entity type
-    let tagName = '';
-    
-    // Standard primitives use a-{type} format
-    const standardPrimitives = ['box', 'sphere', 'cylinder', 'plane', 'cone', 'ring', 'torus'];
-    
-    if (standardPrimitives.includes(type)) {
-      tagName = `a-${type}`;
-    } else if (COMPONENT_BASED_TYPES.includes(type)) {
-      // Component-based types use a-entity with geometry component
-      tagName = 'a-entity';
-    } else {
-      // Default to a-entity
-      tagName = 'a-entity';
+function generateEntityHTML(entity, uuid) {
+    if (!entity || !entity.type) {
+        console.warn('[EntityAPI] Invalid entity data:', entity);
+        return '';
     }
-    
+
+    // Skip system entities
+    if (isSystemEntity(entity, uuid)) {
+        console.log(`[EntityAPI] Skipping system entity: ${entity.type} (${uuid})`);
+        return '';
+    }
+
+    // Determine tag name - standard primitives use a-{type}, others use a-entity
+    const tagName = STANDARD_PRIMITIVES.includes(entity.type) 
+        ? `a-${entity.type}` 
+        : 'a-entity';
+
     // Start tag
-    html += `  <${tagName}`;
-    
-    // Add id attribute if present
-    if (entityData.id) {
-      html += ` id="${entityData.id}"`;
-    }
-    
-    // Add data-entity-uuid
+    let html = `  <${tagName}`;
+
+    // Add required attributes
+    if (entity.id) html += ` id="${entity.id}"`;
     html += ` data-entity-uuid="${uuid}"`;
-    
-    // Add DOM="true" attribute for entities created via DOM (helps with tracking)
     html += ` DOM="true"`;
-    
-    // Handle component-based types
-    if (COMPONENT_BASED_TYPES.includes(type)) {
-      html += ` geometry="primitive: ${type}`;
-      
-      // Add any geometry attributes from state
-      if (entityData.geometry) {
-        for (const key in entityData.geometry) {
-          if (key !== 'primitive') {
-            html += `; ${key}: ${entityData.geometry[key]}`;
-          }
+
+    // Add all attributes except special ones
+    Object.entries(entity).forEach(([key, value]) => {
+        // Skip special attributes
+        if (key === 'type' || key === 'id' || key === 'uuid' || shouldSkipAttribute(key)) {
+            return;
         }
-      }
-      
-      html += '"';
-    }
-    
-    // Add all other attributes
-    for (const key in entityData) {
-      const value = entityData[key];
-      
-      // Skip special attributes
-      if (key === 'type' || key === 'id' || key === 'geometry' || value === undefined || value === null) {
-        continue;
-      }
-      
-      // Format attribute value
-      html += ` ${key}="${_formatAttributeHTML(key, value)}"`;
-    }
-    
+
+        // Format value based on type
+        let formattedValue;
+        if (VECTOR_ATTRIBUTES.includes(key)) {
+            formattedValue = vectorToString(value);
+        } else if (typeof value === 'object') {
+            formattedValue = JSON.stringify(value);
+        } else {
+            formattedValue = value.toString();
+        }
+
+        // Add attribute with proper quote handling
+        const quoteChar = formattedValue.includes('"') ? "'" : '"';
+        html += ` ${key}=${quoteChar}${formattedValue}${quoteChar}`;
+    });
+
     // Close tag
     html += `></${tagName}>\n`;
-  }
-  
-  return html;
+
+    return html;
 }
 
 /**
- * Format attribute value for HTML output
- * @private
- * @param {string} key - Attribute name
- * @param {any} value - Attribute value
- * @returns {string} Formatted attribute value
+ * Generate HTML for all entities in state
+ * @returns {string} HTML string
  */
-function _formatAttributeHTML(key, value) {
-  // Handle vector attributes
-  if (['position', 'rotation', 'scale'].includes(key) && typeof value === 'object') {
-    const vectorStr = positionToString(value);
-    return vectorStr;
-  }
-  
-  // Handle color objects
-  if (key === 'color' && typeof value === 'object' && 'r' in value && 'g' in value && 'b' in value) {
-    const colorStr = `rgb(${value.r}, ${value.g}, ${value.b})`;
-    return colorStr;
-  }
-  
-  // Handle objects
-  if (typeof value === 'object') {
-    const jsonStr = JSON.stringify(value);
-    return jsonStr.replace(/"/g, '&quot;');
-  }
-  
-  // Default string value
-  return String(value);
+export function generateEntitiesHTML() {
+    const state = getState();
+    const entities = state.entities || {};
+    let html = '';
+    
+    // Process each entity
+    Object.entries(entities).forEach(([uuid, entity]) => {
+        // Generate entity HTML (system entities are filtered in generateEntityHTML)
+        html += generateEntityHTML(entity, uuid);
+    });
+    
+    return html;
 } 

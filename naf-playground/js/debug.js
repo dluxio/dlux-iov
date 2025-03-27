@@ -378,38 +378,42 @@ function formatProperties(obj) {
  * @param {string} type - The type of action (info, success, error)
  */
 export function logAction(message, type = 'info') {
-    console.log(`[${type}] ${message}`);
-    
-    // Create timestamp
-    const timestamp = new Date().toLocaleTimeString();
-    
     // Create action object
     const action = {
-        timestamp,
-        message,
+        timestamp: new Date().toISOString(),
+        message: typeof message === 'object' ? JSON.stringify(message, null, 2) : message,
         type
     };
     
-    // Add to actions array
+    // Add to history
     actionHistory.unshift(action);
     
-    // Trim actions if needed
+    // Limit history size
     if (actionHistory.length > MAX_ACTIONS) {
         actionHistory.pop();
     }
     
-    // Update UI
-    updateActionsUI();
+    // Update UI if debug panel is visible
+    if (isDebugPanelVisible) {
+        updateActionsUI();
+    }
+    
+    // Log to console with color coding
+    const colors = {
+        info: '#00ff00',
+        warning: '#ffff00',
+        error: '#ff0000',
+        success: '#00ff00'
+    };
+    
+    console.log(`%c${action.message}`, `color: ${colors[type] || '#ffffff'}`);
 }
 
 /**
  * Update the actions UI
  */
 function updateActionsUI() {
-    // Make sure actions element exists
-    if (!actionsEl) {
-        return;
-    }
+    if (!actionsEl) return;
     
     // Clear existing actions
     while (actionsEl.firstChild) {
@@ -419,8 +423,19 @@ function updateActionsUI() {
     // Add each action
     actionHistory.forEach(action => {
         const actionEl = document.createElement('div');
-        actionEl.className = `action action-${action.type}`;
-        actionEl.textContent = `${action.timestamp}: ${action.message}`;
+        actionEl.className = `action ${action.type}`;
+        
+        // Add timestamp
+        const timestampEl = document.createElement('span');
+        timestampEl.className = 'timestamp';
+        timestampEl.textContent = new Date(action.timestamp).toLocaleTimeString();
+        actionEl.appendChild(timestampEl);
+        
+        // Add message
+        const messageEl = document.createElement('pre');
+        messageEl.textContent = action.message;
+        actionEl.appendChild(messageEl);
+        
         actionsEl.appendChild(actionEl);
     });
 }

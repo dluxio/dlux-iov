@@ -4,8 +4,14 @@
 
 import { getState, setState } from './state.js';
 import { logAction } from './debug.js';
-import { updateMonacoEditor } from './monaco.js';
-import { switchCamera } from './camera.js';
+import { 
+    VECTOR_ATTRIBUTES,
+    COMPONENT_BASED_TYPES,
+    VECTOR_DEFAULTS,
+    GEOMETRY_DEFAULTS,
+    LIGHT_DEFAULTS,
+    UI_CONFIG
+} from './config.js';
 
 // DOM elements
 let addBoxBtn;
@@ -17,7 +23,7 @@ let addTorusBtn;
 let addDodecahedronBtn;
 let openInspectorBtn;
 let saveCodeBtn;
-let cameraSelect;
+let cameraSelector;
 let editorStatus;
 let createRandomSceneBtn;
 
@@ -41,8 +47,11 @@ export function initUI() {
     openInspectorBtn = document.getElementById('open-inspector');
     saveCodeBtn = document.getElementById('save-code-btn');
     editorStatus = document.getElementById('editor-status');
-    cameraSelect = document.getElementById('camera-select');
+    cameraSelector = document.getElementById('camera-selector');
     createRandomSceneBtn = document.getElementById('create-random-scene');
+    
+    // Initialize camera selector
+    initCameraSelector();
     
     // Logging for debugging
     console.log('UI Elements found:');
@@ -56,7 +65,7 @@ export function initUI() {
     console.log('- openInspectorBtn:', openInspectorBtn);
     console.log('- saveCodeBtn:', saveCodeBtn);
     console.log('- editorStatus:', editorStatus);
-    console.log('- cameraSelect:', cameraSelect);
+    console.log('- cameraSelector:', cameraSelector);
     console.log('- createRandomSceneBtn:', createRandomSceneBtn);
     
     // Add event listeners
@@ -136,15 +145,6 @@ export function initUI() {
         });
     } else {
         console.error('Open inspector button not found');
-    }
-    
-    if (cameraSelect) {
-        cameraSelect.addEventListener('change', (event) => {
-            console.log('Camera select changed:', event.target.value);
-            handleCameraChange(event);
-        });
-    } else {
-        console.error('Camera select not found');
     }
     
     // Add event listener for the save code button
@@ -290,6 +290,37 @@ function clearExistingListeners() {
  * @param {string} entityType - Type of entity to add
  */
 function addEntityHandler(entityType) {
+    // First ensure watcher is ready
+    if (!window.watcher) {
+        console.log('Watcher not ready, waiting for initialization...');
+        // Wait for watcher to be ready
+        const checkWatcher = setInterval(() => {
+            if (window.watcher) {
+                clearInterval(checkWatcher);
+                createEntityWithWatcher(entityType);
+            }
+        }, 100);
+        
+        // Set a timeout to prevent infinite waiting
+        setTimeout(() => {
+            if (!window.watcher) {
+                clearInterval(checkWatcher);
+                console.error('Watcher failed to initialize after timeout');
+                import('./utils.js').then(utils => {
+                    utils.showNotification('Error: Watcher not initialized', 'error');
+                });
+            }
+        }, 5000);
+    } else {
+        createEntityWithWatcher(entityType);
+    }
+}
+
+/**
+ * Create an entity once the watcher is ready
+ * @param {string} entityType - Type of entity to create
+ */
+function createEntityWithWatcher(entityType) {
     // Import entity-api module to use the unified API
     import('./entity-api.js').then(entityApi => {
         try {
@@ -371,7 +402,15 @@ function openInspector() {
  */
 function handleCameraChange(event) {
     const cameraId = event.target.value;
-    switchCamera(cameraId);
+    const scene = document.querySelector('a-scene');
+    if (!scene) return;
+
+    // Get the camera entity
+    const camera = scene.querySelector(`#${cameraId}`);
+    if (!camera) return;
+
+    // Set the camera as active
+    camera.setAttribute('camera', 'active', true);
     
     logAction(`Switched to camera: ${cameraId}`);
 }
@@ -382,29 +421,29 @@ function handleCameraChange(event) {
  * @param {string} activeCamera - Currently active camera ID
  */
 export function updateCameraSelect(cameras, activeCamera) {
-    // Clear current options
-    while (cameraSelect.firstChild) {
-        cameraSelect.removeChild(cameraSelect.firstChild);
+    if (!cameraSelector) {
+        console.warn('Camera selector not found');
+        return;
     }
+
+    // Store current selection
+    const currentSelection = cameraSelector.value;
     
-    // Always add the builder camera
-    const builderOption = document.createElement('option');
-    builderOption.value = 'builder-camera';
-    builderOption.textContent = 'Builder Camera';
-    cameraSelect.appendChild(builderOption);
+    // Clear existing options
+    cameraSelector.innerHTML = '';
     
-    // Add user-defined cameras
-    cameras.forEach(cameraId => {
-        if (cameraId !== 'builder-camera') {
-            const option = document.createElement('option');
-            option.value = cameraId;
-            option.textContent = cameraId;
-            cameraSelect.appendChild(option);
-        }
-    });
+    // Add avatar rig option
+    const avatarRigOption = document.createElement('option');
+    avatarRigOption.value = 'avatar-rig';
+    avatarRigOption.textContent = 'Avatar Rig';
+    cameraSelector.appendChild(avatarRigOption);
     
-    // Set the active camera
-    cameraSelect.value = activeCamera;
+    // Restore previous selection if it still exists
+    if (currentSelection) {
+        cameraSelector.value = currentSelection;
+    } else {
+        cameraSelector.value = activeCamera || 'avatar-rig';
+    }
 }
 
 /**
@@ -585,4 +624,82 @@ function showWarning(message) {
     import('./utils.js').then(utils => {
         utils.showNotification(message || 'Changes applied with warnings', 'warning');
     }).catch(err => console.error('Error showing notification:', err));
+}
+
+// Add a function to safely update Monaco
+function updateMonacoSafely(retryCount = 0, maxRetries = 3) {
+    console.log(`[UI] Attempting to update Monaco editor (attempt ${retryCount + 1}/${maxRetries + 1})`);
+    
+    // Dynamic import to avoid circular dependencies
+    import('./monaco.js').then(monaco => {
+        try {
+            if (typeof monaco.updateMonacoEditor === 'function') {
+                monaco.updateMonacoEditor(true); // Force update
+                console.log('[UI] Monaco editor updated successfully');
+            } else if (retryCount < maxRetries) {
+                console.log('[UI] Monaco editor not available, will retry after delay');
+                setTimeout(() => updateMonacoSafely(retryCount + 1, maxRetries), 1000);
+            } else {
+                console.error('[UI] Failed to update Monaco editor after all retries');
+            }
+        } catch (error) {
+            console.error('[UI] Error during Monaco update:', error);
+            if (retryCount < maxRetries) {
+                setTimeout(() => updateMonacoSafely(retryCount + 1, maxRetries), 1000);
+            }
+        }
+    }).catch(err => {
+        console.error('[UI] Error importing monaco module:', err);
+        if (retryCount < maxRetries) {
+            setTimeout(() => updateMonacoSafely(retryCount + 1, maxRetries), 1000);
+        }
+    });
+}
+
+function initCameraSelector() {
+    if (!cameraSelector) {
+        console.warn('Camera selector not found');
+        return;
+    }
+
+    // Clear existing options
+    cameraSelector.innerHTML = '';
+    
+    // Add avatar rig option
+    const avatarRigOption = document.createElement('option');
+    avatarRigOption.value = 'avatar-rig';
+    avatarRigOption.textContent = 'Avatar Rig';
+    cameraSelector.appendChild(avatarRigOption);
+    
+    // Add event listener for camera changes
+    cameraSelector.addEventListener('change', (e) => {
+        const selectedCamera = e.target.value;
+        handleCameraChange({ target: { value: selectedCamera } });
+    });
+}
+
+function updateCameraSelector() {
+    if (!cameraSelector) {
+        console.warn('Camera selector not found');
+        return;
+    }
+
+    // Store current selection
+    const currentSelection = cameraSelector.value;
+    
+    // Clear existing options
+    cameraSelector.innerHTML = '';
+    
+    // Add avatar rig option
+    const avatarRigOption = document.createElement('option');
+    avatarRigOption.value = 'avatar-rig';
+    avatarRigOption.textContent = 'Avatar Rig';
+    cameraSelector.appendChild(avatarRigOption);
+    
+    // Restore previous selection if it still exists
+    if (currentSelection) {
+        cameraSelector.value = currentSelection;
+    } else {
+        cameraSelector.value = 'avatar-rig';
+    }
 } 

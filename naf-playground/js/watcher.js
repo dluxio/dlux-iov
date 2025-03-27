@@ -7,13 +7,44 @@
  * when changes are detected.
  */
 
-import { getState, setState } from './state.js';
-import { updateMonacoEditor } from './monaco.js';
+import { getState, setState, updateEntityState } from './state.js';
 import { logAction } from './debug.js';
+import {
+  shouldSkipAttribute,
+  parseVector,
+  vectorToString,
+  extractGeometryData,
+  cleanEntityData,
+  extractEntityAttributes
+} from './entity-utils.js';
+
+import {
+  INTERNAL_ATTRIBUTES,
+  PRESERVED_DATA_ATTRIBUTES,
+  VECTOR_ATTRIBUTES,
+  COMPONENT_BASED_TYPES,
+  STANDARD_PRIMITIVES,
+  GEOMETRY_ATTRIBUTES,
+  VECTOR_DEFAULTS,
+  GEOMETRY_DEFAULTS,
+  SYSTEM_ENTITY_TYPES,
+  SYSTEM_ENTITY_IDS,
+  SYSTEM_COMPONENTS,
+  SYSTEM_DATA_ATTRIBUTES,
+  FILTERED_ENTITY_TYPES,
+  FILTERED_ENTITY_IDS,
+  FILTERED_COMPONENTS,
+  FILTERED_DATA_ATTRIBUTES,
+  PANEL_IDS,
+  WATCHER_CONFIG,
+  EXCLUDED_ATTRIBUTES
+} from './config.js';
+
+import { skyManager } from './sky-manager.js';
 
 // Constants
-const PANEL_ID = 'watcher-panel';
-const THROTTLE_TIME = 2000; // ms between saves
+const PANEL_ID = PANEL_IDS.WATCHER;
+const THROTTLE_TIME = WATCHER_CONFIG.THROTTLE_TIME;
 
 // State variables
 let watcherPanel = null;
@@ -31,8 +62,8 @@ const entityRegistry = new Map();
 
 // Configuration
 const config = {
-  autoSaveDelay: 1000, // ms to wait before auto-saving
-  debugMode: false,    // enable debug logging
+  autoSaveDelay: WATCHER_CONFIG.AUTO_SAVE_DELAY,
+  debugMode: WATCHER_CONFIG.DEBUG_MODE
 };
 
 // Create global reference
@@ -69,6 +100,9 @@ if (window.AFRAME) {
       if (now - this.lastCheck < 50) return;
       this.lastCheck = now;
       
+      // Skip if this is a system entity
+      if (isSystemEntity(this.el)) return;
+      
       // Detect changes
       if (this.hasComponentChanges()) {
         // Trigger save with a source that identifies this component
@@ -91,16 +125,14 @@ if (window.AFRAME) {
     },
     
     captureBaseline: function() {
-      // Capture current component data as a baseline
-      this.originalData = {};
-      
       // Skip if this is a system entity
       if (isSystemEntity(this.el)) return;
       
       // Get all components on this entity
       const componentNames = Object.keys(this.el.components || {});
       
-      // Store current values
+      // Store original data for each component
+      this.originalData = {};
       componentNames.forEach(name => {
         // Skip the watcher itself
         if (name === 'entity-watcher') return;
@@ -108,16 +140,10 @@ if (window.AFRAME) {
         // Skip raycaster and cursor
         if (name === 'raycaster' || name === 'cursor') return;
         
-        // Try to get component data
+        // Store component data
         const comp = this.el.components[name];
-        if (comp && comp.data) {
-          try {
-            // Make deep copy of data
-            this.originalData[name] = JSON.parse(JSON.stringify(comp.data));
-          } catch (e) {
-            // For components we can't JSON stringify, just store reference
-            this.originalData[name] = comp.data;
-          }
+        if (comp) {
+          this.originalData[name] = { ...comp.data };
         }
       });
     },
@@ -865,6 +891,17 @@ function registerEntity(entity) {
     lastUpdated: Date.now()
   });
   
+  // Ensure entity has watcher component
+  if (!entity.getAttribute('entity-watcher')) {
+    entity.setAttribute('entity-watcher', '');
+  }
+
+  // Capture initial entity data
+  const entityData = captureEntityData(entity);
+  
+  // Update state with this entity
+  updateEntityState(id, entityData, 'registration');
+  
   // Update entity count
   updateEntityCount();
 }
@@ -1005,40 +1042,31 @@ function updateEntityCount() {
 }
 
 /**
- * Check if an entity is a system entity that should be ignored
+ * Check if an entity is a system entity
  * @param {Element} entity - Entity to check
- * @returns {boolean} - Whether the entity is a system entity
+ * @returns {boolean} True if entity is a system entity
  */
 function isSystemEntity(entity) {
-  // Skip system entities by ID
-  const systemIds = [
-    'camera', 'builder-camera', 'rig', 'default-light', 'directional-light',
-    'ambient-light', 'sky', 'cameraRig', 'cursor', 'default-cursor'
-  ];
-  
-  if (entity.id && systemIds.includes(entity.id)) {
-    return true;
-  }
-  
-  // Skip inspector helper entities and invisible entities
-  if (entity.classList && entity.classList.contains('inspector-helper')) {
-    return true;
-  }
-  
-  // Skip entities with raycaster or cursor components
-  if (entity.getAttribute && (
-    entity.getAttribute('raycaster') !== null ||
-    entity.getAttribute('cursor') !== null
-  )) {
-    return true;
-  }
-  
-  // Skip entities belonging to the inspector
-  if (entity.closest && entity.closest('.a-inspector, .a-dom-wrapper')) {
-    return true;
-  }
-  
-  return false;
+    if (!entity) return false;
+    
+    // Check if it's a sky entity first
+    if (skyManager.isSkyEntity(entity)) return false;
+    
+    // Check if it's an environment entity
+    if (entity.id === 'environment') return false;
+    
+    // Check system entity IDs
+    if (SYSTEM_ENTITY_IDS.includes(entity.id)) return true;
+    
+    // Check system components
+    const hasSystemComponent = SYSTEM_COMPONENTS.some(comp => entity.hasAttribute(comp));
+    if (hasSystemComponent) return true;
+    
+    // Check system data attributes
+    const hasSystemDataAttr = SYSTEM_DATA_ATTRIBUTES.some(attr => entity.hasAttribute(attr));
+    if (hasSystemDataAttr) return true;
+    
+    return false;
 }
 
 /**
@@ -1156,15 +1184,27 @@ function setupInspectorHooks() {
  * Watch for inspector gizmo interactions (transform controls)
  */
 function watchInspectorGizmos() {
-  // Since the gizmos operate somewhat outside A-Frame's component system,
-  // we need to add specific detection for them
-
+  let transformActive = false;
+  let pendingUpdate = false;
+  
   // Function to check if transform controls are active
   function checkForTransformControls() {
     const transformControls = document.querySelector('.transformControls');
-    if (transformControls && transformControls.classList.contains('active')) {
-      // If transform controls are active, we might have missed some updates
-      throttledSaveChanges('transform-controls-active');
+    const isActive = transformControls && transformControls.classList.contains('active');
+    
+    // If transform state changed
+    if (isActive !== transformActive) {
+      transformActive = isActive;
+      
+      // If transform ended, trigger an update
+      if (!isActive && !pendingUpdate) {
+        pendingUpdate = true;
+        // Wait a bit for A-Frame to finish updating
+        setTimeout(() => {
+          captureAndSaveChanges('inspector-transform');
+          pendingUpdate = false;
+        }, 100);
+      }
     }
   }
   
@@ -1176,14 +1216,53 @@ function watchInspectorGizmos() {
     }
     
     checkForTransformControls();
-  }, 1000);
+  }, 200); // More frequent checks for better responsiveness
   
-  // Also check on mouseup events, which is when transform operations typically end
+  // Watch for inspector property changes
+  const observer = new MutationObserver((mutations) => {
+    if (!document.body.classList.contains('aframe-inspector-opened')) return;
+    
+    mutations.forEach(mutation => {
+      if (mutation.type === 'attributes' || 
+          (mutation.type === 'childList' && mutation.target.closest('.property-row'))) {
+        // Debounce the update
+        if (!pendingUpdate) {
+          pendingUpdate = true;
+          setTimeout(() => {
+            captureAndSaveChanges('inspector-property-change');
+            pendingUpdate = false;
+          }, 250);
+        }
+      }
+    });
+  });
+  
+  // Observe the inspector panel for changes
+  const inspectorPanel = document.querySelector('.a-inspector');
+  if (inspectorPanel) {
+    observer.observe(inspectorPanel, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+  }
+  
+  // Handle mouseup events for transform operations
   document.addEventListener('mouseup', () => {
     if (!document.body.classList.contains('aframe-inspector-opened')) return;
     
-    // Short delay to allow for A-Frame to update entity
-    setTimeout(checkForTransformControls, 100);
+    // If transform was active, ensure we capture the final state
+    if (transformActive) {
+      transformActive = false;
+      if (!pendingUpdate) {
+        pendingUpdate = true;
+        setTimeout(() => {
+          captureAndSaveChanges('inspector-transform-end');
+          pendingUpdate = false;
+        }, 100);
+      }
+    }
   });
 }
 
@@ -1192,38 +1271,27 @@ function watchInspectorGizmos() {
  * @param {string} source - Source of the changes
  */
 function throttledSaveChanges(source = 'unknown') {
-  // Set change pending flag
   changesPending = true;
-  
-  // Update status to show changes are pending
   updateStatus('Changes detected...', 'saving');
   
-  // Log the source if in debug mode
   if (config.debugMode) {
     console.log(`[Watcher] Changes detected from: ${source}`);
   }
   
-  // Cancel any existing timeout
   if (window._watcherSaveTimeout) {
     clearTimeout(window._watcherSaveTimeout);
   }
   
-  // Get current time to check throttling
   const now = Date.now();
-  
-  // Determine delay based on last save time
   const delay = now - lastSaveTime > THROTTLE_TIME * 2 ? 
     Math.min(300, config.autoSaveDelay) : config.autoSaveDelay;
   
-  // Set a new timeout for saving
   window._watcherSaveTimeout = setTimeout(() => {
-    // Only save if changes are still pending
     if (changesPending) {
       captureAndSaveChanges(source);
     }
   }, delay);
   
-  // Update UI immediately for better feedback
   updateEntityCount();
 }
 
@@ -1239,358 +1307,123 @@ export function saveEntitiesToState(source = 'unknown') {
 }
 
 /**
- * Capture all entities and save changes to application state
- * @param {string} source - Source of the save operation
- * @returns {Object} - The updated entities state
+ * Capture and save changes to state
+ * @param {string} [source='unknown'] - Source of the save operation
  */
-function captureAndSaveChanges(source = 'unknown') {
-  console.log(`[Watcher] Capturing changes from: ${source}`);
-  updateStatus('Saving changes...', 'saving');
-  
-  try {
-    // Reset the changes pending flag
-    changesPending = false;
+function captureAndSaveChanges(source) {
+    console.log(`Capturing changes from ${source}...`);
     
-    // Update the last save time
-    lastSaveTime = Date.now();
-    
-    // Get the scene
+    // Get all entities in the scene
     const scene = document.querySelector('a-scene');
     if (!scene) {
-      console.error('[Watcher] Cannot save - no scene found');
-      updateStatus('Error: No scene found', 'error');
-      return null;
+        console.error('No scene found');
+        return;
     }
     
-    // Debug logging for DOM element detection
-    console.log('[Watcher Debug] Checking scene for A-Frame elements:');
+    // Get environment entity
+    const environment = scene.querySelector('#environment');
+    if (environment) {
+        // Update environment state
+        const state = getState();
+        const environmentState = {
+            id: 'environment',
+            type: 'environment',
+            currentPreset: state.environment?.currentPreset || 'default',
+            sky: state.sky,
+            lights: []
+        };
+        
+        // Get all lights from environment
+        environment.querySelectorAll('[light]').forEach(light => {
+            const lightState = {
+                id: light.id,
+                type: 'light',
+                uuid: light.dataset.entityUuid || generateEntityId('light'),
+                light: {}
+            };
+            
+            // Parse light attributes
+            const lightAttr = light.getAttribute('light');
+            if (lightAttr) {
+                lightAttr.split(';').forEach(prop => {
+                    const [key, value] = prop.split(':').map(s => s.trim());
+                    if (key && value) {
+                        lightState.light[key] = value;
+                    }
+                });
+            }
+            
+            environmentState.lights.push(lightState);
+        });
+        
+        setState({ environment: environmentState });
+    }
     
-    // Direct query for specific primitives to verify they're detected
-    const boxes = scene.querySelectorAll('a-box');
-    const spheres = scene.querySelectorAll('a-sphere');
-    const cylinders = scene.querySelectorAll('a-cylinder');
-    const dodecahedrons = scene.querySelectorAll('a-dodecahedron');
-    
-    console.log(`[Watcher Debug] Direct element counts: boxes=${boxes.length}, spheres=${spheres.length}, cylinders=${cylinders.length}, dodecahedrons=${dodecahedrons.length}`);
-    
-    // Log each primitive for debugging
-    dodecahedrons.forEach((element, i) => {
-      console.log(`[Watcher Debug] Dodecahedron ${i}:`, {
-        id: element.id,
-        uuid: element.dataset.entityUuid,
-        position: element.getAttribute('position'),
-        isConnected: element.isConnected,
-        parent: element.parentNode?.tagName
-      });
-    });
-    
-    // Get current state to compare
-    const currentState = getState();
-    const oldEntities = currentState.entities || {};
-    
-    // Track if any changes were detected
-    let changesDetected = false;
-    
-    // Current entities object to build
+    // Get all user entities
     const entities = {};
     const entityMapping = {};
     
-    // Find all entities in the scene, including nested ones
-    // This ensures we catch ALL A-Frame entities regardless of nesting level
-    const sceneEntities = getAllAFrameEntities(scene);
-    
-    console.log(`[Watcher Debug] Found ${sceneEntities.length} total A-Frame entities in scene`);
-    let count = 0;
-    
-    // First, collect all entity IDs that exist in the DOM
-    const domEntityIds = new Set();
-    
-    // Process each entity in the DOM
-    sceneEntities.forEach(entity => {
-      // Skip system entities
-      if (isSystemEntity(entity)) return;
-      
-      count++;
-      
-      // Get entity ID or UUID
-      let id = entity.dataset.entityUuid || entity.id;
-      if (!id) return; // Skip entities without ID (shouldn't happen)
-      
-      // For backward compatibility, if entity has an ID but no UUID, 
-      // check if it's mapped in the state
-      if (!entity.dataset.entityUuid && entity.id && currentState.entityMapping[entity.id]) {
-        id = currentState.entityMapping[entity.id];
-        // Set the UUID on the element to ensure future consistency
-        entity.dataset.entityUuid = id;
-      }
-      
-      // Add to the set of DOM entity IDs
-      domEntityIds.add(id);
-      
-      // Capture entity data
-      const entityData = captureEntityData(entity);
-      
-      // Mark entity as definitely existing in DOM
-      entityData.DOM = true;
-      
-      // Check if entity has changed
-      if (!oldEntities[id] || !deepEqual(oldEntities[id], entityData)) {
-        changesDetected = true;
+    scene.querySelectorAll('[data-entity-uuid]').forEach(entity => {
+        // Skip system entities
+        if (isSystemEntity(entity)) return;
         
-        if (config.debugMode) {
-          console.log(`[Watcher] Entity changed: ${id}`);
+        const uuid = entity.dataset.entityUuid;
+        if (!uuid) return;
+        
+        const type = entity.tagName.toLowerCase().replace('a-', '');
+        const properties = extractEntityAttributes(entity, type);
+        
+        // Clean up the properties
+        const cleanedProperties = {};
+        for (const [key, value] of Object.entries(properties)) {
+            if (!EXCLUDED_ATTRIBUTES.includes(key)) {
+                cleanedProperties[key] = value;
+            }
         }
-      }
-      
-      // Add to entities object
-      entities[id] = entityData;
-      
-      // Add to entity mapping if entity has an ID
-      if (entity.id) {
-        entityMapping[entity.id] = id;
-      }
+        
+        entities[uuid] = {
+            type,
+            ...cleanedProperties
+        };
+        
+        entityMapping[uuid] = entity.id;
     });
     
-    // Now check for entities in the old state that are not in the DOM
-    Object.keys(oldEntities || {}).forEach(id => {
-      if (!domEntityIds.has(id)) {
-        // Entity is not in DOM - mark it explicitly
-        if (oldEntities[id]) {
-          entities[id] = { ...oldEntities[id], DOM: false };
-          
-          // If the type wasn't already set, make sure it's included
-          if (!entities[id].type && oldEntities[id].type) {
-            entities[id].type = oldEntities[id].type;
-          }
-          
-          changesDetected = true;
-          
-          if (config.debugMode) {
-            console.log(`[Watcher] Entity not in DOM: ${id}`);
-          }
-        }
-      }
+    // Update state
+    setState({
+        entities,
+        entityMapping
     });
     
-    // If no changes and not a manual save, don't update state
-    if (!changesDetected && source !== 'manual-save') {
-      console.log('[Watcher] No changes detected, skipping save');
-      updateStatus('No changes detected', 'info');
-      
-      // Still update the last update time
-      if (lastUpdateEl) {
-        lastUpdateEl.textContent = new Date().toLocaleTimeString();
-      }
-      
-      return entities;
-    }
-    
-    // Update the state with new entities
-    setState({ 
-      entities: entities,
-      entityMapping: entityMapping
+    // Log the action
+    logAction('Scene changes captured', {
+        source,
+        entityCount: Object.keys(entities).length
     });
-    
-    // Debug logging to check DOM status in state
-    console.log('[Watcher Debug] Entity DOM status check:');
-    Object.keys(entities).forEach(id => {
-      const entity = entities[id];
-      const elementExists = !!document.querySelector(`[data-entity-uuid="${id}"]`);
-      console.log(`[Watcher Debug] Entity ${id} (${entity.type}): DOM in state=${entity.DOM}, DOM element exists=${elementExists}`);
-    });
-    
-    // Update the Monaco editor if available
-    if (typeof updateMonacoEditor === 'function') {
-      try {
-        updateMonacoEditor(true); // Force update
-      } catch (e) {
-        console.error('[Watcher] Error updating Monaco editor:', e);
-      }
-    }
-    
-    // Update entity count display
-    updateEntityCount(count);
-    
-    // Update status to success
-    updateStatus('Changes saved', 'success');
-    
-    // Update last update time
-    if (lastUpdateEl) {
-      lastUpdateEl.textContent = new Date().toLocaleTimeString();
-    }
-    
-    // Emit a custom event that other modules can listen for
-    document.dispatchEvent(new CustomEvent('watcher-changes-saved', {
-      detail: {
-        entityCount: count,
-        source: source,
-        changesDetected: changesDetected
-      }
-    }));
-    
-    // After a short delay, update status to ready
-    setTimeout(() => {
-      updateStatus('Ready', 'info');
-    }, 2000);
-    
-    logAction(`Saved ${count} entities`);
-    
-    return entities;
-  } catch (error) {
-    console.error('[Watcher] Error saving changes:', error);
-    updateStatus('Error saving changes', 'error');
-    
-    // Reset the changes pending flag so it can be tried again
-    changesPending = true;
-    
-    return null;
-  }
 }
 
 /**
- * Capture data for a single entity
- * @param {Element} entity - Entity to capture
- * @returns {Object} - Entity data
+ * Capture entity data for state
+ * @param {Element} entity - Entity to capture data from
+ * @returns {Object} Entity data
  */
 function captureEntityData(entity) {
-  const data = {};
-  
-  // Get the tag name of the entity to determine type
-  const tagName = entity.tagName.toLowerCase();
-  data.type = tagName.startsWith('a-') ? tagName.substring(2) : 'entity';
-  
-  // Get the entity ID and UUID
-  if (entity.id) {
-    data.id = entity.id;
+  try {
+    // Get basic type from tag name
+    let type = entity.tagName.toLowerCase().replace('a-', '');
+    
+    // Check for component-based type
+    const geometry = entity.getAttribute('geometry');
+    if (type === 'entity' && geometry?.primitive) {
+      type = geometry.primitive;
+    }
+
+    // Extract attributes using standardized function
+    return extractEntityAttributes(entity, type);
+  } catch (error) {
+    console.error('Error extracting entity data:', error);
+    return { type };
   }
-  
-  // Initial DOM status - can be overridden later
-  data.DOM = true;
-  
-  // Get only explicitly set attributes using getDOMAttribute
-  // This avoids capturing all the default values that A-Frame sets internally
-  
-  // Always capture position, rotation, scale if they're set explicitly
-  if (entity.hasAttribute('position')) {
-    const posAttr = entity.getDOMAttribute('position');
-    if (posAttr) {
-      data.position = typeof posAttr === 'string' 
-        ? posAttr.split(' ').reduce((obj, val, idx) => {
-            const axes = ['x', 'y', 'z'];
-            if (idx < 3) obj[axes[idx]] = parseFloat(val);
-            return obj;
-          }, {})
-        : posAttr;
-    }
-  }
-  
-  if (entity.hasAttribute('rotation')) {
-    const rotAttr = entity.getDOMAttribute('rotation');
-    if (rotAttr) {
-      data.rotation = typeof rotAttr === 'string'
-        ? rotAttr.split(' ').reduce((obj, val, idx) => {
-            const axes = ['x', 'y', 'z'];
-            if (idx < 3) obj[axes[idx]] = parseFloat(val);
-            return obj;
-          }, {})
-        : rotAttr;
-    }
-  }
-  
-  if (entity.hasAttribute('scale')) {
-    const scaleAttr = entity.getDOMAttribute('scale');
-    if (scaleAttr) {
-      data.scale = typeof scaleAttr === 'string'
-        ? scaleAttr.split(' ').reduce((obj, val, idx) => {
-            const axes = ['x', 'y', 'z'];
-            if (idx < 3) obj[axes[idx]] = parseFloat(val);
-            return obj;
-          }, {})
-        : scaleAttr;
-    }
-  }
-  
-  // Initialize material and geometry objects if needed
-  data.material = {};
-  data.geometry = { primitive: data.type };
-  
-  // Get all other attributes that are explicitly set
-  Array.from(entity.attributes).forEach(attr => {
-    const name = attr.name;
-    
-    // Skip attributes we've already handled or that we don't want to capture
-    if (['position', 'rotation', 'scale', 'id', 'class', 'aframe-injected'].includes(name) || 
-        name.startsWith('data-') ||
-        name === 'entity-watcher') {
-      return;
-    }
-    
-    // Handle color - always store in material
-    if (name === 'color') {
-      const colorAttr = entity.getDOMAttribute('color');
-      if (colorAttr) {
-        data.material.color = colorAttr;
-      }
-      return;
-    }
-    
-    // Handle material attributes
-    if (name === 'material') {
-      const materialAttr = entity.getDOMAttribute('material');
-      if (materialAttr) {
-        // Merge with existing material properties
-        data.material = { ...data.material, ...materialAttr };
-      }
-      return;
-    }
-    
-    // Handle geometry attributes
-    if (name === 'geometry') {
-      const geometryAttr = entity.getDOMAttribute('geometry');
-      if (geometryAttr) {
-        // Merge with existing geometry properties
-        data.geometry = { ...data.geometry, ...geometryAttr };
-      }
-      return;
-    }
-    
-    // Handle primitive-specific attributes - store in geometry
-    const primitiveAttrs = {
-      'box': ['width', 'height', 'depth'],
-      'sphere': ['radius'],
-      'cylinder': ['radius', 'height'],
-      'plane': ['width', 'height'],
-      'dodecahedron': ['radius'],
-      'octahedron': ['radius'],
-      'tetrahedron': ['radius'],
-      'icosahedron': ['radius']
-    };
-    
-    // If this is a primitive-specific attribute, store it in geometry
-    if (data.type in primitiveAttrs && primitiveAttrs[data.type].includes(name)) {
-      const attrValue = entity.getDOMAttribute(name);
-      if (attrValue !== undefined && attrValue !== null) {
-        data.geometry[name] = attrValue;
-      }
-      return;
-    }
-    
-    // For other attributes, get the DOM attribute value directly
-    const value = entity.getDOMAttribute(name);
-    if (value !== undefined && value !== null) {
-      data[name] = value;
-    }
-  });
-  
-  // Clean up empty objects
-  if (Object.keys(data.material).length === 0) {
-    delete data.material;
-  }
-  if (Object.keys(data.geometry).length === 1 && data.geometry.primitive) {
-    delete data.geometry;
-  }
-  
-  return data;
 }
 
 /**
@@ -1731,4 +1564,278 @@ window.watcher = {
   capture: captureEntityBaseline,
   checkInspectorState: checkInspectorState,
   config: config
-}; 
+};
+
+/**
+ * Enhanced entity watcher for tracking DOM changes
+ */
+
+class EntityWatcher {
+  constructor() {
+    this.pendingChanges = new Map();
+    this.updateTimeout = null;
+    this.isObserving = false;
+    this.observer = new MutationObserver(this.handleMutations.bind(this));
+  }
+
+  /**
+   * Start observing DOM changes
+   */
+  start() {
+    if (this.isObserving) return;
+
+    const scene = document.querySelector('a-scene');
+    if (!scene) {
+      console.warn('No A-Frame scene found, watcher not started');
+      return;
+    }
+
+    this.observer.observe(scene, {
+      childList: true,
+      attributes: true,
+      subtree: true,
+      attributeOldValue: true,
+      characterData: false
+    });
+
+    this.isObserving = true;
+    console.log('Entity watcher started');
+  }
+
+  /**
+   * Stop observing DOM changes
+   */
+  stop() {
+    if (!this.isObserving) return;
+    this.observer.disconnect();
+    this.isObserving = false;
+    this.clearPendingChanges();
+    console.log('Entity watcher stopped');
+  }
+
+  /**
+   * Handle DOM mutations
+   * @param {MutationRecord[]} mutations - Array of mutation records
+   */
+  handleMutations(mutations) {
+    // Group mutations by entity
+    mutations.forEach(mutation => {
+      const entity = mutation.target;
+      
+      // Skip if not an A-Frame entity
+      if (!entity.tagName || !entity.tagName.toLowerCase().startsWith('a-')) return;
+      
+      // Get entity type
+      const type = entity.tagName.toLowerCase().replace('a-', '');
+      
+      // Skip filtered entity types
+      if (FILTERED_ENTITY_TYPES.includes(type)) return;
+      
+      // Skip if no UUID
+      const uuid = entity.dataset.entityUuid;
+      if (!uuid) return;
+
+      // Skip system entities (but not sky)
+      if (isSystemEntity(entity) && !skyManager.isSkyEntity(entity)) return;
+
+      // Queue change for processing
+      this.queueChange(uuid, entity);
+    });
+
+    // Schedule update
+    this.scheduleUpdate();
+  }
+
+  /**
+   * Queue a change for processing
+   * @param {string} uuid - Entity UUID
+   * @param {Element} entity - Entity element
+   */
+  queueChange(uuid, entity) {
+    this.pendingChanges.set(uuid, entity);
+  }
+
+  /**
+   * Schedule a state update
+   */
+  scheduleUpdate() {
+    if (this.updateTimeout) return;
+    
+    this.updateTimeout = setTimeout(() => {
+      this.processPendingChanges();
+    }, 100); // Debounce time
+  }
+
+  /**
+   * Process all pending changes
+   */
+  processPendingChanges() {
+    if (this.pendingChanges.size === 0) return;
+
+    console.log(`Processing ${this.pendingChanges.size} pending changes`);
+
+    this.pendingChanges.forEach((entity, uuid) => {
+      const data = this.extractEntityData(entity);
+      if (data) {
+        updateEntityState(uuid, data, 'dom');
+      }
+    });
+
+    this.clearPendingChanges();
+  }
+
+  /**
+   * Clear all pending changes
+   */
+  clearPendingChanges() {
+    this.pendingChanges.clear();
+    if (this.updateTimeout) {
+      clearTimeout(this.updateTimeout);
+      this.updateTimeout = null;
+    }
+  }
+
+  /**
+   * Extract entity data from DOM element
+   * @param {Element} entity - Entity element
+   * @returns {Object} Entity data
+   */
+  extractEntityData(entity) {
+    try {
+      // Get basic type from tag name
+      let type = entity.tagName.toLowerCase().replace('a-', '');
+      
+      // Check for component-based type
+      const geometry = entity.getAttribute('geometry');
+      if (type === 'entity' && geometry?.primitive) {
+        type = geometry.primitive;
+      }
+
+      // Extract attributes using standardized function
+      return extractEntityAttributes(entity, type);
+    } catch (error) {
+      console.error('Error extracting entity data:', error);
+      return { type };
+    }
+  }
+}
+
+// Create singleton instance
+const entityWatcher = new EntityWatcher();
+
+/**
+ * Start the watcher system
+ */
+export function startWatcher() {
+    console.log('[Watcher] Starting watcher system...');
+    
+    // Initialize the watcher if not already done
+    if (!window.watcher) {
+        console.log('[Watcher] Creating new watcher instance');
+        window.watcher = new EntityWatcher();
+    }
+    
+    // Ensure watcher methods are available
+    if (!window.watcher.saveEntitiesToState) {
+        console.log('[Watcher] Setting up watcher methods');
+        window.watcher.saveEntitiesToState = saveEntitiesToState;
+    }
+    
+    // Start the watcher
+    window.watcher.start();
+    
+    // Set up mutation observer for scene changes
+    setupSceneObserver();
+    
+    // Set up A-Frame hooks
+    setupAFrameHooks();
+    
+    // Set up inspector detection
+    setupInspectorDetection();
+    
+    console.log('[Watcher] Watcher system started successfully');
+    
+    // Initial state capture
+    setTimeout(() => {
+        console.log('[Watcher] Performing initial state capture');
+        saveEntitiesToState('watcher-start');
+    }, 1000);
+    
+    return window.watcher;
+}
+
+// Add a function to safely update Monaco
+function updateMonacoSafely(retryCount = 0, maxRetries = 3) {
+    console.log(`[Watcher] Attempting to update Monaco editor (attempt ${retryCount + 1}/${maxRetries + 1})`);
+    
+    // Dynamic import to avoid circular dependencies
+    import('./monaco.js').then(monaco => {
+        try {
+            if (typeof monaco.updateMonacoEditor === 'function') {
+                monaco.updateMonacoEditor(true); // Force update
+                console.log('[Watcher] Monaco editor updated successfully');
+            } else if (retryCount < maxRetries) {
+                console.log('[Watcher] Monaco editor not available, will retry after delay');
+                setTimeout(() => updateMonacoSafely(retryCount + 1, maxRetries), 1000);
+            } else {
+                console.error('[Watcher] Failed to update Monaco editor after all retries');
+            }
+        } catch (error) {
+            console.error('[Watcher] Error during Monaco update:', error);
+            if (retryCount < maxRetries) {
+                setTimeout(() => updateMonacoSafely(retryCount + 1, maxRetries), 1000);
+            }
+        }
+    }).catch(err => {
+        console.error('[Watcher] Error importing monaco module:', err);
+        if (retryCount < maxRetries) {
+            setTimeout(() => updateMonacoSafely(retryCount + 1, maxRetries), 1000);
+        }
+    });
+}
+
+/**
+ * Watch for entity changes in the scene
+ * @param {HTMLElement} scene - The A-Frame scene element
+ */
+export function watchScene(scene) {
+    console.log('Setting up scene watcher...');
+    
+    // Create a MutationObserver to watch for entity changes
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            const entity = mutation.target;
+            
+            // Skip if not an A-Frame entity
+            if (!entity.tagName || !entity.tagName.toLowerCase().startsWith('a-')) {
+                return;
+            }
+            
+            // Get entity type
+            const type = entity.tagName.toLowerCase().replace('a-', '');
+            
+            // Skip filtered entity types
+            if (FILTERED_ENTITY_TYPES.includes(type)) {
+                return;
+            }
+            
+            // Process all other entity changes
+            const id = entity.dataset.entityUuid || entity.id;
+            if (id) {
+                // Queue change for processing
+                entityWatcher.queueChange(id, entity);
+                entityWatcher.scheduleUpdate();
+            }
+        });
+    });
+    
+    // Start observing the scene
+    observer.observe(scene, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['id', 'data-entity-uuid', 'position', 'rotation', 'scale', 'color', 'material', 'geometry']
+    });
+    
+    console.log('Scene watcher initialized');
+} 

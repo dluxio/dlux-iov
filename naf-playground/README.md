@@ -106,4 +106,100 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [A-Frame](https://aframe.io/)
 - [Networked A-Frame](https://github.com/networked-aframe/networked-aframe)
-- [Monaco Editor](https://microsoft.github.io/monaco-editor/) 
+- [Monaco Editor](https://microsoft.github.io/monaco-editor/)
+
+## Documentation Guide
+
+### Code Documentation Standards
+
+1. **File Headers**
+   ```javascript
+   /**
+    * file-name.js - Brief description of the file's purpose
+    * 
+    * Detailed description of the file's functionality and role in the system.
+    * Include any important notes about dependencies or usage.
+    */
+   ```
+
+2. **Class Documentation**
+   ```javascript
+   /**
+    * ClassName - Brief description
+    * 
+    * Detailed description of the class's purpose and functionality.
+    * Include any important notes about usage or lifecycle.
+    */
+   class ClassName {
+     /**
+      * Constructor description
+      * @param {Type} paramName - Parameter description
+      */
+     constructor(paramName) {
+       // Implementation
+     }
+   }
+   ```
+
+3. **Function Documentation**
+   ```javascript
+   /**
+    * Function description
+    * @param {Type} paramName - Parameter description
+    * @returns {Type} Description of return value
+    * @throws {ErrorType} Description of when this error is thrown
+    */
+   function functionName(paramName) {
+     // Implementation
+   }
+   ```
+
+4. **Constants and Configuration**
+   - Group related constants together
+   - Use UPPER_SNAKE_CASE for constant names
+   - Document the purpose and valid values
+   ```javascript
+   /**
+    * Configuration for specific feature
+    * @type {Object}
+    */
+   export const FEATURE_CONFIG = {
+     CONSTANT_NAME: 'value', // Description
+   };
+   ```
+
+### Best Practices
+
+1. **Comments**
+   - Use comments to explain "why" not "what"
+   - Keep comments up to date with code changes
+   - Remove commented-out code
+
+2. **Naming Conventions**
+   - Use camelCase for variables and functions
+   - Use PascalCase for classes
+   - Use UPPER_SNAKE_CASE for constants
+   - Use descriptive, self-documenting names
+
+3. **Code Organization**
+   - Group related functionality together
+   - Keep files focused and single-purpose
+   - Use consistent file structure:
+     ```javascript
+     // Imports
+     import { ... } from './module.js';
+     
+     // Constants
+     const CONSTANT = 'value';
+     
+     // Class/Function definitions
+     class ClassName { ... }
+     
+     // Exports
+     export { ... };
+     ```
+
+4. **Error Handling**
+   - Use the standardized error handling system
+   - Always include context in error messages
+   - Document error conditions in JSDoc 

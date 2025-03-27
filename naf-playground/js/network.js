@@ -2,7 +2,7 @@
  * Network.js - Networked A-Frame setup and synchronization
  */
 
-import { getState, setState, applyNetworkStateUpdate } from './state.js';
+import { getState, applyNetworkStateUpdate } from './state.js';
 import { logAction } from './debug.js';
 import { getUrlParams } from './utils.js';
 
@@ -22,6 +22,13 @@ export function initNetwork() {
     console.log('Initializing network module...');
     
     try {
+        // Listen for state changes to broadcast
+        document.addEventListener('state-changed', (event) => {
+            if (isConnected && event.detail.source !== 'network') {
+                broadcastStateUpdate(event.detail);
+            }
+        });
+
         setupNetworkedScene();
         console.log('Network module initialization complete');
         return Promise.resolve();
@@ -446,24 +453,40 @@ function updateNetworkStatus(status) {
  * @param {string} targetClientId - Optional target client ID (if null, broadcast to all)
  */
 export function broadcastStateUpdate(stateUpdate, targetClientId = null) {
-    // Only broadcast if connected
     if (!isConnected) {
-        console.warn('Cannot broadcast state update: not connected');
+        console.warn('Cannot broadcast update: not connected to network');
         return;
     }
-    
-    console.log('Broadcasting state update:', stateUpdate);
-    
-    // Send the update
-    if (targetClientId) {
-        // Send to specific client
-        NAF.connection.sendDataGuaranteed(targetClientId, 'state-update', stateUpdate);
-    } else {
-        // Broadcast to all clients
-        NAF.connection.broadcastDataGuaranteed('state-update', stateUpdate);
+
+    try {
+        // Get the current state
+        const state = getState();
+
+        // Create the network message
+        const message = {
+            type: 'update',
+            data: {
+                uuid: state.uuid,
+                data: stateUpdate
+            },
+            timestamp: Date.now()
+        };
+
+        // Broadcast using NAF
+        if (NAF && NAF.connection.isConnected()) {
+            if (targetClientId) {
+                // Send to specific client
+                NAF.connection.sendDataGuaranteed(targetClientId, 'state-update', message);
+            } else {
+                // Broadcast to all clients
+                NAF.connection.broadcastDataGuaranteed('state-update', message);
+            }
+        }
+
+        logAction('Broadcast state update to ' + (targetClientId ? targetClientId : 'all clients'));
+    } catch (error) {
+        console.error('Error broadcasting state update:', error);
     }
-    
-    logAction('Broadcast state update to ' + (targetClientId ? targetClientId : 'all clients'));
 }
 
 /**
