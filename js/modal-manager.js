@@ -28,23 +28,20 @@ export default {
     template: `<div>
     <slot name="trigger"></slot>
     <teleport to="body">
-      <Standard v-if="type === 'move'" 
+      <Standard v-if="type === 'move' && tokenprotocol.head_block && tokenuser.head_block" 
                 :func="func" 
                 :account="account" 
                 :tokenprotocol="tokenprotocol" 
-                :tokenstats="tokenstats" 
                 :tokenuser="tokenuser" 
                 @modalsign="$emit('modalsign', $event)" />
-      <Contract v-if="type === 'contract'" 
+      <Contract v-if="type === 'contract' && tokenprotocol.head_block && tokenuser.head_block" 
                 :account="account" 
                 :tokenprotocol="tokenprotocol" 
-                :tokenstats="tokenstats" 
                 :tokenuser="tokenuser" 
                 @modalsign="$emit('modalsign', $event)" />
-      <Election v-if="type === 'election'" 
+      <Election v-if="type === 'election' && tokenprotocol.head_block && tokenuser.head_block" 
                 :account="account" 
                 :tokenprotocol="tokenprotocol" 
-                :tokenstats="tokenstats" 
                 :tokenuser="tokenuser" 
                 @modalsign="$emit('modalsign', $event)" />
     </teleport>
