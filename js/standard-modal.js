@@ -26,7 +26,7 @@ export default {
         <h5 class="modal-title">{{ feat ? feat.string : "Loading" }} {{ tokenprotocol.token }}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form name="sendtokens" @submit.prevent="sendTokens">
+      <form name="sendtokens" @submit.prevent="moveTokens">
         <div class="modal-body text-start">
           <!-- From Field (Static) -->
           <label class="small mb-1" for="from">From</label>
