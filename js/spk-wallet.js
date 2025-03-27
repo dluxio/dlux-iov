@@ -1090,5 +1090,6 @@ export default {
         this.getTokenUser();
         this.getSNodes();
         this.getIPFSproviders();
+        this.getProtocols()
     },
 };
