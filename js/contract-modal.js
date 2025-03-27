@@ -156,7 +156,6 @@ export default {
     ...MCommon,
     ...MModals,
     AC() {
-      this.apiSelector(0)
       this.accountCheck(this.to).then(r => {
         this.ac = r
         if (this.amount) this.valid = true

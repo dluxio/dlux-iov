@@ -32,6 +32,16 @@ export default {
                 .catch(m => e(m))
         })
     },
+    Base64toNumber(chars) {
+        const glyphs =
+          "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+        var result = 0;
+        chars = chars.split("");
+        for (var e = 0; e < chars.length; e++) {
+          result = result * 64 + glyphs.indexOf(chars[e]);
+        }
+        return result;
+      },
     fancyBytes(bytes) {
         var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
         while (bytes > 1024) {
@@ -55,10 +65,23 @@ export default {
                 i = i.replace(c, "$1" + e + "$2");
         return (u ? "-" : "") + i + o;
     },
+    NumberToBase64(num) {
+        const glyphs =
+          "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+        var result = "";
+        while (num > 0) {
+          result = glyphs[num % 64] + result;
+          num = Math.floor(num / 64);
+        }
+        return result;
+      },
     pd(p) { //precision devision
         return parseFloat(1 / Math.pow(10, p)).toFixed(p)
     },
     pf(p) { //precision Factor
         return Math.pow(10, p)
     },
+    toFixed(n, digits) {
+        return parseFloat(n).toFixed(digits)
+      },
 };
