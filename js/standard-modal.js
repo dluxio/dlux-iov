@@ -151,7 +151,6 @@ export default {
       if (feature) {
         this.feat = feature;
       } else {
-        this.feat = { string: "Unrecognized Action" };
         this.error = "Feature not found";
       }
     }
