@@ -26,7 +26,7 @@ export default {
         type: { default: "move" },
     },
     template: `<div>
-    <slot name="trigger" :isDisabled="!isFeatureAvailable"></slot>
+    <slot name="trigger"></slot>
     <teleport to="body">
       <Standard v-if="type === 'move'" 
                 :func="func" 
@@ -55,11 +55,6 @@ export default {
         },
     },
     emits: ["modalsign"],
-    computed: {
-        isFeatureAvailable() {
-            return feature && feature.B
-        }
-    },
     mounted() {
         if (this.$slots.trigger) {
             const trigger = this.$el.querySelector('.trigger');
