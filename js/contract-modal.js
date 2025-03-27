@@ -79,7 +79,7 @@ export default {
     tokenuser: Object,
     test: false
   },
-  template: `<div class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  template: `
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content bg-darker text-white">
         <div class="modal-header">
@@ -137,8 +137,7 @@ export default {
           </div>
         </form>
       </div>
-    </div>
-  </div>`,
+    </div>`,
   data() {
     return {
       api: "",

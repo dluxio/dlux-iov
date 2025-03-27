@@ -19,7 +19,7 @@ export default {
       tokenuser: Object,
       test: { type: Boolean, default: false },
     },
-    template: `<div class="modal fade" role="dialog" aria-hidden="true">
+    template: `
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content bg-darker text-white">
       <div class="modal-header">
@@ -78,8 +78,7 @@ export default {
         </div>
       </form>
     </div>
-  </div>
-</div>`,
+  </div>`,
     data() {
         return {
             api: "",
