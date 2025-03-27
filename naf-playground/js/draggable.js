@@ -33,7 +33,7 @@ minimizeBtn.addEventListener('click', () => {
         uiContainer.style.height = '40px';
     } else {
         // If expanding, restore previous height
-        uiContainer.style.height = uiContainer.dataset.prevHeight || '80vh';
+        uiContainer.style.height = uiContainer.dataset.prevHeight || '600px';
     }
 });
 
@@ -43,16 +43,16 @@ maximizeBtn.addEventListener('click', () => {
         windowContent.classList.remove('collapsed');
         uiContainer.classList.remove('collapsed');
         minimizeBtn.textContent = '_';
-        uiContainer.style.height = uiContainer.dataset.prevHeight || '80vh';
+        uiContainer.style.height = uiContainer.dataset.prevHeight || '600px';
     }
 
     // Toggle maximize state
     if (uiContainer.classList.contains('maximized')) {
         // Restore previous size and position
-        uiContainer.style.width = uiContainer.dataset.prevWidth || '300px';
-        uiContainer.style.height = uiContainer.dataset.prevHeight || '80vh';
+        uiContainer.style.width = uiContainer.dataset.prevWidth || '400px';
+        uiContainer.style.height = uiContainer.dataset.prevHeight || '600px';
         uiContainer.style.top = uiContainer.dataset.prevTop || '20px';
-        uiContainer.style.right = uiContainer.dataset.prevRight || '20px';
+        uiContainer.style.left = uiContainer.dataset.prevLeft || '20px';
         uiContainer.classList.remove('maximized');
         maximizeBtn.textContent = '□';
         // Restore previous transform
@@ -62,11 +62,11 @@ maximizeBtn.addEventListener('click', () => {
         uiContainer.dataset.prevWidth = uiContainer.style.width;
         uiContainer.dataset.prevHeight = uiContainer.style.height;
         uiContainer.dataset.prevTop = uiContainer.style.top;
-        uiContainer.dataset.prevRight = uiContainer.style.right;
+        uiContainer.dataset.prevLeft = uiContainer.style.left;
         uiContainer.style.width = '100%';
         uiContainer.style.height = '100%';
         uiContainer.style.top = '0';
-        uiContainer.style.right = '0';
+        uiContainer.style.left = '0';
         uiContainer.classList.add('maximized');
         maximizeBtn.textContent = '❐';
         // Reset transform to origin
