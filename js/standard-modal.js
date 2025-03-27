@@ -54,7 +54,7 @@ export default {
               <input
                 :type="getInputType(field.type)"
                 :class="['form-control', 'text-white', 'bg-dark', 'border-dark', getIcon(key) ? 'ps-4' : '']"
-                :placeholder="Enter ${field.string.toLowerCase()}"
+                :placeholder="'Enter ' + field.string.toLowerCase()"
                 v-model="form[key]"
                 @input="validateField(key)"
                 @blur="field.check ? field.check : null"
