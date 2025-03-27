@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-Frame Scene Editor (Monaco)</title>
+
+    <!-- A-Frame core must load first -->
+    <script src="/js/aframe.min.js"></script>
+    
+    <!-- A-Frame Components - load after core -->
+    <script src="/js/aframe-extras.min.js"></script>
+    <script src="/js/aframe-environment-component.min.js"></script>
+    
+    <!-- Model Viewer -->
+    <script type="module" src="/js/model-viewer.min.js"></script>
+    
+    <!-- Additional styles -->
+    <link rel="stylesheet" href="/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
+    
+    <!-- Monaco Editor -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs/editor/editor.main.css">
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        /* Basic layout */
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .sidebar {
+            width: 200px;
+            background: #1B1B1B;
+            padding: 15px;
+            overflow-y: auto;
+            color: #fff;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .scene-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        .toolbar {
+            padding: 10px;
+            background: #1B1B1B;
+        }
+        
+        /* A-Frame scene and code panel */
+        #scene {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Style for the code panel */
+        #code-panel {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: #1e1e1e;
+            z-index: 10;
+            display: none;
+        }
+        
+        #monaco-editor {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Inspector related styles */
+        body.aframe-inspector-opened .sidebar,
+        body.aframe-inspector-opened .toolbar {
+            display: none !important;
+        }
+        
+        body:not(.aframe-inspector-opened) .toggle-edit {
+            display: none;
+        }
+        
+        body.aframe-inspector-opened .scene-container {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+        
+        /* Asset management */
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            padding: 5px;
+        }
+        
+        .asset-item {
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            transition: border-color 0.2s;
+        }
+        
+        .asset-item:hover {
+            border-color: #666;
+        }
+        
+        .asset-item.active {
+            border-color: #fff;
+        }
+        
+        .preview-wrapper {
+            width: 100%;
+            padding-bottom: 100%;
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+        
+        .preview-wrapper img,
+        .preview-wrapper video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Controls */
+        .geometry-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .geometry-buttons button {
+            width: 100%;
+            padding: 8px 5px;
+            background: #2c2c2c;
+            border: 1px solid #3c3c3c;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+        
+        .geometry-buttons button:hover {
+            background: #3c3c3c;
+            border-color: #4c4c4c;
+        }
+        
+        /* Brand header styles */
+        .brand-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .nav-logo {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .logotype {
+            font-family: 'Audiowide', sans-serif;
+            font-size: 24px;
+            margin: 5px 0;
+            color: #fff;
+        }
+        
+        /* SVG logo styling */
+        .cls-1 {
+            fill: #5D25FA;
+        }
+        
+        .cls-2 {
+            fill: #3a2cdd;
+        }
+        
+        .cls-3 {
+            fill: #9152FF;
+        }
+        
+        /* Effect buttons */
+        .effect-btn {
+            padding: 8px;
+            background: #2c2c2c;
+            border: 1px solid #3c3c3c;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .effect-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .effect-btn:hover {
+            background: #3c3c3c;
+        }
+        
+        /* Panel section */
+        .panel-section {
+            margin-bottom: 20px;
+        }
+        
+        /* SVG styling for geometry buttons */
+        .geometry-buttons svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.5;
+        }
+        
+        .geometry-buttons .filled {
+            fill: rgba(255, 255, 255, 0.2);
+            stroke: currentColor;
+        }
+        
+        /* Utility classes */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="brand-header">
+                <svg class="nav-logo" viewBox="0 0 333 333" xmlns="http://www.w3.org/2000/svg">
+                    <polygon class="cls-1"
+                        points="184.59 135.97 184.21 135.97 110.55 11.06 219.49 9.03 228.91 24.43 137.69 26.25 146.62 41 165.61 72.39 184.6 103.79 193.82 119.03 211.76 119.03 248.48 119.03 284.59 119.02 302.68 119.02 256.79 39.98 273.78 40.15 329.46 134.96 184.59 135.97" />
+                    <polygon class="cls-2"
+                        points="110.55 11.06 184.21 135.97 184.59 135.97 175.83 150.85 175.52 150.85 101.87 27.04 110.55 11.06" />
+                    <polygon class="cls-3"
+                        points="184.01 40.5 146.62 41 137.69 26.25 228.91 24.43 184.6 103.79 174.99 87.86 201.39 40.27 184.08 40.5 184.01 40.5" />
+                    <polygon class="cls-1" points="56.71 41.63 74.44 41.74 148.19 166.21 129.63 166.16 56.71 41.63" />
+                    <polygon class="cls-2"
+                        points="85.44 214.65 102.95 182.4 111.45 166.74 102.39 151.26 83.85 119.57 65.61 88.41 56.48 72.79 11.43 152.31 2.99 137.56 56.71 41.63 129.63 166.16 60.3 293.15 3.54 200.14 12.08 184.24 59.71 262.05 67.94 246.89 85.44 214.65" />
+                    <polygon class="cls-2"
+                        points="184.08 40.5 201.39 40.27 174.99 87.86 184.6 103.79 165.61 72.39 184.01 40.5 184.08 40.5" />
+                    <polygon class="cls-2"
+                        points="211.76 118.76 256.63 39.89 256.79 39.98 302.68 119.02 284.59 119.02 284.59 118.95 266.04 87.37 256.42 71.01 230.02 118.48 211.76 118.76" />
+                    <polygon class="cls-3"
+                        points="56.48 72.79 65.61 88.41 65.55 88.45 47.66 120.4 38.4 136.96 92.7 135.78 102.16 151.4 11.43 152.5 11.43 152.31 56.48 72.79" />
+                    <polygon class="cls-3"
+                        points="256.42 71.01 266.04 87.37 265.75 87.54 248.48 118.39 248.48 119.03 211.76 119.03 211.76 118.76 230.02 118.48 256.42 71.01" />
+                    <polygon class="cls-1"
+                        points="83.85 119.57 102.39 151.26 102.16 151.4 92.7 135.78 38.4 136.96 47.66 120.4 47.95 120.56 83.29 119.89 83.85 119.57" />
+                    <polygon class="cls-3"
+                        points="175.83 150.85 184.59 135.97 329.46 134.96 320.41 150.21 175.83 150.85" />
+                    <polygon class="cls-3"
+                        points="129.63 166.16 148.19 166.21 148.38 166.53 78.48 292.56 60.3 293.15 129.63 166.16" />
+                    <polygon class="cls-1"
+                        points="48.62 214.87 67.94 246.89 59.71 262.05 12.08 184.24 102.95 182.4 94.06 198.74 39.65 199.99 48.59 214.81 48.62 214.87" />
+                    <polygon class="cls-3"
+                        points="102.95 182.4 85.44 214.65 48.62 214.87 48.59 214.81 39.65 199.99 94.06 198.74 102.95 182.4" />
+                    <polygon class="cls-1"
+                        points="175.84 182.61 319.13 180.4 330.01 196.91 185.61 198.39 175.84 182.61 175.84 182.61" />
+                    <polygon class="cls-2"
+                        points="175.47 182.61 175.84 182.61 175.84 182.61 185.61 198.39 113.76 323.97 104.73 308.18 175.47 182.61" />
+                    <polygon class="cls-3"
+                        points="167.45 261.43 149.16 293.24 140.56 308.18 231.79 307.99 222.72 323.59 113.76 323.97 185.61 198.39 330.01 196.91 276.31 291.28 259.33 291.82 303.59 213.44 284.52 213.57 249.4 213.81 230.83 213.93 212.56 214.06 194.63 214.18 185.75 229.62 167.45 261.43" />
+                    <polygon class="cls-2"
+                        points="212.56 214.06 230.83 213.93 258.27 260.81 267.49 244.22 284.52 213.57 303.59 213.44 259.33 291.82 259.17 291.92 212.56 214.06" />
+                    <polygon class="cls-1"
+                        points="230.83 213.93 249.4 213.81 267.23 244.08 267.49 244.22 258.27 260.81 230.83 213.93" />
+                    <polygon class="cls-2"
+                        points="167.45 261.43 185.75 229.62 176.49 245.76 203.93 292.76 186.62 292.91 186.56 292.91 167.45 261.43" />
+                    <polygon class="cls-1"
+                        points="186.56 292.91 186.62 292.91 203.93 292.76 176.49 245.76 185.75 229.62 231.79 307.99 140.56 308.18 149.16 293.24 186.56 292.91" />
+                </svg>
+                <h1 class="logotype">DLUX</h1>
+            </div>
+            <!-- Add environment presets section -->
+            <div class="panel-section">
+                <h3>Environment</h3>
+                <div style="margin-bottom: 15px; position: relative;">
+                    <div style="position: relative; width: 100%;">
+                        <select id="environment-preset"
+                            style="width: 100%; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 100px 8px 8px 8px; border-radius: 4px; appearance: none; text-align: left;">
+                            <option value="none">None (Disable)</option>
+                            <option value="default">Default</option>
+                            <option value="contact">Contact</option>
+                            <option value="forest">Forest</option>
+                            <option value="egypt">Egypt</option>
+                            <option value="checkerboard">Checkerboard</option>
+                            <option value="goaland">Goaland</option>
+                            <option value="yavapai">Yavapai</option>
+                            <option value="goldmine">Goldmine</option>
+                            <option value="threetowers">Three Towers</option>
+                            <option value="poison">Poison</option>
+                            <option value="arches">Arches</option>
+                            <option value="tron">Tron</option>
+                            <option value="japan">Japan</option>
+                            <option value="dream">Dream</option>
+                            <option value="volcano">Volcano</option>
+                            <option value="starry">Starry</option>
+                            <option value="osiris">Osiris</option>
+                            <option value="moon">Moon</option>
+                        </select>
+                        <div id="environment-icon"
+                            style="position: absolute; left: 0; top: 0; width: 100%; height: 92px; pointer-events: none; overflow: hidden; border-radius: 4px 4px 0 0;">
+                            <img src="/playground/env_thumbs/none.png" alt="none environment"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <!-- Previous button -->
+                        <div id="prev-environment"
+                            style="position: absolute; left: 0; top: 0; width: 40px; height: 92px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: linear-gradient(to right, rgba(0,0,0,0.5), transparent);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M15 6l-6 6 6 6" />
+                            </svg>
+                        </div>
+                        <!-- Next button -->
+                        <div id="next-environment"
+                            style="position: absolute; right: 0; top: 0; width: 40px; height: 92px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: linear-gradient(to left, rgba(0,0,0,0.5), transparent);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 6l6 6-6 6" />
+                            </svg>
+                        </div>
+                        <div style="position: absolute; right: 8px; bottom: 8px; pointer-events: none;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M7 10l5 5 5-5z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="background-color-picker" style="margin-bottom: 15px;">
+                    <label for="background-color" style="display: block; margin-bottom: 5px;">Background Color</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="color" id="background-color" value="#ECECEC"
+                            style="width: 50px; height: 30px; padding: 0;">
+                        <input type="text" id="background-color-hex" value="#ECECEC"
+                            style="width: 80px; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 5px;">
+                    </div>
+                </div>
+            </div>
+            <div class="fog-controls"
+                style="margin-bottom: 15px; border: 1px solid #3c3c3c; border-radius: 4px; overflow: hidden;">
+                <div class="collapsible-button"
+                    style="background: #3c3c3c; padding: 8px 12px; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; transition: background-color 0.2s;"
+                    onclick="toggleFogControls()" onmouseover="this.style.background='#4a4a4a'"
+                    onmouseout="this.style.background='#3c3c3c'">
+                    <h3 style="margin: 0; padding: 0; color: #fff; font-size: 16px;">Fog</h3>
+                    <span id="fog-collapse-icon"
+                        style="font-size: 12px; transition: transform 0.3s; transform: rotate(0deg); color: #fff;">▼</span>
+                </div>
+                <div id="fog-collapse-content"
+                    style="overflow: hidden; transition: max-height 0.3s ease-out; max-height: 0px; background: #2c2c2c; border-top: 1px solid #3c3c3c;">
+                    <div style="padding: 10px;">
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; margin-bottom: 5px;">Fog Active</label>
+                            <div style="display: flex; gap: 10px; align-items: center; background: #2c2c2c; padding: 5px; border-radius: 4px; border: 1px solid #3c3c3c;">
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="radio" id="fog-active-radio" name="fog-active" value="active" style="margin: 0;">
+                                    <span style="color: #fff;">Active</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="radio" id="fog-inactive-radio" name="fog-active" value="inactive" checked style="margin: 0;">
+                                    <span style="color: #fff;">Inactive</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; margin-bottom: 5px;">Fog Color</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="color" id="fog-color" value="#ffffff"
+                                    style="width: 50px; height: 30px; padding: 0;">
+                                <input type="text" id="fog-color-hex" value="#ECECEC"
+                                    style="width: 80px; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 5px;">
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; margin-bottom: 5px;">Fog Type</label>
+                            <div
+                                style="display: flex; gap: 10px; align-items: center; background: #2c2c2c; padding: 5px; border-radius: 4px; border: 1px solid #3c3c3c;">
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="radio" name="fog-type" value="linear" style="margin: 0;">
+                                    <span style="color: #fff;">Linear</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="radio" name="fog-type" value="exponential" checked style="margin: 0;">
+                                    <span style="color: #fff;">Exponential</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div id="fog-linear-controls" style="margin-bottom: 10px; display: none;">
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; margin-bottom: 5px;">Near Distance</label>
+                                <input type="range" id="fog-near" min="0" max="100" step="0.1" value="1"
+                                    style="width: 100%;">
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; margin-bottom: 5px;">Far Distance</label>
+                                <input type="range" id="fog-far" min="0" max="250" step="0.1" value="50"
+                                    style="width: 100%;">
+                            </div>
+                        </div>
+                        <div id="fog-exponential-controls" style="margin-bottom: 10px; display: block;">
+                            <label style="display: block; margin-bottom: 5px;">Density</label>
+                            <input type="range" id="fog-intensity" min="0" max="1" step="0.01" value="0.25"
+                                style="width: 100%;">
+                        </div>
+                        <button id="toggle-fog-btn" onclick="toggleFog()" class="effect-btn" style="width: 100%;">
+                            <span>Add Fog</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <h3>Assets</h3>
+            <div style="margin-bottom: 15px;">
+                <input type="file" id="asset-upload" accept="image/*,video/*,.gltf,.glb" onchange="handleFileUpload()"
+                    style="display: none;">
+                <button onclick="document.getElementById('asset-upload').click()" class="effect-btn"
+                    style="width: 100%;">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12,4L12,20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M4,12L20,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    <span>Add File</span>
+                </button>
+            </div>
+            <div id="asset-library"></div>
+            <h3>Add Objects</h3>
+            <div class="geometry-buttons">
+                <!-- Basic Shapes -->
+                <button onclick="addEntity('box')">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="4" y="4" width="16" height="16" class="filled" />
+                    </svg>
+                    Box
+                </button>
+                <button onclick="addEntity('sphere')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" class="filled" />
+                        <ellipse cx="12" cy="12" rx="8" ry="3" />
+                        <line x1="4" y1="12" x2="20" y2="12" />
+                    </svg>
+                    Sphere
+                </button>
+                <button onclick="addEntity('cylinder')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 7 C6 7 6 17 6 17 C6 19 12 19 12 17 C12 17 12 7 12 7 C12 5 6 5 6 7" class="filled" />
+                        <ellipse cx="9" cy="7" rx="3" ry="1" />
+                        <ellipse cx="9" cy="17" rx="3" ry="1" />
+                    </svg>
+                    Cylinder
+                </button>
+                <button onclick="addEntity('plane')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 12 L12 6 L20 12 L12 18 Z" class="filled" />
+                    </svg>
+                    Plane
+                </button>
+                <button onclick="addEntity('cone')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L4 20 L20 20 Z" class="filled" />
+                    </svg>
+                    Cone
+                </button>
+                <button onclick="addEntity('torus')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" class="filled" />
+                        <circle cx="12" cy="12" r="4" />
+                    </svg>
+                    Torus
+                </button>
+                <button onclick="addEntity('ring')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" />
+                        <circle cx="12" cy="12" r="4" />
+                    </svg>
+                    Ring
+                </button>
+                <button onclick="addEntity('circle')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" />
+                    </svg>
+                    Circle
+                </button>
+                <button onclick="addEntity('dodecahedron')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L18 8 L18 16 L12 20 L6 16 L6 8 Z" class="filled" />
+                        <line x1="12" y1="4" x2="12" y2="20" />
+                        <line x1="6" y1="8" x2="18" y2="8" />
+                        <line x1="6" y1="16" x2="18" y2="16" />
+                    </svg>
+                    Dodecahedron
+                </button>
+                <button onclick="addEntity('octahedron')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L20 12 L12 20 L4 12 Z" class="filled" />
+                    </svg>
+                    Octahedron
+                </button>
+                <button onclick="addEntity('tetrahedron')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L18 18 L6 18 Z" class="filled" />
+                        <line x1="6" y1="18" x2="18" y2="18" />
+                    </svg>
+                    Tetrahedron
+                </button>
+                <button onclick="addEntity('triangle')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L20 18 L4 18 Z" />
+                    </svg>
+                    Triangle
+                </button>
+                <button onclick="addEntity('torusKnot')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 8 C16 8 16 16 12 16 C8 16 8 8 12 8" class="filled" />
+                        <path d="M8 12 C8 8 16 8 16 12 C16 16 8 16 8 12" />
+                    </svg>
+                    Torus Knot
+                </button>
+                <button onclick="addEntity('ocean')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 14 Q8 10 12 14 Q16 18 20 14" class="filled" />
+                        <path d="M4 18 Q8 14 12 18 Q16 22 20 18" />
+                    </svg>
+                    Ocean
+                </button>
+                <button onclick="addEntity('tube')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 12 C8 6 16 18 20 12" class="filled" />
+                    </svg>
+                    Tube
+                </button>
+                <button onclick="addEntity('grid')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 4 L20 4 L20 20 L4 20 Z" />
+                        <line x1="9" y1="4" x2="9" y2="20" />
+                        <line x1="15" y1="4" x2="15" y2="20" />
+                        <line x1="4" y1="9" x2="20" y2="9" />
+                        <line x1="4" y1="15" x2="20" y2="15" />
+                    </svg>
+                    Grid
+                </button>
+            </div>
+
+            <h3>Particle Effects</h3>
+            <div class="particle-buttons"
+                style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 15px;">
+                <button id="snow-btn" onclick="toggleParticleSystem('snow')" class="effect-btn">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="6" cy="6" r="1" />
+                        <circle cx="10" cy="12" r="1" />
+                        <circle cx="15" cy="6" r="1" />
+                        <circle cx="19" cy="12" r="1" />
+                        <circle cx="8" cy="18" r="1" />
+                        <circle cx="16" cy="18" r="1" />
+                        <circle cx="12" cy="4" r="1" />
+                        <circle cx="4" cy="12" r="1" />
+                        <circle cx="20" cy="4" r="1" />
+                    </svg>
+                    Snow
+                </button>
+                <button id="dust-btn" onclick="toggleParticleSystem('dust')" class="effect-btn">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="6" cy="6" r="1" />
+                        <circle cx="10" cy="12" r="1" />
+                        <circle cx="15" cy="6" r="1" />
+                        <circle cx="19" cy="12" r="1" />
+                        <circle cx="8" cy="18" r="1" />
+                        <circle cx="16" cy="18" r="1" />
+                        <circle cx="12" cy="4" r="1" />
+                        <circle cx="4" cy="12" r="1" />
+                        <circle cx="20" cy="4" r="1" />
+                    </svg>
+                    Dust
+                </button>
+                <button id="rain-btn" onclick="toggleParticleSystem('rain')" class="effect-btn">
+                    <svg viewBox="0 0 24 24">
+                        <!-- Simplified rain drops icon - just vertical lines -->
+                        <path d="M6,8L6,20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M10,4L10,18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M14,6L14,19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M18,5L18,16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    Rain
+                </button>
+                <button id="toggle-animation-btn" onclick="toggleParticleAnimation()" class="effect-btn" disabled>
+                    <svg viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" id="animation-icon" />
+                    </svg>
+                    <span id="animation-text">Start</span>
+                </button>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="toolbar">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <button id="scene-btn" class="btn btn-sm btn-primary active" onclick="switchToView('scene')">Scene</button>
+                        <button id="code-btn" class="btn btn-sm btn-outline-primary" onclick="switchToView('code')">Code</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleInspector()">Inspector</button>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-success" onclick="exportScene()">Export</button>
+                    </div>
+                </div>
+            </div>
+            <div class="scene-container" id="scene-container">
+                <a-scene embedded renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true; sortObjects: true;">
+                    <a-assets id="asset-container">
+                        <!-- Assets will be added here -->
+                    </a-assets>
+                    
+                    <!-- Camera -->
+                    <a-camera position="0 1.6 0"></a-camera>
+
+                    <!-- Scene Entities -->
+                    <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+                    <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+                    <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+                    <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+
+                    <!-- Environment -->
+                    <a-sky color="#ECECEC"></a-sky>
+                </a-scene>
+            </div>
+            <!-- Code Panel -->
+            <div id="code-panel">
+                <div id="monaco-editor"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Monaco Editor -->
+    <script>
+        // Global variables
+        let editor = null;
+        let currentView = 'scene'; // Track current view: 'scene' or 'code'
+        
+        // Initial code for the editor
+        const initialCode = '<a-scene>\n  <a-box position="0 1 -3" rotation="0 45 0" color="#4CC3D9"></a-box>\n  <a-sphere position="-1 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>\n  <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>\n  <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>\n  <a-sky color="#ECECEC"></a-sky>\n</a-scene>';
+        
+        // Function to switch between scene and code views
+        function switchToView(view) {
+            console.log('Switching to view:', view);
+            const prevView = currentView;
+            currentView = view;
+            
+            const sceneBtn = document.getElementById('scene-btn');
+            const codeBtn = document.getElementById('code-btn');
+            const sceneContainer = document.getElementById('scene-container');
+            const codePanel = document.getElementById('code-panel');
+            
+            if (!sceneBtn || !codeBtn || !sceneContainer || !codePanel) {
+                console.error('Missing required UI elements for view switching');
+                return;
+            }
+            
+            if (view === 'scene') {
+                // Show scene, hide code panel
+                sceneContainer.style.display = 'block';
+                codePanel.style.display = 'none';
+                
+                // Update button classes
+                sceneBtn.classList.add('active');
+                sceneBtn.classList.remove('btn-outline-primary');
+                sceneBtn.classList.add('btn-primary');
+                
+                codeBtn.classList.remove('active');
+                codeBtn.classList.add('btn-outline-primary');
+                codeBtn.classList.remove('btn-primary');
+                
+                // Resume A-Frame scene
+                const scene = document.querySelector('a-scene');
+                if (scene && typeof scene.play === 'function') {
+                    scene.play();
+                }
+            } else if (view === 'code') {
+                // Update code panel with current scene before showing
+                if (!editor) {
+                    initializeMonaco();
+                } else {
+                    updateCodePanel();
+                }
+                
+                // Show code panel, hide scene
+                sceneContainer.style.display = 'none';
+                codePanel.style.display = 'block';
+                
+                // Update button classes
+                sceneBtn.classList.remove('active');
+                sceneBtn.classList.add('btn-outline-primary');
+                sceneBtn.classList.remove('btn-primary');
+                
+                codeBtn.classList.add('active');
+                codeBtn.classList.remove('btn-outline-primary');
+                codeBtn.classList.add('btn-primary');
+                
+                // Pause A-Frame scene to save resources
+                const scene = document.querySelector('a-scene');
+                if (scene && typeof scene.pause === 'function') {
+                    scene.pause();
+                }
+            }
+        }
+        
+        // Function to initialize Monaco editor
+        function initializeMonaco() {
+            if (editor) {
+                console.log("Monaco editor already initialized");
+                return;
+            }
+
+            console.log("Initializing Monaco editor");
+            
+            // Clear any existing Monaco instances if they exist
+            const monacoEditorElement = document.getElementById('monaco-editor');
+            if (monacoEditorElement) {
+                // Make sure the editor container is empty
+                monacoEditorElement.innerHTML = '';
+            }
+            
+            // Check if Monaco is already loaded
+            if (window.monaco) {
+                console.log("Monaco already loaded, creating editor directly");
+                createEditor();
+                return;
+            }
+            
+            // Check if RequireJS is already loaded
+            if (window.require) {
+                console.log("RequireJS already loaded, initializing Monaco");
+                configureRequireAndCreateEditor();
+                return;
+            }
+            
+            // Load Monaco loader script if needed
+            const loaderScript = document.createElement('script');
+            loaderScript.id = 'monaco-loader-script';
+            loaderScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs/loader.min.js';
+            loaderScript.async = true;
+            loaderScript.onload = function() {
+                console.log('Monaco loader script loaded');
+                configureRequireAndCreateEditor();
+            };
+            document.head.appendChild(loaderScript);
+        }
+        
+        // Helper function to configure RequireJS and create editor
+        function configureRequireAndCreateEditor() {
+            if (!window.require) {
+                console.error("RequireJS not loaded");
+                return;
+            }
+            
+            // Configure RequireJS with proper worker paths
+            require.config({ 
+                paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs' },
+                'vs/css': { disabled: true }
+            });
+            
+            // Load Monaco editor with worker configuration
+            require(['vs/editor/editor.main'], function() {
+                // Configure workers path
+                window.MonacoEnvironment = {
+                    getWorkerUrl: function(moduleId, label) {
+                        return 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs/base/worker/workerMain.js';
+                    }
+                };
+                
+                createEditor();
+            });
+        }
+        
+        // Helper function to create the editor instance
+        function createEditor() {
+            const monacoEditorElement = document.getElementById('monaco-editor');
+            if (!monacoEditorElement) {
+                console.error('Monaco editor element not found');
+                return;
+            }
+            
+            try {
+                console.log('Creating Monaco editor instance');
+                
+                // Make sure the code panel is visible
+                const codePanel = document.getElementById('code-panel');
+                if (codePanel) {
+                    codePanel.style.display = 'block';
+                }
+                
+                // Create editor with proper initialization safeguards
+                if (window.monaco) {
+                    editor = monaco.editor.create(monacoEditorElement, {
+                        value: initialCode,
+                        language: 'html',
+                        theme: 'vs-dark',
+                        lineNumbers: true,
+                        automaticLayout: true,
+                        wordWrap: 'on',
+                        minimap: { enabled: false },
+                        tabSize: 4,
+                        contextmenu: false, // Disable context menu to avoid errors
+                        scrollBeyondLastLine: false
+                    });
+                    
+                    console.log('Monaco editor created successfully');
+                    
+                    // Update code panel with current scene
+                    updateCodePanel();
+                } else {
+                    console.error('Monaco editor failed to load properly');
+                }
+            } catch (error) {
+                console.error('Error creating Monaco editor:', error);
+            }
+        }
+        
+        // Function to update code panel with current scene content
+        function updateCodePanel() {
+            // Get the scene content
+            const scene = document.querySelector('a-scene');
+            if (!scene) return;
+            
+            // Extract only the entities (skip the scene tag and camera)
+            let sceneContent = '';
+            
+            // First check if there's an environment entity to ensure we get it before it's fully expanded
+            const envEntity = scene.querySelector('[environment]');
+            if (envEntity) {
+                // Specifically for environment entity, just get its environment attribute
+                const envPreset = envEntity.getAttribute('environment');
+                // Use a simplified representation
+                sceneContent += `<a-entity environment="${envPreset}"></a-entity>\n`;
+            }
+            
+            // Add all other entities
+            scene.childNodes.forEach(node => {
+                if (node.nodeType === 1 && 
+                    node.tagName.toLowerCase().startsWith('a-') && 
+                    node.tagName.toLowerCase() !== 'a-camera' &&
+                    // Skip the environment entity since we already handled it
+                    !node.hasAttribute('environment') &&
+                    !node.classList.contains('inspector')) {
+                    sceneContent += node.outerHTML + '\n';
+                }
+            });
+            
+            if (editor) {
+                editor.setValue(sceneContent || initialCode);
+            }
+        }
+        
+        // Helper function to get a simplified environment representation
+        function getSimplifiedEnvironmentHTML() {
+            const envEntity = document.querySelector('a-entity[environment]');
+            if (!envEntity) return '';
+            
+            // Get the environment preset attribute
+            const envPreset = envEntity.getAttribute('environment');
+            return `<a-entity environment="${envPreset}"></a-entity>\n`;
+        }
+
+        // Function to apply code from the editor to the scene
+        function applyCodeToScene() {
+            if (!editor) return;
+            
+            const code = editor.getValue();
+            const scene = document.querySelector('a-scene');
+            if (!scene) return;
+            
+            // Check if there's an existing environment we need to preserve
+            const existingEnv = scene.querySelector('[environment]');
+            let envPreset = null;
+            if (existingEnv) {
+                envPreset = existingEnv.getAttribute('environment');
+            }
+            
+            // Clear existing entities (except camera and inspector elements)
+            const entitiesToRemove = [];
+            scene.childNodes.forEach(node => {
+                if (node.nodeType === 1 && 
+                    node.tagName.toLowerCase().startsWith('a-') && 
+                    node.tagName.toLowerCase() !== 'a-camera' &&
+                    node.tagName.toLowerCase() !== 'a-assets' &&
+                    !node.classList.contains('inspector')) {
+                    entitiesToRemove.push(node);
+                }
+            });
+            
+            entitiesToRemove.forEach(entity => entity.remove());
+            
+            // Add new entities
+            const tempContainer = document.createElement('div');
+            tempContainer.innerHTML = code;
+            Array.from(tempContainer.children).forEach(node => {
+                if (node.nodeType === 1) {
+                    scene.appendChild(node.cloneNode(true));
+                }
+            });
+            
+            // If we had an environment, restore it if not present in the new code
+            if (envPreset && !scene.querySelector('[environment]')) {
+                const envEntity = document.createElement('a-entity');
+                envEntity.setAttribute('environment', envPreset);
+                scene.appendChild(envEntity);
+            }
+            
+            // Ensure all changes are flushed to the DOM
+            flushAllEntitiesToDOM();
+        }
+
+        // Function to toggle the inspector
+        function toggleInspector() {
+            if (AFRAME && AFRAME.INSPECTOR) {
+                if (AFRAME.INSPECTOR.opened) {
+                    AFRAME.INSPECTOR.close();
+                } else {
+                    AFRAME.INSPECTOR.open();
+                }
+            }
+        }
+
+        // Function to export the scene
+        function exportScene() {
+            const scene = document.querySelector('a-scene');
+            if (!scene) {
+                console.error('No A-Frame scene found');
+                return;
+            }
+            
+            // Clone the scene to avoid modifying the original
+            const sceneClone = scene.cloneNode(true);
+            
+            // Remove inspector-related elements
+            const inspectorElements = sceneClone.querySelectorAll('.a-inspector-loader, .a-enter-vr, .a-enter-ar');
+            inspectorElements.forEach(el => el.parentNode && el.parentNode.removeChild(el));
+            
+            // Get the HTML representation
+            const sceneHTML = sceneClone.outerHTML;
+            
+            // Create a download link
+            const blob = new Blob([sceneHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'a-frame-scene.html';
+            link.click();
+            
+            // Clean up
+            URL.revokeObjectURL(url);
+        }
+
+        // Function to toggle code panel
+        function toggleCodePanel() {
+            const codePanel = document.getElementById('code-panel');
+            if (!codePanel) return;
+            
+            if (codePanel.style.display === 'block') {
+                // Hide code panel
+                codePanel.style.display = 'none';
+                if (editor) {
+                    // Dispose editor to prevent memory leaks
+                    editor.dispose();
+                    editor = null;
+                }
+            } else {
+                // Show code panel and initialize editor
+                codePanel.style.display = 'block';
+                
+                // Initialize Monaco if not already done
+                if (!editor) {
+                    initializeMonaco();
+                } else {
+                    // Update code panel with current scene
+                    updateCodePanel();
+                }
+            }
+        }
+
+        // Set up code panel resize functionality
+        function setupCodePanelResize() {
+            const resizeHandle = document.getElementById('code-panel-resize');
+            const codePanel = document.getElementById('code-panel');
+            
+            if (!resizeHandle || !codePanel) return;
+            
+            let startY, startHeight;
+            
+            function onMouseDown(e) {
+                startY = e.clientY;
+                startHeight = parseInt(getComputedStyle(codePanel).height, 10);
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+                e.preventDefault();
+            }
+            
+            function onMouseMove(e) {
+                const newHeight = startHeight + (startY - e.clientY);
+                if (newHeight > 200 && newHeight < window.innerHeight - 100) {
+                    codePanel.style.height = newHeight + 'px';
+                    if (editor) {
+                        editor.layout();
+                    }
+                }
+            }
+            
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+            
+            resizeHandle.addEventListener('mousedown', onMouseDown);
+            
+            // Setup close button
+            const closeBtn = document.getElementById('close-code-btn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', toggleCodePanel);
+            }
+        }
+
+        // Function to handle environment changes
+        function updateEnvironment(preset) {
+            const scene = document.querySelector('a-scene');
+            if (!scene) return;
+            
+            // Remove existing environment
+            const existingEnv = scene.querySelector('[environment]');
+            if (existingEnv) {
+                existingEnv.parentNode.removeChild(existingEnv);
+            }
+            
+            // Add new environment if not 'none'
+            if (preset !== 'none') {
+                const envEntity = document.createElement('a-entity');
+                envEntity.setAttribute('environment', `preset: ${preset}`);
+                scene.appendChild(envEntity);
+                
+                // Hide default sky when using environment
+                const sky = scene.querySelector('a-sky');
+                if (sky) {
+                    sky.setAttribute('visible', false);
+                }
+            } else {
+                // Show default sky when not using environment
+                const sky = scene.querySelector('a-sky');
+                if (sky) {
+                    sky.setAttribute('visible', true);
+                }
+            }
+            
+            // Flush all entities to DOM to update the code panel
+            flushAllEntitiesToDOM();
+        }
+
+        // Flush all entities to DOM - ensures all entity changes are reflected in the DOM
+        function flushAllEntitiesToDOM() {
+            // Get all entities in the scene
+            const entities = document.querySelectorAll('a-scene > *');
+            
+            // Special handling for environment entities
+            const envEntity = document.querySelector('a-entity[environment]');
+            if (envEntity) {
+                // Force the environment component to update by removing and readding the component
+                const envPreset = envEntity.getAttribute('environment');
+                envEntity.removeAttribute('environment');
+                // Delay to ensure proper removal
+                setTimeout(() => {
+                    envEntity.setAttribute('environment', envPreset);
+                }, 10);
+            }
+            
+            entities.forEach(entity => {
+                // Skip entities created by the inspector itself
+                if (entity.hasAttribute('data-aframe-inspector') ||
+                    entity.id === 'aframeInspectorMouseCursor') {
+                    console.log('Skipping inspector entity during sync:', entity.id);
+                    return;
+                }
+
+                if (typeof entity.flushToDOM === 'function') {
+                    entity.flushToDOM();
+                }
+            });
+            
+            // Update the code panel after a slight delay to ensure environment has fully initialized
+            setTimeout(() => {
+                updateCodePanel();
+            }, 100);
+        }
+
+        // Update background color
+        function updateBackgroundColor(color) {
+            const sky = document.querySelector('a-sky');
+            if (sky) {
+                sky.setAttribute('color', color);
+                flushAllEntitiesToDOM();
+            }
+        }
+
+        // Toggle fog
+        function toggleFog() {
+            const scene = document.querySelector('a-scene');
+            const hasFog = scene && scene.hasAttribute('fog');
+            const toggleBtn = document.getElementById('toggle-fog-btn');
+            
+            if (hasFog) {
+                scene.removeAttribute('fog');
+                if (toggleBtn) {
+                    toggleBtn.textContent = 'Add Fog';
+                }
+                // Update radio button state
+                const fogInactiveRadio = document.getElementById('fog-inactive-radio');
+                if (fogInactiveRadio) fogInactiveRadio.checked = true;
+            } else {
+                // Get values from UI controls
+                const fogType = document.querySelector('input[name="fog-type"]:checked').value;
+                const fogColor = document.getElementById('fog-color').value;
+                
+                if (fogType === 'linear') {
+                    const near = parseFloat(document.getElementById('fog-near').value);
+                    const far = parseFloat(document.getElementById('fog-far').value);
+                    scene.setAttribute('fog', {
+                        type: 'linear',
+                        color: fogColor,
+                        near: near,
+                        far: far
+                    });
+                } else {
+                    const density = parseFloat(document.getElementById('fog-intensity').value);
+                    scene.setAttribute('fog', {
+                        type: 'exponential',
+                        color: fogColor,
+                        density: density
+                    });
+                }
+                
+                if (toggleBtn) {
+                    toggleBtn.textContent = 'Remove Fog';
+                }
+                // Update radio button state
+                const fogActiveRadio = document.getElementById('fog-active-radio');
+                if (fogActiveRadio) fogActiveRadio.checked = true;
+            }
+            
+            flushAllEntitiesToDOM();
+        }
+
+        // Update fog color
+        function updateFogColor(color) {
+            const scene = document.querySelector('a-scene');
+            if (scene && scene.hasAttribute('fog')) {
+                const fogData = scene.getAttribute('fog');
+                fogData.color = color;
+                scene.setAttribute('fog', fogData);
+                flushAllEntitiesToDOM();
+            }
+        }
+
+        // Setup fog controls
+        function setupFogControls() {
+            // Toggle fog active/inactive
+            const fogActiveRadio = document.getElementById('fog-active-radio');
+            const fogInactiveRadio = document.getElementById('fog-inactive-radio');
+            
+            if (fogActiveRadio && fogInactiveRadio) {
+                fogActiveRadio.addEventListener('change', function() {
+                    if (this.checked) {
+                        const scene = document.querySelector('a-scene');
+                        if (scene && !scene.hasAttribute('fog')) {
+                            toggleFog(); // Add fog if not present
+                        }
+                    }
+                });
+                
+                fogInactiveRadio.addEventListener('change', function() {
+                    if (this.checked) {
+                        const scene = document.querySelector('a-scene');
+                        if (scene && scene.hasAttribute('fog')) {
+                            toggleFog(); // Remove fog if present
+                        }
+                    }
+                });
+            }
+            
+            // Fog color picker
+            const fogColorPicker = document.getElementById('fog-color');
+            const fogColorHex = document.getElementById('fog-color-hex');
+            
+            if (fogColorPicker && fogColorHex) {
+                fogColorPicker.addEventListener('input', function() {
+                    const color = fogColorPicker.value;
+                    fogColorHex.value = color;
+                    updateFogColor(color);
+                });
+                
+                fogColorHex.addEventListener('change', function() {
+                    const color = fogColorHex.value;
+                    fogColorPicker.value = color;
+                    updateFogColor(color);
+                });
+            }
+
+            // Fog type controls
+            const fogTypeRadios = document.querySelectorAll('input[name="fog-type"]');
+            fogTypeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const linearControls = document.getElementById('fog-linear-controls');
+                    const exponentialControls = document.getElementById('fog-exponential-controls');
+                    
+                    if (this.value === 'linear') {
+                        linearControls.style.display = 'block';
+                        exponentialControls.style.display = 'none';
+                    } else {
+                        linearControls.style.display = 'none';
+                        exponentialControls.style.display = 'block';
+                    }
+                    
+                    // Apply fog with new type if fog is active
+                    const scene = document.querySelector('a-scene');
+                    if (scene && scene.hasAttribute('fog')) {
+                        toggleFog(); // Remove existing fog
+                        toggleFog(); // Add fog with new settings
+                    }
+                });
+            });
+        }
+
+        // Function to toggle collapsible fog controls
+        function toggleFogControls() {
+            const content = document.getElementById('fog-collapse-content');
+            const icon = document.getElementById('fog-collapse-icon');
+            
+            if (content && icon) {
+                if (content.style.maxHeight === '0px' || !content.style.maxHeight) {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    content.style.maxHeight = '0px';
+                    icon.style.transform = 'rotate(0deg)';
+                }
+            }
+        }
+
+        // Function to add entity to scene
+        function addEntity(type) {
+            const scene = document.querySelector('a-scene');
+            if (!scene) return;
+            
+            let entity;
+            const position = getRandomPosition();
+            
+            switch (type) {
+                case 'box':
+                    entity = document.createElement('a-box');
+                    entity.setAttribute('position', position);
+                    entity.setAttribute('rotation', getRandomRotation());
+                    entity.setAttribute('color', getRandomColor());
+                    entity.setAttribute('shadow', '');
+                    break;
+                case 'sphere':
+                    entity = document.createElement('a-sphere');
+                    entity.setAttribute('position', position);
+                    entity.setAttribute('radius', 0.5 + Math.random() * 0.5);
+                    entity.setAttribute('color', getRandomColor());
+                    entity.setAttribute('shadow', '');
+                    break;
+                case 'cylinder':
+                    entity = document.createElement('a-cylinder');
+                    entity.setAttribute('position', position);
+                    entity.setAttribute('radius', 0.3 + Math.random() * 0.3);
+                    entity.setAttribute('height', 0.5 + Math.random() * 1.5);
+                    entity.setAttribute('color', getRandomColor());
+                    entity.setAttribute('shadow', '');
+                    break;
+                case 'plane':
+                    entity = document.createElement('a-plane');
+                    position.y = 0.01; // Place slightly above the ground
+                    entity.setAttribute('position', position);
+                    entity.setAttribute('rotation', '-90 0 0'); // Flat on the ground
+                    entity.setAttribute('width', 1 + Math.random() * 3);
+                    entity.setAttribute('height', 1 + Math.random() * 3);
+                    entity.setAttribute('color', getRandomColor());
+                    entity.setAttribute('shadow', 'receive: true');
+                    break;
+                case 'cone':
+                    entity = document.createElement('a-cone');
+                    entity.setAttribute('position', position);
+                    entity.setAttribute('radius-bottom', 0.5 + Math.random() * 0.5);
+                    entity.setAttribute('radius-top', 0);
+                    entity.setAttribute('height', 1 + Math.random());
+                    entity.setAttribute('color', getRandomColor());
+                    entity.setAttribute('shadow', '');
+                    break;
+                default:
+                    console.log('Unknown entity type:', type);
+                    return;
+            }
+            
+            scene.appendChild(entity);
+            
+            // Flush all entities to DOM to update the code panel
+            flushAllEntitiesToDOM();
+        }
+        
+        // Helper functions for entity creation
+        function getRandomPosition() {
+            return {
+                x: -3 + Math.random() * 6,
+                y: 0.5 + Math.random() * 2,
+                z: -5 + Math.random() * 4
+            };
+        }
+        
+        function getRandomRotation() {
+            return {
+                x: Math.random() * 360,
+                y: Math.random() * 360,
+                z: Math.random() * 360
+            };
+        }
+        
+        function getRandomColor() {
+            const colors = [
+                '#EF2D5E', '#4CC3D9', '#FFC65D', '#7BC8A4', '#FF6B6B',
+                '#9C6DF2', '#29abe2', '#77DD77', '#FDFD96', '#FFB347'
+            ];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // Setup color pickers
+        function setupColorPickers() {
+            // Background color picker
+            const bgColorPicker = document.getElementById('background-color');
+            const bgColorHex = document.getElementById('background-color-hex');
+            
+            if (bgColorPicker && bgColorHex) {
+                // Initialize with current sky color
+                const sky = document.querySelector('a-sky');
+                if (sky) {
+                    const skyColor = sky.getAttribute('color');
+                    bgColorPicker.value = skyColor;
+                    bgColorHex.value = skyColor;
+                }
+                
+                // Update on color change
+                bgColorPicker.addEventListener('input', function() {
+                    const color = bgColorPicker.value;
+                    bgColorHex.value = color;
+                    updateBackgroundColor(color);
+                });
+                
+                // Update on hex input
+                bgColorHex.addEventListener('change', function() {
+                    const color = bgColorHex.value;
+                    bgColorPicker.value = color;
+                    updateBackgroundColor(color);
+                });
+            }
+        }
+
+        // Setup environment selector
+        function setupEnvironmentSelector() {
+            const envPreset = document.getElementById('environment-preset');
+            const envIcon = document.getElementById('environment-icon').querySelector('img');
+            const prevBtn = document.getElementById('prev-environment');
+            const nextBtn = document.getElementById('next-environment');
+            
+            // Environment presets
+            const presets = [
+                'none', 'default', 'contact', 'forest', 'egypt',
+                'checkerboard', 'goaland', 'yavapai', 'goldmine',
+                'threetowers', 'poison', 'arches', 'tron', 'japan',
+                'dream', 'volcano', 'starry', 'osiris', 'moon'
+            ];
+            
+            if (envPreset && envIcon) {
+                // Update on selection change
+                envPreset.addEventListener('change', function() {
+                    const selectedPreset = envPreset.value;
+                    
+                    // Update the environment
+                    updateEnvironment(selectedPreset);
+                    
+                    // If we're in code view, make sure to update the editor
+                    if (currentView === 'code' && editor) {
+                        setTimeout(() => {
+                            // Get the simplified environment HTML for the updated environment
+                            const simplifiedEnvHTML = getSimplifiedEnvironmentHTML();
+                            
+                            // Get the current code
+                            const code = editor.getValue();
+                            
+                            // Remove any existing environment entities
+                            let updatedCode = code.replace(/<a-entity environment="[^"]*"><\/a-entity>\n?/g, '');
+                            
+                            // Add the new environment entity if it's not 'none'
+                            if (selectedPreset !== 'none') {
+                                updatedCode = simplifiedEnvHTML + updatedCode;
+                            }
+                            
+                            // Update the editor
+                            editor.setValue(updatedCode);
+                        }, 200);
+                    }
+                    
+                    // Update icon
+                    envIcon.src = `/playground/env_thumbs/${selectedPreset}.png`;
+                    envIcon.alt = `${selectedPreset} environment`;
+                });
+                
+                // Navigation buttons
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', function() {
+                        const currentIndex = presets.indexOf(envPreset.value);
+                        const prevIndex = (currentIndex - 1 + presets.length) % presets.length;
+                        envPreset.value = presets[prevIndex];
+                        envPreset.dispatchEvent(new Event('change'));
+                    });
+                }
+                
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', function() {
+                        const currentIndex = presets.indexOf(envPreset.value);
+                        const nextIndex = (currentIndex + 1) % presets.length;
+                        envPreset.value = presets[nextIndex];
+                        envPreset.dispatchEvent(new Event('change'));
+                    });
+                }
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM content loaded');
+            
+            // Set the initial view
+            switchToView('scene');
+            
+            // Set up UI controls
+            setupEnvironmentSelector();
+            setupColorPickers();
+            setupFogControls();
+            
+            // Add an Apply button to the code panel
+            const codePanel = document.getElementById('code-panel');
+            if (codePanel) {
+                const applyBtn = document.createElement('button');
+                applyBtn.id = 'apply-code-btn';
+                applyBtn.textContent = 'Apply Changes';
+                applyBtn.style.position = 'absolute';
+                applyBtn.style.top = '10px';
+                applyBtn.style.right = '10px';
+                applyBtn.style.backgroundColor = '#2c974b';
+                applyBtn.style.color = 'white';
+                applyBtn.style.border = 'none';
+                applyBtn.style.borderRadius = '4px';
+                applyBtn.style.padding = '5px 10px';
+                applyBtn.style.cursor = 'pointer';
+                applyBtn.style.zIndex = '1000';
+                
+                applyBtn.addEventListener('click', function() {
+                    applyCodeToScene();
+                    
+                    // Show success notification
+                    showSuccessNotification('Changes applied!');
+                });
+                codePanel.appendChild(applyBtn);
+            }
+        });
+
+        // Function to show success notification
+        function showSuccessNotification(message) {
+            const codePanel = document.getElementById('code-panel');
+            if (!codePanel) return;
+            
+            // Remove any existing notifications
+            const existingNotifications = document.querySelectorAll('.success-notification');
+            existingNotifications.forEach(notif => notif.remove());
+            
+            // Create and add new notification
+            const notification = document.createElement('div');
+            notification.className = 'success-notification';
+            notification.textContent = message;
+            notification.style.position = 'absolute';
+            notification.style.top = '10px';
+            notification.style.left = '50%';
+            notification.style.transform = 'translateX(-50%)';
+            notification.style.backgroundColor = 'rgba(44, 151, 75, 0.8)';
+            notification.style.color = 'white';
+            notification.style.padding = '5px 10px';
+            notification.style.borderRadius = '4px';
+            notification.style.zIndex = '1001';
+            
+            codePanel.appendChild(notification);
+            
+            // Remove after 2 seconds
+            setTimeout(function() {
+                notification.remove();
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

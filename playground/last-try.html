@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>A-Frame Builder</title>
+  <style>
+    /* Basic layout styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+    }
+    #sidebar {
+      width: 200px;
+      background-color: #f8f8f8;
+      border-right: 1px solid #ccc;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+    }
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    #toolbar {
+      height: 50px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      gap: 1rem;
+    }
+    #content {
+      flex: 1;
+      position: relative;
+      display: flex;
+    }
+    /* Hide/Show sections */
+    .view-section {
+      width: 100%;
+      height: 100%;
+      display: none;
+    }
+    .view-section.active {
+      display: block;
+    }
+    /* Monaco editor takes 100% of its parent container */
+    #editorContainer {
+      width: 100%;
+      height: 100%;
+    }
+    /* A-Frame preview scene styling */
+    #aframePreview {
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <h3>Sidebar</h3>
+    <!-- Additional sidepanel buttons / features will go here -->
+  </div>
+
+  <!-- Main section -->
+  <div id="main">
+    <!-- Top toolbar with buttons -->
+    <div id="toolbar">
+      <button id="btnCodeView">Code View</button>
+      <button id="btnPreview">Preview</button>
+      <button id="btnInspector">Inspector</button>
+    </div>
+    <!-- Content area with code editor, a-frame preview, or inspector -->
+    <div id="content">
+      <!-- Code Editor Section -->
+      <div id="editorContainer" class="view-section"></div>
+
+      <!-- A-Frame Preview Section -->
+      <div id="aframePreview" class="view-section"></div>
+
+      <!-- The Inspector is launched by AFRAME.inspector.open() so we don’t need a separate container.
+           We just treat this empty div as the "inspector" content area (though the built-in inspector
+           will launch full screen by default). -->
+      <div id="inspectorContainer" class="view-section">
+        <!-- The built-in A-Frame inspector will appear when invoked. -->
+      </div>
+    </div>
+  </div>
+
+  <!-- A-Frame core script -->
+  <script src="/js/aframe.min.js"></script>
+
+  <!-- Monaco script loader (needs to be in the page) -->
+  <script src="https://unpkg.com/monaco-editor@0.33.0/min/vs/loader.js"></script>
+
+  <script>
+    //
+    // Basic data model for the scene:
+    // For now, just store a sample A-Frame HTML string:
+    //
+    let aframeSceneHTML = `
+<a-scene embedded>
+  <a-box position="0 1 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+  <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+  <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+  <a-plane rotation="-90 0 0" width="10" height="10" color="#7BC8A4"></a-plane>
+</a-scene>
+    `.trim();
+
+    // Query main content containers
+    const editorContainer = document.getElementById('editorContainer');
+    const previewContainer = document.getElementById('aframePreview');
+    const inspectorContainer = document.getElementById('inspectorContainer');
+
+    // Query toolbar buttons
+    const btnCodeView   = document.getElementById('btnCodeView');
+    const btnPreview    = document.getElementById('btnPreview');
+    const btnInspector  = document.getElementById('btnInspector');
+
+    // View switch function
+    function switchView(target) {
+      // Hide all sections
+      [editorContainer, previewContainer, inspectorContainer].forEach(div => {
+        div.classList.remove('active');
+      });
+      // Show the chosen one
+      if (target) {
+        target.classList.add('active');
+      }
+    }
+
+    // Create a dynamic <iframe> for the A-Frame preview to keep them in sync
+    let previewIframe = document.createElement('iframe');
+    previewIframe.setAttribute('style', 'width:100%; height:100%; border:0;');
+    previewContainer.appendChild(previewIframe);
+
+    // Create the initial document in the preview iframe
+    function refreshPreview() {
+      // Rebuild the iframe content from the model
+      // We embed the A-Frame code inside the iframe
+      const doc = previewIframe.contentDocument;
+      doc.open();
+      doc.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <script src="/js/aframe.min.js"></script>
+        </head>
+        <body style="margin: 0; padding: 0;">
+          ${aframeSceneHTML}
+        </body>
+        </html>
+      `);
+      doc.close();
+    }
+
+    // Initialize the preview to the default scene
+    refreshPreview();
+
+    //
+    // Setup Monaco editor
+    //
+    require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@0.33.0/min/vs' }});
+    require(['vs/editor/editor.main'], function () {
+      // Register new custom language for A-Frame
+      monaco.languages.register({ id: 'aframeHtml' });
+      monaco.languages.setMonarchTokensProvider('aframeHtml', {
+        tokenizer: {
+          root: [
+            // Simple example rules to highlight A-Frame tags
+            [/<a-[\w-]+/,'tag'],
+            [/<\/a-[\w-]+>/,'tag'],
+            [/ [\w-]+=/, 'attribute.name'],
+            [/=".*?"/, 'attribute.value'],
+            [/[\w-]+/, 'text'],
+          ]
+        }
+      });
+
+      // Create editor
+      const editor = monaco.editor.create(editorContainer, {
+        value: aframeSceneHTML,
+        language: 'aframeHtml',
+        theme: 'vs-dark',
+        automaticLayout: true, 
+        minimap: { enabled: false }
+      });
+
+      // Listen for changes in the Monaco editor to update our scene model
+      editor.onDidChangeModelContent(() => {
+        aframeSceneHTML = editor.getValue();
+        refreshPreview();
+      });
+    });
+
+    //
+    // Inspector logic
+    //
+    function openInspector() {
+      // We’ll open the built-in A-Frame inspector for the scene in the iframe
+      // The scene is in the <iframe>, so we need to call inspector from there
+      let doc = previewIframe.contentDocument;
+      const sceneEl = doc.querySelector('a-scene');
+      if (sceneEl && sceneEl.hasLoaded) {
+        sceneEl.components.inspector.openInspector();
+      } else if (sceneEl) {
+        // If the scene hasn't finished loading, wait for it
+        sceneEl.addEventListener('loaded', () => {
+          sceneEl.components.inspector.openInspector();
+        });
+      }
+    }
+
+    //
+    // Wire up buttons
+    //
+    btnCodeView.addEventListener('click', () => switchView(editorContainer));
+    btnPreview.addEventListener('click', () => switchView(previewContainer));
+    btnInspector.addEventListener('click', () => {
+      switchView(inspectorContainer);
+      openInspector();
+    });
+
+    // Default to preview view
+    switchView(previewContainer);
+  </script>
+</body>
+</html>

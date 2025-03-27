@@ -1,0 +1,2498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-Frame Scene Editor (Monaco)</title>
+
+    <!-- A-Frame core must load first -->
+    <script src="/js/aframe.min.js"></script>
+    
+    <!-- A-Frame Components - load after core -->
+    <script src="/js/aframe-extras.min.js"></script>
+    <script src="/js/aframe-environment-component.min.js"></script>
+    
+    <!-- Model Viewer -->
+    <script type="module" src="/js/model-viewer.min.js"></script>
+    
+    <!-- Additional styles -->
+    <link rel="stylesheet" href="/css/custom.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
+    
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        
+        /* Basic layout */
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .sidebar {
+            width: 200px;
+            background: #1B1B1B;
+            padding: 15px;
+            overflow-y: auto;
+            color: #fff;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .scene-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        .toolbar {
+            padding: 10px;
+            background: #1B1B1B;
+        }
+        
+        /* A-Frame scene and code panel */
+        #scene {
+            width: 100%;
+            height: 100%;
+        }
+        
+        #code-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+        
+        /* Inspector related styles */
+        body.aframe-inspector-opened .sidebar,
+        body.aframe-inspector-opened .toolbar {
+            display: none !important;
+        }
+        
+        body:not(.aframe-inspector-opened) .toggle-edit {
+            display: none;
+        }
+        
+        body.aframe-inspector-opened .scene-container {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+        
+        /* Asset management */
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            padding: 5px;
+        }
+        
+        .asset-item {
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            transition: border-color 0.2s;
+        }
+        
+        .asset-item:hover {
+            border-color: #666;
+        }
+        
+        .asset-item.active {
+            border-color: #fff;
+        }
+        
+        .preview-wrapper {
+            width: 100%;
+            padding-bottom: 100%;
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+        
+        .preview-wrapper img,
+        .preview-wrapper video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Controls */
+        .geometry-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .geometry-buttons button {
+            width: 100%;
+            padding: 8px 5px;
+            background: #2c2c2c;
+            border: 1px solid #3c3c3c;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+        
+        .geometry-buttons button:hover {
+            background: #3c3c3c;
+            border-color: #4c4c4c;
+        }
+        
+        /* Brand header styles */
+        .brand-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .nav-logo {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .logotype {
+            font-family: 'Audiowide', sans-serif;
+            font-size: 24px;
+            margin: 5px 0;
+            color: #fff;
+        }
+        
+        /* SVG logo styling */
+        .cls-1 {
+            fill: #5D25FA;
+        }
+        
+        .cls-2 {
+            fill: #3a2cdd;
+        }
+        
+        .cls-3 {
+            fill: #9152FF;
+        }
+        
+        /* Effect buttons */
+        .effect-btn {
+            padding: 8px;
+            background: #2c2c2c;
+            border: 1px solid #3c3c3c;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .effect-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .effect-btn:hover {
+            background: #3c3c3c;
+        }
+        
+        /* Panel section */
+        .panel-section {
+            margin-bottom: 20px;
+        }
+        
+        /* SVG styling for geometry buttons */
+        .geometry-buttons svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.5;
+        }
+        
+        .geometry-buttons .filled {
+            fill: rgba(255, 255, 255, 0.2);
+            stroke: currentColor;
+        }
+        
+        /* Utility classes */
+        .hidden {
+            display: none;
+        }
+    </style>
+
+    <!-- Monaco Editor - load last to avoid conflicts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs/editor/editor.main.css">
+
+    <script>
+        // Global variables
+        let currentView = 'scene';
+        let scene = document.querySelector('a-scene');
+        const codePanel = document.querySelector('#code-panel');
+        let editor;
+        let fogActive = false;
+        let particleSystem = null;
+        let particleType = null;
+        let animationActive = false;
+        
+        // Function to toggle fog controls visibility
+        function toggleFogControls() {
+            console.log('toggleFogControls called');
+            const content = document.getElementById('fog-collapse-content');
+            const icon = document.getElementById('fog-collapse-icon');
+            
+            if (content && icon) {
+                // If maxHeight isn't set yet, initialize it to collapsed state
+                if (content.style.maxHeight === '') {
+                    content.style.maxHeight = '0px';
+                }
+                
+                console.log('Content max height before:', content.style.maxHeight);
+                if (content.style.maxHeight === '0px' || content.style.maxHeight === '') {
+                    content.style.maxHeight = '500px';
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    content.style.maxHeight = '0px';
+                    icon.style.transform = 'rotate(0deg)';
+                }
+                console.log('Content max height after:', content.style.maxHeight);
+            } else {
+                console.log('Content or icon not found', {content, icon});
+            }
+        }
+
+        // Environment thumbnail functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Environment thumbnails mapping
+            const environmentThumbnails = {
+                none: '/playground/env_thumbs/none.png',
+                default: '/playground/env_thumbs/default.png',
+                contact: '/playground/env_thumbs/contact.png',
+                forest: '/playground/env_thumbs/forest.png',
+                egypt: '/playground/env_thumbs/egypt.png',
+                checkerboard: '/playground/env_thumbs/checkerboard.png',
+                goaland: '/playground/env_thumbs/goaland.png',
+                yavapai: '/playground/env_thumbs/yavapai.png',
+                goldmine: '/playground/env_thumbs/goldmine.png',
+                threetowers: '/playground/env_thumbs/threetowers.png',
+                poison: '/playground/env_thumbs/poison.png',
+                arches: '/playground/env_thumbs/arches.png',
+                tron: '/playground/env_thumbs/tron.png',
+                japan: '/playground/env_thumbs/japan.png',
+                dream: '/playground/env_thumbs/dream.png',
+                volcano: '/playground/env_thumbs/volcano.png',
+                starry: '/playground/env_thumbs/starry.png',
+                osiris: '/playground/env_thumbs/osiris.png',
+                moon: '/playground/env_thumbs/moon.png'
+            };
+
+            // Initialize environment selector
+            const select = document.getElementById('environment-preset');
+            const iconContainer = document.getElementById('environment-icon');
+            if (select && iconContainer) {
+                // Get ordered list of environments
+                const environments = Array.from(select.options).map(option => option.value);
+
+                // Update thumbnail when environment changes
+                function updateEnvironmentDisplay(value) {
+                    const thumbnailPath = environmentThumbnails[value];
+                    if (thumbnailPath) {
+                        iconContainer.innerHTML = `<img src="${thumbnailPath}" alt="${value} environment" style="width: 100%; height: 100%; object-fit: cover;">`;
+                    } else {
+                        iconContainer.innerHTML = `<div style="width: 100%; height: 100%; background: #1c1c1c; display: flex; align-items: center; justify-content: center; color: #666;">Environment Preview</div>`;
+                    }
+                }
+
+                // Handle environment changes
+                select.addEventListener('change', function (e) {
+                    updateEnvironmentDisplay(e.target.value);
+                });
+
+                // Navigate to previous environment
+                document.getElementById('prev-environment')?.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const currentIndex = environments.indexOf(select.value);
+                    const prevIndex = (currentIndex - 1 + environments.length) % environments.length;
+                    select.value = environments[prevIndex];
+                    select.dispatchEvent(new Event('change'));
+                });
+
+                // Navigate to next environment
+                document.getElementById('next-environment')?.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const currentIndex = environments.indexOf(select.value);
+                    const nextIndex = (currentIndex + 1) % environments.length;
+                    select.value = environments[nextIndex];
+                    select.dispatchEvent(new Event('change'));
+                });
+
+                // Initialize the display
+                updateEnvironmentDisplay(select.value);
+            }
+
+            // Initialize fog type selection
+            const fogTypeRadios = document.querySelectorAll('input[name="fog-type"]');
+            fogTypeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const linear = document.getElementById('fog-linear-controls');
+                    const exponential = document.getElementById('fog-exponential-controls');
+                    if (this.value === 'linear') {
+                        linear.style.display = 'block';
+                        exponential.style.display = 'none';
+                    } else {
+                        linear.style.display = 'none';
+                        exponential.style.display = 'block';
+                    }
+                });
+            });
+
+            // Initialize scene elements
+            scene = document.querySelector('a-scene');
+            
+            // Initialize background color
+            const initialBgColor = '#ECECEC';
+            scene.setAttribute('background', `color: ${initialBgColor}`);
+            
+            // Set up color picker interactions
+            const bgColorPicker = document.getElementById('background-color');
+            const bgColorHex = document.getElementById('background-color-hex');
+            
+            if (bgColorPicker && bgColorHex) {
+                // Set initial values
+                bgColorPicker.value = initialBgColor;
+                bgColorHex.value = initialBgColor;
+                
+                bgColorPicker.addEventListener('input', function() {
+                    bgColorHex.value = this.value;
+                    document.querySelector('a-scene').setAttribute('background', `color: ${this.value}`);
+                });
+                
+                bgColorHex.addEventListener('input', function() {
+                    if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+                        bgColorPicker.value = this.value;
+                        document.querySelector('a-scene').setAttribute('background', `color: ${this.value}`);
+                    }
+                });
+            }
+            
+            // Set up environment preset selector
+            const environmentSelect = document.getElementById('environment-preset');
+            if (environmentSelect) {
+                // Apply the initial environment setting
+                const initialValue = environmentSelect.value;
+                if (initialValue !== 'none') {
+                    const entity = document.createElement('a-entity');
+                    entity.setAttribute('environment', `preset: ${initialValue}`);
+                    scene.appendChild(entity);
+                }
+                
+                environmentSelect.addEventListener('change', function() {
+                    const scene = document.querySelector('a-scene');
+                    const value = this.value;
+                    
+                    // Remove existing environment
+                    const existingEnv = scene.querySelector('[environment]');
+                    if (existingEnv) {
+                        scene.removeChild(existingEnv);
+                    }
+                    
+                    // If not "none", add new environment
+                    if (value !== 'none') {
+                        const entity = document.createElement('a-entity');
+                        entity.setAttribute('environment', `preset: ${value}`);
+                        scene.appendChild(entity);
+                    }
+                    
+                    // If in code view, update the code panel
+                    if (document.getElementById('code-panel').style.display === 'block') {
+                        updateCodePanel();
+                    }
+                });
+            }
+            
+            // Set up fog color picker
+            const fogColorPicker = document.getElementById('fog-color');
+            const fogColorHex = document.getElementById('fog-color-hex');
+            
+            if (fogColorPicker && fogColorHex) {
+                fogColorPicker.addEventListener('input', function() {
+                    fogColorHex.value = this.value;
+                    if (fogActive) {
+                        updateFog();
+                    }
+                });
+                
+                fogColorHex.addEventListener('input', function() {
+                    if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+                        fogColorPicker.value = this.value;
+                        if (fogActive) {
+                            updateFog();
+                        }
+                    }
+                });
+            }
+            
+            // Initialize fog controls
+            const fogCollapsible = document.querySelector('.fog-controls .collapsible-button');
+            if (fogCollapsible) {
+                console.log('Found fog collapsible button, adding event listener');
+                fogCollapsible.addEventListener('click', toggleFogControls);
+            } else {
+                console.log('Could not find fog collapsible button');
+                console.log('Selector:', '.fog-controls .collapsible-button');
+                console.log('All .fog-controls elements:', document.querySelectorAll('.fog-controls').length);
+            }
+            
+            // Initialize fog type selection
+            const fogTypeRadios = document.querySelectorAll('input[name="fog-type"]');
+            fogTypeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const linear = document.getElementById('fog-linear-controls');
+                    const exponential = document.getElementById('fog-exponential-controls');
+                    if (this.value === 'linear') {
+                        linear.style.display = 'block';
+                        exponential.style.display = 'none';
+                    } else {
+                        linear.style.display = 'none';
+                        exponential.style.display = 'block';
+                    }
+                    
+                    if (fogActive) {
+                        updateFog();
+                    }
+                });
+            });
+            
+            // Dynamically load Monaco
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs/loader.js';
+            script.onload = function() {
+                // Configure RequireJS
+                require.config({ 
+                    paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs' } 
+                });
+                
+                // Load the Monaco editor
+                require(['vs/editor/editor.main'], function() {
+                    // Create Monaco editor
+                    editor = monaco.editor.create(codePanel, {
+                        language: 'html',
+                        theme: 'vs-dark',
+                        lineNumbers: true,
+                        automaticLayout: true,
+                        wordWrap: 'on',
+                        minimap: { enabled: false },
+                        tabSize: 4,
+                        value: ''
+                    });
+                    
+                    // Set up A-Frame completions
+                    setupAFrameCompletions();
+                    
+                    // Update code panel with initial content
+                    updateCodePanel();
+                });
+            };
+            document.head.appendChild(script);
+        });
+        
+        // Function for A-Frame completions in Monaco
+        function setupAFrameCompletions() {
+            // Define A-Frame tags
+            const aframeTags = [
+                { label: 'a-scene', description: 'Root element of every A-Frame experience' },
+                { label: 'a-entity', description: 'General-purpose entity in the scene' },
+                { label: 'a-box', description: 'Box primitive' },
+                { label: 'a-sphere', description: 'Sphere primitive' },
+                { label: 'a-cylinder', description: 'Cylinder primitive' },
+                { label: 'a-plane', description: 'Plane primitive' },
+                { label: 'a-sky', description: 'Sky background' },
+                { label: 'a-camera', description: 'Camera entity' }
+            ];
+            
+            // Define A-Frame attributes
+            const aframeAttributes = [
+                { label: 'position', description: 'Position in 3D space (x y z)' },
+                { label: 'rotation', description: 'Rotation in degrees (x y z)' },
+                { label: 'scale', description: 'Scale (x y z)' },
+                { label: 'material', description: 'Material properties' },
+                { label: 'environment', description: 'Environment settings' }
+            ];
+            
+            // Register completion provider
+            monaco.languages.registerCompletionItemProvider('html', {
+                provideCompletionItems: function(model, position) {
+                    const line = model.getLineContent(position.lineNumber);
+                    const wordUntilPosition = model.getWordUntilPosition(position);
+                    
+                    // Tag completions
+                    if (line.substring(0, position.column - 1).endsWith('<')) {
+                        return {
+                            suggestions: aframeTags.map(tag => ({
+                                label: tag.label,
+                                kind: monaco.languages.CompletionItemKind.Class,
+                                documentation: tag.description,
+                                insertText: tag.label,
+                                range: {
+                                    startLineNumber: position.lineNumber,
+                                    startColumn: wordUntilPosition.startColumn,
+                                    endLineNumber: position.lineNumber,
+                                    endColumn: wordUntilPosition.endColumn
+                                }
+                            }))
+                        };
+                    }
+                    
+                    // Attribute completions
+                    if (/<a-[a-z]+ [^>]*$/i.test(line.substring(0, position.column))) {
+                        return {
+                            suggestions: aframeAttributes.map(attr => ({
+                                label: attr.label,
+                                kind: monaco.languages.CompletionItemKind.Property,
+                                documentation: attr.description,
+                                insertText: attr.label + '=""',
+                                range: {
+                                    startLineNumber: position.lineNumber,
+                                    startColumn: wordUntilPosition.startColumn,
+                                    endLineNumber: position.lineNumber,
+                                    endColumn: wordUntilPosition.endColumn
+                                }
+                            }))
+                        };
+                    }
+                    
+                    return { suggestions: [] };
+                }
+            });
+        }
+        
+        // Function to update code panel with scene content
+        function updateCodePanel() {
+            if (!editor) return; // Skip if editor isn't initialized
+            
+            const sceneEl = document.querySelector('a-scene');
+            if (!sceneEl) return;
+            
+            const sceneClone = sceneEl.cloneNode(true);
+            cleanupSceneElement(sceneClone);
+            
+            // Create scene tag with attributes
+            let content = '<a-scene';
+            if (sceneEl.hasAttribute('embedded')) content += ' embedded';
+            
+            // Add renderer attributes
+            if (sceneEl.hasAttribute('renderer')) {
+                content += ' renderer="' + sceneEl.getAttribute('renderer') + '"';
+            }
+            
+            // Add other scene attributes
+            Array.from(sceneEl.attributes).forEach(attr => {
+                if (attr.name !== 'embedded' && attr.name !== 'renderer' && 
+                    attr.name !== 'style' && attr.name !== 'class') {
+                    content += ` ${attr.name}="${attr.value}"`;
+                }
+            });
+            
+            content += '>\n';
+            
+            // Add assets
+            const assets = sceneClone.querySelector('a-assets');
+            if (assets) {
+                content += '  <a-assets>\n';
+                Array.from(assets.children).forEach(asset => {
+                    content += '    ' + asset.outerHTML + '\n';
+                });
+                content += '  </a-assets>\n\n';
+            }
+            
+            // Add camera
+            const camera = sceneClone.querySelector('a-camera');
+            if (camera) {
+                content += '  <!-- Camera -->\n';
+                content += '  ' + camera.outerHTML + '\n';
+            }
+            
+            // Add entities
+            const entities = Array.from(sceneClone.children).filter(el => {
+                return el !== assets && el !== camera && 
+                       !el.classList.contains('environment') &&
+                       !el.hasAttribute('environment');
+            });
+            
+            if (entities.length > 0) {
+                content += '  <!-- Scene Entities -->\n';
+                entities.forEach(entity => {
+                    content += '  ' + entity.outerHTML + '\n';
+                });
+                content += '\n';
+            }
+            
+            // Add environment/sky
+            const environment = sceneClone.querySelector('[environment]');
+            const sky = sceneClone.querySelector('a-sky');
+            
+            if (environment) {
+                content += '  <!-- Environment -->\n';
+                content += '  ' + environment.outerHTML + '\n';
+            } else if (sky) {
+                content += '  <!-- Sky -->\n';
+                content += '  ' + sky.outerHTML + '\n';
+            }
+            
+            // Close scene tag
+            content += '</a-scene>';
+            
+            // Update Monaco editor content
+            editor.setValue(content);
+        }
+        
+        // Function to update scene from code
+        function updateSceneFromCode() {
+            if (!editor) return;
+            
+            const code = editor.getValue();
+            const tempContainer = document.createElement('div');
+            tempContainer.innerHTML = code;
+            
+            const newScene = tempContainer.querySelector('a-scene');
+            if (!newScene) {
+                console.error('No scene element found in code');
+                return;
+            }
+            
+            // Create new scene
+            const sceneEl = document.createElement('a-scene');
+            sceneEl.setAttribute('embedded', '');
+            
+            // Copy attributes
+            Array.from(newScene.attributes).forEach(attr => {
+                if (attr.name !== 'embedded' && attr.name !== 'style' && attr.name !== 'class') {
+                    sceneEl.setAttribute(attr.name, attr.value);
+                }
+            });
+            
+            // Copy children
+            Array.from(newScene.children).forEach(child => {
+                sceneEl.appendChild(child.cloneNode(true));
+            });
+            
+            // Replace existing scene
+            const oldScene = document.querySelector('a-scene');
+            oldScene.parentNode.replaceChild(sceneEl, oldScene);
+            
+            // Update scene reference
+            scene = sceneEl;
+            
+            // Add default elements if needed
+            setTimeout(() => {
+                if (!scene.querySelector('[environment]') && !scene.querySelector('a-sky')) {
+                    const sky = document.createElement('a-sky');
+                    sky.setAttribute('material', 'shader: gradientshader; topColor: #ECECEC; bottomColor: #87CEEB');
+                    scene.appendChild(sky);
+                }
+                
+                if (scene.renderer) {
+                    scene.renderer.render(scene.object3D, scene.camera);
+                }
+            }, 100);
+        }
+        
+        // Function to switch between views
+        function switchToView(view) {
+            const prevView = currentView;
+            currentView = view;
+            
+            const sceneBtn = document.getElementById('scene-btn');
+            const codeBtn = document.getElementById('code-btn');
+            const sceneContainer = document.querySelector('a-scene');
+            
+            if (view === 'scene') {
+                if (prevView === 'code') {
+                    updateSceneFromCode();
+                }
+                
+                sceneContainer.style.display = 'block';
+                codePanel.style.display = 'none';
+                sceneBtn.classList.add('active');
+                sceneBtn.classList.remove('btn-outline-primary');
+                sceneBtn.classList.add('btn-primary');
+                codeBtn.classList.remove('active');
+                codeBtn.classList.add('btn-outline-primary');
+                codeBtn.classList.remove('btn-primary');
+                
+                // Close inspector if open
+                if (AFRAME && AFRAME.INSPECTOR && AFRAME.INSPECTOR.opened) {
+                    AFRAME.INSPECTOR.close();
+                }
+            } else if (view === 'code') {
+                sceneContainer.style.display = 'none';
+                codePanel.style.display = 'block';
+                sceneBtn.classList.remove('active');
+                sceneBtn.classList.add('btn-outline-primary');
+                sceneBtn.classList.remove('btn-primary');
+                codeBtn.classList.add('active');
+                codeBtn.classList.remove('btn-outline-primary');
+                codeBtn.classList.add('btn-primary');
+                
+                updateCodePanel();
+                
+                // Close inspector if open
+                if (AFRAME && AFRAME.INSPECTOR && AFRAME.INSPECTOR.opened) {
+                    AFRAME.INSPECTOR.close();
+                }
+                
+                // Focus editor
+                if (editor) {
+                    setTimeout(() => {
+                        editor.focus();
+                    }, 100);
+                }
+            }
+        }
+        
+        // Function to toggle A-Frame inspector
+        function toggleInspector() {
+            // Load inspector if needed
+            if (!AFRAME.INSPECTOR || !AFRAME.INSPECTOR.opened) {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js';
+                document.head.appendChild(script);
+            } else {
+                AFRAME.INSPECTOR.close();
+            }
+        }
+        
+        // Function to export scene
+        function exportScene() {
+            if (!editor) {
+                updateCodePanel();
+            }
+            
+            const code = editor.getValue();
+            const blob = new Blob([code], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'scene.html';
+            a.click();
+            
+            URL.revokeObjectURL(url);
+        }
+        
+        // Function to clean up scene element for code panel
+        function cleanupSceneElement(el) {
+            // Remove injected elements
+            const selectors = [
+                'canvas', 
+                '.a-enter-vr',
+                '.a-orientation-modal',
+                '.a-loader-title',
+                '[aframe-injected]'
+            ];
+            
+            selectors.forEach(selector => {
+                const elements = el.querySelectorAll(selector);
+                elements.forEach(element => element.remove());
+            });
+            
+            return el;
+        }
+        
+        // Add entity to the scene
+        function addEntity(type) {
+            const scene = document.querySelector('a-scene');
+            if (!scene) return;
+            
+            const entity = document.createElement('a-entity');
+            
+            // Position slightly in front of camera
+            entity.setAttribute('position', '0 1.5 -3');
+            
+            switch (type) {
+                case 'box':
+                    entity.setAttribute('geometry', 'primitive: box');
+                    entity.setAttribute('material', 'color: #4CC3D9');
+                    break;
+                case 'sphere':
+                    entity.setAttribute('geometry', 'primitive: sphere');
+                    entity.setAttribute('material', 'color: #EF2D5E');
+                    break;
+                case 'cylinder':
+                    entity.setAttribute('geometry', 'primitive: cylinder');
+                    entity.setAttribute('material', 'color: #FFC65D');
+                    break;
+                case 'plane':
+                    entity.setAttribute('geometry', 'primitive: plane');
+                    entity.setAttribute('material', 'color: #7BC8A4');
+                    entity.setAttribute('rotation', '-90 0 0');
+                    entity.setAttribute('position', '0 0 -3');
+                    break;
+                case 'cone':
+                    entity.setAttribute('geometry', 'primitive: cone');
+                    entity.setAttribute('material', 'color: #FF9999');
+                    break;
+                case 'torus':
+                    entity.setAttribute('geometry', 'primitive: torus');
+                    entity.setAttribute('material', 'color: #CCCCFF');
+                    break;
+                case 'ring':
+                    entity.setAttribute('geometry', 'primitive: ring; radiusInner: 0.5; radiusOuter: 1');
+                    entity.setAttribute('material', 'color: #FFCC99; side: double');
+                    break;
+                case 'circle':
+                    entity.setAttribute('geometry', 'primitive: circle');
+                    entity.setAttribute('material', 'color: #99CCFF; side: double');
+                    break;
+                case 'dodecahedron':
+                    entity.setAttribute('geometry', 'primitive: dodecahedron');
+                    entity.setAttribute('material', 'color: #CC99FF');
+                    break;
+                case 'octahedron':
+                    entity.setAttribute('geometry', 'primitive: octahedron');
+                    entity.setAttribute('material', 'color: #FFFF99');
+                    break;
+                case 'tetrahedron':
+                    entity.setAttribute('geometry', 'primitive: tetrahedron');
+                    entity.setAttribute('material', 'color: #99FFCC');
+                    break;
+                case 'triangle':
+                    entity.setAttribute('geometry', 'primitive: triangle');
+                    entity.setAttribute('material', 'color: #FF99CC; side: double');
+                    break;
+                case 'torusKnot':
+                    entity.setAttribute('geometry', 'primitive: torusKnot');
+                    entity.setAttribute('material', 'color: #99FFFF');
+                    break;
+                case 'ocean':
+                    entity.setAttribute('geometry', 'primitive: plane; width: 10; height: 10');
+                    entity.setAttribute('material', 'color: #99CCFF; opacity: 0.8; shader: standard; metalness: 0.3; roughness: 0.3');
+                    entity.setAttribute('rotation', '-90 0 0');
+                    entity.setAttribute('position', '0 0 -3');
+                    entity.setAttribute('ocean', 'density: 20; width: 50; depth: 50; speed: 2');
+                    break;
+                case 'tube':
+                    entity.setAttribute('geometry', 'primitive: tube; radius: 0.5; path: -2 0 0, 0 0 0, 2 0 0');
+                    entity.setAttribute('material', 'color: #99FF99; side: double');
+                    break;
+                case 'grid':
+                    entity.setAttribute('geometry', 'primitive: plane; width: 10; height: 10');
+                    entity.setAttribute('material', 'color: #444; wireframe: true');
+                    entity.setAttribute('rotation', '-90 0 0');
+                    entity.setAttribute('position', '0 0 -3');
+                    break;
+            }
+            
+            scene.appendChild(entity);
+            
+            // If code panel is active, update it
+            if (document.getElementById('code-panel').style.display === 'block') {
+                updateCodePanel();
+            }
+        }
+
+        // Handle file uploads
+        function handleFileUpload() {
+            const fileInput = document.getElementById('asset-upload');
+            const file = fileInput.files[0];
+            
+            if (!file) return;
+            
+            // Create a URL for the uploaded file
+            const url = URL.createObjectURL(file);
+            
+            // Add to asset library
+            const assetContainer = document.getElementById('asset-library');
+            
+            // Create asset in a-assets
+            const aframeAssetContainer = document.querySelector('a-assets');
+            if (!aframeAssetContainer) {
+                const assets = document.createElement('a-assets');
+                document.querySelector('a-scene').appendChild(assets);
+            }
+            
+            let assetEl;
+            
+            // Create preview and add to sidebar
+            const assetItem = document.createElement('div');
+            assetItem.className = 'asset-item';
+            
+            const previewWrapper = document.createElement('div');
+            previewWrapper.className = 'preview-wrapper';
+            
+            if (file.type.includes('image')) {
+                // Create image asset
+                assetEl = document.createElement('img');
+                assetEl.id = 'asset_' + Date.now();
+                assetEl.src = url;
+                document.querySelector('a-assets').appendChild(assetEl);
+                
+                // Create preview
+                const preview = document.createElement('img');
+                preview.src = url;
+                previewWrapper.appendChild(preview);
+                
+                // Add click handler to insert image
+                assetItem.onclick = function() {
+                    insertAsset('image', '#' + assetEl.id);
+                };
+            } else if (file.type.includes('video')) {
+                // Create video asset
+                assetEl = document.createElement('video');
+                assetEl.id = 'asset_' + Date.now();
+                assetEl.src = url;
+                assetEl.setAttribute('preload', 'auto');
+                document.querySelector('a-assets').appendChild(assetEl);
+                
+                // Create preview
+                const preview = document.createElement('video');
+                preview.src = url;
+                preview.muted = true;
+                preview.loop = true;
+                preview.play();
+                previewWrapper.appendChild(preview);
+                
+                // Add click handler to insert video
+                assetItem.onclick = function() {
+                    insertAsset('video', '#' + assetEl.id);
+                };
+            } else if (file.name.endsWith('.gltf') || file.name.endsWith('.glb')) {
+                // Create model asset
+                assetEl = document.createElement('a-asset-item');
+                assetEl.id = 'asset_' + Date.now();
+                assetEl.src = url;
+                document.querySelector('a-assets').appendChild(assetEl);
+                
+                // Create simple preview for model
+                const preview = document.createElement('div');
+                preview.style.width = '100%';
+                preview.style.height = '100%';
+                preview.style.background = '#333';
+                preview.style.display = 'flex';
+                preview.style.alignItems = 'center';
+                preview.style.justifyContent = 'center';
+                preview.innerHTML = '<div style="color: #fff; font-size: 10px; text-align: center;">' + file.name + '</div>';
+                previewWrapper.appendChild(preview);
+                
+                // Add click handler to insert model
+                assetItem.onclick = function() {
+                    insertAsset('model', '#' + assetEl.id);
+                };
+            }
+            
+            // Add preview to asset item
+            assetItem.appendChild(previewWrapper);
+            
+            // Add asset item to library
+            assetContainer.appendChild(assetItem);
+            
+            // Reset file input
+            fileInput.value = null;
+            
+            // If code panel is active, update it
+            if (document.getElementById('code-panel').style.display === 'block') {
+                updateCodePanel();
+            }
+        }
+
+        // Insert asset into scene
+        function insertAsset(type, src) {
+            const scene = document.querySelector('a-scene');
+            if (!scene) return;
+            
+            const entity = document.createElement('a-entity');
+            entity.setAttribute('position', '0 1.5 -3');
+            
+            switch (type) {
+                case 'image':
+                    entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 1.5');
+                    entity.setAttribute('material', `src: ${src}`);
+                    break;
+                case 'video':
+                    entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 1.5');
+                    entity.setAttribute('material', `src: ${src}`);
+                    break;
+                case 'model':
+                    entity.setAttribute('gltf-model', src);
+                    entity.setAttribute('scale', '1 1 1');
+                    break;
+            }
+            
+            scene.appendChild(entity);
+            
+            // If code panel is active, update it
+            if (document.getElementById('code-panel').style.display === 'block') {
+                updateCodePanel();
+            }
+        }
+
+        // Toggle particle system
+        function toggleParticleSystem(type) {
+            const scene = document.querySelector('a-scene');
+            const animationBtn = document.getElementById('toggle-animation-btn');
+            
+            // Remove existing particle system if any
+            if (particleSystem && particleType === type) {
+                scene.removeChild(particleSystem);
+                particleSystem = null;
+                particleType = null;
+                animationBtn.disabled = true;
+                animationActive = false;
+                
+                // Reset button state
+                document.getElementById(type + '-btn').classList.remove('active');
+                
+                document.getElementById('animation-text').innerText = 'Start';
+                document.getElementById('animation-icon').setAttribute('d', 'M8 5v14l11-7z');
+                
+                // If code panel is active, update it
+                if (document.getElementById('code-panel').style.display === 'block') {
+                    updateCodePanel();
+                }
+                
+                return;
+            }
+            
+            // If different type, remove existing
+            if (particleSystem) {
+                scene.removeChild(particleSystem);
+                document.getElementById(particleType + '-btn').classList.remove('active');
+            }
+            
+            // Create new particle system
+            particleSystem = document.createElement('a-entity');
+            particleSystem.setAttribute('position', '0 2.5 -5');
+            
+            // Configure based on type
+            switch (type) {
+                case 'snow':
+                    particleSystem.setAttribute('particle-system', 'preset: snow; particleCount: 5000; maxAge: 5; size: 0.2; velocityValue: 0.2 0.5 0.2; velocitySpread: 0.5 0 0.5; accelerationValue: 0 -0.1 0;');
+                    document.getElementById('snow-btn').classList.add('active');
+                    break;
+                    
+                case 'dust':
+                    particleSystem.setAttribute('particle-system', 'preset: dust; particleCount: 1000; maxAge: 10; size: 0.1; velocityValue: 0.1 0.2 0.1; velocitySpread: 0.5 0 0.5; accelerationValue: 0 -0.02 0;');
+                    document.getElementById('dust-btn').classList.add('active');
+                    break;
+                    
+                case 'rain':
+                    particleSystem.setAttribute('particle-system', 'preset: rain; particleCount: 3000; maxAge: 1; size: 0.1; velocityValue: 0 -20 0; velocitySpread: 4 0 4; accelerationValue: 0 -30 0;');
+                    document.getElementById('rain-btn').classList.add('active');
+                    break;
+            }
+            
+            // Add to scene
+            scene.appendChild(particleSystem);
+            particleType = type;
+            
+            // Enable animation control
+            animationBtn.disabled = false;
+            
+            // If code panel is active, update it
+            if (document.getElementById('code-panel').style.display === 'block') {
+                updateCodePanel();
+            }
+        }
+
+        // Toggle particle animation
+        function toggleParticleAnimation() {
+            if (!particleSystem) return;
+            
+            if (!animationActive) {
+                // Pause animation
+                particleSystem.setAttribute('particle-system', 'enabled: false');
+                animationActive = true;
+                document.getElementById('animation-text').innerText = 'Resume';
+                document.getElementById('animation-icon').setAttribute('d', 'M5 5h3v14H5V5zm11 0h3v14h-3V5z');
+            } else {
+                // Resume animation
+                particleSystem.setAttribute('particle-system', 'enabled: true');
+                animationActive = false;
+                document.getElementById('animation-text').innerText = 'Pause';
+                document.getElementById('animation-icon').setAttribute('d', 'M8 5v14l11-7z');
+            }
+        }
+        
+        // Toggle fog effect
+        function toggleFog() {
+            const scene = document.querySelector('a-scene');
+            const btn = document.getElementById('toggle-fog-btn');
+            
+            if (!fogActive) {
+                // Add fog
+                updateFog();
+                fogActive = true;
+                btn.innerHTML = `<span>Remove Fog</span>`;
+            } else {
+                // Remove fog
+                scene.removeAttribute('fog');
+                fogActive = false;
+                btn.innerHTML = `<span>Add Fog</span>`;
+            }
+            
+            // If code panel is active, update it
+            if (document.getElementById('code-panel').style.display === 'block') {
+                updateCodePanel();
+            }
+        }
+
+        // Update fog parameters
+        function updateFog() {
+            const scene = document.querySelector('a-scene');
+            const color = document.getElementById('fog-color').value;
+            const fogType = document.querySelector('input[name="fog-type"]:checked').value;
+            
+            if (fogType === 'linear') {
+                const near = document.getElementById('fog-near').value;
+                const far = document.getElementById('fog-far').value;
+                scene.setAttribute('fog', `type: linear; color: ${color}; near: ${near}; far: ${far}`);
+            } else {
+                const density = document.getElementById('fog-intensity').value;
+                scene.setAttribute('fog', `type: exponential; color: ${color}; density: ${density}`);
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="brand-header">
+                <svg class="nav-logo" viewBox="0 0 333 333" xmlns="http://www.w3.org/2000/svg">
+                    <polygon class="cls-1"
+                        points="184.59 135.97 184.21 135.97 110.55 11.06 219.49 9.03 228.91 24.43 137.69 26.25 146.62 41 165.61 72.39 184.6 103.79 193.82 119.03 211.76 119.03 248.48 119.03 284.59 119.02 302.68 119.02 256.79 39.98 273.78 40.15 329.46 134.96 184.59 135.97" />
+                    <polygon class="cls-2"
+                        points="110.55 11.06 184.21 135.97 184.59 135.97 175.83 150.85 175.52 150.85 101.87 27.04 110.55 11.06" />
+                    <polygon class="cls-3"
+                        points="184.01 40.5 146.62 41 137.69 26.25 228.91 24.43 184.6 103.79 174.99 87.86 201.39 40.27 184.08 40.5 184.01 40.5" />
+                    <polygon class="cls-1" points="56.71 41.63 74.44 41.74 148.19 166.21 129.63 166.16 56.71 41.63" />
+                    <polygon class="cls-2"
+                        points="85.44 214.65 102.95 182.4 111.45 166.74 102.39 151.26 83.85 119.57 65.61 88.41 72.79 11.43 152.31 2.99 137.56 56.71 41.63 129.63 166.16 60.3 293.15 3.54 200.14 12.08 184.24 59.71 262.05 67.94 246.89 85.44 214.65" />
+                    <polygon class="cls-2"
+                        points="184.08 40.5 201.39 40.27 174.99 87.86 184.6 103.79 165.61 72.39 184.01 40.5 184.08 40.5" />
+                    <polygon class="cls-2"
+                        points="211.76 118.76 256.63 39.89 256.79 39.98 302.68 119.02 284.59 119.02 284.59 118.95 266.04 87.37 256.42 71.01 230.02 118.48 211.76 118.76" />
+                    <polygon class="cls-3"
+                        points="56.48 72.79 65.61 88.41 65.55 88.45 47.66 120.4 38.4 136.96 92.7 135.78 102.16 151.4 11.43 152.5 11.43 152.31 56.48 72.79" />
+                    <polygon class="cls-3"
+                        points="256.42 71.01 266.04 87.37 265.75 87.54 248.48 118.39 248.48 119.03 211.76 119.03 211.76 118.76 230.02 118.48 256.42 71.01" />
+                    <polygon class="cls-1"
+                        points="83.85 119.57 102.39 151.26 102.16 151.4 92.7 135.78 38.4 136.96 47.66 120.4 47.95 120.56 83.29 119.89 83.85 119.57" />
+                    <polygon class="cls-3"
+                        points="175.83 150.85 184.59 135.97 329.46 134.96 320.41 150.21 175.83 150.85" />
+                    <polygon class="cls-3"
+                        points="129.63 166.16 148.19 166.21 148.38 166.53 78.48 292.56 60.3 293.15 129.63 166.16" />
+                    <polygon class="cls-1"
+                        points="48.62 214.87 67.94 246.89 59.71 262.05 12.08 184.24 102.95 182.4 94.06 198.74 39.65 199.99 48.59 214.81 48.62 214.87" />
+                    <polygon class="cls-3"
+                        points="102.95 182.4 85.44 214.65 48.62 214.87 48.59 214.81 39.65 199.99 94.06 198.74 102.95 182.4" />
+                    <polygon class="cls-1"
+                        points="175.84 182.61 319.13 180.4 330.01 196.91 185.61 198.39 175.84 182.61 175.84 182.61" />
+                    <polygon class="cls-2"
+                        points="175.47 182.61 175.84 182.61 175.84 182.61 185.61 198.39 113.76 323.97 104.73 308.18 175.47 182.61" />
+                    <polygon class="cls-3"
+                        points="167.45 261.43 149.16 293.24 140.56 308.18 231.79 307.99 222.72 323.59 113.76 323.97 185.61 198.39 330.01 196.91 276.31 291.28 259.33 291.82 303.59 213.44 284.52 213.57 249.4 213.81 230.83 213.93 212.56 214.06 194.63 214.18 185.75 229.62 167.45 261.43" />
+                    <polygon class="cls-2"
+                        points="212.56 214.06 230.83 213.93 258.27 260.81 267.49 244.22 284.52 213.57 303.59 213.44 259.33 291.82 259.17 291.92 212.56 214.06" />
+                    <polygon class="cls-1"
+                        points="230.83 213.93 249.4 213.81 267.23 244.08 267.49 244.22 258.27 260.81 230.83 213.93" />
+                    <polygon class="cls-2"
+                        points="167.45 261.43 185.75 229.62 176.49 245.76 203.93 292.76 186.62 292.91 186.56 292.91 167.45 261.43" />
+                    <polygon class="cls-1"
+                        points="186.56 292.91 186.62 292.91 203.93 292.76 176.49 245.76 185.75 229.62 231.79 307.99 140.56 308.18 149.16 293.24 186.56 292.91" />
+                </svg>
+                <h1 class="logotype">DLUX</h1>
+            </div>
+            <!-- Add environment presets section -->
+            <div class="panel-section">
+                <h3>Environment</h3>
+                <div style="margin-bottom: 15px; position: relative;">
+                    <div style="position: relative; width: 100%;">
+                        <select id="environment-preset"
+                            style="width: 100%; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 100px 8px 8px 8px; border-radius: 4px; appearance: none; text-align: left;">
+                            <option value="none">None (Disable)</option>
+                            <option value="default">Default</option>
+                            <option value="contact">Contact</option>
+                            <option value="forest">Forest</option>
+                            <option value="egypt">Egypt</option>
+                            <option value="checkerboard">Checkerboard</option>
+                            <option value="goaland">Goaland</option>
+                            <option value="yavapai">Yavapai</option>
+                            <option value="goldmine">Goldmine</option>
+                            <option value="threetowers">Three Towers</option>
+                            <option value="poison">Poison</option>
+                            <option value="arches">Arches</option>
+                            <option value="tron">Tron</option>
+                            <option value="japan">Japan</option>
+                            <option value="dream">Dream</option>
+                            <option value="volcano">Volcano</option>
+                            <option value="starry">Starry</option>
+                            <option value="osiris">Osiris</option>
+                            <option value="moon">Moon</option>
+                        </select>
+                        <div id="environment-icon"
+                            style="position: absolute; left: 0; top: 0; width: 100%; height: 92px; pointer-events: none; overflow: hidden; border-radius: 4px 4px 0 0;">
+                            <img src="/playground/env_thumbs/none.png" alt="none environment"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <!-- Previous button -->
+                        <div id="prev-environment"
+                            style="position: absolute; left: 0; top: 0; width: 40px; height: 92px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: linear-gradient(to right, rgba(0,0,0,0.5), transparent);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M15 6l-6 6 6 6" />
+                            </svg>
+                        </div>
+                        <!-- Next button -->
+                        <div id="next-environment"
+                            style="position: absolute; right: 0; top: 0; width: 40px; height: 92px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: linear-gradient(to left, rgba(0,0,0,0.5), transparent);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 6l6 6-6 6" />
+                            </svg>
+                        </div>
+                        <div style="position: absolute; right: 8px; bottom: 8px; pointer-events: none;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M7 10l5 5 5-5z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="background-color-picker" style="margin-bottom: 15px;">
+                    <label for="background-color" style="display: block; margin-bottom: 5px;">Background Color</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="color" id="background-color" value="#ECECEC"
+                            style="width: 50px; height: 30px; padding: 0;">
+                        <input type="text" id="background-color-hex" value="#ECECEC"
+                            style="width: 80px; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 5px;">
+                    </div>
+                </div>
+            </div>
+            <div class="fog-controls"
+                style="margin-bottom: 15px; border: 1px solid #3c3c3c; border-radius: 4px; overflow: hidden;">
+                <div class="collapsible-button"
+                    style="background: #3c3c3c; padding: 8px 12px; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; transition: background-color 0.2s;"
+                    onclick="toggleFogControls()" onmouseover="this.style.background='#4a4a4a'"
+                    onmouseout="this.style.background='#3c3c3c'">
+                    <h3 style="margin: 0; padding: 0; color: #fff; font-size: 16px;">Fog</h3>
+                    <span id="fog-collapse-icon"
+                        style="font-size: 12px; transition: transform 0.3s; transform: rotate(0deg); color: #fff;">▼</span>
+                </div>
+                <div id="fog-collapse-content"
+                    style="overflow: hidden; transition: max-height 0.3s ease-out; max-height: 0px; background: #2c2c2c; border-top: 1px solid #3c3c3c;">
+                    <div style="padding: 10px;">
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; margin-bottom: 5px;">Fog Color</label>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <input type="color" id="fog-color" value="#ffffff"
+                                    style="width: 50px; height: 30px; padding: 0;">
+                                <input type="text" id="fog-color-hex" value="#ECECEC"
+                                    style="width: 80px; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 5px;">
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; margin-bottom: 5px;">Fog Type</label>
+                            <div
+                                style="display: flex; gap: 10px; align-items: center; background: #2c2c2c; padding: 5px; border-radius: 4px; border: 1px solid #3c3c3c;">
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="radio" name="fog-type" value="linear" style="margin: 0;">
+                                    <span style="color: #fff;">Linear</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                    <input type="radio" name="fog-type" value="exponential" checked style="margin: 0;">
+                                    <span style="color: #fff;">Exponential</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div id="fog-linear-controls" style="margin-bottom: 10px; display: none;">
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; margin-bottom: 5px;">Near Distance</label>
+                                <input type="range" id="fog-near" min="0" max="100" step="0.1" value="1"
+                                    style="width: 100%;">
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; margin-bottom: 5px;">Far Distance</label>
+                                <input type="range" id="fog-far" min="0" max="250" step="0.1" value="50"
+                                    style="width: 100%;">
+                            </div>
+                        </div>
+                        <div id="fog-exponential-controls" style="margin-bottom: 10px; display: block;">
+                            <label style="display: block; margin-bottom: 5px;">Density</label>
+                            <input type="range" id="fog-intensity" min="0" max="1" step="0.01" value="0.25"
+                                style="width: 100%;">
+                        </div>
+                        <button id="toggle-fog-btn" onclick="toggleFog()" class="effect-btn" style="width: 100%;">
+                            <span>Add Fog</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <h3>Assets</h3>
+            <div style="margin-bottom: 15px;">
+                <input type="file" id="asset-upload" accept="image/*,video/*,.gltf,.glb" onchange="handleFileUpload()"
+                    style="display: none;">
+                <button onclick="document.getElementById('asset-upload').click()" class="effect-btn"
+                    style="width: 100%;">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12,4L12,20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M4,12L20,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    <span>Add File</span>
+                </button>
+            </div>
+            <div id="asset-library"></div>
+            <h3>Add Objects</h3>
+            <div class="geometry-buttons">
+                <!-- Basic Shapes -->
+                <button onclick="addEntity('box')">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="4" y="4" width="16" height="16" class="filled" />
+                    </svg>
+                    Box
+                </button>
+                <button onclick="addEntity('sphere')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" class="filled" />
+                        <ellipse cx="12" cy="12" rx="8" ry="3" />
+                        <line x1="4" y1="12" x2="20" y2="12" />
+                    </svg>
+                    Sphere
+                </button>
+                <button onclick="addEntity('cylinder')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 7 C6 7 6 17 6 17 C6 19 12 19 12 17 C12 17 12 7 12 7 C12 5 6 5 6 7" class="filled" />
+                        <ellipse cx="9" cy="7" rx="3" ry="1" />
+                        <ellipse cx="9" cy="17" rx="3" ry="1" />
+                    </svg>
+                    Cylinder
+                </button>
+                <button onclick="addEntity('plane')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 12 L12 6 L20 12 L12 18 Z" class="filled" />
+                    </svg>
+                    Plane
+                </button>
+                <button onclick="addEntity('cone')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L4 20 L20 20 Z" class="filled" />
+                    </svg>
+                    Cone
+                </button>
+                <button onclick="addEntity('torus')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" class="filled" />
+                        <circle cx="12" cy="12" r="4" />
+                    </svg>
+                    Torus
+                </button>
+                <button onclick="addEntity('ring')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" />
+                        <circle cx="12" cy="12" r="4" />
+                    </svg>
+                    Ring
+                </button>
+                <button onclick="addEntity('circle')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" />
+                    </svg>
+                    Circle
+                </button>
+                <button onclick="addEntity('dodecahedron')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L18 8 L18 16 L12 20 L6 16 L6 8 Z" class="filled" />
+                        <line x1="12" y1="4" x2="12" y2="20" />
+                        <line x1="6" y1="8" x2="18" y2="8" />
+                        <line x1="6" y1="16" x2="18" y2="16" />
+                    </svg>
+                    Dodecahedron
+                </button>
+                <button onclick="addEntity('octahedron')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L20 12 L12 20 L4 12 Z" class="filled" />
+                    </svg>
+                    Octahedron
+                </button>
+                <button onclick="addEntity('tetrahedron')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L18 18 L6 18 Z" class="filled" />
+                        <line x1="6" y1="18" x2="18" y2="18" />
+                    </svg>
+                    Tetrahedron
+                </button>
+                <button onclick="addEntity('triangle')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L20 18 L4 18 Z" />
+                    </svg>
+                    Triangle
+                </button>
+                <button onclick="addEntity('torusKnot')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 8 C16 8 16 16 12 16 C8 16 8 8 12 8" class="filled" />
+                        <path d="M8 12 C8 8 16 8 16 12 C16 16 8 16 8 12" />
+                    </svg>
+                    Torus Knot
+                </button>
+                <button onclick="addEntity('ocean')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 14 Q8 10 12 14 Q16 18 20 14" class="filled" />
+                        <path d="M4 18 Q8 14 12 18 Q16 22 20 18" />
+                    </svg>
+                    Ocean
+                </button>
+                <button onclick="addEntity('tube')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 12 C8 6 16 18 20 12" class="filled" />
+                    </svg>
+                    Tube
+                </button>
+                <button onclick="addEntity('grid')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 4 L20 4 L20 20 L4 20 Z" />
+                        <line x1="9" y1="4" x2="9" y2="20" />
+                        <line x1="15" y1="4" x2="15" y2="20" />
+                        <line x1="4" y1="9" x2="20" y2="9" />
+                        <line x1="4" y1="15" x2="20" y2="15" />
+                    </svg>
+                    Grid
+                </button>
+            </div>
+
+            <h3>Particle Effects</h3>
+            <div class="particle-buttons"
+                style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 15px;">
+                <button id="snow-btn" onclick="toggleParticleSystem('snow')" class="effect-btn">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="6" cy="6" r="1" />
+                        <circle cx="10" cy="12" r="1" />
+                        <circle cx="15" cy="6" r="1" />
+                        <circle cx="19" cy="12" r="1" />
+                        <circle cx="8" cy="18" r="1" />
+                        <circle cx="16" cy="18" r="1" />
+                        <circle cx="12" cy="4" r="1" />
+                        <circle cx="4" cy="12" r="1" />
+                        <circle cx="20" cy="4" r="1" />
+                    </svg>
+                    Snow
+                </button>
+                <button id="dust-btn" onclick="toggleParticleSystem('dust')" class="effect-btn">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="6" cy="6" r="1" />
+                        <circle cx="10" cy="12" r="1" />
+                        <circle cx="15" cy="6" r="1" />
+                        <circle cx="19" cy="12" r="1" />
+                        <circle cx="8" cy="18" r="1" />
+                        <circle cx="16" cy="18" r="1" />
+                        <circle cx="12" cy="4" r="1" />
+                        <circle cx="4" cy="12" r="1" />
+                        <circle cx="20" cy="4" r="1" />
+                    </svg>
+                    Dust
+                </button>
+                <button id="rain-btn" onclick="toggleParticleSystem('rain')" class="effect-btn">
+                    <svg viewBox="0 0 24 24">
+                        <!-- Simplified rain drops icon - just vertical lines -->
+                        <path d="M6,8L6,20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M10,4L10,18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M14,6L14,19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M18,5L18,16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    Rain
+                </button>
+                <button id="toggle-animation-btn" onclick="toggleParticleAnimation()" class="effect-btn" disabled>
+                    <svg viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" id="animation-icon" />
+                    </svg>
+                    <span id="animation-text">Start</span>
+                </button>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="toolbar">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <button id="scene-btn" class="btn btn-sm btn-primary active" onclick="switchToView('scene')">Scene</button>
+                        <button id="code-btn" class="btn btn-sm btn-outline-primary" onclick="switchToView('code')">Code</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleInspector()">Inspector</button>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-success" onclick="exportScene()">Export</button>
+                    </div>
+                </div>
+            </div>
+            <div class="scene-container">
+                <a-scene embedded renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true; sortObjects: true;">
+                    <a-assets id="asset-container">
+                        <!-- Assets will be added here -->
+                    </a-assets>
+                    
+                    <!-- Camera -->
+                    <a-camera position="0 1.6 0"></a-camera>
+
+                    <!-- Scene Entities -->
+                    <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+                    <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+                    <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+                    <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+
+                    <!-- Environment -->
+                    <a-sky color="#ECECEC"></a-sky>
+                </a-scene>
+                <div id="code-panel"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Monaco Editor -->
+<!-- REMOVED:     <script>
+<!-- REMOVED:         // Global variables
+<!-- REMOVED:         let currentView = 'scene';
+<!-- REMOVED:         let scene = document.querySelector('a-scene');
+<!-- REMOVED:         const codePanel = document.querySelector('#code-panel');
+<!-- REMOVED:         let editor;
+<!-- REMOVED:         let fogActive = false;
+<!-- REMOVED:         let particleSystem = null;
+<!-- REMOVED:         let particleType = null;
+<!-- REMOVED:         let animationActive = false;
+<!-- REMOVED:         
+<!-- REMOVED:         // Function to toggle fog controls visibility
+<!-- REMOVED:         function toggleFogControls() {
+<!-- REMOVED:             console.log('toggleFogControls called');
+<!-- REMOVED:             const content = document.getElementById('fog-collapse-content');
+<!-- REMOVED:             const icon = document.getElementById('fog-collapse-icon');
+<!-- REMOVED:             
+<!-- REMOVED:             if (content && icon) {
+<!-- REMOVED:                 // If maxHeight isn't set yet, initialize it to collapsed state
+<!-- REMOVED:                 if (content.style.maxHeight === '') {
+<!-- REMOVED:                     content.style.maxHeight = '0px';
+<!-- REMOVED:                 }
+<!-- REMOVED:                 
+<!-- REMOVED:                 console.log('Content max height before:', content.style.maxHeight);
+<!-- REMOVED:                 if (content.style.maxHeight === '0px' || content.style.maxHeight === '') {
+<!-- REMOVED:                     content.style.maxHeight = '500px';
+<!-- REMOVED:                     icon.style.transform = 'rotate(180deg)';
+<!-- REMOVED:                 } else {
+<!-- REMOVED:                     content.style.maxHeight = '0px';
+<!-- REMOVED:                     icon.style.transform = 'rotate(0deg)';
+<!-- REMOVED:                 }
+<!-- REMOVED:                 console.log('Content max height after:', content.style.maxHeight);
+<!-- REMOVED:             } else {
+<!-- REMOVED:                 console.log('Content or icon not found', {content, icon});
+<!-- REMOVED:             }
+<!-- REMOVED:         }
+<!-- REMOVED: 
+<!-- REMOVED:         // Environment thumbnail functionality
+<!-- REMOVED:         document.addEventListener('DOMContentLoaded', function() {
+<!-- REMOVED:             // Environment thumbnails mapping
+<!-- REMOVED:             const environmentThumbnails = {
+<!-- REMOVED:                 none: '/playground/env_thumbs/none.png',
+<!-- REMOVED:                 default: '/playground/env_thumbs/default.png',
+<!-- REMOVED:                 contact: '/playground/env_thumbs/contact.png',
+<!-- REMOVED:                 forest: '/playground/env_thumbs/forest.png',
+<!-- REMOVED:                 egypt: '/playground/env_thumbs/egypt.png',
+<!-- REMOVED:                 checkerboard: '/playground/env_thumbs/checkerboard.png',
+<!-- REMOVED:                 goaland: '/playground/env_thumbs/goaland.png',
+<!-- REMOVED:                 yavapai: '/playground/env_thumbs/yavapai.png',
+<!-- REMOVED:                 goldmine: '/playground/env_thumbs/goldmine.png',
+<!-- REMOVED:                 threetowers: '/playground/env_thumbs/threetowers.png',
+<!-- REMOVED:                 poison: '/playground/env_thumbs/poison.png',
+<!-- REMOVED:                 arches: '/playground/env_thumbs/arches.png',
+<!-- REMOVED:                 tron: '/playground/env_thumbs/tron.png',
+<!-- REMOVED:                 japan: '/playground/env_thumbs/japan.png',
+<!-- REMOVED:                 dream: '/playground/env_thumbs/dream.png',
+<!-- REMOVED:                 volcano: '/playground/env_thumbs/volcano.png',
+<!-- REMOVED:                 starry: '/playground/env_thumbs/starry.png',
+<!-- REMOVED:                 osiris: '/playground/env_thumbs/osiris.png',
+<!-- REMOVED:                 moon: '/playground/env_thumbs/moon.png'
+<!-- REMOVED:             };
+<!-- REMOVED: 
+<!-- REMOVED:             // Initialize environment selector
+<!-- REMOVED:             const select = document.getElementById('environment-preset');
+<!-- REMOVED:             const iconContainer = document.getElementById('environment-icon');
+<!-- REMOVED:             if (select && iconContainer) {
+<!-- REMOVED:                 // Get ordered list of environments
+<!-- REMOVED:                 const environments = Array.from(select.options).map(option => option.value);
+<!-- REMOVED: 
+<!-- REMOVED:                 // Update thumbnail when environment changes
+<!-- REMOVED:                 function updateEnvironmentDisplay(value) {
+<!-- REMOVED:                     const thumbnailPath = environmentThumbnails[value];
+<!-- REMOVED:                     if (thumbnailPath) {
+<!-- REMOVED:                         iconContainer.innerHTML = `<img src="${thumbnailPath}" alt="${value} environment" style="width: 100%; height: 100%; object-fit: cover;">`;
+<!-- REMOVED:                     } else {
+<!-- REMOVED:                         iconContainer.innerHTML = `<div style="width: 100%; height: 100%; background: #1c1c1c; display: flex; align-items: center; justify-content: center; color: #666;">Environment Preview</div>`;
+<!-- REMOVED:                     }
+<!-- REMOVED:                 }
+<!-- REMOVED: 
+<!-- REMOVED:                 // Handle environment changes
+<!-- REMOVED:                 select.addEventListener('change', function (e) {
+<!-- REMOVED:                     updateEnvironmentDisplay(e.target.value);
+<!-- REMOVED:                 });
+<!-- REMOVED: 
+<!-- REMOVED:                 // Navigate to previous environment
+<!-- REMOVED:                 document.getElementById('prev-environment')?.addEventListener('click', function (e) {
+<!-- REMOVED:                     e.stopPropagation();
+<!-- REMOVED:                     const currentIndex = environments.indexOf(select.value);
+<!-- REMOVED:                     const prevIndex = (currentIndex - 1 + environments.length) % environments.length;
+<!-- REMOVED:                     select.value = environments[prevIndex];
+<!-- REMOVED:                     select.dispatchEvent(new Event('change'));
+<!-- REMOVED:                 });
+<!-- REMOVED: 
+<!-- REMOVED:                 // Navigate to next environment
+<!-- REMOVED:                 document.getElementById('next-environment')?.addEventListener('click', function (e) {
+<!-- REMOVED:                     e.stopPropagation();
+<!-- REMOVED:                     const currentIndex = environments.indexOf(select.value);
+<!-- REMOVED:                     const nextIndex = (currentIndex + 1) % environments.length;
+<!-- REMOVED:                     select.value = environments[nextIndex];
+<!-- REMOVED:                     select.dispatchEvent(new Event('change'));
+<!-- REMOVED:                 });
+<!-- REMOVED: 
+<!-- REMOVED:                 // Initialize the display
+<!-- REMOVED:                 updateEnvironmentDisplay(select.value);
+<!-- REMOVED:             }
+<!-- REMOVED: 
+<!-- REMOVED:             // Initialize fog type selection
+<!-- REMOVED:             const fogTypeRadios = document.querySelectorAll('input[name="fog-type"]');
+<!-- REMOVED:             fogTypeRadios.forEach(radio => {
+<!-- REMOVED:                 radio.addEventListener('change', function() {
+<!-- REMOVED:                     const linear = document.getElementById('fog-linear-controls');
+<!-- REMOVED:                     const exponential = document.getElementById('fog-exponential-controls');
+<!-- REMOVED:                     if (this.value === 'linear') {
+<!-- REMOVED:                         linear.style.display = 'block';
+<!-- REMOVED:                         exponential.style.display = 'none';
+<!-- REMOVED:                     } else {
+<!-- REMOVED:                         linear.style.display = 'none';
+<!-- REMOVED:                         exponential.style.display = 'block';
+<!-- REMOVED:                     }
+<!-- REMOVED:                 });
+<!-- REMOVED:             });
+<!-- REMOVED: 
+<!-- REMOVED:             // Initialize scene elements
+<!-- REMOVED:             scene = document.querySelector('a-scene');
+<!-- REMOVED:             
+<!-- REMOVED:             // Initialize background color
+<!-- REMOVED:             const initialBgColor = '#ECECEC';
+<!-- REMOVED:             scene.setAttribute('background', `color: ${initialBgColor}`);
+<!-- REMOVED:             
+<!-- REMOVED:             // Set up color picker interactions
+<!-- REMOVED:             const bgColorPicker = document.getElementById('background-color');
+<!-- REMOVED:             const bgColorHex = document.getElementById('background-color-hex');
+<!-- REMOVED:             
+<!-- REMOVED:             if (bgColorPicker && bgColorHex) {
+<!-- REMOVED:                 // Set initial values
+<!-- REMOVED:                 bgColorPicker.value = initialBgColor;
+<!-- REMOVED:                 bgColorHex.value = initialBgColor;
+<!-- REMOVED:                 
+<!-- REMOVED:                 bgColorPicker.addEventListener('input', function() {
+<!-- REMOVED:                     bgColorHex.value = this.value;
+<!-- REMOVED:                     document.querySelector('a-scene').setAttribute('background', `color: ${this.value}`);
+<!-- REMOVED:                 });
+<!-- REMOVED:                 
+<!-- REMOVED:                 bgColorHex.addEventListener('input', function() {
+<!-- REMOVED:                     if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+<!-- REMOVED:                         bgColorPicker.value = this.value;
+<!-- REMOVED:                         document.querySelector('a-scene').setAttribute('background', `color: ${this.value}`);
+<!-- REMOVED:                     }
+<!-- REMOVED:                 });
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             // Set up environment preset selector
+<!-- REMOVED:             const environmentSelect = document.getElementById('environment-preset');
+<!-- REMOVED:             if (environmentSelect) {
+<!-- REMOVED:                 // Apply the initial environment setting
+<!-- REMOVED:                 const initialValue = environmentSelect.value;
+<!-- REMOVED:                 if (initialValue !== 'none') {
+<!-- REMOVED:                     const entity = document.createElement('a-entity');
+<!-- REMOVED:                     entity.setAttribute('environment', `preset: ${initialValue}`);
+<!-- REMOVED:                     scene.appendChild(entity);
+<!-- REMOVED:                 }
+<!-- REMOVED:                 
+<!-- REMOVED:                 environmentSelect.addEventListener('change', function() {
+<!-- REMOVED:                     const scene = document.querySelector('a-scene');
+<!-- REMOVED:                     const value = this.value;
+<!-- REMOVED:                     
+<!-- REMOVED:                     // Remove existing environment
+<!-- REMOVED:                     const existingEnv = scene.querySelector('[environment]');
+<!-- REMOVED:                     if (existingEnv) {
+<!-- REMOVED:                         scene.removeChild(existingEnv);
+<!-- REMOVED:                     }
+<!-- REMOVED:                     
+<!-- REMOVED:                     // If not "none", add new environment
+<!-- REMOVED:                     if (value !== 'none') {
+<!-- REMOVED:                         const entity = document.createElement('a-entity');
+<!-- REMOVED:                         entity.setAttribute('environment', `preset: ${value}`);
+<!-- REMOVED:                         scene.appendChild(entity);
+<!-- REMOVED:                     }
+<!-- REMOVED:                     
+<!-- REMOVED:                     // If in code view, update the code panel
+<!-- REMOVED:                     if (document.getElementById('code-panel').style.display === 'block') {
+<!-- REMOVED:                         updateCodePanel();
+<!-- REMOVED:                     }
+<!-- REMOVED:                 });
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             // Set up fog color picker
+<!-- REMOVED:             const fogColorPicker = document.getElementById('fog-color');
+<!-- REMOVED:             const fogColorHex = document.getElementById('fog-color-hex');
+<!-- REMOVED:             
+<!-- REMOVED:             if (fogColorPicker && fogColorHex) {
+<!-- REMOVED:                 fogColorPicker.addEventListener('input', function() {
+<!-- REMOVED:                     fogColorHex.value = this.value;
+<!-- REMOVED:                     if (fogActive) {
+<!-- REMOVED:                         updateFog();
+<!-- REMOVED:                     }
+<!-- REMOVED:                 });
+<!-- REMOVED:                 
+<!-- REMOVED:                 fogColorHex.addEventListener('input', function() {
+<!-- REMOVED:                     if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+<!-- REMOVED:                         fogColorPicker.value = this.value;
+<!-- REMOVED:                         if (fogActive) {
+<!-- REMOVED:                             updateFog();
+<!-- REMOVED:                         }
+<!-- REMOVED:                     }
+<!-- REMOVED:                 });
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             // Initialize fog controls
+<!-- REMOVED:             const fogCollapsible = document.querySelector('.fog-controls .collapsible-button');
+<!-- REMOVED:             if (fogCollapsible) {
+<!-- REMOVED:                 console.log('Found fog collapsible button, adding event listener');
+<!-- REMOVED:                 fogCollapsible.addEventListener('click', toggleFogControls);
+<!-- REMOVED:             } else {
+<!-- REMOVED:                 console.log('Could not find fog collapsible button');
+<!-- REMOVED:                 console.log('Selector:', '.fog-controls .collapsible-button');
+<!-- REMOVED:                 console.log('All .fog-controls elements:', document.querySelectorAll('.fog-controls').length);
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             // Initialize fog type selection
+<!-- REMOVED:             const fogTypeRadios = document.querySelectorAll('input[name="fog-type"]');
+<!-- REMOVED:             fogTypeRadios.forEach(radio => {
+<!-- REMOVED:                 radio.addEventListener('change', function() {
+<!-- REMOVED:                     const linear = document.getElementById('fog-linear-controls');
+<!-- REMOVED:                     const exponential = document.getElementById('fog-exponential-controls');
+<!-- REMOVED:                     if (this.value === 'linear') {
+<!-- REMOVED:                         linear.style.display = 'block';
+<!-- REMOVED:                         exponential.style.display = 'none';
+<!-- REMOVED:                     } else {
+<!-- REMOVED:                         linear.style.display = 'none';
+<!-- REMOVED:                         exponential.style.display = 'block';
+<!-- REMOVED:                     }
+<!-- REMOVED:                     
+<!-- REMOVED:                     if (fogActive) {
+<!-- REMOVED:                         updateFog();
+<!-- REMOVED:                     }
+<!-- REMOVED:                 });
+<!-- REMOVED:             });
+<!-- REMOVED:             
+<!-- REMOVED:             // Dynamically load Monaco
+<!-- REMOVED:             const script = document.createElement('script');
+<!-- REMOVED:             script.src = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs/loader.js';
+<!-- REMOVED:             script.onload = function() {
+<!-- REMOVED:                 // Configure RequireJS
+<!-- REMOVED:                 require.config({ 
+<!-- REMOVED:                     paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.41.0/min/vs' } 
+<!-- REMOVED:                 });
+<!-- REMOVED:                 
+<!-- REMOVED:                 // Load the Monaco editor
+<!-- REMOVED:                 require(['vs/editor/editor.main'], function() {
+<!-- REMOVED:                     // Create Monaco editor
+<!-- REMOVED:                     editor = monaco.editor.create(codePanel, {
+<!-- REMOVED:                         language: 'html',
+<!-- REMOVED:                         theme: 'vs-dark',
+<!-- REMOVED:                         lineNumbers: true,
+<!-- REMOVED:                         automaticLayout: true,
+<!-- REMOVED:                         wordWrap: 'on',
+<!-- REMOVED:                         minimap: { enabled: false },
+<!-- REMOVED:                         tabSize: 4,
+<!-- REMOVED:                         value: ''
+<!-- REMOVED:                     });
+<!-- REMOVED:                     
+<!-- REMOVED:                     // Set up A-Frame completions
+<!-- REMOVED:                     setupAFrameCompletions();
+<!-- REMOVED:                     
+<!-- REMOVED:                     // Update code panel with initial content
+<!-- REMOVED:                     updateCodePanel();
+<!-- REMOVED:                 });
+<!-- REMOVED:             };
+<!-- REMOVED:             document.head.appendChild(script);
+<!-- REMOVED:         });
+<!-- REMOVED:         
+<!-- REMOVED:         // Function for A-Frame completions in Monaco
+<!-- REMOVED:         function setupAFrameCompletions() {
+<!-- REMOVED:             // Define A-Frame tags
+<!-- REMOVED:             const aframeTags = [
+<!-- REMOVED:                 { label: 'a-scene', description: 'Root element of every A-Frame experience' },
+<!-- REMOVED:                 { label: 'a-entity', description: 'General-purpose entity in the scene' },
+<!-- REMOVED:                 { label: 'a-box', description: 'Box primitive' },
+<!-- REMOVED:                 { label: 'a-sphere', description: 'Sphere primitive' },
+<!-- REMOVED:                 { label: 'a-cylinder', description: 'Cylinder primitive' },
+<!-- REMOVED:                 { label: 'a-plane', description: 'Plane primitive' },
+<!-- REMOVED:                 { label: 'a-sky', description: 'Sky background' },
+<!-- REMOVED:                 { label: 'a-camera', description: 'Camera entity' }
+<!-- REMOVED:             ];
+<!-- REMOVED:             
+<!-- REMOVED:             // Define A-Frame attributes
+<!-- REMOVED:             const aframeAttributes = [
+<!-- REMOVED:                 { label: 'position', description: 'Position in 3D space (x y z)' },
+<!-- REMOVED:                 { label: 'rotation', description: 'Rotation in degrees (x y z)' },
+<!-- REMOVED:                 { label: 'scale', description: 'Scale (x y z)' },
+<!-- REMOVED:                 { label: 'material', description: 'Material properties' },
+<!-- REMOVED:                 { label: 'environment', description: 'Environment settings' }
+<!-- REMOVED:             ];
+<!-- REMOVED:             
+<!-- REMOVED:             // Register completion provider
+<!-- REMOVED:             monaco.languages.registerCompletionItemProvider('html', {
+<!-- REMOVED:                 provideCompletionItems: function(model, position) {
+<!-- REMOVED:                     const line = model.getLineContent(position.lineNumber);
+<!-- REMOVED:                     const wordUntilPosition = model.getWordUntilPosition(position);
+<!-- REMOVED:                     
+<!-- REMOVED:                     // Tag completions
+<!-- REMOVED:                     if (line.substring(0, position.column - 1).endsWith('<')) {
+<!-- REMOVED:                         return {
+<!-- REMOVED:                             suggestions: aframeTags.map(tag => ({
+<!-- REMOVED:                                 label: tag.label,
+<!-- REMOVED:                                 kind: monaco.languages.CompletionItemKind.Class,
+<!-- REMOVED:                                 documentation: tag.description,
+<!-- REMOVED:                                 insertText: tag.label,
+<!-- REMOVED:                                 range: {
+<!-- REMOVED:                                     startLineNumber: position.lineNumber,
+<!-- REMOVED:                                     startColumn: wordUntilPosition.startColumn,
+<!-- REMOVED:                                     endLineNumber: position.lineNumber,
+<!-- REMOVED:                                     endColumn: wordUntilPosition.endColumn
+<!-- REMOVED:                                 }
+<!-- REMOVED:                             }))
+<!-- REMOVED:                         };
+<!-- REMOVED:                     }
+<!-- REMOVED:                     
+<!-- REMOVED:                     // Attribute completions
+<!-- REMOVED:                     if (/<a-[a-z]+ [^>]*$/i.test(line.substring(0, position.column))) {
+<!-- REMOVED:                         return {
+<!-- REMOVED:                             suggestions: aframeAttributes.map(attr => ({
+<!-- REMOVED:                                 label: attr.label,
+<!-- REMOVED:                                 kind: monaco.languages.CompletionItemKind.Property,
+<!-- REMOVED:                                 documentation: attr.description,
+<!-- REMOVED:                                 insertText: attr.label + '=""',
+<!-- REMOVED:                                 range: {
+<!-- REMOVED:                                     startLineNumber: position.lineNumber,
+<!-- REMOVED:                                     startColumn: wordUntilPosition.startColumn,
+<!-- REMOVED:                                     endLineNumber: position.lineNumber,
+<!-- REMOVED:                                     endColumn: wordUntilPosition.endColumn
+<!-- REMOVED:                                 }
+<!-- REMOVED:                             }))
+<!-- REMOVED:                         };
+<!-- REMOVED:                     }
+<!-- REMOVED:                     
+<!-- REMOVED:                     return { suggestions: [] };
+<!-- REMOVED:                 }
+<!-- REMOVED:             });
+<!-- REMOVED:         }
+<!-- REMOVED:         
+<!-- REMOVED:         // Function to update code panel with scene content
+<!-- REMOVED:         function updateCodePanel() {
+<!-- REMOVED:             if (!editor) return; // Skip if editor isn't initialized
+<!-- REMOVED:             
+<!-- REMOVED:             const sceneEl = document.querySelector('a-scene');
+<!-- REMOVED:             if (!sceneEl) return;
+<!-- REMOVED:             
+<!-- REMOVED:             const sceneClone = sceneEl.cloneNode(true);
+<!-- REMOVED:             cleanupSceneElement(sceneClone);
+<!-- REMOVED:             
+<!-- REMOVED:             // Create scene tag with attributes
+<!-- REMOVED:             let content = '<a-scene';
+<!-- REMOVED:             if (sceneEl.hasAttribute('embedded')) content += ' embedded';
+<!-- REMOVED:             
+<!-- REMOVED:             // Add renderer attributes
+<!-- REMOVED:             if (sceneEl.hasAttribute('renderer')) {
+<!-- REMOVED:                 content += ' renderer="' + sceneEl.getAttribute('renderer') + '"';
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             // Add other scene attributes
+<!-- REMOVED:             Array.from(sceneEl.attributes).forEach(attr => {
+<!-- REMOVED:                 if (attr.name !== 'embedded' && attr.name !== 'renderer' && 
+<!-- REMOVED:                     attr.name !== 'style' && attr.name !== 'class') {
+<!-- REMOVED:                     content += ` ${attr.name}="${attr.value}"`;
+<!-- REMOVED:                 }
+<!-- REMOVED:             });
+<!-- REMOVED:             
+<!-- REMOVED:             content += '>\n';
+<!-- REMOVED:             
+<!-- REMOVED:             // Add assets
+<!-- REMOVED:             const assets = sceneClone.querySelector('a-assets');
+<!-- REMOVED:             if (assets) {
+<!-- REMOVED:                 content += '  <a-assets>\n';
+<!-- REMOVED:                 Array.from(assets.children).forEach(asset => {
+<!-- REMOVED:                     content += '    ' + asset.outerHTML + '\n';
+<!-- REMOVED:                 });
+<!-- REMOVED:                 content += '  </a-assets>\n\n';
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             // Add camera
+<!-- REMOVED:             const camera = sceneClone.querySelector('a-camera');
+<!-- REMOVED:             if (camera) {
+<!-- REMOVED:                 content += '  <!-- Camera -->\n';
+<!-- REMOVED:                 content += '  ' + camera.outerHTML + '\n';
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             // Add entities
+<!-- REMOVED:             const entities = Array.from(sceneClone.children).filter(el => {
+<!-- REMOVED:                 return el !== assets && el !== camera && 
+<!-- REMOVED:                        !el.classList.contains('environment') &&
+<!-- REMOVED:                        !el.hasAttribute('environment');
+<!-- REMOVED:             });
+<!-- REMOVED:             
+<!-- REMOVED:             if (entities.length > 0) {
+<!-- REMOVED:                 content += '  <!-- Scene Entities -->\n';
+<!-- REMOVED:                 entities.forEach(entity => {
+<!-- REMOVED:                     content += '  ' + entity.outerHTML + '\n';
+<!-- REMOVED:                 });
+<!-- REMOVED:                 content += '\n';
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             // Add environment/sky
+<!-- REMOVED:             const environment = sceneClone.querySelector('[environment]');
+<!-- REMOVED:             const sky = sceneClone.querySelector('a-sky');
+<!-- REMOVED:             
+<!-- REMOVED:             if (environment) {
+<!-- REMOVED:                 content += '  <!-- Environment -->\n';
+<!-- REMOVED:                 content += '  ' + environment.outerHTML + '\n';
+<!-- REMOVED:             } else if (sky) {
+<!-- REMOVED:                 content += '  <!-- Sky -->\n';
+<!-- REMOVED:                 content += '  ' + sky.outerHTML + '\n';
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             // Close scene tag
+<!-- REMOVED:             content += '</a-scene>';
+<!-- REMOVED:             
+<!-- REMOVED:             // Update Monaco editor content
+<!-- REMOVED:             editor.setValue(content);
+<!-- REMOVED:         }
+<!-- REMOVED:         
+<!-- REMOVED:         // Function to update scene from code
+<!-- REMOVED:         function updateSceneFromCode() {
+<!-- REMOVED:             if (!editor) return;
+<!-- REMOVED:             
+<!-- REMOVED:             const code = editor.getValue();
+<!-- REMOVED:             const tempContainer = document.createElement('div');
+<!-- REMOVED:             tempContainer.innerHTML = code;
+<!-- REMOVED:             
+<!-- REMOVED:             const newScene = tempContainer.querySelector('a-scene');
+<!-- REMOVED:             if (!newScene) {
+<!-- REMOVED:                 console.error('No scene element found in code');
+<!-- REMOVED:                 return;
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             // Create new scene
+<!-- REMOVED:             const sceneEl = document.createElement('a-scene');
+<!-- REMOVED:             sceneEl.setAttribute('embedded', '');
+<!-- REMOVED:             
+<!-- REMOVED:             // Copy attributes
+<!-- REMOVED:             Array.from(newScene.attributes).forEach(attr => {
+<!-- REMOVED:                 if (attr.name !== 'embedded' && attr.name !== 'style' && attr.name !== 'class') {
+<!-- REMOVED:                     sceneEl.setAttribute(attr.name, attr.value);
+<!-- REMOVED:                 }
+<!-- REMOVED:             });
+<!-- REMOVED:             
+<!-- REMOVED:             // Copy children
+<!-- REMOVED:             Array.from(newScene.children).forEach(child => {
+<!-- REMOVED:                 sceneEl.appendChild(child.cloneNode(true));
+<!-- REMOVED:             });
+<!-- REMOVED:             
+<!-- REMOVED:             // Replace existing scene
+<!-- REMOVED:             const oldScene = document.querySelector('a-scene');
+<!-- REMOVED:             oldScene.parentNode.replaceChild(sceneEl, oldScene);
+<!-- REMOVED:             
+<!-- REMOVED:             // Update scene reference
+<!-- REMOVED:             scene = sceneEl;
+<!-- REMOVED:             
+<!-- REMOVED:             // Add default elements if needed
+<!-- REMOVED:             setTimeout(() => {
+<!-- REMOVED:                 if (!scene.querySelector('[environment]') && !scene.querySelector('a-sky')) {
+<!-- REMOVED:                     const sky = document.createElement('a-sky');
+<!-- REMOVED:                     sky.setAttribute('material', 'shader: gradientshader; topColor: #ECECEC; bottomColor: #87CEEB');
+<!-- REMOVED:                     scene.appendChild(sky);
+<!-- REMOVED:                 }
+<!-- REMOVED:                 
+<!-- REMOVED:                 if (scene.renderer) {
+<!-- REMOVED:                     scene.renderer.render(scene.object3D, scene.camera);
+<!-- REMOVED:                 }
+<!-- REMOVED:             }, 100);
+<!-- REMOVED:         }
+<!-- REMOVED:         
+<!-- REMOVED:         // Function to switch between views
+<!-- REMOVED:         function switchToView(view) {
+<!-- REMOVED:             const prevView = currentView;
+<!-- REMOVED:             currentView = view;
+<!-- REMOVED:             
+<!-- REMOVED:             const sceneBtn = document.getElementById('scene-btn');
+<!-- REMOVED:             const codeBtn = document.getElementById('code-btn');
+<!-- REMOVED:             const sceneContainer = document.querySelector('a-scene');
+<!-- REMOVED:             
+<!-- REMOVED:             if (view === 'scene') {
+<!-- REMOVED:                 if (prevView === 'code') {
+<!-- REMOVED:                     updateSceneFromCode();
+<!-- REMOVED:                 }
+<!-- REMOVED:                 
+<!-- REMOVED:                 sceneContainer.style.display = 'block';
+<!-- REMOVED:                 codePanel.style.display = 'none';
+<!-- REMOVED:                 sceneBtn.classList.add('active');
+<!-- REMOVED:                 sceneBtn.classList.remove('btn-outline-primary');
+<!-- REMOVED:                 sceneBtn.classList.add('btn-primary');
+<!-- REMOVED:                 codeBtn.classList.remove('active');
+<!-- REMOVED:                 codeBtn.classList.add('btn-outline-primary');
+<!-- REMOVED:                 codeBtn.classList.remove('btn-primary');
+<!-- REMOVED:                 
+<!-- REMOVED:                 // Close inspector if open
+<!-- REMOVED:                 if (AFRAME && AFRAME.INSPECTOR && AFRAME.INSPECTOR.opened) {
+<!-- REMOVED:                     AFRAME.INSPECTOR.close();
+<!-- REMOVED:                 }
+<!-- REMOVED:             } else if (view === 'code') {
+<!-- REMOVED:                 sceneContainer.style.display = 'none';
+<!-- REMOVED:                 codePanel.style.display = 'block';
+<!-- REMOVED:                 sceneBtn.classList.remove('active');
+<!-- REMOVED:                 sceneBtn.classList.add('btn-outline-primary');
+<!-- REMOVED:                 sceneBtn.classList.remove('btn-primary');
+<!-- REMOVED:                 codeBtn.classList.add('active');
+<!-- REMOVED:                 codeBtn.classList.remove('btn-outline-primary');
+<!-- REMOVED:                 codeBtn.classList.add('btn-primary');
+<!-- REMOVED:                 
+<!-- REMOVED:                 updateCodePanel();
+<!-- REMOVED:                 
+<!-- REMOVED:                 // Close inspector if open
+<!-- REMOVED:                 if (AFRAME && AFRAME.INSPECTOR && AFRAME.INSPECTOR.opened) {
+<!-- REMOVED:                     AFRAME.INSPECTOR.close();
+<!-- REMOVED:                 }
+<!-- REMOVED:                 
+<!-- REMOVED:                 // Focus editor
+<!-- REMOVED:                 if (editor) {
+<!-- REMOVED:                     setTimeout(() => {
+<!-- REMOVED:                         editor.focus();
+<!-- REMOVED:                     }, 100);
+<!-- REMOVED:                 }
+<!-- REMOVED:             }
+<!-- REMOVED:         }
+<!-- REMOVED:         
+<!-- REMOVED:         // Function to toggle A-Frame inspector
+<!-- REMOVED:         function toggleInspector() {
+<!-- REMOVED:             // Load inspector if needed
+<!-- REMOVED:             if (!AFRAME.INSPECTOR || !AFRAME.INSPECTOR.opened) {
+<!-- REMOVED:                 const script = document.createElement('script');
+<!-- REMOVED:                 script.src = 'https://cdn.jsdelivr.net/gh/aframevr/aframe-inspector@master/dist/aframe-inspector.min.js';
+<!-- REMOVED:                 document.head.appendChild(script);
+<!-- REMOVED:             } else {
+<!-- REMOVED:                 AFRAME.INSPECTOR.close();
+<!-- REMOVED:             }
+<!-- REMOVED:         }
+<!-- REMOVED:         
+<!-- REMOVED:         // Function to export scene
+<!-- REMOVED:         function exportScene() {
+<!-- REMOVED:             if (!editor) {
+<!-- REMOVED:                 updateCodePanel();
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             const code = editor.getValue();
+<!-- REMOVED:             const blob = new Blob([code], { type: 'text/html' });
+<!-- REMOVED:             const url = URL.createObjectURL(blob);
+<!-- REMOVED:             
+<!-- REMOVED:             const a = document.createElement('a');
+<!-- REMOVED:             a.href = url;
+<!-- REMOVED:             a.download = 'scene.html';
+<!-- REMOVED:             a.click();
+<!-- REMOVED:             
+<!-- REMOVED:             URL.revokeObjectURL(url);
+<!-- REMOVED:         }
+<!-- REMOVED:         
+<!-- REMOVED:         // Function to clean up scene element for code panel
+<!-- REMOVED:         function cleanupSceneElement(el) {
+<!-- REMOVED:             // Remove injected elements
+<!-- REMOVED:             const selectors = [
+<!-- REMOVED:                 'canvas', 
+<!-- REMOVED:                 '.a-enter-vr',
+<!-- REMOVED:                 '.a-orientation-modal',
+<!-- REMOVED:                 '.a-loader-title',
+<!-- REMOVED:                 '[aframe-injected]'
+<!-- REMOVED:             ];
+<!-- REMOVED:             
+<!-- REMOVED:             selectors.forEach(selector => {
+<!-- REMOVED:                 const elements = el.querySelectorAll(selector);
+<!-- REMOVED:                 elements.forEach(element => element.remove());
+<!-- REMOVED:             });
+<!-- REMOVED:             
+<!-- REMOVED:             return el;
+<!-- REMOVED:         }
+<!-- REMOVED:         
+<!-- REMOVED:         // Add entity to the scene
+<!-- REMOVED:         function addEntity(type) {
+<!-- REMOVED:             const scene = document.querySelector('a-scene');
+<!-- REMOVED:             if (!scene) return;
+<!-- REMOVED:             
+<!-- REMOVED:             const entity = document.createElement('a-entity');
+<!-- REMOVED:             
+<!-- REMOVED:             // Position slightly in front of camera
+<!-- REMOVED:             entity.setAttribute('position', '0 1.5 -3');
+<!-- REMOVED:             
+<!-- REMOVED:             switch (type) {
+<!-- REMOVED:                 case 'box':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: box');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #4CC3D9');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'sphere':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: sphere');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #EF2D5E');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'cylinder':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: cylinder');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #FFC65D');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'plane':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: plane');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #7BC8A4');
+<!-- REMOVED:                     entity.setAttribute('rotation', '-90 0 0');
+<!-- REMOVED:                     entity.setAttribute('position', '0 0 -3');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'cone':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: cone');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #FF9999');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'torus':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: torus');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #CCCCFF');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'ring':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: ring; radiusInner: 0.5; radiusOuter: 1');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #FFCC99; side: double');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'circle':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: circle');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #99CCFF; side: double');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'dodecahedron':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: dodecahedron');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #CC99FF');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'octahedron':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: octahedron');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #FFFF99');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'tetrahedron':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: tetrahedron');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #99FFCC');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'triangle':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: triangle');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #FF99CC; side: double');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'torusKnot':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: torusKnot');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #99FFFF');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'ocean':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: plane; width: 10; height: 10');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #99CCFF; opacity: 0.8; shader: standard; metalness: 0.3; roughness: 0.3');
+<!-- REMOVED:                     entity.setAttribute('rotation', '-90 0 0');
+<!-- REMOVED:                     entity.setAttribute('position', '0 0 -3');
+<!-- REMOVED:                     entity.setAttribute('ocean', 'density: 20; width: 50; depth: 50; speed: 2');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'tube':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: tube; radius: 0.5; path: -2 0 0, 0 0 0, 2 0 0');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #99FF99; side: double');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'grid':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: plane; width: 10; height: 10');
+<!-- REMOVED:                     entity.setAttribute('material', 'color: #444; wireframe: true');
+<!-- REMOVED:                     entity.setAttribute('rotation', '-90 0 0');
+<!-- REMOVED:                     entity.setAttribute('position', '0 0 -3');
+<!-- REMOVED:                     break;
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             scene.appendChild(entity);
+<!-- REMOVED:             
+<!-- REMOVED:             // If code panel is active, update it
+<!-- REMOVED:             if (document.getElementById('code-panel').style.display === 'block') {
+<!-- REMOVED:                 updateCodePanel();
+<!-- REMOVED:             }
+<!-- REMOVED:         }
+<!-- REMOVED: 
+<!-- REMOVED:         // Handle file uploads
+<!-- REMOVED:         function handleFileUpload() {
+<!-- REMOVED:             const fileInput = document.getElementById('asset-upload');
+<!-- REMOVED:             const file = fileInput.files[0];
+<!-- REMOVED:             
+<!-- REMOVED:             if (!file) return;
+<!-- REMOVED:             
+<!-- REMOVED:             // Create a URL for the uploaded file
+<!-- REMOVED:             const url = URL.createObjectURL(file);
+<!-- REMOVED:             
+<!-- REMOVED:             // Add to asset library
+<!-- REMOVED:             const assetContainer = document.getElementById('asset-library');
+<!-- REMOVED:             
+<!-- REMOVED:             // Create asset in a-assets
+<!-- REMOVED:             const aframeAssetContainer = document.querySelector('a-assets');
+<!-- REMOVED:             if (!aframeAssetContainer) {
+<!-- REMOVED:                 const assets = document.createElement('a-assets');
+<!-- REMOVED:                 document.querySelector('a-scene').appendChild(assets);
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             let assetEl;
+<!-- REMOVED:             
+<!-- REMOVED:             // Create preview and add to sidebar
+<!-- REMOVED:             const assetItem = document.createElement('div');
+<!-- REMOVED:             assetItem.className = 'asset-item';
+<!-- REMOVED:             
+<!-- REMOVED:             const previewWrapper = document.createElement('div');
+<!-- REMOVED:             previewWrapper.className = 'preview-wrapper';
+<!-- REMOVED:             
+<!-- REMOVED:             if (file.type.includes('image')) {
+<!-- REMOVED:                 // Create image asset
+<!-- REMOVED:                 assetEl = document.createElement('img');
+<!-- REMOVED:                 assetEl.id = 'asset_' + Date.now();
+<!-- REMOVED:                 assetEl.src = url;
+<!-- REMOVED:                 document.querySelector('a-assets').appendChild(assetEl);
+<!-- REMOVED:                 
+<!-- REMOVED:                 // Create preview
+<!-- REMOVED:                 const preview = document.createElement('img');
+<!-- REMOVED:                 preview.src = url;
+<!-- REMOVED:                 previewWrapper.appendChild(preview);
+<!-- REMOVED:                 
+<!-- REMOVED:                 // Add click handler to insert image
+<!-- REMOVED:                 assetItem.onclick = function() {
+<!-- REMOVED:                     insertAsset('image', '#' + assetEl.id);
+<!-- REMOVED:                 };
+<!-- REMOVED:             } else if (file.type.includes('video')) {
+<!-- REMOVED:                 // Create video asset
+<!-- REMOVED:                 assetEl = document.createElement('video');
+<!-- REMOVED:                 assetEl.id = 'asset_' + Date.now();
+<!-- REMOVED:                 assetEl.src = url;
+<!-- REMOVED:                 assetEl.setAttribute('preload', 'auto');
+<!-- REMOVED:                 document.querySelector('a-assets').appendChild(assetEl);
+<!-- REMOVED:                 
+<!-- REMOVED:                 // Create preview
+<!-- REMOVED:                 const preview = document.createElement('video');
+<!-- REMOVED:                 preview.src = url;
+<!-- REMOVED:                 preview.muted = true;
+<!-- REMOVED:                 preview.loop = true;
+<!-- REMOVED:                 preview.play();
+<!-- REMOVED:                 previewWrapper.appendChild(preview);
+<!-- REMOVED:                 
+<!-- REMOVED:                 // Add click handler to insert video
+<!-- REMOVED:                 assetItem.onclick = function() {
+<!-- REMOVED:                     insertAsset('video', '#' + assetEl.id);
+<!-- REMOVED:                 };
+<!-- REMOVED:             } else if (file.name.endsWith('.gltf') || file.name.endsWith('.glb')) {
+<!-- REMOVED:                 // Create model asset
+<!-- REMOVED:                 assetEl = document.createElement('a-asset-item');
+<!-- REMOVED:                 assetEl.id = 'asset_' + Date.now();
+<!-- REMOVED:                 assetEl.src = url;
+<!-- REMOVED:                 document.querySelector('a-assets').appendChild(assetEl);
+<!-- REMOVED:                 
+<!-- REMOVED:                 // Create simple preview for model
+<!-- REMOVED:                 const preview = document.createElement('div');
+<!-- REMOVED:                 preview.style.width = '100%';
+<!-- REMOVED:                 preview.style.height = '100%';
+<!-- REMOVED:                 preview.style.background = '#333';
+<!-- REMOVED:                 preview.style.display = 'flex';
+<!-- REMOVED:                 preview.style.alignItems = 'center';
+<!-- REMOVED:                 preview.style.justifyContent = 'center';
+<!-- REMOVED:                 preview.innerHTML = '<div style="color: #fff; font-size: 10px; text-align: center;">' + file.name + '</div>';
+<!-- REMOVED:                 previewWrapper.appendChild(preview);
+<!-- REMOVED:                 
+<!-- REMOVED:                 // Add click handler to insert model
+<!-- REMOVED:                 assetItem.onclick = function() {
+<!-- REMOVED:                     insertAsset('model', '#' + assetEl.id);
+<!-- REMOVED:                 };
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             // Add preview to asset item
+<!-- REMOVED:             assetItem.appendChild(previewWrapper);
+<!-- REMOVED:             
+<!-- REMOVED:             // Add asset item to library
+<!-- REMOVED:             assetContainer.appendChild(assetItem);
+<!-- REMOVED:             
+<!-- REMOVED:             // Reset file input
+<!-- REMOVED:             fileInput.value = null;
+<!-- REMOVED:             
+<!-- REMOVED:             // If code panel is active, update it
+<!-- REMOVED:             if (document.getElementById('code-panel').style.display === 'block') {
+<!-- REMOVED:                 updateCodePanel();
+<!-- REMOVED:             }
+<!-- REMOVED:         }
+<!-- REMOVED: 
+<!-- REMOVED:         // Insert asset into scene
+<!-- REMOVED:         function insertAsset(type, src) {
+<!-- REMOVED:             const scene = document.querySelector('a-scene');
+<!-- REMOVED:             if (!scene) return;
+<!-- REMOVED:             
+<!-- REMOVED:             const entity = document.createElement('a-entity');
+<!-- REMOVED:             entity.setAttribute('position', '0 1.5 -3');
+<!-- REMOVED:             
+<!-- REMOVED:             switch (type) {
+<!-- REMOVED:                 case 'image':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 1.5');
+<!-- REMOVED:                     entity.setAttribute('material', `src: ${src}`);
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'video':
+<!-- REMOVED:                     entity.setAttribute('geometry', 'primitive: plane; width: 2; height: 1.5');
+<!-- REMOVED:                     entity.setAttribute('material', `src: ${src}`);
+<!-- REMOVED:                     break;
+<!-- REMOVED:                 case 'model':
+<!-- REMOVED:                     entity.setAttribute('gltf-model', src);
+<!-- REMOVED:                     entity.setAttribute('scale', '1 1 1');
+<!-- REMOVED:                     break;
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             scene.appendChild(entity);
+<!-- REMOVED:             
+<!-- REMOVED:             // If code panel is active, update it
+<!-- REMOVED:             if (document.getElementById('code-panel').style.display === 'block') {
+<!-- REMOVED:                 updateCodePanel();
+<!-- REMOVED:             }
+<!-- REMOVED:         }
+<!-- REMOVED: 
+<!-- REMOVED:         // Toggle particle system
+<!-- REMOVED:         function toggleParticleSystem(type) {
+<!-- REMOVED:             const scene = document.querySelector('a-scene');
+<!-- REMOVED:             const animationBtn = document.getElementById('toggle-animation-btn');
+<!-- REMOVED:             
+<!-- REMOVED:             // Remove existing particle system if any
+<!-- REMOVED:             if (particleSystem && particleType === type) {
+<!-- REMOVED:                 scene.removeChild(particleSystem);
+<!-- REMOVED:                 particleSystem = null;
+<!-- REMOVED:                 particleType = null;
+<!-- REMOVED:                 animationBtn.disabled = true;
+<!-- REMOVED:                 animationActive = false;
+<!-- REMOVED:                 
+<!-- REMOVED:                 // Reset button state
+<!-- REMOVED:                 document.getElementById(type + '-btn').classList.remove('active');
+<!-- REMOVED:                 
+<!-- REMOVED:                 document.getElementById('animation-text').innerText = 'Start';
+<!-- REMOVED:                 document.getElementById('animation-icon').setAttribute('d', 'M8 5v14l11-7z');
+<!-- REMOVED:                 
+<!-- REMOVED:                 // If code panel is active, update it
+<!-- REMOVED:                 if (document.getElementById('code-panel').style.display === 'block') {
+<!-- REMOVED:                     updateCodePanel();
+<!-- REMOVED:                 }
+<!-- REMOVED:                 
+<!-- REMOVED:                 return;
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             // If different type, remove existing
+<!-- REMOVED:             if (particleSystem) {
+<!-- REMOVED:                 scene.removeChild(particleSystem);
+<!-- REMOVED:                 document.getElementById(particleType + '-btn').classList.remove('active');
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             // Create new particle system
+<!-- REMOVED:             particleSystem = document.createElement('a-entity');
+<!-- REMOVED:             particleSystem.setAttribute('position', '0 2.5 -5');
+<!-- REMOVED:             
+<!-- REMOVED:             // Configure based on type
+<!-- REMOVED:             switch (type) {
+<!-- REMOVED:                 case 'snow':
+<!-- REMOVED:                     particleSystem.setAttribute('particle-system', 'preset: snow; particleCount: 5000; maxAge: 5; size: 0.2; velocityValue: 0.2 0.5 0.2; velocitySpread: 0.5 0 0.5; accelerationValue: 0 -0.1 0;');
+<!-- REMOVED:                     document.getElementById('snow-btn').classList.add('active');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                     
+<!-- REMOVED:                 case 'dust':
+<!-- REMOVED:                     particleSystem.setAttribute('particle-system', 'preset: dust; particleCount: 1000; maxAge: 10; size: 0.1; velocityValue: 0.1 0.2 0.1; velocitySpread: 0.5 0 0.5; accelerationValue: 0 -0.02 0;');
+<!-- REMOVED:                     document.getElementById('dust-btn').classList.add('active');
+<!-- REMOVED:                     break;
+<!-- REMOVED:                     
+<!-- REMOVED:                 case 'rain':
+<!-- REMOVED:                     particleSystem.setAttribute('particle-system', 'preset: rain; particleCount: 3000; maxAge: 1; size: 0.1; velocityValue: 0 -20 0; velocitySpread: 4 0 4; accelerationValue: 0 -30 0;');
+<!-- REMOVED:                     document.getElementById('rain-btn').classList.add('active');
+<!-- REMOVED:                     break;
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             // Add to scene
+<!-- REMOVED:             scene.appendChild(particleSystem);
+<!-- REMOVED:             particleType = type;
+<!-- REMOVED:             
+<!-- REMOVED:             // Enable animation control
+<!-- REMOVED:             animationBtn.disabled = false;
+<!-- REMOVED:             
+<!-- REMOVED:             // If code panel is active, update it
+<!-- REMOVED:             if (document.getElementById('code-panel').style.display === 'block') {
+<!-- REMOVED:                 updateCodePanel();
+<!-- REMOVED:             }
+<!-- REMOVED:         }
+<!-- REMOVED: 
+<!-- REMOVED:         // Toggle particle animation
+<!-- REMOVED:         function toggleParticleAnimation() {
+<!-- REMOVED:             if (!particleSystem) return;
+<!-- REMOVED:             
+<!-- REMOVED:             if (!animationActive) {
+<!-- REMOVED:                 // Pause animation
+<!-- REMOVED:                 particleSystem.setAttribute('particle-system', 'enabled: false');
+<!-- REMOVED:                 animationActive = true;
+<!-- REMOVED:                 document.getElementById('animation-text').innerText = 'Resume';
+<!-- REMOVED:                 document.getElementById('animation-icon').setAttribute('d', 'M5 5h3v14H5V5zm11 0h3v14h-3V5z');
+<!-- REMOVED:             } else {
+<!-- REMOVED:                 // Resume animation
+<!-- REMOVED:                 particleSystem.setAttribute('particle-system', 'enabled: true');
+<!-- REMOVED:                 animationActive = false;
+<!-- REMOVED:                 document.getElementById('animation-text').innerText = 'Pause';
+<!-- REMOVED:                 document.getElementById('animation-icon').setAttribute('d', 'M8 5v14l11-7z');
+<!-- REMOVED:             }
+<!-- REMOVED:         }
+<!-- REMOVED:         
+<!-- REMOVED:         // Toggle fog effect
+<!-- REMOVED:         function toggleFog() {
+<!-- REMOVED:             const scene = document.querySelector('a-scene');
+<!-- REMOVED:             const btn = document.getElementById('toggle-fog-btn');
+<!-- REMOVED:             
+<!-- REMOVED:             if (!fogActive) {
+<!-- REMOVED:                 // Add fog
+<!-- REMOVED:                 updateFog();
+<!-- REMOVED:                 fogActive = true;
+<!-- REMOVED:                 btn.innerHTML = `<span>Remove Fog</span>`;
+<!-- REMOVED:             } else {
+<!-- REMOVED:                 // Remove fog
+<!-- REMOVED:                 scene.removeAttribute('fog');
+<!-- REMOVED:                 fogActive = false;
+<!-- REMOVED:                 btn.innerHTML = `<span>Add Fog</span>`;
+<!-- REMOVED:             }
+<!-- REMOVED:             
+<!-- REMOVED:             // If code panel is active, update it
+<!-- REMOVED:             if (document.getElementById('code-panel').style.display === 'block') {
+<!-- REMOVED:                 updateCodePanel();
+<!-- REMOVED:             }
+<!-- REMOVED:         }
+<!-- REMOVED: 
+<!-- REMOVED:         // Update fog parameters
+<!-- REMOVED:         function updateFog() {
+<!-- REMOVED:             const scene = document.querySelector('a-scene');
+<!-- REMOVED:             const color = document.getElementById('fog-color').value;
+<!-- REMOVED:             const fogType = document.querySelector('input[name="fog-type"]:checked').value;
+<!-- REMOVED:             
+<!-- REMOVED:             if (fogType === 'linear') {
+<!-- REMOVED:                 const near = document.getElementById('fog-near').value;
+<!-- REMOVED:                 const far = document.getElementById('fog-far').value;
+<!-- REMOVED:                 scene.setAttribute('fog', `type: linear; color: ${color}; near: ${near}; far: ${far}`);
+<!-- REMOVED:             } else {
+<!-- REMOVED:                 const density = document.getElementById('fog-intensity').value;
+<!-- REMOVED:                 scene.setAttribute('fog', `type: exponential; color: ${color}; density: ${density}`);
+<!-- REMOVED:             }
+<!-- REMOVED:         }
+<!-- REMOVED:     </script>
+<!-- REMOVED: </body>
+<!-- REMOVED: </html>

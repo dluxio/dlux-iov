@@ -1,0 +1,1878 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>DLUX Scene Builder</title>
+    <!-- aframe -->
+    <script src="/js/aframe.min.js"></script>
+    <script src="/js/aframe-extras.min.js"></script>
+    <script src="/js/aframe-environment-component.min.js"></script>
+    <!-- codemirror -->
+    <link rel="stylesheet" href="/css/codemirror.min.css">
+    <link rel="stylesheet" href="/css/codemirror-monokai.min.css">
+    <script src="/js/codemirror.min.js"></script>
+    <script src="/js/codemirror-xml.min.js"></script>
+    <!-- model-viewer -->
+    <script type="module" src="/js/model-viewer.min.js"></script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@300..700&display=swap"
+        rel="stylesheet">
+    <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
+
+    <style>
+        .logotype {
+            font-size: 2.5em;
+            font-weight: 400;
+            font-family: "Audiowide", serif;
+            color: #fff;
+            margin: 0;
+        }
+
+        h3 {
+            font-family: 'Space Grotesk', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        body,
+        button {
+            font-size: .85rem;
+            line-height: 1.3;
+            font-weight: 300;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+
+        .brand-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .nav-logo {
+            width: 40px;
+            height: 40px;
+            fill: #fff;
+        }
+
+        .nav-logo .cls-1 {
+            fill: #fff;
+        }
+
+        .nav-logo .cls-2 {
+            fill: #666;
+        }
+
+        .nav-logo .cls-3 {
+            fill: #999;
+        }
+
+        /* Update CSS rules to use A-Frame's class */
+        body.aframe-inspector-opened .sidebar,
+        body.aframe-inspector-opened .toolbar {
+            display: none !important;
+        }
+
+        body:not(.aframe-inspector-opened) .sidebar,
+        body:not(.aframe-inspector-opened) .toolbar {
+            display: block;
+        }
+
+        body:not(.aframe-inspector-opened) .toggle-edit {
+            display: none;
+        }
+
+        body.aframe-inspector-opened .scene-container {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+
+        body {
+            margin: 0;
+        }
+
+        .sponsor-btn {
+            display: none !important;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 200px;
+            background: #1B1B1B;
+            padding: 15px;
+            overflow-y: auto;
+            color: #fff;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .scene-container {
+            flex: 1;
+            position: relative;
+        }
+
+        .toolbar {
+            padding: 10px;
+            background: #1B1B1B;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #asset-preview {
+            max-width: 100%;
+            margin-top: 10px;
+        }
+
+        .CodeMirror {
+            height: 100%;
+            font-size: 14px;
+        }
+
+
+        #scene {
+            width: 100%;
+            height: 100%;
+        }
+
+        #code-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        /* Hide the default file input text */
+        input[type="file"] {
+            color: transparent;
+            width: 90px;
+            /* Adjust width to only show the button */
+        }
+
+        /* Show the "Choose File" button text */
+        input[type="file"]::-webkit-file-upload-button {
+            visibility: visible;
+            color: initial;
+        }
+
+        /* Hide the selected filename */
+        input[type="file"]::file-selector-button {
+            color: initial;
+        }
+
+        .asset-preview {
+            width: 100%;
+            max-height: 150px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .asset-container {
+            margin-bottom: 15px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .model-preview {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 5px;
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            background-color: #f0f0f0;
+        }
+
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            padding: 5px;
+        }
+
+        .asset-item {
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            transition: border-color 0.2s;
+        }
+
+        .asset-item:hover {
+            border-color: #666;
+        }
+
+        .asset-item.active {
+            border-color: #fff;
+        }
+
+        .preview-wrapper {
+            width: 100%;
+            padding-bottom: 100%;
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+
+        .preview-wrapper img,
+        .preview-wrapper video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* New styles for the sync button */
+        .sync-to-code-panel-container {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #323232;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #fff;
+            cursor: pointer;
+            z-index: 9999;
+            white-space: nowrap;
+            max-width: 180px;
+            transition: left 0.3s;
+        }
+
+        .sync-to-code-panel-container.hidden {
+            display: none;
+        }
+
+        .sync-to-code-panel-container:hover {
+            background-color: #424242;
+        }
+
+        .sync-to-code-panel-container.syncing {
+            background-color: #2196f3;
+        }
+
+        .sync-to-code-panel-container.synced {
+            background-color: #4caf50;
+        }
+
+        .sync-to-code-panel-container.error {
+            background-color: #f44336;
+        }
+
+        .sync-to-code-panel-container.syncing {
+            background-color: #2196f3;
+        }
+
+        .sync-to-code-panel-container.synced {
+            background-color: #4caf50;
+        }
+
+        .sync-to-code-panel-container.error {
+            background-color: #f44336;
+        }
+
+        .sync-to-code-panel-container.syncing {
+            background-color: #2196f3;
+        }
+
+        .sync-to-code-panel-container.synced {
+            background-color: #4caf50;
+        }
+
+        .sync-to-code-panel-container.error {
+            background-color: #f44336;
+        }
+
+        .sync-to-code-panel-status {
+            margin-left: 5px;
+        }
+
+        body.aframe-inspector-opened .sync-to-code-panel-container {
+            display: flex !important;
+        }
+
+        body:not(.aframe-inspector-opened) .sync-to-code-panel-container {
+            display: none;
+        }
+
+        .geometry-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .geometry-buttons button {
+            width: 100%;
+            padding: 8px 5px;
+            background: #2c2c2c;
+            border: 1px solid #3c3c3c;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .geometry-buttons button:hover {
+            background: #3c3c3c;
+            border-color: #4c4c4c;
+        }
+
+        .geometry-buttons svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .geometry-buttons .filled {
+            fill: currentColor;
+            fill-opacity: 0.2;
+        }
+
+        .playing {
+            background-color: #35a35f;
+        }
+
+        .playing:hover {
+            background-color: #2d8a50;
+        }
+
+        .paused {
+            background-color: #2c2c2c;
+        }
+
+        .paused:hover {
+            background-color: #3c3c3c;
+        }
+
+        .section {
+            background-color: #2c2c2c;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background-color: #3c3c3c;
+            color: #fff;
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .section-header:hover {
+            background-color: #4c4c4c;
+        }
+
+        .toggle-icon {
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .section-header.active .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .section-content.show {
+            max-height: 500px;
+        }
+
+        .section-content > div {
+            padding: 15px;
+        }
+
+        /* Styling for effect buttons (particle effects, add asset, add skybox) */
+        .effect-btn {
+            width: 100%;
+            padding: 8px 10px;
+            background: #2c2c2c;
+            border: 1px solid #3c3c3c;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .effect-btn:hover {
+            background: #3c3c3c;
+            border-color: #4c4c4c;
+        }
+
+        .effect-btn.playing {
+            background-color: #35a35f;
+            border-color: #2d8a50;
+        }
+
+        .effect-btn.playing:hover {
+            background-color: #2d8a50;
+        }
+
+        .effect-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="brand-header">
+                <svg class="nav-logo" viewBox="0 0 333 333" xmlns="http://www.w3.org/2000/svg">
+                    <polygon class="cls-1"
+                        points="184.59 135.97 184.21 135.97 110.55 11.06 219.49 9.03 228.91 24.43 137.69 26.25 146.62 41 165.61 72.39 184.6 103.79 193.82 119.03 211.76 119.03 248.48 119.03 284.59 119.02 302.68 119.02 256.79 39.98 273.78 40.15 329.46 134.96 184.59 135.97" />
+                    <polygon class="cls-2"
+                        points="110.55 11.06 184.21 135.97 184.59 135.97 175.83 150.85 175.52 150.85 101.87 27.04 110.55 11.06" />
+                    <polygon class="cls-3"
+                        points="184.01 40.5 146.62 41 137.69 26.25 228.91 24.43 184.6 103.79 174.99 87.86 201.39 40.27 184.08 40.5 184.01 40.5" />
+                    <polygon class="cls-1" points="56.71 41.63 74.44 41.74 148.19 166.21 129.63 166.16 56.71 41.63" />
+                    <polygon class="cls-2"
+                        points="85.44 214.65 102.95 182.4 111.45 166.74 102.39 151.26 83.85 119.57 65.61 88.41 56.48 72.79 11.43 152.31 2.99 137.56 56.71 41.63 129.63 166.16 60.3 293.15 3.54 200.14 12.08 184.24 59.71 262.05 67.94 246.89 85.44 214.65" />
+                    <polygon class="cls-2"
+                        points="184.08 40.5 201.39 40.27 174.99 87.86 184.6 103.79 165.61 72.39 184.01 40.5 184.08 40.5" />
+                    <polygon class="cls-2"
+                        points="211.76 118.76 256.63 39.89 256.79 39.98 302.68 119.02 284.59 119.02 284.59 118.95 266.04 87.37 256.42 71.01 230.02 118.48 211.76 118.76" />
+                    <polygon class="cls-3"
+                        points="56.48 72.79 65.61 88.41 65.55 88.45 47.66 120.4 38.4 136.96 92.7 135.78 102.16 151.4 11.43 152.5 11.43 152.31 56.48 72.79" />
+                    <polygon class="cls-3"
+                        points="256.42 71.01 266.04 87.37 265.75 87.54 248.48 118.39 248.48 119.03 211.76 119.03 211.76 118.76 230.02 118.48 256.42 71.01" />
+                    <polygon class="cls-1"
+                        points="83.85 119.57 102.39 151.26 102.16 151.4 92.7 135.78 38.4 136.96 47.66 120.4 47.95 120.56 83.29 119.89 83.85 119.57" />
+                    <polygon class="cls-3"
+                        points="175.83 150.85 184.59 135.97 329.46 134.96 320.41 150.21 175.83 150.85" />
+                    <polygon class="cls-3"
+                        points="129.63 166.16 148.19 166.21 148.38 166.53 78.48 292.56 60.3 293.15 129.63 166.16" />
+                    <polygon class="cls-1"
+                        points="48.62 214.87 67.94 246.89 59.71 262.05 12.08 184.24 102.95 182.4 94.06 198.74 39.65 199.99 48.59 214.81 48.62 214.87" />
+                    <polygon class="cls-3"
+                        points="102.95 182.4 85.44 214.65 48.62 214.87 48.59 214.81 39.65 199.99 94.06 198.74 102.95 182.4" />
+                    <polygon class="cls-1"
+                        points="175.84 182.61 319.13 180.4 330.01 196.91 185.61 198.39 175.84 182.61 175.84 182.61" />
+                    <polygon class="cls-2"
+                        points="175.47 182.61 175.84 182.61 175.84 182.61 185.61 198.39 113.76 323.97 104.73 308.18 175.47 182.61" />
+                    <polygon class="cls-3"
+                        points="167.45 261.43 149.16 293.24 140.56 308.18 231.79 307.99 222.72 323.59 113.76 323.97 185.61 198.39 330.01 196.91 276.31 291.28 259.33 291.82 303.59 213.44 284.52 213.57 249.4 213.81 230.83 213.93 212.56 214.06 194.63 214.18 185.75 229.62 167.45 261.43" />
+                    <polygon class="cls-2"
+                        points="212.56 214.06 230.83 213.93 258.27 260.81 267.49 244.22 284.52 213.57 303.59 213.44 259.33 291.82 259.17 291.92 212.56 214.06" />
+                    <polygon class="cls-1"
+                        points="230.83 213.93 249.4 213.81 267.23 244.08 267.49 244.22 258.27 260.81 230.83 213.93" />
+                    <polygon class="cls-2"
+                        points="167.45 261.43 185.75 229.62 176.49 245.76 203.93 292.76 186.62 292.91 186.56 292.91 167.45 261.43" />
+                    <polygon class="cls-1"
+                        points="186.56 292.91 186.62 292.91 203.93 292.76 176.49 245.76 185.75 229.62 231.79 307.99 140.56 308.18 149.16 293.24 186.56 292.91" />
+                </svg>
+                <h1 class="logotype">DLUX</h1>
+            </div>
+            <!-- Add environment presets section -->
+            <div class="panel-section">
+                <h3>Environment</h3>
+                <div style="margin-bottom: 15px; position: relative;">
+                    <div style="position: relative; width: 100%;">
+                        <select id="environment-preset"
+                            style="width: 100%; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 100px 8px 8px 8px; border-radius: 4px; appearance: none; text-align: left;">
+                            <option value="none">No Environment</option>
+                            <option value="default">Default</option>
+                            <option value="contact">Contact</option>
+                            <option value="forest">Forest</option>
+                            <option value="egypt">Egypt</option>
+                            <option value="checkerboard">Checkerboard</option>
+                            <option value="goaland">Goaland</option>
+                            <option value="yavapai">Yavapai</option>
+                            <option value="goldmine">Goldmine</option>
+                            <option value="threetowers">Three Towers</option>
+                            <option value="poison">Poison</option>
+                            <option value="arches">Arches</option>
+                            <option value="tron">Tron</option>
+                            <option value="japan">Japan</option>
+                            <option value="dream">Dream</option>
+                            <option value="volcano">Volcano</option>
+                            <option value="starry">Starry</option>
+                            <option value="osiris">Osiris</option>
+                            <option value="moon">Moon</option>
+                        </select>
+                        <div id="environment-icon"
+                            style="position: absolute; left: 0; top: 0; width: 100%; height: 92px; pointer-events: none; overflow: hidden; border-radius: 4px 4px 0 0;">
+                            <img src="/playground/env_thumbs/none.png" alt="none environment"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <!-- Previous button -->
+                        <div id="prev-environment"
+                            style="position: absolute; left: 0; top: 0; width: 40px; height: 92px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: linear-gradient(to right, rgba(0,0,0,0.5), transparent);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M15 6l-6 6 6 6" />
+                            </svg>
+                        </div>
+                        <!-- Next button -->
+                        <div id="next-environment"
+                            style="position: absolute; right: 0; top: 0; width: 40px; height: 92px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: linear-gradient(to left, rgba(0,0,0,0.5), transparent);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9 6l6 6-6 6" />
+                            </svg>
+                        </div>
+                        <div style="position: absolute; right: 8px; bottom: 8px; pointer-events: none;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M7 10l5 5 5-5z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    // Environment thumbnails mapping (to be populated with actual images)
+                    const environmentThumbnails = {
+                        none: '/playground/env_thumbs/none.png',
+                        default: '/playground/env_thumbs/default.png',
+                        contact: '/playground/env_thumbs/contact.png',
+                        forest: '/playground/env_thumbs/forest.png',
+                        egypt: '/playground/env_thumbs/egypt.png',
+                        checkerboard: '/playground/env_thumbs/checkerboard.png',
+                        goaland: '/playground/env_thumbs/goaland.png',
+                        yavapai: '/playground/env_thumbs/yavapai.png',
+                        goldmine: '/playground/env_thumbs/goldmine.png',
+                        threetowers: '/playground/env_thumbs/threetowers.png',
+                        poison: '/playground/env_thumbs/poison.png',
+                        arches: '/playground/env_thumbs/arches.png',
+                        tron: '/playground/env_thumbs/tron.png',
+                        japan: '/playground/env_thumbs/japan.png',
+                        dream: '/playground/env_thumbs/dream.png',
+                        volcano: '/playground/env_thumbs/volcano.png',
+                        starry: '/playground/env_thumbs/starry.png',
+                        osiris: '/playground/env_thumbs/osiris.png',
+                        moon: '/playground/env_thumbs/moon.png'
+                    };
+
+                    const select = document.getElementById('environment-preset');
+                    const iconContainer = document.getElementById('environment-icon');
+
+                    // Get ordered list of environments
+                    const environments = Array.from(select.options).map(option => option.value);
+
+                    // Update thumbnail when environment changes
+                    function updateEnvironmentDisplay(value) {
+                        const thumbnailPath = environmentThumbnails[value];
+                        if (thumbnailPath) {
+                            iconContainer.innerHTML = `<img src="${thumbnailPath}" alt="${value} environment" style="width: 100%; height: 100%; object-fit: cover;">`;
+                        } else {
+                            iconContainer.innerHTML = `<div style="width: 100%; height: 100%; background: #1c1c1c; display: flex; align-items: center; justify-content: center; color: #666;">Environment Preview</div>`;
+                        }
+                    }
+
+                    // Handle environment changes
+                    select.addEventListener('change', function (e) {
+                        updateEnvironmentDisplay(e.target.value);
+                    });
+
+                    // Navigate to previous environment
+                    document.getElementById('prev-environment').addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        const currentIndex = environments.indexOf(select.value);
+                        const prevIndex = (currentIndex - 1 + environments.length) % environments.length;
+                        select.value = environments[prevIndex];
+                        select.dispatchEvent(new Event('change'));
+                    });
+
+                    // Navigate to next environment
+                    document.getElementById('next-environment').addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        const currentIndex = environments.indexOf(select.value);
+                        const nextIndex = (currentIndex + 1) % environments.length;
+                        select.value = environments[nextIndex];
+                        select.dispatchEvent(new Event('change'));
+                    });
+                </script>
+                <div class="background-color-picker" style="margin-bottom: 15px;">
+                    <label for="background-color" style="display: block; margin-bottom: 5px;">Background Color</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="color" id="background-color" value="#ECECEC"
+                            style="width: 50px; height: 30px; padding: 0;">
+                        <input type="text" id="background-color-hex" value="#ECECEC"
+                            style="width: 80px; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 5px;">
+                    </div>
+                </div>
+
+            </div>
+            <!-- New Section -->
+            <div class="section">
+                <div class="section-header">
+                    <span>Fog Controls</span>
+                    <span class="toggle-icon">▼</span>
+                </div>
+                <div class="section-content">
+                    <div class="control-group">
+                        <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 5px;">Fog Color</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="color" id="fog-color" value="#FFFFFF"
+                            style="width: 50px; height: 30px; padding: 0;">
+                        <input type="text" id="fog-color-hex" value="#FFFFFF"
+                            style="width: 80px; background: #2c2c2c; color: #fff; border: 1px solid #3c3c3c; padding: 5px;">
+                    </div>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; margin-bottom: 5px;">Fog Type</label>
+                    <div
+                        style="display: flex; gap: 10px; align-items: center; background: #2c2c2c; padding: 5px; border-radius: 4px;">
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                            <input type="radio" name="fog-type" value="linear" checked style="margin: 0;">
+                            <span style="color: #fff;">Linear</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                            <input type="radio" name="fog-type" value="exponential" style="margin: 0;">
+                            <span style="color: #fff;">Exponential</span>
+                        </label>
+                    </div>
+                </div>
+                <div id="fog-linear-controls" style="margin-bottom: 10px;">
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px;">Near Distance</label>
+                        <input type="range" id="fog-near" min="0" max="100" step="0.1" value="1" style="width: 100%;">
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px;">Far Distance</label>
+                        <input type="range" id="fog-far" min="0" max="250" step="0.1" value="50" style="width: 100%;">
+                    </div>
+                </div>
+                <div id="fog-exponential-controls" style="margin-bottom: 10px; display: none;">
+                    <label style="display: block; margin-bottom: 5px;">Density</label>
+                    <input type="range" id="fog-intensity" min="0" max="1" step="0.01" value="0.25"
+                        style="width: 100%;">
+                </div>
+                <button id="toggle-fog-btn" onclick="toggleFog()" class="effect-btn" style="width: 100%;">
+                    <span>Add Fog</span>
+                </button>
+                    </div>
+                </div>
+            </div>
+            <div class="fog-controls" style="margin-bottom: 15px;">
+                
+            </div>
+            <h3>Add Objects</h3>
+            <div class="geometry-buttons">
+                <!-- Basic Shapes -->
+                <button onclick="addEntity('box')">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="4" y="4" width="16" height="16" class="filled" />
+                    </svg>
+                    Box
+                </button>
+                <button onclick="addEntity('sphere')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" class="filled" />
+                        <ellipse cx="12" cy="12" rx="8" ry="3" />
+                        <line x1="4" y1="12" x2="20" y2="12" />
+                    </svg>
+                    Sphere
+                </button>
+                <button onclick="addEntity('cylinder')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 7 C6 7 6 17 6 17 C6 19 12 19 12 17 C12 17 12 7 12 7 C12 5 6 5 6 7" class="filled" />
+                        <ellipse cx="9" cy="7" rx="3" ry="1" />
+                        <ellipse cx="9" cy="17" rx="3" ry="1" />
+                    </svg>
+                    Cylinder
+                </button>
+                <button onclick="addEntity('plane')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 12 L12 6 L20 12 L12 18 Z" class="filled" />
+                    </svg>
+                    Plane
+                </button>
+                <button onclick="addEntity('cone')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L4 20 L20 20 Z" class="filled" />
+                    </svg>
+                    Cone
+                </button>
+                <button onclick="addEntity('torus')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" class="filled" />
+                        <circle cx="12" cy="12" r="4" />
+                    </svg>
+                    Torus
+                </button>
+                <button onclick="addEntity('ring')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" />
+                        <circle cx="12" cy="12" r="4" />
+                    </svg>
+                    Ring
+                </button>
+                <button onclick="addEntity('circle')">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="8" />
+                    </svg>
+                    Circle
+                </button>
+                <button onclick="addEntity('dodecahedron')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L18 8 L18 16 L12 20 L6 16 L6 8 Z" class="filled" />
+                        <line x1="12" y1="4" x2="12" y2="20" />
+                        <line x1="6" y1="8" x2="18" y2="8" />
+                        <line x1="6" y1="16" x2="18" y2="16" />
+                    </svg>
+                    Dodecahedron
+                </button>
+                <button onclick="addEntity('octahedron')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L20 12 L12 20 L4 12 Z" class="filled" />
+                    </svg>
+                    Octahedron
+                </button>
+                <button onclick="addEntity('tetrahedron')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L18 18 L6 18 Z" class="filled" />
+                        <line x1="6" y1="18" x2="18" y2="18" />
+                    </svg>
+                    Tetrahedron
+                </button>
+                <button onclick="addEntity('triangle')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 4 L20 18 L4 18 Z" />
+                    </svg>
+                    Triangle
+                </button>
+                <button onclick="addEntity('torusKnot')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 8 C16 8 16 16 12 16 C8 16 8 8 12 8" class="filled" />
+                        <path d="M8 12 C8 8 16 8 16 12 C16 16 8 16 8 12" />
+                    </svg>
+                    Torus Knot
+                </button>
+                <button onclick="addEntity('ocean')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 14 Q8 10 12 14 Q16 18 20 14" class="filled" />
+                        <path d="M4 18 Q8 14 12 18 Q16 22 20 18" />
+                    </svg>
+                    Ocean
+                </button>
+                <button onclick="addEntity('tube')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 12 C8 6 16 18 20 12" class="filled" />
+                    </svg>
+                    Tube
+                </button>
+                <button onclick="addEntity('grid')">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 4 L20 4 L20 20 L4 20 Z" />
+                        <line x1="9" y1="4" x2="9" y2="20" />
+                        <line x1="15" y1="4" x2="15" y2="20" />
+                        <line x1="4" y1="9" x2="20" y2="9" />
+                        <line x1="4" y1="15" x2="20" y2="15" />
+                    </svg>
+                    Grid
+                </button>
+            </div>
+
+            <h3>Particle Effects</h3>
+            <div class="particle-buttons"
+                style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; margin-bottom: 15px;">
+                <button id="snow-btn" onclick="toggleParticleSystem('snow')" class="effect-btn" style="flex-direction: column;">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="6" cy="6" r="1" />
+                        <circle cx="10" cy="12" r="1" />
+                        <circle cx="15" cy="6" r="1" />
+                        <circle cx="19" cy="12" r="1" />
+                        <circle cx="8" cy="18" r="1" />
+                        <circle cx="16" cy="18" r="1" />
+                        <circle cx="12" cy="4" r="1" />
+                        <circle cx="4" cy="12" r="1" />
+                        <circle cx="20" cy="4" r="1" />
+                    </svg>
+                    Snow
+                </button>
+                <button id="dust-btn" onclick="toggleParticleSystem('dust')" class="effect-btn" style="flex-direction: column;">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="6" cy="6" r="1" />
+                        <circle cx="10" cy="12" r="1" />
+                        <circle cx="15" cy="6" r="1" />
+                        <circle cx="19" cy="12" r="1" />
+                        <circle cx="8" cy="18" r="1" />
+                        <circle cx="16" cy="18" r="1" />
+                        <circle cx="12" cy="4" r="1" />
+                        <circle cx="4" cy="12" r="1" />
+                        <circle cx="20" cy="4" r="1" />
+                    </svg>
+                    Dust
+                </button>
+                <button id="rain-btn" onclick="toggleParticleSystem('rain')" class="effect-btn" style="flex-direction: column;">
+                    <svg viewBox="0 0 24 24">
+                        <!-- Simplified rain drops icon - just vertical lines -->
+                        <path d="M6,8L6,20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M10,4L10,18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M14,6L14,19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <path d="M18,5L18,16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    Rain
+                </button>
+                <button id="toggle-animation-btn" onclick="toggleParticleAnimation()" class="effect-btn" disabled style="flex-direction: column;">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" id="animation-icon" />
+                    </svg>
+                    <span id="animation-text">Start</span>
+                </button>
+            </div>
+
+
+
+            <h3>Assets</h3>
+            <div style="margin-bottom: 15px;">
+                <input type="file" id="asset-upload" accept="image/*,video/*,.gltf,.glb" onchange="handleFileUpload()"
+                    style="display: none;">
+                <button onclick="document.getElementById('asset-upload').click()" class="effect-btn"
+                    style="width: 100%; flex-direction: column;">
+                    <svg viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor" />
+                    </svg>
+                    <span>Load File</span>
+                </button>
+            </div>
+            <div id="asset-preview"></div>
+
+            <h3>Asset Library</h3>
+            <div id="asset-library"></div>
+
+            <div class="panel-section">
+                <h3>Skybox</h3>
+
+                <div id="skybox-container" class="asset-grid" style="margin-bottom: 10px;">
+                    <!-- Skybox previews will be added here -->
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <input type="file" id="skybox-input" accept="image/*,video/*" style="display: none;">
+                    <button onclick="document.getElementById('skybox-input').click()" class="effect-btn"
+                        style="width: 100%; flex-direction: column;">
+                        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px;">
+                            <path d="M12 2L4 12h4v8h8v-8h4L12 2z" fill="currentColor" />
+                        </svg>
+                        <span>Add Skybox</span>
+                    </button>
+                </div>
+            </div>
+
+
+
+        </div>
+
+        <div class="main-content">
+            <div class="toolbar" id="view-selector">
+                <button onclick="switchToView('code')">Edit Code</button>
+                <button onclick="switchToView('scene')">Preview Scene</button>
+                <button onclick="switchToView('inspector')">Inspector</button>
+                <button onclick="saveScene()">Save Scene</button>
+                <button onclick="resetScene()">Reset Scene</button>
+                <button onclick="clearScene()">Clear Scene</button>
+                <button onclick="clearEntities()">Clear Entities</button>
+            </div>
+
+            <div class="scene-container">
+                <a-scene embedded id="scene" background="color: #ECECEC">
+                    <a-assets id="asset-container">
+                        <!-- Uploaded assets will be added here -->
+                    </a-assets>
+
+                    <!-- Default scene setup -->
+                    <a-box position="-1 0.5 -3" rotation="0 45 0" color="#4CC3D9"></a-box>
+                    <a-sphere position="0 1.25 -5" radius="1.25" color="#EF2D5E"></a-sphere>
+                    <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
+                    <a-entity environment="preset: default"></a-entity>
+                    <a-camera position="0 1.6 0"></a-camera>
+                </a-scene>
+                <div id="code-panel"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sync-to-code-panel-container hidden">
+        <span class="sync-to-code-panel-status">Sync to Code Panel</span>
+    </div>
+
+    <script>
+        let currentView = 'scene';
+        let scene = document.querySelector('a-scene');
+        const codePanel = document.querySelector('#code-panel');
+        let editor;
+
+        // Register custom tube component
+        AFRAME.registerComponent('custom-tube', {
+            schema: {
+                path: { default: '-2 0 0, -1 1 0, 0 0 0, 1 -1 0, 2 0 0' },
+                radius: { default: 0.2 },
+                tubularSegments: { default: 20 },
+                radialSegments: { default: 8 },
+                closed: { default: false },
+                color: { default: '#ff0000' }
+            },
+            
+            init: function() {
+                // Parse path points from the path string
+                const pathStr = this.data.path;
+                const points = pathStr.split(',').map(point => {
+                    const coords = point.trim().split(' ').map(Number);
+                    return new THREE.Vector3(coords[0], coords[1], coords[2]);
+                });
+                
+                // Create a curve from the points
+                const curve = new THREE.CatmullRomCurve3(points);
+                
+                // Create the tube geometry
+                const geometry = new THREE.TubeGeometry(
+                    curve,
+                    this.data.tubularSegments,
+                    this.data.radius,
+                    this.data.radialSegments,
+                    this.data.closed
+                );
+                
+                // Create the material
+                const material = new THREE.MeshStandardMaterial({
+                    color: this.data.color,
+                    side: THREE.DoubleSide
+                });
+                
+                // Create and add mesh
+                this.mesh = new THREE.Mesh(geometry, material);
+                this.el.setObject3D('mesh', this.mesh);
+            },
+            
+            update: function(oldData) {
+                // If color changed, update material
+                if (oldData.color !== this.data.color && this.mesh) {
+                    this.mesh.material.color.set(this.data.color);
+                    this.mesh.material.needsUpdate = true;
+                }
+            },
+            
+            remove: function() {
+                if (this.mesh) {
+                    this.el.removeObject3D('mesh');
+                }
+            }
+        });
+
+        // Available environment presets
+        const environmentPresets = [
+            'default', 'contact', 'forest', 'egypt', 'checkerboard', 
+            'goaland', 'yavapai', 'goldmine', 'threetowers', 'poison', 
+            'arches', 'tron', 'japan', 'dream', 'volcano', 'starry', 
+            'osiris', 'moon'
+        ];
+
+        // Function to select a random environment preset
+        function getRandomEnvironmentPreset() {
+            const randomIndex = Math.floor(Math.random() * environmentPresets.length);
+            return environmentPresets[randomIndex];
+        }
+
+        // Set up initial environment
+        function setupInitialEnvironment() {
+            const randomPreset = getRandomEnvironmentPreset();
+            const environmentEntity = document.querySelector('a-entity[environment]');
+            
+            // Set the environment attribute
+            environmentEntity.setAttribute('environment', `preset: ${randomPreset}`);
+            
+            // Update the environment dropdown
+            const environmentDropdown = document.getElementById('environment-preset');
+            if (environmentDropdown) {
+                environmentDropdown.value = randomPreset;
+            }
+            
+            // Update the environment thumbnail
+            const environmentIcon = document.querySelector('#environment-icon img');
+            if (environmentIcon && environmentThumbnails[randomPreset]) {
+                environmentIcon.src = environmentThumbnails[randomPreset];
+                environmentIcon.alt = `${randomPreset} environment`;
+            }
+
+            // Flush to DOM
+            environmentEntity.flushToDOM();
+            scene.flushToDOM();
+            
+            // Force a render if renderer exists
+            if (scene.renderer) {
+                scene.renderer.render(scene.object3D, scene.camera);
+            }
+        }
+
+        // Initialize scene after it's loaded
+        scene.addEventListener('loaded', function() {
+            setupInitialEnvironment();
+            if (typeof updateCodePanel === 'function') {
+                updateCodePanel();
+            }
+        });
+
+        // ... existing code ...
+        // Handle environment presets
+        document.getElementById('environment-preset').addEventListener('change', function (e) {
+            const preset = e.target.value;
+            const sceneEl = document.querySelector('a-scene');
+            let environment = sceneEl.querySelector('a-entity[environment]');
+
+            // Clean up fog if it exists
+            const fog = sceneEl.querySelector('a-entity[fog]');
+            if (fog) fog.parentNode.removeChild(fog);
+
+            if (preset === 'none') {
+                // Remove environment if it exists
+                if (environment) {
+                    environment.parentNode.removeChild(environment);
+                }
+
+                // Add default lights that match A-Frame's defaults
+                const ambientLight = document.createElement('a-entity');
+                ambientLight.setAttribute('light', 'type: ambient; color: #BBB;');
+                ambientLight.setAttribute('data-aframe-default-light', '');
+                ambientLight.setAttribute('aframe-injected', '');
+                scene.appendChild(ambientLight);
+                
+                const directionalLight = document.createElement('a-entity');
+                directionalLight.setAttribute('light', 'color: #FFF; intensity: 1.884; castShadow: true');
+                directionalLight.setAttribute('position', '-0.5 1 1');
+                directionalLight.setAttribute('data-aframe-default-light', '');
+                directionalLight.setAttribute('aframe-injected', '');
+                scene.appendChild(directionalLight);
+            } else {
+                // Create or update environment entity
+                if (!environment) {
+                    environment = document.createElement('a-entity');
+                    environment.setAttribute('environment', '');
+                    sceneEl.appendChild(environment);
+                }
+
+                // Update environment entity
+                environment.setAttribute('environment', `preset: ${preset}`);
+                environment.flushToDOM();
+            }
+
+            // Force a scene update and flush all entities
+            sceneEl.flushToDOM();
+            
+            // Update code panel to show actual state
+            updateCodePanel();
+        });
+        // ... existing code ...
+
+        // ... existing code ...
+        // Handle section toggling
+        document.querySelectorAll('.section-header').forEach(header => {
+            header.addEventListener('click', function() {
+                const content = this.nextElementSibling;
+                
+                if (content.classList.contains('show')) {
+                    content.classList.remove('show');
+                    this.classList.remove('active');
+                    } else {
+                    content.classList.add('show');
+                    this.classList.add('active');
+                }
+            });
+        });
+        // ... existing code ...
+
+        // Function to switch between different views
+        function switchToView(view) {
+            currentView = view;
+            
+            if (view === 'code') {
+                // Show code editor
+                codePanel.style.display = 'block';
+                scene.style.display = 'none';
+                
+                // Initialize editor if needed
+                if (!editor) {
+                    initCodeEditor();
+                }
+                updateCodePanel();
+            } else if (view === 'scene') {
+                // Show scene view
+                codePanel.style.display = 'none';
+                scene.style.display = 'block';
+                
+                // Exit inspector if it's open
+                if (AFRAME.INSPECTOR && AFRAME.INSPECTOR.opened) {
+                    AFRAME.INSPECTOR.close();
+                }
+            } else if (view === 'inspector') {
+                // Show A-Frame inspector
+                codePanel.style.display = 'none';
+                scene.style.display = 'block';
+                
+                if (AFRAME.INSPECTOR) {
+                    AFRAME.INSPECTOR.open();
+                } else {
+                    console.warn('A-Frame Inspector not available');
+                }
+            }
+        }
+        
+        // Initialize code editor
+        function initCodeEditor() {
+            editor = CodeMirror(codePanel, {
+                mode: 'xml',
+                theme: 'monokai',
+                lineNumbers: true,
+                lineWrapping: true,
+                indentWithTabs: false,
+                indentUnit: 2,
+                tabSize: 2,
+                autoCloseTags: true
+            });
+        }
+
+        // Function to update code panel with current scene content
+        function updateCodePanel() {
+            if (!editor) {
+                initCodeEditor();
+            }
+            
+            // Format the scene content and set it in the editor
+            const content = formatSceneContent();
+            editor.setValue(content);
+            editor.refresh();
+        }
+
+        // Function to format scene content for the code panel
+        function formatSceneContent() {
+            const sceneEl = document.querySelector('a-scene');
+            const sceneClone = sceneEl.cloneNode(true);
+            
+            // Clean up unnecessary attributes
+            sceneClone.removeAttribute('embedded');
+            sceneClone.removeAttribute('inspector');
+            sceneClone.removeAttribute('keyboard-shortcuts');
+            sceneClone.removeAttribute('screenshot');
+            sceneClone.removeAttribute('vr-mode-ui');
+            
+            // Format scene content
+            let content = '';
+            
+            // Add assets
+            const assetsEl = sceneClone.querySelector('a-assets');
+            if (assetsEl) {
+                content += '<a-assets>\n';
+                Array.from(assetsEl.children).forEach(child => {
+                    content += '  ' + child.outerHTML + '\n';
+                });
+                content += '</a-assets>\n\n';
+            }
+            
+            // Add entities (excluding camera and injected entities)
+            Array.from(sceneClone.children).forEach(child => {
+                if (child.tagName.toLowerCase() === 'a-assets') {
+                    return; // Skip assets, already handled
+                }
+                
+                // Skip injected entities (like the inspector)
+                if (child.hasAttribute('aframe-injected') || child.hasAttribute('data-aframe-inspector')) {
+                    return;
+                }
+                
+                content += child.outerHTML + '\n';
+            });
+            
+            return content;
+        }
+
+        // Function to save the current scene
+        function saveScene() {
+            const content = formatSceneContent();
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'scene.html';
+            a.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // Function to reset the scene to default
+        function resetScene() {
+            if (confirm('Are you sure you want to reset the scene to default?')) {
+                const sceneEl = document.querySelector('a-scene');
+                
+                // Clear existing entities except camera
+                while (sceneEl.firstChild) {
+                    const child = sceneEl.firstChild;
+                    if (child.tagName && child.tagName.toLowerCase() === 'a-camera') {
+                        // Keep the camera
+                        sceneEl.appendChild(child);
+                    }
+                    sceneEl.removeChild(child);
+                }
+                
+                // Add assets container
+                const assetsEl = document.createElement('a-assets');
+                assetsEl.id = 'asset-container';
+                sceneEl.appendChild(assetsEl);
+                
+                // Add default entities
+                const box = document.createElement('a-box');
+                box.setAttribute('position', '-1 0.5 -3');
+                box.setAttribute('rotation', '0 45 0');
+                box.setAttribute('color', '#4CC3D9');
+                sceneEl.appendChild(box);
+                
+                const sphere = document.createElement('a-sphere');
+                sphere.setAttribute('position', '0 1.25 -5');
+                sphere.setAttribute('radius', '1.25');
+                sphere.setAttribute('color', '#EF2D5E');
+                sceneEl.appendChild(sphere);
+                
+                const cylinder = document.createElement('a-cylinder');
+                cylinder.setAttribute('position', '1 0.75 -3');
+                cylinder.setAttribute('radius', '0.5');
+                cylinder.setAttribute('height', '1.5');
+                cylinder.setAttribute('color', '#FFC65D');
+                sceneEl.appendChild(cylinder);
+                
+                // Add environment entity
+                const environment = document.createElement('a-entity');
+                environment.setAttribute('environment', '');
+                sceneEl.appendChild(environment);
+                
+                // Add camera if needed
+                if (!sceneEl.querySelector('a-camera')) {
+                    const camera = document.createElement('a-camera');
+                    camera.setAttribute('position', '0 1.6 0');
+                    sceneEl.appendChild(camera);
+                }
+                
+                // Set up initial environment
+                setupInitialEnvironment();
+                
+                // Update the code panel
+                if (currentView === 'code' && editor) {
+                    updateCodePanel();
+                }
+            }
+        }
+
+        // Function to clear all entities in the scene
+        function clearScene() {
+            if (confirm('Are you sure you want to clear the scene?')) {
+                const sceneEl = document.querySelector('a-scene');
+                
+                // Clear all children except assets and camera
+                Array.from(sceneEl.children).forEach(child => {
+                    const tagName = child.tagName.toLowerCase();
+                    if (tagName !== 'a-assets' && tagName !== 'a-camera') {
+                        sceneEl.removeChild(child);
+                    }
+                });
+                
+                // Update the code panel
+                if (currentView === 'code' && editor) {
+                    updateCodePanel();
+                }
+            }
+        }
+
+        // Function to clear just the entities (keep environment, etc.)
+        function clearEntities() {
+            if (confirm('Are you sure you want to clear entities?')) {
+                const sceneEl = document.querySelector('a-scene');
+                
+                // Keep only assets, camera, environment, and sky
+                Array.from(sceneEl.children).forEach(child => {
+                    const tagName = child.tagName.toLowerCase();
+                    if (tagName !== 'a-assets' && 
+                        tagName !== 'a-camera' && 
+                        !child.hasAttribute('environment') && 
+                        tagName !== 'a-sky') {
+                        sceneEl.removeChild(child);
+                    }
+                });
+                
+                // Update the code panel
+                if (currentView === 'code' && editor) {
+                    updateCodePanel();
+                }
+            }
+        }
+
+        // Function to add a new entity to the scene
+        function addEntity(type) {
+            const sceneEl = document.querySelector('a-scene');
+            let entity;
+            
+            // Default position offset for new entities
+            const posZ = -3;
+            const randomX = (Math.random() * 4 - 2).toFixed(2);
+            const randomY = (Math.random() * 2 + 0.5).toFixed(2);
+            
+            // Generate a random color
+            const color = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+            
+            // Create entity based on type
+            switch(type) {
+                case 'box':
+                    entity = document.createElement('a-box');
+                    entity.setAttribute('position', `${randomX} ${randomY} ${posZ}`);
+                    entity.setAttribute('rotation', '0 45 0');
+                    entity.setAttribute('color', color);
+                    break;
+                    
+                case 'sphere':
+                    entity = document.createElement('a-sphere');
+                    entity.setAttribute('position', `${randomX} ${randomY} ${posZ}`);
+                    entity.setAttribute('radius', '0.8');
+                    entity.setAttribute('color', color);
+                    break;
+                    
+                case 'cylinder':
+                    entity = document.createElement('a-cylinder');
+                    entity.setAttribute('position', `${randomX} ${randomY} ${posZ}`);
+                    entity.setAttribute('radius', '0.5');
+                    entity.setAttribute('height', '1.5');
+                    entity.setAttribute('color', color);
+                    break;
+                    
+                case 'plane':
+                    entity = document.createElement('a-plane');
+                    entity.setAttribute('position', `${randomX} ${randomY} ${posZ}`);
+                    entity.setAttribute('rotation', '-90 0 0');
+                    entity.setAttribute('width', '2');
+                    entity.setAttribute('height', '2');
+                    entity.setAttribute('color', color);
+                    break;
+                    
+                case 'cone':
+                    entity = document.createElement('a-cone');
+                    entity.setAttribute('position', `${randomX} ${randomY} ${posZ}`);
+                    entity.setAttribute('radius-bottom', '1');
+                    entity.setAttribute('radius-top', '0');
+                    entity.setAttribute('height', '2');
+                    entity.setAttribute('color', color);
+                    break;
+                    
+                case 'torus':
+                    entity = document.createElement('a-torus');
+                    entity.setAttribute('position', `${randomX} ${randomY} ${posZ}`);
+                    entity.setAttribute('radius', '0.8');
+                    entity.setAttribute('radius-tubular', '0.2');
+                    entity.setAttribute('color', color);
+                    break;
+                    
+                case 'ring':
+                    entity = document.createElement('a-ring');
+                    entity.setAttribute('position', `${randomX} ${randomY} ${posZ}`);
+                    entity.setAttribute('radius-inner', '0.5');
+                    entity.setAttribute('radius-outer', '1');
+                    entity.setAttribute('color', color);
+                    break;
+                    
+                case 'circle':
+                    entity = document.createElement('a-circle');
+                    entity.setAttribute('position', `${randomX} ${randomY} ${posZ}`);
+                    entity.setAttribute('radius', '1');
+                    entity.setAttribute('color', color);
+                    break;
+                    
+                case 'dodecahedron':
+                case 'octahedron':
+                case 'tetrahedron':
+                case 'torusKnot':
+                    entity = document.createElement('a-entity');
+                    entity.setAttribute('position', `${randomX} ${randomY} ${posZ}`);
+                    entity.setAttribute('geometry', `primitive: ${type}; radius: 1`);
+                    entity.setAttribute('material', `color: ${color}`);
+                    break;
+                
+                case 'triangle':
+                    entity = document.createElement('a-entity');
+                    entity.setAttribute('position', `${randomX} ${randomY} ${posZ}`);
+                    // Triangle uses vertices instead of radius
+                    entity.setAttribute('geometry', `primitive: triangle; 
+                        vertexA: 0 1 0; 
+                        vertexB: -1 -1 0; 
+                        vertexC: 1 -1 0`);
+                    entity.setAttribute('material', `color: ${color}; side: double`);
+                    break;
+                    
+                case 'grid':
+                    entity = document.createElement('a-grid');
+                    entity.setAttribute('position', '0 0 0');
+                    entity.setAttribute('rotation', '-90 0 0');
+                    entity.setAttribute('width', '20');
+                    entity.setAttribute('height', '20');
+                    entity.setAttribute('color', '#666');
+                    break;
+                    
+                case 'ocean':
+                    entity = document.createElement('a-ocean');
+                    entity.setAttribute('position', '0 0 0');
+                    entity.setAttribute('width', '50');
+                    entity.setAttribute('depth', '50');
+                    entity.setAttribute('density', '10');
+                    entity.setAttribute('color', '#4682B4');
+                    break;
+                    
+                case 'tube':
+                    // Use our custom tube component
+                    entity = document.createElement('a-entity');
+                    entity.setAttribute('position', `${randomX} ${randomY} ${posZ}`);
+                    entity.setAttribute('custom-tube', `color: ${color}`);
+                    break;
+                    
+                default:
+                    console.warn(`Unknown entity type: ${type}`);
+                    return;
+            }
+            
+            // Add entity to scene
+            sceneEl.appendChild(entity);
+            
+            // Update the code panel if in code view
+            if (currentView === 'code' && editor) {
+                updateCodePanel();
+            }
+            
+            // Return the created entity
+            return entity;
+        }
+
+        // Function to handle file uploads
+        function handleFileUpload() {
+            const input = document.getElementById('asset-upload');
+            const file = input.files[0];
+            
+            if (!file) return;
+            
+            const assetPreview = document.getElementById('asset-preview');
+            const assetContainer = document.getElementById('asset-container');
+            
+            // Create a URL for the uploaded file
+            const url = URL.createObjectURL(file);
+            const fileName = file.name;
+            const fileType = file.type.split('/')[0]; // image, video, etc.
+            
+            // Create appropriate asset in a-assets
+            let assetEl;
+            let previewEl;
+            
+            if (fileType === 'image') {
+                // Image asset
+                assetEl = document.createElement('img');
+                assetEl.id = 'img-' + Date.now();
+                assetEl.src = url;
+                
+                // Image preview
+                previewEl = document.createElement('img');
+                previewEl.className = 'asset-preview';
+                previewEl.src = url;
+                previewEl.alt = fileName;
+            } else if (fileType === 'video') {
+                // Video asset
+                assetEl = document.createElement('video');
+                assetEl.id = 'video-' + Date.now();
+                assetEl.src = url;
+                assetEl.setAttribute('crossorigin', 'anonymous');
+                
+                // Video preview
+                previewEl = document.createElement('video');
+                previewEl.className = 'asset-preview';
+                previewEl.src = url;
+                previewEl.controls = true;
+                previewEl.muted = true;
+            } else if (fileName.endsWith('.glb') || fileName.endsWith('.gltf')) {
+                // 3D model asset
+                assetEl = document.createElement('a-asset-item');
+                assetEl.id = 'model-' + Date.now();
+                assetEl.src = url;
+                
+                // Model preview (using model-viewer)
+                const previewContainer = document.createElement('div');
+                previewContainer.className = 'model-preview';
+                
+                const modelViewer = document.createElement('model-viewer');
+                modelViewer.src = url;
+                modelViewer.setAttribute('auto-rotate', '');
+                modelViewer.setAttribute('camera-controls', '');
+                modelViewer.setAttribute('shadow-intensity', '1');
+                modelViewer.style.width = '100%';
+                modelViewer.style.height = '100%';
+                
+                previewContainer.appendChild(modelViewer);
+                previewEl = previewContainer;
+            } else {
+                alert('Unsupported file type');
+                return;
+            }
+            
+            // Add asset to a-assets
+            assetContainer.appendChild(assetEl);
+            
+            // Create asset display container
+            const container = document.createElement('div');
+            container.className = 'asset-container';
+            
+            // Add preview
+            container.appendChild(previewEl);
+            
+            // Add file info
+            const fileInfo = document.createElement('div');
+            fileInfo.innerHTML = `<strong>${fileName}</strong>`;
+            container.appendChild(fileInfo);
+            
+            // Add use buttons based on file type
+            if (fileType === 'image') {
+                // Buttons for images (texture, skybox, etc.)
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.display = 'flex';
+                buttonContainer.style.gap = '5px';
+                buttonContainer.style.marginTop = '5px';
+                
+                const textureBtn = document.createElement('button');
+                textureBtn.textContent = 'Use as Texture';
+                textureBtn.style.flex = '1';
+                textureBtn.onclick = () => createTexturedEntity(assetEl.id);
+                
+                const skyboxBtn = document.createElement('button');
+                skyboxBtn.textContent = 'Use as Skybox';
+                skyboxBtn.style.flex = '1';
+                skyboxBtn.onclick = () => setSkybox(assetEl.id);
+                
+                buttonContainer.appendChild(textureBtn);
+                buttonContainer.appendChild(skyboxBtn);
+                container.appendChild(buttonContainer);
+            } else if (fileType === 'video') {
+                // Buttons for videos
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.display = 'flex';
+                buttonContainer.style.gap = '5px';
+                buttonContainer.style.marginTop = '5px';
+                
+                const videoTextureBtn = document.createElement('button');
+                videoTextureBtn.textContent = 'Use as Video Texture';
+                videoTextureBtn.style.flex = '1';
+                videoTextureBtn.onclick = () => createVideoTextureEntity(assetEl.id);
+                
+                const skyVideoBtn = document.createElement('button');
+                skyVideoBtn.textContent = 'Use as Sky Video';
+                skyVideoBtn.style.flex = '1';
+                skyVideoBtn.onclick = () => setVideoSkybox(assetEl.id);
+                
+                buttonContainer.appendChild(videoTextureBtn);
+                buttonContainer.appendChild(skyVideoBtn);
+                container.appendChild(buttonContainer);
+            } else if (fileName.endsWith('.glb') || fileName.endsWith('.gltf')) {
+                // Button for 3D models
+                const modelBtn = document.createElement('button');
+                modelBtn.textContent = 'Add to Scene';
+                modelBtn.style.width = '100%';
+                modelBtn.style.marginTop = '5px';
+                modelBtn.onclick = () => addModelToScene(assetEl.id);
+                container.appendChild(modelBtn);
+            }
+            
+            // Clear previous preview and add new one
+            assetPreview.innerHTML = '';
+            assetPreview.appendChild(container);
+            
+            // Reset the file input
+            input.value = '';
+        }
+
+        // Function to create a textured entity
+        function createTexturedEntity(assetId) {
+            const entity = document.createElement('a-box');
+            entity.setAttribute('position', '0 1 -3');
+            entity.setAttribute('rotation', '0 45 0');
+            entity.setAttribute('material', `src: #${assetId}`);
+            
+            // Add to scene
+            scene.appendChild(entity);
+            
+            // Update code panel if in code view
+            if (currentView === 'code' && editor) {
+                updateCodePanel();
+            }
+        }
+
+        // Function to set a skybox
+        function setSkybox(assetId) {
+            // Remove existing sky
+            const existingSky = document.querySelector('a-sky');
+            if (existingSky) {
+                existingSky.parentNode.removeChild(existingSky);
+            }
+            
+            // Create new sky
+            const sky = document.createElement('a-sky');
+            sky.setAttribute('src', `#${assetId}`);
+            
+            // Add to scene
+            scene.appendChild(sky);
+            
+            // Update code panel if in code view
+            if (currentView === 'code' && editor) {
+                updateCodePanel();
+            }
+        }
+
+        // Function to create a video textured entity
+        function createVideoTextureEntity(assetId) {
+            const entity = document.createElement('a-box');
+            entity.setAttribute('position', '0 1 -3');
+            entity.setAttribute('rotation', '0 45 0');
+            entity.setAttribute('material', `src: #${assetId}`);
+            
+            // Start video playback
+            const video = document.getElementById(assetId);
+            if (video) {
+                video.play();
+            }
+            
+            // Add to scene
+            scene.appendChild(entity);
+            
+            // Update code panel if in code view
+            if (currentView === 'code' && editor) {
+                updateCodePanel();
+            }
+        }
+
+        // Function to set a video skybox
+        function setVideoSkybox(assetId) {
+            // Remove existing sky
+            const existingSky = document.querySelector('a-sky');
+            if (existingSky) {
+                existingSky.parentNode.removeChild(existingSky);
+            }
+            
+            // Create new sky
+            const sky = document.createElement('a-sky');
+            sky.setAttribute('src', `#${assetId}`);
+            
+            // Start video playback
+            const video = document.getElementById(assetId);
+            if (video) {
+                video.play();
+            }
+            
+            // Add to scene
+            scene.appendChild(sky);
+            
+            // Update code panel if in code view
+            if (currentView === 'code' && editor) {
+                updateCodePanel();
+            }
+        }
+
+        // Function to add a 3D model to the scene
+        function addModelToScene(assetId) {
+            const entity = document.createElement('a-entity');
+            entity.setAttribute('position', '0 0 -3');
+            entity.setAttribute('gltf-model', `#${assetId}`);
+            
+            // Add to scene
+            scene.appendChild(entity);
+            
+            // Update code panel if in code view
+            if (currentView === 'code' && editor) {
+                updateCodePanel();
+            }
+        }
+
+        // Variables to track particle systems
+        let currentParticleSystem = null;
+        let isParticleAnimationPlaying = false;
+        
+        // Function to toggle particle system
+        function toggleParticleSystem(type) {
+            const sceneEl = document.querySelector('a-scene');
+            
+            // Get animation controls
+            const animationBtn = document.getElementById('toggle-animation-btn');
+            const animationText = document.getElementById('animation-text');
+            
+            // Remove existing particle system if any
+            if (currentParticleSystem) {
+                // Store the current type before removing
+                const currentType = currentParticleSystem.getAttribute('data-type');
+                
+                // Remove the particle system
+                currentParticleSystem.parentNode.removeChild(currentParticleSystem);
+                currentParticleSystem = null;
+                
+                // If the same type is clicked, just remove it
+                if (type === currentType) {
+                    document.getElementById(`${type}-btn`).classList.remove('playing');
+                    animationBtn.classList.remove('playing');
+                    animationBtn.disabled = true;
+                    animationText.textContent = 'Start';
+                    isParticleAnimationPlaying = false;
+                    return;
+                }
+            }
+            
+            // Reset button states
+            document.querySelectorAll('.effect-btn').forEach(btn => {
+                btn.classList.remove('playing');
+            });
+            
+            // Create new particle system
+            const particleEntity = document.createElement('a-entity');
+            particleEntity.setAttribute('data-type', type);
+            
+            // Configure based on type
+            switch(type) {
+                case 'snow':
+                    particleEntity.setAttribute('position', '0 2.25 -15');
+                    particleEntity.setAttribute('particle-system', 'preset: snow; particleCount: 5000; size: 0.5; color: white; opacity: 0.7');
+                    document.getElementById('snow-btn').classList.add('playing');
+                    break;
+                    
+                case 'dust':
+                    particleEntity.setAttribute('position', '0 2.25 -15');
+                    particleEntity.setAttribute('particle-system', 'preset: dust; particleCount: 5000; color: #ffff00; opacity: 0.3');
+                    document.getElementById('dust-btn').classList.add('playing');
+                    break;
+                    
+                case 'rain':
+                    particleEntity.setAttribute('position', '0 5 -15');
+                    particleEntity.setAttribute('particle-system', 'preset: rain; particleCount: 3000; size: 0.1; color: #99cfff; opacity: 0.7');
+                    document.getElementById('rain-btn').classList.add('playing');
+                    break;
+                    
+                default:
+                    console.warn(`Unknown particle type: ${type}`);
+                    return;
+            }
+            
+            // Add to scene
+            sceneEl.appendChild(particleEntity);
+            currentParticleSystem = particleEntity;
+            
+            // Enable animation controls
+            animationBtn.disabled = false;
+            animationBtn.classList.add('playing');
+            animationText.textContent = 'Pause';
+            isParticleAnimationPlaying = true;
+            
+            // Update code panel if in code view
+            if (currentView === 'code' && editor) {
+                updateCodePanel();
+            }
+        }
+        
+        // Function to toggle particle animation
+        function toggleParticleAnimation() {
+            if (!currentParticleSystem) return;
+            
+            const animationBtn = document.getElementById('toggle-animation-btn');
+            const animationText = document.getElementById('animation-text');
+            const animationIcon = document.getElementById('animation-icon');
+            
+            const particleSystem = currentParticleSystem.components['particle-system'];
+            
+            if (isParticleAnimationPlaying) {
+                // Pause the animation
+                particleSystem.pause();
+                animationBtn.classList.remove('playing');
+                animationBtn.classList.add('paused');
+                animationText.textContent = 'Resume';
+                isParticleAnimationPlaying = false;
+            } else {
+                // Resume the animation
+                particleSystem.play();
+                animationBtn.classList.remove('paused');
+                animationBtn.classList.add('playing');
+                animationText.textContent = 'Pause';
+                isParticleAnimationPlaying = true;
+            }
+        }
+        
+        // Function to toggle fog
+        function toggleFog() {
+            const sceneEl = document.querySelector('a-scene');
+            const fogBtn = document.getElementById('toggle-fog-btn');
+            
+            const existingFog = sceneEl.querySelector('a-entity[fog]');
+            
+            if (existingFog) {
+                // Remove fog
+                existingFog.parentNode.removeChild(existingFog);
+                fogBtn.textContent = 'Add Fog';
+                fogBtn.classList.remove('playing');
+            } else {
+                // Get fog parameters
+                const fogColor = document.getElementById('fog-color').value;
+                const fogType = document.querySelector('input[name="fog-type"]:checked').value;
+                
+                // Create fog entity
+                const fogEntity = document.createElement('a-entity');
+                
+                if (fogType === 'linear') {
+                    const fogNear = document.getElementById('fog-near').value;
+                    const fogFar = document.getElementById('fog-far').value;
+                    fogEntity.setAttribute('fog', `type: linear; color: ${fogColor}; near: ${fogNear}; far: ${fogFar}`);
+                } else {
+                    const fogDensity = document.getElementById('fog-intensity').value;
+                    fogEntity.setAttribute('fog', `type: exponential; color: ${fogColor}; density: ${fogDensity}`);
+                }
+                
+                // Add to scene
+                sceneEl.appendChild(fogEntity);
+                fogBtn.textContent = 'Remove Fog';
+                fogBtn.classList.add('playing');
+            }
+            
+            // Update code panel if in code view
+            if (currentView === 'code' && editor) {
+                updateCodePanel();
+            }
+        }
+    </script>
+</body>
+
+</html>
