@@ -1,6 +1,5 @@
 import Contract from "/js/contract-modal.js";
 import Election from "/js/election-modal.js";
-// import Extend from "/js/extend-modal.js";
 import Standard from "/js/standard-modal.js";
 
 export default {
@@ -8,7 +7,6 @@ export default {
     components: {
         "Contract": Contract,
         "Election": Election,
-        // "Extend": Extend,
         "Standard": Standard,
     },
     props: {
@@ -22,25 +20,32 @@ export default {
         },
         type: { default: "move" },
     },
+    data() {
+        return {
+            modalId: `modal-${Math.random().toString(36).substr(2, 9)}`, // e.g., "modal-abc123def"
+        };
+    },
     template: `<div>
     <slot name="trigger"></slot>
     <teleport to="body">
-      <Standard v-if="type === 'move' && tokenprotocol.head_block && tokenuser.head_block" 
+        <div :id="modalId">
+            <Standard v-if="type === 'move' && tokenprotocol.head_block && tokenuser.head_block" 
                 :func="func" 
                 :account="account" 
                 :tokenprotocol="tokenprotocol" 
                 :tokenuser="tokenuser" 
                 @modalsign="$emit('modalsign', $event)" />
-      <Contract v-if="type === 'contract' && tokenprotocol.head_block && tokenuser.head_block" 
+            <Contract v-if="type === 'contract' && tokenprotocol.head_block && tokenuser.head_block" 
                 :account="account" 
                 :tokenprotocol="tokenprotocol" 
                 :tokenuser="tokenuser" 
                 @modalsign="$emit('modalsign', $event)" />
-      <Election v-if="type === 'election' && tokenprotocol.head_block && tokenuser.head_block" 
+            <Election v-if="type === 'election' && tokenprotocol.head_block && tokenuser.head_block" 
                 :account="account" 
                 :tokenprotocol="tokenprotocol" 
                 :tokenuser="tokenuser" 
                 @modalsign="$emit('modalsign', $event)" />
+        </div>
     </teleport>
   </div>`,
     methods: {
@@ -50,34 +55,18 @@ export default {
     },
     emits: ["modalsign"],
     mounted() {
-        // if (this.$slots.trigger) {
-        //     const trigger = this.$el.querySelector('.trigger');
-        //     const modalEl = this.$el.querySelector('.modal'); // Assumes modals have .modal class
-        //     if (trigger && modalEl) {
-        //         const modal = new bootstrap.Modal(modalEl);
-        //         trigger.addEventListener('click', () => modal.show());
-        //         this.$once('hook:beforeDestroy', () => {
-        //             trigger.removeEventListener('click', () => modal.show());
-        //             modal.dispose();
-        //         });
-        //     }
-        // }
-        var trigger = this.$el.getElementsByClassName("trigger")[0];
-      var target = this.$el.children[options.type];
-      document.getElementById("app").appendChild(target);
-      trigger.addEventListener("click", () => {
-        var theModal = new Modal(target, () => { });
-        theModal.show();
-      });
+        if (this.$slots.trigger) {
+            const trigger = this.$el.querySelector(".trigger");
+            const modalEl = document.getElementById(this.modalId);
+            if (trigger && modalEl) {
+              const modal = new bootstrap.Modal(modalEl);
+              trigger.addEventListener("click", () => modal.show());
+              this.$once("hook:beforeDestroy", () => {
+                trigger.removeEventListener("click", () => modal.show());
+                modal.dispose();
+              });
+            }
+          }
+
     }
 }
-
-/*
-<ModalVue :type="type" :tokenprotocol="tokenprotocol" :func="func">
-  <template #trigger="{ isDisabled }">
-    <button :disabled="isDisabled" class="trigger btn btn-primary">
-      Open Modal
-    </button>
-  </template>
-</ModalVue>
-*/
