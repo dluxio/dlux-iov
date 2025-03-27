@@ -24,6 +24,7 @@ import NFTDetail from "/js/nftdetail.js";
 import SPKVue from "/js/spk-wallet.js";
 import Assets from "/js/assets.js"
 import MFI from "/js/mfi-vue.js";
+import MCommon from '/js/methods-common.js'
 
 
 let url = location.href.replace(/\/$/, "");
@@ -1553,6 +1554,7 @@ PORT=3000
     "mfi-vue": MFI,
   },
   methods: {
+    ...MCommon,
     getSetPhotos(s, c) {
       return s.setname ? `https://ipfs.dlux.io/ipfs/${s.set[c]}` : "";
     },

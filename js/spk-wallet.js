@@ -1,4 +1,4 @@
-import ModalVue from './modalvue.js'
+import ModalVue from './modal-manager.js'
 
 export default {
     components: {

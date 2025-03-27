@@ -81,6 +81,36 @@ export default {
     pf(p) { //precision Factor
         return Math.pow(10, p)
     },
+    sigFig(num, sig) {
+        // return a number in K or M or B format
+        var post = typeof num.split == "function" ? num.split(" ")[1] : "";
+        num = parseFloat(num);
+        var out;
+        if (num < 1) {
+          out = (num * 1000).toFixed(sig);
+          post = "m" + post;
+        } else if (num < 1000) {
+          out = num.toFixed(sig);
+        } else if (num < 1000000) {
+          out = (num / 1000).toFixed(sig);
+          post = "K" + post;
+        } else if (num < 1000000000) {
+          out = (num / 1000000).toFixed(sig);
+          post = "M" + post;
+        } else if (num < 1000000000000) {
+          out = (num / 1000000000).toFixed(sig);
+          post = "B" + post;
+        } else if (num < 1000000000000000) {
+          out = (num / 1000000000000).toFixed(sig);
+          post = "T" + post;
+        } else if (num < 1000000000000000000) {
+          out = (num / 1000000000000000).toFixed(sig);
+          post = "Q" + post;
+        }
+        //remove trailing zeros
+        out = out.replace(/\.?0+$/, "");
+        return out + post;
+      },
     toFixed(n, digits) {
         return parseFloat(n).toFixed(digits)
       },
