@@ -811,6 +811,7 @@ export default {
                 id: "",
                 api: "",
             },
+            protocolspk: {},
             larynxbehind: 999,
             petitionStatus: 'Ask for Contract',
             saccountapi: {
