@@ -81,6 +81,9 @@ export default {
     pf(p) { //precision Factor
         return Math.pow(10, p)
     },
+    precision(num, precision) {
+        return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
+    },
     sigFig(num, sig) {
         // return a number in K or M or B format
         var post = typeof num.split == "function" ? num.split(" ")[1] : "";

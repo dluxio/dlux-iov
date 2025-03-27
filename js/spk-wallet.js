@@ -1,4 +1,5 @@
 import ModalVue from './modal-manager.js'
+import MCommon from '/js/methods-common.js'
 
 export default {
     components: {
@@ -294,7 +295,7 @@ export default {
                     <h5>
                         {{formatNumber(broca_calc(saccountapi.broca), 0, '', ',')}} BROCA
                     </h5>
-                     <div class="mb-2"> <span class="small">{{(broca_calc(saccountapi.broca) * 6)}} KBs per Month</span></div>
+                     <div class="mb-2"> <span class="small">{{(fancyBytes(broca_calc(saccountapi.broca) * 6000))}} per Month</span></div>
 
                     <div class="btn-group" role="group"
                         aria-label="Power Actions">
@@ -935,6 +936,7 @@ export default {
     },
     emits: ["tosign"],
     methods: {
+        ...MCommon,
         sendIt(event){
             console.log(event)
             this.$emit('tosign', event)
@@ -999,16 +1001,6 @@ export default {
                 this.ipfsProviders = data.providers
               });
           },
-        Base64toNumber(chars) {
-            const glyphs =
-                "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
-            var result = 0;
-            chars = chars.split("");
-            for (var e = 0; e < chars.length; e++) {
-                result = result * 64 + glyphs.indexOf(chars[e]);
-            }
-            return result;
-        },
         slotDecode(slot, index) {
             var item = slot.split(',')
             switch (index) {
@@ -1038,27 +1030,6 @@ export default {
                 console.log(res)
                 this.contract.api = res.services.IPFS[Object.keys(res.services.IPFS)[0]].a
               })
-        },
-        precision(num, precision) {
-            return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
-        },
-        toFixed(num, dig) {
-            return parseFloat(num).toFixed(dig);
-        },
-        formatNumber(t, n, r, e) {
-            if (typeof t != "number") t = parseFloat(t);
-            if (isNaN(t)) return "Invalid Number";
-            if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
-            (r = r || "."), (e = e || "");
-            var u = t < 0;
-            t = Math.abs(t);
-            var a = (null != n && 0 <= n ? t.toFixed(n) : t.toString()).split("."),
-                i = a[0],
-                o = 1 < a.length ? r + a[1] : "";
-            if (e)
-                for (var c = /(\d+)(\d{3})/; c.test(i);)
-                    i = i.replace(c, "$1" + e + "$2");
-            return (u ? "-" : "") + i + o;
         },
         exp_to_time(exp = '0:0') {
             return this.when([parseInt(exp.split(':')[0])])

@@ -11,7 +11,7 @@ import Tagify from "/js/tagifyvue.js";
 import MDE from "/js/mde-min.js";
 import ChatVue from "/js/chatvue.js";
 import SPKVue from "/js/spk-wallet-comp.js";
-
+import MCommon from '/js/methods-common.js'
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "",
@@ -853,6 +853,7 @@ createApp({
     "chat-vue": ChatVue,
   },
   methods: {
+    ...MCommon,
     buildTags() {
       this.postTags = this.postTags.replace(/#/g, "");
     },
