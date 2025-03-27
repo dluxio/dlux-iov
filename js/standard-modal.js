@@ -12,7 +12,7 @@ export default {
         default: () => ({
           precision: 3,
           token: 'HIVE',
-          features: []
+          features: {}
         })
       },
       tokenstats: Object,
@@ -153,5 +153,6 @@ export default {
       } else {
         this.error = "Feature not found";
       }
+      console.log(this.feat)
     }
 };
