@@ -1,4 +1,5 @@
 import ChoicesVue from '/js/choices-vue.js';
+import MCommon from '/js/methods-common.js'
 
 export default {
   components: {
@@ -407,6 +408,7 @@ export default {
   },
   emits: ["tosign", "done"],
   methods: {
+    ...MCommon,
     addUser() {
       if (this.encryption.input) {
         this.encryption.accounts[this.encryption.input] = {
@@ -418,14 +420,6 @@ export default {
     },
     delUser(user) {
       delete this.encryption.accounts[user]
-    },
-    fancyBytes(bytes) {
-      var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
-      while (bytes > 1024) {
-        bytes = bytes / 1024
-        counter++
-      }
-      return `${this.toFixed(bytes, 2)} ${p[counter]}B`
     },
     handleLabel(n, m) {
       if (m.action == 'added') {
@@ -495,9 +489,6 @@ export default {
             this.fetching = false
           })
       })
-    },
-    toFixed(n, digits) {
-      return parseFloat(n).toFixed(digits)
     },
     encryptKeyToUsers(usernames) {
       return new Promise((resolve, reject) => {
@@ -974,26 +965,6 @@ export default {
       if (num & 4) out.nsfw = true
       if (num & 8) out.executable = true
       return out
-    },
-    Base64toNumber(chars) {
-      const glyphs =
-        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
-      var result = 0;
-      chars = chars.split("");
-      for (var e = 0; e < chars.length; e++) {
-        result = result * 64 + glyphs.indexOf(chars[e]);
-      }
-      return result;
-    },
-    NumberToBase64(num) {
-      const glyphs =
-        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
-      var result = "";
-      while (num > 0) {
-        result = glyphs[num % 64] + result;
-        num = Math.floor(num / 64);
-      }
-      return result;
     },
     upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract) { // = { api: 'https://ipfs.dlux.io', id: '1668913215284', sigs: {}, s: 10485760, t: 0 }) {
       cids = cids.sort(function (a, b) {
