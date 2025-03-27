@@ -22,7 +22,9 @@ export default {
     },
     data() {
         return {
-            modalId: `modal-${Math.random().toString(36).substr(2, 9)}`, // e.g., "modal-abc123def"
+            modalId: `modal-${Math.random().toString(36).substr(2, 9)}`,
+            showModalListener: null,
+      modalInstance: null,
         };
     },
     template: `<div>
@@ -56,17 +58,25 @@ export default {
     emits: ["modalsign"],
     mounted() {
         if (this.$slots.trigger) {
-            const trigger = this.$el.querySelector(".trigger");
-            const modalEl = document.getElementById(this.modalId);
+            const trigger = this.$el.querySelector(".trigger")
+            const modalEl = document.getElementById(this.modalId)
             if (trigger && modalEl) {
-              const modal = new bootstrap.Modal(modalEl);
-              trigger.addEventListener("click", () => modal.show());
-              this.$once("hook:beforeDestroy", () => {
-                trigger.removeEventListener("click", () => modal.show());
-                modal.dispose();
-              });
+              const modal = new bootstrap.Modal(modalEl)
+              const showModal = () => modal.show()
+              trigger.addEventListener("click", showModal)
+              this.showModalListener = showModal;
+              this.modalInstance = modal
             }
           }
 
-    }
+    },
+    beforeUnmount() {
+        if (this.showModalListener && this.modalInstance) {
+          const trigger = this.$el.querySelector(".trigger")
+          if (trigger) {
+            trigger.removeEventListener("click", this.showModalListener)
+          }
+          this.modalInstance.dispose()
+        }
+      },
 }
