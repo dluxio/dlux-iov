@@ -17,9 +17,6 @@ export default {
         tokenprotocol: {
             default: () => ({ head_block: 0 }),
         },
-        tokenstats: {
-            default: () => ({ head_block: 0 }),
-        },
         tokenuser: {
             default: () => ({ head_block: 0 }),
         },
@@ -53,18 +50,25 @@ export default {
     },
     emits: ["modalsign"],
     mounted() {
-        if (this.$slots.trigger) {
-            const trigger = this.$el.querySelector('.trigger');
-            const modalEl = this.$el.querySelector('.modal'); // Assumes modals have .modal class
-            if (trigger && modalEl) {
-                const modal = new bootstrap.Modal(modalEl);
-                trigger.addEventListener('click', () => modal.show());
-                this.$once('hook:beforeDestroy', () => {
-                    trigger.removeEventListener('click', () => modal.show());
-                    modal.dispose();
-                });
-            }
-        }
+        // if (this.$slots.trigger) {
+        //     const trigger = this.$el.querySelector('.trigger');
+        //     const modalEl = this.$el.querySelector('.modal'); // Assumes modals have .modal class
+        //     if (trigger && modalEl) {
+        //         const modal = new bootstrap.Modal(modalEl);
+        //         trigger.addEventListener('click', () => modal.show());
+        //         this.$once('hook:beforeDestroy', () => {
+        //             trigger.removeEventListener('click', () => modal.show());
+        //             modal.dispose();
+        //         });
+        //     }
+        // }
+        var trigger = this.$el.getElementsByClassName("trigger")[0];
+      var target = this.$el.children[options.type];
+      document.getElementById("app").appendChild(target);
+      trigger.addEventListener("click", () => {
+        var theModal = new Modal(target, () => { });
+        theModal.show();
+      });
     }
 }
 
