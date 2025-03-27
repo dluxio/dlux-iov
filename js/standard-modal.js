@@ -15,7 +15,7 @@ export default {
           features: {}
         })
       },
-      tokenstats: Object,
+      // tokenstats: Object,
       tokenuser: Object,
       test: { type: Boolean, default: false },
     },
