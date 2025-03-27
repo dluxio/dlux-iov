@@ -78,8 +78,9 @@ export default {
                     <div class="btn-group" role="group"
                         aria-label="SPK Actions">
                         <button type="button" class="btn btn-primary p-0">
-                            <modal-vue type="send" token="SPK" :test="test"
-                                :balance="saccountapi.spk" :account="account"
+                            <modal-vue func="send" token="spk" :test="test"
+                                :tokenuser="saccountapi" :account="account"
+                                :tokenprotocol="protocolspk"
                                 @modalsign="sendIt($event)" v-slot:trigger>
                                 <span class="p-2 trigger"><i
                                         class="fas fa-paper-plane me-2"></i>Send</span>
@@ -950,6 +951,15 @@ export default {
                     this.saccountapi = data
                 });
             else setTimeout(this.getTokenUser, 1000)
+        },
+        getProtocols(){
+            fetch(this.sapi + "/spk/api/protocol").then(r => r.json())
+            .then(data =>{
+                this.protocolspk = data
+            })
+            .catch(e => {
+                console.log(e)
+            })
         },
         getSNodes() {
             // fetch(this.sapi + "/runners")
