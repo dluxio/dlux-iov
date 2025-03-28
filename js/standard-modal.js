@@ -147,7 +147,7 @@ export default {
                 this.pfp[key] = result; // Store URL for UI
               } else {
                 this.validations[key] = false;
-                this.profilePicUrl = null;
+                this.pfp[key] = null;
               }
             }).catch(() => {
               this.validations[key] = false;
