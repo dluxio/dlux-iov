@@ -53,7 +53,7 @@ export default {
 </span>
               <input
                 :type="getInputType(field.type)"
-                :class="['form-control', 'text-white', 'bg-dark', 'border-dark', getIcon(key) ? 'ps-4' : '']"
+                :class="['form-control', 'text-white', 'bg-dark', 'border-dark', getIcon(key) ? 'ps-4' : '', key === 'amount' ? 'pe-5' : '']"
                 :placeholder="'Enter ' + field.string.toLowerCase()"
                 v-model="form[key]"
                 @input="validateField(key)"
