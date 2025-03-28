@@ -103,6 +103,7 @@ export default {
                                 <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="powup" token="spk" :test="test"
                                 :tokenuser="saccountapi" :account="account"
                                 :tokenprotocol="protocolspk"
+                                :mypfp="mypfp" 
                                 @modalsign="sendIt($event)" v-slot:trigger>
                                     <button class="dropdown-item trigger"
                                         type="button"><i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
