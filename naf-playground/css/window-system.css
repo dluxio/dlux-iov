@@ -1003,13 +1003,7 @@ body:not(.aframe-inspector-opened) .toggle-edit {
     gap: 4px;
 }
 
-#app-container .window-btn {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-}
+
 
 #app-container .minimize-btn {
     background: #ffbd44;

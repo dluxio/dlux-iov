@@ -48,9 +48,9 @@ export default {
               </span>
             </label>
             <div class="position-relative">
-              <div v-if="pfp[key]" class="mt-2">
-  <img :src="pfp[key]" alt="Recipient Profile Picture" onerror="this.src='/img/no-user.png'" style="width: 50px; height: 50px; border-radius: 50%;">
-</div>
+              <span v-if="pfp[key]" class="position-absolute top-50 translate-middle-y mx-1 bg-light rounded-circle">
+  <img :src="pfp[key]" alt="Recipient Profile Picture" onerror="this.src='/img/no-user.png'" style="width: 30px; height: 30px; border-radius: 50%;">
+</span>
               <input
                 :type="getInputType(field.type)"
                 :class="['form-control', 'text-white', 'bg-dark', 'border-dark', getIcon(key) ? 'ps-4' : '']"
