@@ -139,6 +139,7 @@ export default {
 
         },
         validateField(key) {
+          this.validations[key] = false
           const field = this.feat.json[key];
           if (field.check === 'AC') {
             this.accountCheck(this.form[key]).then(result => {
