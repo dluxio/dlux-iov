@@ -77,7 +77,7 @@ export default {
                     </h5>
                     <div class="btn-group" role="group"
                         aria-label="SPK Actions">
-                        <button type="button" class="btn btn-primary p-0">
+                        <button data-bs-toggle="modal" data-bs-target="#send" class="btn btn-primary p-0">
                             <modal-vue func="send" token="spk" :test="test"
                                 :tokenuser="saccountapi" :account="account"
                                 :tokenprotocol="protocolspk"
