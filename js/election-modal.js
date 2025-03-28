@@ -57,7 +57,7 @@ export default {
       <!-- Selected Validators -->
       <div class="col-6">
         <button class="btn btn-success invisible" type="button">Save</button>
-        <h5 class="m-0">Node (Weight)</h5>
+        <h5 class="m-0">Nodes Selected (Weight)</h5>
         <div class="list-group">
           <div
             v-for="(node, index) in d.valWorkable"
@@ -148,7 +148,7 @@ export default {
         ...MModals,
       // Checks if a node is a validator
       isVal(node) {
-        return typeof node.val_code === 'string';
+        return typeof node.val_code === 'string' && node.self;
       },
       // Checks if a node is already selected
       isSelected(nodeSelf) {
