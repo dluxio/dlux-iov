@@ -149,7 +149,7 @@ export default {
           if (field.check === 'AC') {
             if(this.account == this.form[key]){
               this.validations[key] = false;
-              this.pfp[key] = '/img/no-user.png'
+              this.pfp[key] = this.mypfp
             }
             else this.accountCheck(this.form[key]).then(result => {
               if (result) {
