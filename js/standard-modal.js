@@ -61,7 +61,7 @@ export default {
                 :class="['form-control', 'text-white', 'bg-dark', 'border-dark', getIcon(key) ? 'ps-4' : '', key === 'amount' ? 'pe-5' : '']"
                 :placeholder="field.string === 'To' ? 'Enter username' : 'Enter ' + field.string.toLowerCase()"
                 v-model="form[key]"
-                @input="validateField(key)"
+                @input="debouncedValidateField(key)"
                 @blur="field.check ? field.check : null"
                 :step="key === 'amount' ? pd(tokenprotocol.precision) : null"
                 :min="key === 'amount' ? pd(tokenprotocol.precision) : null"
@@ -87,6 +87,7 @@ export default {
     data() {
         return {
             api: "",
+            debouncedValidateField: null,
             error: "",
             feat: {},
             form: {},
@@ -99,12 +100,15 @@ export default {
     methods: {
         ...MCommon,
         ...MModals,
-        // AC(key){
-        //     this.accountCheck(this.to).then(r=>{
-        //         this.ac = r
-        //         if(this.amount)this.valid = true
-        //     }).catch(e=>{this.ac = false})
-        // },
+        debounce(fn, delay) {
+          let timeoutId;
+          return (...args) => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+              fn.apply(this, args);
+            }, delay);
+          };
+        },
         getIcon(key) {
           if (key === 'to') return 'fa-at';
           return '';
@@ -177,6 +181,11 @@ export default {
         }
         return true;
       }
+    },
+    created() {
+      this.debouncedValidateField = this.debounce((key) => {
+        this.validateField(key);
+      }, 300);
     },
     mounted() {
       const feature = this.tokenprotocol.features[this.func]
