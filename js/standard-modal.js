@@ -48,7 +48,7 @@ export default {
               </span>
             </label>
             <div class="position-relative">
-              <span v-if="pfp[key]" class="position-absolute top-50 translate-middle-y mx-1 bg-light rounded-circle" :class="{'bg-warning': !validations[key],'bg-success': validations[key]}">
+              <span v-if="pfp[key]" class="position-absolute top-50 translate-middle-y mx-1 rounded-circle" :class="{'bg-warning': !validations[key],'bg-success': validations[key]}">
   <img :src="pfp[key]" alt="Recipient Profile Picture" onerror="this.src='/img/no-user.png'" style="width: 30px; height: 30px; border-radius: 50%;">
 </span>
               <input
