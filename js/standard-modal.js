@@ -148,11 +148,11 @@ export default {
                 else this.pfp[key] = result
               } else {
                   
-                this.pfp[key] = null;
+                this.pfp[key] = '/img/no-user.png'
               }
             }).catch(() => {
               this.validations[key] = false;
-              this.pfp[key] = null;
+              this.pfp[key] = '/img/no-user.png'
             });
           }
         }
