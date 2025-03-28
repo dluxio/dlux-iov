@@ -33,7 +33,7 @@ export default {
           <label class="small mb-1" for="from">From</label>
           <div class="position-relative mb-3">
           <span class="position-absolute top-50 translate-middle-y mx-1 rounded-circle bg-light " style="border-style: solid; border-size: 2px; border-color:rgb(78, 78, 78)">
-  <img :src="mypfp" alt="My pfp" onerror="this.src='/img/no-user.png'" style="width: 30px; height: 30px; border-radius: 50%;">
+  <img :src="mypfp" alt="My pfp" @error="fallBackIMG($event, account)" style="width: 30px; height: 30px; border-radius: 50%;">
 </span>
 
             <input class="ps-4 form-control bg-dark border-dark" type="text" :value="account" readonly placeholder="Please login">
@@ -54,7 +54,7 @@ export default {
       'border-color': !form[key] ? 'rgb(255, 255, 255)' : validations[key] ? 'rgb(0, 255, 0)' : 'rgb(255, 0, 0)',
       'border-width': '2px',
       'border-style': 'solid'
-    }"><img :src="pfp[key]" alt="Recipient Profile Picture" onerror="this.src='/img/no-user.png'" style="width: 30px; height: 30px; border-radius: 50%;">
+    }"><img :src="pfp[key]" alt="Recipient Profile Picture" @error="fallBackIMG($event, form[key])" style="width: 30px; height: 30px; border-radius: 50%;">
 </span>
               <input
                 :type="getInputType(field.type)"
@@ -108,6 +108,10 @@ export default {
               fn.apply(this, args);
             }, delay);
           };
+        },
+        fallBackIMG(event, string){
+          console.log(event)
+          event.target.src = 'https://images.hive.blog/u/' + string + '/avatar'
         },
         getIcon(key) {
           if (key === 'to') return 'fa-at';
