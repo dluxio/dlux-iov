@@ -367,70 +367,46 @@ export class StateManager {
    * @param {HTMLElement} scene - The A-Frame scene element
    */
   initState(scene) {
-    console.log('Initializing state with scene...');
-    
-    if (!scene) {
-      console.error('No scene found during state initialization');
-      return this.state;
+    // Get or create state manager
+    if (!window.stateManager) {
+        window.stateManager = new StateManager();
     }
-    
-    // Get all entities with data-entity-uuid
-    const entityElements = scene.querySelectorAll('[data-entity-uuid]');
-    
-    // If no entities found, create default scene
-    if (entityElements.length === 0) {
-      console.log('No entities found, creating default scene');
-      const defaultState = generateInitialState();
-      
-      // Create DOM elements for default entities
-      Object.entries(defaultState.entities).forEach(([uuid, entityData]) => {
-        const element = this.createEntityElement(entityData);
-        if (element) {
-          scene.appendChild(element);
-          entityData.DOM = true;
-        }
-      });
-      
-      // Update state with default entities
-      this.state.entities = defaultState.entities;
-      this.state.entityMapping = defaultState.entityMapping;
-    } else {
-      // Process existing entities
-      const entities = {};
-      const entityMapping = {};
-      
-      entityElements.forEach(element => {
-        const uuid = element.getAttribute('data-entity-uuid');
-        if (!uuid) return;
-        
-        const id = element.id;
-        if (!id) return;
-        
-        // Update mapping
-        entityMapping[id] = uuid;
-        
-        // Extract entity data
-        const type = element.tagName.toLowerCase().replace('a-', '');
-        const properties = extractEntityAttributes(element, type);
-        
-        // Add to entities object with DOM flag
-        entities[uuid] = {
-          type,
-          ...properties,
-          uuid,
-          DOM: true
-        };
-      });
-      
-      // Update state with found entities
-      this.state.entities = entities;
-      this.state.entityMapping = entityMapping;
+
+    // Initialize sky if it doesn't exist
+    const state = window.stateManager.getState();
+    if (!state.sky) {
+        window.stateManager.updateState({
+            sky: {
+                type: 'color',
+                data: { color: DEFAULT_SKY_COLOR },
+                uuid: 'sky-entity-1'
+            }
+        }, 'state-init');
     }
-    
-    // Log the state for debugging
-    console.log('Initialized state:', this.state);
-    
-    return this.state;
+
+    // Initialize environment if it doesn't exist
+    if (!state.environment) {
+        window.stateManager.updateState({
+            environment: {
+                sky: state.sky || {
+                    type: 'color',
+                    data: { color: DEFAULT_SKY_COLOR },
+                    uuid: 'sky-entity-1'
+                }
+            }
+        }, 'state-init');
+    }
+
+    // Ensure sky exists in scene
+    let skyEntity = scene.querySelector('a-sky');
+    if (!skyEntity) {
+        skyEntity = document.createElement('a-sky');
+        skyEntity.id = 'sky';
+        skyEntity.setAttribute('color', DEFAULT_SKY_COLOR);
+        scene.appendChild(skyEntity);
+    }
+
+    return window.stateManager;
   }
 
   /**

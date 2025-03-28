@@ -71,6 +71,43 @@ if (typeof window !== 'undefined') {
   window.watcher = window.watcher || {};
 }
 
+/**
+ * Set up watcher methods on the global watcher object
+ */
+export function setupWatcherMethods() {
+    console.log('[Watcher] Setting up watcher methods');
+    
+    // Set up start method
+    window.watcher.start = function() {
+        console.log('[Watcher] Starting watcher system...');
+        
+        // Set up mutation observer for scene changes
+        setupSceneObserver();
+        
+        // Set up A-Frame hooks
+        setupAFrameHooks();
+        
+        // Set up inspector detection
+        setupInspectorDetection();
+        
+        console.log('[Watcher] Watcher system started successfully');
+        
+        // Initial state capture
+        setTimeout(() => {
+            console.log('[Watcher] Performing initial state capture');
+            saveEntitiesToState('watcher-start');
+        }, 1000);
+        
+        return this;
+    };
+    
+    // Set up other methods
+    window.watcher.saveEntitiesToState = saveEntitiesToState;
+    window.watcher.setupSceneObserver = setupSceneObserver;
+    window.watcher.setupAFrameHooks = setupAFrameHooks;
+    window.watcher.setupInspectorDetection = setupInspectorDetection;
+}
+
 // Initialize the A-Frame entity watcher component
 if (window.AFRAME) {
   // Register the entity-watcher component
@@ -84,11 +121,22 @@ if (window.AFRAME) {
       this.lastCheck = Date.now();
       this.isInitialized = false;
       
-      // Wait a bit for entity to be fully initialized
-      setTimeout(() => {
-        this.captureBaseline();
-        this.isInitialized = true;
-      }, 100);
+      // Wait for entity to be fully initialized and scene to be ready
+      if (document.querySelector('a-scene').hasLoaded) {
+        // Add a small delay to ensure entity is fully initialized
+        setTimeout(() => {
+          this.captureBaseline();
+          this.isInitialized = true;
+        }, 100);
+      } else {
+        document.querySelector('a-scene').addEventListener('loaded', () => {
+          // Add a small delay to ensure entity is fully initialized
+          setTimeout(() => {
+            this.captureBaseline();
+            this.isInitialized = true;
+          }, 100);
+        });
+      }
     },
     
     update: function(oldData) {
@@ -97,7 +145,7 @@ if (window.AFRAME) {
       
       // Skip too frequent updates during initialization
       const now = Date.now();
-      if (now - this.lastCheck < 50) return;
+      if (now - this.lastCheck < 100) return;
       this.lastCheck = now;
       
       // Skip if this is a system entity
@@ -105,10 +153,10 @@ if (window.AFRAME) {
       
       // Detect changes
       if (this.hasComponentChanges()) {
-        // Trigger save with a source that identifies this component
-        throttledSaveChanges(`entity-component-update:${this.el.id || 'unnamed'}`);
-        // Update baseline
+        // Update baseline first to prevent continuous detection
         this.captureBaseline();
+        // Then trigger save
+        throttledSaveChanges(`entity-component-update:${this.el.id || 'unnamed'}`);
       }
     },
     
@@ -134,16 +182,14 @@ if (window.AFRAME) {
       // Store original data for each component
       this.originalData = {};
       componentNames.forEach(name => {
-        // Skip the watcher itself
-        if (name === 'entity-watcher') return;
-        
-        // Skip raycaster and cursor
-        if (name === 'raycaster' || name === 'cursor') return;
+        // Skip the watcher itself and system components
+        if (name === 'entity-watcher' || SYSTEM_COMPONENTS.includes(name)) return;
         
         // Store component data
         const comp = this.el.components[name];
         if (comp) {
-          this.originalData[name] = { ...comp.data };
+          // Deep clone the data to avoid reference issues
+          this.originalData[name] = JSON.parse(JSON.stringify(comp.data));
         }
       });
     },
@@ -160,11 +206,8 @@ if (window.AFRAME) {
       
       // Check for new components first
       for (const name of componentNames) {
-        // Skip the watcher itself
-        if (name === 'entity-watcher') continue;
-        
-        // Skip raycaster and cursor
-        if (name === 'raycaster' || name === 'cursor') continue;
+        // Skip the watcher itself and system components
+        if (name === 'entity-watcher' || SYSTEM_COMPONENTS.includes(name)) continue;
         
         // If component wasn't in original data, it's new
         if (!this.originalData.hasOwnProperty(name)) {
@@ -193,36 +236,33 @@ if (window.AFRAME) {
           const newData = comp.data;
           const oldData = this.originalData[name];
           
-          // Check if vector has changed significantly
+          // Check if vector has changed significantly (using a larger threshold)
           const hasSignificantChange = ['x', 'y', 'z'].some(axis => {
-            return Math.abs((newData[axis] || 0) - (oldData[axis] || 0)) > 0.0001;
+            return Math.abs((newData[axis] || 0) - (oldData[axis] || 0)) > 0.01;
           });
           
           if (hasSignificantChange) {
             if (config.debugMode) {
-              console.log(`[Watcher] Transformation changed on ${this.el.id || 'unnamed'}`);
+              console.log(`[Watcher] Significant ${name} change detected on ${this.el.id || 'unnamed'}`);
             }
             return true;
           }
-          
           continue;
         }
         
-        // For other components, just check if data changed
+        // For other components, do a deep comparison
         try {
-          const oldJSON = JSON.stringify(this.originalData[name]);
           const newJSON = JSON.stringify(comp.data);
-          
-          if (oldJSON !== newJSON) {
+          const oldJSON = JSON.stringify(this.originalData[name]);
+          if (newJSON !== oldJSON) {
             if (config.debugMode) {
-              console.log(`[Watcher] Component changed: ${name} on ${this.el.id || 'unnamed'}`);
+              console.log(`[Watcher] Component ${name} changed on ${this.el.id || 'unnamed'}`);
             }
             return true;
           }
         } catch (e) {
-          // For components we can't compare with JSON, assume they changed
-          console.warn(`[Watcher] Cannot compare ${name} data, assuming changed`, e);
-          return true;
+          // If we can't compare, assume no change
+          console.warn(`[Watcher] Could not compare ${name} data, assuming no change`, e);
         }
       }
       
@@ -338,168 +378,86 @@ function setupAFrameEventListeners() {
  * Create the watcher panel UI
  */
 function createWatcherPanel() {
-  if (document.getElementById(PANEL_ID)) {
-    return; // Panel already exists
-  }
-  
-  // Create panel
-  watcherPanel = document.createElement('div');
-  watcherPanel.id = PANEL_ID;
-  watcherPanel.className = 'watcher-panel';
-  
-  // Add content
-  watcherPanel.innerHTML = `
-    <style>
-      .watcher-panel {
-        position: fixed;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(20, 20, 30, 0.85);
-        color: white;
-        padding: 10px 15px;
-        border-radius: 5px;
-        font-family: Arial, sans-serif;
-        font-size: 12px;
-        z-index: 999;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        pointer-events: all;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
-        transition: background 0.3s ease, transform 0.2s ease;
-        min-width: 250px;
-        backdrop-filter: blur(2px);
-        animation: fadeIn 0.5s ease-out;
-      }
-      .watcher-panel:hover {
-        background: rgba(0, 0, 0, 0.8);
-      }
-      .watcher-panel.watcher-saving {
-        background: rgba(255, 152, 0, 0.7);
-      }
-      .watcher-panel.watcher-saved {
-        background: rgba(76, 175, 80, 0.7);
-      }
-      .watcher-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        padding-bottom: 6px;
-        font-weight: bold;
-      }
-      .watcher-content {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
-      .watcher-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-      }
-      .watcher-label {
-        opacity: 0.8;
-      }
-      .watcher-value {
-        font-weight: bold;
-      }
-      .watcher-status {
-        padding: 2px 6px;
-        border-radius: 3px;
-        font-size: 11px;
-        text-align: center;
-        transition: all 0.2s ease;
-      }
-      .status-info {
-        background: rgba(33, 150, 243, 0.3);
-      }
-      .status-error {
-        background: rgba(244, 67, 54, 0.3);
-      }
-      .status-saving {
-        background: rgba(255, 152, 0, 0.3);
-        animation: pulse 1s infinite;
-      }
-      .status-saved {
-        background: rgba(76, 175, 80, 0.3);
-      }
-      .status-flash {
-        animation: flash 0.5s;
-      }
-      .watcher-save-button {
-        background: rgba(33, 150, 243, 0.5);
-        border: none;
-        color: white;
-        padding: 6px 12px;
-        border-radius: 3px;
-        cursor: pointer;
-        font-size: 12px;
-        font-weight: bold;
-        transition: background 0.2s ease;
-        display: block;
-        width: 100%;
-        margin-top: 4px;
-      }
-      .watcher-save-button:hover {
-        background: rgba(33, 150, 243, 0.8);
-      }
-      @keyframes pulse {
-        0% { opacity: 1; }
-        50% { opacity: 0.7; }
-        100% { opacity: 1; }
-      }
-      @keyframes flash {
-        0% { background: rgba(76, 175, 80, 0.8); }
-        100% { background: rgba(76, 175, 80, 0.3); }
-      }
-      @keyframes fadeIn {
-        0% { opacity: 0; transform: translateY(10px) translateX(-50%); }
-        100% { opacity: 1; transform: translateY(0) translateX(-50%); }
-      }
-    </style>
-    <div class="watcher-header">
-      <span>Scene Watcher</span>
-      <span class="watcher-status status-info">Ready</span>
-    </div>
-    <div class="watcher-content">
-      <div class="watcher-row">
-        <span class="watcher-label">Entities:</span>
-        <span id="watcher-entity-count" class="watcher-value">0</span>
-      </div>
-      <div class="watcher-row">
-        <span class="watcher-label">Last update:</span>
-        <span id="watcher-last-update" class="watcher-value">-</span>
-      </div>
-      <div class="watcher-row" style="justify-content: center; margin-top: 4px;">
-        <button id="watcher-save-button" class="watcher-save-button">Save Now</button>
-        <button id="debug-panel-toggle" class="watcher-save-button" style="margin-left: 8px;">Debug State</button>
-      </div>
-    </div>
-  `;
-  
-  // Add to body
-  document.body.appendChild(watcherPanel);
-  
-  // Get references to elements
-  statusEl = document.querySelector('.watcher-status');
-  entityCountEl = document.getElementById('watcher-entity-count');
-  lastUpdateEl = document.getElementById('watcher-last-update');
-  saveButton = document.getElementById('watcher-save-button');
-  
-  // Add event listener to save button
-  saveButton.addEventListener('click', onSaveButtonClick);
-  
-  // Add event listener for debug panel toggle
-  const debugToggleButton = document.getElementById('debug-panel-toggle');
-  debugToggleButton.addEventListener('click', () => {
-    document.dispatchEvent(new CustomEvent('toggle-debug-panel'));
-  });
-  
-  console.log('[Watcher] Panel created');
-  
-  return watcherPanel;
+    if (document.getElementById(PANEL_ID)) {
+        return; // Panel already exists
+    }
+    
+    // Create panel
+    watcherPanel = document.createElement('div');
+    watcherPanel.id = PANEL_ID;
+    watcherPanel.className = 'window';
+    
+    // Add content
+    watcherPanel.innerHTML = `
+        <div class="window-header">
+            <span class="window-title">Scene Watcher</span>
+            <div class="window-controls">
+                <button class="window-btn minimize-btn">_</button>
+                <button class="window-btn maximize-btn">□</button>
+                <button class="window-btn close-btn">×</button>
+            </div>
+        </div>
+        
+        <div class="window-content">
+            <div class="watcher-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Entities</div>
+                    <div class="stat-value" id="entity-count">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Changes</div>
+                    <div class="stat-value" id="changes-count">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Last Update</div>
+                    <div class="stat-value" id="last-update">Never</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Status</div>
+                    <div class="stat-value" id="watcher-status">Ready</div>
+                </div>
+            </div>
+            
+            <div class="watcher-actions">
+                <button class="watcher-btn save" id="save-changes">Save Changes</button>
+                <button class="watcher-btn" id="toggle-debug">Debug</button>
+            </div>
+        </div>
+        
+        <div class="resize-handle right"></div>
+        <div class="resize-handle bottom"></div>
+        <div class="resize-handle corner"></div>
+    `;
+    
+    // Add to document
+    document.body.appendChild(watcherPanel);
+    
+    // Get references to elements
+    statusEl = watcherPanel.querySelector('#watcher-status');
+    entityCountEl = watcherPanel.querySelector('#entity-count');
+    lastUpdateEl = watcherPanel.querySelector('#last-update');
+    saveButton = watcherPanel.querySelector('#save-changes');
+    
+    // Add event listeners
+    saveButton.addEventListener('click', () => {
+        saveEntitiesToState('manual-save');
+    });
+    
+    watcherPanel.querySelector('#toggle-debug').addEventListener('click', () => {
+        document.dispatchEvent(new CustomEvent('toggle-debug-panel'));
+    });
+    
+    // Add watcher-active class by default
+    watcherPanel.classList.add('watcher-active');
+
+    // Initialize draggable functionality after a small delay to ensure DOM is ready
+    setTimeout(() => {
+        import('./draggable.js').then(module => {
+            module.initDraggable(watcherPanel);
+        });
+    }, 0);
+    
+    console.log('[Watcher] Panel created');
 }
 
 /**
@@ -514,154 +472,16 @@ function setupAFrameHooks() {
   }
 
   try {
-    // 1. Create a component that will be added to every entity to track changes
-    AFRAME.registerComponent('entity-watcher', {
-      schema: { type: 'string' }, // Simple schema, not actually used
-      
-      init: function() {
-        this.originalComponents = this.captureCurrentComponents();
-        this.lastUpdated = Date.now();
-        
-        // Make sure the entity has a unique identifier
-        this.ensureEntityHasUUID();
-        
-        // Register this entity
-        registerEntity(this.el);
-        
-        // Log the initialization
-        if (config.debugMode) {
-          console.log('[Watcher] Entity initialized:', this.getEntityInfo());
-        }
-      },
-      
-      update: function() {
-        const entityId = this.el.id || this.el.getAttribute('data-entity-uuid');
-        
-        // Skip updates for system entities
-        if (isSystemEntity(this.el)) return;
-        
-        // Check if components have changed
-        const currentComponents = this.captureCurrentComponents();
-        const hasChanged = this.haveComponentsChanged(currentComponents);
-        
-        if (hasChanged) {
-          this.lastUpdated = Date.now();
-          throttledSaveChanges('component-update-' + entityId);
-          
-          // Update our record of components
-          this.originalComponents = currentComponents;
-          
-          if (config.debugMode) {
-            console.log('[Watcher] Entity updated:', this.getEntityInfo());
-          }
-        }
-      },
-      
-      remove: function() {
-        const entityId = this.el.id || this.el.getAttribute('data-entity-uuid');
-        
-        // Skip for system entities
-        if (isSystemEntity(this.el)) return;
-        
-        // Remove this entity from the registry
-        unregisterEntity(this.el);
-        
-        // Trigger a save when an entity is removed
-        throttledSaveChanges('entity-removed-' + entityId);
-        
-        if (config.debugMode) {
-          console.log('[Watcher] Entity removed:', this.getEntityInfo());
-        }
-      },
-      
-      // Helper function to ensure the entity has a UUID
-      ensureEntityHasUUID: function() {
-        if (!this.el.id && !this.el.hasAttribute('data-entity-uuid')) {
-          // Generate a UUID
-          const uuid = 'entity-' + Math.random().toString(36).substring(2, 10);
-          this.el.setAttribute('data-entity-uuid', uuid);
-        }
-      },
-      
-      // Helper function to capture the current state of all components
-      captureCurrentComponents: function() {
-        const components = {};
-        
-        // Get all component names from the entity
-        for (const name in this.el.components) {
-          // Skip the entity-watcher component and system components
-          if (name === 'entity-watcher' || 
-              name === 'raycaster' || 
-              name === 'cursor' ||
-              name === 'look-controls') {
-            continue;
-          }
-          
-          // Try to get the component data
-          try {
-            const comp = this.el.components[name];
-            if (comp && comp.data) {
-              // For object data, we need to clone to avoid reference issues
-              if (typeof comp.data === 'object') {
-                components[name] = JSON.stringify(comp.data);
-              } else {
-                components[name] = comp.data;
-              }
-            }
-          } catch (e) {
-            console.warn('[Watcher] Error capturing component:', name, e);
-          }
-        }
-        
-        return components;
-      },
-      
-      // Helper function to check if components have changed
-      haveComponentsChanged: function(newComponents) {
-        // First check if the number of components is different
-        if (Object.keys(this.originalComponents).length !== Object.keys(newComponents).length) {
-          return true;
-        }
-        
-        // Check each component for changes
-        for (const name in newComponents) {
-          // If component didn't exist before or has changed
-          if (!(name in this.originalComponents) || 
-              newComponents[name] !== this.originalComponents[name]) {
-            return true;
-          }
-        }
-        
-        // Check for removed components
-        for (const name in this.originalComponents) {
-          if (!(name in newComponents)) {
-            return true;
-          }
-        }
-        
-        return false;
-      },
-      
-      // Helper function to get entity info for logging
-      getEntityInfo: function() {
-        return {
-          id: this.el.id || this.el.getAttribute('data-entity-uuid'),
-          tagName: this.el.tagName.toLowerCase(),
-          componentCount: Object.keys(this.originalComponents).length
-        };
-      }
-    });
-    
-    // 2. Hook into scene loading to add the entity-watcher component to all entities
+    // 1. Hook into scene loading to add the entity-watcher component to all entities
     setupSceneLoadedHook();
     
-    // 3. Hook into scene's entity added events
+    // 2. Hook into scene's entity added events
     setupEntityAddedHook();
     
-    // 4. Register a DOM observer to catch changes that happen outside A-Frame's component system
+    // 3. Register a DOM observer to catch changes that happen outside A-Frame's component system
     setupSceneObserver();
     
-    // 5. Hook into A-Frame's component definitions to catch all component updates
+    // 4. Hook into A-Frame's component definitions to catch all component updates
     setupComponentHooks();
     
     console.log('[Watcher] A-Frame hooks successfully set up');
@@ -1121,7 +941,7 @@ function captureEntityBaseline() {
   // Trigger save after baseline capture to ensure state is updated
   setTimeout(() => {
     captureAndSaveChanges('baseline-capture');
-  }, 200);
+  }, 500); // Increased from 200ms to 500ms
 }
 
 /**
@@ -1271,6 +1091,9 @@ function watchInspectorGizmos() {
  * @param {string} source - Source of the changes
  */
 function throttledSaveChanges(source = 'unknown') {
+  // Skip if we're still initializing
+  if (!document.querySelector('a-scene').hasLoaded) return;
+  
   changesPending = true;
   updateStatus('Changes detected...', 'saving');
   
@@ -1284,11 +1107,19 @@ function throttledSaveChanges(source = 'unknown') {
   
   const now = Date.now();
   const delay = now - lastSaveTime > THROTTLE_TIME * 2 ? 
-    Math.min(300, config.autoSaveDelay) : config.autoSaveDelay;
+    Math.min(500, config.autoSaveDelay) : config.autoSaveDelay;
   
   window._watcherSaveTimeout = setTimeout(() => {
     if (changesPending) {
       captureAndSaveChanges(source);
+      // Update status after save
+      updateStatus('Changes saved', 'saved');
+      changesPending = false;
+      
+      // After a short delay, return to ready state
+      setTimeout(() => {
+        updateStatus('Ready', 'info');
+      }, 2000);
     }
   }, delay);
   
@@ -1729,21 +1560,6 @@ const entityWatcher = new EntityWatcher();
 export function startWatcher() {
     console.log('[Watcher] Starting watcher system...');
     
-    // Initialize the watcher if not already done
-    if (!window.watcher) {
-        console.log('[Watcher] Creating new watcher instance');
-        window.watcher = new EntityWatcher();
-    }
-    
-    // Ensure watcher methods are available
-    if (!window.watcher.saveEntitiesToState) {
-        console.log('[Watcher] Setting up watcher methods');
-        window.watcher.saveEntitiesToState = saveEntitiesToState;
-    }
-    
-    // Start the watcher
-    window.watcher.start();
-    
     // Set up mutation observer for scene changes
     setupSceneObserver();
     
@@ -1752,6 +1568,26 @@ export function startWatcher() {
     
     // Set up inspector detection
     setupInspectorDetection();
+    
+    // Set up global watcher object
+    window.watcher = {
+        start: function() {
+            console.log('[Watcher] Starting watcher instance...');
+            // Start the entity watcher
+            entityWatcher.start();
+            return this;
+        },
+        stop: function() {
+            console.log('[Watcher] Stopping watcher instance...');
+            // Stop the entity watcher
+            entityWatcher.stop();
+            return this;
+        },
+        saveEntitiesToState: saveEntitiesToState,
+        capture: captureEntityBaseline,
+        checkInspectorState: checkInspectorState,
+        config: config
+    };
     
     console.log('[Watcher] Watcher system started successfully');
     

@@ -45,7 +45,7 @@ export function initUI() {
     addTorusBtn = document.getElementById('add-torus');
     addDodecahedronBtn = document.getElementById('add-dodecahedron');
     openInspectorBtn = document.getElementById('open-inspector');
-    saveCodeBtn = document.getElementById('save-code-btn');
+    saveCodeBtn = document.getElementById('apply-changes');
     editorStatus = document.getElementById('editor-status');
     cameraSelector = document.getElementById('camera-selector');
     createRandomSceneBtn = document.getElementById('create-random-scene');
@@ -159,19 +159,34 @@ export function initUI() {
     
     // Create random scene button
     if (createRandomSceneBtn) {
-        createRandomSceneBtn.addEventListener('click', () => {
+        createRandomSceneBtn.addEventListener('click', async () => {
             console.log('Create random scene button clicked');
             
-            // Import main module to access createRandomScene function
-            import('./main.js').then(main => {
-                if (main.createRandomScene) {
-                    main.createRandomScene();
-                } else {
-                    console.error('createRandomScene function not found in main module');
-                }
-            }).catch(err => {
-                console.error('Error importing main module:', err);
-            });
+            // Import the entity API module
+            const entityApi = await import('./entity-api.js');
+            
+            // Create a mix of different entities
+            const entities = [
+                { type: 'box', count: 3 },
+                { type: 'sphere', count: 2 },
+                { type: 'cylinder', count: 2 },
+                { type: 'torus', count: 2 },
+                { type: 'dodecahedron', count: 1 }
+            ];
+            
+            // Add each group of entities
+            for (const entity of entities) {
+                await entityApi.addMultipleEntities(entity.type, entity.count, {
+                    positionOptions: {
+                        minX: -5,
+                        maxX: 5,
+                        minY: 0,
+                        maxY: 3,
+                        minZ: -5,
+                        maxZ: -3
+                    }
+                });
+            }
         });
     }
     

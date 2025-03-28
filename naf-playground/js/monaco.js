@@ -352,35 +352,37 @@ function createEditor(callback) {
         }
         
         // Create the editor
-        try {
-            editor = monaco.editor.create(editorContainer, {
-                value: sceneHTML,
-                language: 'html',
-                theme: 'vs-dark',
-                automaticLayout: true,
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                lineNumbers: 'on'
-            });
-            
-            // Setup editor events
-            setupEditorEvents();
-            
-            console.log('Monaco editor created successfully');
-            
-            // Call success callback
-            if (callback) callback(true);
-        } catch (editorError) {
-            console.error('Error creating Monaco editor instance, falling back to textarea:', editorError);
-            
-            // Try the fallback
-            const fallbackCreated = createFallbackTextarea(sceneHTML);
-            if (fallbackCreated) {
-                if (callback) callback(true);
-            } else {
-                if (callback) callback(false, editorError);
-            }
-        }
+        editor = monaco.editor.create(editorContainer, {
+            value: sceneHTML,
+            language: 'html',
+            theme: 'vs-dark',
+            automaticLayout: true,
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            fontSize: 14,
+            lineNumbers: 'on',
+            roundedSelection: false,
+            scrollbar: {
+                vertical: 'visible',
+                horizontal: 'visible'
+            },
+            fixedOverflowWidgets: true,
+            height: '100%',
+            width: '100%'
+        });
+        
+        // Force a resize after a short delay
+        setTimeout(() => {
+            editor.layout();
+        }, 100);
+        
+        // Setup editor events
+        setupEditorEvents();
+        
+        console.log('Monaco editor created successfully');
+        
+        // Call success callback
+        if (callback) callback(true);
     } catch (error) {
         console.error('Error in createEditor:', error);
         
