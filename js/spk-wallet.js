@@ -98,10 +98,10 @@ export default {
                                 aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
                                 aria-labelledby="btnGroupDrop1">
-                                <modal-vue type="power" token="SPK" :test="test"
-                                    func="Power Up" :balance="saccountapi.spk"
-                                    :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
+                                <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="powup" token="spk" :test="test"
+                                :tokenuser="saccountapi" :account="account"
+                                :tokenprotocol="protocolspk"
+                                @modalsign="sendIt($event)" v-slot:trigger>
                                     <button class="dropdown-item trigger"
                                         type="button"><i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
                                 </modal-vue>
