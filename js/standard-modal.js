@@ -32,12 +32,10 @@ export default {
           <!-- From Field (Static) -->
           <label class="small mb-1" for="from">From</label>
           <div class="position-relative mb-3">
-          <span class="position-absolute top-50 translate-middle-y mx-1 rounded-circle bg-light">
+          <span class="position-absolute top-50 translate-middle-y mx-1 rounded-circle bg-light " style="border-style: solid; border-size: 2px; border-color:rgb(78, 78, 78)">
   <img :src="mypfp" alt="My pfp" onerror="this.src='/img/no-user.png'" style="width: 30px; height: 30px; border-radius: 50%;">
 </span>
-            <span class="position-absolute top-50 translate-middle-y ps-2">
-              <i class="fa-solid fa-at fa-fw"></i>
-            </span>
+
             <input class="ps-4 form-control bg-dark border-dark" type="text" :value="account" readonly placeholder="Please login">
           </div>
 
@@ -52,8 +50,11 @@ export default {
               </span>
             </label>
             <div class="position-relative">
-              <span v-if="pfp[key]" class="position-absolute top-50 translate-middle-y mx-1 rounded-circle" :class="{'bg-warning': !validations[key],'bg-success': validations[key], 'bg-light': !form[key]}">
-  <img :src="pfp[key]" alt="Recipient Profile Picture" onerror="this.src='/img/no-user.png'" style="width: 30px; height: 30px; border-radius: 50%;">
+              <span v-if="pfp[key]" class="position-absolute top-50 translate-middle-y mx-1 rounded-circle bg-light" :style="{
+      'border-color': !form[key] ? 'rgb(255, 255, 255)' : validations[key] ? 'rgb(0, 255, 0)' : 'rgb(255, 0, 0)',
+      'border-width': '2px',
+      'border-style': 'solid'
+    }"><img :src="pfp[key]" alt="Recipient Profile Picture" onerror="this.src='/img/no-user.png'" style="width: 30px; height: 30px; border-radius: 50%;">
 </span>
               <input
                 :type="getInputType(field.type)"
