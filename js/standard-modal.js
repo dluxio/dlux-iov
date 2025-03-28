@@ -38,7 +38,7 @@ export default {
           </div>
 
           <!-- Dynamic Fields -->
-          <div v-for="(field, key) in feat?.json_req" :key="key" class="mb-3">
+          <div v-for="(field, key) in feat.json" :key="key" class="mb-3">
             <label class="small mb-1 d-flex" :for="key">
               {{ field.string }}
               <span v-if="key === 'amount'" class="ms-auto">
@@ -48,8 +48,8 @@ export default {
               </span>
             </label>
             <div class="position-relative">
-              <div v-if="feat[key].profilePicUrl" class="mt-2">
-  <img :src="feat[key].profilePicUrl" alt="Recipient Profile Picture" style="width: 50px; height: 50px; border-radius: 50%;">
+              <div v-if="pfp[key]" class="mt-2">
+  <img :src="pfp[key]" alt="Recipient Profile Picture" style="width: 50px; height: 50px; border-radius: 50%;">
 </div>
               <input
                 :type="getInputType(field.type)"
@@ -85,6 +85,7 @@ export default {
             error: "",
             feat: {},
             form: {},
+            pfp: {},
             testTx: false,
             valid: false,
             validations: {}
@@ -93,12 +94,15 @@ export default {
     methods: {
         ...MCommon,
         ...MModals,
-        AC(){
-            this.apiSelector(0)
-            this.accountCheck(this.to).then(r=>{
-                this.ac = r
-                if(this.amount)this.valid = true
-            }).catch(e=>{this.ac = false})
+        // AC(key){
+        //     this.accountCheck(this.to).then(r=>{
+        //         this.ac = r
+        //         if(this.amount)this.valid = true
+        //     }).catch(e=>{this.ac = false})
+        // },
+        getIcon(key) {
+          if (key === 'to') return 'fa-at';
+          return '';
         },
         isValid(){
             if(this.ac)this.valid = true
@@ -117,6 +121,7 @@ export default {
             op.ops = ['getHiveUser'];
           } else {
             op.type = this.feat.auth === "posting" ? 'cj' : 'cja';
+            op.cj = {}
             for (const key in this.form) {
               if (key === 'amount') {
                 op.cj[key] = parseInt(parseFloat(this.form[key]) * this.pf(this.tokenprotocol.precision));
@@ -132,13 +137,30 @@ export default {
           }
             this.$emit('modalsign', op)
 
+        },
+        validateField(key) {
+          const field = this.feat.json[key];
+          if (field.check === 'AC') {
+            this.accountCheck(this.form[key]).then(result => {
+              if (result) {
+                this.validations[key] = true;
+                this.pfp[key] = result; // Store URL for UI
+              } else {
+                this.validations[key] = false;
+                this.profilePicUrl = null;
+              }
+            }).catch(() => {
+              this.validations[key] = false;
+              this.pfp[key] = '/img/no-user.png';
+            });
+          }
         }
     },
     computed: {
       isFormValid() {
-        if (!this.feat || !this.feat.json_req) return false;
-        for (const key in this.feat.json_req) {
-          const field = this.feat.json_req[key];
+        if (!this.feat || !this.feat.json) return false;
+        for (const key in this.feat.json) {
+          const field = this.feat.json[key];
           if (field.req && !this.form[key]) return false;
           if (field.check === 'AC' && !this.validations[key]) return false;
         }
@@ -149,6 +171,9 @@ export default {
       const feature = this.tokenprotocol.features[this.func]
       if (feature) {
         this.feat = feature;
+        for (const key in feature.json) {
+          this.form[key]= ""
+        }
       } else {
         this.error = "Feature not found";
       }
