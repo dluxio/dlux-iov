@@ -144,14 +144,15 @@ export default {
             this.accountCheck(this.form[key]).then(result => {
               if (result) {
                 this.validations[key] = true;
-                this.pfp[key] = result; // Store URL for UI
+                if(result === true)this.pfp[key] = '/img/no-user.png'
+                else this.pfp[key] = result
               } else {
                 this.validations[key] = false;
                 this.pfp[key] = null;
               }
             }).catch(() => {
               this.validations[key] = false;
-              this.pfp[key] = '/img/no-user.png';
+              this.pfp[key] = null;
             });
           }
         }
