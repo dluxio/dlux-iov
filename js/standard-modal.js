@@ -32,7 +32,7 @@ export default {
           <!-- From Field (Static) -->
           <label class="small mb-1" for="from">From</label>
           <div class="position-relative mb-3">
-          <span class="position-absolute top-50 translate-middle-y mx-1 rounded-circle bg-light " style="border-style: solid; border-size: 2px; border-color:rgb(78, 78, 78)">
+          <span class="position-absolute top-50 translate-middle-y mx-1 rounded-circle bg-light " style="border-style: solid; border-width: 2px; border-color:rgb(255, 255, 255)">
   <img :src="mypfp" alt="My pfp" @error="fallBackIMG($event, account)" style="width: 30px; height: 30px; border-radius: 50%;">
 </span>
 
