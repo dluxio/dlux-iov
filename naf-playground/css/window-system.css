@@ -39,50 +39,83 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    cursor: move;
-    pointer-events: auto;
     border-bottom: 1px solid var(--window-border-color);
     user-select: none;
+    position: relative;
 }
 
+/* Make the title area draggable */
 .window-title {
     font-weight: bold;
     color: #4CAF50;
     user-select: none;
+    cursor: move;
+    flex: 1;
+    margin-right: 20px; /* Add space between title and controls */
+}
+
+/* Window Controls Container */
+.window-controls {
+    display: flex;
+    gap: 12.5px;
+    position: relative;
+    z-index: 2;
+    padding: 8px;
+    margin: -8px;
+    background: var(--window-header-bg);
+    height: 100%;
+
+    cursor: default;
+    align-items: center;
+    justify-content: center;
+/* Add minimum width to ensure proper centering */
 }
 
 /* Window Controls */
-.window-controls {
-    display: flex;
-    gap: 5px;
-    position: relative;
-    z-index: 2;
-}
-
 .window-btn {
-    width: 24px;
-    height: 24px;
+    width: 15px;
+    height: 15px;
     border: none;
-    background: transparent;
-    color: var(--window-text-color);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 4px;
+    border-radius: 50%;
     transition: all 0.2s ease;
     position: relative;
+    padding: 0;
+    margin: 0 3px;
 }
 
 .window-btn::before {
     font-family: "Font Awesome 6 Free";
     font-weight: 900;
-    font-size: 12px;
+    font-size: 8px;
     line-height: 1;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    color: #333; /* Dark color for icons */
+}
+
+/* Show icons when hovering over controls container */
+.window-controls:hover .window-btn::before {
+    opacity: 1;
 }
 
 .window-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.window-btn.minimize-btn {
+    background: #ffbd44;
+}
+
+.window-btn.maximize-btn {
+    background: #00ca56;
+}
+
+.window-btn.close-btn {
+    background: #ff605c;
 }
 
 .window-btn.minimize-btn::before {
@@ -681,4 +714,341 @@ body:not(.aframe-inspector-opened) .toggle-edit {
 /* Ensure the dropdown appears above other elements */
 #window-dock {
     z-index: 1001;
+}
+
+/* Add a specific namespace class to the app container */
+#app-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    font-size: 14px !important; /* Force base font size */
+}
+
+/* Make all window-related styles more specific */
+#app-container .window {
+    position: fixed;
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    min-width: 300px;
+    min-height: 200px;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+#app-container .window-header {
+    background: #2d2d2d;
+    padding: 8px 12px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+#app-container .window-title {
+    color: #fff;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+#app-container .window-content {
+    padding: 12px;
+    overflow: auto;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+/* Make dock styles more specific */
+#app-container #window-dock {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(30, 30, 30, 0.8);
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    gap: 8px;
+    backdrop-filter: blur(10px);
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+#app-container .dock-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(45, 45, 45, 0.8);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+/* Make dropdown styles more specific */
+#app-container .windows-dropdown {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: #2d2d2d;
+    border: 1px solid #333;
+    border-radius: 4px;
+    padding: 4px 0;
+    margin-bottom: 8px;
+    min-width: 150px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    display: none;
+    z-index: 1000;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+#app-container .dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    background: none;
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+/* Make button styles more specific */
+#app-container .entity-btn,
+#app-container .tool-btn {
+    padding: 8px 16px;
+    margin: 4px;
+    background: #2d2d2d;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+/* Make input styles more specific */
+#app-container input,
+#app-container select {
+    padding: 8px;
+    background: #2d2d2d;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+/* Make heading styles more specific */
+#app-container h2,
+#app-container h3 {
+    color: #fff;
+    margin: 0 0 12px 0;
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+}
+
+#app-container h3 {
+    font-size: 14px !important;
+}
+
+/* Make debug panel styles more specific */
+#app-container #debug-panel {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+#app-container #debug-panel div {
+    margin: 4px 0;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+/* Make watcher panel styles more specific */
+#app-container .watcher-stats {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+#app-container .stat-item {
+    margin: 8px 0;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+#app-container .stat-label {
+    color: #888;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+#app-container .stat-value {
+    color: #fff;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+/* Make editor styles more specific */
+#app-container .editor-controls {
+    margin-bottom: 8px;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+#app-container .editor-btn {
+    padding: 6px 12px;
+    background: #2d2d2d;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+#app-container .editor-status {
+    margin-left: 8px;
+    color: #888;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+/* Make network info styles more specific */
+#app-container .network-info {
+    margin-top: 12px;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+#app-container .network-connect {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+/* Make action history styles more specific */
+#app-container #action-history {
+    margin-top: 16px;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+#app-container #actions {
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+/* Make camera selector styles more specific */
+#app-container .camera-selector {
+    padding: 6px;
+    background: #2d2d2d;
+    border: 1px solid #333;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+}
+
+/* Keep existing hover and active states */
+#app-container .dock-icon:hover {
+    background: rgba(60, 60, 60, 0.8);
+}
+
+#app-container .dock-icon.active {
+    background: rgba(60, 60, 60, 0.8);
+}
+
+#app-container .dock-icon.active svg {
+    color: var(--primary-color);
+}
+
+#app-container .entity-btn:hover,
+#app-container .tool-btn:hover {
+    background: #3d3d3d;
+}
+
+#app-container .dropdown-item:hover {
+    background: #3d3d3d;
+}
+
+/* Keep existing transitions */
+#app-container .dock-icon,
+#app-container .entity-btn,
+#app-container .tool-btn,
+#app-container .dropdown-item {
+    transition: all 0.2s ease;
+}
+
+/* Keep existing window controls */
+#app-container .window-controls {
+    display: flex;
+    gap: 4px;
+}
+
+#app-container .window-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+}
+
+#app-container .minimize-btn {
+    background: #ffbd44;
+}
+
+#app-container .maximize-btn {
+    background: #00ca56;
+}
+
+#app-container .close-btn {
+    background: #ff605c;
+}
+
+/* Keep existing resize handles */
+#app-container .resize-handle {
+    position: absolute;
+    background: transparent;
+}
+
+#app-container .resize-handle.right {
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    cursor: ew-resize;
+}
+
+#app-container .resize-handle.bottom {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    cursor: ns-resize;
+}
+
+#app-container .resize-handle.corner {
+    right: 0;
+    bottom: 0;
+    width: 16px;
+    height: 16px;
+    cursor: se-resize;
 }
