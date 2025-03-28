@@ -1,10 +1,82 @@
 // Global z-index tracker and window management
 const WindowManager = {
-    highestZIndex: 1000,
+    // Base z-index values for different layers
+    Z_LAYERS: {
+        BACKGROUND: 1000,    // Base layer for all windows
+        NORMAL: 2000,        // Normal windows
+        FOCUSED: 3000,       // Currently focused window
+        MODAL: 4000,         // Modal dialogs/popups
+        OVERLAY: 5000        // Overlay elements (dropdowns, tooltips)
+    },
+    
+    // Window priorities within each layer
+    WINDOW_PRIORITIES: {
+        'ui-container': 1,
+        'editor-window': 2,
+        'state-debug-panel': 3,
+        'watcher-panel': 4
+    },
+    
+    // Default window positions and sizes
+    DEFAULT_POSITIONS: {
+        'ui-container': {
+            top: '20px',
+            left: '20px',
+            width: '300px',
+            height: '500px'
+        },
+        'editor-window': {
+            top: '20px',
+            left: '340px',
+            width: '1000px',
+            height: '400px'
+        },
+        'state-debug-panel': {
+            top: 'calc(50vh - 300px)',
+            right: '20px',
+            width: '300px',
+            height: '600px'
+        },
+        'watcher-panel': {
+            top: 'calc(100vh - 220px)',
+            left: '20px',
+            width: '300px',
+            height: '200px'
+        }
+    },
+    
     windows: new Set(),
     closedWindows: new Map(),
+    windowStates: new Map(),
+    windowIds: ['ui-container', 'editor-window', 'state-debug-panel', 'watcher-panel'],
+    activeWindow: null,
+    
+    /**
+     * Calculate z-index for a window based on its layer and priority
+     * @param {HTMLElement} element - The window element
+     * @param {boolean} isFocused - Whether the window is focused
+     * @returns {number} The calculated z-index
+     */
+    calculateZIndex(element, isFocused = false) {
+        const baseLayer = isFocused ? this.Z_LAYERS.FOCUSED : this.Z_LAYERS.NORMAL;
+        const priority = this.WINDOW_PRIORITIES[element.id] || 0;
+        return baseLayer + priority;
+    },
+    
+    /**
+     * Update z-index for all windows
+     */
+    updateAllZIndices() {
+        this.windows.forEach(win => {
+            const isFocused = win === this.activeWindow;
+            win.style.zIndex = this.calculateZIndex(win, isFocused);
+        });
+    },
     
     bringToFront(element) {
+        // Update active window
+        this.activeWindow = element;
+        
         // Remove active class from all windows
         this.windows.forEach(win => {
             win.classList.remove('active');
@@ -13,21 +85,21 @@ const WindowManager = {
         // Add active class to current window
         element.classList.add('active');
         
-        // Update global z-index
-        this.highestZIndex++;
-        element.style.zIndex = this.highestZIndex;
-        
-        // Force a reflow to ensure z-index is applied
-        element.offsetHeight;
+        // Update all z-indices
+        this.updateAllZIndices();
     },
     
     registerWindow(element) {
         this.windows.add(element);
-        element.style.zIndex = this.highestZIndex++;
+        this.updateAllZIndices();
     },
     
     unregisterWindow(element) {
         this.windows.delete(element);
+        if (this.activeWindow === element) {
+            this.activeWindow = null;
+        }
+        this.updateAllZIndices();
     },
 
     closeWindow(element) {
@@ -88,6 +160,119 @@ const WindowManager = {
         if (dockIcon) {
             dockIcon.classList.toggle('active', isVisible);
         }
+    },
+
+    hideAllWindows() {
+        this.windowIds.forEach(windowId => {
+            const element = document.getElementById(windowId);
+            if (element && element.style.display !== 'none') {
+                this.closeWindow(element);
+            }
+        });
+    },
+
+    showAllWindows() {
+        this.windowIds.forEach(windowId => {
+            const element = document.getElementById(windowId);
+            if (element && element.style.display === 'none') {
+                this.showWindow(element);
+            }
+        });
+    },
+
+    gatherWindows() {
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+        const windowWidth = 400;  // Standard width for gathered windows
+        const windowHeight = 300; // Standard height for gathered windows
+        const offsetX = 40;       // Horizontal offset between windows
+        const offsetY = 40;       // Vertical offset between windows
+
+        // Calculate center position for the first window
+        const centerX = (screenWidth - windowWidth) / 2;
+        const centerY = (screenHeight - windowHeight) / 2;
+
+        // Position windows in a stack with offset
+        this.windowIds.forEach((windowId, index) => {
+            const element = document.getElementById(windowId);
+            if (element) {
+                // Show window if it's hidden
+                if (element.style.display === 'none') {
+                    this.showWindow(element);
+                }
+
+                // Reset transform and any maximized state
+                element.style.transform = 'none';
+                element.classList.remove('maximized');
+
+                // Calculate stacked position with offset
+                const x = centerX + (index * offsetX);
+                const y = centerY + (index * offsetY);
+
+                // Apply position using transform
+                element.style.left = `${x}px`;
+                element.style.top = `${y}px`;
+                element.style.width = `${windowWidth}px`;
+                element.style.height = `${windowHeight}px`;
+
+                // Reset the original position variables and transform offset
+                element.style.setProperty('--original-top', `${y}px`);
+                element.style.setProperty('--original-left', `${x}px`);
+                element.style.setProperty('--original-width', `${windowWidth}px`);
+                element.style.setProperty('--original-height', `${windowHeight}px`);
+                
+                // Reset transform offset variables
+                element.style.setProperty('--transform-x', '0px');
+                element.style.setProperty('--transform-y', '0px');
+            }
+        });
+    },
+
+    resetLayout() {
+        this.windowIds.forEach(windowId => {
+            const element = document.getElementById(windowId);
+            if (element) {
+                // Show window if it's hidden
+                if (element.style.display === 'none') {
+                    this.showWindow(element);
+                }
+
+                // Reset transform and states
+                element.style.transform = 'none';
+                element.classList.remove('maximized');
+                element.classList.remove('minimized');
+
+                // Get default position
+                const defaults = this.DEFAULT_POSITIONS[windowId];
+                if (defaults) {
+                    // Apply default position and size
+                    element.style.top = defaults.top;
+                    element.style.width = defaults.width;
+                    element.style.height = defaults.height;
+
+                    // Handle left/right positioning
+                    if (defaults.left !== undefined) {
+                        element.style.left = defaults.left;
+                        element.style.right = 'auto';
+                        element.style.setProperty('--original-left', defaults.left);
+                    }
+                    if (defaults.right !== undefined) {
+                        element.style.right = defaults.right;
+                        element.style.left = 'auto';
+                        element.style.setProperty('--original-right', defaults.right);
+                    }
+
+                    // Reset the original position variables
+                    element.style.setProperty('--original-top', defaults.top);
+                    element.style.setProperty('--original-width', defaults.width);
+                    element.style.setProperty('--original-height', defaults.height);
+                    
+                    // Reset transform offset variables
+                    element.style.setProperty('--transform-x', '0px');
+                    element.style.setProperty('--transform-y', '0px');
+                }
+            }
+        });
     }
 };
 
@@ -141,6 +326,9 @@ export function initDraggable(target) {
         // Check if the click is within the header or its children
         if (header.contains(e.target)) {
             isDragging = true;
+            // Get current transform offset or default to 0
+            xOffset = parseInt(target.style.getPropertyValue('--transform-x') || '0');
+            yOffset = parseInt(target.style.getPropertyValue('--transform-y') || '0');
             initialX = e.clientX - xOffset;
             initialY = e.clientY - yOffset;
             WindowManager.bringToFront(target);
@@ -224,12 +412,24 @@ export function initDraggable(target) {
             currentY = e.clientY - initialY;
             xOffset = currentX;
             yOffset = currentY;
+            
+            // Update transform offset variables
+            target.style.setProperty('--transform-x', `${currentX}px`);
+            target.style.setProperty('--transform-y', `${currentY}px`);
+            
             setTranslate(currentX, currentY, target);
             
             // Save the new position
             const rect = target.getBoundingClientRect();
             target.style.setProperty('--original-top', `${rect.top}px`);
-            target.style.setProperty('--original-left', `${rect.left}px`);
+            
+            // Handle left/right positioning
+            if (target.style.left !== 'auto') {
+                target.style.setProperty('--original-left', `${rect.left}px`);
+            }
+            if (target.style.right !== 'auto') {
+                target.style.setProperty('--original-right', `${window.innerWidth - rect.right}px`);
+            }
         } else if (isResizing && resizeHandle) {
             e.preventDefault();
             const deltaX = e.clientX - initialX;
@@ -283,21 +483,109 @@ export function initDraggable(target) {
 
 // Initialize dock functionality
 export function initDock() {
+    console.log('Initializing dock...');
+    
     const dock = document.getElementById('window-dock');
-    if (!dock) return;
+    if (!dock) {
+        console.error('Dock element not found');
+        return;
+    }
 
-    // Add click handlers to dock icons
+    // Add click handlers for dock icons
     dock.querySelectorAll('.dock-icon').forEach(icon => {
-        icon.addEventListener('click', () => {
-            const windowId = icon.getAttribute('data-window');
-            const window = document.getElementById(windowId);
-            if (window) {
-                if (window.style.display === 'none') {
-                    WindowManager.showWindow(window);
-                } else {
-                    WindowManager.closeWindow(window);
+        if (icon.classList.contains('windows-manager')) {
+            // Handle windows manager button click
+            icon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dropdown = icon.querySelector('.windows-dropdown');
+                if (dropdown) {
+                    dropdown.classList.toggle('visible');
                 }
+            });
+
+            // Handle windows manager dropdown items
+            icon.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const action = item.dataset.action;
+                    switch (action) {
+                        case 'hide-all':
+                            WindowManager.hideAllWindows();
+                            break;
+                        case 'show-all':
+                            WindowManager.showAllWindows();
+                            break;
+                        case 'gather':
+                            WindowManager.gatherWindows();
+                            break;
+                        case 'reset-layout':
+                            WindowManager.resetLayout();
+                            break;
+                    }
+                    // Hide dropdown after action
+                    const dropdown = icon.querySelector('.windows-dropdown');
+                    if (dropdown) {
+                        dropdown.classList.remove('visible');
+                    }
+                });
+            });
+        } else if (icon.id === 'inspector-toggle') {
+            // Handle inspector toggle
+            icon.addEventListener('click', () => {
+                const isInspectorOpen = document.body.classList.contains('aframe-inspector-opened');
+                if (isInspectorOpen) {
+                    // Close inspector
+                    document.body.classList.remove('aframe-inspector-opened');
+                    if (AFRAME.INSPECTOR && AFRAME.INSPECTOR.close) {
+                        AFRAME.INSPECTOR.close();
+                    }
+                    icon.classList.remove('active');
+                } else {
+                    // Open inspector
+                    document.body.classList.add('aframe-inspector-opened');
+                    const scene = document.querySelector('a-scene');
+                    if (scene) {
+                        if (typeof window.loadAFrameInspector === 'function') {
+                            window.loadAFrameInspector();
+                        } else if (scene.components && scene.components.inspector) {
+                            scene.components.inspector.openInspector();
+                        } else if (typeof AFRAME !== 'undefined' && AFRAME.INSPECTOR) {
+                            AFRAME.INSPECTOR.open();
+                        }
+                    }
+                    icon.classList.add('active');
+                }
+            });
+
+            // Set initial state
+            if (document.body.classList.contains('aframe-inspector-opened')) {
+                icon.classList.add('active');
             }
-        });
+        } else {
+            // Handle regular window icons
+            const windowId = icon.dataset.window;
+            if (windowId) {
+                icon.addEventListener('click', () => {
+                    const element = document.getElementById(windowId);
+                    if (element) {
+                        if (element.style.display === 'none') {
+                            WindowManager.showWindow(element);
+                        } else {
+                            WindowManager.closeWindow(element);
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.windows-manager')) {
+            const dropdown = dock.querySelector('.windows-dropdown');
+            if (dropdown) {
+                dropdown.classList.remove('visible');
+            }
+        }
     });
 } 

@@ -7,8 +7,7 @@ import { logEntityPositions } from './entities.js';
 
 // DOM elements
 let debugPanel = null;
-let isDebugPanelVisible = true; // Changed to true by default
-let refreshInterval = null;
+let isDebugPanelVisible = true;
 
 // Maximum number of actions to display
 const MAX_ACTIONS = 50;
@@ -74,13 +73,6 @@ export function initDebug() {
             color: #888;
             font-size: 10px;
         }
-        .debug-panel .refresh-indicator {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: #888;
-            font-size: 10px;
-        }
         .entity-uuid { color: #88f; font-weight: bold; }
         .dom-status { font-style: italic; }
         .dom-status.found { color: #8f8; }
@@ -97,8 +89,8 @@ export function initDebug() {
         updateDebugPanel();
     });
     
-    // Start continuous refresh
-    startContinuousRefresh();
+    // Initial update
+    updateDebugPanel();
     
     console.log('Debug tools initialized');
 }
@@ -115,35 +107,7 @@ export function toggleDebugPanel() {
     debugPanel.style.display = isDebugPanelVisible ? 'block' : 'none';
     
     if (isDebugPanelVisible) {
-        startContinuousRefresh();
         updateDebugPanel();
-    } else {
-        stopContinuousRefresh();
-    }
-}
-
-/**
- * Start continuous refresh of the debug panel
- */
-function startContinuousRefresh() {
-    // Clear any existing interval
-    if (refreshInterval) {
-        clearInterval(refreshInterval);
-    }
-    
-    // Update every 500ms
-    refreshInterval = setInterval(() => {
-        updateDebugPanel();
-    }, 500);
-}
-
-/**
- * Stop continuous refresh of the debug panel
- */
-function stopContinuousRefresh() {
-    if (refreshInterval) {
-        clearInterval(refreshInterval);
-        refreshInterval = null;
     }
 }
 

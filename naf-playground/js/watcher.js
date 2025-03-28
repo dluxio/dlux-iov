@@ -443,10 +443,6 @@ function createWatcherPanel() {
         saveEntitiesToState('manual-save');
     });
     
-    watcherPanel.querySelector('#toggle-debug').addEventListener('click', () => {
-        document.dispatchEvent(new CustomEvent('toggle-debug-panel'));
-    });
-    
     // Add watcher-active class by default
     watcherPanel.classList.add('watcher-active');
 

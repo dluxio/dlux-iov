@@ -33,24 +33,6 @@ export function setupEventListeners() {
                 const bodyClasses = document.body.classList;
                 console.log('Body class changed, contains inspector class:', 
                     bodyClasses.contains('aframe-inspector-opened'));
-                
-                // Get UI container
-                const uiContainer = document.getElementById('ui-container');
-                
-                // If inspector is open
-                if (bodyClasses.contains('aframe-inspector-opened')) {
-                    // Only hide UI container
-                    if (uiContainer && uiContainer.style.display !== 'none') {
-                        console.log('Fixing inspector view (UI still visible)');
-                        uiContainer.style.display = 'none';
-                    }
-                } else {
-                    // If inspector is closed
-                    if (uiContainer && uiContainer.style.display === 'none') {
-                        console.log('Fixing standard view (UI still hidden)');
-                        uiContainer.style.display = 'flex';
-                    }
-                }
             }
         });
     });
