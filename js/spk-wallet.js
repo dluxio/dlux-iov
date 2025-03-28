@@ -77,17 +77,16 @@ export default {
                     </h5>
                     <div class="btn-group" role="group"
                         aria-label="SPK Actions">
-                        
+                        <button type="button" class="btn btn-primary p-0">
                             <modal-vue func="send" token="spk" :test="test"
                                 :tokenuser="saccountapi" :account="account"
                                 :tokenprotocol="protocolspk"
                                 @modalsign="sendIt($event)" v-slot:trigger>
-                                <button type="button" class="btn btn-primary p-0 trigger">
-                                <span class="p-2"><i
+                                <span class="p-2 trigger"><i
                                         class="fas fa-paper-plane me-2"></i>Send</span>
-                                        </button>
+                                        
                             </modal-vue>
-                        
+                        </button>
                         <button type="button"
                             class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                             disabled></button>
