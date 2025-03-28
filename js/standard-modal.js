@@ -48,7 +48,7 @@ export default {
               </span>
             </label>
             <div class="position-relative">
-              <span v-if="pfp[key]" class="position-absolute top-50 translate-middle-y mx-1 bg-light rounded-circle">
+              <span v-if="pfp[key]" class="position-absolute top-50 translate-middle-y mx-1 bg-light rounded-circle" :class="{'bg-warning': !validations[key],'bg-success': validations[key]}">
   <img :src="pfp[key]" alt="Recipient Profile Picture" onerror="this.src='/img/no-user.png'" style="width: 30px; height: 30px; border-radius: 50%;">
 </span>
               <input
@@ -147,7 +147,7 @@ export default {
                 if(result === true)this.pfp[key] = '/img/no-user.png'
                 else this.pfp[key] = result
               } else {
-                this.validations[key] = false;
+                  
                 this.pfp[key] = null;
               }
             }).catch(() => {
@@ -174,7 +174,10 @@ export default {
         this.feat = feature;
         for (const key in feature.json) {
           this.form[key]= ""
-          if(feature.json[key]?.check == "AC")this.pfp[key] = '/img/no-user.png'
+          if(feature.json[key]?.check == "AC"){
+            this.pfp[key] = '/img/no-user.png'
+            this.validations[key] = false;
+          }
         }
       } else {
         this.error = "Feature not found";
