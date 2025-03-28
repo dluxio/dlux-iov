@@ -19,6 +19,7 @@ export default {
             default: () => ({ head_block: 0 }),
         },
         type: { default: "move" },
+        mypfp: String,
     },
     data() {
         return {
@@ -33,7 +34,8 @@ export default {
         <div :id="modalId" class="modal fade" role="dialog" aria-hidden="true">
             <Standard v-if="type === 'move' && tokenprotocol.head_block && tokenuser.head_block" 
                 :func="func" 
-                :account="account" 
+                :account="account"
+                :mypfp="mypfp"
                 :tokenprotocol="tokenprotocol" 
                 :tokenuser="tokenuser" 
                 @modalsign="$emit('modalsign', $event)" />

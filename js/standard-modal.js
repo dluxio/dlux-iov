@@ -5,6 +5,7 @@ export default {
     name: 'Standard',
     props: {
       account: String,
+      mypfp: String,
       func: { type: String, default: 'send' },
       token: { type: String, default: 'balance' },
       tokenprotocol: {
@@ -31,6 +32,9 @@ export default {
           <!-- From Field (Static) -->
           <label class="small mb-1" for="from">From</label>
           <div class="position-relative mb-3">
+          <span class="position-absolute top-50 translate-middle-y mx-1 rounded-circle bg-light">
+  <img :src="mypfp" alt="My pfp" onerror="this.src='/img/no-user.png'" style="width: 30px; height: 30px; border-radius: 50%;">
+</span>
             <span class="position-absolute top-50 translate-middle-y ps-2">
               <i class="fa-solid fa-at fa-fw"></i>
             </span>

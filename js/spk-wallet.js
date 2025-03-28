@@ -78,7 +78,9 @@ export default {
                     <div class="btn-group" role="group"
                         aria-label="SPK Actions">
                         <button type="button" class="btn btn-primary p-0">
-                            <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="send" token="spk" :test="test"
+                            <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="send" :mypfp="mypfp" 
+                            token="spk" 
+                            :test="test"
                                 :tokenuser="saccountapi" :account="account"
                                 :tokenprotocol="protocolspk"
                                 @modalsign="sendIt($event)" v-slot:trigger>
@@ -806,6 +808,7 @@ export default {
     data() {
         return {
             spk2gov: false,
+            mypfp: "",
             ipfsProviders: {
                 "na": "na",
             },
@@ -1093,5 +1096,13 @@ export default {
         this.getSNodes();
         this.getIPFSproviders();
         this.getProtocols()
+        this.accountCheck(this.account).then(result => {
+            if (result) {
+              if(result === true)this.mypfp = '/img/no-user.png'
+              else this.mypfp = result
+            } else this.mypfp = '/img/no-user.png'
+          }).catch(() => {
+            this.mypfp = '/img/no-user.png'
+          })
     },
 };
