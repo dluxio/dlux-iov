@@ -159,25 +159,24 @@ export default {
                                     aria-expanded="false"></button>
                                 <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
                                     aria-labelledby="btnGroupDrop1">
-                                    <modal-vue type="power" token="SPK" 
-                                        func="Power Down"
-                                        :balance="saccountapi.spk_power"
-                                        :account="account"
-                                        :test="test"
-                                        @modalsign="sendIt($event)" v-slot:trigger>
+                                    <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="powdn" :mypfp="mypfp" 
+                            token="spk" 
+                            :test="test"
+                                :tokenuser="saccountapi" :account="account"
+                                :tokenprotocol="protocolspk"
+                                @modalsign="sendIt($event)" v-slot:trigger>
                                         <button class="dropdown-item trigger"
                                             type="button"><i
                                                 class="fas fa-angle-double-down fa-fw me-2"></i>Power
                                             Down</button>
                                     </modal-vue>
                                     <div class="dropdown-divider"></div>
-                                    <modal-vue type="power" token="SPK" 
-                                        func="Election"
-                                        :test="test"
-                                        :balance="saccountapi.spk_power"
-                                        :account="account" :smarkets="smarkets.node"
-                                        :current="saccountapi.spk_vote"
-                                        @modalsign="sendIt($event)" v-slot:trigger>
+                                    <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" type="election" :mypfp="mypfp" 
+                            token="spk" 
+                            :test="test"
+                                :tokenuser="saccountapi" :account="account"
+                                :tokenprotocol="protocolspk"
+                                @modalsign="sendIt($event)" v-slot:trigger>
                                         <button class="dropdown-item trigger"
                                             type="button"><i
                                                 class="fa-solid fa-plug fa-fw me-2"></i>Elect
@@ -311,15 +310,17 @@ export default {
                             @click="updatePubkey">
                             <i class="fas fa-plus fa-fw me-2"></i>Register Account
                             </div>
-                            <!-- new contract -->
+                            <!-- new contract 
                             <div v-if="saccountapi.pubKey != 'NA'">
-                            <modal-vue type="build" token="BROCA"  :test="test"
-                                :balance="broca_calc(saccountapi.broca)" 
-                                :account="account" @modalsign="sendIt($event)"
-                                :ipfsproviders="ipfsProviders" v-slot:trigger>
+                            <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" type="contract" :mypfp="mypfp" 
+                            token="spk" 
+                            :test="test"
+                                :tokenuser="saccountapi" :account="account"
+                                :tokenprotocol="protocolspk"
+                                @modalsign="sendIt($event)" v-slot:trigger>
                                 <span class="p-2 trigger"><i class="fa-solid fa-file-contract fa-fw me-2"></i>Create A Contract</span>
                             </modal-vue>
-                            </div>
+                            </div>-->
                         </button>
                         <button type="button"
                             class="btn btn-dark ms-0 me-0 ps-0 pe-0"
@@ -818,6 +819,8 @@ export default {
                 api: "",
             },
             protocolspk: {},
+            protocolbroca: {},
+            protocollarynx: {},
             larynxbehind: 999,
             petitionStatus: 'Ask for Contract',
             saccountapi: {
@@ -963,6 +966,20 @@ export default {
             fetch(this.sapi + "/spk/api/protocol").then(r => r.json())
             .then(data =>{
                 this.protocolspk = data
+            })
+            .catch(e => {
+                console.log(e)
+            })
+            fetch(this.sapi + "/api/protocol").then(r => r.json())
+            .then(data =>{
+                this.protocollarynx = data
+            })
+            .catch(e => {
+                console.log(e)
+            })
+            fetch(this.sapi + "/broca/api/protocol").then(r => r.json())
+            .then(data =>{
+                this.protocolbroca = data
             })
             .catch(e => {
                 console.log(e)

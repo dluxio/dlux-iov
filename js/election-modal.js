@@ -22,8 +22,9 @@ export default {
       func: String,
       smarkets: Object,
     },
-    template: `<div class="modal-body p-0">
-    <div class="row m-0">
+    template: `
+    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content row m-0">
       <!-- Available Validators -->
       <div class="col-6">
         <h5 class="m-0">Available Validators</h5>
@@ -88,7 +89,7 @@ export default {
         </button>
       </div>
     </div>
-  </div>
+    </div>
     `,
     data() {
       return {
