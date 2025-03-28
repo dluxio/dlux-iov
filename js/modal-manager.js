@@ -29,7 +29,7 @@ export default {
     },
     template: `<div>
     <slot name="trigger"></slot>
-    <teleport to="app">
+    <teleport to="body">
         <div :id="modalId" class="modal fade" role="dialog" aria-hidden="true" tabindex="-1">
             <Standard v-if="type === 'move' && tokenprotocol.head_block && tokenuser.head_block" 
                 :func="func" 
