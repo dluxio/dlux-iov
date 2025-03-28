@@ -18,6 +18,7 @@ export default {
         tokenuser: {
             default: () => ({ head_block: 0 }),
         },
+        smarkets: Object,
         type: { default: "move" },
         mypfp: String,
     },
@@ -48,6 +49,7 @@ export default {
                 :account="account" 
                 :tokenprotocol="tokenprotocol" 
                 :tokenuser="tokenuser" 
+                :smarkets="smarkets"
                 @modalsign="$emit('modalsign', $event)" />
         </div>
     </teleport>

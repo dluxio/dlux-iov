@@ -16,7 +16,6 @@ export default {
           prefix: "spk"
         })
       },
-      tokenstats: Object,
       tokenuser: Object,
       test: { type: Boolean, default: false },
       func: String,
@@ -31,8 +30,8 @@ export default {
         <div class="list-group">
           <div
             v-for="(node, key) in smarkets"
-            :key="key"
-            class="list-group-item d-flex justify-content-between align-items-center"
+            :key="key">
+          <div v-if="isVal(node)" class="list-group-item d-flex justify-content-between align-items-center"
           >
             <span>{{ node.self }}</span>
             <div>
@@ -51,6 +50,7 @@ export default {
                 <i class="fas fa-plus"></i>
               </button>
             </div>
+          </div>
           </div>
         </div>
       </div>

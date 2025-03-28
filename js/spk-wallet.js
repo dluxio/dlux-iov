@@ -176,6 +176,7 @@ export default {
                             :test="test"
                                 :tokenuser="saccountapi" :account="account"
                                 :tokenprotocol="protocolspk"
+                                :smarkets="smarkets.node" 
                                 @modalsign="sendIt($event)" v-slot:trigger>
                                         <button class="dropdown-item trigger"
                                             type="button"><i
