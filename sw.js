@@ -1,4 +1,4 @@
-this.version = "2025.03.27.3";
+this.version = "2025.03.28.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -202,9 +202,9 @@ var urlsToCache = [
   `/naf-playground/aframe/aframe.min.js`,
   `/naf-playground/aframe/networked-aframe.min.js`,
   `/naf-playground/css/styles.css`,
+  `/naf-playground/css/window-system.css`,
   `/naf-playground/entity-api-test.html`,
   `/naf-playground/index.html`,
-  `/naf-playground/js/app.js`,
   `/naf-playground/js/autosave.js`,
   `/naf-playground/js/avatar-system.js`,
   `/naf-playground/js/config.js`,
@@ -217,6 +217,7 @@ var urlsToCache = [
   `/naf-playground/js/environment-manager.js`,
   `/naf-playground/js/error-handlers.js`,
   `/naf-playground/js/event-handlers.js`,
+  `/naf-playground/js/initialization-manager.js`,
   `/naf-playground/js/main.js`,
   `/naf-playground/js/monaco.js`,
   `/naf-playground/js/network-manager.js`,
