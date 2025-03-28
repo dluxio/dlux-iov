@@ -174,6 +174,7 @@ export default {
         this.feat = feature;
         for (const key in feature.json) {
           this.form[key]= ""
+          if(feature.json[key]?.check == "AC")this.pfp[key] = '/img/no-user.png'
         }
       } else {
         this.error = "Feature not found";
