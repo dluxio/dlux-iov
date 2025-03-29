@@ -171,7 +171,7 @@ export default {
                                             Down</button>
                                     </modal-vue>
                                     <div class="dropdown-divider"></div>
-                                    <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" type="election" :mypfp="mypfp" 
+                                    <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" type="election" :mypfp="mypfp" 
                             token="spk" 
                             :test="test"
                                 :tokenuser="saccountapi" :account="account"
