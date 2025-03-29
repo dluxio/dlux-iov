@@ -307,17 +307,17 @@ export default {
                             @click="updatePubkey">
                             <i class="fas fa-plus fa-fw me-2"></i>Register Account
                             </div>
-                            <!-- new contract 
+                            <!-- new contract -->
                             <div v-if="saccountapi.pubKey != 'NA'">
-                            <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" type="contract" :mypfp="mypfp" 
-                            token="spk" 
+                            <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" type="contract" :mypfp="mypfp" 
+                            token="broca" 
                             :test="test"
                                 :tokenuser="saccountapi" :account="account"
-                                :tokenprotocol="protocolspk"
+                                :tokenprotocol="protocollarynx"
                                 @modalsign="sendIt($event)" v-slot:trigger>
                                 <span class="p-2 trigger"><i class="fa-solid fa-file-contract fa-fw me-2"></i>Create A Contract</span>
                             </modal-vue>
-                            </div>-->
+                            </div>
                         </button>
                         <button type="button"
                             class="btn btn-dark ms-0 me-0 ps-0 pe-0"
@@ -409,10 +409,11 @@ export default {
                     <div class="btn-group" role="group"
                         aria-label="LARYNX Actions">
                         <button type="button" class="btn btn-primary p-0">
-                            <modal-vue type="send" token="LARYNX"
-                                :balance="saccountapi.balance"
-                                :account="account" @modalsign="sendIt($event)"
-                                :test="test" v-slot:trigger>
+                            <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" func="send" :mypfp="mypfp" 
+                            :test="test"
+                                :tokenuser="saccountapi" :account="account"
+                                :tokenprotocol="protocollarynx"
+                                @modalsign="sendIt($event)" v-slot:trigger>
                                 <span class="p-2 trigger"><i
                                         class="fas fa-paper-plane me-2"></i>Send</span>
                             </modal-vue>

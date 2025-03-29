@@ -1,6 +1,7 @@
 export default {
     apiSelector(t) {
         if (this.tokenprotocol.token == "HIVE" || this.tokenprotocol.token == "HBD") this.api = "NA"
+        const nodes = Object.keys(this.tokenprotocol.consensus)
         if (t >= nodes.length) {
             this.api = null
             console.warn("No suitable API node found.")
@@ -8,7 +9,6 @@ export default {
         }
 
         if (this.api) return;
-        const nodes = Object.keys(this.tokenprotocol.consensus)
         if (!this.api && t < nodes.length) {
             const controller = new AbortController()
             const timeoutId = setTimeout(() => controller.abort(), 1000)

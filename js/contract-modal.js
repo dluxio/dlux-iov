@@ -5,7 +5,6 @@ export default {
   name: 'contract-modal',
   props: {
     account: String,
-    func: "channel_open",
     token: "BROCA",
     tokenprotocol: {
       default: function () {
@@ -87,8 +86,8 @@ export default {
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <form name="contract" @submit.prevent="createContract">
-          <div class="modal-body text-start">
-            <div v-for="(field, key) in feat?.json_req" :key="key" class="mb-3" v-if="shouldShowField(key)">
+          <div class="modal-body text-start" v-if="!isLoading">
+            <div v-for="(field, key) in feat[func].json_req" :key="key" class="mb-3" v-if="shouldShowField(key)">
               <label class="small mb-1 d-flex" :for="key">
                 {{ field.string }}
                 <span v-if="key === 'amount'" class="ms-auto">
@@ -102,7 +101,7 @@ export default {
                   <select class="form-select text-white bg-dark border-dark ps-4" :id="key" v-model="form[key]">
                     <option value="" disabled selected>Select {{ field.string.toLowerCase() }}</option>
                     <option v-for="(name, id) in filteredBrokerOptions" :value="id" :disabled="isProviderDisabled(id)">
-                      {{ id }} <i :class="getProviderIconClass(id)"></i>
+{{getProviderIconUnicode(id)}}}} | @{{ id }}
                     </option>
                   </select>
                 </template>
@@ -112,7 +111,7 @@ export default {
                     :class="['form-control', 'text-white', 'bg-dark', 'border-dark', field.icon ? 'ps-4' : '']"
                     :placeholder="'Enter ' + field.string.toLowerCase()"
                     v-model="form[key]"
-                    @input="key === 'amount' ? handleAmountInput() : validateField(key)"
+                    @input="key === 'amount' ? handleAmountInput() : handleCheck(key)"
                     :step="field.step || null"
                     :min="field.min || null"
                     :max="field.max === 'balance' ? tokenuser[token] : field.max"
@@ -143,10 +142,16 @@ export default {
       api: "",
       availableProvidersCount: 0,
       filteredBrokerOptions: {},
+      feat: {
+        string: 'loading',
+        json_req: {},
+      },
       form: {
         contract_type: "0",
       },
+      func: "channel_open",
       ipfsProviders: {},
+      isLoading: true,
       providerStats: {},
       validations: {},
     };
@@ -154,12 +159,6 @@ export default {
   methods: {
     ...MCommon,
     ...MModals,
-    AC() {
-      this.accountCheck(this.to).then(r => {
-        this.ac = r
-        if (this.amount) this.valid = true
-      }).catch(e => { this.ac = false })
-    },
     createContract() {
       const op = {
         type: "cj",
@@ -195,7 +194,7 @@ export default {
       Promise.all(promises).then(results => {
         results.forEach(result => {
           if (result.stats) {
-            this.$set(this.providerStats, result.id, result.stats);
+            this.providerStats[result.id] = result.stats
           }
         });
       });
@@ -209,18 +208,19 @@ export default {
         })
         .catch(error => console.error('Error fetching IPFS providers:', error));
     },
-    getProviderIconClass(providerId) {
+    getProviderIconUnicode(providerId) {
       if (!this.form.amount) return '';
-      const requiredSize = this.form.amount * 1024; // Bytes
+      const amount = parseFloat(this.form.amount);
+      if (isNaN(amount)) return; // Early return if invalid
+      const requiredSize = amount * 1024;
       const stats = this.providerStats[providerId];
       if (!stats) return '';
       const freeSpace = BigInt(stats.disk.free);
       const ratio = Number(freeSpace) / requiredSize;
 
-      if (ratio >= 100) return 'fas fa-check-circle text-success'; // Green
-      if (ratio >= 10) return 'fas fa-exclamation-circle text-warning'; // Yellow
-      if (ratio >= 2) return 'fas fa-exclamation-circle text-warning'; // Yellow (<10x but ≥2x)
-      return 'fas fa-times-circle text-danger'; // Red (<2x)
+      if (ratio >= 100) return '✅';
+      if (ratio >= 2) return '⚠️';
+      return '❌';
     },
     handleAmountInput() {
       if (this.form.amount) {
@@ -271,14 +271,6 @@ export default {
     },
   },
   computed: {
-    brokerOptions() {
-      if (this.filteredProviders.length > 0) {
-        return Object.fromEntries(
-          Object.entries(this.ipfsProviders).filter(([id]) => this.filteredProviders.includes(id))
-        );
-      }
-      return this.ipfsProviders;
-    },
     isFormValid() {
       if (!this.feat || !this.feat.json_req) return false;
       for (const key in this.feat.json_req) {
@@ -293,9 +285,6 @@ export default {
       }
       return true;
     },
-    feat() {
-      return this.tokenprotocol.features[this.func]
-    },
   },
   watch: {
     'form.contract_type'(newVal) {
@@ -307,11 +296,25 @@ export default {
     }
   },
   mounted() {
+    const feature = this.tokenprotocol.features[this.func]
+      if (feature) {
+        this.feat = feature;
+        for (const key in feature.json) {
+          this.form[key]= ""
+          if(feature.json[key]?.check == "AC"){
+            this.pfp[key] = '/img/no-user.png'
+            this.validations[key] = false;
+          }
+        }
+      } else {
+        this.error = "Feature not found";
+      }
     this.apiSelector(0)
     this.getIPFSproviders().then(() => {
       this.fetchProviderStats()
       this.filteredBrokerOptions = { ...this.ipfsProviders }
       this.availableProvidersCount = Object.keys(this.ipfsProviders).length
+      this.isLoading = false;
     });
   }
 };
