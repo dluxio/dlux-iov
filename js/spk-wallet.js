@@ -46,7 +46,7 @@ export default {
                 <div id="userNode" class="ms-auto" if="isnode">
                 </div>
             </div>
-            <div class="border-bottom border-secondary text-start">
+            <div class="border-bottom border-white-50 text-start">
                 <p class="lead">Decentralized and incentivized
                     network
                     infrastructure,
@@ -56,7 +56,7 @@ export default {
             </div>
             <!--spk token-->
             <div
-                class="d-flex flex-wrap align-items-center border-bottom border-secondary py-5">
+                class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
                 <div>
                     <div class="d-flex align-items-start fs-4 fw-bold">SPK Token
                             <div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-warning text-black ms-1"
@@ -119,7 +119,7 @@ export default {
                 </div>
             </div>
             <!-- SPK Power -->
-            <div class="d-flex flex-column border-bottom border-secondary py-5">
+            <div class="d-flex flex-column border-bottom border-white-50 py-3">
                 <div class="d-flex flex-wrap align-items-center">
                     <div class="text-start">
                         <div class="d-flex align-items-start fs-4 fw-bold">SPK Power
@@ -273,7 +273,7 @@ export default {
             </div>
             <!-- Broca -->
             <div v-if="saccountapi.spk_power"
-                class="d-flex flex-wrap align-items-center border-bottom border-secondary py-5">
+                class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
                 <div class="text-start">
                     <div class="d-flex align-items-start fs-4 fw-bold">BROCA KBs
                             <div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-warning text-black ms-1"
@@ -348,7 +348,7 @@ export default {
                 </div>
             </div>
             <!--claim larynx rewards-->
-            <div class="d-flex flex-wrap align-items-center border-bottom border-secondary py-5"
+            <div class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3"
                 id="larynxclaimrewards" v-if="saccountapi.claim > 0 && me">
                 <div>
                     <div class="d-flex align-items-start">
@@ -397,7 +397,7 @@ export default {
             </div>
             <!--larynx token-->
             <div
-                class="d-flex flex-wrap align-items-center border-bottom border-secondary py-5">
+                class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
                 <div>
                     <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Token
                             <div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-warning text-black ms-1"
@@ -501,7 +501,7 @@ export default {
                 </div>
             </div>
             <!--locked larynx-->
-            <div class="d-flex text-start flex-wrap align-items-center border-bottom border-secondary py-5"
+            <div class="d-flex text-start flex-wrap align-items-center border-bottom border-white-50 py-3"
                 v-if="saccountapi.gov">
                 <div>
                     <div class="d-flex align-items-start">
@@ -563,7 +563,7 @@ export default {
                 </div>
             </div>
             <!--larynx power-->
-            <div class="border-bottom border-secondary py-5">
+            <div class="border-bottom border-white-50 py-3">
                 <div class="d-flex flex-wrap text-start align-items-center">
                     <div>
                        <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Power
@@ -747,7 +747,7 @@ export default {
             </div>
             <!--account value-->
             <div
-                class="d-flex flex-wrap text-start align-items-center border-secondary py-5">
+                class="d-flex flex-wrap text-start align-items-center py-3">
                 <div class="">
                     <h4>Estimated Account Value</h4>
                     <p class="text-white-50">The approximate US Dollar value for all SPK assets in your account</p>
