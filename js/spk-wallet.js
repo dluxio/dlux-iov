@@ -30,7 +30,9 @@ export default {
             </div>
             <div class="d-flex align-items-center mt-4 mb-2">
                 <div class="d-flex align-items-start">
-                    <h1 class="m-0">SPK</h1>
+                    <h1 class="m-0">SPK</h1><div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-info text-black ms-1"
+                                style="font-size: xx-small;">TEST NET
+                            </div>
                 </div>
                 <div class="text-center small m-0 p-2 ms-2" v-bind:class="{'text-success': larynxbehind < 30,
                             'text-warning': larynxbehind >= 30,
@@ -59,9 +61,7 @@ export default {
                 class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
                 <div>
                     <div class="d-flex align-items-start fs-4 fw-bold">SPK Token
-                            <div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-warning text-black ms-1"
-                                style="font-size: xx-small;">TEST
-                            </div>
+                            
                         </div>
                     <p class="text-white-50 m-0">The governance
                         token for
@@ -123,9 +123,7 @@ export default {
                 <div class="d-flex flex-wrap align-items-center">
                     <div class="text-start">
                         <div class="d-flex align-items-start fs-4 fw-bold">SPK Power
-                            <div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-warning text-black ms-1"
-                                style="font-size: xx-small;">TEST
-                            </div>
+                            
                         </div>
                        
                         <p class="text-white-50">Powered SPK for
@@ -276,9 +274,7 @@ export default {
                 class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
                 <div class="text-start">
                     <div class="d-flex align-items-start fs-4 fw-bold">BROCA KBs
-                            <div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-warning text-black ms-1"
-                                style="font-size: xx-small;">TEST
-                            </div>
+                            
                         </div>
                     <p class="text-white-50">Storage Credits
                         for the SPK
@@ -400,9 +396,7 @@ export default {
                 class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
                 <div>
                     <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Token
-                            <div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-warning text-black ms-1"
-                                style="font-size: xx-small;">TEST
-                            </div>
+                            
                         </div>
                     <p class="text-white-50">The mining token
                         for the SPK
@@ -567,9 +561,7 @@ export default {
                 <div class="d-flex flex-wrap text-start align-items-center">
                     <div>
                        <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Power
-                            <div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-warning text-black ms-1"
-                                style="font-size: xx-small;">TEST
-                            </div>
+                            
                         </div>
                         <p class="text-white-50">Powered tokens used to mine SPK</p>
                         <p class="text-white-50">Benefits of LARYNX Power:
