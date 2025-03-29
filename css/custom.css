@@ -14633,4 +14633,12 @@ body[data-touch=false] .nav-more .nav-link:hover .bar {
 
 body[data-touch=false] .dropdown-extra:hover {
   color: #2F7AD0 !important;
+}
+
+.draggable {
+  cursor: move;
+}
+
+.draggable:hover {
+  background-color: rgba(112, 112, 112, 0.662745098);
 }/*# sourceMappingURL=custom.css.map */

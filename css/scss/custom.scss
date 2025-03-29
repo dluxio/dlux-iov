@@ -2441,3 +2441,10 @@ body[data-touch="false"] .nav-more .nav-link:hover .bar {
 body[data-touch="false"] .dropdown-extra:hover {
   color: $highlight-1 !important;
 }
+
+.draggable {
+  cursor:move;
+}
+.draggable:hover {
+  background-color: #707070a9;
+}

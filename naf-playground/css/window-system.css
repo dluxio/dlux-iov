@@ -1,6 +1,6 @@
 /* Window System Styles */
 :root {
-    --window-header-bg: #1a1a1a;
+    --window-header-bg: #2d2d2d;
     --window-border-color: #333;
     --window-text-color: #fff;
     --window-btn-hover-bg: rgba(255, 255, 255, 0.1);
@@ -64,11 +64,9 @@
     margin: -8px;
     background: var(--window-header-bg);
     height: 100%;
-
     cursor: default;
     align-items: center;
     justify-content: center;
-/* Add minimum width to ensure proper centering */
 }
 
 /* Window Controls */
@@ -630,7 +628,7 @@ body:not(.aframe-inspector-opened) .toggle-edit {
 
 /* Add tooltips */
 .dock-icon::after {
-    content: attr(data-window);
+    content: attr(data-tooltip);
     position: absolute;
     bottom: 100%;
     left: 50%;

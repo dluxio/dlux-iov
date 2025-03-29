@@ -22,47 +22,48 @@ export default {
       smarkets: Object,
     },
     template: `
-    <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content row m-0">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content pt-2">
+   
+    <div class="row m-0">
       <!-- Available Validators -->
-      <div class="col-6">
-        <h5 class="m-0">Available Validators</h5>
-        <div class="list-group">
-          <div
-            v-for="(node, key) in smarkets"
-            :key="key">
-          <div v-if="isVal(node)" class="list-group-item d-flex justify-content-between align-items-center"
-          >
-            <span>{{ node.self }}</span>
-            <div>
-              <button
-                class="btn btn-sm btn-outline-secondary invisible"
-                type="button"
-              >
-                <i class="fas fa-plus"></i>
-              </button>
-              <button
-                :disabled="d.valWorkable.length >= 30 || isSelected(node.self)"
-                class="btn btn-sm btn-outline-success"
-                type="button"
-                @click="add(node)"
-              >
-                <i class="fas fa-plus"></i>
-              </button>
+      <div class="col-lg-6">
+        <div class="mb-2 text-center border-bottom border-light border-2">
+          <h5 class="mb-1">Available Validators</h5>
+        </div>
+        <div v-for="(node, key) in smarkets" :key="key">
+          <div v-if="isVal(node)">
+            <div class="d-flex justify-content-between align-items-center border border-light rounded ps-2 pe-1 py-1 my-1">
+              <span>{{ node.self }}</span>
+              <div>
+                <button
+                  class="btn btn-sm btn-outline-secondary invisible"
+                  type="button"
+                >
+                  <i class="fas fa-plus"></i>
+                </button>
+                <button
+                  :disabled="d.valWorkable.length >= 30 || isSelected(node.self)"
+                  class="btn btn-sm btn-outline-info"
+                  type="button"
+                  @click="add(node)"
+                >
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
             </div>
-          </div>
           </div>
         </div>
       </div>
       <!-- Selected Validators -->
-      <div class="col-6">
-        <button class="btn btn-success invisible" type="button">Save</button>
-        <h5 class="m-0">Nodes Selected (Weight)</h5>
-        <div class="list-group">
+      <div class="col-lg-6">
+       <div class="mb-2 text-center border-bottom border-light border-2">
+          <h5 class="mb-1">Selected (Weight)</h5>
+        </div>
           <div
             v-for="(node, index) in d.valWorkable"
             :key="node.self"
-            class="list-group-item d-flex justify-content-between align-items-center"
+            class=" d-flex justify-content-between align-items-center border border-light rounded ps-2 pe-1 py-1 my-1 draggable"
             draggable="true"
             @dragstart="pick($event, index)"
             @drop="move($event, index)"
@@ -70,6 +71,7 @@ export default {
             @dragenter.prevent
           >
             <span>{{ node.self }}</span>
+            <span>{{sigFig(((30-index)/30) * 100, 2)}}%</span>
             <button
               class="btn btn-sm btn-outline-danger"
               type="button"
@@ -78,15 +80,22 @@ export default {
               <i class="fas fa-minus"></i>
             </button>
           </div>
+        <div v-if="!d.valWorkable.length" class="m-3">
+          <div class="lead text-center">No validators selected</div>
+          <p class="text-center">Add validators from the available list, then drag to rearrange the vote weight.</p>
         </div>
-        <button
-          :class="{ 'invisible': !difVote }"
+      </div>
+       <div class="lead text-center my-2">Nodes Selected ({{d.valWorkable.length}}/30)</div>
+      <div class="text-center my-2">
+       <button
+          :class="{ 'disabled': !difVote }"
           class="btn btn-success"
           type="button"
           @click="valVote()"
         >
           Save
         </button>
+        </div>
       </div>
     </div>
     </div>
