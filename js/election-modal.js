@@ -32,7 +32,7 @@ export default {
           <h5 class="mb-1">Available Validators</h5>
         </div>
         <div v-for="(node, key) in smarkets" :key="key">
-          <div v-if="isVal(node)">
+          <div v-if="isVal(node) && !isSelected(node.self)">
             <div class="d-flex justify-content-between align-items-center border border-light rounded ps-2 pe-1 py-1 my-1">
               <span>{{ node.self }}</span>
               <div>
@@ -58,7 +58,7 @@ export default {
       <!-- Selected Validators -->
       <div class="col-lg-6">
        <div class="mb-2 text-center border-bottom border-light border-2">
-          <h5 class="mb-1">Selected (Weight)</h5>
+          <h5 class="m-0">Nodes Selected ({{d.valWorkable.length}}/30)</h5>
         </div>
           <div
             v-for="(node, index) in d.valWorkable"
@@ -197,7 +197,7 @@ export default {
             cj: {
               votes: this.voteString,
             },
-            id: `${this.tokenprotocol.prefix}T_val_vote`,
+            id: `${this.tokenprotocol.prefix}val_vote`,
             msg: `Voting for Validators...`,
             ops: ["getSapi"],
             api: "https://spkinstant.hivehoneycomb.com",
@@ -208,5 +208,18 @@ export default {
           this.$emit("modalsign", op);
         }
       },
+    },
+    mounted() {
+      try{
+        this.d.valWorkable = []
+      const voteString = this.tokenuser?.spk_vote.split(',')[1];
+            for (let i = 0; i < voteString.length; i += 2) {
+              const code = voteString.substr(i, 2);
+              const node = this.valCodeDict[code];
+              if (node) {
+                this.d.valWorkable.push(node);
+              }
+            }
+          } catch (e) {}
     }
   };
