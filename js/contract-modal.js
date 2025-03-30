@@ -5,6 +5,8 @@ export default {
   name: 'contract-modal',
   props: {
     account: String,
+    api: String,
+    mypfp: String,
     token: "BROCA",
     tokenprotocol: {
       default: function () {
@@ -15,10 +17,10 @@ export default {
           features: {
             channel_open: {
               "string": "Create Contract",
-              "json_req": {
+              "json": {
                 "contract": {
                   "string": "Contract Type",
-                  "type": "select",
+                  "type": "O",
                   "req": true,
                   "options": {
                     "0": "Pay for a contract for you or another",
@@ -28,7 +30,7 @@ export default {
                 },
                 "amount": {
                   "string": "Amount",
-                  "type": "number",
+                  "type": "I",
                   "req": true,
                   "min": 100,
                   "step": 1,
@@ -37,28 +39,28 @@ export default {
                 },
                 "to": {
                   "string": "Account to Upload File",
-                  "type": "text",
+                  "type": "S",
                   "req": true,
                   "check": "AC",
                   "icon": "fa-solid fa-at"
                 },
                 "broker": {
                   "string": "IPFS Service Provider",
-                  "type": "select",
+                  "type": "O",
                   "req": true,
                   "options": "ipfsproviders",
                   "icon": "fa-solid fa-server"
                 },
                 "ben_to": {
                   "string": "Beneficiary Account",
-                  "type": "text",
+                  "type": "S",
                   "req": false,
                   "check": "AC",
                   "icon": "fa-solid fa-at"
                 },
                 "ben_amount": {
                   "string": "Requested Beneficiary Amount",
-                  "type": "number",
+                  "type": "I",
                   "req": false,
                   "min": 0,
                   "max": 100,
@@ -87,7 +89,8 @@ export default {
         </div>
         <form name="contract" @submit.prevent="createContract">
           <div class="modal-body text-start" v-if="!isLoading">
-            <div v-for="(field, key) in feat[func].json_req" :key="key" class="mb-3" v-if="shouldShowField(key)">
+          <div v-for="(field, key) in feat.json">
+            <div class="mb-3" v-if="shouldShowField(key)">
               <label class="small mb-1 d-flex" :for="key">
                 {{ field.string }}
                 <span v-if="key === 'amount'" class="ms-auto">
@@ -97,11 +100,17 @@ export default {
                 </span>
               </label>
               <div class="position-relative">
-                <template v-if="field.type === 'select' && key === 'broker'">
-                  <select class="form-select text-white bg-dark border-dark ps-4" :id="key" v-model="form[key]">
+                <template v-if="field.type === 'O'">
+                  <select v-if="key === 'broker'" class="form-select text-white bg-dark border-dark ps-4" :id="key" v-model="form[key]">
                     <option value="" disabled selected>Select {{ field.string.toLowerCase() }}</option>
                     <option v-for="(name, id) in filteredBrokerOptions" :value="id" :disabled="isProviderDisabled(id)">
-{{getProviderIconUnicode(id)}}}} | @{{ id }}
+{{getProviderIconUnicode(id)}} | @{{ id }}
+                    </option>
+                  </select>
+                  <select v-else class="form-select text-white bg-dark border-dark ps-4" :id="key" v-model="form[key]">
+                    <option value="" disabled selected>Select {{ field.string.toLowerCase() }}</option>
+                    <option v-for="(name, id) in field.options" :value="id">
+{{name}}
                     </option>
                   </select>
                 </template>
@@ -129,6 +138,7 @@ export default {
                 ~{{ fancyBytes(form[key] * 1024) }} ({{ availableProvidersCount }} storage providers available)
               </div>
             </div>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -139,12 +149,11 @@ export default {
     </div>`,
   data() {
     return {
-      api: "",
       availableProvidersCount: 0,
       filteredBrokerOptions: {},
       feat: {
         string: 'loading',
-        json_req: {},
+        json: {},
       },
       form: {
         contract_type: "0",
@@ -152,6 +161,7 @@ export default {
       func: "channel_open",
       ipfsProviders: {},
       isLoading: true,
+      pfp: {},
       providerStats: {},
       validations: {},
     };
@@ -180,33 +190,42 @@ export default {
       this.$emit("modalsign", op);
     },
     fetchProviderStats() {
-      const promises = this.ipfsServices.map(service => {
-        const providerId = service.i;
-        const apiUrl = service.a;
-        return fetch(`${apiUrl}/storage-stats`)
-          .then(response => response.json())
-          .then(data => ({ id: providerId, stats: data }))
-          .catch(error => {
-            console.error(`Error fetching stats for ${providerId}:`, error);
-            return { id: providerId, stats: null };
-          });
-      });
-      Promise.all(promises).then(results => {
-        results.forEach(result => {
-          if (result.stats) {
-            this.providerStats[result.id] = result.stats
-          }
-        });
-      });
+      for (var i = 0; i < this.ipfsServices.length; i++) {
+        for (var node in this.ipfsServices[i]) {
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 1000)
+          console.log(`${this.ipfsServices[i][node].a}/upload-stats`)
+          fetch(`${this.ipfsServices[i][node].a}/upload-stats`, { signal: controller.signal })
+            .then(response => response.json())
+            .then(data => {
+              console.log('ipfs Stats', data)
+              if (data?.node) {
+                this.providerStats[data.node] = data
+              }
+            })
+            .catch(error => { })
+        }
+      }
     },
     getIPFSproviders() {
-      return fetch(this.api + "/services/IPFS")
-        .then(response => response.json())
-        .then(data => {
-          this.ipfsProviders = data.providers;
-          this.ipfsServices = data.services;
-        })
-        .catch(error => console.error('Error fetching IPFS providers:', error));
+      return new Promise((res, rej) => {
+        fetch(this.api + "/services/IPFS")
+          .then(response => response.json())
+          .then(data => {
+            for (var node in data.providers) {
+              const id_array = data.providers[node].split(',')
+              for (var i = 0; i < id_array.length; i++) {
+                this.ipfsProviders[node] = id_array
+              }
+            }
+            this.ipfsServices = data.services;
+            res(true)
+          })
+          .catch(error => {
+            console.warn('Error fetching IPFS providers:', error)
+            rej(error)
+          })
+      })
     },
     getProviderIconUnicode(providerId) {
       if (!this.form.amount) return '';
@@ -215,7 +234,8 @@ export default {
       const requiredSize = amount * 1024;
       const stats = this.providerStats[providerId];
       if (!stats) return '';
-      const freeSpace = BigInt(stats.disk.free);
+      const max = BigInt(stats.StorageMax)
+      const freeSpace = max - BigInt(stats.RepoSize);
       const ratio = Number(freeSpace) / requiredSize;
 
       if (ratio >= 100) return '✅';
@@ -229,7 +249,8 @@ export default {
           .filter(([id]) => {
             const stats = this.providerStats[id];
             if (!stats) return false;
-            const freeSpace = BigInt(stats.disk.free);
+            const max = BigInt(stats.StorageMax)
+            const freeSpace = max - BigInt(stats.RepoSize);
             return freeSpace >= BigInt(requiredSize * 2); // Minimum 2x requirement
           })
           .reduce((acc, [id, name]) => {
@@ -243,9 +264,8 @@ export default {
       }
     },
     handleCheck(key) {
-      const field = this.feat.json_req[key];
+      const field = this.feat.json[key];
       if (field.check === "AC" && this.form[key]) {
-        this.api = "https://spktest.dlux.io"; // Hardcoded for testing, adjust as needed
         this.accountCheck(this.form[key])
           .then((r) => {
             this.validations[key] = r;
@@ -260,21 +280,22 @@ export default {
       const requiredSize = this.form.amount * 1024;
       const stats = this.providerStats[providerId];
       if (!stats) return true;
-      const freeSpace = BigInt(stats.disk.free);
+      const max = BigInt(stats.StorageMax)
+      const freeSpace = max - BigInt(stats.RepoSize);
       return freeSpace < BigInt(requiredSize * 2); // Disable if <2x
     },
     shouldShowField(key) {
       if (key === 'ben_to' || key === 'ben_amount') {
-        return this.form.contract_type === '1';
+        return this.form.contract == 1;
       }
       return true;
     },
   },
   computed: {
     isFormValid() {
-      if (!this.feat || !this.feat.json_req) return false;
-      for (const key in this.feat.json_req) {
-        const field = this.feat.json_req[key];
+      if (!this.feat || !this.feat.json) return false;
+      for (const key in this.feat.json) {
+        const field = this.feat.json[key];
         if (field.req && !this.form[key]) return false;
         if (field.check === "AC" && this.form[key] && !this.validations[key]) return false;
       }
@@ -287,29 +308,33 @@ export default {
     },
   },
   watch: {
-    'form.contract_type'(newVal) {
-      if (newVal === "0") {
+    'form.contract'(newVal) {
+      if (newVal == 1) {
         this.form.ben_to = '';
         this.form.ben_amount = '';
         this.validations.ben_to = false;
+        this.feat.json.ben_to.req = true
+        this.feat.json.ben_amount.req = true
+      } else {
+        this.feat.json.ben_to.req = false
+        this.feat.json.ben_amount.req = false
       }
     }
   },
   mounted() {
     const feature = this.tokenprotocol.features[this.func]
-      if (feature) {
-        this.feat = feature;
-        for (const key in feature.json) {
-          this.form[key]= ""
-          if(feature.json[key]?.check == "AC"){
-            this.pfp[key] = '/img/no-user.png'
-            this.validations[key] = false;
-          }
+    if (feature) {
+      this.feat = feature;
+      for (const key in feature.json) {
+        this.form[key] = ""
+        if (feature.json[key]?.check == "AC") {
+          this.pfp[key] = '/img/no-user.png'
+          this.validations[key] = false;
         }
-      } else {
-        this.error = "Feature not found";
       }
-    this.apiSelector(0)
+    } else {
+      this.error = "Feature not found";
+    }
     this.getIPFSproviders().then(() => {
       this.fetchProviderStats()
       this.filteredBrokerOptions = { ...this.ipfsProviders }

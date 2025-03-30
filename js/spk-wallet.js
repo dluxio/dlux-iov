@@ -309,11 +309,12 @@ export default {
                             </div>
                             <!-- new contract -->
                             <div v-if="saccountapi.pubKey != 'NA'">
-                            <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" type="contract" :mypfp="mypfp" 
+                            <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" type="contract" 
+                            :api="api"
+                            :mypfp="mypfp" 
                             token="broca" 
                             :test="test"
                                 :tokenuser="saccountapi" :account="account"
-                                :tokenprotocol="protocollarynx"
                                 @modalsign="sendIt($event)" v-slot:trigger>
                                 <span class="p-2 trigger"><i class="fa-solid fa-file-contract fa-fw me-2"></i>Create A Contract</span>
                             </modal-vue>
@@ -803,6 +804,7 @@ export default {
     emits: ['tosign'],
     data() {
         return {
+            api: "https://spktest.dlux.io",
             spk2gov: false,
             mypfp: "",
             ipfsProviders: {

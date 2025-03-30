@@ -11,6 +11,7 @@ export default {
     },
     props: {
         account: { default: "Please login" },
+        api: String,
         func: { default: "send" },
         tokenprotocol: {
             default: () => ({ head_block: 0 }),
@@ -36,17 +37,20 @@ export default {
             <Standard v-if="type === 'move' && tokenprotocol.head_block && tokenuser.head_block" 
                 :func="func" 
                 :account="account"
+                :api="api"
                 :mypfp="mypfp"
                 :tokenprotocol="tokenprotocol" 
                 :tokenuser="tokenuser" 
                 @modalsign="$emit('modalsign', $event)" />
-            <Contract v-if="type === 'contract' && tokenprotocol.head_block && tokenuser.head_block" 
-                :account="account" 
-                :tokenprotocol="tokenprotocol" 
+            <Contract v-if="type === 'contract' && tokenuser.head_block" 
+                :account="account"
+                :api="api"
+                :mypfp="mypfp"
                 :tokenuser="tokenuser" 
                 @modalsign="$emit('modalsign', $event)" />
             <Election v-if="type === 'election' && tokenprotocol.head_block && tokenuser.head_block" 
-                :account="account" 
+                :account="account"
+                :api="api"
                 :tokenprotocol="tokenprotocol" 
                 :tokenuser="tokenuser" 
                 :smarkets="smarkets"
@@ -65,7 +69,7 @@ export default {
             if (this.type === 'move') {
                 return this.tokenprotocol.head_block && this.tokenuser.head_block;
             } else if (this.type === 'contract') {
-                return this.tokenprotocol.head_block && this.tokenuser.head_block;
+                return !!this.tokenuser.head_block
             } else if (this.type === 'election') {
                 return this.tokenprotocol.head_block && this.tokenuser.head_block;
             }

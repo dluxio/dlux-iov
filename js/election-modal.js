@@ -5,6 +5,7 @@ export default {
   name: 'Election',
   props: {
     account: String,
+    api: String,
     func: { type: String, default: 'send' },
     token: { type: String, default: 'balance' },
     tokenprotocol: {
@@ -189,7 +190,7 @@ export default {
           id: `${this.tokenprotocol.prefix}val_vote`,
           msg: `Voting for Validators...`,
           ops: ["getSapi"],
-          api: "https://spkinstant.hivehoneycomb.com",
+          api: this.api,
           txid: "val_vote",
         };
       }

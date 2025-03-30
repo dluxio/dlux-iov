@@ -5,6 +5,7 @@ export default {
     name: 'Standard',
     props: {
       account: String,
+      api: String,
       mypfp: String,
       func: { type: String, default: 'send' },
       token: { type: String, default: 'balance' },
@@ -86,7 +87,6 @@ export default {
   </div>`,
     data() {
         return {
-            api: "",
             debouncedValidateField: null,
             error: "",
             feat: {},
