@@ -16,6 +16,7 @@ export default {
         tokenprotocol: {
             default: () => ({ head_block: 0 }),
         },
+        tokenstats: Object,
         tokenuser: {
             default: () => ({ head_block: 0 }),
         },
@@ -47,6 +48,7 @@ export default {
                 :api="api"
                 :mypfp="mypfp"
                 :tokenuser="tokenuser" 
+                :tokenstats="tokenstats"
                 @modalsign="$emit('modalsign', $event)" />
             <Election v-if="type === 'election' && tokenprotocol.head_block && tokenuser.head_block" 
                 :account="account"

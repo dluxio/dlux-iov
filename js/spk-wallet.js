@@ -314,6 +314,7 @@ export default {
                             :mypfp="mypfp" 
                             token="broca" 
                             :test="test"
+                            :tokenstats="spkStats"
                                 :tokenuser="saccountapi" :account="account"
                                 @modalsign="sendIt($event)" v-slot:trigger>
                                 <span class="p-2 trigger"><i class="fa-solid fa-file-contract fa-fw me-2"></i>Create A Contract</span>

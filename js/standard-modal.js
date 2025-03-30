@@ -100,19 +100,6 @@ export default {
     methods: {
         ...MCommon,
         ...MModals,
-        debounce(fn, delay) {
-          let timeoutId;
-          return (...args) => {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => {
-              fn.apply(this, args);
-            }, delay);
-          };
-        },
-        fallBackIMG(event, string){
-          console.log(event)
-          event.target.src = 'https://images.hive.blog/u/' + string + '/avatar'
-        },
         getIcon(key) {
           if (key === 'to') return 'fa-at';
           return '';

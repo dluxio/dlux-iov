@@ -1,5 +1,6 @@
 import MCommon from '/js/methods-common.js'
 import MModals from '/js/methods-modals.js'
+import MSpk from '/js//methods-spk.js'
 
 export default {
   name: 'contract-modal',
@@ -7,7 +8,7 @@ export default {
     account: String,
     api: String,
     mypfp: String,
-    token: "BROCA",
+    token: "broca",
     tokenprotocol: {
       default: function () {
         return {
@@ -42,7 +43,6 @@ export default {
                   "type": "S",
                   "req": true,
                   "check": "AC",
-                  "icon": "fa-solid fa-at"
                 },
                 "broker": {
                   "string": "IPFS Service Provider",
@@ -56,7 +56,6 @@ export default {
                   "type": "S",
                   "req": false,
                   "check": "AC",
-                  "icon": "fa-solid fa-at"
                 },
                 "ben_amount": {
                   "string": "Requested Beneficiary Amount",
@@ -94,9 +93,9 @@ export default {
               <label class="small mb-1 d-flex" :for="key">
                 {{ field.string }}
                 <span v-if="key === 'amount'" class="ms-auto">
-                  Balance: <a role="button" class="text-info" @click="form[key] = tokenuser[token]">
-                    {{ formatNumber(tokenuser[token], 0, '.', ',') }}
-                  </a> {{ token }}
+                  Balance: <a role="button" class="text-info" @click="form[key] = broca_calc(tokenuser[token], tokenstats.broca_refill, tokenuser.spk_power, tokenuser.head_block)">
+                    {{ formatNumber(broca_calc(tokenuser[token], tokenstats.broca_refill, tokenuser.spk_power, tokenuser.head_block), 0, '.', ',') }}
+                  </a> {{ tokenprotocol.token }}
                 </span>
               </label>
               <div class="position-relative">
@@ -115,12 +114,20 @@ export default {
                   </select>
                 </template>
                 <template v-else>
+                <span v-if="pfp[key]" class="position-absolute top-50 translate-middle-y mx-1 rounded-circle bg-light" :style="{
+      'border-color': !form[key] ? 'rgb(255, 255, 255)' : validations[key] ? 'rgb(0, 255, 0)' : 'rgb(255, 0, 0)',
+      'border-width': '2px',
+      'border-style': 'solid'
+    }"><img :src="pfp[key]" alt="Recipient Profile Picture" @error="fallBackIMG($event, form[key])" style="width: 30px; height: 30px; border-radius: 50%;">
+</span>
+<!-- @input="key === 'amount' ? handleAmountInput() : handleCheck(key)" -->
                   <input
                     :type="getInputType(field.type)"
                     :class="['form-control', 'text-white', 'bg-dark', 'border-dark', field.icon ? 'ps-4' : '']"
                     :placeholder="'Enter ' + field.string.toLowerCase()"
                     v-model="form[key]"
-                    @input="key === 'amount' ? handleAmountInput() : handleCheck(key)"
+                    @input="debouncedValidateField(key)"
+                    
                     :step="field.step || null"
                     :min="field.min || null"
                     :max="field.max === 'balance' ? tokenuser[token] : field.max"
@@ -128,9 +135,9 @@ export default {
                   <span v-if="field.icon" class="position-absolute top-50 translate-middle-y ps-2">
                     <i :class="field.icon"></i>
                   </span>
-                  <span v-if="key === 'amount'" class="position-absolute end-0 top-50 translate-middle-y px-2">
-                    {{ token }}
-                  </span>
+                   <span v-if="key === 'amount'" class="position-absolute end-0 top-50 translate-middle-y px-2">
+                {{ tokenprotocol.token }}
+              </span>
                 </template>
               </div>
               <!-- Display storage size and available providers -->
@@ -150,6 +157,7 @@ export default {
   data() {
     return {
       availableProvidersCount: 0,
+      debouncedValidateField: null,
       filteredBrokerOptions: {},
       feat: {
         string: 'loading',
@@ -166,9 +174,15 @@ export default {
       validations: {},
     };
   },
+  created() {
+    this.debouncedValidateField = this.debounce((key) => {
+      this.validateField(key);
+    }, 300);
+  },
   methods: {
     ...MCommon,
     ...MModals,
+    ...MSpk,
     createContract() {
       const op = {
         type: "cj",
@@ -290,6 +304,29 @@ export default {
       }
       return true;
     },
+    validateField(key) {
+      this.validations[key] = false
+      const field = this.feat.json[key];
+      if (field.check === 'AC') {
+        if (this.account == this.form[key]) {
+          this.validations[key] = false;
+          this.pfp[key] = this.mypfp
+        }
+        else this.accountCheck(this.form[key]).then(result => {
+          if (result) {
+            this.validations[key] = true;
+            if (result === true) this.pfp[key] = '/img/no-user.png'
+            else this.pfp[key] = result
+          } else {
+
+            this.pfp[key] = '/img/no-user.png'
+          }
+        }).catch(() => {
+          this.validations[key] = false;
+          this.pfp[key] = '/img/no-user.png'
+        });
+      }
+    }
   },
   computed: {
     isFormValid() {
