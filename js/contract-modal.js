@@ -204,14 +204,6 @@ export default {
     ...MCommon,
     ...MModals,
     ...MSpk,
-    toggleBeneficiary() {
-      this.form.contract = this.form.contract === "1" ? "0" : "1";
-      if (this.form.contract === "0") {
-        this.form.ben_to = "";
-        this.form.ben_amount = "";
-        this.validations.ben_to = false;
-      }
-    },
     createContract() {
       const op = {
         type: "cj",
@@ -346,15 +338,22 @@ export default {
       }
       return true;
     },
+    toggleBeneficiary() {
+      this.form.contract = this.form.contract === "1" ? "0" : "1";
+      if (this.form.contract === "0") {
+        this.form.ben_to = "";
+        this.form.ben_amount = "";
+        this.validations.ben_to = false;
+      }
+    },
     validateField(key) {
       this.validations[key] = false
       const field = this.feat.json[key];
       if (field.check === 'AC') {
         if (this.account === this.form[key]) {
-          this.validations[key] = false;
+          this.validations[key] = true;
           this.pfp[key] = this.mypfp
-        }
-        else this.accountCheck(this.form[key]).then(result => {
+        } else this.accountCheck(this.form[key]).then(result => {
           if (result) {
             this.validations[key] = true;
             if (result === true) this.pfp[key] = '/img/no-user.png'
