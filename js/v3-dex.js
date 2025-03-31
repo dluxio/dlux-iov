@@ -992,7 +992,7 @@ var app = new Vue({
       const dex = this.dexapi;
       if (!dex.markets.hive.his) return;
       const current_block = this.stats.lastIBlock;
-      const buckets = Object.keys(dex.markets[pair].days);
+      const buckets = Object.keys(dex.markets[pair]?.days);
       buckets.sort(function (a, b) {
         return parseInt(a) - parseInt(b);
       });
