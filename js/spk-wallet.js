@@ -104,7 +104,7 @@ export default {
                     </div>
                 </div>
             </div>
-            <!--spk token-->
+            <!-- Liquid SPK -->
             <div
                 class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
                 <div>
@@ -175,9 +175,6 @@ export default {
                         <div class="d-flex align-items-start fs-4 fw-bold">
                             SPK Power
                         </div>
-
-                        <p class="text-white-50">Powered SPK for
-                            Voting.</p>
                         <p class="text-white-50">Benefits of SPK
                             Power:</p>
                         <ul class="text-white-50">
@@ -387,12 +384,7 @@ export default {
             <div v-if="saccountapi.spk_power"
                 class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
                 <div class="text-start">
-                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power
-                            
-                        </div>
-                    <p class="text-white-50">Storage Credits
-                        for the SPK
-                        network.</p>
+                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power</div>
                     <p class="text-white-50">BROCA stats:</p>
                     <ul class="text-white-50">
                         <li>Current cost to store: 1 BROCA per
@@ -459,7 +451,6 @@ export default {
                     </div>
                 </div>
             </div>
-            
             <!--larynx token-->
             <div
                 class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
@@ -566,76 +557,11 @@ export default {
                     </div>
                 </div>
             </div>
-            <!--locked larynx-->
-            <div class="d-flex text-start flex-wrap align-items-center border-bottom border-white-50 py-3"
-                v-if="saccountapi.gov">
-                <div>
-                    <div class="d-flex align-items-start">
-                        <h4 class="m-0">LARYNX Locked</h4>
-                    </div>
-                    <p class="text-white-50">Locked tokens
-                        provide liquidity
-                        to the
-                        network, aid in determining consensus,
-                        and earn rewards for node runners</p>
-                    <p class="text-white-50">Benefits of LARYNX Locked:</p>
-                    <ul class="text-white-50">
-                        <li>Provides collateral for DEX transactions and proof-of-stake consensus</li>
-                        <li>Instant Lock | 4 Week Unlock</li>
-                        <li>Requires an operating LARYNX node
-                        </li>
-                        <li>LARYNX LOCKED (LL) earns SPK tokens at {{toFixed(pFloat(spkStats.spk_rate_lgov) * 100,3)}}%</li>
-                    </ul>
-                </div>
-                <div id="larynxgactions" class="ms-auto text-end" v-show="me">
-                    <div class="d-flex flex-wrap align-items-center mb-2">
-                        <small class="ms-auto"><span
-                                class="badge me-2 bg-success">{{toFixed(pFloat(spkStats.spk_rate_lgov) * 100,3)}}%</span></small>
-                        <h5 id="govbalance" class="m-0">
-                            {{formatNumber((saccountapi.gov)/1000, 3, '.', ',')}} LL
-                        </h5>
-                    </div>
-                    <div class="btn-group" role="group"
-                        aria-label="LARYNX Actions">
-                        <button onclick="window.open('https://www.dlux.io/dex/#larynx', '_blank')"
-                            type="button" class="btn btn-primary p-0">
-                            <span class="p-2"><i
-                                    class="fa-solid fa-gear fa-fw me-2"></i>Options</span>
-                        </button>
-                        <button type="button"
-                            class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                            disabled></button>
-                        <div class="btn-group" role="group" v-if="me">
-                            <button id="btnGroupDrop1" type="button"
-                                class="btn btn-primary dropdown-toggle"
-                                data-bs-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false"></button>
-
-                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
-                                aria-labelledby="btnGroupDrop1">
-                                <modal-vue type="power" token="LARYNX"
-                                    func="Unlock Liquidity"
-                                    :balance="saccountapi.gov"
-                                    :test="test"
-                                    :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
-                                    <button class="dropdown-item trigger" 
-                                        type="button"><i
-                                            class="fas fa-lock-open fa-fw me-2"></i>Unlock Liquidity</button>
-                                </modal-vue>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
             <!--larynx power-->
             <div class="border-bottom border-white-50 py-3">
                 <div class="d-flex flex-wrap text-start align-items-center">
                     <div>
-                       <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Power
-                            
-                        </div>
-                        <p class="text-white-50">Powered tokens used to mine SPK</p>
+                       <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Power</div>
                         <p class="text-white-50">Benefits of LARYNX Power:
                         </p>
                         <ul class="text-white-50">
