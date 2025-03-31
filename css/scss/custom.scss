@@ -2448,3 +2448,30 @@ body[data-touch="false"] .dropdown-extra:hover {
 .draggable:hover {
   background-color: #707070a9;
 }
+
+.dropdown-divider {
+  margin: 0;
+}
+.dropdown-menu {
+  padding: 0;
+}
+.dropdown-item {
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+/* Target any div, button, or a inside the first dropdown-menu-item */
+.dropdown-menu .dropdown-menu-item:first-child > div,
+.dropdown-menu .dropdown-menu-item:first-child > button,
+.dropdown-menu .dropdown-menu-item:first-child > a {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+/* Target any div, button, or a inside the last dropdown-menu-item */
+.dropdown-menu .dropdown-menu-item:last-child > div,
+.dropdown-menu .dropdown-menu-item:last-child > button,
+.dropdown-menu .dropdown-menu-item:last-child > a {
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
