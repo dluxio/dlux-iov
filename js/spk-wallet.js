@@ -107,6 +107,9 @@ export default {
             <!-- Liquid SPK -->
             <div
                 class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
+                <div class="rounded border border-primary me-2">
+                    <img src="/img/spk512.png" class="rounded img-fluid border border-3 border-dark" width="70">
+                </div>
                 <div>
                     <div class="d-flex align-items-start fs-4 fw-bold">SPK Token
                             
@@ -171,6 +174,10 @@ export default {
             <!-- SPK Power -->
             <div class="d-flex flex-column border-bottom border-white-50 py-3">
                 <div class="d-flex flex-wrap align-items-center">
+                <div class="position-relative me-2 rounded border border-1 border-warning">
+                    <img src="/img/spk512.png" width="70" class="img-fluid rounded border border-3 border-dark">
+                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-circle bg-warning text-dark"><i class="fa-solid fa-bolt" style="font-size: .65rem;"></i></span>
+                </div>
                     <div class="text-start">
                         <div class="d-flex align-items-start fs-4 fw-bold">
                             SPK Power
