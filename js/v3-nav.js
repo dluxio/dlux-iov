@@ -90,6 +90,8 @@ export default {
         this.$emit("ack", op.txid);
         if (op.type == "cja") {
           this.broadcastCJA(op);
+        } else if (op.type == "cj") {
+          this.broadcastCJ(op);
         } else if (this.op.type == "xfr") {
           this.broadcastTransfer(op);
         } else if (this.op.type == "comment") {
@@ -176,6 +178,34 @@ export default {
       this.HSR = false;
       this.PEN = true;
       localStorage.setItem("signer", "PEN");
+    },
+    broadcastCJ(obj) {
+      var op = [
+        this.user,
+        [
+          [
+            "custom_json",
+            {
+              required_auths: [],
+              required_posting_auths: [this.user],
+              id: obj.id,
+              json: JSON.stringify(obj.cj),
+            },
+          ],
+        ],
+        "active",
+      ];
+      console.log("CJ");
+      this.sign(op)
+        .then((r) => {
+          this.statusFinder(r, obj);
+          try {
+            obj.callbacks[0](`${obj.challenge}:${r}`, console.log("callback?"));
+          } catch (e) { }
+        })
+        .catch((e) => {
+          console.log(e);
+        });
     },
     broadcastCJA(obj) {
       var op = [
