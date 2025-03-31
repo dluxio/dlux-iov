@@ -343,6 +343,7 @@ export default {
       this.form.contract = this.form.contract === "1" ? "0" : "1";
       if (this.form.contract === "0") {
         this.form.ben_to = "";
+        this.pfp.ben_to = '/img/no-user.png'
         this.form.ben_amount = "";
         this.validations.ben_to = false;
       }
@@ -351,7 +352,6 @@ export default {
       this.validations[key] = false
       const field = this.feat.json[key];
       if (field.check === 'AC') {
-        this.pfp[key] = '/img/no-user.png'
         if (this.account === this.form[key]) {
           this.validations[key] = true;
           this.pfp[key] = this.mypfp
