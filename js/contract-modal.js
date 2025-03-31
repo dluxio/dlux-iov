@@ -19,15 +19,11 @@ export default {
             channel_open: {
               "string": "Create Contract",
               "json": {
-                "contract": {
-                  "string": "Contract Type",
-                  "type": "O",
+                "to": {
+                  "string": "Account to Upload File",
+                  "type": "S",
                   "req": true,
-                  "options": {
-                    "0": "No Beneficiary",
-                    "1": "Beneficiary Required"
-                  },
-                  "icon": "fa-solid fa-file-contract"
+                  "check": "AC",
                 },
                 "amount": {
                   "string": "Amount",
@@ -37,18 +33,22 @@ export default {
                   "step": 1,
                   "max": "balance",
                 },
-                "to": {
-                  "string": "Account to Upload File",
-                  "type": "S",
-                  "req": true,
-                  "check": "AC",
-                },
                 "broker": {
-                  "string": "IPFS Service Provider",
+                  "string": "Service Provider",
                   "type": "O",
                   "req": true,
                   "options": "ipfsproviders",
                   "icon": "fa-solid fa-server"
+                },
+                "contract": {
+                  "string": "",
+                  "type": "O",
+                  "req": true,
+                  "options": {
+                    "0": "Standard",
+                    "1": "Beneficiary"
+                  },
+                  "icon": "fa-solid fa-file-contract"
                 },
                 "ben_to": {
                   "string": "Beneficiary Account",
@@ -57,7 +57,7 @@ export default {
                   "check": "AC",
                 },
                 "ben_amount": {
-                  "string": "Requested Beneficiary Percentage",
+                  "string": "Beneficiary Percentage",
                   "type": "I",
                   "req": false,
                   "min": 0,
@@ -86,7 +86,7 @@ export default {
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <form name="contract" @submit.prevent="createContract">
-          <div class="modal-body text-start" v-if="!isLoading">
+          <div class="modal-body text-start pb-1" v-if="!isLoading">
             <div v-for="(field, key) in feat.json">
               <div class="mb-3" v-if="shouldShowField(key)">
                 <!-- form field label -->
@@ -100,7 +100,6 @@ export default {
                 </label>
                 <!-- form field input -->
                 <div class="position-relative">
-                  
                   <template v-if="field.type === 'O'">
                     <!-- provider select -->
                     <select v-if="key === 'broker'" class="form-select text-white bg-dark border-dark" :id="key" v-model="form[key]">
@@ -109,12 +108,18 @@ export default {
                         {{getProviderIconUnicode(id)}} | @{{ id }}
                       </option>
                     </select>
-                    <!-- default select -->
-                    <select v-else class="form-select text-white bg-dark border-dark" :id="key" v-model="form[key]">
-                      <option v-for="(name, id) in field.options" :value="id">
-                        {{name}}
-                      </option>
-                    </select>
+                    <!-- beneficiary toggle button -->
+                    <div v-else-if="key === 'contract'" class="text-center">
+                      <button 
+                         
+                        type="button" 
+                        class="btn text-white"
+                        :class="form.contract === '1' ? 'btn-danger' : 'btn-success'"
+                        @click="toggleBeneficiary"
+                      >
+                        {{ form.contract === '1' ? 'Remove Beneficiary' : 'Add Beneficiary' }}
+                      </button>
+                    </div>
                   </template>
                   <!-- input -->
                   <template v-else>
@@ -132,7 +137,6 @@ export default {
                       :placeholder="'Enter ' + field.string.toLowerCase()"
                       v-model="form[key]"
                       @input="debouncedValidateField(key)"
-                      
                       :step="field.step || null"
                       :min="field.min || null"
                       :max="field.max === 'balance' ? tokenuser[token] : field.max"
@@ -148,8 +152,13 @@ export default {
                   </template>
                 </div>
                 <!-- form field info message -->
-                <div v-if="key === 'amount'" class="text-center mb-3 small text-muted">
-                  ~{{ fancyBytes(form[key] * 1024) }} ({{ availableProvidersCount }} storage providers available)
+                <div class="text-center mb-3 small text-muted">
+                  <span v-if="key === 'amount'">
+                    ~{{ fancyBytes(form[key] * 1024) }}
+                  </span>
+                  <span v-if="key === 'broker'">
+                    ({{ availableProvidersCount }} storage providers available)
+                  </span>
                 </div>
               </div>
             </div>
@@ -171,7 +180,12 @@ export default {
         json: {},
       },
       form: {
-        contract_type: "0",
+        contract: "0",
+        to: "",
+        amount: "",
+        broker: "",
+        ben_to: "",
+        ben_amount: ""
       },
       func: "channel_open",
       ipfsProviders: {},
@@ -190,12 +204,20 @@ export default {
     ...MCommon,
     ...MModals,
     ...MSpk,
+    toggleBeneficiary() {
+      this.form.contract = this.form.contract === "1" ? "0" : "1";
+      if (this.form.contract === "0") {
+        this.form.ben_to = "";
+        this.form.ben_amount = "";
+        this.validations.ben_to = false;
+      }
+    },
     createContract() {
       const op = {
         type: "cj",
         cj: {
           to: this.form.to,
-          broca: parseInt(this.form.amount), // Precision is 0
+          broca: parseInt(this.form.amount),
           broker: this.form.broker,
           contract: this.form.contract
         },
@@ -251,7 +273,7 @@ export default {
     getProviderIconUnicode(providerId) {
       if (!this.form.amount) return '';
       const amount = parseFloat(this.form.amount);
-      if (isNaN(amount)) return; // Early return if invalid
+      if (isNaN(amount)) return;
       const requiredSize = amount * 1024;
       const stats = this.providerStats[providerId];
       if (!stats) return '';
@@ -265,14 +287,14 @@ export default {
     },
     handleAmountInput() {
       if (this.form.amount) {
-        const requiredSize = this.form.amount * 1024; // Convert to bytes (1 unit = 1024 bytes)
+        const requiredSize = this.form.amount * 1024;
         this.filteredBrokerOptions = Object.entries(this.ipfsProviders)
           .filter(([id]) => {
             const stats = this.providerStats[id];
             if (!stats) return false;
             const max = BigInt(stats.StorageMax)
             const freeSpace = max - BigInt(stats.RepoSize);
-            return freeSpace >= BigInt(requiredSize * 2); // Minimum 2x requirement
+            return freeSpace >= BigInt(requiredSize * 2);
           })
           .reduce((acc, [id, name]) => {
             acc[id] = name;
@@ -280,7 +302,7 @@ export default {
           }, {});
         this.availableProvidersCount = Object.keys(this.filteredBrokerOptions).length;
       } else {
-        this.filteredBrokerOptions = this.ipfsProviders; // Show all providers if no amount
+        this.filteredBrokerOptions = this.ipfsProviders;
         this.availableProvidersCount = Object.keys(this.ipfsProviders).length;
       }
     },
@@ -303,11 +325,11 @@ export default {
       if (!stats) return true;
       const max = BigInt(stats.StorageMax)
       const freeSpace = max - BigInt(stats.RepoSize);
-      return freeSpace < BigInt(requiredSize * 2); // Disable if <2x
+      return freeSpace < BigInt(requiredSize * 2);
     },
     shouldShowField(key) {
       if (key === 'ben_to' || key === 'ben_amount') {
-        return this.form.contract == 1;
+        return this.form.contract === "1";
       }
       return true;
     },
@@ -315,7 +337,7 @@ export default {
       this.validations[key] = false
       const field = this.feat.json[key];
       if (field.check === 'AC') {
-        if (this.account == this.form[key]) {
+        if (this.account === this.form[key]) {
           this.validations[key] = false;
           this.pfp[key] = this.mypfp
         }
@@ -325,7 +347,6 @@ export default {
             if (result === true) this.pfp[key] = '/img/no-user.png'
             else this.pfp[key] = result
           } else {
-
             this.pfp[key] = '/img/no-user.png'
           }
         }).catch(() => {
@@ -343,7 +364,7 @@ export default {
         if (field.req && !this.form[key]) return false;
         if (field.check === "AC" && this.form[key] && !this.validations[key]) return false;
       }
-      if (this.form.contract_type === "1") {
+      if (this.form.contract === "1") {
         if (!this.form.ben_to || !this.form.ben_amount) return false;
         if (!this.validations.ben_to) return false;
         if (this.form.ben_amount < 0.01 || this.form.ben_amount > 100) return false;
@@ -353,26 +374,28 @@ export default {
   },
   watch: {
     'form.contract'(newVal) {
-      if (newVal == 1) {
+      if (newVal === "1") {
         this.form.ben_to = '';
         this.form.ben_amount = '';
         this.validations.ben_to = false;
-        this.feat.json.ben_to.req = true
-        this.feat.json.ben_amount.req = true
+        this.feat.json.ben_to.req = true;
+        this.feat.json.ben_amount.req = true;
       } else {
-        this.feat.json.ben_to.req = false
-        this.feat.json.ben_amount.req = false
+        this.feat.json.ben_to.req = false;
+        this.feat.json.ben_amount.req = false;
       }
     }
   },
   mounted() {
-    const feature = this.tokenprotocol.features[this.func]
+    const feature = this.tokenprotocol.features[this.func];
     if (feature) {
       this.feat = feature;
       for (const key in feature.json) {
-        this.form[key] = ""
-        if (feature.json[key]?.check == "AC") {
-          this.pfp[key] = '/img/no-user.png'
+        if (this.form[key] === undefined) {
+          this.form[key] = "";
+        }
+        if (feature.json[key]?.check === "AC") {
+          this.pfp[key] = '/img/no-user.png';
           this.validations[key] = false;
         }
       }
@@ -380,9 +403,9 @@ export default {
       this.error = "Feature not found";
     }
     this.getIPFSproviders().then(() => {
-      this.fetchProviderStats()
-      this.filteredBrokerOptions = { ...this.ipfsProviders }
-      this.availableProvidersCount = Object.keys(this.ipfsProviders).length
+      this.fetchProviderStats();
+      this.filteredBrokerOptions = { ...this.ipfsProviders };
+      this.availableProvidersCount = Object.keys(this.ipfsProviders).length;
       this.isLoading = false;
     });
   }
