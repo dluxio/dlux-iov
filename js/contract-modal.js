@@ -351,6 +351,7 @@ export default {
       this.validations[key] = false
       const field = this.feat.json[key];
       if (field.check === 'AC') {
+        this.pfp[key] = '/img/no-user.png'
         if (this.account === this.form[key]) {
           this.validations[key] = true;
           this.pfp[key] = this.mypfp
