@@ -310,6 +310,7 @@ export default {
         this.filteredBrokerOptions = this.ipfsProviders;
         this.availableProvidersCount = Object.keys(this.ipfsProviders).length;
       }
+      if (!this.ipfsProviders[this.form.broker])this.form.broker = ""
     },
     handleCheck(key) {
       const field = this.feat.json[key];
