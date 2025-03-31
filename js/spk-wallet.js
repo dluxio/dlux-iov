@@ -56,6 +56,54 @@ export default {
                     providers with SPK governance and BROCA gas
                     tokens.</p>
             </div>
+            <!--claim  rewards-->
+            <div class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3"
+                id="larynxclaimrewards" v-if="saccountapi.claim > 0 && me">
+                <div>
+                    <div class="d-flex align-items-start">
+                        <h4 class="m-0">Claim Rewards
+                        </h4>
+                    </div>
+                    <p class="text-white-50">Claimable rewards
+                        for running a
+                         service
+                        node.</p>
+                </div>
+                <div id="claimlarynxrewardbtn" class="ms-auto text-end">
+                    <h5>{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
+                    </h5>
+                    <div class="mb-2"> <span class="small" v-show="!spk2gov">50%
+                            Liquid |
+                            50%
+                            Power</span> <span class="small"
+                            v-show="spk2gov">50%
+                            Liquid | 50% Gov</span></div>
+                    <div v-show="saccountapi.gov > 0" class="text-white">
+                        <div class="input-group my-3">
+                            <span
+                                class="input-group-text bg-dark border-info text-info">
+                                <div class="form-check form-switch ">
+                                    <input class="form-check-input"
+                                        type="checkbox" role="switch"
+                                        id="flexSwitchCheckDefault"
+                                        v-model="spk2gov">
+                                    <label class="form-check-label"
+                                        for="flexSwitchCheckDefault">Claim
+                                        GOV not
+                                        PWR</label>
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="btn-group" role="group"
+                        aria-label="LARYNX Claim">
+                        <button type="submit" class="btn btn-primary "
+                            @click="rewardClaim('spkcc', 'shares_claim', spk2gov)"><i
+                                class="fas fa-coin"></i><i
+                                class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
+                    </div>
+                </div>
+            </div>
             <!--spk token-->
             <div
                 class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
@@ -85,8 +133,8 @@ export default {
                                 :tokenprotocol="protocolspk"
                                 @modalsign="sendIt($event)" v-slot:trigger>
                                 <span  class="p-2 trigger">
-        <i class="fas fa-paper-plane me-2"></i>Send
-    </span>
+                                <i class="fas fa-paper-plane me-2"></i>Send
+                            </span>
                                         
                             </modal-vue>
                         </button>
@@ -145,7 +193,7 @@ export default {
                         <div class="btn-group" role="group"
                             aria-label="Power Actions">
                             <!-- vote btn -->
-                            <button class="dropdown btn btn-primary p-2" href="#" role="button" id="settingsDropdownBtn" data-bs-toggle="collapse" data-bs-target="#collapseVote" aria-expanded="false" aria-controls="collapseVote">
+                            <button class="dropdown btn btn-primary" href="#" role="button" id="settingsDropdownBtn" data-bs-toggle="collapse" data-bs-target="#collapseVote" aria-expanded="false" aria-controls="collapseVote">
                                 <i class="me-2 fa-solid fa-person-booth"></i>Vote</button>
                             <button type="button"
                                 class="btn btn-dark ms-0 me-0 ps-0 pe-0"
@@ -269,11 +317,73 @@ export default {
                     </div>
                 </div>
             </div>
-            <!-- Broca -->
+            <!-- Liquid BROCA -->
+            <div
+                class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
+                <div>
+                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA Token
+                            
+                        </div>
+                    <p class="text-white-50 m-0">The governance
+                        token for
+                        the SPK network.
+                    </p>
+                </div>
+                <div class="ms-auto text-end">
+                    <h5>
+                        {{formatNumber((saccountapi.spk)/1000,
+                        3, '.',
+                        ',')}}
+                        SPK
+                    </h5>
+                    <div class="btn-group" role="group"
+                        aria-label="SPK Actions">
+                        <button type="button" class="btn btn-primary p-0">
+                            <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="send" :mypfp="mypfp" 
+                            token="spk" 
+                            :test="test"
+                                :tokenuser="saccountapi" :account="account"
+                                :tokenprotocol="protocolspk"
+                                @modalsign="sendIt($event)" v-slot:trigger>
+                                <span  class="p-2 trigger">
+                                <i class="fas fa-paper-plane me-2"></i>Send
+                            </span>
+                                        
+                            </modal-vue>
+                        </button>
+                        <button type="button"
+                            class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                            disabled></button>
+                        <div class="btn-group" role="group" v-if="me">
+                            <button type="button"
+                                class="btn btn-primary dropdown-toggle"
+                                data-bs-toggle="dropdown" aria-haspopup="true"
+                                aria-expanded="false"></button>
+                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
+                                aria-labelledby="btnGroupDrop1">
+                                <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="powup" token="spk" :test="test"
+                                :tokenuser="saccountapi" :account="account"
+                                :tokenprotocol="protocolspk"
+                                :mypfp="mypfp" 
+                                @modalsign="sendIt($event)" v-slot:trigger>
+                                    <button class="dropdown-item trigger"
+                                        type="button"><i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
+                                </modal-vue>
+                                <div class="dropdown-divider">
+                                </div>
+                                <a class="dropdown-item" href="https://www.dlux.io/dex/?api=https://spktest.dlux.io/broca#dex"
+                                    id="buylink" target="_blank"><i
+                                        class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Broca Power-->
             <div v-if="saccountapi.spk_power"
                 class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
                 <div class="text-start">
-                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA KBs
+                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power
                             
                         </div>
                     <p class="text-white-50">Storage Credits
@@ -325,8 +435,8 @@ export default {
                             class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                             disabled></button>
                         <div class="btn-group" role="group" v-if="me">
-                            <button disabled type="button"
-                                class="disabled btn btn-primary dropdown-toggle"
+                            <button type="button"
+                                class="btn btn-primary dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
@@ -338,61 +448,14 @@ export default {
                                     @modalsign="sendIt($event)" v-slot:trigger>
                                     <button class="dropdown-item trigger"
                                         type="button"><i
-                                            class="fas fa-coins fa-fw me-2"></i>Buy / Sell</button>
+                                            class="fas fa-angle-double-down fa-fw me-2"></i>Power Down</button>
                                 </modal-vue>
                             </ul>
                         </div>
                     </div>
                 </div>
             </div>
-            <!--claim larynx rewards-->
-            <div class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3"
-                id="larynxclaimrewards" v-if="saccountapi.claim > 0 && me">
-                <div>
-                    <div class="d-flex align-items-start">
-                        <h4 class="m-0">LARYNX Rewards Claim
-                        </h4>
-                    </div>
-                    <p class="text-white-50">Claimable rewards
-                        for running a
-                        SPK service
-                        node.</p>
-                </div>
-                <div id="claimlarynxrewardbtn" class="ms-auto text-end">
-                    <h5>{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
-                    </h5>
-                    <div class="mb-2"> <span class="small" v-show="!spk2gov">50%
-                            Liquid |
-                            50%
-                            Power</span> <span class="small"
-                            v-show="spk2gov">50%
-                            Liquid | 50% Gov</span></div>
-                    <div v-show="saccountapi.gov > 0" class="text-white">
-                        <div class="input-group my-3">
-                            <span
-                                class="input-group-text bg-dark border-info text-info">
-                                <div class="form-check form-switch ">
-                                    <input class="form-check-input"
-                                        type="checkbox" role="switch"
-                                        id="flexSwitchCheckDefault"
-                                        v-model="spk2gov">
-                                    <label class="form-check-label"
-                                        for="flexSwitchCheckDefault">Claim
-                                        GOV not
-                                        PWR</label>
-                                </div>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="btn-group" role="group"
-                        aria-label="LARYNX Claim">
-                        <button type="submit" class="btn btn-primary "
-                            @click="rewardClaim('spkcc', 'shares_claim', spk2gov)"><i
-                                class="fas fa-coin"></i><i
-                                class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
-                    </div>
-                </div>
-            </div>
+            
             <!--larynx token-->
             <div
                 class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
