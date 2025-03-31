@@ -195,7 +195,7 @@ export default {
         ],
         "posting",
       ];
-      console.log("CJA");
+      console.log("CJ");
       this.sign(op)
         .then((r) => {
           this.statusFinder(r, obj);
