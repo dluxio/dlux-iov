@@ -1608,7 +1608,7 @@
               <div id="userNode" class="">
                 <h4 class="text-center text-white-50">@{{account}}</h4>
                 <form name="nodeSettings" class="needs-validation" novalidate>
-                  <div class="row mb-3" v-for="opt in features.node.opts">
+                  <div class="row mb-3" v-for="opt in features?.node?.opts">
                     <label :for="opt.json" class="form-label">{{opt.S}}:</label>
                     <div class="input-group">
                       <input v-if="opt.type == 'text'" :type="opt.type" v-model="opt.val" class="form-control text-info"
