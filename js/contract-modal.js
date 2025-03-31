@@ -24,8 +24,8 @@ export default {
                   "type": "O",
                   "req": true,
                   "options": {
-                    "0": "Pay for a contract for you or another",
-                    "1": "Pay for a contract for another and require a post beneficiary"
+                    "0": "No Beneficiary",
+                    "1": "Beneficiary Required"
                   },
                   "icon": "fa-solid fa-file-contract"
                 },
@@ -36,7 +36,6 @@ export default {
                   "min": 100,
                   "step": 1,
                   "max": "balance",
-                  "icon": "fa-solid fa-coins"
                 },
                 "to": {
                   "string": "Account to Upload File",
@@ -58,7 +57,7 @@ export default {
                   "check": "AC",
                 },
                 "ben_amount": {
-                  "string": "Requested Beneficiary Amount",
+                  "string": "Requested Beneficiary Percentage",
                   "type": "I",
                   "req": false,
                   "min": 0,
@@ -88,63 +87,71 @@ export default {
         </div>
         <form name="contract" @submit.prevent="createContract">
           <div class="modal-body text-start" v-if="!isLoading">
-          <div v-for="(field, key) in feat.json">
-            <div class="mb-3" v-if="shouldShowField(key)">
-              <label class="small mb-1 d-flex" :for="key">
-                {{ field.string }}
-                <span v-if="key === 'amount'" class="ms-auto">
-                  Balance: <a role="button" class="text-info" @click="form[key] = broca_calc(tokenuser[token], tokenstats.broca_refill, tokenuser.spk_power, tokenuser.head_block)">
-                    {{ formatNumber(broca_calc(tokenuser[token], tokenstats.broca_refill, tokenuser.spk_power, tokenuser.head_block), 0, '.', ',') }}
-                  </a> {{ tokenprotocol.token }}
-                </span>
-              </label>
-              <div class="position-relative">
-                <template v-if="field.type === 'O'">
-                  <select v-if="key === 'broker'" class="form-select text-white bg-dark border-dark ps-4" :id="key" v-model="form[key]">
-                    <option value="" disabled selected>Select {{ field.string.toLowerCase() }}</option>
-                    <option v-for="(name, id) in filteredBrokerOptions" :value="id" :disabled="isProviderDisabled(id)">
-{{getProviderIconUnicode(id)}} | @{{ id }}
-                    </option>
-                  </select>
-                  <select v-else class="form-select text-white bg-dark border-dark ps-4" :id="key" v-model="form[key]">
-                    <option value="" disabled selected>Select {{ field.string.toLowerCase() }}</option>
-                    <option v-for="(name, id) in field.options" :value="id">
-{{name}}
-                    </option>
-                  </select>
-                </template>
-                <template v-else>
-                <span v-if="pfp[key]" class="position-absolute top-50 translate-middle-y mx-1 rounded-circle bg-light" :style="{
-      'border-color': !form[key] ? 'rgb(255, 255, 255)' : validations[key] ? 'rgb(0, 255, 0)' : 'rgb(255, 0, 0)',
-      'border-width': '2px',
-      'border-style': 'solid'
-    }"><img :src="pfp[key]" alt="Recipient Profile Picture" @error="fallBackIMG($event, form[key])" style="width: 30px; height: 30px; border-radius: 50%;">
-</span>
-<!-- @input="key === 'amount' ? handleAmountInput() : handleCheck(key)" -->
-                  <input
-                    :type="getInputType(field.type)"
-                    :class="['form-control', 'text-white', 'bg-dark', 'border-dark', field.icon ? 'ps-4' : '']"
-                    :placeholder="'Enter ' + field.string.toLowerCase()"
-                    v-model="form[key]"
-                    @input="debouncedValidateField(key)"
-                    
-                    :step="field.step || null"
-                    :min="field.min || null"
-                    :max="field.max === 'balance' ? tokenuser[token] : field.max"
-                  >
-                  <span v-if="field.icon" class="position-absolute top-50 translate-middle-y ps-2">
-                    <i :class="field.icon"></i>
+            <div v-for="(field, key) in feat.json">
+              <div class="mb-3" v-if="shouldShowField(key)">
+                <!-- form field label -->
+                <label class="small mb-1 d-flex" :for="key">
+                  {{ field.string }}
+                  <span v-if="key === 'amount'" class="ms-auto">
+                    Balance: <a role="button" class="text-info" @click="form[key] = broca_calc(tokenuser[token], tokenstats.broca_refill, tokenuser.spk_power, tokenuser.head_block)">
+                      {{ formatNumber(broca_calc(tokenuser[token], tokenstats.broca_refill, tokenuser.spk_power, tokenuser.head_block), 0, '.', ',') }}
+                    </a> {{ tokenprotocol.token }}
                   </span>
-                   <span v-if="key === 'amount'" class="position-absolute end-0 top-50 translate-middle-y px-2">
-                {{ tokenprotocol.token }}
-              </span>
-                </template>
+                </label>
+                <!-- form field input -->
+                <div class="position-relative">
+                  
+                  <template v-if="field.type === 'O'">
+                    <!-- provider select -->
+                    <select v-if="key === 'broker'" class="form-select text-white bg-dark border-dark" :id="key" v-model="form[key]">
+                      <option value="" disabled selected>Select {{ field.string.toLowerCase() }}</option>
+                      <option v-for="(name, id) in filteredBrokerOptions" :value="id" :disabled="isProviderDisabled(id)">
+                        {{getProviderIconUnicode(id)}} | @{{ id }}
+                      </option>
+                    </select>
+                    <!-- default select -->
+                    <select v-else class="form-select text-white bg-dark border-dark" :id="key" v-model="form[key]">
+                      <option v-for="(name, id) in field.options" :value="id">
+                        {{name}}
+                      </option>
+                    </select>
+                  </template>
+                  <!-- input -->
+                  <template v-else>
+                    <!-- input field pfp -->
+                    <span v-if="pfp[key]" class="position-absolute top-50 translate-middle-y mx-1 rounded-circle bg-light" :style="{
+                          'border-color': !form[key] ? 'rgb(255, 255, 255)' : validations[key] ? 'rgb(0, 255, 0)' : 'rgb(255, 0, 0)',
+                          'border-width': '2px',
+                          'border-style': 'solid'
+                        }"><img :src="pfp[key]" alt="Recipient Profile Picture" @error="fallBackIMG($event, form[key])" style="width: 30px; height: 30px; border-radius: 50%;">
+                    </span>
+                    <!-- input field -->
+                    <input
+                      :type="getInputType(field.type)"
+                      :class="['form-control', 'text-white', 'bg-dark', 'border-dark',  field.icon ? 'pe-4' : '', pfp[key] ? 'ps-4' : '',  key === 'amount' ? 'pe-5' : '']"
+                      :placeholder="'Enter ' + field.string.toLowerCase()"
+                      v-model="form[key]"
+                      @input="debouncedValidateField(key)"
+                      
+                      :step="field.step || null"
+                      :min="field.min || null"
+                      :max="field.max === 'balance' ? tokenuser[token] : field.max"
+                    >
+                    <!-- input field units -->
+                    <span v-if="key === 'amount'" class="position-absolute end-0 top-50 translate-middle-y px-2">
+                      {{ tokenprotocol.token }}
+                    </span>
+                    <!-- input field icon -->
+                    <span v-if="field.icon" class="position-absolute end-0 top-50 translate-middle-y px-2">
+                      <i :class="field.icon"></i>
+                    </span>
+                  </template>
+                </div>
+                <!-- form field info message -->
+                <div v-if="key === 'amount'" class="text-center mb-3 small text-muted">
+                  ~{{ fancyBytes(form[key] * 1024) }} ({{ availableProvidersCount }} storage providers available)
+                </div>
               </div>
-              <!-- Display storage size and available providers -->
-              <div v-if="key === 'amount'" class="text-center mb-3 small text-muted">
-                ~{{ fancyBytes(form[key] * 1024) }} ({{ availableProvidersCount }} storage providers available)
-              </div>
-            </div>
             </div>
           </div>
           <div class="modal-footer">
