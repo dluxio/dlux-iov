@@ -1,4 +1,4 @@
-this.version = "2025.03.30.2";
+this.version = "2025.03.31.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -148,6 +148,7 @@ var urlsToCache = [
   `/js/mde.js`,
   `/js/methods-common.js`,
   `/js/methods-modals.js`,
+  `/js/methods-spk.js`,
   `/js/mfi-vue.js`,
   `/js/modal-manager.js`,
   `/js/modalvue-old.js`,

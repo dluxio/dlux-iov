@@ -245,6 +245,19 @@ export default {
               if (data?.node) {
                 this.providerStats[data.node] = data
               }
+              this.filteredBrokerOptions = Object.entries(this.ipfsProviders)
+                .filter(([id]) => {
+                  const stats = this.providerStats[id];
+                  if (!stats) return false;
+                  const max = BigInt(stats.StorageMax)
+                  const freeSpace = max - BigInt(stats.RepoSize);
+                  return freeSpace >= BigInt(2);
+                })
+                .reduce((acc, [id, name]) => {
+                  acc[id] = name;
+                  return acc;
+                }, {});
+              this.availableProvidersCount = Object.keys(this.filteredBrokerOptions).length;
             })
             .catch(error => { })
         }
@@ -396,6 +409,8 @@ export default {
         }
         if (feature.json[key]?.check === "AC") {
           this.pfp[key] = '/img/no-user.png';
+          this.validations[key] = false;
+        } else if (feature.json[key]?.check) {
           this.validations[key] = false;
         }
       }
