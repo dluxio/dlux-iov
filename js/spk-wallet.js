@@ -695,18 +695,13 @@ export default {
                     </div>
                     <div>
                        <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Power</div>
-                        <p class="text-white-50">Benefits of LARYNX Power:
-                        </p>
                         <ul class="text-white-50">
-                            <li>Delegate to node service accounts to build consensus (DPoS)
+                            <li>Increases the effectiveness of your nodes
                             </li>
                             <li>Instant Power Up | 4 Week Power
                                 Down</li>
-                            <li>LARYNX POWER (LP) helps to earn SPK
-                                tokens for validated services provided
-                            </li>
-                            <li>Delegated LP (DLP) earns SPK
-                                tokens for both
+                            <li>Delegated LP (DLP) earns
+                                 for both
                                 delegator and
                                 delegatee
                             </li>
