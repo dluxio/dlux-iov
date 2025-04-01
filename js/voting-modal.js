@@ -14,7 +14,7 @@ export default {
         return {
           precision: 0,
           prefix: "spkccT_",
-          token: "BROCA",
+          token: "SPK",
           features: {
             channel_open: {
               "string": "Create Contract",
@@ -193,210 +193,11 @@ export default {
       validations: {},
     };
   },
-  created() {
-    this.debouncedValidateField = this.debounce((key) => {
-      this.validateField(key);
-    }, 300);
-  },
   methods: {
     ...MCommon,
     ...MModals,
     ...MSpk,
-    createContract() {
-      const op = {
-        type: "cj",
-        cj: {
-          to: this.form.to,
-          broca: parseInt(this.form.amount),
-          broker: this.form.broker,
-          contract: this.form.contract
-        },
-        id: `${this.tokenprotocol.prefix}${this.feat.id}`,
-        msg: `Preparing a file store for ${this.form.to}`,
-        ops: ["getSapi", "refreshComponents"],
-        api: this.api,
-        txid: `${this.func}_${Date.now()}`
-      };
-      if (op.cj.contract === "1") {
-        op.cj.slots = `${this.form.ben_to},${parseInt(this.form.ben_amount * 100)}`;
-      }
-      this.$emit("modalsign", op);
-    },
-    fetchProviderStats() {
-      for (var i = 0; i < this.ipfsServices.length; i++) {
-        for (var node in this.ipfsServices[i]) {
-          const controller = new AbortController()
-          const timeoutId = setTimeout(() => controller.abort(), 1000)
-          console.log(`${this.ipfsServices[i][node].a}/upload-stats`)
-          fetch(`${this.ipfsServices[i][node].a}/upload-stats`, { signal: controller.signal })
-            .then(response => response.json())
-            .then(data => {
-              console.log('ipfs Stats', data)
-              if (data?.node) {
-                this.providerStats[data.node] = data
-              }
-              this.filteredBrokerOptions = Object.entries(this.ipfsProviders)
-                .filter(([id]) => {
-                  const stats = this.providerStats[id];
-                  if (!stats) return false;
-                  const max = BigInt(stats.StorageMax)
-                  const freeSpace = max - BigInt(stats.RepoSize);
-                  return freeSpace >= BigInt(2);
-                })
-                .reduce((acc, [id, name]) => {
-                  acc[id] = name;
-                  return acc;
-                }, {});
-              this.availableProvidersCount = Object.keys(this.filteredBrokerOptions).length;
-            })
-            .catch(error => { })
-        }
-      }
-    },
-    getIPFSproviders() {
-      return new Promise((res, rej) => {
-        fetch(this.api + "/services/IPFS")
-          .then(response => response.json())
-          .then(data => {
-            for (var node in data.providers) {
-              const id_array = data.providers[node].split(',')
-              for (var i = 0; i < id_array.length; i++) {
-                this.ipfsProviders[node] = id_array
-              }
-            }
-            this.ipfsServices = data.services;
-            res(true)
-          })
-          .catch(error => {
-            console.warn('Error fetching IPFS providers:', error)
-            rej(error)
-          })
-      })
-    },
-    getProviderIconUnicode(providerId) {
-      if (!this.form.amount) return '';
-      const amount = parseFloat(this.form.amount);
-      if (isNaN(amount)) return;
-      const requiredSize = amount * 1024;
-      const stats = this.providerStats[providerId];
-      if (!stats) return '';
-      const max = BigInt(stats.StorageMax)
-      const freeSpace = max - BigInt(stats.RepoSize);
-      const ratio = Number(freeSpace) / requiredSize;
-
-      if (ratio >= 100) return '✅';
-      if (ratio >= 2) return '⚠️';
-      return '❌';
-    },
-    handleAmountInput() {
-      if (this.form.amount) {
-        const requiredSize = this.form.amount * 1024;
-        this.filteredBrokerOptions = Object.entries(this.ipfsProviders)
-          .filter(([id]) => {
-            const stats = this.providerStats[id];
-            if (!stats) return false;
-            const max = BigInt(stats.StorageMax)
-            const freeSpace = max - BigInt(stats.RepoSize);
-            return freeSpace >= BigInt(requiredSize * 2);
-          })
-          .reduce((acc, [id, name]) => {
-            acc[id] = name;
-            return acc;
-          }, {});
-        this.availableProvidersCount = Object.keys(this.filteredBrokerOptions).length;
-      } else {
-        this.filteredBrokerOptions = this.ipfsProviders;
-        this.availableProvidersCount = Object.keys(this.ipfsProviders).length;
-      }
-      if (!this.ipfsProviders[this.form.broker])this.form.broker = ""
-    },
-    handleCheck(key) {
-      const field = this.feat.json[key];
-      if (field.check === "AC" && this.form[key]) {
-        this.accountCheck(this.form[key])
-          .then((r) => {
-            this.validations[key] = r;
-          })
-          .catch(() => {
-            this.validations[key] = false;
-          });
-      }
-    },
-    isProviderDisabled(providerId) {
-      if (!this.form.amount) return false;
-      const requiredSize = this.form.amount * 1024;
-      const stats = this.providerStats[providerId];
-      if (!stats) return true;
-      const max = BigInt(stats.StorageMax)
-      const freeSpace = max - BigInt(stats.RepoSize);
-      return freeSpace < BigInt(requiredSize * 2);
-    },
-    shouldShowField(key) {
-      if (key === 'ben_to' || key === 'ben_amount') {
-        return this.form.contract === "1";
-      }
-      return true;
-    },
-    toggleBeneficiary() {
-      this.form.contract = this.form.contract === "1" ? "0" : "1";
-      if (this.form.contract === "0") {
-        this.form.ben_to = "";
-        this.pfp.ben_to = '/img/no-user.png'
-        this.form.ben_amount = "";
-        this.validations.ben_to = false;
-      }
-    },
-    validateField(key) {
-      this.validations[key] = false
-      const field = this.feat.json[key];
-      if (field.check === 'AC') {
-        if (this.account === this.form[key]) {
-          this.validations[key] = true;
-          this.pfp[key] = this.mypfp
-        } else this.accountCheck(this.form[key]).then(result => {
-          if (result) {
-            this.validations[key] = true;
-            if (result === true) this.pfp[key] = '/img/no-user.png'
-            else this.pfp[key] = result
-          } else {
-            this.pfp[key] = '/img/no-user.png'
-          }
-        }).catch(() => {
-          this.validations[key] = false;
-          this.pfp[key] = '/img/no-user.png'
-        });
-      }
-    }
-  },
-  computed: {
-    isFormValid() {
-      if (!this.feat || !this.feat.json) return false;
-      for (const key in this.feat.json) {
-        const field = this.feat.json[key];
-        if (field.req && !this.form[key]) return false;
-        if (field.check === "AC" && this.form[key] && !this.validations[key]) return false;
-      }
-      if (this.form.contract === "1") {
-        if (!this.form.ben_to || !this.form.ben_amount) return false;
-        if (!this.validations.ben_to) return false;
-        if (this.form.ben_amount < 0.01 || this.form.ben_amount > 100) return false;
-      }
-      return true;
-    },
-  },
-  watch: {
-    'form.contract'(newVal) {
-      if (newVal === "1") {
-        this.form.ben_to = '';
-        this.form.ben_amount = '';
-        this.validations.ben_to = false;
-        this.feat.json.ben_to.req = true;
-        this.feat.json.ben_amount.req = true;
-      } else {
-        this.feat.json.ben_to.req = false;
-        this.feat.json.ben_amount.req = false;
-      }
-    }
+  
   },
   mounted() {
     const feature = this.tokenprotocol.features[this.func];
@@ -406,21 +207,9 @@ export default {
         if (this.form[key] === undefined) {
           this.form[key] = "";
         }
-        if (feature.json[key]?.check === "AC") {
-          this.pfp[key] = '/img/no-user.png';
-          this.validations[key] = false;
-        } else if (feature.json[key]?.check) {
-          this.validations[key] = false;
-        }
       }
     } else {
       this.error = "Feature not found";
     }
-    this.getIPFSproviders().then(() => {
-      this.fetchProviderStats();
-      this.filteredBrokerOptions = { ...this.ipfsProviders };
-      this.availableProvidersCount = Object.keys(this.ipfsProviders).length;
-      this.isLoading = false;
-    });
   }
 };

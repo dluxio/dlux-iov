@@ -58,7 +58,7 @@ export default {
             </div>
             <!--claim  rewards-->
             <div class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3"
-                id="larynxclaimrewards" v-if="saccountapi.claim > 0 && me">
+                id="larynxclaimrewards" v-if="(saccountapi.claim_spk > 0 || saccountapi.claim > 0) && me">
                 <div>
                     <div class="d-flex align-items-start">
                         <h4 class="m-0">Claim Rewards
@@ -70,14 +70,16 @@ export default {
                         node.</p>
                 </div>
                 <div id="claimlarynxrewardbtn" class="ms-auto text-end">
-                    <h5>{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
+                <h5 v-if="saccountapi.claim_spk
+ > 0">{{formatNumber((saccountapi.claim_spk
+)/1000, 3, '.', ',')}} SPK
+                    </h5>    
+                <h5 v-if="saccountapi.claim > 0">{{formatNumber((saccountapi.claim)/1000, 3, '.', ',')}} LARYNX
                     </h5>
-                    <div class="mb-2"> <span class="small" v-show="!spk2gov">50%
+                    <div class="mb-2"> <span class="small">50%
                             Liquid |
                             50%
-                            Power</span> <span class="small"
-                            v-show="spk2gov">50%
-                            Liquid | 50% Gov</span></div>
+                            Power</span></div>
                     <div v-show="saccountapi.gov > 0" class="text-white">
                         <div class="input-group my-3">
                             <span
@@ -111,7 +113,7 @@ export default {
                     <img src="/img/spk512.png" class="rounded img-fluid border border-3 border-dark" width="70">
                 </div>
                 <div>
-                    <div class="d-flex align-items-start fs-4 fw-bold">SPK Token
+                    <div class="d-flex align-items-start fs-4 fw-bold">SPK
                             
                         </div>
                     <p class="text-white-50 m-0">The governance
@@ -327,29 +329,29 @@ export default {
             <div
                 class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
                 <div>
-                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA Token
+                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA
                             
                         </div>
-                    <p class="text-white-50 m-0">The governance
+                    <p class="text-white-50 m-0">The storage
                         token for
                         the SPK network.
                     </p>
                 </div>
                 <div class="ms-auto text-end">
                     <h5>
-                        {{formatNumber((saccountapi.spk)/1000,
+                        {{formatNumber((saccountapi.liq_broca)/1000,
                         3, '.',
                         ',')}}
-                        SPK
+                        BROCA
                     </h5>
                     <div class="btn-group" role="group"
                         aria-label="SPK Actions">
                         <button type="button" class="btn btn-primary p-0">
                             <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="send" :mypfp="mypfp" 
-                            token="spk" 
+                            token="balance" 
                             :test="test"
                                 :tokenuser="saccountapi" :account="account"
-                                :tokenprotocol="protocolspk"
+                                :tokenprotocol="protocolbroca"
                                 @modalsign="sendIt($event)" v-slot:trigger>
                                 <span  class="p-2 trigger">
                                 <i class="fas fa-paper-plane me-2"></i>Send
@@ -395,8 +397,8 @@ export default {
                     <p class="text-white-50">BROCA stats:</p>
                     <ul class="text-white-50">
                         <li>Current cost to store: 1 BROCA per
-                            {{spkStats.channel_bytes}}
-                            Bytes
+                            {{fancyBytes(1000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}
+                            
                             for 30 days.</li>
                         <li>Recharge Rate:
                             {{formatNumber((spkStats.broca_refill / 28800), 2, '.', ',')}} Days to Recharge.</li>
@@ -407,10 +409,16 @@ export default {
                     </ul>
                 </div>
                 <div class="ms-auto text-end">
-                    <h5>
-                        {{formatNumber(broca_calc(saccountapi.broca), 0, '', ',')}} BROCA
+                <h5>
+                        {{formatNumber((saccountapi.pow_broca)/1000,
+                        3, '.',
+                        ',')}}
+                        BROCA
                     </h5>
-                     <div class="mb-2"> <span class="small">{{(fancyBytes(broca_calc(saccountapi.broca) * 6000))}} per Month</span></div>
+                    <h6>
+                        {{fancyBytes(broca_calc(saccountapi.broca) * spkStats.channel_bytes)}} Availible Now
+                    </h6>
+                     <div class="mb-2"> <span class="small">~{{(fancyBytes(broca_calc(saccountapi.broca) * 6000))}} per Month</span></div>
 
                     <div class="btn-group" role="group"
                         aria-label="Power Actions">
@@ -462,7 +470,7 @@ export default {
             <div
                 class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
                 <div>
-                    <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Token
+                    <div class="d-flex align-items-start fs-4 fw-bold">LARYNX
                             
                         </div>
                     <p class="text-white-50">The mining token
@@ -576,15 +584,13 @@ export default {
                             </li>
                             <li>Instant Power Up | 4 Week Power
                                 Down</li>
-                            <li>LARYNX POWER (LP) earns SPK
-                                tokens at
-                                {{toFixed(pFloat(spkStats.spk_rate_lpow) * 100,3)}}%
+                            <li>LARYNX POWER (LP) helps to earn SPK
+                                tokens for validated services provided
                             </li>
                             <li>Delegated LP (DLP) earns SPK
                                 tokens for both
                                 delegator and
-                                delegatee at
-                                {{toFixed(pFloat(spkStats.spk_rate_ldel) * 100,3)}}%
+                                delegatee for validated services provided.
                             </li>
                         </ul>
                     </div>
