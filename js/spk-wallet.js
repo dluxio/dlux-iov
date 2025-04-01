@@ -211,7 +211,7 @@ export default {
                
                     <div class="text-start">
                         <div class="d-flex align-items-start fs-4 fw-bold">
-                            SPK Power (SP)
+                            SPK Power
                         </div>
                         <ul class="text-white-50">
                             <li>Enables voting</li>
@@ -223,7 +223,7 @@ export default {
                     <div class="ms-auto text-end">
                         <h5 class="d-flex align-items-center justify-content-end text-warning">
                             {{formatNumber((saccountapi.spk_power)/1000, 3, '.', ',')}}
-                            SP <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                            SPK <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
                             </span>
                         </h5>
@@ -449,7 +449,7 @@ export default {
                 </div>
             </div>
             <!-- Broca Power-->
-            <div v-if="saccountapi.spk_power"
+            <div 
                 class="d-flex flex-wrap align-items-center py-3">
                     <div class="me-4 position-relative" style="width: 70px;">
                         <div class="ratio ratio-1x1">
@@ -470,7 +470,7 @@ export default {
                     </div>
                
                 <div class="text-start">
-                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power (BP)</div>
+                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power</div>
                     <ul class="text-white-50">
                         <li>Generates BROCA RESOURCE CREDITS (BRC)</li>
                         <li>Instant Power Up | 4 Week Power
@@ -488,7 +488,7 @@ export default {
                         {{formatNumber((saccountapi.pow_broca)/1000,
                         3, '.',
                         ',')}}
-                        BP
+                        BROCA
                         <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
                             </span>
@@ -702,52 +702,24 @@ export default {
                             </li>
                             <li>Instant Power Up | 4 Week Power
                                 Down</li>
-                            <li>Delegated LP (DLP) earns
-                                 for both
-                                delegator and
-                                delegatee
+                            <li>LP earns
+                             <small class="ms-auto"><span
+                                    class="badge me-1 bg-light">{{toFixed(pFloat(spkStats.spk_rate_lpow) * 100,3)}}%</span></small>
+                                Delegated LP (DLP) earns    
+                                <small class="ms-auto"><span
+                                        class="badge bg-light">{{toFixed(pFloat(spkStats.spk_rate_ldel) * 100,3)}}%</span></small> 
+                                
                             </li>
                         </ul>
                     </div>
-                    <div id="larynxgactions" class="ms-auto text-end">
+                    <div id="larynxgactions" class="ms-auto">
                         <div class="d-flex flex-wrap align-items-center mb-2">
-                            <small class="ms-auto"><span
-                                    class="badge me-2 bg-success">{{toFixed(pFloat(spkStats.spk_rate_lpow) * 100,3)}}%</span></small>
-                            <h5 class="m-0"> {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}} LP</h5>
-                        </div>
-                        <div class="mb-2">
-                            <a v-if="saccountapi.granting.t || saccountapi.granted.t"
-                                data-bs-toggle="collapse" id="delegationsbtn"
-                                href="#delegationsspk" role="button"
-                                aria-expanded="false"
-                                aria-controls="Show delegations"
-                                class="text-white d-flex align-items-center "
-                                style="text-decoration: none">
-                                <small class="ms-auto"><span
-                                        class="badge me-2 bg-success">{{toFixed(pFloat(spkStats.spk_rate_ldel) * 100,3)}}%</span></small>
-                                <h5 class="m-0 d-flex align-items-center">
-                                    {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000, 3, '.', ',')}} DLP<span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                           
+                            <h5 class="ms-auto mb-0 d-flex align-items-center text-warning"> {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}} LARYNX<span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
-                            </span><i class="fas fa-search ms-2"></i>
-                                </h5>
-                            </a>
+                            </span></h5>
                         </div>
-                        <a v-if="saccountapi.granting.t || saccountapi.granted.t"
-                            data-bs-toggle="collapse" id="delegationsbtn"
-                            href="#delegationsspk" role="button"
-                            aria-expanded="false"
-                            aria-controls="Show delegations"
-                            class="text-white d-none"
-                            style="text-decoration: none">
-                            <h6 id="delegatebal">
-                                <span
-                                    v-if="saccountapi.granting.t">(-{{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}} LP)</span>
-                                <span
-                                    v-if="saccountapi.granted.t">(+{{formatNumber((saccountapi.granted.t)/1000, 3,'.', ',')}} LP)</span>
-                                <i class="fas fa-search ms-2"></i>
-                            </h6>
-
-                        </a>
+                        
 
                         <div class="btn-group" role="group"
                             aria-label="LARYNX Actions">
@@ -802,6 +774,7 @@ export default {
                         </div>
                     </div>
                 </div>
+            
                 <div
                     :class="{'d-none': !when(saccountapi.powerDowns), 'd-flex': true, 'align-items-center': true}">
                     <b>A power down is scheduled to happen in {{when(saccountapi.powerDowns)}} ({{when(saccountapi.powerDowns, true)}} installments remaining)</b><small class="ms-2">
@@ -814,6 +787,53 @@ export default {
                                 STOP</button>
                         </modal-vue>
                     </small>
+                </div>
+            </div>
+                 <!-- Delegated LARYNX Power -->
+            <div class="d-flex flex-column py-3 border-top border-white-50" v-if="saccountapi.granting.t || saccountapi.granted.t">
+                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                    <div class="me-4 position-relative" style="width: 70px;">
+                        <div class="ratio ratio-1x1">
+                            <div class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
+                                <img src="/img/spknetwork/larynx_icon.png" class="rounded img-fluid p-1" alt="LARYNX Token Logo">   
+                            </div>
+                        </div>
+                        <div class="position-absolute top-0 start-0 translate-middle" style="margig-top: 10px; margin-left: 10px;">
+                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.5rem; height: 1.5rem;">
+                                <i class="fa-solid fa-bolt-lightning" style="font-size: .65rem;"></i>
+                            </span>
+                        </div>
+                        <div class="position-absolute top-100 start-100 translate-middle" style="margig-top: -3px; margin-left: -3px;">
+                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem;">
+                                <i class="fa-solid fa-right-left" style="font-size: 1.3rem;"></i>
+                            </span>
+                        </div>
+                    </div>
+               
+                    <div class="text-start">
+                        <div class="d-flex align-items-start fs-4 fw-bold">
+                            Delegated LARYNX Power (DLP)
+                        </div>
+                        <ul class="text-white-50">
+                            <li>Something</li>
+                        </ul>
+                    </div>
+                    <div class="ms-auto text-end">
+                    
+                        <h5 class="d-flex align-items-center justify-content-end text-warning">
+                             {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000, 3, '.', ',')}}
+                            DLP <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                                <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
+                            </span>
+                        </h5>
+                        <div class="btn-group" role="group"
+                            aria-label="DLP Actions">
+                            <!-- Details collapse button -->
+                            <button class="dropdown btn btn-light" href="#" role="button" id="delegationsbtn" data-bs-toggle="collapse" data-bs-target="#delegationsspk" aria-expanded="false" aria-controls="Show Delegations">
+                                <i class="me-2 fa-solid fa-search"></i>Details</button>
+                           
+                        </div>
+                    </div>
                 </div>
                 <div class="collapse" id="delegationsspk">
                     <div class="d-flex flex-column text-start border border-secondary rounded px-2 py-1 p-lg-4 my-4" style="background-color: rgba(0, 0, 0, 0.5);">
