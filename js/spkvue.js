@@ -1,4 +1,4 @@
-import { createApp, toRaw } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+import { createApp, toRaw } from '/js/vue.esm-browser.js'
 import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
