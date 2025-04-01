@@ -554,24 +554,48 @@ export default {
                 </div>
                 
             </div>
-            <div class="d-flex row mx-3 rounded border border-white-50 text-center " style="background-color:rgb(87, 94, 99);">
-             <div class="p-1 col-md-4">
-                            Current storage cost<br>
-                             1 BROCA • 
-                            {{fancyBytes(1000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}
-                            • 30 days
+            <div class="card-group">
+                <div class="card">
+                    <div class="card-header">
+                    <h3 class="card-title mb-0">Storage Price</h3>
                     </div>
-                    <div class="p-1  col-md-4">
-                    Available Storage<br>
-                        {{fancyBytes(broca_calc(saccountapi.broca) * spkStats.channel_bytes)}}
+                    <div class="card-body">
+                    <div class="d-flex align-items-center mb-2"><h5 class="mb-0 card-title text-info">
+                            {{fancyBytes(1000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}/</h5><span class="small ms-1 d-flex align-items-center text-warning">1 BROCA <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                                <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
+                            </span></span></div>
+                    <p class="card-text">Current exchange rate between BROCA Power and SPK Network Storage Services for 30 days.</p>
                     </div>
-                    <div class="p-1 col-md-4"> 
-                    Perpetual Storage<br>
-                        ~{{(fancyBytes(broca_calc(saccountapi.broca) * 6000))}}
+                    <div class="card-footer">
+                    <small class="text-body-secondary">30 Days of Storage</small>
                     </div>
-                   
                 </div>
+                <div class="card">
+                    <div class="card-header">
+                    <h3 class="card-title mb-0">Upload Limit</h3>
+                    </div>
+                    <div class="card-body">
+                    <h5 class="card-title text-info">{{fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * spkStats.channel_bytes)}}</h5>
+                    <p class="card-text">Your current available storage based on your current BROCA Power resource availability.</p>
+                    </div>
+                    <div class="card-footer">
+                    <small class="text-body-secondary">Regenerates Every 5 Days</small>
+                    </div>
                 </div>
+                <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Drive Size</h3>
+                    </div>
+                    <div class="card-body">
+                    <h5 class="card-title text-info">~{{(fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * 6000))}}</h5>
+                    <p class="card-text">Maximum perpetual storage when files are set to autorenew at current network rates.</p>
+                    </div>
+                    <div class="card-footer">
+                    <small class="text-body-secondary">Rolling Storage Over 30 Days</small>
+                    </div>
+                </div>
+            </div>
+            
              <!-- larynx banner -->
             <div class="d-flex justify-content-center align-items-center bg-dark mt-4 p-2 rounded">
                 <img src="/img/spknetwork/larynx_logomark.png" class="img-fluid" alt="LARYNX Logomark" style="height: 70px;">

@@ -14674,4 +14674,8 @@ body[data-touch=false] .dropdown-extra:hover {
 .dropdown-menu .dropdown-menu-item:last-child > a {
   border-bottom-left-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
+}
+
+.spk-blue {
+  color: #5658dd;
 }/*# sourceMappingURL=custom.css.map */
