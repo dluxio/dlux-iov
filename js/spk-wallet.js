@@ -108,7 +108,7 @@ export default {
                 </div>
             </div>
             <!-- spk banner -->
-            <div class="d-flex justify-content-between align-items-center bg-dark p-2 rounded">
+            <div class="d-flex justify-content-center align-items-center bg-dark p-2 rounded">
                 <img src="/img/spknetwork/spk_logomark.png" class="img-fluid" alt="SPK Logomark" style="height: 70px;">
             </div>
             <!-- Liquid SPK -->
@@ -125,7 +125,7 @@ export default {
                         </div>
                     <p class="text-white-50 m-0">The governance
                         token for
-                        the SPK network.
+                        the SPK network
                     </p>
                 </div>
                 <div class="ms-auto text-end">
@@ -214,19 +214,19 @@ export default {
                         <div class="d-flex align-items-start fs-4 fw-bold">
                             SPK Power
                         </div>
-                        <p class="text-white-50">Benefits of SPK
-                            Power:</p>
                         <ul class="text-white-50">
                             <li>Enables voting</li>
                             <li>Instant Power Up | 4 Week Power Down
                             </li>
-                            <li>Collateral to Secure the DEX</li>
+                            <li>Adds collateral to secure the DEX</li>
                         </ul>
                     </div>
                     <div class="ms-auto text-end">
-                        <h5>
+                        <h5 class="d-flex align-items-center justify-content-end text-warning">
                             {{formatNumber((saccountapi.spk_power)/1000, 3, '.', ',')}}
-                            SPK
+                            SPK <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                                <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
+                            </span>
                         </h5>
                         <div class="btn-group" role="group"
                             aria-label="Power Actions">
@@ -368,7 +368,7 @@ export default {
                 </div>
             </div>
             <!-- broca banner -->
-            <div class="d-flex justify-content-between align-items-center bg-dark p-2 rounded">
+            <div class="d-flex justify-content-center align-items-center bg-dark p-2 rounded">
                 <img src="/img/spknetwork/broca_logomark.png" class="img-fluid" alt="BROCA Logomark" style="height: 70px;">
             </div>
             <!-- Liquid BROCA -->
@@ -383,9 +383,9 @@ export default {
                     <div class="d-flex align-items-start fs-4 fw-bold">BROCA
                             
                         </div>
-                    <p class="text-white-50 m-0">The storage
+                    <p class="text-white-50 m-0">The resource
                         token for
-                        the SPK network.
+                        the SPK network
                     </p>
                 </div>
                 <div class="ms-auto text-end">
@@ -472,13 +472,12 @@ export default {
                
                 <div class="text-start">
                     <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power</div>
-                    <p class="text-white-50">BROCA stats:</p>
                     <ul class="text-white-50">
-                        <li>Current cost to store: 1 BROCA per
+                        <li>Current storage cost: 1 BRC per
                             {{fancyBytes(1000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}
                             
                             for 30 days.</li>
-                        <li>Recharge Rate:
+                        <li>BRC Recharge Rate:
                             {{formatNumber((spkStats.broca_refill / 28800), 2, '.', ',')}} Days to Recharge.</li>
                         <li>Time Until Full: {{formatNumber((1 -
                             (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) * (spkStats.broca_refill / 28800), 2, '.', ',')}}
@@ -487,11 +486,14 @@ export default {
                     </ul>
                 </div>
                 <div class="ms-auto text-end">
-                <h5>
+                <h5 class="d-flex align-items-center justify-content-end text-warning">
                         {{formatNumber((saccountapi.pow_broca)/1000,
                         3, '.',
                         ',')}}
                         BROCA
+                        <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                                <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
+                            </span>
                     </h5>
                     <h6>
                         {{fancyBytes(broca_calc(saccountapi.broca) * spkStats.channel_bytes)}} Availible Now
