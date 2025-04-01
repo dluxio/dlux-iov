@@ -1,5 +1,6 @@
 import ModalVue from './modal-manager.js'
 import MCommon from '/js/methods-common.js'
+import MSpk from '/js//methods-spk.js'
 
 export default {
     components: {
@@ -1002,6 +1003,7 @@ export default {
     emits: ["tosign"],
     methods: {
         ...MCommon,
+        ...MSpk,
         sendIt(event){
             console.log(event)
             this.$emit('tosign', event)
