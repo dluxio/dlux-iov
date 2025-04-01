@@ -124,7 +124,7 @@ export default {
                         </div>
                     <p class="text-white-50 m-0">The governance
                         token for
-                        the SPK network
+                        SPK Network
                     </p>
                 </div>
                 <div class="ms-auto text-end">
@@ -384,7 +384,7 @@ export default {
                         </div>
                     <p class="text-white-50 m-0">The storage
                         token for
-                        the SPK network
+                        SPK Network
                     </p>
                 </div>
                 <div class="ms-auto text-end">
@@ -472,10 +472,10 @@ export default {
                 <div class="text-start">
                     <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power</div>
                     <ul class="text-white-50">
-                        <li>Generates BROCA Resource Credits (BRC)</li>
+                        <li>Regenerative Storage Resource Credits</li>
                         <li>Instant Power Up | 4 Week Power
                                 Down</li>
-                        <li>BRC recharges every 
+                        <li>Recharges every 
                             {{formatNumber((spkStats.broca_refill / 28800), 2, '.', ',')}} Days, {{formatNumber((1 -
                             (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) * (spkStats.broca_refill / 28800), 2, '.', ',')}}
                             Days until full
@@ -497,7 +497,7 @@ export default {
                         aria-label="Power Actions">
                         <button type="button" class="btn btn-light p-0">
                             <!-- register -->
-                            <div v-if="saccountapi.pubKey == 'NA'"
+                            <div class="px-2" v-if="saccountapi.pubKey == 'NA'"
                             @click="updatePubkey">
                             <i class="fas fa-plus fa-fw me-2"></i>Register Account
                             </div>
@@ -554,17 +554,20 @@ export default {
                 </div>
                 
             </div>
-            <div class="d-flex rounded border justify-content-around border-white-50">
-             <div class="p-1">
-                            Current storage cost: 1 BRC per
+            <div class="d-flex row mx-3 rounded border border-white-50 text-center " style="background-color:rgb(87, 94, 99);">
+             <div class="p-1 col-md-4">
+                            Current storage cost<br>
+                             1 BROCA • 
                             {{fancyBytes(1000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}
-                            for 30 days
+                            • 30 days
                     </div>
-                    <div class="p-1">
-                        {{fancyBytes(broca_calc(saccountapi.broca) * spkStats.channel_bytes)}} Availible Now
+                    <div class="p-1  col-md-4">
+                    Available Storage<br>
+                        {{fancyBytes(broca_calc(saccountapi.broca) * spkStats.channel_bytes)}}
                     </div>
-                    <div class="p-1"> 
-                        ~{{(fancyBytes(broca_calc(saccountapi.broca) * 6000))}} per Month
+                    <div class="p-1 col-md-4"> 
+                    Perpetual Storage<br>
+                        ~{{(fancyBytes(broca_calc(saccountapi.broca) * 6000))}}
                     </div>
                    
                 </div>
@@ -586,8 +589,8 @@ export default {
                             
                         </div>
                     <p class="text-white-50">The mining token
-                        for the SPK
-                        network.</p>
+                        for SPK
+                        Network.</p>
                 </div>
                 <div class="ms-auto text-end">
                     <h5>
@@ -625,17 +628,7 @@ export default {
                                         type="button"><i
                                             class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
                                 </modal-vue>
-                                <modal-vue type="power" :dis="!isNode"
-                                    token="LARYNX" func="Lock Liquidity"
-                                    :balance="saccountapi.balance"
-                                    :account="account" class="dropdown-menu-item"
-                                    @modalsign="sendIt($event)"
-                                    :test="test" v-slot:trigger>
-                                    <button class="dropdown-item trigger"
-                                        :disabled="!isNode" 
-                                        type="button"><i
-                                            class="fas fa-lock fa-fw me-2"></i>Lock Liquidity</button>
-                                </modal-vue>
+                                
                                 <modal-vue type="power" token="LARYNX"  :test="test"
                                     func="Register a Service"
                                     :balance="saccountapi.balance"
@@ -660,16 +653,17 @@ export default {
                                         A Service Type
                                     </button>
                                 </modal-vue>
-                                <modal-vue v-if="isNode" type="power" :test="test"
+                                <modal-vue  type="power" :test="test"
                                     token="LARYNX" func="Register a Validator"
                                     :balance="saccountapi.balance"
                                     :min="isValidator ? '0.001' : spkStats.IPFSRate/1000"
                                     :account="account" class="dropdown-menu-item"
                                     @modalsign="sendIt($event)" v-slot:trigger>
-                                    <button class="dropdown-item trigger" 
+                                    <button :class="!isNode || isValidator ? 'disabled' : ''"
+                                        class="dropdown-item trigger" 
                                         type="button"><i
                                             class="fa fa-network-wired fa-fw me-2"></i>
-                                        {{isValidator ? 'Burn LARYNX to your Validator' : 'Register a Validator'}}
+                                        Register A Validator
                                     </button>
                                 </modal-vue>
                                 <div class="dropdown-divider">
