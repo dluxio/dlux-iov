@@ -223,7 +223,7 @@ export default {
                     <div class="ms-auto text-end">
                         <h5 class="d-flex align-items-center justify-content-end text-warning">
                             {{formatNumber((saccountapi.spk_power)/1000, 3, '.', ',')}}
-                            SP <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                            SPK <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
                             </span>
                         </h5>
@@ -382,7 +382,7 @@ export default {
                     <div class="d-flex align-items-start fs-4 fw-bold">BROCA
                             
                         </div>
-                    <p class="text-white-50 m-0">The resource
+                    <p class="text-white-50 m-0">The storage
                         token for
                         the SPK network
                     </p>
@@ -470,12 +470,11 @@ export default {
                     </div>
                
                 <div class="text-start">
-                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power (BP)</div>
+                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power</div>
                     <ul class="text-white-50">
-                        <li>Generates BROCA RESOURCE CREDITS (BRC)</li>
+                        <li>Generates BROCA Resource Credits (BRC)</li>
                         <li>Instant Power Up | 4 Week Power
                                 Down</li>
-                        
                         <li>BRC recharges every 
                             {{formatNumber((spkStats.broca_refill / 28800), 2, '.', ',')}} Days, {{formatNumber((1 -
                             (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) * (spkStats.broca_refill / 28800), 2, '.', ',')}}
@@ -488,7 +487,7 @@ export default {
                         {{formatNumber((saccountapi.pow_broca)/1000,
                         3, '.',
                         ',')}}
-                        BP
+                        BROCA
                         <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
                             </span>
@@ -701,12 +700,12 @@ export default {
                         </div>
                         <div class="position-absolute top-100 start-100 translate-middle" style="margig-top: -3px; margin-left: -3px;">
                             <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem;">
-                                <i class="fa-solid fa-microchip" style="font-size: 1.3rem;"></i>
+                                <i class="fa-solid fa-arrow-up-right-dots" style="font-size: 1.3rem;"></i>
                             </span>
                         </div>
                     </div>
                     <div>
-                       <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Power (LP)</div>
+                       <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Power</div>
                         <ul class="text-white-50">
                             <li>Increases the effectiveness of your nodes
                             </li>
@@ -719,7 +718,7 @@ export default {
                     <div id="larynxgactions" class="ms-auto">
                         <div class="d-flex flex-wrap align-items-center mb-2">
                            
-                            <h5 class="ms-auto mb-0 d-flex align-items-center text-warning"> {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}} LP<span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                            <h5 class="ms-auto mb-0 d-flex align-items-center text-warning"> {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}} LARYNX<span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
                             </span></h5>
                         </div>
@@ -804,19 +803,19 @@ export default {
                         </div>
                         <div class="position-absolute top-0 start-0 translate-middle" style="margig-top: 10px; margin-left: 10px;">
                             <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.5rem; height: 1.5rem;">
-                                <i class="fa-solid fa-bolt-lightning" style="font-size: .65rem;"></i>
+                                <i class="fa-solid fa-right-left" style="font-size: .65rem;"></i>
                             </span>
                         </div>
                         <div class="position-absolute top-100 start-100 translate-middle" style="margig-top: -3px; margin-left: -3px;">
                             <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem;">
-                                <i class="fa-solid fa-right-left" style="font-size: 1.3rem;"></i>
+                                <i class="fa-solid fa-hand-holding-dollar" style="font-size: 1.3rem;"></i>
                             </span>
                         </div>
                     </div>
                
                     <div class="text-start">
                         <div class="d-flex align-items-start fs-4 fw-bold">
-                            Delegated LARYNX Power (DLP)
+                            Delegated LARYNX Power
                         </div>
                         <ul class="text-white-50">
                             <li>Profit sharing with service providers</li>
@@ -826,8 +825,8 @@ export default {
                     
                         <h5 class="d-flex align-items-center justify-content-end text-warning">
                              {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000, 3, '.', ',')}}
-                            DLP <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
+                            LARYNX <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                                <i class="fa-solid fa-right-left" style="font-size: .5rem;"></i>
                             </span>
                         </h5>
                         <div class="btn-group" role="group"
