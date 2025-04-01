@@ -7,6 +7,16 @@ broca_calc(last = '0,0', broca_refill = 144000, spk_power = 0, head_block = 0) {
     if (total > spk_power * 1000) total = spk_power * 1000;
     return total;
   },
+  rewardClaim() {
+    this.toSign = {
+      type: "cj",
+      cj: {},
+      id: `spkcc_reward_claim`,
+      msg: `Claiming SPK...`,
+      ops: ["getTokenUser"],
+      txid: "reward_claim",
+    };
+  },
   reward_spk(saccountapi, sstats) {
     var r = 0,
       a = 0,

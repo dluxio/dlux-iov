@@ -1,4 +1,4 @@
-this.version = "2025.03.31.16";
+this.version = "2025.04.01.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -97,6 +97,12 @@ var urlsToCache = [
   `/img/spk192.png`,
   `/img/spk512.png`,
   `/img/spknetwork.png`,
+  `/img/spknetwork/broca_icon.png`,
+  `/img/spknetwork/broca_logomark.png`,
+  `/img/spknetwork/larynx_icon.png`,
+  `/img/spknetwork/larynx_logomark.png`,
+  `/img/spknetwork/spk_icon.png`,
+  `/img/spknetwork/spk_logomark.png`,
   `/img/sting_white.svg`,
   `/img/txt-file-type-svgrepo-com.svg`,
   `/img/wav-file-type-svgrepo-com.svg`,

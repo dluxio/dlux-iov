@@ -806,7 +806,7 @@ export default {
                 </div>
                 <div class="ms-auto text-end">
                     <h5 id="totallarynx">
-                        {{toFixed(spkval * saccountapi.tick * hiveprice.hive.usd,2)}}
+                        <span>&#36;</span>{{EAV}}
                     </h5>
                 </div>
             </div>
@@ -840,7 +840,7 @@ export default {
             default: function () {
                 return {
                     hive: {
-                        usd: 0.0,
+                        usd: 0.235,
                         btc: 0.0,
                     }
                 }
@@ -1162,6 +1162,18 @@ export default {
               return Object.keys(this.saccountapi.channels).length
             }
           },
+        EAV: {
+            get() {
+                const lt = (this.saccountapi.balance + this.saccountapi.claim + this.saccountapi.poweredUp)/1000
+                const st = (this.saccountapi.spk + this.saccountapi.spk_power + this.saccountapi.claim_spk) / 1000
+                const bt = (this.saccountapi.liq_broca + this.saccountapi.pow_broca ) / 1000
+                var total = parseFloat(this.saccountapi.tick_spk * st)
+                total += parseFloat(this.saccountapi.tick * lt)
+                total += parseFloat(this.saccountapi.tick_broca * bt)
+                console.log({total, st, bt, lt}, this.hiveprice.hive.usd)
+                return (this.hiveprice.hive.usd * total).toFixed(2)
+            }
+        },
     },
     mounted() {
         this.getTokenUser();
