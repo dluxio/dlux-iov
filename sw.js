@@ -1,4 +1,4 @@
-this.version = "2025.04.01.6";
+this.version = "2025.04.01.7";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -202,6 +202,7 @@ var urlsToCache = [
   `/js/vote.js`,
   `/js/voting-modal.js`,
   `/js/vrvue.js`,
+  `/js/vue.esm-browser.js`,
   `/js/vueme.js`,
   `/js/vueqr.js`,
   `/lang/en.js`,

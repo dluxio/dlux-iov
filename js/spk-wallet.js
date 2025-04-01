@@ -52,23 +52,21 @@ export default {
             <div class="text-start">
                 <p class="lead">Decentralized and incentivized
                     network
-                    infrastructure,
-                    rewarding
-                    providers with SPK governance and BROCA gas
-                    tokens.</p>
+                    infrastructure that rewards service operators</p>
             </div>
             <!--claim  rewards-->
-            <div class="d-flex flex-wrap align-items-center py-3 border-top border-white-50"
+            <div class="bg-special border border-4 border-dark rounded mt-4"
                 id="larynxclaimrewards" v-if="(saccountapi.claim_spk > 0 || saccountapi.claim > 0) && me">
+            <div class="d-flex text-dark flex-wrap align-items-center p-3" style="background-color: #00000020">
                 <div>
                     <div class="d-flex align-items-start">
                         <h4 class="m-0">Claim Rewards
                         </h4>
                     </div>
-                    <p class="text-white-50">Claimable rewards
-                        for running a
+                    <p>Claimable rewards
+                        for running or delegating to a
                          service
-                        node.</p>
+                        node</p>
                 </div>
                 <div id="claimlarynxrewardbtn" class="ms-auto text-end">
                 <h5 v-if="saccountapi.claim_spk
@@ -99,16 +97,17 @@ export default {
                         </div>
                     </div>
                     <div class="btn-group" role="group"
-                        aria-label="LARYNX Claim">
-                        <button type="submit" class="btn btn-primary "
+                        aria-label="SPK Network Claim">
+                        <button type="submit" class="btn btn-dark "
                             @click="rewardClaim('spkcc', 'shares_claim', spk2gov)"><i
                                 class="fas fa-coin"></i><i
                                 class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
                     </div>
                 </div>
             </div>
+            </div>
             <!-- spk banner -->
-            <div class="d-flex justify-content-center align-items-center bg-dark p-2 rounded">
+            <div class="d-flex justify-content-center align-items-center bg-dark mt-4 p-2 rounded">
                 <img src="/img/spknetwork/spk_logomark.png" class="img-fluid" alt="SPK Logomark" style="height: 70px;">
             </div>
             <!-- Liquid SPK -->
@@ -218,7 +217,7 @@ export default {
                             <li>Enables voting</li>
                             <li>Instant Power Up | 4 Week Power Down
                             </li>
-                            <li>Adds collateral to secure the DEX</li>
+                            <li>Used as collateral to secure the DEX</li>
                         </ul>
                     </div>
                     <div class="ms-auto text-end">
@@ -368,7 +367,7 @@ export default {
                 </div>
             </div>
             <!-- broca banner -->
-            <div class="d-flex justify-content-center align-items-center bg-dark p-2 rounded">
+            <div class="d-flex justify-content-center align-items-center bg-dark mt-4 p-2 rounded">
                 <img src="/img/spknetwork/broca_logomark.png" class="img-fluid" alt="BROCA Logomark" style="height: 70px;">
             </div>
             <!-- Liquid BROCA -->
@@ -473,15 +472,14 @@ export default {
                 <div class="text-start">
                     <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power</div>
                     <ul class="text-white-50">
+                        <li>Generates BROCA RESOURCE CREDITS (BRC)</li>
                         <li>Current storage cost: 1 BRC per
                             {{fancyBytes(1000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}
-                            
-                            for 30 days.</li>
-                        <li>BRC Recharge Rate:
-                            {{formatNumber((spkStats.broca_refill / 28800), 2, '.', ',')}} Days to Recharge.</li>
-                        <li>Time Until Full: {{formatNumber((1 -
+                            for 30 days</li>
+                        <li>BRC Recharge Rate: Every 
+                            {{formatNumber((spkStats.broca_refill / 28800), 2, '.', ',')}} Days, {{formatNumber((1 -
                             (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) * (spkStats.broca_refill / 28800), 2, '.', ',')}}
-                            Days until full.
+                            Days until full
                         </li>
                     </ul>
                 </div>
@@ -561,7 +559,7 @@ export default {
                 </div>
             </div>
              <!-- larynx banner -->
-            <div class="d-flex justify-content-between align-items-center bg-dark p-2 rounded">
+            <div class="d-flex justify-content-center align-items-center bg-dark mt-4 p-2 rounded">
                 <img src="/img/spknetwork/larynx_logomark.png" class="img-fluid" alt="LARYNX Logomark" style="height: 70px;">
             </div>
             <!--larynx token-->
@@ -870,7 +868,7 @@ export default {
             </div>
             <!--account value-->
             <div
-                class="d-flex flex-wrap text-start align-items-center p-3 bg-dark rounded">
+                class="d-flex flex-wrap text-start align-items-center mt-4 p-3 bg-dark rounded">
                 <div class="">
                     <h4>Estimated Account Value</h4>
                     <p class="text-white-50">The approximate US Dollar value for all SPK assets in your account</p>
