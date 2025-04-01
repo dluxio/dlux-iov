@@ -223,7 +223,7 @@ export default {
                     <div class="ms-auto text-end">
                         <h5 class="d-flex align-items-center justify-content-end text-warning">
                             {{formatNumber((saccountapi.spk_power)/1000, 3, '.', ',')}}
-                            SPK <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                            SP <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
                             </span>
                         </h5>
@@ -449,8 +449,8 @@ export default {
                 </div>
             </div>
             <!-- Broca Power-->
-            <div 
-                class="d-flex flex-wrap align-items-center py-3">
+            <div class="d-flex flex-column justify-content-center">
+            <div class="d-flex flex-wrap align-items-center py-3">
                     <div class="me-4 position-relative" style="width: 70px;">
                         <div class="ratio ratio-1x1">
                             <div class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
@@ -470,7 +470,7 @@ export default {
                     </div>
                
                 <div class="text-start">
-                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power</div>
+                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power (BP)</div>
                     <ul class="text-white-50">
                         <li>Generates BROCA RESOURCE CREDITS (BRC)</li>
                         <li>Instant Power Up | 4 Week Power
@@ -488,18 +488,12 @@ export default {
                         {{formatNumber((saccountapi.pow_broca)/1000,
                         3, '.',
                         ',')}}
-                        BROCA
+                        BP
                         <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
                             </span>
                     </h5>
-                    <h6>
-                        {{fancyBytes(broca_calc(saccountapi.broca) * spkStats.channel_bytes)}} Availible Now
-                    </h6>
-                     <div class="mb-2"> <span class="small">~{{(fancyBytes(broca_calc(saccountapi.broca) * 6000))}} per Month</span></div>
-<div>Current storage cost: 1 BRC per
-                            {{fancyBytes(1000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}
-                            for 30 days</div>
+                   
                     <div class="btn-group" role="group"
                         aria-label="Power Actions">
                         <button type="button" class="btn btn-light p-0">
@@ -559,7 +553,23 @@ export default {
                         </div>
                     </div>
                 </div>
+                
             </div>
+            <div class="d-flex rounded border justify-content-around border-white-50">
+             <div class="p-1">
+                            Current storage cost: 1 BRC per
+                            {{fancyBytes(1000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}
+                            for 30 days
+                    </div>
+                    <div class="p-1">
+                        {{fancyBytes(broca_calc(saccountapi.broca) * spkStats.channel_bytes)}} Availible Now
+                    </div>
+                    <div class="p-1"> 
+                        ~{{(fancyBytes(broca_calc(saccountapi.broca) * 6000))}} per Month
+                    </div>
+                   
+                </div>
+                </div>
              <!-- larynx banner -->
             <div class="d-flex justify-content-center align-items-center bg-dark mt-4 p-2 rounded">
                 <img src="/img/spknetwork/larynx_logomark.png" class="img-fluid" alt="LARYNX Logomark" style="height: 70px;">
@@ -696,26 +706,20 @@ export default {
                         </div>
                     </div>
                     <div>
-                       <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Power</div>
+                       <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Power (LP)</div>
                         <ul class="text-white-50">
                             <li>Increases the effectiveness of your nodes
                             </li>
                             <li>Instant Power Up | 4 Week Power
                                 Down</li>
-                            <li>LP earns
-                             <small class="ms-auto"><span
-                                    class="badge me-1 bg-light">{{toFixed(pFloat(spkStats.spk_rate_lpow) * 100,3)}}%</span></small>
-                                Delegated LP (DLP) earns    
-                                <small class="ms-auto"><span
-                                        class="badge bg-light">{{toFixed(pFloat(spkStats.spk_rate_ldel) * 100,3)}}%</span></small> 
-                                
+                            <li>Can be delegated to other node operators
                             </li>
                         </ul>
                     </div>
                     <div id="larynxgactions" class="ms-auto">
                         <div class="d-flex flex-wrap align-items-center mb-2">
                            
-                            <h5 class="ms-auto mb-0 d-flex align-items-center text-warning"> {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}} LARYNX<span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                            <h5 class="ms-auto mb-0 d-flex align-items-center text-warning"> {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}} LP<span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
                             </span></h5>
                         </div>
@@ -815,7 +819,7 @@ export default {
                             Delegated LARYNX Power (DLP)
                         </div>
                         <ul class="text-white-50">
-                            <li>Something</li>
+                            <li>Profit sharing with service providers</li>
                         </ul>
                     </div>
                     <div class="ms-auto text-end">
