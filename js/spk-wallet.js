@@ -189,8 +189,16 @@ export default {
                                 <img src="/img/spknetwork/spk_icon.png" class="rounded img-fluid p-1" alt="SPK Token Logo">   
                             </div>
                         </div>
-                        <span class="position-absolute top-0 start-0 translate-middle badge rounded-circle bg-warning text-dark"><i class="fa-solid fa-bolt-lightning" style="font-size: .65rem;"></i></span>
-                         <span class="position-absolute top-100 start-100 translate-middle badge rounded-circle bg-warning text-dark p-1"><i class="fa-solid fa-check-to-slot" style="font-size: 1.3rem;"></i></span>
+                        <div class="position-absolute top-0 start-0 translate-middle" style="margig-top: 10px; margin-left: 10px;">
+                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.5rem; height: 1.5rem;">
+                                <i class="fa-solid fa-bolt-lightning" style="font-size: .65rem;"></i>
+                            </span>
+                        </div>
+                        <div class="position-absolute top-100 start-100 translate-middle" style="margig-top: -3px; margin-left: -3px;">
+                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem;">
+                                <i class="fa-solid fa-check-to-slot" style="font-size: 1.3rem;"></i>
+                            </span>
+                        </div>
                     </div>
                
                     <div class="text-start">
@@ -420,8 +428,16 @@ export default {
                                 <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1" alt="BROCA Token Logo">   
                             </div>
                         </div>
-                        <span class="position-absolute top-0 start-0 translate-middle badge rounded-circle bg-warning text-dark"><i class="fa-solid fa-bolt-lightning" style="font-size: .65rem;"></i></span>
-                         <span class="position-absolute top-100 start-100 translate-middle badge rounded-circle bg-warning text-dark py-1"><i class="fa-solid fa-hard-drive fa-fw force-parent-lh" style="font-size: 1.3rem;"></i></span>
+                        <div class="position-absolute top-0 start-0 translate-middle" style="margig-top: 10px; margin-left: 10px;">
+                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.5rem; height: 1.5rem;">
+                                <i class="fa-solid fa-bolt-lightning" style="font-size: .65rem;"></i>
+                            </span>
+                        </div>
+                        <div class="position-absolute top-100 start-100 translate-middle" style="margig-top: -3px; margin-left: -3px;">
+                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem;">
+                                <i class="fa-solid fa-hard-drive" style="font-size: 1.3rem;"></i>
+                            </span>
+                        </div>
                     </div>
                
                 <div class="text-start">
@@ -470,7 +486,7 @@ export default {
                             :tokenstats="spkStats"
                                 :tokenuser="saccountapi" :account="account"
                                 @modalsign="sendIt($event)" v-slot:trigger>
-                                <span class="p-2 trigger"><i class="fa-solid fa-file-contract fa-fw me-2"></i>Create A Contract</span>
+                                <span class="p-2 trigger"><i class="fa-solid fa-file-contract fa-fw me-2"></i>Storage Contract</span>
                             </modal-vue>
                             </div>
                         </button>
@@ -616,14 +632,22 @@ export default {
             <!--larynx power-->
             <div class="py-3">
                 <div class="d-flex flex-wrap text-start align-items-center">
-                <div class="me-4 position-relative" style="width: 70px;">
+                    <div class="me-4 position-relative" style="width: 70px;">
                         <div class="ratio ratio-1x1">
                             <div class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
                                 <img src="/img/spknetwork/larynx_icon.png" class="rounded img-fluid p-1" alt="LARYNX Token Logo">   
                             </div>
                         </div>
-                        <span class="position-absolute top-0 start-0 translate-middle badge rounded-circle bg-warning text-dark"><i class="fa-solid fa-bolt-lightning" style="font-size: .65rem;"></i></span>
-                         <span class="position-absolute top-100 start-100 translate-middle badge rounded-circle bg-warning text-dark p-1"><i class="fa-solid fa-microchip fa-fw force-parent-lh" style="font-size: 1.3rem;"></i></span>
+                        <div class="position-absolute top-0 start-0 translate-middle" style="margig-top: 10px; margin-left: 10px;">
+                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.5rem; height: 1.5rem;">
+                                <i class="fa-solid fa-bolt-lightning" style="font-size: .65rem;"></i>
+                            </span>
+                        </div>
+                        <div class="position-absolute top-100 start-100 translate-middle" style="margig-top: -3px; margin-left: -3px;">
+                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem;">
+                                <i class="fa-solid fa-microchip" style="font-size: 1.3rem;"></i>
+                            </span>
+                        </div>
                     </div>
                     <div>
                        <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Power</div>
