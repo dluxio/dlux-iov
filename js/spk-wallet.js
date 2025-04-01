@@ -48,7 +48,7 @@ export default {
                 <div id="userNode" class="ms-auto" if="isnode">
                 </div>
             </div>
-            <div class="border-bottom border-white-50 text-start">
+            <div class="text-start">
                 <p class="lead">Decentralized and incentivized
                     network
                     infrastructure,
@@ -57,7 +57,7 @@ export default {
                     tokens.</p>
             </div>
             <!--claim  rewards-->
-            <div class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3"
+            <div class="d-flex flex-wrap align-items-center py-3 border-top border-white-50"
                 id="larynxclaimrewards" v-if="(saccountapi.claim_spk > 0 || saccountapi.claim > 0) && me">
                 <div>
                     <div class="d-flex align-items-start">
@@ -106,11 +106,17 @@ export default {
                     </div>
                 </div>
             </div>
+            <!-- spk banner -->
+            <div class="d-flex justify-content-between align-items-center bg-dark p-2 rounded">
+                <img src="/img/spknetwork/spk_logomark.png" class="img-fluid" alt="SPK Logomark" style="height: 70px;">
+            </div>
             <!-- Liquid SPK -->
             <div
                 class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
-                <div class="rounded border border-primary me-2">
-                    <img src="/img/spk512.png" class="rounded img-fluid border border-3 border-dark" width="70">
+                <div class="ratio ratio-1x1 me-4" style="width: 70px;">
+                    <div class="rounded-circle border border-light bg-dark d-flex justify-content-center align-items-center">
+                        <img src="/img/spknetwork/spk_icon.png" class="rounded img-fluid p-1" alt="SPK Token Logo">
+                    </div>
                 </div>
                 <div>
                     <div class="d-flex align-items-start fs-4 fw-bold">SPK
@@ -130,7 +136,7 @@ export default {
                     </h5>
                     <div class="btn-group" role="group"
                         aria-label="SPK Actions">
-                        <button type="button" class="btn btn-primary p-0">
+                        <button type="button" class="btn btn-light p-0">
                             <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="send" :mypfp="mypfp" 
                             token="spk" 
                             :test="test"
@@ -148,7 +154,7 @@ export default {
                             disabled></button>
                         <div class="btn-group" role="group" v-if="me">
                             <button type="button"
-                                class="btn btn-primary dropdown-toggle"
+                                class="btn btn-light dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
@@ -174,12 +180,18 @@ export default {
                 </div>
             </div>
             <!-- SPK Power -->
-            <div class="d-flex flex-column border-bottom border-white-50 py-3">
-                <div class="d-flex flex-wrap align-items-center">
-                <div class="position-relative me-2 rounded border border-1 border-warning">
-                    <img src="/img/spk512.png" width="70" class="img-fluid rounded border border-3 border-dark">
-                    <span class="position-absolute top-0 start-0 translate-middle badge rounded-circle bg-warning text-dark"><i class="fa-solid fa-bolt" style="font-size: .65rem;"></i></span>
-                </div>
+            <div class="d-flex flex-column py-3">
+                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                    <div class="me-4 position-relative" style="width: 70px;">
+                        <div class="ratio ratio-1x1">
+                            <div class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
+                                <img src="/img/spknetwork/spk_icon.png" class="rounded img-fluid p-1" alt="SPK Token Logo">   
+                            </div>
+                        </div>
+                        <span class="position-absolute top-0 start-0 translate-middle badge rounded-circle bg-warning text-dark"><i class="fa-solid fa-bolt-lightning" style="font-size: .65rem;"></i></span>
+                         <span class="position-absolute top-100 start-100 translate-middle badge rounded-circle bg-warning text-dark p-1"><i class="fa-solid fa-check-to-slot" style="font-size: 1.3rem;"></i></span>
+                    </div>
+               
                     <div class="text-start">
                         <div class="d-flex align-items-start fs-4 fw-bold">
                             SPK Power
@@ -201,14 +213,14 @@ export default {
                         <div class="btn-group" role="group"
                             aria-label="Power Actions">
                             <!-- vote btn -->
-                            <button class="dropdown btn btn-primary" href="#" role="button" id="settingsDropdownBtn" data-bs-toggle="collapse" data-bs-target="#collapseVote" aria-expanded="false" aria-controls="collapseVote">
+                            <button class="dropdown btn btn-light" href="#" role="button" id="settingsDropdownBtn" data-bs-toggle="collapse" data-bs-target="#collapseVote" aria-expanded="false" aria-controls="collapseVote">
                                 <i class="me-2 fa-solid fa-person-booth"></i>Vote</button>
                             <button type="button"
                                 class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                 disabled></button>
                             <div class="btn-group" role="group" v-if="me">
                                 <button type="button"
-                                    class="btn btn-primary dropdown-toggle"
+                                    class="btn btn-light dropdown-toggle"
                                     data-bs-toggle="dropdown" aria-haspopup="true"
                                     aria-expanded="false"></button>
                                 <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
@@ -325,9 +337,18 @@ export default {
                     </div>
                 </div>
             </div>
+            <!-- broca banner -->
+            <div class="d-flex justify-content-between align-items-center bg-dark p-2 rounded">
+                <img src="/img/spknetwork/broca_logomark.png" class="img-fluid" alt="BROCA Logomark" style="height: 70px;">
+            </div>
             <!-- Liquid BROCA -->
             <div
                 class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
+                <div class="ratio ratio-1x1 me-4" style="width: 70px;">
+                    <div class="rounded-circle border border-light bg-dark d-flex justify-content-center align-items-center">
+                        <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1" alt="BROCA Token Logo">
+                    </div>
+                </div>
                 <div>
                     <div class="d-flex align-items-start fs-4 fw-bold">BROCA
                             
@@ -346,7 +367,7 @@ export default {
                     </h5>
                     <div class="btn-group" role="group"
                         aria-label="SPK Actions">
-                        <button type="button" class="btn btn-primary p-0">
+                        <button type="button" class="btn btn-light p-0">
                             <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="send" :mypfp="mypfp" 
                             token="balance" 
                             :test="test"
@@ -359,12 +380,12 @@ export default {
                                         
                             </modal-vue>
                         </button>
-                        <button type="button"
+                       <button type="button"
                             class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                             disabled></button>
                         <div class="btn-group" role="group" v-if="me">
                             <button type="button"
-                                class="btn btn-primary dropdown-toggle"
+                                class="btn btn-light dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
@@ -391,7 +412,17 @@ export default {
             </div>
             <!-- Broca Power-->
             <div v-if="saccountapi.spk_power"
-                class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
+                class="d-flex flex-wrap align-items-center py-3">
+                    <div class="me-4 position-relative" style="width: 70px;">
+                        <div class="ratio ratio-1x1">
+                            <div class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
+                                <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1" alt="BROCA Token Logo">   
+                            </div>
+                        </div>
+                        <span class="position-absolute top-0 start-0 translate-middle badge rounded-circle bg-warning text-dark"><i class="fa-solid fa-bolt-lightning" style="font-size: .65rem;"></i></span>
+                         <span class="position-absolute top-100 start-100 translate-middle badge rounded-circle bg-warning text-dark py-1"><i class="fa-solid fa-hard-drive fa-fw force-parent-lh" style="font-size: 1.3rem;"></i></span>
+                    </div>
+               
                 <div class="text-start">
                     <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power</div>
                     <p class="text-white-50">BROCA stats:</p>
@@ -422,7 +453,7 @@ export default {
 
                     <div class="btn-group" role="group"
                         aria-label="Power Actions">
-                        <button type="button" class="btn btn-primary p-0">
+                        <button type="button" class="btn btn-light p-0">
                             <!-- register -->
                             <div v-if="saccountapi.pubKey == 'NA'"
                             @click="updatePubkey">
@@ -442,12 +473,12 @@ export default {
                             </modal-vue>
                             </div>
                         </button>
-                        <button type="button"
+                      <button type="button"
                             class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                             disabled></button>
                         <div class="btn-group" role="group" v-if="me">
                             <button type="button"
-                                class="btn btn-primary dropdown-toggle"
+                                class="btn btn-light dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
@@ -466,9 +497,18 @@ export default {
                     </div>
                 </div>
             </div>
+             <!-- larynx banner -->
+            <div class="d-flex justify-content-between align-items-center bg-dark p-2 rounded">
+                <img src="/img/spknetwork/larynx_logomark.png" class="img-fluid" alt="LARYNX Logomark" style="height: 70px;">
+            </div>
             <!--larynx token-->
             <div
                 class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
+                <div class="ratio ratio-1x1 me-4" style="width: 70px;">
+                    <div class="rounded-circle border border-light bg-dark d-flex justify-content-center align-items-center">
+                        <img src="/img/spknetwork/larynx_icon.png" class="rounded img-fluid p-1" alt="LARYNX Token Logo">
+                    </div>
+                </div>
                 <div>
                     <div class="d-flex align-items-start fs-4 fw-bold">LARYNX
                             
@@ -483,7 +523,7 @@ export default {
                     </h5>
                     <div class="btn-group" role="group"
                         aria-label="LARYNX Actions">
-                        <button type="button" class="btn btn-primary p-0">
+                        <button type="button" class="btn btn-light p-0">
                             <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" func="send" :mypfp="mypfp" 
                             :test="test"
                                 :tokenuser="saccountapi" :account="account"
@@ -498,7 +538,7 @@ export default {
                             disabled></button>
                         <div class="btn-group" role="group" v-if="me">
                             <button type="button"
-                                class="btn btn-primary dropdown-toggle"
+                                class="btn btn-light dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                 aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
@@ -573,8 +613,17 @@ export default {
                 </div>
             </div>
             <!--larynx power-->
-            <div class="border-bottom border-white-50 py-3">
+            <div class="py-3">
                 <div class="d-flex flex-wrap text-start align-items-center">
+                <div class="me-4 position-relative" style="width: 70px;">
+                        <div class="ratio ratio-1x1">
+                            <div class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
+                                <img src="/img/spknetwork/larynx_icon.png" class="rounded img-fluid p-1" alt="LARYNX Token Logo">   
+                            </div>
+                        </div>
+                        <span class="position-absolute top-0 start-0 translate-middle badge rounded-circle bg-warning text-dark"><i class="fa-solid fa-bolt-lightning" style="font-size: .65rem;"></i></span>
+                         <span class="position-absolute top-100 start-100 translate-middle badge rounded-circle bg-warning text-dark p-1"><i class="fa-solid fa-microchip fa-fw force-parent-lh" style="font-size: 1.3rem;"></i></span>
+                    </div>
                     <div>
                        <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Power</div>
                         <p class="text-white-50">Benefits of LARYNX Power:
@@ -590,7 +639,7 @@ export default {
                             <li>Delegated LP (DLP) earns SPK
                                 tokens for both
                                 delegator and
-                                delegatee for validated services provided.
+                                delegatee
                             </li>
                         </ul>
                     </div>
@@ -634,7 +683,7 @@ export default {
 
                         <div class="btn-group" role="group"
                             aria-label="LARYNX Actions">
-                            <button class="btn btn-primary p-0" type="button">
+                            <button class="btn btn-light p-0" type="button">
                                 <modal-vue type="delegate" 
                                     :smarkets="smarkets.node" token="LARYNX"
                                     func="Lock Liquidity" :stats="spkStats"
@@ -651,7 +700,7 @@ export default {
                                 disabled></button>
                             <div class="btn-group" role="group" v-if="me">
                                 <button id="btnGroupDrop1" type="button"
-                                    class="btn btn-primary dropdown-toggle"
+                                    class="btn btn-light dropdown-toggle"
                                     data-bs-toggle="dropdown"
                                     aria-haspopup="true"
                                     aria-expanded="false"></button>
@@ -750,7 +799,7 @@ export default {
             </div>
             <!--account value-->
             <div
-                class="d-flex flex-wrap text-start align-items-center py-3">
+                class="d-flex flex-wrap text-start align-items-center p-3 bg-dark rounded">
                 <div class="">
                     <h4>Estimated Account Value</h4>
                     <p class="text-white-50">The approximate US Dollar value for all SPK assets in your account</p>
