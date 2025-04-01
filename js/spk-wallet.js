@@ -211,7 +211,7 @@ export default {
                
                     <div class="text-start">
                         <div class="d-flex align-items-start fs-4 fw-bold">
-                            SPK Power
+                            SPK Power (SP)
                         </div>
                         <ul class="text-white-50">
                             <li>Enables voting</li>
@@ -223,7 +223,7 @@ export default {
                     <div class="ms-auto text-end">
                         <h5 class="d-flex align-items-center justify-content-end text-warning">
                             {{formatNumber((saccountapi.spk_power)/1000, 3, '.', ',')}}
-                            SPK <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                            SP <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
                             </span>
                         </h5>
@@ -470,13 +470,13 @@ export default {
                     </div>
                
                 <div class="text-start">
-                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power</div>
+                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power (BP)</div>
                     <ul class="text-white-50">
                         <li>Generates BROCA RESOURCE CREDITS (BRC)</li>
-                        <li>Current storage cost: 1 BRC per
-                            {{fancyBytes(1000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}
-                            for 30 days</li>
-                        <li>BRC Recharge Rate: Every 
+                        <li>Instant Power Up | 4 Week Power
+                                Down</li>
+                        
+                        <li>BRC recharges every 
                             {{formatNumber((spkStats.broca_refill / 28800), 2, '.', ',')}} Days, {{formatNumber((1 -
                             (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) * (spkStats.broca_refill / 28800), 2, '.', ',')}}
                             Days until full
@@ -488,7 +488,7 @@ export default {
                         {{formatNumber((saccountapi.pow_broca)/1000,
                         3, '.',
                         ',')}}
-                        BROCA
+                        BP
                         <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
                             </span>
@@ -497,7 +497,9 @@ export default {
                         {{fancyBytes(broca_calc(saccountapi.broca) * spkStats.channel_bytes)}} Availible Now
                     </h6>
                      <div class="mb-2"> <span class="small">~{{(fancyBytes(broca_calc(saccountapi.broca) * 6000))}} per Month</span></div>
-
+<div>Current storage cost: 1 BRC per
+                            {{fancyBytes(1000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}
+                            for 30 days</div>
                     <div class="btn-group" role="group"
                         aria-label="Power Actions">
                         <button type="button" class="btn btn-light p-0">
@@ -723,8 +725,10 @@ export default {
                                 style="text-decoration: none">
                                 <small class="ms-auto"><span
                                         class="badge me-2 bg-success">{{toFixed(pFloat(spkStats.spk_rate_ldel) * 100,3)}}%</span></small>
-                                <h5 class="m-0">
-                                    {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000, 3, '.', ',')}} DLP<i class="fas fa-search ms-2"></i>
+                                <h5 class="m-0 d-flex align-items-center">
+                                    {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000, 3, '.', ',')}} DLP<span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                                <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
+                            </span><i class="fas fa-search ms-2"></i>
                                 </h5>
                             </a>
                         </div>
