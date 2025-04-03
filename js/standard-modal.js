@@ -80,7 +80,7 @@ export default {
             <label>Test Network Only</label>
           </div>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button :disabled="!isFormValid" type="submit" class="btn btn-primary" data-bs-dismiss="modal">Send</button>
+          <button :disabled="!isFormValid" type="submit" class="btn btn-primary" data-bs-dismiss="modal">{{feat.string}}</button>
         </div>
       </form>
     </div>

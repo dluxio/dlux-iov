@@ -13,6 +13,7 @@ export default {
         account: { default: "Please login" },
         api: String,
         func: { default: "send" },
+        token: { default: "balance" },
         tokenprotocol: {
             default: () => ({ head_block: 0 }),
         },
@@ -40,6 +41,7 @@ export default {
                 :account="account"
                 :api="api"
                 :mypfp="mypfp"
+                :token="token"
                 :tokenprotocol="tokenprotocol" 
                 :tokenuser="tokenuser" 
                 @modalsign="$emit('modalsign', $event)" />
