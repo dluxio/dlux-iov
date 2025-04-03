@@ -173,25 +173,6 @@
                                     </ul>
                                 </div>
                             </div>
-                            <!-- nav tabs -->
-                            <!-- <div class="mt-5 mb-2">
-                                <ul id="usertabs" class="nav nav-tabs" role="tablist">
-                                    <li class="nav-item"> <a class="nav-link active" id="blogtab" role="tab"
-                                            data-bs-toggle="tab" aria-controls="blog" aria-expanded="true"
-                                            @click="activeTab = 'blog'" href="#blog">Blog</a>
-                                    </li>
-                                    <li class="nav-item"> <a class="nav-link" id="wallettab" role="tab"
-                                            data-bs-toggle="tab" @click="activeTab = 'wallet'" aria-controls="wallet"
-                                            aria-expanded="true" href="#wallet">Wallet</a></li>
-                                    <li class="nav-item"> <a class="nav-link" id="inventorytab" role="tab"
-                                            @click="activeTab = 'inventory'" data-bs-toggle="tab"
-                                            aria-controls="inventory" aria-expanded="true"
-                                            href="#inventory">Inventory</a></li>
-                                    <li class="nav-item"> <a class="nav-link" id="drivetab" role="tab"
-                                            data-bs-toggle="tab" @click="activeTab = 'drive'" aria-controls="drive"
-                                            aria-expanded="true" href="#drive">Drive</a></li>
-                                </ul>
-                            </div> -->
                         </div>
                     </div>
                     <!-- page tab content -->
@@ -240,12 +221,12 @@
                                         aria-labelledby="dluxtab">
                                         <div class="">
                                             <div>
-                                                <div class="d-flex align-items-center mb-2">
-                                                    <div class="d-flex align-items-start">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    
                                                         <h1 class="display-5 mb-0">DLUX<i
                                                                 class="fa-solid fa-link fa-fw ms-2"></i></h1>
-                                                    </div>
-                                                    <div class="text-center small m-0 p-2 ms-2" v-bind:class="{'text-success': behind < 30,
+                                                    
+                                                    <div class="text-center small p-2 ms-2" v-bind:class="{'text-success': behind < 30,
                                                     'text-warning': behind >= 30,
                                                     'text-danger': behind > 100}"> <span v-show="behind < 30">ONLINE -
                                                         </span> <span v-show="behind >= 30 && behind <=100">LAGGING
@@ -255,13 +236,13 @@
                                                             HIVE</span></div>
                                                 </div>
                                                 <div class="">
-                                                    <p class="lead mb-0">An open source platform for p2p games, apps,
+                                                    <p class="mb-0 lead">An open source platform for p2p games, apps,
                                                         and
                                                         experiences.
                                                     </p>
                                                 </div>
                                                 <!--claim dlux-->
-                                                <div class="bg-special border border-4 border-dark rounded mt-3">
+                                                <div v-if="accountapi.claim" class="bg-special border border-4 border-dark rounded mt-3">
                                                     <div class="d-flex text-dark flex-wrap align-items-center p-3"
                                                         style="background-color: #00000030">
                                                         <div>
@@ -333,7 +314,7 @@
                                                     </div>
                                                     <div>
                                                         <div class="d-flex align-items-start">
-                                                            <h4>DLUX Token</h4>
+                                                            <h4>DLUX</h4>
                                                         </div>
                                                         <p class="text-white-50">The utility token for content
                                                             distribution,
@@ -628,16 +609,12 @@
                                     <!-- spk wallet tab-->
                                     <div role="tabpanel" class="tab-pane" id="spk" aria-labelledby="spktab">
                                         <div>
-                                            <div class="alert mb-3 bg-img-none alert-info d-flex align-items-center flex-wrap"
+                                            <div class="alert py-0 mb-3 bg-img-none alert-info d-flex align-items-center flex-wrap"
                                                 role="alert">
                                                 <div class="d-flex flex-column flex-grow-1">
                                                     <div class="fs-3 fw-light">The SPK Files Testnet is live
                                                     </div>
-                                                    <div class="fw-6">Use the SPK Test button here and on
-                                                        the
-                                                        Files
-                                                        tab
-                                                        to power up SPK and unlock BROCA resource credits
+                                                    <div class="fw-6">Power up BROCA to generate resource credits
                                                         for
                                                         file
                                                         storage</div>
@@ -679,9 +656,9 @@
                                             <div role="tabpanel" class="tab-pane show active" id="spk-base"
                                                 aria-labelledby="spkbasetab">
                                                 <div class="">
-                                                    <div class="d-flex align-items-center mb-2">
+                                                    <div class="d-flex align-items-center mb-1">
                                                         <div class="d-flex align-items-start">
-                                                            <h1 class="display-5 m-0">SPK<i
+                                                            <h1 class="display-5 mb-0">SPK<i
                                                                     class="fa-solid fa-link fa-fw ms-2"></i></h1>
                                                         </div>
                                                         <div class="text-center small m-0 p-2 ms-2" v-bind:class="{'text-success': larynxbehind < 30,
@@ -783,13 +760,13 @@
                                                         </div>
                                                     </div>
                                                     <div class="">
-                                                        <p class="lead">Decentralized and incentivized network
+                                                        <p class="lead mb-0">Decentralized and incentivized network
                                                             infrastructure,
                                                             rewarding
                                                             providers with SPK governance and BROCA gas tokens.</p>
                                                     </div>
                                                     <!--claim larynx rewards-->
-                                                    <div class="bg-special border border-4 border-dark rounded mt-3">
+                                                    <div v-if="saccountapi.claim" class="bg-special border border-4 border-dark rounded mt-3">
                                                         <div class="d-flex text-dark flex-wrap align-items-center p-3"
                                                             style="background-color: #00000030">
                                                             <div>
@@ -845,7 +822,7 @@
                                                     </div>
                                                     <!-- spk banner -->
                                                     <div
-                                                        class="d-flex justify-content-center align-items-center bg-dark mt-4 p-2 rounded">
+                                                        class="d-flex justify-content-center align-items-center bg-dark my-3 p-2 rounded">
                                                         <img src="/img/spknetwork/spk_logomark.png" class="img-fluid"
                                                             alt="SPK Logomark" style="height: 70px;">
                                                     </div>
@@ -860,7 +837,7 @@
                                                         </div>
                                                         <div>
                                                             <div class="d-flex align-items-start">
-                                                                <h4 class="m-0">SPK Token</h4>
+                                                                <h4 class="m-0">SPK</h4>
                                                             </div>
                                                             <p class="text-white-50 m-0">The governance token for the
                                                                 SPK
@@ -936,7 +913,7 @@
                                                     </div>
                                                     <!-- larynx banner -->
                                                     <div
-                                                        class="d-flex justify-content-center align-items-center bg-dark mt-4 p-2 rounded">
+                                                        class="d-flex justify-content-center align-items-center bg-dark my-3 p-2 rounded">
                                                         <img src="/img/spknetwork/larynx_logomark.png" class="img-fluid"
                                                             alt="LARYNX Logomark" style="height: 70px;">
                                                     </div>
@@ -953,7 +930,7 @@
                                                         </div>
                                                         <div>
                                                             <div class="d-flex align-items-start">
-                                                                <h4 class="m-0">LARYNX Token</h4>
+                                                                <h4 class="m-0">LARYNX</h4>
                                                             </div>
                                                             <p class="text-white-50">The mining token for the SPK
                                                                 network.
@@ -1343,7 +1320,7 @@
                                                     </div>
                                                     <!--account value-->
                                                     <div
-                                                        class="d-flex flex-wrap text-start align-items-center mt-4 p-3 bg-dark rounded">
+                                                        class="d-flex flex-wrap text-start align-items-center mt-3 p-3 bg-dark rounded">
                                                         <div class="">
                                                             <h4>Estimated Account Value</h4>
                                                             <p class="text-white-50">The approximate US Dollar value for
@@ -1374,8 +1351,8 @@
                                     <!-- hive wallet tab-->
                                     <div role="tabpanel" class="tab-pane" id="hive" aria-labelledby="hivetab">
 
-                                        <div class="d-flex flex-column mb-2">
-                                            <h1 class="display-5">HIVE<i class="fa-solid fa-link fa-fw ms-2"></i>
+                                        <div class="d-flex flex-column">
+                                            <h1 class="display-5 mb-1">HIVE<i class="fa-solid fa-link fa-fw ms-2"></i>
                                             </h1>
                                             <p class="lead mb-0">A proof-of-stake blockchain built for
                                                 censorship
@@ -1401,7 +1378,7 @@
                                             </div>
                                             <div>
                                                 <div class="d-flex align-items-start">
-                                                    <h4>HIVE Token</h4>
+                                                    <h4>HIVE</h4>
                                                 </div>
                                                 <p class="text-white-50">The main token of the chain, often
                                                     rewarded
@@ -1666,8 +1643,7 @@
                                             </div>
 
                                         </div>
-                                        <div id="hivetransactions" class="jumbotron pt-3 text-white">
-                                        </div>
+                                        
                                     </div>
                                 </div>
                             </div>

@@ -29,13 +29,13 @@ export default {
                     effect your real
                     account.</p>
             </div>
-            <div class="d-flex align-items-center mb-2">
+            <div class="d-flex align-items-center mb-1">
                 <div class="d-flex align-items-start">
                     <h1 class="display-5 m-0 d-flex align-items-center">SPK<span v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-info text-black ms-1"
-                                style="font-size: .7ch;">TEST NET
+                                style="font-size: .6ch;">TEST NET
                             </span><i class="fa-solid fa-link fa-fw ms-2"></i></h1>
                 </div>
-                <div class="text-center small m-0 p-2 ms-2" v-bind:class="{'text-success': larynxbehind < 30,
+                <div class="text-center small p-2 ms-2" v-bind:class="{'text-success': larynxbehind < 30,
                             'text-warning': larynxbehind >= 30,
                             'text-danger': larynxbehind > 100}"> <span
                         v-show="larynxbehind < 30">ONLINE -
@@ -50,7 +50,7 @@ export default {
                 </div>
             </div>
             <div class="text-start">
-                <p class="lead">Decentralized and incentivized
+                <p class="mb-0 lead">Decentralized and incentivized
                     network
                     infrastructure that rewards service operators</p>
             </div>
@@ -107,7 +107,7 @@ export default {
             </div>
             </div>
             <!-- spk banner -->
-            <div class="d-flex justify-content-center align-items-center bg-dark mt-4 p-2 rounded">
+            <div class="d-flex justify-content-center align-items-center bg-dark my-3 p-2 rounded">
                 <img src="/img/spknetwork/spk_logomark.png" class="img-fluid" alt="SPK Logomark" style="height: 70px;">
             </div>
             <!-- Liquid SPK -->
@@ -367,7 +367,7 @@ export default {
                 </div>
             </div>
             <!-- broca banner -->
-            <div class="d-flex justify-content-center align-items-center bg-dark mt-4 p-2 rounded">
+            <div class="d-flex justify-content-center align-items-center bg-dark my-3 p-2 rounded">
                 <img src="/img/spknetwork/broca_logomark.png" class="img-fluid" alt="BROCA Logomark" style="height: 70px;">
             </div>
             <!-- Liquid BROCA -->
@@ -597,7 +597,7 @@ export default {
             </div>
             
              <!-- larynx banner -->
-            <div class="d-flex justify-content-center align-items-center bg-dark mt-4 p-2 rounded">
+            <div class="d-flex justify-content-center align-items-center bg-dark my-3 p-2 rounded">
                 <img src="/img/spknetwork/larynx_logomark.png" class="img-fluid" alt="LARYNX Logomark" style="height: 70px;">
             </div>
             <!--larynx token-->
@@ -908,7 +908,7 @@ export default {
             </div>
             <!--account value-->
             <div
-                class="d-flex flex-wrap text-start align-items-center mt-4 p-3 bg-dark rounded">
+                class="d-flex flex-wrap text-start align-items-center mt-3 p-3 bg-dark rounded">
                 <div class="">
                     <h4>Estimated Account Value</h4>
                     <p class="text-white-50">The approximate US Dollar value for all SPK assets in your account</p>
