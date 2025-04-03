@@ -562,7 +562,7 @@ export default {
                     </div>
                     <div class="card-body">
                     <div class="d-flex align-items-center mb-2 justify-content-center"><h5 class="mb-0 card-title text-info">
-                            {{fancyBytes(1000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}/</h5><span class="small ms-1 d-flex align-items-center text-warning">1 BROCA <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                            {{fancyBytes(1000000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}/</h5><span class="small ms-1 d-flex align-items-center text-warning">1 BROCA <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
                             </span></span></div>
                     <p class="card-text text-white-50">SPK Network IPFS Pinning Service for 30 days per BROCA Power.</p>
