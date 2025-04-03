@@ -658,7 +658,9 @@ export default {
                                     :account="account"
                                     :tokenprotocol="protocollarynx"
                                     @modalsign="sendIt($event)" 
-                                    v-slot:trigger>
+                                    v-slot:trigger class="dropdown-menu-item">
+                                    <button class="dropdown-item trigger" 
+                                        type="button">
                                     <i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
                                 </modal-vue>
                                 
