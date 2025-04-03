@@ -55,7 +55,7 @@ export default {
                     infrastructure that rewards service operators</p>
             </div>
             <!--claim  rewards-->
-            <div class="bg-special border border-4 border-dark rounded"
+            <div class="bg-special border border-4 border-dark rounded my-3"
                 id="larynxclaimrewards" v-if="(saccountapi.claim_spk > 0 || saccountapi.claim > 0) && me">
             <div class="d-flex text-dark flex-wrap align-items-center p-3" style="background-color: #00000020">
                 <div>
@@ -128,11 +128,13 @@ export default {
                     </p>
                 </div>
                 <div class="ms-auto text-end">
-                    <h5>
+                    <h5 class="d-flex align-items-center justify-content-end">
                         {{formatNumber((saccountapi.spk)/1000,
                         3, '.',
                         ',')}}
-                        SPK
+                        <span class="ms-2">SPK</span><span class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                                                                    <i class="fa-solid fa-atom" style="font-size: .5rem;"></i>
+                                                                </span>
                     </h5>
                     <div class="btn-group" role="group"
                         aria-label="SPK Actions">
@@ -221,9 +223,9 @@ export default {
                         </ul>
                     </div>
                     <div class="ms-auto text-end">
-                        <h5 class="d-flex align-items-center justify-content-end text-warning">
+                        <h5 class="d-flex align-items-center justify-content-end">
                             {{formatNumber((saccountapi.spk_power)/1000, 3, '.', ',')}}
-                            SPK <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                            <span class="ms-2 text-warning">SPK</span> <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
                             </span>
                         </h5>
@@ -388,11 +390,13 @@ export default {
                     </p>
                 </div>
                 <div class="ms-auto text-end">
-                    <h5>
+                    <h5 class="d-flex align-items-center justify-content-end">
                         {{formatNumber((saccountapi.liq_broca)/1000,
                         3, '.',
                         ',')}}
-                        BROCA
+                        <span class="ms-2">BROCA</span><span class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                                                                    <i class="fa-solid fa-atom" style="font-size: .5rem;"></i>
+                                                                </span>
                     </h5>
                     <div class="btn-group" role="group"
                         aria-label="SPK Actions">
@@ -483,11 +487,11 @@ export default {
                     </ul>
                 </div>
                 <div class="ms-auto text-end">
-                <h5 class="d-flex align-items-center justify-content-end text-warning">
+                <h5 class="d-flex align-items-center justify-content-end">
                         {{formatNumber((saccountapi.pow_broca)/1000,
                         3, '.',
                         ',')}}
-                        BROCA
+                        <span class="ms-2 text-warning">BROCA</span>
                         <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
                             </span>
@@ -554,7 +558,7 @@ export default {
                 </div>
                 
             </div>
-            <div class="card-group">
+            <div class="card-group bg-dark rounded">
                 <div class="card">
                     <div class="card-header">
                     <h3 class="card-title mb-0">Storage Price</h3>
@@ -617,8 +621,11 @@ export default {
                         Network.</p>
                 </div>
                 <div class="ms-auto text-end">
-                    <h5>
-                        {{formatNumber((saccountapi.balance)/1000, 3, '.', ',')}} LARYNX
+                    <h5 class="d-flex align-items-center justify-content-end">
+                        {{formatNumber((saccountapi.balance)/1000, 3, '.', ',')}} 
+                        <span class="ms-2">LARYNX</span><span class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                                                                    <i class="fa-solid fa-atom" style="font-size: .5rem;"></i>
+                                                                </span>
                     </h5>
                     <div class="btn-group" role="group"
                         aria-label="LARYNX Actions">
@@ -736,7 +743,8 @@ export default {
                     <div id="larynxgactions" class="ms-auto">
                         <div class="d-flex flex-wrap align-items-center mb-2">
                            
-                            <h5 class="ms-auto mb-0 d-flex align-items-center text-warning"> {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}} LARYNX<span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                            <h5 class="ms-auto mb-0 d-flex align-items-center"> {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}} 
+                            <span class="ms-2 text-warning">LARYNX</span><span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
                             </span></h5>
                         </div>
@@ -841,9 +849,9 @@ export default {
                     </div>
                     <div class="ms-auto text-end">
                     
-                        <h5 class="d-flex align-items-center justify-content-end text-warning">
+                        <h5 class="d-flex align-items-center justify-content-end">
                              {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000, 3, '.', ',')}}
-                            LARYNX <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                            <span class="ms-2 text-warning">LARYNX</span> <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-right-left" style="font-size: .5rem;"></i>
                             </span>
                         </h5>

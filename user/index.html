@@ -276,7 +276,7 @@
                                                                 </div>
                                                                 <div v-show="accountapi.gov > 0" class="text-white">
                                                                     <div class="input-group my-3">
-                                                                        <span class="input-group-text bg-dark-2">
+                                                                        <span class="input-group-text bg-dark">
                                                                             <div class="form-check form-switch ">
                                                                                 <input class="form-check-input"
                                                                                     type="checkbox" role="switch"
@@ -321,9 +321,11 @@
                                                             smart contracts, and NFT creation.</p>
                                                     </div>
                                                     <div id="dluxactions" class="ms-auto text-end">
-                                                        <h5 id="dluxbalance">
+                                                        <h5 id="dluxbalance" class="d-flex align-items-center justify-content-end">
                                                             {{formatNumber((accountapi.balance)/1000, 3, '.', ',')}}
-                                                            DLUX
+                                                            <span class="ms-2">DLUX</span><span class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                                                                <i class="fa-solid fa-atom" style="font-size: .5rem;"></i>
+                                                            </span>
                                                         </h5>
                                                         <div class="btn-group" v-if="me" role="group"
                                                             aria-label="DLUX Actions">
@@ -426,10 +428,12 @@
                                                             </ul>
                                                         </div>
                                                         <div id="dluxpactions" class="ms-auto text-end">
-                                                            <h5 id="pwrbalance">
+                                                            <h5 id="pwrbalance" class="d-flex align-items-center justify-content-end">
                                                                 {{formatNumber((accountapi.poweredUp)/1000, 3, '.',
                                                                 ',')}}
-                                                                DLUX
+                                                                <span class="ms-2 text-warning">DLUX</span><span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                                                                    <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
+                                                                </span>
                                                             </h5>
                                                             <a v-if="accountapi.granting > 0" data-bs-toggle="collapse"
                                                                 id="delegationsbtn" href="#delegations" role="button"
@@ -543,8 +547,10 @@
                                                         </ul>
                                                     </div>
                                                     <div id="dluxgactions" class="ms-auto text-end">
-                                                        <h5 id="govbalance">
-                                                            {{formatNumber((accountapi.gov)/1000, 3, '.', ',')}} DLUX
+                                                        <h5 id="govbalance" class="d-flex align-items-center justify-content-end">
+                                                            {{formatNumber((accountapi.gov)/1000, 3, '.', ',')}} <span class="ms-2 text-primary">DLUX</span><span class="ms-1 badge bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                                                                <i class="fa-solid fa-lock" style="font-size: .5rem;"></i>
+                                                            </span>
                                                         </h5>
                                                         <a data-bs-toggle="collapse" id="escrowtxbutton"
                                                             href="#escrowtx" role="button" aria-expanded="false"
@@ -618,10 +624,10 @@
                                                         for
                                                         file
                                                         storage</div>
-                                                    <p>Actions that don't have "Mirror Network Only"
+                                                    <p>Actions that don't have "Test Network Only"
                                                         will not
                                                         effect your real
-                                                        account.</p>
+                                                        account</p>
                                                 </div>
                                                 <div class="mx-auto py-1 d-none">
                                                     <button type="button"
@@ -845,9 +851,11 @@
                                                             </p>
                                                         </div>
                                                         <div class="ms-auto text-end">
-                                                            <h5>
+                                                            <h5 class="d-flex align-items-center justify-content-end">
                                                                 {{formatNumber((saccountapi.spk)/1000, 3, '.', ',')}}
-                                                                SPK
+                                                                <span class="ms-2">SPK</span><span class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                                                                    <i class="fa-solid fa-atom" style="font-size: .5rem;"></i>
+                                                                </span>
                                                             </h5>
                                                             <div class="btn-group" v-if="me" role="group"
                                                                 aria-label="SPK Actions">
@@ -940,7 +948,7 @@
                                                             <h5 class="d-flex align-items-center">
                                                                 {{formatNumber((saccountapi.balance)/1000, 3, '.',
                                                                 ',')}}
-                                                                <span class=" ms-2">LARYNX</span><span class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                                                                <span class="ms-2">LARYNX</span><span class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                                                     <i class="fa-solid fa-atom" style="font-size: .5rem;"></i>
                                                                 </span>
                                                             </h5>
