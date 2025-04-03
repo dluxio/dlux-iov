@@ -1,4 +1,4 @@
-this.version = "2025.04.02.1";
+this.version = "2025.04.02.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -63,6 +63,7 @@ var urlsToCache = [
   `/img/eps-file-type-svgrepo-com.svg`,
   `/img/excel-file-type-svgrepo-com.svg`,
   `/img/gallery-vr-comp.jpg`,
+  `/img/hbd_green.svg`,
   `/img/hextacular.svg`,
   `/img/hiveauth.svg`,
   `/img/hivesigner.svg`,

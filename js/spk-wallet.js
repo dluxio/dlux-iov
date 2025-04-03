@@ -7,9 +7,9 @@ export default {
         "modal-vue": ModalVue
     },
     template: `
-    <div class="container">
-        <div class="mt-3">
-            <div class="alert alert-danger text-start bg-dark" role="alert">
+    <div class="">
+        <div class="">
+            <div class="alert alert-danger text-start bg-dark d-none" role="alert">
                 <h3 class="text-center"><i
                         class="fa-solid fa-triangle-exclamation me-2"></i>Mirror
                     Network
@@ -29,11 +29,11 @@ export default {
                     effect your real
                     account.</p>
             </div>
-            <div class="d-flex align-items-center mt-4 mb-2">
+            <div class="d-flex align-items-center mb-2">
                 <div class="d-flex align-items-start">
-                    <h1 class="m-0">SPK</h1><div v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-info text-black ms-1"
-                                style="font-size: xx-small;">TEST NET
-                            </div>
+                    <h1 class="display-5 m-0 d-flex align-items-center">SPK<span v-if="sapi == 'https://spktest.dlux.io'" class="badge rounded-pill text-bg-info text-black ms-1"
+                                style="font-size: .7ch;">TEST NET
+                            </span><i class="fa-solid fa-link fa-fw ms-2"></i></h1>
                 </div>
                 <div class="text-center small m-0 p-2 ms-2" v-bind:class="{'text-success': larynxbehind < 30,
                             'text-warning': larynxbehind >= 30,
@@ -55,7 +55,7 @@ export default {
                     infrastructure that rewards service operators</p>
             </div>
             <!--claim  rewards-->
-            <div class="bg-special border border-4 border-dark rounded mt-4"
+            <div class="bg-special border border-4 border-dark rounded"
                 id="larynxclaimrewards" v-if="(saccountapi.claim_spk > 0 || saccountapi.claim > 0) && me">
             <div class="d-flex text-dark flex-wrap align-items-center p-3" style="background-color: #00000020">
                 <div>
