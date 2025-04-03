@@ -274,20 +274,20 @@
                                                                         v-show="dlux2gov">50%
                                                                         Liquid | 50% Gov</span>
                                                                 </div>
-                                                                <div v-show="accountapi.gov > 0" class="text-white">
-                                                                    <div class="input-group my-3">
-                                                                        <span class="input-group-text bg-dark">
-                                                                            <div class="form-check form-switch ">
+                                                                <div v-show="accountapi.gov > 0">
+                                                                    <div class="rounded text-light px-2 py-1 mt-1" style="background-color: rgba(0,0,0,0.3)">
+                                                                       
+                                                                            <div class="form-check form-switch">
                                                                                 <input class="form-check-input"
                                                                                     type="checkbox" role="switch"
                                                                                     id="flexSwitchCheckDefault"
                                                                                     v-model="dlux2gov">
                                                                                 <label class="form-check-label"
                                                                                     for="flexSwitchCheckDefault">Claim
-                                                                                    GOV not
-                                                                                    PWR</label>
+                                                                                    GOV not PWR
+                                                                                    </label>
                                                                             </div>
-                                                                        </span>
+                                                                       
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -615,16 +615,16 @@
                                     <!-- spk wallet tab-->
                                     <div role="tabpanel" class="tab-pane" id="spk" aria-labelledby="spktab">
                                         <div>
-                                            <div class="alert py-0 mb-3 bg-img-none alert-info d-flex align-items-center flex-wrap"
-                                                role="alert">
+                                            <div class="alert mb-4 alert-info bg-img-none d-flex align-items-center flex-wrap"
+                                                role="alert" style="background-color: #ffffff10;">
                                                 <div class="d-flex flex-column flex-grow-1">
                                                     <div class="fs-3 fw-light">The SPK Files Testnet is live
                                                     </div>
-                                                    <div class="fw-6">Power up BROCA to generate resource credits
+                                                    <div class="fw-6">Turn on the Testnet to Power up BROCA and generate resource credits
                                                         for
                                                         file
                                                         storage</div>
-                                                    <p>Actions that don't have "Test Network Only"
+                                                    <p class="mb-0">Actions that don't have "Test Network Only"
                                                         will not
                                                         effect your real
                                                         account</p>

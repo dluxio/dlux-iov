@@ -476,14 +476,15 @@ export default {
                 <div class="text-start">
                     <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power</div>
                     <ul class="text-white-50">
-                        <li>Regenerative Storage Resource Credits</li>
-                        <li>Instant Power Up | 4 Week Power
-                                Down</li>
+                        <li>Regenerative Resource Credits for IPFS Storage</li>
+                        
                         <li>Recharges every 
                             {{formatNumber((spkStats.broca_refill / 28800), 2, '.', ',')}} Days, {{formatNumber((1 -
                             (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) * (spkStats.broca_refill / 28800), 2, '.', ',')}}
                             Days until full
                         </li>
+                        <li>Instant Power Up | 4 Week Power
+                                Down</li>
                     </ul>
                 </div>
                 <div class="ms-auto text-end">
@@ -554,43 +555,43 @@ export default {
                 </div>
                 
             </div>
-            <div class="card-group bg-dark rounded">
-                <div class="card">
-                    <div class="card-header">
-                    <h3 class="card-title mb-0">Storage Price</h3>
+            <div class="card-group mb-3 mt-2 rounded">
+                <div class="card bg-img-none">
+                    <div class="card-header bg-info-50 text-dark text-center">
+                    <h3 class="card-title mb-0">Network Fee</h3>
                     </div>
                     <div class="card-body">
-                    <div class="d-flex align-items-center mb-2"><h5 class="mb-0 card-title text-info">
+                    <div class="d-flex align-items-center mb-2 justify-content-center"><h5 class="mb-0 card-title text-info">
                             {{fancyBytes(1000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}/</h5><span class="small ms-1 d-flex align-items-center text-warning">1 BROCA <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
                                 <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
                             </span></span></div>
-                    <p class="card-text">Current exchange rate between BROCA Power and SPK Network Storage Services for 30 days.</p>
+                    <p class="card-text text-white-50">SPK Network IPFS Pinning Service for 30 days per BROCA Power.</p>
                     </div>
-                    <div class="card-footer">
+                    <div class="card-footer bg-card text-center">
                     <small class="text-body-secondary">30 Days of Storage</small>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-header">
+                <div class="card bg-img-none">
+                    <div class="card-header bg-info-50 text-dark text-center">
                     <h3 class="card-title mb-0">Upload Limit</h3>
                     </div>
                     <div class="card-body">
-                    <h5 class="card-title text-info">{{fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * spkStats.channel_bytes)}}</h5>
-                    <p class="card-text">Your current available storage based on your current BROCA Power resource availability.</p>
+                    <h5 class="card-title text-info text-center">{{fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * spkStats.channel_bytes)}}</h5>
+                    <p class="card-text text-white-50">Your current available storage based on your current BROCA Power resources</p>
                     </div>
-                    <div class="card-footer">
+                    <div class="card-footer bg-card text-center">
                     <small class="text-body-secondary">Regenerates Every 5 Days</small>
                     </div>
                 </div>
-                <div class="card">
-                <div class="card-header">
+                <div class="card bg-img-none">
+                <div class="card-header bg-info-50 text-dark text-center">
                     <h3 class="card-title mb-0">Drive Size</h3>
                     </div>
                     <div class="card-body">
-                    <h5 class="card-title text-info">~{{(fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * 6000))}}</h5>
-                    <p class="card-text">Maximum perpetual storage when files are set to autorenew at current network rates.</p>
+                    <h5 class="card-title text-info text-center">~{{(fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * 6000))}}</h5>
+                    <p class="card-text text-white-50">Maximum perpetual storage when files are set to autorenew at current network rates</p>
                     </div>
-                    <div class="card-footer">
+                    <div class="card-footer bg-card text-center">
                     <small class="text-body-secondary">Rolling Storage Over 30 Days</small>
                     </div>
                 </div>
