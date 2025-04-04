@@ -307,7 +307,7 @@
                                                 </div>
                                                 <!--dlux token-->
                                                 <div
-                                                    class="border-bottom border-white-50 px-2 py-5 p-sm-5 px-lg-1 py-lg-3">
+                                                    class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
                                                     <div
                                                         class="d-flex flex-column flex-lg-row align-items-center justify-content-between gap-3 gap-lg-4">
                                                         
@@ -344,7 +344,7 @@
                                                                     <modal-vue type="send" token="DLUX"
                                                                         :balance="accountapi.balance" :account="account"
                                                                         @modalsign="sendIt($event)" v-slot:trigger>
-                                                                        <span slot="trigger" class="p-2 trigger"><i
+                                                                        <span slot="trigger" class="p-2 trigger text-nowrap"><i
                                                                                 class="fas fa-paper-plane me-2"></i>Send</button>
                                                                 </modal-vue>
                                                                 </button>
@@ -397,7 +397,7 @@
                                                 </div>
                                                 <!--dlux power-->
                                                 <div
-                                                    class="border-bottom border-white-50 px-2 py-5 p-sm-5 px-lg-1 py-lg-3">
+                                                    class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
                                                     <div
                                                         class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
                                                         <div class="text-center position-relative">
@@ -459,7 +459,7 @@
                                                                         :balance="accountapi.poweredUp"
                                                                         :account="account" @modalsign="sendIt($event)"
                                                                         v-slot:trigger>
-                                                                        <span class="p-2 trigger" slot="trigger"><i
+                                                                        <span class="p-2 trigger text-nowrap" slot="trigger"><i
                                                                                 class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
                                                                     </modal-vue>
                                                                 </button>
@@ -492,7 +492,7 @@
                                                     </div>
                                                 </div>
                                                 <!--delegated dlux power -->
-                                                <div class="border-bottom border-white-50 px-2 py-5 p-sm-5 px-lg-1 py-lg-3">
+                                                <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
                                                     <div
                                                         class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
                                                         <div class="position-relative text-center">
@@ -542,7 +542,7 @@
                                                             </h5>
                                                             <div class="btn-group" v-if="me" role="group"
                                                                 aria-label="DLUX Actions">
-                                                                <button class="dropdown btn btn-light" href="#"
+                                                                <button class="dropdown btn btn-light text-nowrap" href="#"
                                                                     role="button" id="delegationsbtn"
                                                                     data-bs-toggle="collapse"
                                                                     data-bs-target="#delegations" aria-expanded="false"
@@ -573,7 +573,7 @@
                                                     </div>
                                                 </div>
                                                 <!-- dlux governance -->
-                                                <div class="px-2 py-5 p-sm-5 px-lg-1 py-lg-3">
+                                                <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
                                                     <div
                                                         class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
                                                         <div class="text-center position-relative">
@@ -639,7 +639,7 @@
                                                             </a>
                                                             <div class="btn-group" v-if="me" role="group"
                                                                 aria-label="DLUX Actions">
-                                                                <button type="button" class="btn btn-light " disabled
+                                                                <button type="button" class="btn btn-light text-nowrap" disabled
                                                                     title="Coming soon!"
                                                                     style="pointer-events: none;"><i
                                                                         class="fas fa-balance-scale fa-fw me-2"></i>Measures</button>
