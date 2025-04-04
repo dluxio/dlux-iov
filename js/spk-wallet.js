@@ -55,15 +55,12 @@ export default {
                     infrastructure that rewards service operators</p>
             </div>
             <!--claim  rewards-->
-            <div class="bg-special border border-4 border-dark rounded my-3"
+            <div class="bg-special border border-4 border-dark rounded mt-3"
                 id="larynxclaimrewards" v-if="(saccountapi.claim_spk > 0 || saccountapi.claim > 0) && me">
-            <div class="d-flex text-dark flex-wrap align-items-center p-3" style="background-color: #00000020">
-                <div>
-                    <div class="d-flex align-items-start">
-                        <h4 class="m-0">Claim Rewards
-                        </h4>
-                    </div>
-                    <p>Claimable rewards
+            <div class="d-flex text-dark flex-column flex-lg-row gap-3 justify-content-between align-items-center p-3" style="background-color: #00000020">
+                <div class="text-center text-lg-start flex-grow-1">
+                        <h4 class="m-0">Claim Rewards</h4>
+                    <p class="m-0">Claimable rewards
                         for running or delegating to a
                          service
                         node</p>
@@ -111,128 +108,130 @@ export default {
                 <img src="/img/spknetwork/spk_logomark.png" class="img-fluid" alt="SPK Logomark" style="height: 70px;">
             </div>
             <!-- Liquid SPK -->
-            <div
-                class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
-                <div class="ratio ratio-1x1 me-4" style="width: 70px;">
-                    <div class="rounded-circle border border-light bg-dark d-flex justify-content-center align-items-center">
-                        <img src="/img/spknetwork/spk_icon.png" class="rounded img-fluid p-1" alt="SPK Token Logo">
-                    </div>
-                </div>
-                <div>
-                    <div class="d-flex align-items-start fs-4 fw-bold">SPK
-                            
+            <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                <div
+                    class="d-flex flex-wrap flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
+                    <div class="text-center position-relative">
+                        <div class="ratio ratio-1x1 wallet-token-img">
+                            <div class="rounded-circle border border-light bg-dark d-flex justify-content-center align-items-center">
+                                <img src="/img/spknetwork/spk_icon.png" class="rounded img-fluid p-1" alt="SPK Token Logo">
+                            </div>
                         </div>
-                    <p class="text-white-50 m-0">The governance
-                        token for
-                        SPK Network
-                    </p>
-                </div>
-                <div class="ms-auto text-end">
-                    <h5 class="d-flex align-items-center justify-content-end">
-                        {{formatNumber((saccountapi.spk)/1000,
-                        3, '.',
-                        ',')}}
-                        <span class="ms-2">SPK</span><span class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                                                    <i class="fa-solid fa-atom" style="font-size: .5rem;"></i>
-                                                                </span>
-                    </h5>
-                    <div class="btn-group" role="group"
-                        aria-label="SPK Actions">
-                        <button type="button" class="btn btn-light p-0">
-                            <modal-vue 
-                                v-if="protocolspk.head_block && saccountapi.head_block" func="send" 
-                                :mypfp="mypfp" 
-                                token="spk" 
-                                :test="test"
-                                :tokenuser="saccountapi" 
-                                :account="account"
-                                :tokenprotocol="protocolspk"
-                                @modalsign="sendIt($event)" 
-                                v-slot:trigger>
-                                <span  class="p-2 trigger">
-                                    <i class="fas fa-paper-plane me-2"></i>Send
-                                </span>          
-                            </modal-vue>
-                        </button>
-                        <button type="button"
-                            class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                            disabled></button>
-                        <div class="btn-group" role="group" v-if="me">
-                            <button type="button"
-                                class="btn btn-light dropdown-toggle"
-                                data-bs-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false"></button>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
-                                aria-labelledby="btnGroupDrop1">
-                                <modal-vue
-                                    class="dropdown-menu-item" 
-                                    v-if="protocolspk.head_block && saccountapi.head_block" func="powup" 
+                    </div>
+                    <div class="text-center text-lg-start flex-grow-1">
+                        <h4>SPK</h4>
+                        <p class="text-white-50 m-0">The governance
+                            token for
+                            SPK Network
+                        </p>
+                    </div>
+                    <div class="text-center text-lg-end">
+                        <h5 class="d-flex align-items-center justify-content-center justify-content-lg-end">
+                            {{formatNumber((saccountapi.spk)/1000,
+                            3, '.',
+                            ',')}}
+                            <span class="ms-2">SPK</span><span class="ms-1 badge badge-type-append bg-light text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                                        <i class="fa-solid fa-atom"></i>
+                                                                    </span>
+                        </h5>
+                        <div class="btn-group" role="group"
+                            aria-label="SPK Actions">
+                            <button type="button" class="btn btn-light p-0">
+                                <modal-vue 
+                                    v-if="protocolspk.head_block && saccountapi.head_block" func="send" 
+                                    :mypfp="mypfp" 
                                     token="spk" 
                                     :test="test"
                                     :tokenuser="saccountapi" 
                                     :account="account"
                                     :tokenprotocol="protocolspk"
-                                    :mypfp="mypfp" 
                                     @modalsign="sendIt($event)" 
                                     v-slot:trigger>
-                                    <button class="dropdown-item trigger"
-                                        type="button"><i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
+                                    <span class="text-nowrap p-2 trigger">
+                                        <i class="fas fa-paper-plane me-2"></i>Send
+                                    </span>          
                                 </modal-vue>
-                                <div class="dropdown-divider">
-                                </div>
-                                <div class="dropdown-menu-item">
-                                    <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/spk"
-                                    id="buylink" target="_blank"><i
-                                        class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
-                                </div>
-                            </ul>
+                            </button>
+                            <button type="button"
+                                class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                disabled></button>
+                            <div class="btn-group" role="group" v-if="me">
+                                <button type="button"
+                                    class="btn btn-light dropdown-toggle"
+                                    data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false"></button>
+                                <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
+                                    aria-labelledby="btnGroupDrop1">
+                                    <modal-vue
+                                        class="dropdown-menu-item" 
+                                        v-if="protocolspk.head_block && saccountapi.head_block" func="powup" 
+                                        token="spk" 
+                                        :test="test"
+                                        :tokenuser="saccountapi" 
+                                        :account="account"
+                                        :tokenprotocol="protocolspk"
+                                        :mypfp="mypfp" 
+                                        @modalsign="sendIt($event)" 
+                                        v-slot:trigger>
+                                        <button class="dropdown-item trigger"
+                                            type="button"><i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
+                                    </modal-vue>
+                                    <div class="dropdown-divider">
+                                    </div>
+                                    <div class="dropdown-menu-item">
+                                        <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/spk"
+                                        id="buylink" target="_blank"><i
+                                            class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
+                                    </div>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- SPK Power -->
-            <div class="d-flex flex-column py-3">
-                <div class="d-flex flex-wrap align-items-center justify-content-center">
-                    <div class="me-4 position-relative" style="width: 70px;">
-                        <div class="ratio ratio-1x1">
+            <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
+                    <div class="text-center position-relative">
+                        <div class="ratio ratio-1x1 wallet-token-img">
                             <div class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
                                 <img src="/img/spknetwork/spk_icon.png" class="rounded img-fluid p-1" alt="SPK Token Logo">   
                             </div>
                         </div>
-                        <div class="position-absolute top-0 start-0 translate-middle" style="margig-top: 10px; margin-left: 10px;">
-                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.5rem; height: 1.5rem;">
-                                <i class="fa-solid fa-bolt-lightning" style="font-size: .65rem;"></i>
+                        <div class="position-absolute badge-type-offset top-0 start-0 translate-middle">
+                            <span class="badge badge-type bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                <i class="fa-solid fa-bolt-lightning"></i>
                             </span>
                         </div>
-                        <div class="position-absolute top-100 start-100 translate-middle" style="margig-top: -3px; margin-left: -3px;">
-                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem;">
-                                <i class="fa-solid fa-check-to-slot" style="font-size: 1.3rem;"></i>
+                        <div class="position-absolute badge-perk-offset top-100 start-100 translate-middle">
+                            <span class="badge badge-perk bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                <i class="fa-solid fa-check-to-slot"></i>
                             </span>
                         </div>
                     </div>
                
-                    <div class="text-start">
-                        <div class="d-flex align-items-start fs-4 fw-bold">
+                    <div class="text-center text-lg-start flex-grow-1">
+                        <h4>
                             SPK Power
-                        </div>
-                        <ul class="text-white-50">
+                        </h4>
+                        <ul class="text-white-50 text-start">
                             <li>Enables voting</li>
                             <li>Instant Power Up | 4 Week Power Down
                             </li>
                             <li>Used as collateral to secure the DEX</li>
                         </ul>
                     </div>
-                    <div class="ms-auto text-end">
-                        <h5 class="d-flex align-items-center justify-content-end">
+                    <div class="text-center text-lg-end">
+                        <h5 class="d-flex align-items-center justify-content-center justify-content-lg-end">
                             {{formatNumber((saccountapi.spk_power)/1000, 3, '.', ',')}}
-                            <span class="ms-2 text-warning">SPK</span> <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
+                            <span class="ms-2 text-warning">SPK</span> <span class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                <i class="fa-solid fa-bolt-lightning"></i>
                             </span>
                         </h5>
                         <div class="btn-group" role="group"
                             aria-label="Power Actions">
                             <!-- vote btn -->
-                            <button class="dropdown btn btn-light" href="#" role="button" id="settingsDropdownBtn" data-bs-toggle="collapse" data-bs-target="#collapseVote" aria-expanded="false" aria-controls="collapseVote">
+                            <button class="dropdown text-nowrap btn btn-light" href="#" role="button" id="settingsDropdownBtn" data-bs-toggle="collapse" data-bs-target="#collapseVote" aria-expanded="false" aria-controls="collapseVote">
                                 <i class="me-2 fa-solid fa-person-booth"></i>Vote</button>
                             <button type="button"
                                 class="btn btn-dark ms-0 me-0 ps-0 pe-0"
@@ -373,379 +372,379 @@ export default {
                 <img src="/img/spknetwork/broca_logomark.png" class="img-fluid" alt="BROCA Logomark" style="height: 70px;">
             </div>
             <!-- Liquid BROCA -->
-            <div
-                class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
-                <div class="ratio ratio-1x1 me-4" style="width: 70px;">
-                    <div class="rounded-circle border border-light bg-dark d-flex justify-content-center align-items-center">
-                        <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1" alt="BROCA Token Logo">
-                    </div>
-                </div>
-                <div>
-                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA
-                            
+            <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                <div
+                    class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
+                    <div class="text-center position-relative">
+                        <div class="ratio ratio-1x1 wallet-token-img">
+                            <div class="rounded-circle border border-light bg-dark d-flex justify-content-center align-items-center">
+                                <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1" alt="BROCA Token Logo">
+                            </div>
                         </div>
-                    <p class="text-white-50 m-0">The storage
-                        token for
-                        SPK Network
-                    </p>
-                </div>
-                <div class="ms-auto text-end">
-                    <h5 class="d-flex align-items-center justify-content-end">
-                        {{formatNumber((saccountapi.liq_broca)/1000,
-                        3, '.',
-                        ',')}}
-                        <span class="ms-2">BROCA</span><span class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                                                    <i class="fa-solid fa-atom" style="font-size: .5rem;"></i>
-                                                                </span>
-                    </h5>
-                    <div class="btn-group" role="group"
-                        aria-label="SPK Actions">
-                        <button type="button" class="btn btn-light p-0">
-                            <modal-vue 
-                                v-if="protocolspk.head_block && saccountapi.head_block" func="send" 
-                                :mypfp="mypfp" 
-                                token="liq_broca" 
-                                :test="test"
-                                :tokenuser="saccountapi" 
-                                :account="account"
-                                :tokenprotocol="protocolbroca"
-                                @modalsign="sendIt($event)" 
-                                v-slot:trigger>
-                                <span  class="p-2 trigger">
-                                    <i class="fas fa-paper-plane me-2"></i>Send
-                                </span> 
-                            </modal-vue>
-                        </button>
-                       <button type="button"
-                            class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                            disabled></button>
-                        <div class="btn-group" role="group" v-if="me">
-                            <button type="button"
-                                class="btn btn-light dropdown-toggle"
-                                data-bs-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false"></button>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
-                                aria-labelledby="btnGroupDrop1">
+                    </div>
+                    <div class="text-center text-lg-start flex-grow-1">
+                        <h4>BROCA</h4>
+                        <p class="text-white-50 m-0">The storage
+                            token for
+                            SPK Network
+                        </p>
+                    </div>
+                    <div class="text-center text-lg-end">
+                        <h5 class="d-flex align-items-center justify-content-center justify-content-lg-end">
+                            {{formatNumber((saccountapi.liq_broca)/1000,
+                            3, '.',
+                            ',')}}
+                            <span class="ms-2">BROCA</span><span class="ms-1 badge badge-type-append bg-light text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                                        <i class="fa-solid fa-atom"></i>
+                                                                    </span>
+                        </h5>
+                        <div class="btn-group" role="group"
+                            aria-label="SPK Actions">
+                            <button type="button" class="btn btn-light p-0">
                                 <modal-vue 
-                                    class="dropdown-menu-item"
-                                    v-if="protocolspk.head_block && saccountapi.head_block" func="powup" 
+                                    v-if="protocolspk.head_block && saccountapi.head_block" func="send" 
+                                    :mypfp="mypfp" 
                                     token="liq_broca" 
                                     :test="test"
                                     :tokenuser="saccountapi" 
-                                    :account="account" 
+                                    :account="account"
                                     :tokenprotocol="protocolbroca"
-                                    :mypfp="mypfp" 
                                     @modalsign="sendIt($event)" 
                                     v-slot:trigger>
-                                    <button class="dropdown-item trigger"
-                                        type="button"><i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
+                                    <span class="text-nowrap p-2 trigger">
+                                        <i class="fas fa-paper-plane me-2"></i>Send
+                                    </span> 
                                 </modal-vue>
-                                <div class="dropdown-divider">
-                                </div>
-                                <div class="dropdown-menu-item">
-                                <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/broca"
-                                    id="buylink" target="_blank"><i
-                                        class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
-                                </div>
-                            </ul>
+                            </button>
+                        <button type="button"
+                                class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                disabled></button>
+                            <div class="btn-group" role="group" v-if="me">
+                                <button type="button"
+                                    class="btn btn-light dropdown-toggle"
+                                    data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false"></button>
+                                <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
+                                    aria-labelledby="btnGroupDrop1">
+                                    <modal-vue 
+                                        class="dropdown-menu-item"
+                                        v-if="protocolspk.head_block && saccountapi.head_block" func="powup" 
+                                        token="liq_broca" 
+                                        :test="test"
+                                        :tokenuser="saccountapi" 
+                                        :account="account" 
+                                        :tokenprotocol="protocolbroca"
+                                        :mypfp="mypfp" 
+                                        @modalsign="sendIt($event)" 
+                                        v-slot:trigger>
+                                        <button class="dropdown-item trigger"
+                                            type="button"><i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
+                                    </modal-vue>
+                                    <div class="dropdown-divider">
+                                    </div>
+                                    <div class="dropdown-menu-item">
+                                    <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/broca"
+                                        id="buylink" target="_blank"><i
+                                            class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
+                                    </div>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- Broca Power-->
-            <div class="d-flex flex-column justify-content-center">
-            <div class="d-flex flex-wrap align-items-center py-3">
-                    <div class="me-4 position-relative" style="width: 70px;">
-                        <div class="ratio ratio-1x1">
-                            <div class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
-                                <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1" alt="BROCA Token Logo">   
+            <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
+                        <div class="text-center position-relative">
+                            <div class="ratio ratio-1x1 wallet-token-img">
+                                <div class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
+                                    <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1" alt="BROCA Token Logo">   
+                                </div>
+                            </div>
+                            <div class="position-absolute badge-type-offset top-0 start-0 translate-middle">
+                                <span class="badge badge-type bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                    <i class="fa-solid fa-bolt-lightning"></i>
+                                </span>
+                            </div>
+                            <div class="position-absolute badge-perk-offset top-100 start-100 translate-middle">
+                                <span class="badge badge-perk bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                    <i class="fa-solid fa-hard-drive"></i>
+                                </span>
                             </div>
                         </div>
-                        <div class="position-absolute top-0 start-0 translate-middle" style="margig-top: 10px; margin-left: 10px;">
-                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.5rem; height: 1.5rem;">
-                                <i class="fa-solid fa-bolt-lightning" style="font-size: .65rem;"></i>
-                            </span>
-                        </div>
-                        <div class="position-absolute top-100 start-100 translate-middle" style="margig-top: -3px; margin-left: -3px;">
-                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem;">
-                                <i class="fa-solid fa-hard-drive" style="font-size: 1.3rem;"></i>
-                            </span>
-                        </div>
+                    <div class="text-center text-lg-start flex-grow-1">
+                        <h4>BROCA Power</h4>
+                        <ul class="text-white-50 text-start">
+                            <li>Regenerative Resource Credits for IPFS Storage</li>
+                            <li>Recharges every 
+                                {{formatNumber((spkStats.broca_refill / 28800), 2, '.', ',')}} Days, {{formatNumber((1 -
+                                (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) * (spkStats.broca_refill / 28800), 2, '.', ',')}}
+                                Days until full
+                            </li>
+                            <li>Instant Power Up | 4 Week Power
+                                    Down</li>
+                        </ul>
                     </div>
-               
-                <div class="text-start">
-                    <div class="d-flex align-items-start fs-4 fw-bold">BROCA Power</div>
-                    <ul class="text-white-50">
-                        <li>Regenerative Resource Credits for IPFS Storage</li>
-                        
-                        <li>Recharges every 
-                            {{formatNumber((spkStats.broca_refill / 28800), 2, '.', ',')}} Days, {{formatNumber((1 -
-                            (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) * (spkStats.broca_refill / 28800), 2, '.', ',')}}
-                            Days until full
-                        </li>
-                        <li>Instant Power Up | 4 Week Power
-                                Down</li>
-                    </ul>
-                </div>
-                <div class="ms-auto text-end">
-                <h5 class="d-flex align-items-center justify-content-end">
-                        {{formatNumber((saccountapi.pow_broca)/1000,
-                        3, '.',
-                        ',')}}
-                        <span class="ms-2 text-warning">BROCA</span>
-                        <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
-                            </span>
-                    </h5>
-                   
-                    <div class="btn-group" role="group"
-                        aria-label="Power Actions">
-                        <button type="button" class="btn btn-light p-0">
-                            <!-- register -->
-                            <div class="px-2" v-if="saccountapi.pubKey == 'NA'"
-                            @click="updatePubkey">
-                            <i class="fas fa-plus fa-fw me-2"></i>Register Account
-                            </div>
-                            <!-- new contract -->
-                            <div v-if="saccountapi.pubKey != 'NA'">
-                            <modal-vue 
-                                v-if="protocolbroca.head_block && saccountapi.head_block" 
-                                type="contract" 
-                                :api="api"
-                                :mypfp="mypfp" 
-                                token="balance" 
-                                :test="test"
-                                :tokenstats="spkStats"
-                                :tokenprotocol="protocolbroca"
-                                :tokenuser="saccountapi" 
-                                :account="account"
-                                @modalsign="sendIt($event)" 
-                                v-slot:trigger>
-                                <span class="p-2 trigger"><i class="fa-solid fa-file-contract fa-fw me-2"></i>Storage Contract</span>
-                            </modal-vue>
-                            </div>
-                        </button>
-                      <button type="button"
-                            class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                            disabled></button>
-                        <div class="btn-group" role="group" v-if="me">
-                            <button type="button"
-                                class="btn btn-light dropdown-toggle"
-                                data-bs-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false"></button>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
-                                aria-labelledby="btnGroupDrop1">
+                    <div class="text-center text-lg-end">
+                    <h5 class="d-flex align-items-center justify-content-center justify-content-lg-end">
+                            {{formatNumber((saccountapi.pow_broca)/1000,
+                            3, '.',
+                            ',')}}
+                            <span class="ms-2 text-warning">BROCA</span>
+                            <span class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                    <i class="fa-solid fa-bolt-lightning"></i>
+                                </span>
+                        </h5>
+                        <div class="btn-group" role="group"
+                            aria-label="Power Actions">
+                            <button type="button" class="btn btn-light p-0">
+                                <!-- register -->
+                                <div class="px-2 text-nowrap" v-if="saccountapi.pubKey == 'NA'"
+                                @click="updatePubkey">
+                                <i class="fas fa-plus fa-fw me-2"></i>Register Account
+                                </div>
+                                <!-- new contract -->
+                                <div v-if="saccountapi.pubKey != 'NA'">
                                 <modal-vue 
-                                    class="dropdown-menu-item"
-                                    v-if="protocolspk.head_block && saccountapi.head_block" func="powdn" 
-                                    token="pow_broca" 
-                                    :test="test"
-                                    :tokenuser="saccountapi" 
-                                    :account="account" 
-                                    :tokenprotocol="protocolbroca"
+                                    v-if="protocolbroca.head_block && saccountapi.head_block" 
+                                    type="contract" 
+                                    :api="api"
                                     :mypfp="mypfp" 
+                                    token="balance" 
+                                    :test="test"
+                                    :tokenstats="spkStats"
+                                    :tokenprotocol="protocolbroca"
+                                    :tokenuser="saccountapi" 
+                                    :account="account"
                                     @modalsign="sendIt($event)" 
                                     v-slot:trigger>
-                                    <button class="dropdown-item trigger"
-                                        type="button"><i class="fas fa-angle-double-down fa-fw me-2"></i>Power Down</button>
+                                    <span class="text-nowrap p-2 trigger"><i class="fa-solid fa-file-contract fa-fw me-2"></i>Storage Contract</span>
                                 </modal-vue>
-                            </ul>
+                                </div>
+                            </button>
+                        <button type="button"
+                                class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                disabled></button>
+                            <div class="btn-group" role="group" v-if="me">
+                                <button type="button"
+                                    class="btn btn-light dropdown-toggle"
+                                    data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false"></button>
+                                <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
+                                    aria-labelledby="btnGroupDrop1">
+                                    <modal-vue 
+                                        class="dropdown-menu-item"
+                                        v-if="protocolspk.head_block && saccountapi.head_block" func="powdn" 
+                                        token="pow_broca" 
+                                        :test="test"
+                                        :tokenuser="saccountapi" 
+                                        :account="account" 
+                                        :tokenprotocol="protocolbroca"
+                                        :mypfp="mypfp" 
+                                        @modalsign="sendIt($event)" 
+                                        v-slot:trigger>
+                                        <button class="dropdown-item trigger"
+                                            type="button"><i class="fas fa-angle-double-down fa-fw me-2"></i>Power Down</button>
+                                    </modal-vue>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
-                
-            </div>
-            <div class="card-group mb-3 mt-2 rounded">
-                <div class="card bg-img-none">
+                </div>
+                <div class="card-group mb-3 mt-2 rounded">
+                    <div class="card bg-img-none">
+                        <div class="card-header bg-info-50 text-dark text-center">
+                        <h3 class="card-title mb-0">Network Fee</h3>
+                        </div>
+                        <div class="card-body">
+                        <div class="d-flex align-items-center mb-2 justify-content-center"><h5 class="mb-0 card-title text-info">
+                                {{fancyBytes(1000000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}/</h5><span class="small ms-1 d-flex align-items-center text-warning">1 BROCA <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
+                                    <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
+                                </span></span></div>
+                        <p class="card-text text-white-50">SPK Network IPFS Pinning Service for 30 days per BROCA Power.</p>
+                        </div>
+                        <div class="card-footer bg-card text-center">
+                        <small class="text-body-secondary">30 Days of Storage</small>
+                        </div>
+                    </div>
+                    <div class="card bg-img-none">
+                        <div class="card-header bg-info-50 text-dark text-center">
+                        <h3 class="card-title mb-0">Upload Limit</h3>
+                        </div>
+                        <div class="card-body">
+                        <h5 class="card-title text-info text-center">{{fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * spkStats.channel_bytes)}}</h5>
+                        <p class="card-text text-white-50">Your current available storage based on your current BROCA Power resources</p>
+                        </div>
+                        <div class="card-footer bg-card text-center">
+                        <small class="text-body-secondary">Regenerates Every 5 Days</small>
+                        </div>
+                    </div>
+                    <div class="card bg-img-none">
                     <div class="card-header bg-info-50 text-dark text-center">
-                    <h3 class="card-title mb-0">Network Fee</h3>
+                        <h3 class="card-title mb-0">Drive Size</h3>
+                        </div>
+                        <div class="card-body">
+                        <h5 class="card-title text-info text-center">~{{(fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * 6000))}}</h5>
+                        <p class="card-text text-white-50">Maximum perpetual storage when files are set to autorenew at current network rates</p>
+                        </div>
+                        <div class="card-footer bg-card text-center">
+                        <small class="text-body-secondary">Rolling Storage Over 30 Days</small>
+                        </div>
                     </div>
-                    <div class="card-body">
-                    <div class="d-flex align-items-center mb-2 justify-content-center"><h5 class="mb-0 card-title text-info">
-                            {{fancyBytes(1000000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}/</h5><span class="small ms-1 d-flex align-items-center text-warning">1 BROCA <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
-                            </span></span></div>
-                    <p class="card-text text-white-50">SPK Network IPFS Pinning Service for 30 days per BROCA Power.</p>
-                    </div>
-                    <div class="card-footer bg-card text-center">
-                    <small class="text-body-secondary">30 Days of Storage</small>
-                    </div>
-                </div>
-                <div class="card bg-img-none">
-                    <div class="card-header bg-info-50 text-dark text-center">
-                    <h3 class="card-title mb-0">Upload Limit</h3>
-                    </div>
-                    <div class="card-body">
-                    <h5 class="card-title text-info text-center">{{fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * spkStats.channel_bytes)}}</h5>
-                    <p class="card-text text-white-50">Your current available storage based on your current BROCA Power resources</p>
-                    </div>
-                    <div class="card-footer bg-card text-center">
-                    <small class="text-body-secondary">Regenerates Every 5 Days</small>
-                    </div>
-                </div>
-                <div class="card bg-img-none">
-                <div class="card-header bg-info-50 text-dark text-center">
-                    <h3 class="card-title mb-0">Drive Size</h3>
-                    </div>
-                    <div class="card-body">
-                    <h5 class="card-title text-info text-center">~{{(fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * 6000))}}</h5>
-                    <p class="card-text text-white-50">Maximum perpetual storage when files are set to autorenew at current network rates</p>
-                    </div>
-                    <div class="card-footer bg-card text-center">
-                    <small class="text-body-secondary">Rolling Storage Over 30 Days</small>
-                    </div>
-                </div>
-            </div>
-            
+                </div>         
              <!-- larynx banner -->
             <div class="d-flex justify-content-center align-items-center bg-dark my-3 p-2 rounded">
                 <img src="/img/spknetwork/larynx_logomark.png" class="img-fluid" alt="LARYNX Logomark" style="height: 70px;">
             </div>
             <!--larynx token-->
-            <div
-                class="d-flex flex-wrap align-items-center border-bottom border-white-50 py-3">
-                <div class="ratio ratio-1x1 me-4" style="width: 70px;">
-                    <div class="rounded-circle border border-light bg-dark d-flex justify-content-center align-items-center">
-                        <img src="/img/spknetwork/larynx_icon.png" class="rounded img-fluid p-1" alt="LARYNX Token Logo">
-                    </div>
-                </div>
-                <div>
-                    <div class="d-flex align-items-start fs-4 fw-bold">LARYNX
-                            
+            <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                <div
+                    class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
+                    <div class="text-center position-relative">    
+                        <div class="ratio ratio-1x1 wallet-token-img">
+                            <div class="rounded-circle border border-light bg-dark d-flex justify-content-center align-items-center">
+                                <img src="/img/spknetwork/larynx_icon.png" class="rounded img-fluid p-1" alt="LARYNX Token Logo">
+                            </div>
                         </div>
-                    <p class="text-white-50">The mining token
-                        for SPK
-                        Network.</p>
-                </div>
-                <div class="ms-auto text-end">
-                    <h5 class="d-flex align-items-center justify-content-end">
-                        {{formatNumber((saccountapi.balance)/1000, 3, '.', ',')}} 
-                        <span class="ms-2">LARYNX</span><span class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                                                    <i class="fa-solid fa-atom" style="font-size: .5rem;"></i>
-                                                                </span>
-                    </h5>
-                    <div class="btn-group" role="group"
-                        aria-label="LARYNX Actions">
-                        <button type="button" class="btn btn-light p-0">
-                            <modal-vue 
-                                v-if="protocollarynx.head_block && saccountapi.head_block" func="send" 
-                                :mypfp="mypfp" 
-                                :test="test"
-                                :tokenuser="saccountapi" 
-                                :account="account"
-                                :tokenprotocol="protocollarynx"
-                                @modalsign="sendIt($event)" 
-                                v-slot:trigger>
-                                <span class="p-2 trigger"><i
-                                        class="fas fa-paper-plane me-2"></i>Send</span>
-                            </modal-vue>
-                        </button>
-                        <button type="button"
-                            class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                            disabled></button>
-                        <div class="btn-group" role="group" v-if="me">
-                            <button type="button"
-                                class="btn btn-light dropdown-toggle"
-                                data-bs-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false"></button>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
-                                aria-labelledby="btnGroupDrop1">
+                    </div>
+                    <div class="text-center text-lg-start flex-grow-1">
+                        <h4>LARYNX</h4>
+                        <p class="text-white-50">The mining token
+                            for SPK
+                            Network.</p>
+                    </div>
+                    <div class="text-center text-lg-end">
+                        <h5 class="d-flex align-items-center justify-content-center justify-content-lg-end">
+                            {{formatNumber((saccountapi.balance)/1000, 3, '.', ',')}} 
+                            <span class="ms-2">LARYNX</span><span class="ms-1 badge badge-type-append bg-light text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                                        <i class="fa-solid fa-atom"></i>
+                                                                    </span>
+                        </h5>
+                        <div class="btn-group" role="group"
+                            aria-label="LARYNX Actions">
+                            <button type="button" class="btn btn-light p-0">
                                 <modal-vue 
-                                    v-if="protocollarynx.head_block && saccountapi.head_block" func="powup" 
+                                    v-if="protocollarynx.head_block && saccountapi.head_block" func="send" 
                                     :mypfp="mypfp" 
                                     :test="test"
                                     :tokenuser="saccountapi" 
                                     :account="account"
                                     :tokenprotocol="protocollarynx"
                                     @modalsign="sendIt($event)" 
-                                    v-slot:trigger class="dropdown-menu-item">
-                                    <button class="dropdown-item trigger" 
-                                        type="button">
-                                    <i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
-                                </modal-vue>
-                                
-                                <modal-vue 
-                                    v-if="protocollarynx.head_block && saccountapi.head_block"
-                                    type="register" 
-                                    :test="test"
-                                    func="service"
-                                    :account="account" 
-                                    class="dropdown-menu-item"
-                                    @modalsign="sendIt($event)"
                                     v-slot:trigger>
-                                    <button class="dropdown-item trigger" 
-                                        type="button"><i :class="!saccountapi.balance ? 'disabled' : ''"
-                                            class="fa fa-network-wired fa-fw me-2"></i>Register
-                                        A Service
-                                    </button>
+                                    <span class="text-nowrap p-2 trigger"><i
+                                            class="fas fa-paper-plane me-2"></i>Send</span>
                                 </modal-vue>
-                                <modal-vue 
-                                    v-if="protocollarynx.head_block && saccountapi.head_block"
-                                    type="register" 
-                                    :test="test"
-                                    func="type"
-                                    :account="account" 
-                                    class="dropdown-menu-item"
-                                    @modalsign="sendIt($event)"
-                                    v-slot:trigger>
-                                    <button class="dropdown-item trigger" 
-                                        type="button"><i :class="!saccountapi.balance ? 'disabled' : ''"
-                                            class="fa fa-network-wired fa-fw me-2"></i>Register
-                                        A Service Type
-                                    </button>
-                                </modal-vue>
-                                <modal-vue 
+                            </button>
+                            <button type="button"
+                                class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                disabled></button>
+                            <div class="btn-group" role="group" v-if="me">
+                                <button type="button"
+                                    class="btn btn-light dropdown-toggle"
+                                    data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false"></button>
+                                <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
+                                    aria-labelledby="btnGroupDrop1">
+                                    <modal-vue 
+                                        v-if="protocollarynx.head_block && saccountapi.head_block" func="powup" 
+                                        :mypfp="mypfp" 
+                                        :test="test"
+                                        :tokenuser="saccountapi" 
+                                        :account="account"
+                                        :tokenprotocol="protocollarynx"
+                                        @modalsign="sendIt($event)" 
+                                        v-slot:trigger class="dropdown-menu-item">
+                                        <button class="dropdown-item trigger" 
+                                            type="button">
+                                        <i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
+                                    </modal-vue>
+                                    
+                                    <modal-vue 
+                                        v-if="protocollarynx.head_block && saccountapi.head_block"
+                                        type="register" 
+                                        :test="test"
+                                        func="service"
+                                        :account="account" 
+                                        class="dropdown-menu-item"
+                                        @modalsign="sendIt($event)"
+                                        v-slot:trigger>
+                                        <button class="dropdown-item trigger" 
+                                            type="button"><i :class="!saccountapi.balance ? 'disabled' : ''"
+                                                class="fa fa-network-wired fa-fw me-2"></i>Register
+                                            A Service
+                                        </button>
+                                    </modal-vue>
+                                    <modal-vue 
+                                        v-if="protocollarynx.head_block && saccountapi.head_block"
+                                        type="register" 
+                                        :test="test"
+                                        func="type"
+                                        :account="account" 
+                                        class="dropdown-menu-item"
+                                        @modalsign="sendIt($event)"
+                                        v-slot:trigger>
+                                        <button class="dropdown-item trigger" 
+                                            type="button"><i :class="!saccountapi.balance ? 'disabled' : ''"
+                                                class="fa fa-network-wired fa-fw me-2"></i>Register
+                                            A Service Type
+                                        </button>
+                                    </modal-vue>
+                                    <modal-vue 
 
-                                    v-if="protocollarynx.head_block && saccountapi.head_block"
-                                    type="register" 
-                                    :test="test"
-                                    func="val"
-                                    :account="account" 
-                                    class="dropdown-menu-item"
-                                    @modalsign="sendIt($event)"
-                                    v-slot:trigger>
-                                    <button :class="!isNode || isValidator ? 'disabled' : ''"
-                                        class="dropdown-item trigger" 
-                                        type="button"><i
-                                            class="fa fa-network-wired fa-fw me-2"></i>
-                                        Register A Validator
-                                    </button>
-                                </modal-vue>
-                                <div class="dropdown-divider">
-                                </div>
-                                <div class="dropdown-menu-item">
-                                <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/larynx"
-                                    id="buylink" target="_blank"><i
-                                        class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
-                                </div>
-                            </ul>
+                                        v-if="protocollarynx.head_block && saccountapi.head_block"
+                                        type="register" 
+                                        :test="test"
+                                        func="val"
+                                        :account="account" 
+                                        class="dropdown-menu-item"
+                                        @modalsign="sendIt($event)"
+                                        v-slot:trigger>
+                                        <button :class="!isNode || isValidator ? 'disabled' : ''"
+                                            class="dropdown-item trigger" 
+                                            type="button"><i
+                                                class="fa fa-network-wired fa-fw me-2"></i>
+                                            Register A Validator
+                                        </button>
+                                    </modal-vue>
+                                    <div class="dropdown-divider">
+                                    </div>
+                                    <div class="dropdown-menu-item">
+                                    <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/larynx"
+                                        id="buylink" target="_blank"><i
+                                            class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
+                                    </div>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
             <!--larynx power-->
-            <div class="py-3">
-                <div class="d-flex flex-wrap text-start align-items-center">
-                    <div class="me-4 position-relative" style="width: 70px;">
-                        <div class="ratio ratio-1x1">
+            <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 text-start align-items-center">
+                    <div class="text-center position-relative">
+                        <div class="ratio ratio-1x1 wallet-token-img">
                             <div class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
                                 <img src="/img/spknetwork/larynx_icon.png" class="rounded img-fluid p-1" alt="LARYNX Token Logo">   
                             </div>
                         </div>
-                        <div class="position-absolute top-0 start-0 translate-middle" style="margig-top: 10px; margin-left: 10px;">
-                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.5rem; height: 1.5rem;">
-                                <i class="fa-solid fa-bolt-lightning" style="font-size: .65rem;"></i>
+                        <div class="position-absolute badge-type-offset top-0 start-0 translate-middle">
+                            <span class="badge badge-type bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                <i class="fa-solid fa-bolt-lightning"></i>
                             </span>
                         </div>
-                        <div class="position-absolute top-100 start-100 translate-middle" style="margig-top: -3px; margin-left: -3px;">
-                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem;">
-                                <i class="fa-solid fa-arrow-up-right-dots" style="font-size: 1.3rem;"></i>
+                        <div class="position-absolute badge-perk-offset top-100 start-100 translate-middle">
+                            <span class="badge badge-perk bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                <i class="fa-solid fa-arrow-up-right-dots"></i>
                             </span>
                         </div>
                     </div>
-                    <div>
-                       <div class="d-flex align-items-start fs-4 fw-bold">LARYNX Power</div>
-                        <ul class="text-white-50">
+                    <div class="text-center text-lg-start flex-grow-1">
+                       <h4>LARYNX Power</h4>
+                        <ul class="text-white-50 text-start">
                             <li>Increases the effectiveness of your nodes
                             </li>
                             <li>Instant Power Up | 4 Week Power
@@ -754,16 +753,11 @@ export default {
                             </li>
                         </ul>
                     </div>
-                    <div id="larynxgactions" class="ms-auto">
-                        <div class="d-flex flex-wrap align-items-center mb-2">
-                           
-                            <h5 class="ms-auto mb-0 d-flex align-items-center"> {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}} 
-                            <span class="ms-2 text-warning">LARYNX</span><span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
-                            </span></h5>
-                        </div>
-                        
-
+                    <div id="larynxgactions" class="text-center text-lg-end">
+                        <h5 class="d-flex align-items-center justify-content-center justify-content-lg-end"> {{formatNumber((saccountapi.poweredUp)/1000, 3, '.', ',')}} 
+                        <span class="ms-2 text-warning">LARYNX</span><span class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                            <i class="fa-solid fa-bolt-lightning"></i>
+                        </span></h5>
                         <div class="btn-group" role="group"
                             aria-label="LARYNX Actions">
                             <button class="btn btn-light p-0" type="button">
@@ -774,7 +768,7 @@ export default {
                                     :account="account"
                                     @modalsign="sendIt($event)"
                                     :test="test" v-slot:trigger><span
-                                        class="p-2 trigger">
+                                        class="text-nowrap p-2 trigger">
                                         <i class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
                                 </modal-vue>
                             </button>
@@ -817,13 +811,11 @@ export default {
                                             type="button">
                                             <i class="fa-solid fa-xmark fa-fw me-2"></i>Cancel Power Down</button>
                                     </modal-vue>
-
                                 </ul>
                             </div>
                         </div>
                     </div>
                 </div>
-            
                 <div
                     :class="{'d-none': !when(saccountapi.powerDowns), 'd-flex': true, 'align-items-center': true}">
                     <b>A power down is scheduled to happen in {{when(saccountapi.powerDowns)}} ({{when(saccountapi.powerDowns, true)}} installments remaining)</b><small class="ms-2">
@@ -838,96 +830,91 @@ export default {
                     </small>
                 </div>
             </div>
-                 <!-- Delegated LARYNX Power -->
-            <div class="d-flex flex-column py-3 border-top border-white-50" v-if="saccountapi.granting.t || saccountapi.granted.t">
-                <div class="d-flex flex-wrap align-items-center justify-content-center">
-                    <div class="me-4 position-relative" style="width: 70px;">
-                        <div class="ratio ratio-1x1">
-                            <div class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
-                                <img src="/img/spknetwork/larynx_icon.png" class="rounded img-fluid p-1" alt="LARYNX Token Logo">   
+            <!-- Delegated LARYNX Power -->
+            <div class="border-top border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4" v-if="saccountapi.granting.t || saccountapi.granted.t">
+                        <div class="text-center position-relative">
+                            <div class="ratio ratio-1x1 wallet-token-img">
+                                <div class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
+                                    <img src="/img/spknetwork/larynx_icon.png" class="rounded img-fluid p-1" alt="LARYNX Token Logo">   
+                                </div>
+                            </div>
+                            <div class="position-absolute badge-type-offset top-0 start-0 translate-middle">
+                                <span class="badge badge-type bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                    <i class="fa-solid fa-right-left"></i>
+                                </span>
+                            </div>
+                            <div class="position-absolute badge-perk-offset top-100 start-100 translate-middle">
+                                <span class="badge badge-perk bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                    <i class="fa-solid fa-hand-holding-dollar"></i>
+                                </span>
                             </div>
                         </div>
-                        <div class="position-absolute top-0 start-0 translate-middle" style="margin-left: 10px;">
-                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.5rem; height: 1.5rem;">
-                                <i class="fa-solid fa-right-left" style="font-size: .65rem;"></i>
-                            </span>
+                        <div class="text-center text-lg-start flex-grow-1">
+                            <h4>Delegated LARYNX Power</h4>
+                            <ul class="text-white-50 text-start">
+                                <li>Profit sharing with service providers</li>
+                            </ul>
                         </div>
-                        <div class="position-absolute top-100 start-100 translate-middle" style="margin-left: -3px;">
-                            <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem;">
-                                <i class="fa-solid fa-hand-holding-dollar" style="font-size: 1.3rem;"></i>
-                            </span>
+                        <div class="text-center text-lg-end">
+                            <h5 class="d-flex align-items-center justify-content-center justify-content-lg-end">
+                                {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000, 3, '.', ',')}}
+                                <span class="ms-2 text-warning">LARYNX</span> <span class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                    <i class="fa-solid fa-right-left"></i>
+                                </span>
+                            </h5>
+                            <div class="btn-group" role="group"
+                                aria-label="DLP Actions">
+                                <!-- Details collapse button -->
+                                <button class="dropdown btn btn-light text-nowrap" href="#" role="button" id="delegationsbtn" data-bs-toggle="collapse" data-bs-target="#delegationsspk" aria-expanded="false" aria-controls="Show Delegations">
+                                    <i class="me-2 fa-solid fa-search"></i>Details</button>
+                            </div>
                         </div>
-                    </div>
-               
-                    <div class="text-start">
-                        <div class="d-flex align-items-start fs-4 fw-bold">
-                            Delegated LARYNX Power
-                        </div>
-                        <ul class="text-white-50">
-                            <li>Profit sharing with service providers</li>
-                        </ul>
-                    </div>
-                    <div class="ms-auto text-end">
-                    
-                        <h5 class="d-flex align-items-center justify-content-end">
-                             {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000, 3, '.', ',')}}
-                            <span class="ms-2 text-warning">LARYNX</span> <span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                <i class="fa-solid fa-right-left" style="font-size: .5rem;"></i>
-                            </span>
-                        </h5>
-                        <div class="btn-group" role="group"
-                            aria-label="DLP Actions">
-                            <!-- Details collapse button -->
-                            <button class="dropdown btn btn-light" href="#" role="button" id="delegationsbtn" data-bs-toggle="collapse" data-bs-target="#delegationsspk" aria-expanded="false" aria-controls="Show Delegations">
-                                <i class="me-2 fa-solid fa-search"></i>Details</button>
-                           
-                        </div>
-                    </div>
-                </div>
-                <div class="collapse" id="delegationsspk">
-                    <div class="d-flex flex-column text-start border border-secondary rounded px-2 py-1 p-lg-4 my-4" style="background-color: rgba(0, 0, 0, 0.5);">
-                        <div class="mb-3">    
-                            <h4 class="py-2 m-0">
-                                Delegated: {{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}} LP</h4>
-                            <div v-for="(a,b,c) in saccountapi.granting">
-                                <div class="d-flex align-items-center border-top border-secondary py-2"
-                                    v-if="b != 't'">
-                                    <p class="my-0"><a :href="'https://www.dlux.io/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>: {{formatNumber((a)/1000, 3, '.', ',')}} LP</p>
-                                    <div class="d-flex ms-auto ">
-                                        <modal-vue type="delegate" 
-                                            :smarkets="smarkets.node" token="LARYNX"
-                                            :to="b" :amount="a" :stats="spkStats"
-                                            :balance="saccountapi.poweredUp"
-                                            :account="account"
-                                            @modalsign="sendIt($event)"
-                                            :test="test" v-slot:trigger>
-                                            <button type="button"
-                                                class="ms-1 btn btn-sm btn-secondary trigger"><i
-                                                    class="fas fa-fw fa-user-edit"></i></button>
-                                        </modal-vue>
-                                        <modal-vue type="delegate" 
-                                            :smarkets="smarkets.node" token="LARYNX"
-                                            :to="b" amount="0" :stats="spkStats"
-                                            :balance="saccountapi.poweredUp"
-                                            :account="account"
-                                            :test="test"
-                                            @modalsign="sendIt($event)" v-slot:trigger>
-                                            <button class="ms-1 btn btn-sm btn-danger ms-1 trigger"
-                                                type="button"><i
-                                                    class="fas fa-fw fa-trash-alt"></i></button>
-                                        </modal-vue>
+                    <div class="collapse" id="delegationsspk">
+                        <div class="d-flex flex-column text-start border border-secondary rounded px-2 py-1 p-lg-4 my-4" style="background-color: rgba(0, 0, 0, 0.5);">
+                            <div class="mb-3">    
+                                <h4 class="py-2 m-0">
+                                    Delegated: {{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}} LP</h4>
+                                <div v-for="(a,b,c) in saccountapi.granting">
+                                    <div class="d-flex align-items-center border-top border-secondary py-2"
+                                        v-if="b != 't'">
+                                        <p class="my-0"><a :href="'https://www.dlux.io/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>: {{formatNumber((a)/1000, 3, '.', ',')}} LP</p>
+                                        <div class="d-flex ms-auto ">
+                                            <modal-vue type="delegate" 
+                                                :smarkets="smarkets.node" token="LARYNX"
+                                                :to="b" :amount="a" :stats="spkStats"
+                                                :balance="saccountapi.poweredUp"
+                                                :account="account"
+                                                @modalsign="sendIt($event)"
+                                                :test="test" v-slot:trigger>
+                                                <button type="button"
+                                                    class="ms-1 btn btn-sm btn-secondary trigger"><i
+                                                        class="fas fa-fw fa-user-edit"></i></button>
+                                            </modal-vue>
+                                            <modal-vue type="delegate" 
+                                                :smarkets="smarkets.node" token="LARYNX"
+                                                :to="b" amount="0" :stats="spkStats"
+                                                :balance="saccountapi.poweredUp"
+                                                :account="account"
+                                                :test="test"
+                                                @modalsign="sendIt($event)" v-slot:trigger>
+                                                <button class="ms-1 btn btn-sm btn-danger ms-1 trigger"
+                                                    type="button"><i
+                                                        class="fas fa-fw fa-trash-alt"></i></button>
+                                            </modal-vue>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="mb-1">
-                            <h4 class="py-2 m-0">
-                                Received: {{formatNumber((saccountapi.granted.t)/1000, 3,'.', ',')}} LP</h4>
-                            <div v-for="(a,b,c) in saccountapi.granted" >
-                                <div class="d-flex align-items-center border-top border-secondary py-2"
-                                    v-if="b != 't'">
-                                    <p class="my-0"><a :href="'https://www.dlux.io/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>: {{formatNumber((a)/1000, 3, '.', ',')}} LP</p>
+                            <div class="mb-1">
+                                <h4 class="py-2 m-0">
+                                    Received: {{formatNumber((saccountapi.granted.t)/1000, 3,'.', ',')}} LP</h4>
+                                <div v-for="(a,b,c) in saccountapi.granted" >
+                                    <div class="d-flex align-items-center border-top border-secondary py-2"
+                                        v-if="b != 't'">
+                                        <p class="my-0"><a :href="'https://www.dlux.io/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>: {{formatNumber((a)/1000, 3, '.', ',')}} LP</p>
 
+                                    </div>
                                 </div>
                             </div>
                         </div>
