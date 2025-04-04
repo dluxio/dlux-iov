@@ -2135,6 +2135,65 @@ html {
   }
 
 }
+/* wallet tokens */
+/* Small screens (< 992px) - Default */
+.wallet-token-img {
+  width: 180px;
+}
+.badge-type {
+  width: 2.7rem;
+  height: 2.7rem;
+}
+.badge-perk {
+  width: 3.5rem;
+  height: 3.5rem;
+}
+.badge-type-offset {
+  margin-left: 15px;
+  margin-top: 15px;
+}
+.badge-perk-offset {
+  margin-left: -12px;
+  margin-top: -12px;
+}
+.badge-type-icon {
+  font-size: 1rem;
+}
+.badge-perk-icon {
+  font-size: 1.7rem;
+}
+/* Large screens (≥ 992px) */
+@media (min-width: 992px) {
+  .wallet-token {
+    width: 110px;
+  }
+  .wallet-token-img {
+    width: 100px;
+  }
+  .badge-type {
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+  .badge-perk {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  .badge-type-offset {
+    margin-left: 20px;
+    margin-top: 0px;
+  }
+  .badge-perk-offset {
+    margin-left: -20px;
+    margin-top: 0px;
+  }
+  .badge-type-icon {
+    font-size: 0.65rem;
+  }
+  .badge-perk-icon {
+    font-size: 1.3rem;
+  }
+}
+
 
 @media (max-width: 768px) {
   .nav-hide {
