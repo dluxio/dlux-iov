@@ -222,10 +222,10 @@
                                         <div class="">
                                             <div>
                                                 <div class="d-flex align-items-center mb-1">
-                                                    
-                                                        <h1 class="display-5 mb-0">DLUX<i
-                                                                class="fa-solid fa-link fa-fw ms-2"></i></h1>
-                                                    
+
+                                                    <h1 class="display-5 mb-0">DLUX<i
+                                                            class="fa-solid fa-link fa-fw ms-2"></i></h1>
+
                                                     <div class="text-center small p-2 ms-2" v-bind:class="{'text-success': behind < 30,
                                                     'text-warning': behind >= 30,
                                                     'text-danger': behind > 100}"> <span v-show="behind < 30">ONLINE -
@@ -236,13 +236,15 @@
                                                             HIVE</span></div>
                                                 </div>
                                                 <div class="">
-                                                    <p class="mb-0 lead">An open source platform for p2p games, apps,
+                                                    <p class="mb-0 lead">An open source platform for p2p games,
+                                                        apps,
                                                         and
                                                         experiences.
                                                     </p>
                                                 </div>
                                                 <!--claim dlux-->
-                                                <div v-if="accountapi.claim" class="bg-special border border-4 border-dark rounded mt-3">
+                                                <div v-if="accountapi.claim"
+                                                    class="bg-special border border-4 border-dark rounded mt-3">
                                                     <div class="d-flex text-dark flex-wrap align-items-center p-3"
                                                         style="background-color: #00000030">
                                                         <div>
@@ -257,7 +259,8 @@
                                                         </div>
                                                         <div class="ms-auto text-end">
                                                             <h5>
-                                                                {{formatNumber((accountapi.claim)/1000, 3, '.', ',')}}
+                                                                {{formatNumber((accountapi.claim)/1000, 3, '.',
+                                                                ',')}}
                                                                 DLUX
                                                             </h5>
                                                             <div v-if="me">
@@ -268,26 +271,28 @@
                                                                             class="fas fa-coin"></i><i
                                                                             class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
                                                                 </div>
-                                                                <div> <span class="small" v-show="!dlux2gov">50% Liquid
+                                                                <div> <span class="small" v-show="!dlux2gov">50%
+                                                                        Liquid
                                                                         | 50%
                                                                         Power</span> <span class="small"
                                                                         v-show="dlux2gov">50%
                                                                         Liquid | 50% Gov</span>
                                                                 </div>
                                                                 <div v-show="accountapi.gov > 0">
-                                                                    <div class="rounded text-light px-2 py-1 mt-1" style="background-color: rgba(0,0,0,0.3)">
-                                                                       
-                                                                            <div class="form-check form-switch">
-                                                                                <input class="form-check-input"
-                                                                                    type="checkbox" role="switch"
-                                                                                    id="flexSwitchCheckDefault"
-                                                                                    v-model="dlux2gov">
-                                                                                <label class="form-check-label"
-                                                                                    for="flexSwitchCheckDefault">Claim
-                                                                                    GOV not PWR
-                                                                                    </label>
-                                                                            </div>
-                                                                       
+                                                                    <div class="rounded text-light px-2 py-1 mt-1"
+                                                                        style="background-color: rgba(0,0,0,0.3)">
+
+                                                                        <div class="form-check form-switch">
+                                                                            <input class="form-check-input"
+                                                                                type="checkbox" role="switch"
+                                                                                id="flexSwitchCheckDefault"
+                                                                                v-model="dlux2gov">
+                                                                            <label class="form-check-label"
+                                                                                for="flexSwitchCheckDefault">Claim
+                                                                                GOV not PWR
+                                                                            </label>
+                                                                        </div>
+
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -321,10 +326,14 @@
                                                             smart contracts, and NFT creation.</p>
                                                     </div>
                                                     <div id="dluxactions" class="ms-auto text-end">
-                                                        <h5 id="dluxbalance" class="d-flex align-items-center justify-content-end">
+                                                        <h5 id="dluxbalance"
+                                                            class="d-flex align-items-center justify-content-end">
                                                             {{formatNumber((accountapi.balance)/1000, 3, '.', ',')}}
-                                                            <span class="ms-2">DLUX</span><span class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                                                <i class="fa-solid fa-atom" style="font-size: .5rem;"></i>
+                                                            <span class="ms-2">DLUX</span><span
+                                                                class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                                style="width: 1.25rem; height: 1.25rem;">
+                                                                <i class="fa-solid fa-atom"
+                                                                    style="font-size: .5rem;"></i>
                                                             </span>
                                                         </h5>
                                                         <div class="btn-group" v-if="me" role="group"
@@ -415,7 +424,8 @@
                                                             <div class="d-flex align-items-start">
                                                                 <h4>DLUX Power</h4>
                                                             </div>
-                                                            <p class="text-white-50">Staked tokens (Powered Up) allowing
+                                                            <p class="text-white-50">Staked tokens (Powered Up)
+                                                                allowing
                                                                 for
                                                                 inflationary rewards on new content</p>
                                                             <ul class="text-white-50">
@@ -428,22 +438,18 @@
                                                             </ul>
                                                         </div>
                                                         <div id="dluxpactions" class="ms-auto text-end">
-                                                            <h5 id="pwrbalance" class="d-flex align-items-center justify-content-end">
+                                                            <h5 id="pwrbalance"
+                                                                class="d-flex align-items-center justify-content-end">
                                                                 {{formatNumber((accountapi.poweredUp)/1000, 3, '.',
                                                                 ',')}}
-                                                                <span class="ms-2 text-warning">DLUX</span><span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                                                    <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
+                                                                <span class="ms-2 text-warning">DLUX</span><span
+                                                                    class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                                    style="width: 1.25rem; height: 1.25rem;">
+                                                                    <i class="fa-solid fa-bolt-lightning"
+                                                                        style="font-size: .5rem;"></i>
                                                                 </span>
                                                             </h5>
-                                                            <a v-if="accountapi.granting > 0" data-bs-toggle="collapse"
-                                                                id="delegationsbtn" href="#delegations" role="button"
-                                                                aria-expanded="false" aria-controls="Show delegations"
-                                                                class="text-white" style="text-decoration: none">
-                                                                <h6 id="delegatebal">
-                                                                    (-{{formatNumber((accountapi.granting)/1000, 3,
-                                                                    '.', ',')}} G)<i class="fas fa-search ms-2"></i>
-                                                                </h6>
-                                                            </a>
+                                                           
                                                             <div class="btn-group" v-if="me" role="group"
                                                                 aria-label="DLUX Power Actions">
                                                                 <button type="button" class="btn btn-light p-0">
@@ -483,8 +489,67 @@
                                                         </div>
                                                     </div>
 
+
+                                                </div>
+                                                <!--delegated dlux power -->
+                                                <div class="border-bottom border-white-50 py-3">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="me-4 position-relative" style="width: 70px;">
+                                                            <div class="ratio ratio-1x1">
+                                                                <div
+                                                                    class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
+                                                                    <img src="/img/dlux-logo.png"
+                                                                        class="rounded img-fluid p-1"
+                                                                        alt="LARYNX Token Logo">
+                                                                </div>
+                                                            </div>
+                                                            <div class="position-absolute top-0 start-0 translate-middle"
+                                                                style="margin-left: 10px;">
+                                                                <span
+                                                                    class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                                    style="width: 1.5rem; height: 1.5rem;">
+                                                                    <i class="fa-solid fa-right-left"
+                                                                        style="font-size: .65rem;"></i>
+                                                                </span>
+                                                            </div>
+                                                            <div class="position-absolute top-100 start-100 translate-middle"
+                                                                style=" margin-left: -3px;">
+                                                                <span
+                                                                    class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                                    style="width: 2.5rem; height: 2.5rem;">
+                                                                    <i class="fa-solid fa-hand-holding-dollar"
+                                                                        style="font-size: 1.3rem;"></i>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <div class="d-flex align-items-start">
+                                                                <h4>Delegated DLUX Power</h4>
+                                                            </div>
+                                                            <p class="text-white-50">Profit sharing with node operators
+                                                            </p>
+                                                        </div>
+                                                        <div id="dluxactions" class="ms-auto text-end">
+                                                            <h5 id="dluxbalance"
+                                                                class="d-flex align-items-center justify-content-end">
+                                                                {{formatNumber((accountapi.granting)/1000, 3,
+                                                                '.', ',')}}
+                                                                <span class="ms-2 text-warning">DLUX</span><span
+                                                                    class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                                    style="width: 1.25rem; height: 1.25rem;">
+                                                                    <i class="fa-solid fa-right-left"
+                                                                        style="font-size: .5rem;"></i>
+                                                                </span>
+                                                            </h5>
+                                                            <div class="btn-group" v-if="me" role="group"
+                                                                aria-label="DLUX Actions">
+                                                                <button class="dropdown btn btn-light" href="#" role="button" id="delegationsbtn" data-bs-toggle="collapse" data-bs-target="#delegations" aria-expanded="false" aria-controls="Show Delegations">
+                                                                    <i class="me-2 fa-solid fa-search"></i>Details</button>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
                                                     <div class="collapse" id="delegations">
-                                                        <hr class="my-2 bg-light">
                                                         <div class="">
                                                             <div v-for="item in saccountapi.granting">
                                                                 <div v-if="item != 't'"
@@ -547,9 +612,14 @@
                                                         </ul>
                                                     </div>
                                                     <div id="dluxgactions" class="ms-auto text-end">
-                                                        <h5 id="govbalance" class="d-flex align-items-center justify-content-end">
-                                                            {{formatNumber((accountapi.gov)/1000, 3, '.', ',')}} <span class="ms-2 text-primary">DLUX</span><span class="ms-1 badge bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                                                <i class="fa-solid fa-lock" style="font-size: .5rem;"></i>
+                                                        <h5 id="govbalance"
+                                                            class="d-flex align-items-center justify-content-end">
+                                                            {{formatNumber((accountapi.gov)/1000, 3, '.', ',')}} <span
+                                                                class="ms-2 text-primary">DLUX</span><span
+                                                                class="ms-1 badge bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                                style="width: 1.25rem; height: 1.25rem;">
+                                                                <i class="fa-solid fa-lock"
+                                                                    style="font-size: .5rem;"></i>
                                                             </span>
                                                         </h5>
                                                         <a data-bs-toggle="collapse" id="escrowtxbutton"
@@ -590,9 +660,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="collapse" id="escrowtx">
-                                                    <hr class="my-2 bg-light">
-                                                </div>
+
                                                 <!-- account value -->
                                                 <div class="d-flex align-items-center p-3 bg-dark rounded mt-3">
                                                     <div>
@@ -618,9 +686,10 @@
                                             <div class="alert mb-4 alert-info bg-img-none d-flex align-items-center flex-wrap"
                                                 role="alert" style="background-color: #ffffff10;">
                                                 <div class="d-flex flex-column flex-grow-1">
-                                                    <div class="fs-3 fw-light">The SPK Files Testnet is live
+                                                    <div class="fs-3 fw-light">The SPK Files Test Net is live
                                                     </div>
-                                                    <div class="fw-6">Turn on the Testnet to Power up BROCA and generate resource credits
+                                                    <div class="fw-6">Turn on the Test Net to Power up BROCA and
+                                                        generate resource credits
                                                         for
                                                         file
                                                         storage</div>
@@ -772,18 +841,19 @@
                                                             providers with SPK governance and BROCA gas tokens.</p>
                                                     </div>
                                                     <!--claim larynx rewards-->
-                                                    <div v-if="saccountapi.claim" class="bg-special border border-4 border-dark rounded mt-3">
+                                                    <div v-if="saccountapi.claim"
+                                                        class="bg-special border border-4 border-dark rounded mt-3">
                                                         <div class="d-flex text-dark flex-wrap align-items-center p-3"
-                                                            style="background-color: #00000030">
+                                                            style="background-color: #00000020">
                                                             <div>
                                                                 <div class="d-flex align-items-start">
-                                                                    <h4 class="m-0">LARYNX Rewards Claim</h4>
+                                                                    <h4 class="m-0">Claim Rewards</h4>
                                                                 </div>
 
-                                                                <p class="text-white-50">Claimable rewards for running a
-                                                                    SPK
+                                                                <p class="">Claimable rewards
+                                                                    for running or delegating to a
                                                                     service
-                                                                    node.</p>
+                                                                    node</p>
                                                             </div>
                                                             <div id="claimlarynxrewardbtn" class="ms-auto text-end">
                                                                 <h5>{{formatNumber((saccountapi.claim)/1000, 3, '.',
@@ -853,8 +923,11 @@
                                                         <div class="ms-auto text-end">
                                                             <h5 class="d-flex align-items-center justify-content-end">
                                                                 {{formatNumber((saccountapi.spk)/1000, 3, '.', ',')}}
-                                                                <span class="ms-2">SPK</span><span class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                                                    <i class="fa-solid fa-atom" style="font-size: .5rem;"></i>
+                                                                <span class="ms-2">SPK</span><span
+                                                                    class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                                    style="width: 1.25rem; height: 1.25rem;">
+                                                                    <i class="fa-solid fa-atom"
+                                                                        style="font-size: .5rem;"></i>
                                                                 </span>
                                                             </h5>
                                                             <div class="btn-group" v-if="me" role="group"
@@ -948,8 +1021,11 @@
                                                             <h5 class="d-flex align-items-center">
                                                                 {{formatNumber((saccountapi.balance)/1000, 3, '.',
                                                                 ',')}}
-                                                                <span class="ms-2">LARYNX</span><span class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                                                    <i class="fa-solid fa-atom" style="font-size: .5rem;"></i>
+                                                                <span class="ms-2">LARYNX</span><span
+                                                                    class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                                    style="width: 1.25rem; height: 1.25rem;">
+                                                                    <i class="fa-solid fa-atom"
+                                                                        style="font-size: .5rem;"></i>
                                                                 </span>
                                                             </h5>
                                                             <div class="btn-group" v-if="me" role="group"
@@ -998,12 +1074,12 @@
                                                                         </modal-vue>
                                                                         <div class="dropdown-divider"></div>
                                                                         <div class="dropdown-menu-item">
-                                                                        <a class="dropdown-item" href="/dex/larynx"
-                                                                            id="buylink"><i
-                                                                                class="fas fa-coins fa-fw me-2"></i>Buy
-                                                                            /
-                                                                            Sell</a>
-                                                                            </div>
+                                                                            <a class="dropdown-item" href="/dex/larynx"
+                                                                                id="buylink"><i
+                                                                                    class="fas fa-coins fa-fw me-2"></i>Buy
+                                                                                /
+                                                                                Sell</a>
+                                                                        </div>
                                                                     </ul>
                                                                 </div>
                                                             </div>
@@ -1015,18 +1091,29 @@
                                                         <div class="d-flex align-items-center">
                                                             <div class="me-4 position-relative" style="width: 70px;">
                                                                 <div class="ratio ratio-1x1">
-                                                                    <div class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
-                                                                        <img src="/img/spknetwork/larynx_icon.png" class="rounded img-fluid p-1" alt="LARYNX Token Logo">   
+                                                                    <div
+                                                                        class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
+                                                                        <img src="/img/spknetwork/larynx_icon.png"
+                                                                            class="rounded img-fluid p-1"
+                                                                            alt="LARYNX Token Logo">
                                                                     </div>
                                                                 </div>
-                                                                <div class="position-absolute top-0 start-0 translate-middle" style="margig-top: 10px; margin-left: 10px;">
-                                                                    <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.5rem; height: 1.5rem;">
-                                                                        <i class="fa-solid fa-bolt-lightning" style="font-size: .65rem;"></i>
+                                                                <div class="position-absolute top-0 start-0 translate-middle"
+                                                                    style="margig-top: 10px; margin-left: 10px;">
+                                                                    <span
+                                                                        class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                                        style="width: 1.5rem; height: 1.5rem;">
+                                                                        <i class="fa-solid fa-bolt-lightning"
+                                                                            style="font-size: .65rem;"></i>
                                                                     </span>
                                                                 </div>
-                                                                <div class="position-absolute top-100 start-100 translate-middle" style="margig-top: -3px; margin-left: -3px;">
-                                                                    <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem;">
-                                                                        <i class="fa-solid fa-arrow-up-right-dots" style="font-size: 1.3rem;"></i>
+                                                                <div class="position-absolute top-100 start-100 translate-middle"
+                                                                    style="margig-top: -3px; margin-left: -3px;">
+                                                                    <span
+                                                                        class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                                        style="width: 2.5rem; height: 2.5rem;">
+                                                                        <i class="fa-solid fa-arrow-up-right-dots"
+                                                                            style="font-size: 1.3rem;"></i>
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -1043,18 +1130,22 @@
                                                                         consensus
                                                                         (DPoS)
                                                                     </li>
-                                                                    
+
                                                                 </ul>
                                                             </div>
                                                             <div id="larynxgactions" class="ms-auto">
-                                                                    <h5 class="d-flex align-items-center justify-content-end">
-                                                                        {{formatNumber((saccountapi.poweredUp)/1000, 3,
-                                                                        '.',
-                                                                        ',')}}
-                                                                        <span class="text-warning ms-2">LARYNX</span><span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                                                            <i class="fa-solid fa-bolt-lightning" style="font-size: .5rem;"></i>
-                                                                        </span>
-                                                                    </h5>
+                                                                <h5
+                                                                    class="d-flex align-items-center justify-content-end">
+                                                                    {{formatNumber((saccountapi.poweredUp)/1000, 3,
+                                                                    '.',
+                                                                    ',')}}
+                                                                    <span class="text-warning ms-2">LARYNX</span><span
+                                                                        class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                                        style="width: 1.25rem; height: 1.25rem;">
+                                                                        <i class="fa-solid fa-bolt-lightning"
+                                                                            style="font-size: .5rem;"></i>
+                                                                    </span>
+                                                                </h5>
                                                                 <div class="btn-group" v-if="me" role="group"
                                                                     aria-label="LARYNX Actions">
                                                                     <button class="btn btn-light p-0" type="button">
@@ -1087,7 +1178,8 @@
                                                                                 :balance="saccountapi.poweredUp"
                                                                                 :account="account"
                                                                                 @modalsign="sendIt($event)"
-                                                                                v-slot:trigger class="dropdown-menu-item">
+                                                                                v-slot:trigger
+                                                                                class="dropdown-menu-item">
                                                                                 <button
                                                                                     :disabled="!saccountapi.poweredUp"
                                                                                     class="dropdown-item trigger"
@@ -1100,7 +1192,8 @@
                                                                                 type="confirm" token="LARYNX"
                                                                                 func="powercancel" :account="account"
                                                                                 @modalsign="sendIt($event)"
-                                                                                v-slot:trigger class="dropdown-menu-item">
+                                                                                v-slot:trigger
+                                                                                class="dropdown-menu-item">
                                                                                 <button class="dropdown-item trigger"
                                                                                     slot="trigger" type="button">
                                                                                     <i
@@ -1135,18 +1228,29 @@
                                                         <div class="d-flex align-items-center ">
                                                             <div class="me-4 position-relative" style="width: 70px;">
                                                                 <div class="ratio ratio-1x1">
-                                                                    <div class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
-                                                                        <img src="/img/spknetwork/larynx_icon.png" class="rounded img-fluid p-1" alt="LARYNX Token Logo">   
+                                                                    <div
+                                                                        class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
+                                                                        <img src="/img/spknetwork/larynx_icon.png"
+                                                                            class="rounded img-fluid p-1"
+                                                                            alt="LARYNX Token Logo">
                                                                     </div>
                                                                 </div>
-                                                                <div class="position-absolute top-0 start-0 translate-middle" style="margig-top: 10px; margin-left: 10px;">
-                                                                    <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.5rem; height: 1.5rem;">
-                                                                        <i class="fa-solid fa-right-left" style="font-size: .65rem;"></i>
+                                                                <div class="position-absolute top-0 start-0 translate-middle"
+                                                                    style="margig-top: 10px; margin-left: 10px;">
+                                                                    <span
+                                                                        class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                                        style="width: 1.5rem; height: 1.5rem;">
+                                                                        <i class="fa-solid fa-right-left"
+                                                                            style="font-size: .65rem;"></i>
                                                                     </span>
                                                                 </div>
-                                                                <div class="position-absolute top-100 start-100 translate-middle" style="margig-top: -3px; margin-left: -3px;">
-                                                                    <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem;">
-                                                                        <i class="fa-solid fa-hand-holding-dollar" style="font-size: 1.3rem;"></i>
+                                                                <div class="position-absolute top-100 start-100 translate-middle"
+                                                                    style="margig-top: -3px; margin-left: -3px;">
+                                                                    <span
+                                                                        class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                                        style="width: 2.5rem; height: 2.5rem;">
+                                                                        <i class="fa-solid fa-hand-holding-dollar"
+                                                                            style="font-size: 1.3rem;"></i>
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -1154,16 +1258,20 @@
                                                                 <div class="d-flex align-items-start">
                                                                     <h4 class="m-0">Delegated LARYNX Power</h4>
                                                                 </div>
-                                                                <p class="text-white-50">Profit sharing with service providers
+                                                                <p class="text-white-50">Profit sharing with service
+                                                                    providers
                                                                 </p>
                                                             </div>
                                                             <div class="ms-auto text-end">
                                                                 <h5 class="d-flex align-items-center">
                                                                     {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000,
-                                                                        3, '.', ',')}}
-                                                                        
-                                                                        <span class="text-warning ms-2">LARYNX</span><span class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                                                        <i class="fa-solid fa-right-left" style="font-size: .5rem;"></i>
+                                                                    3, '.', ',')}}
+
+                                                                    <span class="text-warning ms-2">LARYNX</span><span
+                                                                        class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                                        style="width: 1.25rem; height: 1.25rem;">
+                                                                        <i class="fa-solid fa-right-left"
+                                                                            style="font-size: .5rem;"></i>
                                                                     </span>
                                                                 </h5>
                                                                 <div class="btn-group" role="group"
@@ -1242,7 +1350,8 @@
                                                     </div>
 
                                                     <!--locked larynx-->
-                                                    <div class="border-top border-white-50 d-flex align-items-center py-3" v-if="saccountapi.gov">
+                                                    <div class="border-top border-white-50 d-flex align-items-center py-3"
+                                                        v-if="saccountapi.gov">
                                                         <div class="me-4 position-relative" style="width: 70px;">
                                                             <div class="ratio ratio-1x1">
                                                                 <div
@@ -1275,24 +1384,29 @@
                                                             <div class="d-flex align-items-start">
                                                                 <h4 class="m-0">Locked LARYNX</h4>
                                                             </div>
-                                                           
+
                                                             <ul class="text-white-50">
-                                                                <li>PoS concensus and collateral for DEX transactions</li>
+                                                                <li>PoS concensus and collateral for DEX transactions
+                                                                </li>
                                                                 <li>Instant Lock | 4 Week Unlock</li>
                                                                 <li>Requires an operating LARYNX node</li>
 
                                                             </ul>
                                                         </div>
                                                         <div id="larynxgactions" class="ms-auto text-end" v-show="me">
-                                                            
-                                                               
-                                                                <h5 id="govbalance" class="d-flex align-items-center">
-                                                                    {{formatNumber((saccountapi.gov)/1000, 3, '.',
-                                                                    ',')}} <span class="text-primary ms-2">LARYNX</span><span class="ms-1 badge bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.25rem; height: 1.25rem;">
-                                                                        <i class="fa-solid fa-lock" style="font-size: .5rem;"></i>
-                                                                    </span>
-                                                                </h5>
-                                                            
+
+
+                                                            <h5 id="govbalance" class="d-flex align-items-center">
+                                                                {{formatNumber((saccountapi.gov)/1000, 3, '.',
+                                                                ',')}} <span
+                                                                    class="text-primary ms-2">LARYNX</span><span
+                                                                    class="ms-1 badge bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                                    style="width: 1.25rem; height: 1.25rem;">
+                                                                    <i class="fa-solid fa-lock"
+                                                                        style="font-size: .5rem;"></i>
+                                                                </span>
+                                                            </h5>
+
                                                             <div class="btn-group" v-if="me" role="group"
                                                                 aria-label="LARYNX Actions">
                                                                 <button onclick="location.href='/dex/#larynx'"
@@ -1315,7 +1429,8 @@
                                                                             func="Unlock Liquidity"
                                                                             :balance="saccountapi.gov"
                                                                             :account="account"
-                                                                            @modalsign="sendIt($event)" v-slot:trigger class="dropdown-menu-item">
+                                                                            @modalsign="sendIt($event)" v-slot:trigger
+                                                                            class="dropdown-menu-item">
                                                                             <button class="dropdown-item trigger"
                                                                                 slot="trigger" type="button"><i
                                                                                     class="fas fa-lock-open fa-fw me-2"></i>Unlock
@@ -1394,8 +1509,14 @@
                                                     content.</p>
                                             </div>
                                             <div id="hiveactions" class="ms-auto text-end">
-                                                <h5 id="hivebalance">{{formatNumber(focus.balance,3,'.', ',')}}
-                                                    HIVE
+                                                <h5 id="hivebalance"
+                                                    class="d-flex align-items-center justify-content-end">
+                                                    {{formatNumber(focus.balance,3,'.', ',')}}
+                                                    <span class="ms-2">HIVE</span><span
+                                                        class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                        style="width: 1.25rem; height: 1.25rem;">
+                                                        <i class="fa-solid fa-atom" style="font-size: .5rem;"></i>
+                                                    </span>
                                                 </h5>
                                                 <div class="btn-group" v-if="me" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-light">
@@ -1474,10 +1595,17 @@
                                                     </ul>
                                                 </div>
                                                 <div id="hivepactions" class="ms-auto text-end">
-                                                    <h5 id="hpbal">
+                                                    <h5 id="hpbal"
+                                                        class="d-flex align-items-center justify-content-end">
                                                         {{formatNumber(((pFloat(hivestats.total_vesting_fund_hive)*pFloat(focus.vesting_shares))/pFloat(hivestats.total_vesting_shares)),3,
                                                         '.', ',')}}
-                                                        HP</h5>
+                                                        <span class="ms-2 text-warning">HP</span><span
+                                                            class="ms-1 badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                            style="width: 1.25rem; height: 1.25rem;">
+                                                            <i class="fa-solid fa-bolt-lightning"
+                                                                style="font-size: .5rem;"></i>
+                                                        </span>
+                                                    </h5>
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="DLUX Actions">
                                                         <button type="button" class="btn btn-light "
@@ -1536,9 +1664,15 @@
                                                     to the US Dollar</p>
                                             </div>
                                             <div id="hbdactions" class="ms-auto text-end">
-                                                <h5 id="hbdbalance">{{formatNumber(focus.hbd_balance,3,'.',
+                                                <h5 id="hbdbalance"
+                                                    class="d-flex align-items-center justify-content-end">
+                                                    {{formatNumber(focus.hbd_balance,3,'.',
                                                     ',')}}
-                                                    HBD
+                                                    <span class="ms-2">HBD</span><span
+                                                        class="ms-1 badge bg-light text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                        style="width: 1.25rem; height: 1.25rem;">
+                                                        <i class="fa-solid fa-money-bill" style="font-size: .5rem;"></i>
+                                                    </span>
                                                 </h5>
                                                 <div class="btn-group" v-if="me" role="group" aria-label="DLUX Actions">
                                                     <button type="button" class="btn btn-light">
@@ -1625,10 +1759,16 @@
                                                     </ul>
                                                 </div>
                                                 <div id="savingsactions" class="ms-auto text-end">
-                                                    <h5 id="savbal">
+                                                    <h5 id="savbal"
+                                                        class="d-flex align-items-center justify-content-end">
                                                         {{formatNumber(focus.savings_hbd_balance,3,'.',
                                                         ',')}}
-                                                        HBD</h5>
+                                                        <span class="ms-2 text-primary">HBD</span><span
+                                                            class="ms-1 badge bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle"
+                                                            style="width: 1.25rem; height: 1.25rem;">
+                                                            <i class="fa-solid fa-lock" style="font-size: .5rem;"></i>
+                                                        </span>
+                                                    </h5>
                                                 </div>
                                             </div>
                                         </div>
@@ -1651,7 +1791,7 @@
                                             </div>
 
                                         </div>
-                                        
+
                                     </div>
                                 </div>
                             </div>

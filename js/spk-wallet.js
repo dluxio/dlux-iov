@@ -847,12 +847,12 @@ export default {
                                 <img src="/img/spknetwork/larynx_icon.png" class="rounded img-fluid p-1" alt="LARYNX Token Logo">   
                             </div>
                         </div>
-                        <div class="position-absolute top-0 start-0 translate-middle" style="margig-top: 10px; margin-left: 10px;">
+                        <div class="position-absolute top-0 start-0 translate-middle" style="margin-left: 10px;">
                             <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 1.5rem; height: 1.5rem;">
                                 <i class="fa-solid fa-right-left" style="font-size: .65rem;"></i>
                             </span>
                         </div>
-                        <div class="position-absolute top-100 start-100 translate-middle" style="margig-top: -3px; margin-left: -3px;">
+                        <div class="position-absolute top-100 start-100 translate-middle" style="margin-left: -3px;">
                             <span class="badge bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle" style="width: 2.5rem; height: 2.5rem;">
                                 <i class="fa-solid fa-hand-holding-dollar" style="font-size: 1.3rem;"></i>
                             </span>
