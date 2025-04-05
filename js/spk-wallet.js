@@ -121,7 +121,7 @@ export default {
                     <div class="text-center text-lg-start flex-grow-1">
                         <h4>SPK</h4>
                         <p class="text-white-50 m-0">The governance
-                            token for
+                            token of
                             SPK Network
                         </p>
                     </div>
@@ -181,7 +181,7 @@ export default {
                                     <div class="dropdown-menu-item">
                                         <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/spk"
                                         id="buylink" target="_blank"><i
-                                            class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
+                                            class="fas fa-store fa-fw me-2"></i>Market</a>
                                     </div>
                                 </ul>
                             </div>
@@ -216,9 +216,7 @@ export default {
                         </h4>
                         <ul class="text-white-50 text-start">
                             <li>Enables voting</li>
-                            <li>Instant Power Up | 4 Week Power Down
-                            </li>
-                            <li>Used as collateral to secure the DEX</li>
+                            <li>Instant Power Up | 4 Week Power Down</li>
                         </ul>
                     </div>
                     <div class="text-center text-lg-end">
@@ -385,7 +383,7 @@ export default {
                     <div class="text-center text-lg-start flex-grow-1">
                         <h4>BROCA</h4>
                         <p class="text-white-50 m-0">The storage
-                            token for
+                            token of
                             SPK Network
                         </p>
                     </div>
@@ -445,7 +443,7 @@ export default {
                                     <div class="dropdown-menu-item">
                                     <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/broca"
                                         id="buylink" target="_blank"><i
-                                            class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
+                                            class="fas fa-store fa-fw me-2"></i>Market</a>
                                     </div>
                                 </ul>
                             </div>
@@ -554,47 +552,49 @@ export default {
                 </div>
                 </div>
                 <div class="card-group mb-3 mt-2 rounded">
-                    <div class="card bg-img-none">
-                        <div class="card-header bg-info-50 text-dark text-center">
-                        <h3 class="card-title mb-0">Network Fee</h3>
+                    <div class="card bg-img-none text-center">
+                        <div class="card-header bg-info-50 text-dark">
+                        <h3 class="card-title mb-0">Storage Rate</h3>
                         </div>
                         <div class="card-body">
                             <div class="d-flex align-items-center mb-2 justify-content-center">
                                 <h5 class="mb-0 card-title text-info">
-                                {{fancyBytes(1000000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}/</h5>
-                                <span class="small ms-1 d-flex align-items-center text-warning">1 BROCA 
-                                    <span class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                {{fancyBytes(1000000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}}</h5>
+                                <h5 class="mb-0 mx-1 card-title text-info">/</h5>
+                                <p class="mb-0 me-1 lead text-warning">1 BROCA</p>
+                                <div class="d-flex align-items-center text-warning"> 
+                                    <span class="badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
                                         <i class="fa-solid fa-bolt-lightning"></i>
                                     </span>
-                                </span>
+                                </div>
                             </div>
-                            <p class="card-text text-white-50">SPK Network IPFS Pinning Service for 30 days per BROCA Power.</p>
+                            <p class="card-text text-white-50">Current SPK Network IPFS Pinning Service size per one BROCA Power</p>
                         </div>
-                        <div class="card-footer bg-card text-center">
-                        <small class="text-body-secondary">30 Days of Storage</small>
+                        <div class="card-footer bg-card">
+                        <small class="text-body-secondary">Pinned for 30 Days</small>
                         </div>
                     </div>
-                    <div class="card bg-img-none">
-                        <div class="card-header bg-info-50 text-dark text-center">
+                    <div class="card bg-img-none text-center">
+                        <div class="card-header bg-info-50 text-dark">
                         <h3 class="card-title mb-0">Upload Limit</h3>
                         </div>
                         <div class="card-body">
-                        <h5 class="card-title text-info text-center">{{fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * spkStats.channel_bytes)}}</h5>
-                        <p class="card-text text-white-50">Your current available storage based on your current BROCA Power resources</p>
+                        <h5 class="card-title text-info">{{fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * spkStats.channel_bytes)}}</h5>
+                        <p class="card-text text-white-50">Your available storage based on your current BROCA Power resources</p>
                         </div>
-                        <div class="card-footer bg-card text-center">
+                        <div class="card-footer bg-card">
                         <small class="text-body-secondary">Regenerates Every 5 Days</small>
                         </div>
                     </div>
-                    <div class="card bg-img-none">
-                    <div class="card-header bg-info-50 text-dark text-center">
+                    <div class="card bg-img-none text-center">
+                    <div class="card-header bg-info-50 text-dark">
                         <h3 class="card-title mb-0">Drive Size</h3>
                         </div>
                         <div class="card-body">
-                        <h5 class="card-title text-info text-center">~{{(fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * 6000))}}</h5>
-                        <p class="card-text text-white-50">Maximum perpetual storage when files are set to autorenew at current network rates</p>
+                        <h5 class="card-title text-info">~{{(fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * 6000))}}</h5>
+                        <p class="card-text text-white-50">Your perpetual storage when files are set to autorenew at current network rates</p>
                         </div>
-                        <div class="card-footer bg-card text-center">
+                        <div class="card-footer bg-card">
                         <small class="text-body-secondary">Rolling Storage Over 30 Days</small>
                         </div>
                     </div>
@@ -616,9 +616,9 @@ export default {
                     </div>
                     <div class="text-center text-lg-start flex-grow-1">
                         <h4>LARYNX</h4>
-                        <p class="text-white-50">The mining token
-                            for SPK
-                            Network.</p>
+                        <p class="text-white-50">The service token
+                            of SPK
+                            Network</p>
                     </div>
                     <div class="text-center text-lg-end">
                         <h5 class="d-flex align-items-center justify-content-center justify-content-lg-end">
@@ -719,7 +719,7 @@ export default {
                                     <div class="dropdown-menu-item">
                                     <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/larynx"
                                         id="buylink" target="_blank"><i
-                                            class="fas fa-coins fa-fw me-2"></i>Buy / Sell</a>
+                                            class="fas fa-store fa-fw me-2"></i>Market</a>
                                     </div>
                                 </ul>
                             </div>
@@ -750,7 +750,7 @@ export default {
                     <div class="text-center text-lg-start flex-grow-1">
                        <h4>LARYNX Power</h4>
                         <ul class="text-white-50 text-start">
-                            <li>Increases the effectiveness of your nodes
+                            <li>Increases the effectiveness of your service nodes
                             </li>
                             <li>Instant Power Up | 4 Week Power
                                 Down</li>
@@ -837,7 +837,7 @@ export default {
             </div>
             <!-- Delegated LARYNX Power -->
             <div class="border-top border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
-                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4" v-if="saccountapi.granting.t || saccountapi.granted.t">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
                         <div class="text-center position-relative">
                             <div class="ratio ratio-1x1 wallet-token-img">
                                 <div class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
@@ -857,9 +857,9 @@ export default {
                         </div>
                         <div class="text-center text-lg-start flex-grow-1">
                             <h4>Delegated LARYNX Power</h4>
-                            <ul class="text-white-50 text-start">
-                                <li>Profit sharing with service providers</li>
-                            </ul>
+                            <p class="text-white-50 text-start">
+                                Profit sharing with service providers
+                            </p>
                         </div>
                         <div class="text-center text-lg-end">
                             <h5 class="d-flex align-items-center justify-content-center justify-content-lg-end">
@@ -875,8 +875,9 @@ export default {
                                     <i class="me-2 fa-solid fa-search"></i>Details</button>
                             </div>
                         </div>
+                    </div>
                     <div class="collapse" id="delegationsspk">
-                        <div class="d-flex flex-column text-start border border-secondary rounded px-2 py-1 p-lg-4 my-4" style="background-color: rgba(0, 0, 0, 0.5);">
+                        <div class="d-flex flex-column text-start border border-secondary rounded px-1 px-lg-2 pt-1 mt-3" style="background-color: rgba(0, 0, 0, 0.5);">
                             <div class="mb-3">    
                                 <h4 class="py-2 m-0">
                                     Delegated: {{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}} LP</h4>
@@ -911,7 +912,7 @@ export default {
                                     </div>
                                 </div>
                             </div>
-                            <div class="mb-1">
+                            <div class="">
                                 <h4 class="py-2 m-0">
                                     Received: {{formatNumber((saccountapi.granted.t)/1000, 3,'.', ',')}} LP</h4>
                                 <div v-for="(a,b,c) in saccountapi.granted" >
@@ -925,7 +926,7 @@ export default {
                         </div>
                     </div>
                 </div>
-            </div>
+            
             <!--account value-->
             <div
                 class="d-flex flex-wrap text-start align-items-center mt-3 p-3 bg-dark rounded">

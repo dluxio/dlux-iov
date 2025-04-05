@@ -383,9 +383,7 @@
                                                                         <div class="dropdown-menu-item">
                                                                             <a class="dropdown-item" href="/dex/#dlux"
                                                                                 id="buylink"><i
-                                                                                    class="fas fa-coins fa-fw me-2"></i>Buy
-                                                                                /
-                                                                                Sell
+                                                                                    class="fas fa-store fa-fw me-2"></i>Market
                                                                             </a>
                                                                         </div>
                                                                     </ul>
@@ -427,13 +425,9 @@
                                                         </div>
                                                         <div class="text-center text-lg-start flex-grow-1">
                                                             <h4>DLUX Power</h4>
-                                                            <p class="text-white-50">Staked tokens (Powered Up)
-                                                                allowing
-                                                                for
-                                                                inflationary rewards on new content</p>
+                                                           
                                                             <ul class="text-white-50 text-start">
-                                                                <li>Increased voting power on content</li>
-                                                                <li>Increased rewards from content</li>
+                                                                <li>Increased voting power and rewards</li>
                                                                 <li>Increased resource credits</li>
                                                                 <li>Instant Power Up | 4 Week Power Down</li>
                                                             </ul>
@@ -593,7 +587,8 @@
                                                                 class="position-absolute badge-perk-offset top-100 start-100 translate-middle">
                                                                 <span
                                                                     class="badge badge-perk bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle">
-                                                                    <i class="fa-solid badge-perk-icon fa-gavel"></i>
+                                                                    <i
+                                                                        class="fa-solid badge-perk-icon fa-building-columns"></i>
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -601,14 +596,11 @@
 
                                                             <h4>DLUX Governance</h4>
 
-                                                            <p class="text-white-50">Locked tokens used to determine
-                                                                concensus and
-                                                                earn rewards for running a node</p>
+                                                           
                                                             <ul class="text-white-50 text-start">
-                                                                <li>Provides liquid funds to DAO multi-sig wallet</li>
-                                                                <li>Ensures collateral for DEX escrow transactions</li>
+                                                                <li>Liquidity for DAO multi-sig wallet and DEX escrow transactions</li>
                                                                 <li>Enables voting on proposed community measures</li>
-                                                                <li>1 Week Lock | 4 Week Unlock | 1 Week Convert</li>
+                                                                <li>1 Week Lock | 4 Week Unlock</li>
                                                             </ul>
                                                         </div>
                                                         <div id="dluxgactions" class="text-center text-lg-end">
@@ -911,10 +903,9 @@
                                                             </div>
                                                             <div class="text-center text-lg-start flex-grow-1">
                                                                 <h4>SPK</h4>
-                                                                <p class="text-white-50 m-0">The governance token for
-                                                                    the
+                                                                <p class="text-white-50 m-0">The governance token of
                                                                     SPK
-                                                                    network.
+                                                                    network
                                                                 </p>
                                                             </div>
                                                             <div class="text-center text-lg-end">
@@ -944,7 +935,7 @@
                                                                         disabled></button>
                                                                     <div class="btn-group" role="group">
                                                                         <button type="button"
-                                                                            class="btn btn-light disabled dropdown-toggle"
+                                                                            class="btn btn-light dropdown-toggle"
                                                                             data-bs-toggle="dropdown"
                                                                             aria-haspopup="true"
                                                                             aria-expanded="false"></button>
@@ -953,43 +944,10 @@
                                                                             <a class="dropdown-item disabled"
                                                                                 href="/dex/?api=https://spktest.dlux.io/spk#spk"
                                                                                 id="buylink"><i
-                                                                                    class="fas fa-coins fa-fw me-2"></i>Buy
-                                                                                /
-                                                                                Sell</a>
+                                                                                    class="fas fa-store fa-fw me-2"></i>Market</a>
                                                                         </ul>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <!--claim larynx airdrop-->
-                                                    <div id="larynxclaimdiv"
-                                                        class="d-flex align-items-center border-bottom border-secondary py-5"
-                                                        v-if="parseInt(saccountapi.drop.last_claim, 16) != frmDate() && saccountapi.drop.availible.amount > 0 && me">
-                                                        <div>
-                                                            <div class="d-flex align-items-start">
-                                                                <h4 class="m-0">LARYNX Airdrop Claim</h4>
-                                                            </div>
-                                                            <p class="text-white-50">This months claimable tokens based
-                                                                on a
-                                                                January
-                                                                6th HIVE blockchain snapshot.</p>
-                                                            <p>Tokens not claimed do not roll over to next month.</p>
-                                                            <input type="text" name="frmDateReg" required id="frmDate"
-                                                                value="" class="d-none">
-                                                        </div>
-                                                        <div id="claimlarynxbtn" class="ms-auto text-end">
-                                                            <h5>{{formatNumber((saccountapi.drop.availible.amount)/1000,
-                                                                3,
-                                                                '.',
-                                                                ',')}}
-                                                                LARYNX</h5>
-                                                            <div class="btn-group" role="group"
-                                                                aria-label="LARYNX Claim">
-                                                                <button type="submit" class="btn btn-primary "
-                                                                    @click="dropClaim('spkcc', 'claim')"><i
-                                                                        class="fas fa-coin"></i><i
-                                                                        class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1016,8 +974,8 @@
                                                             </div>
                                                             <div class="text-center text-lg-start flex-grow-1">
                                                                 <h4>LARYNX</h4>
-                                                                <p class="text-white-50">The mining token for the SPK
-                                                                    network.
+                                                                <p class="text-white-50">The service token of SPK
+                                                                    network
                                                                 </p>
                                                             </div>
                                                             <div class="text-center text-lg-end">
@@ -1082,9 +1040,7 @@
                                                                             <div class="dropdown-menu-item">
                                                                                 <a class="dropdown-item"
                                                                                     href="/dex/larynx" id="buylink"><i
-                                                                                        class="fas fa-coins fa-fw me-2"></i>Buy
-                                                                                    /
-                                                                                    Sell</a>
+                                                                                        class="fas fa-store fa-fw me-2"></i>Market</a>
                                                                             </div>
                                                                         </ul>
                                                                     </div>
@@ -1125,7 +1081,7 @@
                                                                 <h4>LARYNX Power</h4>
                                                                 <ul class="text-white-50 text-start">
                                                                     <li>Earns SPK governance tokens</li>
-                                                                    <li>Instant Lock | 4 Week Unlock</li>
+                                                                    <li>Instant Power Up | 4 Week Power Down</li>
                                                                     <li>Delegate to node service accounts to build
                                                                         consensus
                                                                     </li>
@@ -1340,7 +1296,7 @@
                                                     </div>
 
                                                     <!--locked larynx-->
-                                                    <div v-if="saccountapi.gov"
+                                                    <div
                                                         class="border-top border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
                                                         <div
                                                             class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
@@ -1364,7 +1320,7 @@
                                                                     class="position-absolute badge-perk-offset top-100 start-100 translate-middle">
                                                                     <span
                                                                         class="badge badge-perk bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle">
-                                                                        <i class="fa-solid fa-gavel"></i>
+                                                                        <i class="fa-solid fa-building-columns"></i>
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -1467,6 +1423,29 @@
                                                 resistant
                                                 content and apps</p>
                                         </div>
+                                        <!-- claim HIVE -->
+                                        <div class="bg-special border border-4 border-dark rounded mt-3">
+                                            <div class="d-flex text-dark flex-column flex-lg-row gap-3 justify-content-between align-items-center p-3"
+                                                style="background-color: #00000020">
+                                                <div class="text-center text-lg-start flex-grow-1">
+                                                    <h4 class="m-0">Claim Rewards</h4>
+                                                    <p class="m-0">You have some pending rewards to claim</p>
+                                                </div>
+                                                <div id="claimlarynxrewardbtn" class="ms-auto text-end">
+                                                    <h5><!-- {{formatNumber((saccountapi.claim)/1000, 3, '.',
+                                                        ',')}} -->
+                                                        number HBD | number HP
+                                                    </h5>
+                                                  
+                                                    <div class="btn-group" role="group" aria-label="LARYNX Claim">
+                                                        <button type="submit" class="btn btn-dark "
+                                                            @click="rewardClaim('spkcc', 'shares_claim', spk2gov)"><i
+                                                                class="fas fa-coin"></i><i
+                                                                class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <!-- hive banner -->
                                         <div
                                             class="d-flex mt-3 justify-content-center align-items-center bg-dark mb-3 p-2 rounded">
@@ -1528,10 +1507,18 @@
                                                                             class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                         Up</a>
                                                                 </div>
+                                                                <div class="dropdown-menu-item">
+                                                                    <a class="dropdown-item disabled" href="#"><i
+                                                                            class="fas fa-random fa-fw me-2"></i>Convert to HBD</a>
+                                                                </div>
+                                                                <div class="dropdown-menu-item">
+                                                                    <a class="dropdown-item disabled" href="#"><i
+                                                                            class="fas fa-lock fa-fw me-2"></i>Send to HIVE Savings</a>
+                                                                </div>
                                                                 <div class="dropdown-divider"></div>
                                                                 <div class="dropdown-menu-item">
                                                                     <a class="dropdown-item" href="/dex#dlux"><i
-                                                                            class="fas fa-store fa-fw me-2"></i>Trade</a>
+                                                                            class="fas fa-store fa-fw me-2"></i>Market</a>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1540,7 +1527,7 @@
                                             </div>
                                         </div>
                                         <!-- hive power -->
-                                        <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                        <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
                                             <div
                                                 class="d-flex align-items-center flex-column flex-lg-row justify-content-between gap-3 gap-lg-4">
                                                 <div class="text-center position-relative">
@@ -1568,9 +1555,6 @@
                                                 </div>
                                                 <div class="text-center text-lg-start flex-grow-1">
                                                     <h4>HIVE Power</h4>
-                                                    <p class="text-white-50">Staked tokens (Powered Up) allowing
-                                                        for
-                                                        inflationary rewards on new content</p>
                                                     <ul class="text-white-50 text-start">
                                                         <li>Increased voting power on content</li>
                                                         <li>Increased rewards from content</li>
@@ -1614,6 +1598,172 @@
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Delegated HIVE Power -->
+                                        <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                            <div
+                                                class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
+                                                <!--v-if="saccountapi.granting.t || saccountapi.granted.t"-->
+                                                <div class="text-center position-relative">
+                                                    <div class="ratio ratio-1x1 wallet-token-img">
+                                                        <div
+                                                            class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
+                                                            <img src="/img/hextacular.svg" class="rounded img-fluid p-1"
+                                                                alt="HIVE Token Logo">
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        class="position-absolute badge-type-offset top-0 start-0 translate-middle">
+                                                        <span
+                                                            class="badge badge-type bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                            <i class="fa-solid fa-right-left"></i>
+                                                        </span>
+                                                    </div>
+                                                    <div
+                                                        class="position-absolute badge-perk-offset top-100 start-100 translate-middle">
+                                                        <span
+                                                            class="badge badge-perk bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                            <i class="fa-solid fa-hand-holding-dollar"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="text-center text-lg-start flex-grow-1">
+                                                    <h4>Delegated HIVE Power</h4>
+                                                    <p class="text-white-50 text-start">
+                                                       Profit sharing with service providers
+                                                    </p>
+                                                </div>
+                                                <div class="text-center text-lg-end">
+                                                    <h5
+                                                        class="d-flex align-items-center justify-content-center justify-content-lg-end">
+                                                        <!-- {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000,
+                                                        3, '.', ',')}} --> Number Here
+                                                        <span class="ms-2 text-warning">HP</span> <span
+                                                            class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                            <i class="fa-solid fa-right-left"></i>
+                                                        </span>
+                                                    </h5>
+                                                    <div class="btn-group" role="group" aria-label="DLP Actions">
+                                                        <!-- Details collapse button -->
+                                                        <button class="dropdown btn btn-light text-nowrap" href="#"
+                                                            role="button" id="delegationshivebtn"
+                                                            data-bs-toggle="collapse" data-bs-target="#delegationshive"
+                                                            aria-expanded="false" aria-controls="Show Delegations">
+                                                            <i class="me-2 fa-solid fa-search"></i>Details</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="collapse" id="delegationshive">
+                                                <div class="d-flex flex-column text-start border border-secondary rounded px-1 px-lg-2 pt-1 mt-3"
+                                                    style="background-color: rgba(0, 0, 0, 0.5);">
+                                                    <!-- <div class="mb-3">
+                                                        <h4 class="py-2 m-0">
+                                                            Delegated: {{formatNumber((saccountapi.granting.t)/1000,
+                                                            3, '.', ',')}} LP</h4>
+                                                        <div v-for="(a,b,c) in saccountapi.granting">
+                                                            <div class="d-flex align-items-center border-top border-secondary py-2"
+                                                                v-if="b != 't'">
+                                                                <p class="my-0"><a :href="'https://www.dlux.io/@' + b "
+                                                                        target="_blank"
+                                                                        class="text-info no-decoration">@{{b}}</a>:
+                                                                    {{formatNumber((a)/1000, 3, '.', ',')}} LP</p>
+                                                                <div class="d-flex ms-auto ">
+                                                                    <modal-vue type="delegate" :smarkets="smarkets.node"
+                                                                        token="LARYNX" :to="b" :amount="a"
+                                                                        :stats="spkStats"
+                                                                        :balance="saccountapi.poweredUp"
+                                                                        :account="account" @modalsign="sendIt($event)"
+                                                                        :test="test" v-slot:trigger>
+                                                                        <button type="button"
+                                                                            class="ms-1 btn btn-sm btn-secondary trigger"><i
+                                                                                class="fas fa-fw fa-user-edit"></i></button>
+                                                                    </modal-vue>
+                                                                    <modal-vue type="delegate" :smarkets="smarkets.node"
+                                                                        token="LARYNX" :to="b" amount="0"
+                                                                        :stats="spkStats"
+                                                                        :balance="saccountapi.poweredUp"
+                                                                        :account="account" :test="test"
+                                                                        @modalsign="sendIt($event)" v-slot:trigger>
+                                                                        <button
+                                                                            class="ms-1 btn btn-sm btn-danger ms-1 trigger"
+                                                                            type="button"><i
+                                                                                class="fas fa-fw fa-trash-alt"></i></button>
+                                                                    </modal-vue>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="">
+                                                        <h4 class="py-2 m-0">
+                                                            Received: {{formatNumber((saccountapi.granted.t)/1000,
+                                                            3,'.', ',')}} LP</h4>
+                                                        <div v-for="(a,b,c) in saccountapi.granted">
+                                                            <div class="d-flex align-items-center border-top border-secondary py-2"
+                                                                v-if="b != 't'">
+                                                                <p class="my-0"><a :href="'https://www.dlux.io/@' + b "
+                                                                        target="_blank"
+                                                                        class="text-info no-decoration">@{{b}}</a>:
+                                                                    {{formatNumber((a)/1000, 3, '.', ',')}} LP</p>
+
+                                                            </div>
+                                                        </div>
+                                                    </div> -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- HIVE Savings -->
+                                        <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                            <div
+                                                class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
+                                                <div class="text-center position-relative">
+                                                    <div class="ratio ratio-1x1 wallet-token-img">
+                                                        <div
+                                                            class="rounded-circle border border-primary d-flex justify-content-center align-items-center bg-dark">
+                                                            <img src="/img/hextacular.svg" class="rounded img-fluid p-1"
+                                                                alt="HIVE Token Logo">
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        class="position-absolute badge-type-offset top-0 start-0 translate-middle">
+                                                        <span
+                                                            class="badge badge-type text-bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                            <i class="fa-solid badge-type-icon fa-lock"></i>
+                                                        </span>
+                                                    </div>
+                                                    <div
+                                                        class="position-absolute badge-perk-offset top-100 start-100 translate-middle">
+                                                        <span
+                                                            class="badge badge-perk bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                            <i class="fa-solid badge-perk-icon fa-piggy-bank"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="text-center text-lg-start flex-grow-1">
+                                                    <h4>HIVE Savings</h4>
+                                                    <ul class="text-white-50 text-start">
+                                                        <li>APR ?? Set By Witnesses</li>
+                                                        <li>Instant Lock | 3 Day Unlock</li>
+                                                    </ul>
+                                                </div>
+                                                <div id="dluxgactions" class="text-center text-lg-end">
+                                                    <h5 id="govbalance"
+                                                        class="d-flex align-items-center justify-content-center justify-content-lg-end">
+                                                        <!--  {{formatNumber((accountapi.gov)/1000, 3, '.', ',')}} -->
+                                                        Number Here
+                                                        <span class="ms-2 text-primary">HIVE</span><span
+                                                            class="ms-1 badge badge-type-append bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                            <i class="fa-solid fa-lock"></i>
+                                                        </span>
+                                                    </h5>
+                                                    <div class="btn-group" v-if="me" role="group"
+                                                        aria-label="HIVE Actions">
+                                                        <button type="button" class="btn btn-light text-nowrap" disabled
+                                                            title="Coming soon!" style="pointer-events: none;"><i
+                                                                class="fas fa-money-bill-transfer fa-fw me-2"></i>Withdraw</button>
+
                                                     </div>
                                                 </div>
                                             </div>
@@ -1682,14 +1832,13 @@
                                                                 </div>
                                                                 <div class="dropdown-menu-item"><a
                                                                         class="dropdown-item  disabled" href="#"><i
-                                                                            class="fas fa-piggy-bank fa-fw me-2"></i>Transfer
-                                                                        to
-                                                                        Savings</a>
+                                                                            class="fas fa-lock fa-fw me-2"></i>
+                                                                        Send to HBD Savings</a>
                                                                 </div>
                                                                 <div class="dropdown-divider"></div>
                                                                 <div class="dropdown-menu-item">
                                                                     <a class="dropdown-item " href="/dex#dlux"><i
-                                                                            class="fas fa-store fa-fw me-2"></i>Trade</a>
+                                                                            class="fas fa-store fa-fw me-2"></i>Market</a>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -1698,7 +1847,7 @@
                                             </div>
                                         </div>
                                         <!-- hbd savings -->
-                                        <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                        <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
                                             <div
                                                 class="d-flex align-items-center flex-column flex-lg-row justify-content-between gap-3 gap-lg-4">
                                                 <div class="text-center position-relative">
@@ -1726,12 +1875,6 @@
                                                 </div>
                                                 <div class="text-center text-lg-start flex-grow-1">
                                                     <h4>HBD Savings</h4>
-                                                    <p class="text-white-50">Earns high APR with a 3 day waiting
-                                                        period
-                                                        imposed
-                                                        on
-                                                        withdrawl
-                                                    </p>
                                                     <ul class="text-white-50 text-start">
                                                         <li>APR 15% Set By Witnesses</li>
                                                         <li>Instant Lock | 3 Day Unlock</li>
@@ -1747,6 +1890,68 @@
                                                             <i class="fa-solid fa-lock"></i>
                                                         </span>
                                                     </h5>
+                                                    <div class="btn-group" v-if="me" role="group"
+                                                        aria-label="HIVE Actions">
+                                                        <button type="button" class="btn btn-light text-nowrap" disabled
+                                                            title="Coming soon!" style="pointer-events: none;"><i
+                                                                class="fas fa-money-bill-transfer fa-fw me-2"></i>Withdraw</button>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- hbd savings claimable -->
+                                        <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                            <div
+                                                class="d-flex align-items-center flex-column flex-lg-row justify-content-between gap-3 gap-lg-4">
+                                                <div class="text-center position-relative">
+                                                    <div class="ratio ratio-1x1 wallet-token-img">
+                                                        <div
+                                                            class="rounded-circle border border-primary d-flex justify-content-center align-items-center bg-dark">
+                                                            <img src="/img/hbd_green.svg" class="rounded img-fluid p-1"
+                                                                alt="SPK Token Logo">
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        class="position-absolute badge-type-offset top-0 start-0 translate-middle">
+                                                        <span
+                                                            class="badge badge-type bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                            <i class="fa-solid fa-plus-circle"></i>
+                                                        </span>
+                                                    </div>
+                                                    <div
+                                                        class="position-absolute badge-perk-offset top-100 start-100 translate-middle">
+                                                        <span
+                                                            class="badge bg-primary badge-perk text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                            <i class="fa-solid fa-gift"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="text-center text-lg-start flex-grow-1">
+                                                    <h4>HBD Savings Claimable</h4>
+                                                    <ul class="text-white-50 text-start">
+                                                        <li>Claim every 30 days</li>
+                                                        <li>Days until next claim</li>
+                                                    </ul>
+                                                </div>
+                                                <div id="savingsactions" class="text-center text-lg-end">
+                                                    <h5 id="savbal"
+                                                        class="d-flex align-items-center justify-content-center justify-content-lg-end">
+                                                        <!-- {{formatNumber(focus.savings_hbd_balance,3,'.',
+                                                        ',')}} -->
+                                                        Number Here
+                                                        <span class="ms-2 text-primary">HBD</span><span
+                                                            class="ms-1 badge badge-type-append bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                            <i class="fa-solid fa-lock"></i>
+                                                        </span>
+                                                    </h5>
+                                                    <div class="btn-group" v-if="me" role="group"
+                                                        aria-label="HIVE Actions">
+                                                        <button type="button" class="btn btn-light text-nowrap" disabled
+                                                            title="Coming soon!" style="pointer-events: none;"><i
+                                                                class="fas fa-plus-circle fa-fw me-2"></i>Claim</button>
+
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

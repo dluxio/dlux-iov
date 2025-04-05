@@ -2165,21 +2165,18 @@ html {
 }
 /* Large screens (≥ 992px) */
 @media (min-width: 992px) {
-  .wallet-token {
-    width: 110px;
-  }
   .wallet-token-img {
-    width: 100px;
+    width: 90px;
   }
   .badge-type {
-    width: 1.8rem;
-    height: 1.8rem;
+    width: 1.5rem;
+    height: 1.5rem;
     font-size: 0.65rem;
   }
   .badge-perk {
-    width: 2.5rem;
-    height: 2.5rem;
-    font-size: 1.3rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1.2rem;
   }
   .badge-type-offset {
     margin-left: 12px;
