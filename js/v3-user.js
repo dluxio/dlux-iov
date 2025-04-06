@@ -4,7 +4,7 @@ import Navue from "/js/v3-nav.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
 import Popper from "/js/pop.js";
-import ModalVue from "/js/modalvue.js";
+import ModalVue from "/js/modal-manager.js";
 import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
@@ -85,6 +85,7 @@ createApp({
   data() {
     return {
       fileRequests: {},
+      protocol: {},
       videosrc: null,
       videoMsg: "Drop a video file to transcode",
       ffmpeg: "Loading...",
@@ -3860,6 +3861,7 @@ function buyNFT(setname, uid, price, type, callback){
       fetch(this.lapi + "/api/protocol")
         .then((response) => response.json())
         .then((data) => {
+          this.protocol[data.jsontoken] = data
           this.prefix = data.prefix;
           this.multisig = data.multisig;
           this.jsontoken = data.jsontoken;

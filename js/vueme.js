@@ -4,7 +4,7 @@ import Navue from "/js/navue.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
 import Popper from "/js/pop.js";
-import ModalVue from "/js/modalvue.js";
+import ModalVue from "/js/modal-manager.js";
 import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
@@ -1132,6 +1132,7 @@ PORT=3000
       recenthbd: {},
       openorders: [],
       toasts: [],
+      protocol: {},
       tokenGov: {
         title: "SPK VOTE",
         options: [
@@ -3862,6 +3863,7 @@ function buyNFT(setname, uid, price, type, callback){
       fetch(this.lapi + "/api/protocol")
         .then((response) => response.json())
         .then((data) => {
+          this.protocol[data.jsontoken] = data
           this.prefix = data.prefix;
           this.multisig = data.multisig;
           this.jsontoken = data.jsontoken;

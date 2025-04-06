@@ -766,13 +766,16 @@ export default {
                         <div class="btn-group" role="group"
                             aria-label="LARYNX Actions">
                             <button class="btn btn-light p-0" type="button">
-                                <modal-vue type="delegate" 
-                                    :smarkets="smarkets.node" token="LARYNX"
-                                    func="Lock Liquidity" :stats="spkStats"
-                                    :balance="saccountapi.poweredUp"
-                                    :account="account"
-                                    @modalsign="sendIt($event)"
-                                    :test="test" v-slot:trigger><span
+                                <modal-vue 
+                                        v-if="protocollarynx.head_block && saccountapi.head_block" func="powdel"
+                                        :test="test"
+                                        :tokenuser="saccountapi" 
+                                        :account="account" 
+                                        :tokenprotocol="protocollarynx"
+                                        token="poweredUp"
+                                        :mypfp="mypfp" 
+                                        @modalsign="sendIt($event)" 
+                                        v-slot:trigger>
                                         class="text-nowrap p-2 trigger">
                                         <i class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
                                 </modal-vue>

@@ -144,8 +144,10 @@
                                                 v-if="!relations.follows">Follow</a> <a class="dropdown-item"
                                                 type="button" @click="unfollow(pageAccount)"
                                                 v-if="relations.follows">Unfollow</a>
-                                            <modal-vue type="send" token="DLUX" :balance="accountapi.balance"
-                                                :account="account" @modalsign="sendIt($event)" v-slot:trigger>
+                                            <modal-vue v-if="protocol.dlux.head_block && accountapi.head_block"
+                                                func="send" :mypfp="mypfp" token="balance" :tokenuser="accountapi"
+                                                :account="account" :tokenprotocol="protocol.dlux"
+                                                @modalsign="sendIt($event)" v-slot:trigger>
                                                 <a slot="trigger" class="dropdown-item trigger" type="button">Send
                                                     DLUX</a>
                                             </modal-vue>
@@ -339,9 +341,13 @@
                                                             <div class="btn-group" v-if="me" role="group"
                                                                 aria-label="DLUX Actions">
                                                                 <button type="button" class="btn btn-light p-0">
-                                                                    <modal-vue type="send" token="DLUX"
-                                                                        :balance="accountapi.balance" :account="account"
+                                                                    <modal-vue
+                                                                        v-if="protocol.dlux.head_block && accountapi.head_block"
+                                                                        func="send" :mypfp="mypfp" token="balance"
+                                                                        :tokenuser="accountapi" :account="account"
+                                                                        :tokenprotocol="protocol.dlux"
                                                                         @modalsign="sendIt($event)" v-slot:trigger>
+
                                                                         <span slot="trigger"
                                                                             class="p-2 trigger text-nowrap"><i
                                                                                 class="fas fa-paper-plane me-2"></i>Send</button>
@@ -357,10 +363,11 @@
                                                                         aria-expanded="false"></button>
                                                                     <ul class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                         aria-labelledby="btnGroupDrop1">
-                                                                        <modal-vue type="power" token="DLUX"
-                                                                            func="Power Up" i="-99"
-                                                                            :balance="accountapi.balance"
-                                                                            :account="account"
+                                                                        <modal-vue
+                                                                            v-if="protocol.dlux.head_block && accountapi.head_block"
+                                                                            func="powup" :mypfp="mypfp" token="balance"
+                                                                            :tokenuser="accountapi" :account="account"
+                                                                            :tokenprotocol="protocol.dlux"
                                                                             @modalsign="sendIt($event)" v-slot:trigger
                                                                             class="dropdown-menu-item">
                                                                             <a class="dropdown-item trigger"
@@ -369,9 +376,11 @@
                                                                                     class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                                 Up</a>
                                                                         </modal-vue>
-                                                                        <modal-vue type="power" token="DLUX" func="Lock"
-                                                                            :balance="accountapi.balance"
-                                                                            :account="account"
+                                                                        <modal-vue
+                                                                            v-if="protocol.dlux.head_block && accountapi.head_block"
+                                                                            func="govup" :mypfp="mypfp" token="balance"
+                                                                            :tokenuser="accountapi" :account="account"
+                                                                            :tokenprotocol="protocol.dlux"
                                                                             @modalsign="sendIt($event)" v-slot:trigger
                                                                             class="dropdown-menu-item">
                                                                             <a class="dropdown-item trigger"
@@ -425,7 +434,7 @@
                                                         </div>
                                                         <div class="text-center text-lg-start flex-grow-1">
                                                             <h4>DLUX Power</h4>
-                                                           
+
                                                             <ul class="text-white-50 text-start">
                                                                 <li>Increased voting power and rewards</li>
                                                                 <li>Increased resource credits</li>
@@ -446,10 +455,12 @@
                                                             <div class="btn-group" v-if="me" role="group"
                                                                 aria-label="DLUX Power Actions">
                                                                 <button type="button" class="btn btn-light p-0">
-                                                                    <modal-vue type="delegate" token="DLUX" func="why"
-                                                                        :balance="accountapi.poweredUp"
-                                                                        :account="account" @modalsign="sendIt($event)"
-                                                                        v-slot:trigger>
+                                                                    <modal-vue
+                                                                        v-if="protocol.dlux.head_block && accountapi.head_block"
+                                                                        func="powdel" :mypfp="mypfp" token="poweredUp"
+                                                                        :tokenuser="accountapi" :account="account"
+                                                                        :tokenprotocol="protocol.dlux"
+                                                                        @modalsign="sendIt($event)" v-slot:trigger>
                                                                         <span class="p-2 trigger text-nowrap"
                                                                             slot="trigger"><i
                                                                                 class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
@@ -465,12 +476,13 @@
                                                                         aria-expanded="false"></button>
                                                                     <ul class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                         aria-labelledby="btnGroupDrop1">
-                                                                        <modal-vue type="power" token="DLUX"
-                                                                            func="Power Down"
-                                                                            :balance="accountapi.poweredUp"
+                                                                        <modal-vue class="dropdown-menu-item"
+                                                                            v-if="protocol.dlux.head_block && accountapi.head_block"
+                                                                            func="powdn" :mypfp="mypfp"
+                                                                            token="poweredUp" :tokenuser="accountapi"
                                                                             :account="account"
-                                                                            @modalsign="sendIt($event)" v-slot:trigger
-                                                                            class="dropdown-menu-item">
+                                                                            :tokenprotocol="protocol.dlux"
+                                                                            @modalsign="sendIt($event)" v-slot:trigger>
                                                                             <button class="dropdown-item trigger"
                                                                                 slot="trigger" type="button">
                                                                                 <i
@@ -596,9 +608,10 @@
 
                                                             <h4>DLUX Governance</h4>
 
-                                                           
+
                                                             <ul class="text-white-50 text-start">
-                                                                <li>Liquidity for DAO multi-sig wallet and DEX escrow transactions</li>
+                                                                <li>Liquidity for DAO multi-sig wallet and DEX escrow
+                                                                    transactions</li>
                                                                 <li>Enables voting on proposed community measures</li>
                                                                 <li>1 Week Lock | 4 Week Unlock</li>
                                                             </ul>
@@ -636,11 +649,13 @@
                                                                         aria-expanded="false"></button>
                                                                     <ul class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                         aria-labelledby="btnGroupDrop1">
-                                                                        <modal-vue type="power" token="DLUX"
-                                                                            func="Unlock" :balance="accountapi.gov"
+                                                                        <modal-vue class="dropdown-menu-item"
+                                                                            v-if="protocol.dlux.head_block && accountapi.head_block"
+                                                                            func="govdn" :mypfp="mypfp"
+                                                                            token="gov" :tokenuser="accountapi"
                                                                             :account="account"
-                                                                            @modalsign="sendIt($event)" v-slot:trigger
-                                                                            class="dropdown-menu-item">
+                                                                            :tokenprotocol="protocol.dlux"
+                                                                            @modalsign="sendIt($event)" v-slot:trigger>
                                                                             <button class="dropdown-item trigger"
                                                                                 slot="trigger" type="button"><i
                                                                                     class="fas fa-lock-open fa-fw me-2"></i>Unlock
@@ -1436,7 +1451,7 @@
                                                         ',')}} -->
                                                         number HBD | number HP
                                                     </h5>
-                                                  
+
                                                     <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                         <button type="submit" class="btn btn-dark "
                                                             @click="rewardClaim('spkcc', 'shares_claim', spk2gov)"><i
@@ -1509,11 +1524,13 @@
                                                                 </div>
                                                                 <div class="dropdown-menu-item">
                                                                     <a class="dropdown-item disabled" href="#"><i
-                                                                            class="fas fa-random fa-fw me-2"></i>Convert to HBD</a>
+                                                                            class="fas fa-random fa-fw me-2"></i>Convert
+                                                                        to HBD</a>
                                                                 </div>
                                                                 <div class="dropdown-menu-item">
                                                                     <a class="dropdown-item disabled" href="#"><i
-                                                                            class="fas fa-lock fa-fw me-2"></i>Transfer to HIVE Savings</a>
+                                                                            class="fas fa-lock fa-fw me-2"></i>Transfer
+                                                                        to HIVE Savings</a>
                                                                 </div>
                                                                 <div class="dropdown-divider"></div>
                                                                 <div class="dropdown-menu-item">
@@ -1575,7 +1592,8 @@
                                                         aria-label="DLUX Actions">
                                                         <button type="button" class="btn btn-light text-nowrap"
                                                             style="pointer-events: none;" disabled><i
-                                                                class="fas fa-angle-double-down me-2"></i>Power Down</button>
+                                                                class="fas fa-angle-double-down me-2"></i>Power
+                                                            Down</button>
                                                         <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                                             disabled></button>
                                                         <div class="btn-group" role="group">
@@ -1587,11 +1605,13 @@
                                                                 aria-labelledby="btnGroupDrop1">
                                                                 <div class="dropdown-menu-item">
                                                                     <a class="dropdown-item disabled" href="#"><i
-                                                                            class="fas fa-user-friends fa-fw me-2"></i>Delegate HP</a>
+                                                                            class="fas fa-user-friends fa-fw me-2"></i>Delegate
+                                                                        HP</a>
                                                                 </div>
                                                                 <div class="dropdown-menu-item">
                                                                     <a class="dropdown-item disabled" href="#"><i
-                                                                            class="fas fa-microchip fa-fw me-2"></i>Delegate RC</a>
+                                                                            class="fas fa-microchip fa-fw me-2"></i>Delegate
+                                                                        RC</a>
                                                                 </div>
                                                                 <div class="dropdown-divider"></div>
                                                                 <div class="dropdown-menu-item">
@@ -1636,7 +1656,7 @@
                                                 <div class="text-center text-lg-start flex-grow-1">
                                                     <h4>Delegated HIVE Power</h4>
                                                     <p class="text-white-50 text-start">
-                                                       Profit sharing with service providers
+                                                        Profit sharing with service providers
                                                     </p>
                                                 </div>
                                                 <div class="text-center text-lg-end">
