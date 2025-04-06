@@ -1044,6 +1044,7 @@ PORT=3000
         tick: 0.01,
         claim: 0,
         poweredUp: 0,
+        head_block: 0,
         drop: {
           last_claim: 0,
           availible: {

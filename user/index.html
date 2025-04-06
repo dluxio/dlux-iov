@@ -144,9 +144,9 @@
                                                 v-if="!relations.follows">Follow</a> <a class="dropdown-item"
                                                 type="button" @click="unfollow(pageAccount)"
                                                 v-if="relations.follows">Unfollow</a>
-                                            <modal-vue v-if="protocol.dlux.head_block && accountapi.head_block"
+                                            <modal-vue v-if="protocol?.dlux?.head_block && accountapi.head_block"
                                                 func="send" :mypfp="mypfp" token="balance" :tokenuser="accountapi"
-                                                :account="account" :tokenprotocol="protocol.dlux"
+                                                :account="account" :tokenprotocol="protocol?.dlux"
                                                 @modalsign="sendIt($event)" v-slot:trigger>
                                                 <a slot="trigger" class="dropdown-item trigger" type="button">Send
                                                     DLUX</a>
@@ -342,10 +342,10 @@
                                                                 aria-label="DLUX Actions">
                                                                 <button type="button" class="btn btn-light p-0">
                                                                     <modal-vue
-                                                                        v-if="protocol.dlux.head_block && accountapi.head_block"
+                                                                        v-if="protocol?.dlux?.head_block && accountapi.head_block"
                                                                         func="send" :mypfp="mypfp" token="balance"
                                                                         :tokenuser="accountapi" :account="account"
-                                                                        :tokenprotocol="protocol.dlux"
+                                                                        :tokenprotocol="protocol?.dlux"
                                                                         @modalsign="sendIt($event)" v-slot:trigger>
 
                                                                         <span slot="trigger"
@@ -364,10 +364,10 @@
                                                                     <ul class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                         aria-labelledby="btnGroupDrop1">
                                                                         <modal-vue
-                                                                            v-if="protocol.dlux.head_block && accountapi.head_block"
+                                                                            v-if="protocol?.dlux?.head_block && accountapi.head_block"
                                                                             func="powup" :mypfp="mypfp" token="balance"
                                                                             :tokenuser="accountapi" :account="account"
-                                                                            :tokenprotocol="protocol.dlux"
+                                                                            :tokenprotocol="protocol?.dlux"
                                                                             @modalsign="sendIt($event)" v-slot:trigger
                                                                             class="dropdown-menu-item">
                                                                             <a class="dropdown-item trigger"
@@ -377,10 +377,10 @@
                                                                                 Up</a>
                                                                         </modal-vue>
                                                                         <modal-vue
-                                                                            v-if="protocol.dlux.head_block && accountapi.head_block"
+                                                                            v-if="protocol?.dlux?.head_block && accountapi.head_block"
                                                                             func="govup" :mypfp="mypfp" token="balance"
                                                                             :tokenuser="accountapi" :account="account"
-                                                                            :tokenprotocol="protocol.dlux"
+                                                                            :tokenprotocol="protocol?.dlux"
                                                                             @modalsign="sendIt($event)" v-slot:trigger
                                                                             class="dropdown-menu-item">
                                                                             <a class="dropdown-item trigger"
@@ -456,10 +456,10 @@
                                                                 aria-label="DLUX Power Actions">
                                                                 <button type="button" class="btn btn-light p-0">
                                                                     <modal-vue
-                                                                        v-if="protocol.dlux.head_block && accountapi.head_block"
+                                                                        v-if="protocol?.dlux?.head_block && accountapi.head_block"
                                                                         func="powdel" :mypfp="mypfp" token="poweredUp"
                                                                         :tokenuser="accountapi" :account="account"
-                                                                        :tokenprotocol="protocol.dlux"
+                                                                        :tokenprotocol="protocol?.dlux"
                                                                         @modalsign="sendIt($event)" v-slot:trigger>
                                                                         <span class="p-2 trigger text-nowrap"
                                                                             slot="trigger"><i
@@ -477,11 +477,11 @@
                                                                     <ul class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                         aria-labelledby="btnGroupDrop1">
                                                                         <modal-vue class="dropdown-menu-item"
-                                                                            v-if="protocol.dlux.head_block && accountapi.head_block"
+                                                                            v-if="protocol?.dlux?.head_block && accountapi.head_block"
                                                                             func="powdn" :mypfp="mypfp"
                                                                             token="poweredUp" :tokenuser="accountapi"
                                                                             :account="account"
-                                                                            :tokenprotocol="protocol.dlux"
+                                                                            :tokenprotocol="protocol?.dlux"
                                                                             @modalsign="sendIt($event)" v-slot:trigger>
                                                                             <button class="dropdown-item trigger"
                                                                                 slot="trigger" type="button">
@@ -650,11 +650,11 @@
                                                                     <ul class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                         aria-labelledby="btnGroupDrop1">
                                                                         <modal-vue class="dropdown-menu-item"
-                                                                            v-if="protocol.dlux.head_block && accountapi.head_block"
+                                                                            v-if="protocol?.dlux?.head_block && accountapi.head_block"
                                                                             func="govdn" :mypfp="mypfp"
                                                                             token="gov" :tokenuser="accountapi"
                                                                             :account="account"
-                                                                            :tokenprotocol="protocol.dlux"
+                                                                            :tokenprotocol="protocol?.dlux"
                                                                             @modalsign="sendIt($event)" v-slot:trigger>
                                                                             <button class="dropdown-item trigger"
                                                                                 slot="trigger" type="button"><i
