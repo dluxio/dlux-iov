@@ -777,7 +777,7 @@ export default {
                                         @modalsign="sendIt($event)" 
                                         v-slot:trigger>
                                         class="text-nowrap p-2 trigger">
-                                        <i class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
+                                        <span><i class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
                                 </modal-vue>
                             </button>
                             <button type="button"
@@ -800,7 +800,6 @@ export default {
                                         :tokenuser="saccountapi" 
                                         :account="account" 
                                         :tokenprotocol="protocollarynx"
-                                        token="poweredUp"
                                         :mypfp="mypfp" 
                                         @modalsign="sendIt($event)" 
                                         v-slot:trigger>

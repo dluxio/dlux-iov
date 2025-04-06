@@ -24,7 +24,7 @@ import NFTDetail from "/js/nftdetail.js";
 import SPKVue from "/js/spk-wallet.js";
 import Assets from "/js/assets.js"
 import MFI from "/js/mfi-vue.js";
-
+import MCommon from '/js/methods-common.js'
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "",
@@ -749,6 +749,7 @@ PORT=3000
       },
       disablePost: true,
       inventory: true,
+      mypfp: '/img/no-user.png',
       File: [],
       FileInfo: {},
       postTitle: "",
@@ -1555,6 +1556,7 @@ PORT=3000
     "mfi-vue": MFI,
   },
   methods: {
+    ...MCommon,
     getSetPhotos(s, c) {
       return s.setname ? `https://ipfs.dlux.io/ipfs/${s.set[c]}` : "";
     },
@@ -4808,6 +4810,14 @@ function buyNFT(setname, uid, price, type, callback){
       this.init(true)
     }
     this.rcCosts()
+    this.accountCheck(this.account).then(result => {
+      if (result) {
+        if(result === true)this.mypfp = '/img/no-user.png'
+        else this.mypfp = result
+      } else this.mypfp = '/img/no-user.png'
+    }).catch(() => {
+      this.mypfp = '/img/no-user.png'
+    })
   },
   beforeDestroy() {
     this.observer.disconnect();
