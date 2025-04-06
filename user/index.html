@@ -463,7 +463,7 @@
                                                                         @modalsign="sendIt($event)" v-slot:trigger>
                                                                         <span class="p-2 trigger text-nowrap"
                                                                             slot="trigger"><span><i
-                                                                                class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
+                                                                                    class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
                                                                     </modal-vue>
                                                                 </button>
                                                                 <button type="button"
@@ -651,9 +651,8 @@
                                                                         aria-labelledby="btnGroupDrop1">
                                                                         <modal-vue class="dropdown-menu-item"
                                                                             v-if="protocol?.dlux?.head_block && accountapi.head_block"
-                                                                            func="govdn" :mypfp="mypfp"
-                                                                            token="gov" :tokenuser="accountapi"
-                                                                            :account="account"
+                                                                            func="govdn" :mypfp="mypfp" token="gov"
+                                                                            :tokenuser="accountapi" :account="account"
                                                                             :tokenprotocol="protocol?.dlux"
                                                                             @modalsign="sendIt($event)" v-slot:trigger>
                                                                             <button class="dropdown-item trigger"
@@ -936,9 +935,11 @@
                                                                 <div class="btn-group" v-if="me" role="group"
                                                                     aria-label="SPK Actions">
                                                                     <button type="button" class="btn btn-light p-0">
-                                                                        <modal-vue type="send" token="SPK"
-                                                                            :balance="saccountapi.spk"
-                                                                            :account="account"
+                                                                        <modal-vue
+                                                                            v-if="protocol?.spk?.head_block && saccountapi.head_block"
+                                                                            func="send" :mypfp="mypfp" token="spk"
+                                                                            :tokenuser="saccountapi" :account="account"
+                                                                            :tokenprotocol="protocol?.spk"
                                                                             @modalsign="sendIt($event)" v-slot:trigger>
                                                                             <span slot="trigger"
                                                                                 class="text-nowrap p-2 trigger"><i
@@ -1006,9 +1007,11 @@
                                                                 <div class="btn-group" v-if="me" role="group"
                                                                     aria-label="LARYNX Actions">
                                                                     <button type="button" class="btn btn-light p-0">
-                                                                        <modal-vue type="send" token="LARYNX"
-                                                                            :balance="saccountapi.balance"
-                                                                            :account="account"
+                                                                        <modal-vue
+                                                                            v-if="protocol?.larynx?.head_block && saccountapi.head_block"
+                                                                            func="send" :mypfp="mypfp" token="balance"
+                                                                            :tokenuser="saccountapi" :account="account"
+                                                                            :tokenprotocol="protocol?.larynx"
                                                                             @modalsign="sendIt($event)" v-slot:trigger>
                                                                             <span slot="trigger"
                                                                                 class="text-nowrap p-2 trigger"><i
@@ -1026,25 +1029,28 @@
                                                                             aria-expanded="false"></button>
                                                                         <ul class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                             aria-labelledby="btnGroupDrop1">
-                                                                            <modal-vue type="power" token="LARYNX"
-                                                                                func="Power Up"
-                                                                                :balance="saccountapi.balance"
+                                                                            <modal-vue class="dropdown-menu-item"
+                                                                                v-if="protocol?.larynx?.head_block && saccountapi.head_block"
+                                                                                func="powup" :mypfp="mypfp"
+                                                                                token="balance" :tokenuser="saccountapi"
                                                                                 :account="account"
+                                                                                :tokenprotocol="protocol?.larynx"
                                                                                 @modalsign="sendIt($event)"
-                                                                                v-slot:trigger
-                                                                                class="dropdown-menu-item">
+                                                                                v-slot:trigger>
                                                                                 <button class="dropdown-item trigger"
                                                                                     slot="trigger" type="button"><i
                                                                                         class="fas fa-angle-double-up fa-fw me-2"></i>Power
                                                                                     Up</button>
                                                                             </modal-vue>
-                                                                            <modal-vue type="power" :dis="!isNode"
-                                                                                token="LARYNX" func="Lock Liquidity"
-                                                                                :balance="saccountapi.balance"
+                                                                            <modal-vue class="dropdown-menu-item"
+                                                                                :dis="!isNode"
+                                                                                v-if="protocol?.larynx?.head_block && saccountapi.head_block"
+                                                                                func="govup" :mypfp="mypfp"
+                                                                                token="balance" :tokenuser="saccountapi"
                                                                                 :account="account"
+                                                                                :tokenprotocol="protocol?.larynx"
                                                                                 @modalsign="sendIt($event)"
-                                                                                v-slot:trigger
-                                                                                class="dropdown-menu-item">
+                                                                                v-slot:trigger>
                                                                                 <button class="dropdown-item trigger"
                                                                                     :disabled="!isNode" slot="trigger"
                                                                                     type="button"><i
@@ -1117,16 +1123,18 @@
                                                                 <div class="btn-group" v-if="me" role="group"
                                                                     aria-label="LARYNX Actions">
                                                                     <button class="btn btn-light p-0" type="button">
-                                                                        <modal-vue type="delegate"
-                                                                            :smarkets="smarkets.node" token="LARYNX"
-                                                                            func="Lock Liquidity" :stats="sstats"
-                                                                            :balance="saccountapi.poweredUp"
-                                                                            :account="account"
-                                                                            @modalsign="sendIt($event)"
-                                                                            v-slot:trigger><span slot="trigger"
+                                                                        <modal-vue class="dropdown-menu-item"
+                                                                                v-if="protocol?.larynx?.head_block && saccountapi.head_block"
+                                                                                func="powdel" :mypfp="mypfp"
+                                                                                token="poweredUp" :tokenuser="saccountapi"
+                                                                                :account="account"
+                                                                                :tokenprotocol="protocol?.larynx"
+                                                                                @modalsign="sendIt($event)"
+                                                                                v-slot:trigger>
+                                                                        <span slot="trigger"
                                                                                 class="p-2 trigger"><span>
-                                                                                <i
-                                                                                    class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
+                                                                                    <i
+                                                                                        class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
                                                                         </modal-vue>
                                                                     </button>
                                                                     <button type="button"
@@ -1141,13 +1149,14 @@
 
                                                                         <ul class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                             aria-labelledby="btnGroupDrop1">
-                                                                            <modal-vue type="power" token="LARYNX"
-                                                                                func="Power Down"
-                                                                                :balance="saccountapi.poweredUp"
+                                                                            <modal-vue class="dropdown-menu-item"
+                                                                                v-if="protocol?.larynx?.head_block && saccountapi.head_block"
+                                                                                func="powdn" :mypfp="mypfp"
+                                                                                token="poweredUp" :tokenuser="saccountapi"
                                                                                 :account="account"
+                                                                                :tokenprotocol="protocol?.larynx"
                                                                                 @modalsign="sendIt($event)"
-                                                                                v-slot:trigger
-                                                                                class="dropdown-menu-item">
+                                                                                v-slot:trigger>
                                                                                 <button
                                                                                     :disabled="!saccountapi.poweredUp"
                                                                                     class="dropdown-item trigger"
@@ -1155,7 +1164,7 @@
                                                                                         class="fas fa-angle-double-down fa-fw me-2"></i>Power
                                                                                     Down</button>
                                                                             </modal-vue>
-                                                                            <modal-vue
+                                                                            <!-- <modal-vue
                                                                                 v-if="when(saccountapi.powerDowns)"
                                                                                 type="confirm" token="LARYNX"
                                                                                 func="powercancel" :account="account"
@@ -1167,7 +1176,7 @@
                                                                                     <i
                                                                                         class="fa-solid fa-xmark fa-fw me-2"></i>Cancel
                                                                                     Power Down</button>
-                                                                            </modal-vue>
+                                                                            </modal-vue> -->
 
                                                                         </ul>
                                                                     </div>
@@ -1180,14 +1189,14 @@
                                                                 to happen in {{when(saccountapi.powerDowns)}}
                                                                 ({{saccountapi.powerDowns.length}} installments
                                                                 remaining)</b><small class="ms-2">
-                                                                <modal-vue type="confirm" token="LARYNX"
+                                                                <!-- <modal-vue type="confirm" token="LARYNX"
                                                                     func="powercancel" :account="account"
                                                                     @modalsign="sendIt($event)" v-slot:trigger>
                                                                     <button
                                                                         class="btn btn-sm btn-outline-danger trigger"
                                                                         slot="trigger" type="button">
                                                                         STOP</button>
-                                                                </modal-vue>
+                                                                </modal-vue> -->
                                                             </small>
                                                         </div>
                                                     </div>
@@ -1265,6 +1274,14 @@
                                                                             LP
                                                                         </p>
                                                                         <div class="d-flex ms-auto ">
+                                                                            <modal-vue 
+                                                                                v-if="protocol?.larynx?.head_block && saccountapi.head_block"
+                                                                                func="powdel" :mypfp="mypfp"
+                                                                                token="poweredUp" :tokenuser="saccountapi"
+                                                                                :account="account"
+                                                                                :tokenprotocol="protocol?.larynx"
+                                                                                @modalsign="sendIt($event)"
+                                                                                v-slot:trigger>
                                                                             <modal-vue type="delegate"
                                                                                 :smarkets="smarkets.node" token="LARYNX"
                                                                                 :to="b" :amount="a" :stats="sstats"
@@ -1276,11 +1293,12 @@
                                                                                     class="ms-1 btn btn-secondary"><i
                                                                                         class="fas fa-fw fa-user-edit"></i></button>
                                                                             </modal-vue>
-                                                                            <modal-vue type="delegate"
-                                                                                :smarkets="smarkets.node" token="LARYNX"
-                                                                                :to="b" amount="0" :stats="sstats"
-                                                                                :balance="saccountapi.poweredUp"
+                                                                            <modal-vue class="dropdown-menu-item"
+                                                                                v-if="protocol?.larynx?.head_block && saccountapi.head_block"
+                                                                                func="powdel" :mypfp="mypfp"
+                                                                                token="poweredUp" :tokenuser="saccountapi"
                                                                                 :account="account"
+                                                                                :tokenprotocol="protocol?.larynx"
                                                                                 @modalsign="sendIt($event)"
                                                                                 v-slot:trigger>
                                                                                 <button
@@ -1380,13 +1398,14 @@
 
                                                                         <ul class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                             aria-labelledby="btnGroupDrop1">
-                                                                            <modal-vue type="power" token="LARYNX"
-                                                                                func="Unlock Liquidity"
-                                                                                :balance="saccountapi.gov"
+                                                                            <modal-vue class="dropdown-menu-item"
+                                                                                v-if="protocol?.larynx?.head_block && saccountapi.head_block"
+                                                                                func="govdn" :mypfp="mypfp"
+                                                                                token="poweredUp" :tokenuser="saccountapi"
                                                                                 :account="account"
+                                                                                :tokenprotocol="protocol?.larynx"
                                                                                 @modalsign="sendIt($event)"
-                                                                                v-slot:trigger
-                                                                                class="dropdown-menu-item">
+                                                                                v-slot:trigger>
                                                                                 <button class="dropdown-item trigger"
                                                                                     slot="trigger" type="button"><i
                                                                                         class="fas fa-lock-open fa-fw me-2"></i>Unlock

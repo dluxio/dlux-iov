@@ -3875,6 +3875,16 @@ function buyNFT(setname, uid, price, type, callback){
           this.behind = data.behind;
           this.behindTitle = data.behind + " Blocks Behind Hive";
         });
+        fetch(`https://spkinstant.hivehoneycomb.com` + "/api/protocol")
+        .then((response) => response.json())
+        .then((data) => {
+          this.protocol[data.jsontoken] = data
+        });
+        fetch(`https://spkinstant.hivehoneycomb.com` + "/spk/api/protocol")
+        .then((response) => response.json())
+        .then((data) => {
+          this.protocol[data.jsontoken] = data
+        });
     },
     removeUser() {
       this.balance = 0;
