@@ -2913,6 +2913,25 @@ function buyNFT(setname, uid, price, type, callback){
         txid: "reward_claim",
       };
     },
+    hiveClaim(){
+      this.toSign = {
+        type: "raw",
+        op: [
+          "claim_reward_balance",
+          {
+            "account": this.account,
+            "reward_hive": this.accountinfo.reward_hive_balance,
+            "reward_hbd": this.accountinfo.reward_hbd_balance,
+            "reward_vests": this.accountinfo.reward_vesting_balance
+          }
+        ],
+        id: `Hive Claim ${this.account}`,
+        msg: `Claiming...`,
+        ops: ["getTokenUser"],
+        txid: "reward_claim",
+      };
+      
+    },
     pending(url, text) {
       this.posturls[url].comment = text;
       this.comment(url);
@@ -4851,6 +4870,13 @@ function buyNFT(setname, uid, price, type, callback){
       get() {
         return this.rcinfo.current > this.rcCost["claim_account_operation"] ? true : false
       },
+    },
+    hasHiveRewards: {
+      get() {
+        return parseInt((parseFloat(this.accountinfo.reward_hive_balance) +
+        parseFloat(this.accountinfo.reward_hbd_balance) +
+          parseFloat(this.accountinfo.reward_vesting_balance)) * 1000 )
+      }
     },
     location: {
       get() {

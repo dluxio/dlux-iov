@@ -1458,7 +1458,7 @@
                                                 content and apps</p>
                                         </div>
                                         <!-- claim HIVE -->
-                                        <div class="bg-special border border-4 border-dark rounded mt-3">
+                                        <div v-if="hasHiveRewards" class="bg-special border border-4 border-dark rounded mt-3">
                                             <div class="d-flex text-dark flex-column flex-lg-row gap-3 justify-content-between align-items-center p-3"
                                                 style="background-color: #00000020">
                                                 <div class="text-center text-lg-start flex-grow-1">
@@ -1468,12 +1468,13 @@
                                                 <div id="claimlarynxrewardbtn" class="ms-auto text-end">
                                                     <h5><!-- {{formatNumber((saccountapi.claim)/1000, 3, '.',
                                                         ',')}} -->
-                                                        number HBD | number HP
+                                                        {{accountinfo.reward_hbd_balance}} | {{accountinfo.reward_hive_balance}} | {{accountinfo.reward_vesting_hive
+                                                        }} Power
                                                     </h5>
 
                                                     <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                         <button type="submit" class="btn btn-dark "
-                                                            @click="rewardClaim('spkcc', 'shares_claim', spk2gov)"><i
+                                                            @click="hiveClaim()"><i
                                                                 class="fas fa-coin"></i><i
                                                                 class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
                                                     </div>
