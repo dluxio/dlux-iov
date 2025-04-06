@@ -122,6 +122,9 @@ export default {
     }
     return result;
   },
+  parseF(n){
+    return parseFloat(n)
+  },
   pd(p) { //precision devision
     return parseFloat(1 / Math.pow(10, p)).toFixed(p)
   },

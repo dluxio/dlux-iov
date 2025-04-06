@@ -1458,7 +1458,7 @@
                                                 content and apps</p>
                                         </div>
                                         <!-- claim HIVE -->
-                                        <div v-if="hasHiveRewards" class="bg-special border border-4 border-dark rounded mt-3">
+                                        <div v-if="hasHiveRewards && me" class="bg-special border border-4 border-dark rounded mt-3">
                                             <div class="d-flex text-dark flex-column flex-lg-row gap-3 justify-content-between align-items-center p-3"
                                                 style="background-color: #00000020">
                                                 <div class="text-center text-lg-start flex-grow-1">
@@ -1682,8 +1682,7 @@
                                                 <div class="text-center text-lg-end">
                                                     <h5
                                                         class="d-flex align-items-center justify-content-center justify-content-lg-end">
-                                                        <!-- {{formatNumber((saccountapi.granting.t+saccountapi.granted.t)/1000,
-                                                        3, '.', ',')}} --> Number Here
+                                                        {{formatNumber( ((parseF(focus.received_vesting_shares)/parseF(hivestats.total_vesting_shares))*parseF(hivestats.total_vesting_fund_hive)) - ((parseF(focus.delegated_vesting_shares)/parseF(hivestats.total_vesting_shares))*parseF(hivestats.total_vesting_fund_hive)),3,'.', ',')}}
                                                         <span class="ms-2 text-warning">HP</span> <span
                                                             class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
                                                             <i class="fa-solid fa-right-left"></i>
@@ -1795,7 +1794,7 @@
                                                     <h5 id="govbalance"
                                                         class="d-flex align-items-center justify-content-center justify-content-lg-end">
                                                         <!--  {{formatNumber((accountapi.gov)/1000, 3, '.', ',')}} -->
-                                                        Number Here
+                                                        {{formatNumber(focus.savings_hbd_balance,3,'.', ',')}}
                                                         <span class="ms-2 text-primary">HIVE</span><span
                                                             class="ms-1 badge badge-type-append bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle">
                                                             <i class="fa-solid fa-lock"></i>
