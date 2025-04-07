@@ -2179,6 +2179,51 @@ PORT=3000
           this.ipfsProviders = data.providers
         });
     },
+    calculateHbdSavingsInterest(focus) {
+      if(!focus.savings_hbd_seconds_last_update || !this.hivestats.time)return {
+        pendingInterestHbd: 0,
+        canClaimInterest: 0,
+        nextClaimDate: 0
+    }
+      const currentTime = this.isoToUnix(this.hivestats.time)
+      const savingsHbdSecondsLastUpdate = this.isoToUnix(focus.savings_hbd_seconds_last_update)
+      const savingsHbdLastInterestPayment = this.isoToUnix(focus.savings_hbd_last_interest_payment)
+      const hbdInterestRate = BigInt(this.hivestats.hbd_interest_rate)
+      const savingsHbdBalanceStr = focus.savings_hbd_balance.split(' ')[0]
+      const savingsHbdBalance = parseFloat(savingsHbdBalanceStr)
+      const savingsHbdBalanceInt = BigInt(Math.floor(savingsHbdBalance * 1000))
+      const savingsHbdSeconds = BigInt(focus.savings_hbd_seconds)
+      const timeSinceLastUpdate = BigInt(currentTime - savingsHbdSecondsLastUpdate)
+      const additionalHbdSeconds = savingsHbdBalanceInt * timeSinceLastUpdate
+      const currentHbdSeconds = savingsHbdSeconds + additionalHbdSeconds
+      const SECONDS_PER_YEAR = 31536000n
+      const HIVE_100_PERCENT = 10000n
+      let interest = currentHbdSeconds / SECONDS_PER_YEAR
+      interest *= hbdInterestRate
+      interest /= HIVE_100_PERCENT
+      const interestStr = interest.toString()
+      const len = interestStr.length
+      let pendingInterestHbd
+      if (len <= 3) {
+          pendingInterestHbd = '0.' + interestStr.padStart(3, '0')
+      } else {
+          const integerPart = interestStr.slice(0, len - 3)
+          const decimalPart = interestStr.slice(len - 3).padStart(3, '0')
+          pendingInterestHbd = integerPart + '.' + decimalPart
+      }
+      const timeSinceLastPayment = currentTime - savingsHbdLastInterestPayment
+      const canClaimInterest = timeSinceLastPayment > 30 * 24 * 3600
+      let nextClaimDate = null
+      if (!canClaimInterest) {
+          const nextClaimTime = savingsHbdLastInterestPayment + 30 * 24 * 3600
+          nextClaimDate = new Date(nextClaimTime * 1000).toISOString().split('T')[0]
+      }
+      return {
+          pendingInterestHbd: pendingInterestHbd,
+          canClaimInterest: canClaimInterest,
+          nextClaimDate: nextClaimDate
+      }
+  },
     getMARKETS() {
       console.log('Getting Markets')
       fetch("https://spktest.dlux.io/services/MARKET")

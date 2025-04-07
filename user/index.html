@@ -1786,15 +1786,15 @@
                                                 <div class="text-center text-lg-start flex-grow-1">
                                                     <h4>HIVE Savings</h4>
                                                     <ul class="text-white-50 text-start">
-                                                        <li>APR ?? Set By Witnesses</li>
-                                                        <li>Instant Lock | 3 Day Unlock</li>
+                                                        <li>Protect you liquid Hive with a 3 day unlock.</li>
+                                                        <li>Monitor your account and recover your keys before your savings can be moved.</li>
                                                     </ul>
                                                 </div>
                                                 <div id="dluxgactions" class="text-center text-lg-end">
                                                     <h5 id="govbalance"
                                                         class="d-flex align-items-center justify-content-center justify-content-lg-end">
                                                         <!--  {{formatNumber((accountapi.gov)/1000, 3, '.', ',')}} -->
-                                                        {{formatNumber(focus.savings_hbd_balance,3,'.', ',')}}
+                                                        {{formatNumber(focus.savings_balance,3,'.', ',')}}
                                                         <span class="ms-2 text-primary">HIVE</span><span
                                                             class="ms-1 badge badge-type-append bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle">
                                                             <i class="fa-solid fa-lock"></i>
@@ -1918,7 +1918,7 @@
                                                 <div class="text-center text-lg-start flex-grow-1">
                                                     <h4>HBD Savings</h4>
                                                     <ul class="text-white-50 text-start">
-                                                        <li>APR 15% Set By Witnesses</li>
+                                                        <li>APR {{hivestats.hbd_interest_rate/100}}% Set By Witnesses</li>
                                                         <li>Instant Lock | 3 Day Unlock</li>
                                                     </ul>
                                                 </div>
@@ -1973,21 +1973,19 @@
                                                     <h4>HBD Savings Claimable</h4>
                                                     <ul class="text-white-50 text-start">
                                                         <li>Claim every 30 days</li>
-                                                        <li>Days until next claim</li>
+                                                        <li>Next claim date: {{calculateHbdSavingsInterest(focus).nextClaimDate}}</li>
                                                     </ul>
                                                 </div>
                                                 <div id="savingsactions" class="text-center text-lg-end">
                                                     <h5 id="savbal"
                                                         class="d-flex align-items-center justify-content-center justify-content-lg-end">
-                                                        <!-- {{formatNumber(focus.savings_hbd_balance,3,'.',
-                                                        ',')}} -->
-                                                        Number Here
+                                                        {{formatNumber(focus.savings_balance,3,'.', ',')}}
                                                         <span class="ms-2 text-primary">HBD</span><span
                                                             class="ms-1 badge badge-type-append bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle">
                                                             <i class="fa-solid fa-lock"></i>
                                                         </span>
                                                     </h5>
-                                                    <div class="btn-group" v-if="me" role="group"
+                                                    <div class="btn-group" v-if="me && calculateHbdSavingsInterest(focus).canClaimInterest" role="group"
                                                         aria-label="HIVE Actions">
                                                         <button type="button" class="btn btn-light text-nowrap" disabled
                                                             title="Coming soon!" style="pointer-events: none;"><i

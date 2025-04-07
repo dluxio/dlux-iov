@@ -112,6 +112,9 @@ export default {
         i = i.replace(c, "$1" + e + "$2");
     return (u ? "-" : "") + i + o;
   },
+  isoToUnix(isoString) {
+    return Math.floor(new Date(isoString).getTime() / 1000);
+  },
   NumberToBase64(num) {
     const glyphs =
       "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
@@ -122,7 +125,7 @@ export default {
     }
     return result;
   },
-  parseF(n){
+  parseF(n) {
     return parseFloat(n)
   },
   pd(p) { //precision devision
