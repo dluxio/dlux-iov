@@ -89,7 +89,7 @@ export default {
             } else if (this.type === 'election') {
                 return this.tokenprotocol.head_block && this.tokenuser.head_block;
             } else {
-                return true
+                return this.tokenuser.id && this.tokenstats.content_reward_percent
             }
             return false; // Default case if type is unrecognized
         },
