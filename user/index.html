@@ -1528,7 +1528,7 @@
                                                         aria-label="DLUX Actions">
                                                         <button type="button" class="btn btn-light">
                                                             <modal-vue 
-                                                                v-if="focus.id"
+                                                                v-if="focus.id && hivestats.content_reward_percent"
                                                                 func="transfer" 
                                                                 :mypfp="mypfp"
                                                                 token="HIVE"
@@ -1868,9 +1868,16 @@
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="DLUX Actions">
                                                         <button type="button" class="btn btn-light">
-                                                            <modal-vue type="send" token="HBD"
-                                                                :balance="pFloat(focus.hbd_balance) * 1000"
-                                                                :account="account" @modalsign="sendIt($event)"
+                                                            <modal-vue 
+                                                                v-if="focus.id && hivestats.content_reward_percent"
+                                                                func="transfer" 
+                                                                :mypfp="mypfp"
+                                                                token="HBD"
+                                                                :tokenuser="focus"
+                                                                :account="account"
+                                                                :tokenstats="hivestats"
+                                                                @modalsign="sendIt($event)"
+                                                                type="hive"
                                                                 v-slot:trigger>
                                                                 <span class="text-nowrap" slot="trigger"><i
                                                                         class="fas fa-paper-plane me-2 trigger"></i>Send</span>
