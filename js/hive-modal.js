@@ -135,7 +135,11 @@ export default {
                             owner: {
                                 type: "self",
                             },
-                            amount: { type: "amount", asset: "HIVE" },
+                            amount: { 
+                                type: "amount",
+                                asset: "HIVE",
+                                string: "Amount",
+                            },
                             requestid: {
                                 type: "func",
                                 name: "buildID"
@@ -151,7 +155,11 @@ export default {
                             owner: {
                                 type: "self",
                             },
-                            amount: { type: "amount", asset: "HBD" },
+                            amount: { 
+                                type: "amount",
+                                asset: "HBD",
+                                string: "Amount",
+                            },
                             requestid: {
                                 type: "func",
                                 name: "buildID"
@@ -191,7 +199,11 @@ export default {
                                 req: true,
                                 check: "AC"
                             },
-                            amount: { type: "amount", asset: "token" },
+                            amount: { 
+                                type: "amount",
+                                asset: "token",
+                                string: "Amount",
+                            },
                             memo: {
                                 type: "S",
                                 string: "Memo",
@@ -241,7 +253,11 @@ export default {
                                 req: true,
                                 check: "AC"
                             },
-                            amount: { type: "amount", asset: "token" },
+                            amount: { 
+                                type: "amount",
+                                asset: "token",
+                                string: "Amount",
+                            },
                             memo: {
                                 type: "S",
                                 string: "Memo",
@@ -264,7 +280,11 @@ export default {
                                 req: true,
                                 check: "AC"
                             },
-                            amount: { type: "amount", asset: "token" },
+                            amount: { 
+                                type: "amount",
+                                asset: "token",
+                                string: "Amount",
+                            },
                             memo: {
                                 type: "S",
                                 string: "Memo",
@@ -290,7 +310,11 @@ export default {
                                 req: true,
                                 check: "AC"
                             },
-                            amount: { type: "amount", asset: "HIVE" },
+                            amount: { 
+                                type: "amount",
+                                asset: "HIVE",
+                                string: "Amount",
+                            },
                         }
                     },
                     transfer_to_savings: {
@@ -308,7 +332,11 @@ export default {
                                 req: true,
                                 check: "AC"
                             },
-                            amount: { type: "amount", asset: "token" },
+                            amount: { 
+                                type: "amount",
+                                asset: "token",
+                                string: "Amount",
+                            },
                             memo: {
                                 type: "S",
                                 string: "Memo",
@@ -325,7 +353,11 @@ export default {
                             account: {
                                 type: "self",
                             },
-                            vesting_shares: { type: "amount", asset: "VESTS" }
+                            vesting_shares: { 
+                                type: "amount",
+                                asset: "VESTS",
+                                string: "Amount",
+                            }
                         }
                     },
                 },
