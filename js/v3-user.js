@@ -4303,7 +4303,12 @@ function buyNFT(setname, uid, price, type, callback){
           var pfp = "";
           if (user == this.account) {
             try {
-              this.mypfp = this.accountinfo.posting_json_metadata.profile.profile_image;
+              var profilePicUrl = '/img/no-user.png'
+              const metadata = JSON.parse(this.accountinfo.posting_json_metadata || this.accountinfo.json_metadata || '{}');
+              if (metadata.profile && metadata.profile.profile_image) {
+                profilePicUrl = metadata.profile.profile_image;
+              }
+              this.mypfp = profilePicUrl
             } catch (e) {
               this.mypfp = '/img/no-user.png'
             }
