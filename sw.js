@@ -1,4 +1,4 @@
-this.version = "2025.04.07.3";
+this.version = "2025.04.07.4";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -148,6 +148,7 @@ var urlsToCache = [
   `/js/filesvue.js`,
   `/js/footvue.js`,
   `/js/fttransfer.js`,
+  `/js/hive-modal.js`,
   `/js/img-ipfs.js`,
   `/js/indexvue.js`,
   `/js/marker.js`,
