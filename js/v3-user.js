@@ -979,7 +979,13 @@ PORT=3000
             about: "",
           },
         },
+        hbd: {
+          pendingInterestHbd: 0,
+          canClaimInterest: 0,
+          nextClaimDate: 0
+        }
       },
+      hbdclaim: {},
       focusdata: {
         balance: 0,
         gov: 0,
@@ -2180,11 +2186,10 @@ PORT=3000
         });
     },
     calculateHbdSavingsInterest(focus) {
-      if(!focus.savings_hbd_seconds_last_update || !this.hivestats.time)return {
-        pendingInterestHbd: 0,
-        canClaimInterest: 0,
-        nextClaimDate: 0
-    }
+      if(!focus.name)return
+      if (!focus.savings_hbd_seconds_last_update || !this.hivestats.time || !this.hivestats.hbd_interest_rate){
+        setTimeout(()=>{this.calculateHbdSavingsInterest(focus)},1000)
+      }
       const currentTime = this.isoToUnix(this.hivestats.time)
       const savingsHbdSecondsLastUpdate = this.isoToUnix(focus.savings_hbd_seconds_last_update)
       const savingsHbdLastInterestPayment = this.isoToUnix(focus.savings_hbd_last_interest_payment)
@@ -2205,25 +2210,25 @@ PORT=3000
       const len = interestStr.length
       let pendingInterestHbd
       if (len <= 3) {
-          pendingInterestHbd = '0.' + interestStr.padStart(3, '0')
+        pendingInterestHbd = '0.' + interestStr.padStart(3, '0')
       } else {
-          const integerPart = interestStr.slice(0, len - 3)
-          const decimalPart = interestStr.slice(len - 3).padStart(3, '0')
-          pendingInterestHbd = integerPart + '.' + decimalPart
+        const integerPart = interestStr.slice(0, len - 3)
+        const decimalPart = interestStr.slice(len - 3).padStart(3, '0')
+        pendingInterestHbd = integerPart + '.' + decimalPart
       }
       const timeSinceLastPayment = currentTime - savingsHbdLastInterestPayment
       const canClaimInterest = timeSinceLastPayment > 30 * 24 * 3600
       let nextClaimDate = null
       if (!canClaimInterest) {
-          const nextClaimTime = savingsHbdLastInterestPayment + 30 * 24 * 3600
-          nextClaimDate = new Date(nextClaimTime * 1000).toISOString().split('T')[0]
+        const nextClaimTime = savingsHbdLastInterestPayment + 30 * 24 * 3600
+        nextClaimDate = new Date(nextClaimTime * 1000).toISOString().split('T')[0]
       }
-      return {
-          pendingInterestHbd: pendingInterestHbd,
-          canClaimInterest: canClaimInterest,
-          nextClaimDate: nextClaimDate
+      this.hbdclaim[focus.name] = {
+        pendingInterestHbd: parseFloat(pendingInterestHbd),
+        canClaimInterest: canClaimInterest,
+        nextClaimDate: nextClaimDate
       }
-  },
+    },
     getMARKETS() {
       console.log('Getting Markets')
       fetch("https://spktest.dlux.io/services/MARKET")
@@ -2958,7 +2963,7 @@ function buyNFT(setname, uid, price, type, callback){
         txid: "reward_claim",
       };
     },
-    hiveClaim(){
+    hiveClaim() {
       this.toSign = {
         type: "raw",
         op: [
@@ -2975,7 +2980,7 @@ function buyNFT(setname, uid, price, type, callback){
         ops: ["getTokenUser"],
         txid: "reward_claim",
       };
-      
+
     },
     pending(url, text) {
       this.posturls[url].comment = text;
@@ -3279,6 +3284,7 @@ function buyNFT(setname, uid, price, type, callback){
           }
           if (re.result.length) {
             this[key] = rez;
+            this.calculateHbdSavingsInterest(this[key])
             if (key == "newAccountDeets") this.newAccount.msg = "Account Found"
           } else {
             this[key] = false;
@@ -3939,12 +3945,12 @@ function buyNFT(setname, uid, price, type, callback){
           this.behind = data.behind;
           this.behindTitle = data.behind + " Blocks Behind Hive";
         });
-        fetch(`https://spkinstant.hivehoneycomb.com` + "/api/protocol")
+      fetch(`https://spkinstant.hivehoneycomb.com` + "/api/protocol")
         .then((response) => response.json())
         .then((data) => {
           this.protocol[data.jsontoken] = data
         });
-        fetch(`https://spkinstant.hivehoneycomb.com` + "/spk/api/protocol")
+      fetch(`https://spkinstant.hivehoneycomb.com` + "/spk/api/protocol")
         .then((response) => response.json())
         .then((data) => {
           this.protocol[data.jsontoken] = data
@@ -4319,6 +4325,7 @@ function buyNFT(setname, uid, price, type, callback){
             current: data.result[0].rc_manabar.current_mana,
             max: data.result[0].max_rc
           }
+          this.calculateHbdSavingsInterest(this.focus)
         });
     },
     getHiveStats() {
@@ -4886,7 +4893,7 @@ function buyNFT(setname, uid, price, type, callback){
     this.rcCosts()
     this.accountCheck(this.account).then(result => {
       if (result) {
-        if(result === true)this.mypfp = '/img/no-user.png'
+        if (result === true) this.mypfp = '/img/no-user.png'
         else this.mypfp = result
       } else this.mypfp = '/img/no-user.png'
     }).catch(() => {
@@ -4919,8 +4926,8 @@ function buyNFT(setname, uid, price, type, callback){
     hasHiveRewards: {
       get() {
         return parseInt((parseFloat(this.accountinfo.reward_hive_balance) +
-        parseFloat(this.accountinfo.reward_hbd_balance) +
-          parseFloat(this.accountinfo.reward_vesting_balance)) * 1000 )
+          parseFloat(this.accountinfo.reward_hbd_balance) +
+          parseFloat(this.accountinfo.reward_vesting_balance)) * 1000)
       }
     },
     location: {
