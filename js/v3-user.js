@@ -2186,9 +2186,9 @@ PORT=3000
         });
     },
     calculateHbdSavingsInterest(focus) {
-      if(!focus.name)return
-      if (!focus.savings_hbd_seconds_last_update || !this.hivestats.time || !this.hivestats.hbd_interest_rate){
-        setTimeout(()=>{this.calculateHbdSavingsInterest(focus)},1000)
+      if (!focus.name) return
+      if (!focus.savings_hbd_seconds_last_update || !this.hivestats.time || !this.hivestats.hbd_interest_rate) {
+        setTimeout(() => { this.calculateHbdSavingsInterest(focus) }, 1000)
       }
       const currentTime = this.isoToUnix(this.hivestats.time)
       const savingsHbdSecondsLastUpdate = this.isoToUnix(focus.savings_hbd_seconds_last_update)
@@ -2966,7 +2966,7 @@ function buyNFT(setname, uid, price, type, callback){
     hiveClaim() {
       this.toSign = {
         type: "raw",
-        op: [
+        op: [[
           "claim_reward_balance",
           {
             "account": this.account,
@@ -2974,10 +2974,11 @@ function buyNFT(setname, uid, price, type, callback){
             "reward_hbd": this.accountinfo.reward_hbd_balance,
             "reward_vests": this.accountinfo.reward_vesting_balance
           }
-        ],
+        ]],
+        key: "posting",
         id: `Hive Claim ${this.account}`,
         msg: `Claiming...`,
-        ops: ["getTokenUser"],
+        ops: ["getHiveUser"],
         txid: "reward_claim",
       };
 
@@ -4300,9 +4301,13 @@ function buyNFT(setname, uid, price, type, callback){
           this.barhbd = this.accountinfo.hbd_balance;
           this.denoms.HBD.balance = `${this.formatNumber((parseFloat(this.accountinfo.hbd_balance)).toFixed(3), 3, '.', ',')} HBD`
           var pfp = "";
-          try {
-            pfp = this.accountinfo.posting_json_metadata.profile.profile_image;
-          } catch (e) { }
+          if (user == this.account) {
+            try {
+              this.mypfp = this.accountinfo.posting_json_metadata.profile.profile_image;
+            } catch (e) {
+              this.mypfp = '/img/no-user.png'
+            }
+          }
           const total_vests =
             parseInt(this.accountinfo.vesting_shares) +
             parseInt(this.accountinfo.received_vesting_shares) -
@@ -4891,14 +4896,6 @@ function buyNFT(setname, uid, price, type, callback){
       this.init(true)
     }
     this.rcCosts()
-    this.accountCheck(this.account).then(result => {
-      if (result) {
-        if (result === true) this.mypfp = '/img/no-user.png'
-        else this.mypfp = result
-      } else this.mypfp = '/img/no-user.png'
-    }).catch(() => {
-      this.mypfp = '/img/no-user.png'
-    })
   },
   beforeDestroy() {
     this.observer.disconnect();

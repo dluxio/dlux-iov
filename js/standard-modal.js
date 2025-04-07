@@ -109,17 +109,6 @@ export default {
         },
         moveTokens() {
           const op = {};
-          if (this.tokenprotocol.token === 'HIVE' || this.tokenprotocol.token === 'HBD') {
-            op.type = 'xfr';
-            op.cj = {
-              to: this.form.to,
-              [this.tokenprotocol.token.toLowerCase()]: parseFloat(this.form.amount) * 1000,
-              memo: this.form.memo || ''
-            };
-            op.txid = 'sendhive';
-            op.msg = `Trying to send ${this.tokenprotocol.token}...`;
-            op.ops = ['getHiveUser'];
-          } else {
             op.type = this.feat.auth === "posting" ? 'cj' : 'cja';
             op.cj = {}
             for (const key in this.form) {
@@ -134,7 +123,6 @@ export default {
             op.ops = ['getTokenUser'];
             op.api = this.api;
             op.txid = this.func + '_' + Date.now();
-          }
             this.$emit('modalsign', op)
 
         },
@@ -192,6 +180,5 @@ export default {
       } else {
         this.error = "Feature not found";
       }
-      console.log(this.feat)
     }
 };

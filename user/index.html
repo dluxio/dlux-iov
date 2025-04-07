@@ -1124,14 +1124,13 @@
                                                                     aria-label="LARYNX Actions">
                                                                     <button class="btn btn-light p-0" type="button">
                                                                         <modal-vue class="dropdown-menu-item"
-                                                                                v-if="protocol?.larynx?.head_block && saccountapi.head_block"
-                                                                                func="powdel" :mypfp="mypfp"
-                                                                                token="poweredUp" :tokenuser="saccountapi"
-                                                                                :account="account"
-                                                                                :tokenprotocol="protocol?.larynx"
-                                                                                @modalsign="sendIt($event)"
-                                                                                v-slot:trigger>
-                                                                        <span slot="trigger"
+                                                                            v-if="protocol?.larynx?.head_block && saccountapi.head_block"
+                                                                            func="powdel" :mypfp="mypfp"
+                                                                            token="poweredUp" :tokenuser="saccountapi"
+                                                                            :account="account"
+                                                                            :tokenprotocol="protocol?.larynx"
+                                                                            @modalsign="sendIt($event)" v-slot:trigger>
+                                                                            <span slot="trigger"
                                                                                 class="p-2 trigger"><span>
                                                                                     <i
                                                                                         class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
@@ -1152,7 +1151,8 @@
                                                                             <modal-vue class="dropdown-menu-item"
                                                                                 v-if="protocol?.larynx?.head_block && saccountapi.head_block"
                                                                                 func="powdn" :mypfp="mypfp"
-                                                                                token="poweredUp" :tokenuser="saccountapi"
+                                                                                token="poweredUp"
+                                                                                :tokenuser="saccountapi"
                                                                                 :account="account"
                                                                                 :tokenprotocol="protocol?.larynx"
                                                                                 @modalsign="sendIt($event)"
@@ -1274,38 +1274,41 @@
                                                                             LP
                                                                         </p>
                                                                         <div class="d-flex ms-auto ">
-                                                                            <modal-vue 
+                                                                            <modal-vue
                                                                                 v-if="protocol?.larynx?.head_block && saccountapi.head_block"
                                                                                 func="powdel" :mypfp="mypfp"
-                                                                                token="poweredUp" :tokenuser="saccountapi"
+                                                                                token="poweredUp"
+                                                                                :tokenuser="saccountapi"
                                                                                 :account="account"
                                                                                 :tokenprotocol="protocol?.larynx"
                                                                                 @modalsign="sendIt($event)"
                                                                                 v-slot:trigger>
-                                                                            <modal-vue type="delegate"
-                                                                                :smarkets="smarkets.node" token="LARYNX"
-                                                                                :to="b" :amount="a" :stats="sstats"
-                                                                                :balance="saccountapi.poweredUp"
-                                                                                :account="account"
-                                                                                @modalsign="sendIt($event)">
-                                                                                <button slot="trigger trigger"
-                                                                                    type="button"
-                                                                                    class="ms-1 btn btn-secondary"><i
-                                                                                        class="fas fa-fw fa-user-edit"></i></button>
-                                                                            </modal-vue>
-                                                                            <modal-vue class="dropdown-menu-item"
-                                                                                v-if="protocol?.larynx?.head_block && saccountapi.head_block"
-                                                                                func="powdel" :mypfp="mypfp"
-                                                                                token="poweredUp" :tokenuser="saccountapi"
-                                                                                :account="account"
-                                                                                :tokenprotocol="protocol?.larynx"
-                                                                                @modalsign="sendIt($event)"
-                                                                                v-slot:trigger>
-                                                                                <button
-                                                                                    class="ms-1 btn btn-danger ms-1 trigger"
-                                                                                    slot="trigger" type="button"><i
-                                                                                        class="fas fa-fw fa-trash-alt"></i></button>
-                                                                            </modal-vue>
+                                                                                <modal-vue type="delegate"
+                                                                                    :smarkets="smarkets.node"
+                                                                                    token="LARYNX" :to="b" :amount="a"
+                                                                                    :stats="sstats"
+                                                                                    :balance="saccountapi.poweredUp"
+                                                                                    :account="account"
+                                                                                    @modalsign="sendIt($event)">
+                                                                                    <button slot="trigger trigger"
+                                                                                        type="button"
+                                                                                        class="ms-1 btn btn-secondary"><i
+                                                                                            class="fas fa-fw fa-user-edit"></i></button>
+                                                                                </modal-vue>
+                                                                                <modal-vue class="dropdown-menu-item"
+                                                                                    v-if="protocol?.larynx?.head_block && saccountapi.head_block"
+                                                                                    func="powdel" :mypfp="mypfp"
+                                                                                    token="poweredUp"
+                                                                                    :tokenuser="saccountapi"
+                                                                                    :account="account"
+                                                                                    :tokenprotocol="protocol?.larynx"
+                                                                                    @modalsign="sendIt($event)"
+                                                                                    v-slot:trigger>
+                                                                                    <button
+                                                                                        class="ms-1 btn btn-danger ms-1 trigger"
+                                                                                        slot="trigger" type="button"><i
+                                                                                            class="fas fa-fw fa-trash-alt"></i></button>
+                                                                                </modal-vue>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -1401,7 +1404,8 @@
                                                                             <modal-vue class="dropdown-menu-item"
                                                                                 v-if="protocol?.larynx?.head_block && saccountapi.head_block"
                                                                                 func="govdn" :mypfp="mypfp"
-                                                                                token="poweredUp" :tokenuser="saccountapi"
+                                                                                token="poweredUp"
+                                                                                :tokenuser="saccountapi"
                                                                                 :account="account"
                                                                                 :tokenprotocol="protocol?.larynx"
                                                                                 @modalsign="sendIt($event)"
@@ -1458,7 +1462,8 @@
                                                 content and apps</p>
                                         </div>
                                         <!-- claim HIVE -->
-                                        <div v-if="hasHiveRewards && me" class="bg-special border border-4 border-dark rounded mt-3">
+                                        <div v-if="hasHiveRewards && me"
+                                            class="bg-special border border-4 border-dark rounded mt-3">
                                             <div class="d-flex text-dark flex-column flex-lg-row gap-3 justify-content-between align-items-center p-3"
                                                 style="background-color: #00000020">
                                                 <div class="text-center text-lg-start flex-grow-1">
@@ -1468,14 +1473,15 @@
                                                 <div id="claimlarynxrewardbtn" class="ms-auto text-end">
                                                     <h5><!-- {{formatNumber((saccountapi.claim)/1000, 3, '.',
                                                         ',')}} -->
-                                                        {{accountinfo.reward_hbd_balance}} | {{accountinfo.reward_hive_balance}} | {{accountinfo.reward_vesting_hive
+                                                        {{accountinfo.reward_hbd_balance}} |
+                                                        {{accountinfo.reward_hive_balance}} |
+                                                        {{accountinfo.reward_vesting_hive
                                                         }} Power
                                                     </h5>
 
                                                     <div class="btn-group" role="group" aria-label="LARYNX Claim">
                                                         <button type="submit" class="btn btn-dark "
-                                                            @click="hiveClaim()"><i
-                                                                class="fas fa-coin"></i><i
+                                                            @click="hiveClaim()"><i class="fas fa-coin"></i><i
                                                                 class="fas fa-money-bill-wave-alt me-2"></i>Claim</button>
                                                     </div>
                                                 </div>
@@ -1521,9 +1527,16 @@
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="DLUX Actions">
                                                         <button type="button" class="btn btn-light">
-                                                            <modal-vue type="send" token="HIVE"
-                                                                :balance="pFloat(focus.balance) * 1000"
-                                                                :account="account" @modalsign="sendIt($event)"
+                                                            <modal-vue 
+                                                                v-if="focus.id"
+                                                                func="transfer" 
+                                                                :mypfp="mypfp"
+                                                                token="HIVE"
+                                                                :tokenuser="focus"
+                                                                :account="account"
+                                                                :tokenstats="hivestats"
+                                                                @modalsign="sendIt($event)"
+                                                                type="hive"
                                                                 v-slot:trigger>
                                                                 <span class="text-nowrap" slot="trigger"><i
                                                                         class="fas fa-paper-plane me-2 trigger"></i>Send</span>
@@ -1682,7 +1695,11 @@
                                                 <div class="text-center text-lg-end">
                                                     <h5
                                                         class="d-flex align-items-center justify-content-center justify-content-lg-end">
-                                                        {{formatNumber( ((parseF(focus.received_vesting_shares)/parseF(hivestats.total_vesting_shares))*parseF(hivestats.total_vesting_fund_hive)) - ((parseF(focus.delegated_vesting_shares)/parseF(hivestats.total_vesting_shares))*parseF(hivestats.total_vesting_fund_hive)),3,'.', ',')}}
+                                                        {{formatNumber(
+                                                        ((parseF(focus.received_vesting_shares)/parseF(hivestats.total_vesting_shares))*parseF(hivestats.total_vesting_fund_hive))
+                                                        -
+                                                        ((parseF(focus.delegated_vesting_shares)/parseF(hivestats.total_vesting_shares))*parseF(hivestats.total_vesting_fund_hive)),3,'.',
+                                                        ',')}}
                                                         <span class="ms-2 text-warning">HP</span> <span
                                                             class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
                                                             <i class="fa-solid fa-right-left"></i>
@@ -1787,7 +1804,8 @@
                                                     <h4>HIVE Savings</h4>
                                                     <ul class="text-white-50 text-start">
                                                         <li>Protect you liquid Hive with a 3 day unlock.</li>
-                                                        <li>Monitor your account and recover your keys before your savings can be moved.</li>
+                                                        <li>Monitor your account and recover your keys before your
+                                                            savings can be moved.</li>
                                                     </ul>
                                                 </div>
                                                 <div id="dluxgactions" class="text-center text-lg-end">
@@ -1918,7 +1936,8 @@
                                                 <div class="text-center text-lg-start flex-grow-1">
                                                     <h4>HBD Savings</h4>
                                                     <ul class="text-white-50 text-start">
-                                                        <li>APR {{hivestats.hbd_interest_rate/100}}% Set By Witnesses</li>
+                                                        <li>APR {{hivestats.hbd_interest_rate/100}}% Set By Witnesses
+                                                        </li>
                                                         <li>Instant Lock | 3 Day Unlock</li>
                                                     </ul>
                                                 </div>
@@ -1926,7 +1945,7 @@
                                                     <h5 id="savbal"
                                                         class="d-flex align-items-center justify-content-center justify-content-lg-end">
                                                         {{formatNumber(focus.savings_hbd_balance ,3,'.',
-                                                        ',')}} 
+                                                        ',')}}
                                                         <span class="ms-2 text-primary">HBD</span><span
                                                             class="ms-1 badge badge-type-append bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle">
                                                             <i class="fa-solid fa-lock"></i>
@@ -1973,19 +1992,22 @@
                                                     <h4>HBD Savings Claimable</h4>
                                                     <ul class="text-white-50 text-start">
                                                         <li>Claim every 30 days</li>
-                                                        <li>Next claim date: {{hbdclaim[focus.name] ? hbdclaim[focus.name].nextClaimDate : '0'}}</li>
+                                                        <li>Next claim date: {{hbdclaim[focus.name] ?
+                                                            hbdclaim[focus.name].nextClaimDate : '0'}}</li>
                                                     </ul>
                                                 </div>
                                                 <div id="savingsactions" class="text-center text-lg-end">
                                                     <h5 id="savbal"
                                                         class="d-flex align-items-center justify-content-center justify-content-lg-end">
-                                                        {{hbdclaim[focus.name] ? hbdclaim[focus.name].pendingInterestHbd : '0'}}
+                                                        {{hbdclaim[focus.name] ? hbdclaim[focus.name].pendingInterestHbd
+                                                        : '0'}}
                                                         <span class="ms-2 text-primary">HBD</span><span
                                                             class="ms-1 badge badge-type-append bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle">
                                                             <i class="fa-solid fa-lock"></i>
                                                         </span>
                                                     </h5>
-                                                    <div class="btn-group" v-if="me && hbdclaim[focus.name]?.canClaimInterest" role="group"
+                                                    <div class="btn-group"
+                                                        v-if="me && hbdclaim[focus.name]?.canClaimInterest" role="group"
                                                         aria-label="HIVE Actions">
                                                         <button type="button" class="btn btn-light text-nowrap" disabled
                                                             title="Coming soon!" style="pointer-events: none;"><i

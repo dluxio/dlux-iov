@@ -1,6 +1,7 @@
-import Contract from "/js/contract-modal.js";
-import Election from "/js/election-modal.js";
-import Standard from "/js/standard-modal.js";
+import Contract from "/js/contract-modal.js"
+import Election from "/js/election-modal.js"
+import Standard from "/js/standard-modal.js"
+import HiveWallet from "/js/hive-modal.js"
 
 export default {
     name: "ModalVue",
@@ -8,6 +9,7 @@ export default {
         "Contract": Contract,
         "Election": Election,
         "Standard": Standard,
+        "Hive": HiveWallet
     },
     props: {
         account: { default: "Please login" },
@@ -45,6 +47,16 @@ export default {
                 :tokenprotocol="tokenprotocol" 
                 :tokenuser="tokenuser" 
                 @modalsign="$emit('modalsign', $event)" />
+            <Hive v-if="(token === 'HIVE' || token === 'HBD' || token === 'HP') && tokenstats?.content_reward_percent" 
+                :func="func" 
+                :account="account"
+                :mypfp="mypfp"
+                :token="token" 
+                :tokenuser="tokenuser"
+                :to_account="type"
+                :reqid="type"
+                :tokenstats="tokenstats"
+                @modalsign="$emit('modalsign', $event)" />
             <Contract v-if="type === 'contract' && tokenuser.head_block" 
                 :account="account"
                 :api="api"
@@ -76,6 +88,8 @@ export default {
                 return !!this.tokenuser.head_block
             } else if (this.type === 'election') {
                 return this.tokenprotocol.head_block && this.tokenuser.head_block;
+            } else {
+                return true
             }
             return false; // Default case if type is unrecognized
         },
