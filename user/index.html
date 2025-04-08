@@ -1970,20 +1970,42 @@
                                                                 aria-expanded="false"></button>
                                                             <div class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                 aria-labelledby="btnGroupDrop1">
-                                                                <div class="dropdown-menu-item">
-                                                                    <a class="dropdown-item disabled" href="#"><i
+                                                                <modal-vue 
+                                                                v-if="focus.id && hivestats.content_reward_percent"
+                                                                func="convert" 
+                                                                :mypfp="mypfp"
+                                                                token="HBD"
+                                                                :tokenuser="focus"
+                                                                :account="account"
+                                                                :tokenstats="hivestats"
+                                                                @modalsign="sendIt($event)"
+                                                                type="hive"
+                                                                v-slot:trigger
+                                                                class="dropdown-menu-item">
+                                                                    <span class="text-nowrap trigger dropdown-item" slot="trigger" :disabled="!parseF(focus.hbd_balance)"><i
                                                                             class="fas fa-random fa-fw me-2"></i>Convert
                                                                         to
-                                                                        HIVE</a>
-                                                                </div>
-                                                                <div class="dropdown-menu-item"><a
-                                                                        class="dropdown-item  disabled" href="#"><i
+                                                                        HIVE</span>
+                                                                    </modal-vue>
+                                                                    <modal-vue 
+                                                                    v-if="focus.id && hivestats.content_reward_percent"
+                                                                    func="transfer_to_savings" 
+                                                                    :mypfp="mypfp"
+                                                                    token="HBD"
+                                                                    :tokenuser="focus"
+                                                                    :account="account"
+                                                                    :tokenstats="hivestats"
+                                                                    @modalsign="sendIt($event)"
+                                                                    type="hive"
+                                                                    v-slot:trigger
+                                                                    class="dropdown-menu-item">
+                                                                        <span class="text-nowrap trigger dropdown-item" slot="trigger" :disabled="!parseF(focus.hbd_balance)"><i
                                                                             class="fas fa-lock fa-fw me-2"></i>
-                                                                        Transfer to HBD Savings</a>
-                                                                </div>
+                                                                        Transfer to HBD Savings</span>
+                                                                        </modal-vue>
                                                                 <div class="dropdown-divider"></div>
                                                                 <div class="dropdown-menu-item">
-                                                                    <a class="dropdown-item " href="/dex#dlux"><i
+                                                                    <a class="dropdown-item " href="https://hivehub.dev/market/swap"><i
                                                                             class="fas fa-store fa-fw me-2"></i>Market</a>
                                                                 </div>
                                                             </div>
@@ -2039,9 +2061,20 @@
                                                     </h5>
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="HIVE Actions">
-                                                        <button type="button" class="btn btn-light text-nowrap" disabled
-                                                            title="Coming soon!" style="pointer-events: none;"><i
-                                                                class="fas fa-money-bill-transfer fa-fw me-2"></i>Withdraw</button>
+                                                        <button type="button" class="btn btn-light text-nowrap" :disabled="!parseF(focus.savings_hbd_balance)" >
+                                                            <modal-vue 
+                                                                v-if="focus.id && hivestats.content_reward_percent"
+                                                                func="transfer" 
+                                                                :mypfp="mypfp"
+                                                                token="HBD"
+                                                                :tokenuser="focus"
+                                                                :account="account"
+                                                                :tokenstats="hivestats"
+                                                                @modalsign="sendIt($event)"
+                                                                type="hive"
+                                                                v-slot:trigger>
+                                                                <span class="text-nowrap" slot="trigger"><i
+                                                                class="fas fa-money-bill-transfer fa-fw me-2"></i>Withdraw</span></modal-vue></button>
 
                                                     </div>
                                                 </div>
