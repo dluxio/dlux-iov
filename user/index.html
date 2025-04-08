@@ -1671,11 +1671,21 @@
                                                                         RC</a>
                                                                 </div>
                                                                 <div class="dropdown-divider"></div>
-                                                                <div class="dropdown-menu-item">
-                                                                    <a class="dropdown-item disabled"
-                                                                        href="../dex/">Claim
-                                                                        Account Creation Token</a>
-                                                                </div>
+                                                                <modal-vue 
+                                                                    v-if="focus.id && hivestats.content_reward_percent"
+                                                                    func="claim_account" 
+                                                                    :mypfp="mypfp"
+                                                                    token="HP"
+                                                                    :tokenuser="focus"
+                                                                    :account="account"
+                                                                    :tokenstats="hivestats"
+                                                                    @modalsign="sendIt($event)"
+                                                                    type="hive"
+                                                                    v-slot:trigger
+                                                                    class="dropdown-menu-item">
+                                                                    <span class="text-nowrap trigger dropdown-item" slot="trigger" :disabled="parseF(focus.vesting_shares) > 10000">Claim
+                                                                        Account Creation Token</span>
+                                                                </modal-vue>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1844,10 +1854,22 @@
                                                     </h5>
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="HIVE Actions">
-                                                        <button type="button" class="btn btn-light text-nowrap" disabled
-                                                            title="Coming soon!" style="pointer-events: none;"><i
+                                                        <button type="button" class="btn btn-light text-nowrap" :disabled="!parseF(focus.savings_balance)">
+                                                            <modal-vue 
+                                                                v-if="focus.id && hivestats.content_reward_percent"
+                                                                func="transfer_from_savings" 
+                                                                :mypfp="mypfp"
+                                                                token="HIVE"
+                                                                :tokenuser="focus"
+                                                                :account="account"
+                                                                :tokenstats="hivestats"
+                                                                @modalsign="sendIt($event)"
+                                                                type="hive"
+                                                                v-slot:trigger>
+                                                                <span class="text-nowrap trigger" slot="trigger"><i
                                                                 class="fas fa-money-bill-transfer fa-fw me-2"></i>Withdraw</button>
-
+                                                                </span>
+                                                            </modal-vue>
                                                     </div>
                                                 </div>
                                             </div>
