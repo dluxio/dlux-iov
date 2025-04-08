@@ -169,7 +169,7 @@ export default {
                     delegate_vesting_shares: {
                         id: "delegate_vesting_shares",
                         key: "active",
-                        string: "Delegate HIVE Power",
+                        string: "Delegate",
                         info: "Delegate vesting shares from one account to the other. The vesting shares are still owned by the original account, but content voting rights and resource credit are transferred to the receiving account. This sets the delegation to vesting_shares, increasing it or decreasing it as needed (i.e. a delegation of 0 removes the delegation).When a delegation is removed the shares are placed in limbo for a week to prevent using them and voting on the same content twice.",
                         json: {
                             delegator: {
@@ -181,7 +181,7 @@ export default {
                                 req: true,
                                 check: "AC"
                             },
-                            vesting_shares: { type: "amount", asset: "VESTS" }
+                            vesting_shares: { type: "amount", string: "Amount", asset: "VESTS" }
                         }
                     },
                     recurrent_transfer: {

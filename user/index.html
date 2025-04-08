@@ -1649,11 +1649,22 @@
                                                                 aria-expanded="false"></button>
                                                             <div class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                 aria-labelledby="btnGroupDrop1">
-                                                                <div class="dropdown-menu-item">
-                                                                    <a class="dropdown-item disabled" href="#"><i
+                                                                <modal-vue 
+                                                                v-if="focus.id && hivestats.content_reward_percent"
+                                                                func="delegate_vesting_shares" 
+                                                                :mypfp="mypfp"
+                                                                token="HP"
+                                                                :tokenuser="focus"
+                                                                :account="account"
+                                                                :tokenstats="hivestats"
+                                                                @modalsign="sendIt($event)"
+                                                                type="hive"
+                                                                v-slot:trigger
+                                                                class="dropdown-menu-item">
+                                                                    <span class="text-nowrap trigger dropdown-item" slot="trigger" :disabled="!parseF(focus.vesting_shares)"><i
                                                                             class="fas fa-user-friends fa-fw me-2"></i>Delegate
-                                                                        HP</a>
-                                                                </div>
+                                                                        HP</span>
+                                                                    </modal-vue>
                                                                 <div class="dropdown-menu-item">
                                                                     <a class="dropdown-item disabled" href="#"><i
                                                                             class="fas fa-microchip fa-fw me-2"></i>Delegate
