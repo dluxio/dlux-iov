@@ -1623,10 +1623,23 @@
                                                     </h5>
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="DLUX Actions">
-                                                        <button type="button" class="btn btn-light text-nowrap"
-                                                            style="pointer-events: none;" disabled><i
-                                                                class="fas fa-angle-double-down me-2"></i>Power
-                                                            Down</button>
+                                                        <button type="button" class="btn btn-light text-nowrap"  :disabled="!parseF(focus.vesting_shares)">
+                                                            <modal-vue 
+                                                                v-if="focus.id && hivestats.content_reward_percent"
+                                                                func="withdraw_vesting" 
+                                                                :mypfp="mypfp"
+                                                                token="HP"
+                                                                :tokenuser="focus"
+                                                                :account="account"
+                                                                :tokenstats="hivestats"
+                                                                @modalsign="sendIt($event)"
+                                                                type="hive"
+                                                                v-slot:trigger>
+                                                                <span class="text-nowrap trigger" slot="trigger">
+                                                                    <i
+                                                                    class="fas fa-angle-double-down me-2"></i>Power Down</span>
+                                                            </modal-vue>
+                                                        </button>
                                                         <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                                             disabled></button>
                                                         <div class="btn-group" role="group">
