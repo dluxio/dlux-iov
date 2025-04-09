@@ -104,6 +104,7 @@ export default {
             <label class="form-check-label" for="recurrentTransfer">Make this a recurrent transfer</label>
           </div>
           </div>
+          <span>{{feat.info}}</span>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="openModal('')">Cancel</button>
             <button :disabled="!isFormValid" type="submit" class="btn btn-primary" data-bs-dismiss="modal">{{ feat.string }}</button>
