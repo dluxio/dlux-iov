@@ -66,7 +66,7 @@ export default {
                             :min="field.type === 'N' ? '0' : null"
                             :max="field.type === 'N' && key === 'max_rc' ? getMaxRc() : null"
                         >
-        <input v-else
+        <input v-else v-show="field.type !== 'func'"
             :type="getInputType(field.type)"
             :class="['form-control', 'text-white', 'bg-dark', 'border-dark', field.check === 'AC' ? 'ps-4' : '', field.type === 'amount' ? 'pe-5' : '']"
             :placeholder="'Enter ' + field.string"
