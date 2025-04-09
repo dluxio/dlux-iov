@@ -825,7 +825,7 @@ export default {
                 </div>
                 <div
                     :class="{'d-none': !when(saccountapi.power_downs), 'd-flex': true, 'align-items-center': true}">
-                    <b>A power down is scheduled to happen in {{when(saccountapi.power_downs)}} ({{when(saccountapi.powerDowns, true)}} installments remaining)</b><small class="ms-2">
+                    <b>A power down is scheduled to happen in {{when(saccountapi.power_downs)}} ({{when(saccountapi.power_downs, true)}} installments remaining)</b><small class="ms-2">
                         <modal-vue type="confirm" token="LARYNX" 
                             func="powercancel" :account="account"
                             @modalsign="sendIt($event)"
