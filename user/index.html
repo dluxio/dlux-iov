@@ -1777,7 +1777,7 @@
                                                                     <button class="dropdown-item"><modal-vue
                                                                             v-if="focus.id && hivestats.content_reward_percent"
                                                                             func="delegate_rc" :mypfp="mypfp" token="RC"
-                                                                            
+
                                                                             :tokenuser="focus" :account="account"
                                                                             :tokenstats="hivestats" :rc-info="rcAccount"
                                                                             @modalsign="sendIt($event)" type="hive"
@@ -1797,6 +1797,19 @@
                                                                         slot="trigger"
                                                                         :disabled="!(parseF(focus.vesting_shares) > 1000000)">Claim
                                                                         Account Creation Token</button>
+                                                                </modal-vue>
+                                                                <modal-vue
+                                                                    v-if="focus.id && hivestats.content_reward_percent"
+                                                                    func="set_withdraw_vesting_route" :mypfp="mypfp" token="HP"
+                                                                    :tokenuser="focus" 
+                                                                    type="HIVE"
+                                                                    :account="account"
+                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                    v-slot:trigger class="dropdown-menu-item">
+                                                                    <button class="text-nowrap trigger dropdown-item"
+                                                                        slot="trigger"
+                                                                        :disabled="!parseF(focus.vesting_shares)">
+                                                                        Set Withdrawl Route</button>
                                                                 </modal-vue>
                                                             </div>
                                                         </div>
