@@ -1600,6 +1600,120 @@
                                         <!-- hive power -->
                                         <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
                                             <div
+                                                class="d-flex align-items-center flex-column flex-lg-row justify-content-between gap-3 gap-lg-4">
+                                                <div class="text-center position-relative">
+                                                    <div class="ratio ratio-1x1 wallet-token-img">
+                                                        <div
+                                                            class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
+                                                            <img src="/img/hextacular.svg" class="rounded img-fluid p-1"
+                                                                alt="SPK Token Logo">
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        class="position-absolute badge-type-offset top-0 start-0 translate-middle">
+                                                        <span
+                                                            class="badge badge-type bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                            <i class="fa-solid fa-bolt-lightning"></i>
+                                                        </span>
+                                                    </div>
+                                                    <div
+                                                        class="position-absolute badge-perk-offset top-100 start-100 translate-middle">
+                                                        <span
+                                                            class="badge badge-perk bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                            <i class="fa-solid fa-gauge-high"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="text-center text-lg-start flex-grow-1">
+                                                    <h4>HIVE Power</h4>
+                                                    <ul class="text-white-50 text-start">
+                                                        <li>Increased voting power on content</li>
+                                                        <li>Increased rewards from content</li>
+                                                        <li>Increased resource credits</li>
+                                                    </ul>
+                                                </div>
+                                                <div id="hivepactions" class="text-center text-lg-end">
+                                                    <h5 id="hpbal"
+                                                        class="d-flex align-items-center justify-content-center justify-content-lg-end">
+                                                        {{formatNumber(((pFloat(hivestats.total_vesting_fund_hive)*pFloat(focus.vesting_shares))/pFloat(hivestats.total_vesting_shares)),3,
+                                                        '.', ',')}}
+                                                        <span class="ms-2 text-warning">HP</span><span
+                                                            class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                            <i class="fa-solid fa-bolt-lightning"></i>
+                                                        </span>
+                                                    </h5>
+                                                    <div class="btn-group" v-if="me" role="group"
+                                                        aria-label="DLUX Actions">
+                                                        <button type="button" class="btn btn-light text-nowrap">
+                                                            <modal-vue
+                                                                v-if="focus.id && hivestats.content_reward_percent"
+                                                                func="delegate_vesting_shares" :mypfp="mypfp" token="HP"
+                                                                :tokenuser="focus" :account="account"
+                                                                :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                type="hive" v-slot:trigger class="">
+                                                                <span class="text-nowrap trigger" slot="trigger"
+                                                                    :disabled="!parseF(focus.vesting_shares)"><i
+                                                                        class="fas fa-user-friends fa-fw me-2"></i>Delegate
+                                                                    HP</span>
+                                                            </modal-vue>
+                                                        </button>
+                                                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
+                                                            disabled></button>
+                                                        <div class="btn-group" role="group">
+                                                            <button id="btnGroupDrop1" type="button"
+                                                                class="btn btn-light dropdown-toggle"
+                                                                data-bs-toggle="dropdown" aria-haspopup="true"
+                                                                aria-expanded="false"></button>
+                                                            <div class="dropdown-menu bg-black dropdown-menu-end text-white"
+                                                                aria-labelledby="btnGroupDrop1">
+                                                                <modal-vue
+                                                                    v-if="focus.id && hivestats.content_reward_percent"
+                                                                    func="withdraw_vesting" :mypfp="mypfp" token="HP"
+                                                                    :tokenuser="focus" :account="account"
+                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                    type="hive" v-slot:trigger
+                                                                    class="dropdown-menu-item">
+                                                                    <button class="text-nowrap trigger dropdown-item"
+                                                                        slot="trigger"
+                                                                        :disabled="!parseF(focus.vesting_shares)">
+                                                                        <i
+                                                                            class="fas fa-angle-double-down fa-fw me-2"></i>Power
+                                                                        Down</button>
+                                                                </modal-vue>
+                                                                <div class="dropdown-menu-item">
+                                                                    <button class="dropdown-item"><modal-vue
+                                                                        v-if="focus.id && hivestats.content_reward_percent"
+                                                                        func="delegate_rc" :mypfp="mypfp" token="RC"
+                                                                        :tokenuser="focus" :account="account"
+                                                                        :tokenstats="hivestats"
+                                                                        :rc-info="rcAccount"
+                                                                        @modalsign="sendIt($event)"
+                                                                        type="hive" v-slot:trigger><span class="trigger"><i
+                                                                            class="fas fa-microchip fa-fw me-2"></i>Delegate
+                                                                        RC</span></button>
+                                                                </div>
+                                                                <div class="dropdown-divider"></div>
+                                                                <modal-vue
+                                                                    v-if="focus.id && hivestats.content_reward_percent"
+                                                                    func="claim_account" :mypfp="mypfp" token="HP"
+                                                                    :tokenuser="focus" :account="account"
+                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                    type="hive" v-slot:trigger
+                                                                    class="dropdown-menu-item">
+                                                                    <button class="text-nowrap trigger dropdown-item"
+                                                                        slot="trigger"
+                                                                        :disabled="!(parseF(focus.vesting_shares) > 1000000)">Claim
+                                                                        Account Creation Token</button>
+                                                                </modal-vue>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Delegated HIVE Power -->
+                                        <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                            <div
                                                 class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
                                                 <div class="text-center position-relative">
                                                     <div class="ratio ratio-1x1 wallet-token-img">
@@ -1802,7 +1916,15 @@
                                                                         <div class="d-flex ms-auto">
                                                                             <button type="button"
                                                                                 class="ms-1 btn btn-sm btn-secondary">
-                                                                                <i class="fas fa-fw fa-user-edit"></i>
+                                                                                <modal-vue
+                                                                v-if="focus.id && hivestats.content_reward_percent"
+                                                                func="delegate_rc" :mypfp="mypfp" token="RC"
+                                                                :tokenuser="focus" :account="account"
+                                                                :tokenstats="hivestats" 
+                                                                :to_account="delegation.to"
+                                                                :rc-info="rcAccount"
+                                                                @modalsign="sendIt($event)"
+                                                                type="hive" v-slot:trigger><span class="trigger"><i class="fas fa-fw fa-user-edit"></i></span></modal-vue>
                                                                             </button>
                                                                             <button type="button"
                                                                                 class="ms-1 btn btn-sm btn-danger ms-1"

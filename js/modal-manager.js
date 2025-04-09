@@ -47,7 +47,7 @@ export default {
                 :tokenprotocol="tokenprotocol" 
                 :tokenuser="tokenuser" 
                 @modalsign="$emit('modalsign', $event)" />
-            <Hive v-if="(token === 'HIVE' || token === 'HBD' || token === 'HP') && tokenstats?.content_reward_percent" 
+            <Hive v-if="(token === 'HIVE' || token === 'HBD' || token === 'HP' || token === 'RC') && tokenstats?.content_reward_percent" 
                 :func="func" 
                 :account="account"
                 :mypfp="mypfp"

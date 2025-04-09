@@ -2,9 +2,11 @@ export default {
     getInputType(type) {
         switch (type) {
             case 'I': return 'number';
+            case 'N': return 'number';
             case 'amount': return 'number;'
             case 'percent': return 'number'; 
             case 'S': return 'text';
+            case 'A': return 'text';
             case 'O': return 'select';
             default: return 'text';
         }

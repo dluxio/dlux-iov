@@ -7,6 +7,7 @@ export default {
         account: String,
         mypfp: String,
         func: { type: String, default: 'transfer' },
+        rcInfo: { type: Object, default: () => ({}) },
         reqid: String,
         to_account: { type: String, default: '' },
         token: { type: String, default: 'HIVE' },
@@ -56,7 +57,16 @@ export default {
         }">
             <img :src="pfp[key]" alt="Recipient Profile Picture" @error="fallBackIMG($event, form[key])" style="width: 30px; height: 30px; border-radius: 50%;">
         </span>
-        <input
+        <input v-if="field.type == 'N'"
+                            :type="getInputType(field.type)"
+                            :class="['form-control', 'text-white', 'bg-dark', 'border-dark']"
+                            v-model="form[key]"
+                            :placeholder="'Enter ' + field.string"
+                            :step="field.type === 'N' && key === 'max_rc' ? '10000000000' : null"
+                            :min="field.type === 'N' ? '0' : null"
+                            :max="field.type === 'N' && key === 'max_rc' ? getMaxRc() : null"
+                        >
+        <input v-else
             :type="getInputType(field.type)"
             :class="['form-control', 'text-white', 'bg-dark', 'border-dark', field.check === 'AC' ? 'ps-4' : '', field.type === 'amount' ? 'pe-5' : '']"
             :placeholder="'Enter ' + field.string"
@@ -74,6 +84,10 @@ export default {
   </template>
   </div>
 </div>
+<div v-if="func === 'transfer'" class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" v-model="isRecurrent" id="recurrentTransfer">
+            <label class="form-check-label" for="recurrentTransfer">Make this a recurrent transfer</label>
+          </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -88,6 +102,7 @@ export default {
             error: "",
             feat: {},
             form: {},
+            isRecurrent: false,
             key: "active",
             pfp: {},
             tokenprotocol: {
@@ -135,7 +150,7 @@ export default {
                             owner: {
                                 type: "self",
                             },
-                            amount: { 
+                            amount: {
                                 type: "amount",
                                 asset: "HIVE",
                                 string: "Amount",
@@ -155,7 +170,7 @@ export default {
                             owner: {
                                 type: "self",
                             },
-                            amount: { 
+                            amount: {
                                 type: "amount",
                                 asset: "HBD",
                                 string: "Amount",
@@ -164,6 +179,17 @@ export default {
                                 type: "func",
                                 name: "buildID"
                             }
+                        }
+                    },
+                    delegate_rc: {
+                        id: "delegate_rc",
+                        key: "posting",
+                        string: "Delegate RC",
+                        info: "Delegate Resource Credits to another account.",
+                        json: {
+                            from: { type: "self" },
+                            delegatees: { type: "A", string: "To", req: true, check: "AC" },
+                            max_rc: { type: "N", string: "Max RC", req: true }
                         }
                     },
                     delegate_vesting_shares: {
@@ -188,27 +214,15 @@ export default {
                         id: "recurrent_transfer",
                         key: "active",
                         string: "Transfer Recurrently",
-                        info: "",
+                        info: "Set up a recurring transfer to another account.",
                         json: {
-                            from: {
-                                type: "self",
-                            },
-                            to: {
-                                type: "S",
-                                string: "To",
-                                req: true,
-                                check: "AC"
-                            },
-                            amount: { 
-                                type: "amount",
-                                asset: "token",
-                                string: "Amount",
-                            },
-                            memo: {
-                                type: "S",
-                                string: "Memo",
-                                req: false
-                            },
+                            from: { type: "self" },
+                            to: { type: "S", string: "To", req: true, check: "AC" },
+                            amount: { type: "amount", asset: "token", string: "Amount" },
+                            memo: { type: "S", string: "Memo", req: false },
+                            recurrence: { type: "I", string: "Recurrence (hours)", req: true },
+                            executions: { type: "I", string: "Number of executions", req: true },
+                            extensions: { type: "static", value: [] }
                         }
                     },
                     set_withdraw_vesting_route: {
@@ -253,7 +267,7 @@ export default {
                                 req: true,
                                 check: "AC"
                             },
-                            amount: { 
+                            amount: {
                                 type: "amount",
                                 asset: "token",
                                 string: "Amount",
@@ -280,7 +294,7 @@ export default {
                                 req: true,
                                 check: "AC"
                             },
-                            amount: { 
+                            amount: {
                                 type: "amount",
                                 asset: "token",
                                 string: "Amount",
@@ -310,7 +324,7 @@ export default {
                                 req: true,
                                 check: "AC"
                             },
-                            amount: { 
+                            amount: {
                                 type: "amount",
                                 asset: "HIVE",
                                 string: "Amount",
@@ -332,7 +346,7 @@ export default {
                                 req: true,
                                 check: "AC"
                             },
-                            amount: { 
+                            amount: {
                                 type: "amount",
                                 asset: "token",
                                 string: "Amount",
@@ -353,7 +367,7 @@ export default {
                             account: {
                                 type: "self",
                             },
-                            vesting_shares: { 
+                            vesting_shares: {
                                 type: "amount",
                                 asset: "VESTS",
                                 string: "Amount",
@@ -384,6 +398,9 @@ export default {
         },
         parseBalance(balanceStr) {
             return parseFloat(balanceStr.split(' ')[0]);
+        },
+        getMaxRc() {
+            return this.rcInfo && this.rcInfo.available_rc ? this.rcInfo.available_rc : null;
         },
         getRawBalance(field) {
             const asset = this.getAsset(field);
@@ -419,6 +436,9 @@ export default {
         },
         moveTokens() {
             const opid = this.feat.id;
+            if (this.func === 'transfer' && this.isRecurrent) {
+                opid = 'recurrent_transfer';
+            }
             const opParams = {};
             for (const param in this.feat.json) {
                 const field = this.feat.json[param];
@@ -430,6 +450,8 @@ export default {
                     const inputValue = parseFloat(this.form[param]);
                     const rawValue = asset === "VESTS" ? this.hpToVests(inputValue) : inputValue;
                     opParams[param] = rawValue.toFixed(precision) + " " + asset;
+                } else if (field.type === "A") {
+                    opParams[param] = [this.form[param]];
                 } else if (field.type === "percent") {
                     opParams[param] = parseInt(this.form[param], 10);
                 } else if (field.type === "func") {
@@ -442,17 +464,39 @@ export default {
                     opParams[param] = this.form[param];
                 }
             }
-            const op = {
-                type: "raw",
-                op: [[opid, opParams]],
-                key: this.feat.key,
-                id: `${opid} ${this.account}`,
-                msg: this.feat.string,
-                ops: ["getHiveUser"],
-                txid: opid
-            };
-            this.$emit('modalsign', op)
+            if (opid === 'delegate_rc') {
+                const op = {
+                    type: "raw",
+                    op: ["rc", ["delegate_rc", opParams]],
+                    key: this.feat.key,
+                    id: `${opid} ${this.account}`,
+                    msg: this.feat.string,
+                    ops: ["getHiveUser"],
+                    txid: opid
+                };
+                this.$emit('modalsign', op);
+            } else {
+                const op = {
+                    type: "raw",
+                    op: [[opid, opParams]],
+                    key: this.feat.key,
+                    id: `${opid} ${this.account}`,
+                    msg: this.feat.string,
+                    ops: ["getHiveUser"],
+                    txid: opid
+                };
+                this.$emit('modalsign', op);
+            }
 
+        },
+        prefillToField() {
+            if (this.to_account && (this.func === 'delegate_vesting_shares' || this.func === 'transfer' || this.func === 'delegate_rc')) {
+                const toKey = this.func === 'delegate_vesting_shares' ? 'delegatee' : this.func === 'delegate_rc' ? 'delegatees' : 'to';
+                if (this.feat.json[toKey]) {
+                    this.form[toKey] = this.to_account;
+                    this.validateField(toKey);
+                }
+            }
         },
         validateField(key) {
             this.validations[key] = false
@@ -497,22 +541,23 @@ export default {
     mounted() {
         const feature = this.tokenprotocol.features[this.func]
         if (feature) {
-            this.feat = feature;
+            this.feat = feature
             for (const key in feature.json) {
                 if (feature.json[key].type === "B") {
-                    this.form[key] = false; // Boolean fields start as false
+                    this.form[key] = false
                 } else if (feature.json[key].type === "percent") {
-                    this.form[key] = ""; // Empty string for number input
+                    this.form[key] = ""
                 } else if (feature.json[key].type !== "self") {
                     this.form[key] = "";
                 }
                 if (feature.json[key]?.check == "AC") {
                     this.pfp[key] = '/img/no-user.png'
-                    this.validations[key] = false;
+                    this.validations[key] = false
                 }
             }
+            this.prefillToField()
         } else {
-            this.error = "Feature not found";
+            this.error = "Feature not found"
         }
         console.log(this.feat)
     }
