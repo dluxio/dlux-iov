@@ -809,7 +809,7 @@ export default {
                                             type="button"><i class="fas fa-angle-double-down fa-fw me-2"></i>Power Down</button>
                                     </modal-vue>
                                     <modal-vue :test="test" class="dropdown-menu-item"
-                                        v-if="when(saccountapi.powerDowns)"
+                                        v-if="when(saccountapi.power_downs)"
                                         type="confirm" token="LARYNX"
                                         func="powercancel" :account="account"
                                         @modalsign="sendIt($event)"
@@ -824,8 +824,8 @@ export default {
                     </div>
                 </div>
                 <div
-                    :class="{'d-none': !when(saccountapi.powerDowns), 'd-flex': true, 'align-items-center': true}">
-                    <b>A power down is scheduled to happen in {{when(saccountapi.powerDowns)}} ({{when(saccountapi.powerDowns, true)}} installments remaining)</b><small class="ms-2">
+                    :class="{'d-none': !when(saccountapi.power_downs), 'd-flex': true, 'align-items-center': true}">
+                    <b>A power down is scheduled to happen in {{when(saccountapi.power_downs)}} ({{when(saccountapi.powerDowns, true)}} installments remaining)</b><small class="ms-2">
                         <modal-vue type="confirm" token="LARYNX" 
                             func="powercancel" :account="account"
                             @modalsign="sendIt($event)"
@@ -1016,7 +1016,9 @@ export default {
                 granted: {
                     t: 0
                 },
-                powerDowns: {},
+                power_downs: {},
+                spower_downs: {},
+                bpower_downs: {},
                 channels: {
                     na: [{
                         a: 0,
