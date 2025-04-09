@@ -232,7 +232,6 @@ export default {
           fetch(`${this.ipfsServices[i][node].a}/upload-stats`, { signal: controller.signal })
             .then(response => response.json())
             .then(data => {
-              console.log('ipfs Stats', data)
               if (data?.node) {
                 this.providerStats[data.node] = data
               }

@@ -1132,7 +1132,6 @@ export default {
 
                 if (hash.includes('/')) {
                     const parts = hash.split('/');
-                    console.log('Hash parts:', parts);
 
                     const parentGroup = parts[0] === 'wallet' ? '#usertabs' : parts[0] === 'drive' ? '#usertabs' : null;
                     const childGroup = parts[0] === 'wallet' ? '#wallettabs' : parts[0] === 'drive' ? '#drivetabs' : null;
@@ -1141,7 +1140,6 @@ export default {
                     console.log('Parent Tab:', parentTab);
 
                     childTab = childGroup ? document.querySelector(`${childGroup} a[href="#${parts[1]}"]`) : null;
-                    console.log('Child Tab:', childTab);
 
                     if (parentTab) {
                         const parentTabInstance = new bootstrap.Tab(parentTab);
