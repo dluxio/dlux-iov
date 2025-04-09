@@ -1671,8 +1671,7 @@
                                                                     func="withdraw_vesting" :mypfp="mypfp" token="HP"
                                                                     :tokenuser="focus" :account="account"
                                                                     :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                    v-slot:trigger
-                                                                    class="dropdown-menu-item">
+                                                                    v-slot:trigger class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
                                                                         slot="trigger"
                                                                         :disabled="!parseF(focus.vesting_shares)">
@@ -1682,15 +1681,14 @@
                                                                 </modal-vue>
                                                                 <div class="dropdown-menu-item">
                                                                     <button class="dropdown-item"><modal-vue
-                                                                        v-if="focus.id && hivestats.content_reward_percent"
-                                                                        func="delegate_rc" :mypfp="mypfp" token="RC"
-                                                                        :tokenuser="focus" :account="account"
-                                                                        :tokenstats="hivestats"
-                                                                        :rc-info="rcAccount"
-                                                                        @modalsign="sendIt($event)"
-                                                                        type="hive" v-slot:trigger><span class="trigger"><i
-                                                                            class="fas fa-microchip fa-fw me-2"></i>Delegate
-                                                                        RC</span></button>
+                                                                            v-if="focus.id && hivestats.content_reward_percent"
+                                                                            func="delegate_rc" :mypfp="mypfp" token="RC"
+                                                                            :tokenuser="focus" :account="account"
+                                                                            :tokenstats="hivestats" :rc-info="rcAccount"
+                                                                            @modalsign="sendIt($event)" type="hive"
+                                                                            v-slot:trigger><span class="trigger"><i
+                                                                                    class="fas fa-microchip fa-fw me-2"></i>Delegate
+                                                                                RC</span></button>
                                                                 </div>
                                                                 <div class="dropdown-divider"></div>
                                                                 <modal-vue
@@ -1709,6 +1707,32 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                            </div>
+                                            <!-- HIVE Power Down -->
+                                            <div class="alert alert-danger bg-img-none align-items-center mt-2 d-flex"
+                                                role="alert" style="background-color: #ffffff10;">
+                                                <!-- :class="{'d-none': !when(focus.next_vesting_withdrawl), 'd-flex': true, 'align-items-center': true}" -->
+                                                <p class="mb-0 lead ">A Power Down is scheduled to happen in
+                                                    <!--  {{when(saccountapi.spower_downs)}} ({{when(saccountapi.spower_downs,true)}}  -->
+                                                    (installments remaining)
+                                                </p>
+                                                <small class="ms-auto">
+                                                    <div class="d-flex ms-2">
+                                                        <!--  <modal-vue class="dropdown-menu-item"
+                                                            v-if="protocolspk.head_block && saccountapi.head_block"
+                                                            func="powdn" token="poweredUp" :test="test"
+                                                            :tokenuser="saccountapi" :account="account"
+                                                            :tokenprotocol="protocolspk" :mypfp="mypfp"
+                                                            @modalsign="sendIt($event)" v-slot:trigger> -->
+                                                        <button class="btn btn-sm btn-outline-light trigger"
+                                                            type="button">
+                                                            CHANGE</button>
+                                                        </modal-vue>
+                                                        <button class="btn btn-sm btn-outline-danger ms-2" type="button"
+                                                            @click="simpleCJ('spkccT_spk_power_down', 'amount:0', {'broadcast':'tosign'})">
+                                                            STOP</button>
+                                                    </div>
+                                                </small>
                                             </div>
                                         </div>
                                         <!-- Delegated HIVE Power -->
@@ -1828,16 +1852,21 @@
                                                                             <button type="button"
                                                                                 class="ms-1 btn btn-sm btn-secondary">
                                                                                 <modal-vue
-                                                                v-if="focus.id && hivestats.content_reward_percent"
-                                                                func="delegate_vesting_shares" :mypfp="mypfp" token="HP"
-                                                                :tokenuser="focus" :account="account"
-                                                                :type="delegation.delegatee"
-                                                                :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                v-slot:trigger>
-                                                                <span class="trigger"><i class="fas fa-fw fa-user-edit"></i></span></modal-vue>
+                                                                                    v-if="focus.id && hivestats.content_reward_percent"
+                                                                                    func="delegate_vesting_shares"
+                                                                                    :mypfp="mypfp" token="HP"
+                                                                                    :tokenuser="focus"
+                                                                                    :account="account"
+                                                                                    :type="delegation.delegatee"
+                                                                                    :tokenstats="hivestats"
+                                                                                    @modalsign="sendIt($event)"
+                                                                                    v-slot:trigger>
+                                                                                    <span class="trigger"><i
+                                                                                            class="fas fa-fw fa-user-edit"></i></span></modal-vue>
                                                                             </button>
                                                                             <button type="button"
-                                                                                class="ms-1 btn btn-sm btn-danger ms-1" @click="stopHP(account, delegation.delegatee)">
+                                                                                class="ms-1 btn btn-sm btn-danger ms-1"
+                                                                                @click="stopHP(account, delegation.delegatee)">
                                                                                 <i class="fas fa-fw fa-trash-alt"></i>
                                                                             </button>
                                                                         </div>
@@ -1924,13 +1953,17 @@
                                                                             <button type="button"
                                                                                 class="ms-1 btn btn-sm btn-secondary">
                                                                                 <modal-vue
-                                                                v-if="focus.id && hivestats.content_reward_percent"
-                                                                func="delegate_rc" :mypfp="mypfp" token="RC"
-                                                                :tokenuser="focus" :account="account"
-                                                                :tokenstats="hivestats" 
-                                                                :type="delegation.to"
-                                                                :rc-info="rcAccount"
-                                                                @modalsign="sendIt($event)"v-slot:trigger><span class="trigger"><i class="fas fa-fw fa-user-edit"></i></span></modal-vue>
+                                                                                    v-if="focus.id && hivestats.content_reward_percent"
+                                                                                    func="delegate_rc" :mypfp="mypfp"
+                                                                                    token="RC" :tokenuser="focus"
+                                                                                    :account="account"
+                                                                                    :tokenstats="hivestats"
+                                                                                    :type="delegation.to"
+                                                                                    :rc-info="rcAccount"
+                                                                                    @modalsign="sendIt($event)"
+                                                                                    v-slot:trigger><span
+                                                                                        class="trigger"><i
+                                                                                            class="fas fa-fw fa-user-edit"></i></span></modal-vue>
                                                                             </button>
                                                                             <button type="button"
                                                                                 class="ms-1 btn btn-sm btn-danger ms-1"
@@ -2039,6 +2072,32 @@
                                                                         class="fas fa-money-bill-transfer fa-fw me-2"></i>Withdraw</button>
                                                         </span>
                                                         </modal-vue>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- HIVE Withdrawl -->
+                                            <div class="alert alert-danger bg-img-none align-items-center mt-2 d-flex flex-column"
+                                                role="alert" style="background-color: #ffffff10;">
+                                                <!-- :class="{'d-none': !when(saccountapi.spower_downs), 'd-flex': true, 'align-items-center': true}" -->
+                                                <div class="d-flex w-100 align-items-center"><span class="lead">A HIVE Savings withdrawl is scheduled to happen in
+                                                    <!--  {{when(saccountapi.spower_downs)}} ({{when(saccountapi.spower_downs,
+                                                    true)}} --> days</span>
+                                               
+                                                    <a class="ms-auto no-decoration border border-light rounded-pill px-2 py-1" data-bs-toggle="collapse" href="#savingsWithdrawls" role="button" aria-expanded="false" aria-controls="savingsWithdrawls">
+                                                        3 Withdrawls<i class="ms-2 fa-solid fa-search"></i>
+                                                      </a>
+                                                </div>
+                                                <div class="collapse w-100 mt-2" id="savingsWithdrawls">
+                                                    <div class="d-flex w-100 align-items-center border-top border-white-50 py-2">
+                                                        <div class="flex-grow-1">withdrawl route message username etc here</div>
+                                                        <small class="ms-auto">
+                                                            <div class="d-flex ms-2">
+                                                                <button class="btn btn-sm btn-outline-danger ms-2"
+                                                                    type="button"
+                                                                    @click="simpleCJ('spkccT_spk_power_down', 'amount:0', {'broadcast':'tosign'})">
+                                                                    STOP</button>
+                                                            </div>
+                                                        </small>
                                                     </div>
                                                 </div>
                                             </div>
