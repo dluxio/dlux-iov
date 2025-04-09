@@ -167,6 +167,18 @@ export default {
     out = out.replace(/\.?0+$/, "");
     return out + post;
   },
+  stopRC(from, to){
+    var op = {
+      id: "rc"
+    }
+    op.type = 'cj'
+    op.cj = ["delegate_rc",{"from":from,"delegatees":[to],"max_rc":0}]
+    op.msg = "Removing RC delegation to @" + to
+    op.ops = ["fetchDelegationsData"];
+    op.txid = 'rc_del_' + to
+    this.$emit('tosign', op)
+    this.toSign = op
+  },
   simpleCJ(id, params, options){
 
     var op = {
