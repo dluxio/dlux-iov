@@ -1649,6 +1649,7 @@
                                                                 v-if="focus.id && hivestats.content_reward_percent"
                                                                 func="delegate_vesting_shares" :mypfp="mypfp" token="HP"
                                                                 :tokenuser="focus" :account="account"
+                                                                type="HIVE"
                                                                 :tokenstats="hivestats" @modalsign="sendIt($event)"
                                                                 v-slot:trigger class="">
                                                                 <span class="text-nowrap trigger" slot="trigger"
@@ -1670,7 +1671,9 @@
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="withdraw_vesting" :mypfp="mypfp" token="HP"
                                                                     :tokenuser="focus" :account="account"
-                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                    :tokenstats="hivestats" 
+                                                                    type="HIVE"
+                                                                    @modalsign="sendIt($event)"
                                                                     v-slot:trigger
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
@@ -1686,7 +1689,7 @@
                                                                         func="delegate_rc" :mypfp="mypfp" token="RC"
                                                                         :tokenuser="focus" :account="account"
                                                                         :tokenstats="hivestats"
-                                                                        :rc-info="rcAccount"
+                                                                        type="hive"
                                                                         @modalsign="sendIt($event)"
                                                                         type="hive" v-slot:trigger><span class="trigger"><i
                                                                             class="fas fa-microchip fa-fw me-2"></i>Delegate

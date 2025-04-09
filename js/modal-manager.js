@@ -32,6 +32,7 @@ export default {
             modalId: `modal-${Math.random().toString(36).substr(2, 9)}`,
             showModalListener: null,
             modalInstance: null,
+            mutablefunc: "",
         };
     },
     template: `<div>
@@ -48,7 +49,7 @@ export default {
                 :tokenuser="tokenuser" 
                 @modalsign="$emit('modalsign', $event)" />
             <Hive v-if="(token === 'HIVE' || token === 'HBD' || token === 'HP' || token === 'RC') && tokenstats?.content_reward_percent" 
-                :func="func" 
+                :func="mutablefunc || func" 
                 :account="account"
                 :mypfp="mypfp"
                 :token="token" 
@@ -56,6 +57,7 @@ export default {
                 :to_account="type"
                 :reqid="type"
                 :tokenstats="tokenstats"
+                @open-modal="openModal($event)"
                 @modalsign="$emit('modalsign', $event)" />
             <Contract v-if="type === 'contract' && tokenuser.head_block" 
                 :account="account"
@@ -78,6 +80,14 @@ export default {
         modalsign(op) {
             this.$emit("modalsign", op)
         },
+        openModal(data){
+            console.log(data, 1234)
+            if(data){
+                this.mutablefunc = data
+            } else {
+                this.mutablefunc = this.func
+            }
+          },
     },
     emits: ["modalsign"],
     computed: {

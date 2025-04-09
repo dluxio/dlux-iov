@@ -229,7 +229,6 @@ export default {
         for (var node in this.ipfsServices[i]) {
           const controller = new AbortController()
           const timeoutId = setTimeout(() => controller.abort(), 1000)
-          console.log(`${this.ipfsServices[i][node].a}/upload-stats`)
           fetch(`${this.ipfsServices[i][node].a}/upload-stats`, { signal: controller.signal })
             .then(response => response.json())
             .then(data => {

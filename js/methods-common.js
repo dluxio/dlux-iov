@@ -86,7 +86,6 @@ export default {
     };
   },
   fallBackIMG(event, string) {
-    console.log(event)
     event.target.src = 'https://images.hive.blog/u/' + string + '/avatar'
   },
   fancyBytes(bytes) {
@@ -111,6 +110,33 @@ export default {
       for (var c = /(\d+)(\d{3})/; c.test(i);)
         i = i.replace(c, "$1" + e + "$2");
     return (u ? "-" : "") + i + o;
+  },
+  hiveApiCall(method, params, api) {
+    const body = JSON.stringify({
+      jsonrpc: '2.0',
+      method: method,
+      params: params,
+      id: 1
+    });
+    return fetch(api ? api : this.hapi, {
+      body: body,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: 'POST'
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          console.error(`Error in ${method}:`, data.error);
+          throw new Error(data.error.message);
+        }
+        return data.result; // Resolve with the result
+      })
+      .catch(error => {
+        console.error(`Error in ${method}:`, error);
+        throw error; // Propagate the error
+      });
   },
   isoToUnix(isoString) {
     return Math.floor(new Date(isoString).getTime() / 1000);

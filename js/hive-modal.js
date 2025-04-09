@@ -84,18 +84,34 @@ export default {
   </template>
   </div>
 </div>
+<div v-if="func === 'withdraw_vesting'" class="mt-3">
+        <div v-if="withdrawalRoutes.length > 0">
+            <h6>Withdrawal Routes:</h6>
+            <ul>
+                <li v-for="route in withdrawalRoutes" :key="route.id">
+                    To: {{ route.to_account }}, Percent: {{ route.percent / 100 }}%, Auto Vest: {{ route.auto_vest ? 'Yes' : 'No' }}
+                </li>
+            </ul>
+        </div>
+        <div v-else>
+            <p>No withdrawal routes set. Setting a route allows you to automatically transfer withdrawn funds to another account.</p>
+        </div>
+        <button class="btn btn-secondary" type="button" @click="openModal('set_withdraw_vesting_route')">
+        Set Withdrawal Route</button>
+    </div>
 <div v-if="func === 'transfer'" class="form-check mb-3">
             <input class="form-check-input" type="checkbox" v-model="isRecurrent" id="recurrentTransfer">
             <label class="form-check-label" for="recurrentTransfer">Make this a recurrent transfer</label>
           </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="openModal('')">Cancel</button>
             <button :disabled="!isFormValid" type="submit" class="btn btn-primary" data-bs-dismiss="modal">{{ feat.string }}</button>
           </div>
         </form>
       </div>
     </div>`,
+    emits: ["open-modal", "modalsign"],
     data() {
         return {
             debouncedValidateField: null,
@@ -377,7 +393,8 @@ export default {
                 },
             },
             valid: false,
-            validations: {}
+            validations: {},
+            withdrawalRoutes: [],
         };
     },
     methods: {
@@ -385,6 +402,16 @@ export default {
         ...MModals,
         buildID() {
             return Math.floor(Math.random() * 100000000);
+        },
+        async fetchWithdrawalRoutes() {
+            console.log('outgoing', this.account)
+            try {
+                const routes = await this.hiveApiCall('condenser_api.get_withdraw_routes', [this.account, 'outgoing'], 'https://api.hive.blog')
+                this.withdrawalRoutes = routes
+            } catch (error) {
+                console.error('Error fetching withdrawal routes:', error);
+                this.withdrawalRoutes = []
+            }
         },
         getIcon(key) {
             return key === 'to' || key === 'delegatee' || key === 'to_account' ? 'fa-at' : '';
@@ -475,6 +502,7 @@ export default {
                     txid: opid
                 };
                 this.$emit('modalsign', op);
+                this.$emit('open-modal', "")
             } else {
                 const op = {
                     type: "raw",
@@ -486,8 +514,13 @@ export default {
                     txid: opid
                 };
                 this.$emit('modalsign', op);
+                this.$emit('open-modal', "")
             }
 
+        },
+        openModal(func) {
+            const pass = func
+            this.$emit('open-modal', pass)
         },
         prefillToField() {
             if (this.to_account && (this.func === 'delegate_vesting_shares' || this.func === 'transfer' || this.func === 'delegate_rc')) {
@@ -538,6 +571,33 @@ export default {
             this.validateField(key);
         }, 300);
     },
+    watch: {
+        func(newFunc) {
+            const feature = this.tokenprotocol.features[this.func]
+            if (feature) {
+                this.feat = feature
+                for (const key in feature.json) {
+                    if (feature.json[key].type === "B") {
+                        this.form[key] = false
+                    } else if (feature.json[key].type === "percent") {
+                        this.form[key] = ""
+                    } else if (feature.json[key].type !== "self") {
+                        this.form[key] = "";
+                    }
+                    if (feature.json[key]?.check == "AC") {
+                        this.pfp[key] = '/img/no-user.png'
+                        this.validations[key] = false
+                    }
+                }
+                this.prefillToField()
+            } else {
+                this.error = "Feature not found"
+            }
+            if (this.func === 'withdraw_vesting') {
+                this.fetchWithdrawalRoutes();
+            }
+        }
+    },
     mounted() {
         const feature = this.tokenprotocol.features[this.func]
         if (feature) {
@@ -559,6 +619,8 @@ export default {
         } else {
             this.error = "Feature not found"
         }
-        console.log(this.feat)
+        if (this.func === 'withdraw_vesting') {
+            this.fetchWithdrawalRoutes();
+        }
     }
 };
