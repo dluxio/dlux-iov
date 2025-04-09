@@ -775,7 +775,7 @@ export default {
                                         token="poweredUp"
                                         :mypfp="mypfp" 
                                         @modalsign="sendIt($event)" 
-                                        v-slot:trigger>
+                                        v-slot:trigger
                                         class="text-nowrap p-2 trigger">
                                         <span><i class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
                                 </modal-vue>

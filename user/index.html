@@ -1527,17 +1527,12 @@
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="DLUX Actions">
                                                         <button type="button" class="btn btn-light">
-                                                            <modal-vue 
+                                                            <modal-vue
                                                                 v-if="focus.id && hivestats.content_reward_percent"
-                                                                func="transfer" 
-                                                                :mypfp="mypfp"
-                                                                token="HIVE"
-                                                                :tokenuser="focus"
-                                                                :account="account"
-                                                                :tokenstats="hivestats"
-                                                                @modalsign="sendIt($event)"
-                                                                type="hive"
-                                                                v-slot:trigger>
+                                                                func="transfer" :mypfp="mypfp" token="HIVE"
+                                                                :tokenuser="focus" :account="account"
+                                                                :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                type="hive" v-slot:trigger>
                                                                 <span class="text-nowrap trigger" slot="trigger"><i
                                                                         class="fas fa-paper-plane me-2 "></i>Send</span>
                                                             </modal-vue></button>
@@ -1550,57 +1545,49 @@
                                                                 aria-expanded="false"></button>
                                                             <div class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                 aria-labelledby="btnGroupDrop1">
-                                                                <modal-vue 
-                                                                v-if="focus.id && hivestats.content_reward_percent"
-                                                                func="transfer_to_vesting" 
-                                                                :mypfp="mypfp"
-                                                                token="HIVE"
-                                                                :tokenuser="focus"
-                                                                :account="account"
-                                                                :tokenstats="hivestats"
-                                                                @modalsign="sendIt($event)"
-                                                                type="hive"
-                                                                v-slot:trigger
-                                                                class="dropdown-menu-item">
-                                                                    <span class="text-nowrap trigger dropdown-item" slot="trigger" :disabled="!parseF(focus.balance)"><i
+                                                                <modal-vue
+                                                                    v-if="focus.id && hivestats.content_reward_percent"
+                                                                    func="transfer_to_vesting" :mypfp="mypfp"
+                                                                    token="HIVE" :tokenuser="focus" :account="account"
+                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                    type="hive" v-slot:trigger
+                                                                    class="dropdown-menu-item">
+                                                                    <button class="text-nowrap trigger dropdown-item"
+                                                                        slot="trigger"
+                                                                        :disabled="!parseF(focus.balance)"><i
                                                                             class="fas fa-angle-double-up fa-fw me-2"></i>Power
-                                                                        Up</span>
+                                                                        Up</button>
                                                                 </modal-vue>
-                                                                <modal-vue 
-                                                                v-if="focus.id && hivestats.content_reward_percent"
-                                                                func="collateralized_convert" 
-                                                                :mypfp="mypfp"
-                                                                token="HIVE"
-                                                                :tokenuser="focus"
-                                                                :account="account"
-                                                                :tokenstats="hivestats"
-                                                                @modalsign="sendIt($event)"
-                                                                type="hive"
-                                                                v-slot:trigger
-                                                                class="dropdown-menu-item">
-                                                                    <span class="text-nowrap trigger dropdown-item" slot="trigger" :disabled="!parseF(focus.balance)"><i
+                                                                <modal-vue
+                                                                    v-if="focus.id && hivestats.content_reward_percent"
+                                                                    func="collateralized_convert" :mypfp="mypfp"
+                                                                    token="HIVE" :tokenuser="focus" :account="account"
+                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                    type="hive" v-slot:trigger
+                                                                    class="dropdown-menu-item">
+                                                                    <button class="text-nowrap trigger dropdown-item"
+                                                                        slot="trigger"
+                                                                        :disabled="!parseF(focus.balance)"><i
                                                                             class="fas fa-random fa-fw me-2"></i>Convert
-                                                                        to HBD</span>
+                                                                        to HBD</button>
                                                                 </modal-vue>
-                                                                <modal-vue 
-                                                                v-if="focus.id && hivestats.content_reward_percent"
-                                                                func="transfer_to_savings" 
-                                                                :mypfp="mypfp"
-                                                                token="HIVE"
-                                                                :tokenuser="focus"
-                                                                :account="account"
-                                                                :tokenstats="hivestats"
-                                                                @modalsign="sendIt($event)"
-                                                                type="hive"
-                                                                v-slot:trigger
-                                                                class="dropdown-menu-item">
-                                                                    <span class="text-nowrap trigger dropdown-item" slot="trigger" :disabled="!parseF(focus.balance)"><i
+                                                                <modal-vue
+                                                                    v-if="focus.id && hivestats.content_reward_percent"
+                                                                    func="transfer_to_savings" :mypfp="mypfp"
+                                                                    token="HIVE" :tokenuser="focus" :account="account"
+                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                    type="hive" v-slot:trigger
+                                                                    class="dropdown-menu-item">
+                                                                    <button class="text-nowrap trigger dropdown-item"
+                                                                        slot="trigger"
+                                                                        :disabled="!parseF(focus.balance)"><i
                                                                             class="fas fa-lock fa-fw me-2"></i>Transfer
-                                                                        to HIVE Savings</span>
-                                                                    </modal-vue>
+                                                                        to HIVE Savings</button>
+                                                                </modal-vue>
                                                                 <div class="dropdown-divider"></div>
                                                                 <div class="dropdown-menu-item">
-                                                                    <a class="dropdown-item" href="https://hivehub.dev/market/swap"><i
+                                                                    <a class="dropdown-item"
+                                                                        href="https://hivehub.dev/market/swap"><i
                                                                             class="fas fa-store fa-fw me-2"></i>Market</a>
                                                                 </div>
                                                             </div>
@@ -1656,21 +1643,17 @@
                                                     </h5>
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="DLUX Actions">
-                                                        <button type="button" class="btn btn-light text-nowrap"  :disabled="!parseF(focus.vesting_shares)">
-                                                            <modal-vue 
+                                                        <button type="button" class="btn btn-light text-nowrap">
+                                                            <modal-vue
                                                                 v-if="focus.id && hivestats.content_reward_percent"
-                                                                func="withdraw_vesting" 
-                                                                :mypfp="mypfp"
-                                                                token="HP"
-                                                                :tokenuser="focus"
-                                                                :account="account"
-                                                                :tokenstats="hivestats"
-                                                                @modalsign="sendIt($event)"
-                                                                type="hive"
-                                                                v-slot:trigger>
-                                                                <span class="text-nowrap trigger" slot="trigger">
-                                                                    <i
-                                                                    class="fas fa-angle-double-down me-2"></i>Power Down</span>
+                                                                func="delegate_vesting_shares" :mypfp="mypfp" token="HP"
+                                                                :tokenuser="focus" :account="account"
+                                                                :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                type="hive" v-slot:trigger class="">
+                                                                <span class="text-nowrap trigger" slot="trigger"
+                                                                    :disabled="!parseF(focus.vesting_shares)"><i
+                                                                        class="fas fa-user-friends fa-fw me-2"></i>Delegate
+                                                                    HP</span>
                                                             </modal-vue>
                                                         </button>
                                                         <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
@@ -1682,42 +1665,37 @@
                                                                 aria-expanded="false"></button>
                                                             <div class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                 aria-labelledby="btnGroupDrop1">
-                                                                <modal-vue 
-                                                                v-if="focus.id && hivestats.content_reward_percent"
-                                                                func="delegate_vesting_shares" 
-                                                                :mypfp="mypfp"
-                                                                token="HP"
-                                                                :tokenuser="focus"
-                                                                :account="account"
-                                                                :tokenstats="hivestats"
-                                                                @modalsign="sendIt($event)"
-                                                                type="hive"
-                                                                v-slot:trigger
-                                                                class="dropdown-menu-item">
-                                                                    <span class="text-nowrap trigger dropdown-item" slot="trigger" :disabled="!parseF(focus.vesting_shares)"><i
-                                                                            class="fas fa-user-friends fa-fw me-2"></i>Delegate
-                                                                        HP</span>
-                                                                    </modal-vue>
+                                                                <modal-vue
+                                                                    v-if="focus.id && hivestats.content_reward_percent"
+                                                                    func="withdraw_vesting" :mypfp="mypfp" token="HP"
+                                                                    :tokenuser="focus" :account="account"
+                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                    type="hive" v-slot:trigger
+                                                                    class="dropdown-menu-item">
+                                                                    <button class="text-nowrap trigger dropdown-item"
+                                                                        slot="trigger"
+                                                                        :disabled="!parseF(focus.vesting_shares)">
+                                                                        <i
+                                                                            class="fas fa-angle-double-down fa-fw me-2"></i>Power
+                                                                        Down</button>
+                                                                </modal-vue>
                                                                 <div class="dropdown-menu-item">
-                                                                    <a class="dropdown-item disabled" href="#"><i
+                                                                    <button class="dropdown-item disabled"><i
                                                                             class="fas fa-microchip fa-fw me-2"></i>Delegate
-                                                                        RC</a>
+                                                                        RC</button>
                                                                 </div>
                                                                 <div class="dropdown-divider"></div>
-                                                                <modal-vue 
+                                                                <modal-vue
                                                                     v-if="focus.id && hivestats.content_reward_percent"
-                                                                    func="claim_account" 
-                                                                    :mypfp="mypfp"
-                                                                    token="HP"
-                                                                    :tokenuser="focus"
-                                                                    :account="account"
-                                                                    :tokenstats="hivestats"
-                                                                    @modalsign="sendIt($event)"
-                                                                    type="hive"
-                                                                    v-slot:trigger
+                                                                    func="claim_account" :mypfp="mypfp" token="HP"
+                                                                    :tokenuser="focus" :account="account"
+                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                    type="hive" v-slot:trigger
                                                                     class="dropdown-menu-item">
-                                                                    <span class="text-nowrap trigger dropdown-item" slot="trigger" :disabled="parseF(focus.vesting_shares) > 10000">Claim
-                                                                        Account Creation Token</span>
+                                                                    <button class="text-nowrap trigger dropdown-item"
+                                                                        slot="trigger"
+                                                                        :disabled="parseF(focus.vesting_shares) > 10000">Claim
+                                                                        Account Creation Token</button>
                                                                 </modal-vue>
                                                             </div>
                                                         </div>
@@ -1887,22 +1865,18 @@
                                                     </h5>
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="HIVE Actions">
-                                                        <button type="button" class="btn btn-light text-nowrap" :disabled="!parseF(focus.savings_balance)">
-                                                            <modal-vue 
+                                                        <button type="button" class="btn btn-light text-nowrap"
+                                                            :disabled="!parseF(focus.savings_balance)">
+                                                            <modal-vue
                                                                 v-if="focus.id && hivestats.content_reward_percent"
-                                                                func="transfer_from_savings" 
-                                                                :mypfp="mypfp"
-                                                                token="HIVE"
-                                                                :tokenuser="focus"
-                                                                :account="account"
-                                                                :tokenstats="hivestats"
-                                                                @modalsign="sendIt($event)"
-                                                                type="hive"
-                                                                v-slot:trigger>
+                                                                func="transfer_from_savings" :mypfp="mypfp" token="HIVE"
+                                                                :tokenuser="focus" :account="account"
+                                                                :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                type="hive" v-slot:trigger>
                                                                 <span class="text-nowrap trigger" slot="trigger"><i
-                                                                class="fas fa-money-bill-transfer fa-fw me-2"></i>Withdraw</button>
-                                                                </span>
-                                                            </modal-vue>
+                                                                        class="fas fa-money-bill-transfer fa-fw me-2"></i>Withdraw</button>
+                                                        </span>
+                                                        </modal-vue>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1947,17 +1921,12 @@
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="DLUX Actions">
                                                         <button type="button" class="btn btn-light">
-                                                            <modal-vue 
+                                                            <modal-vue
                                                                 v-if="focus.id && hivestats.content_reward_percent"
-                                                                func="transfer" 
-                                                                :mypfp="mypfp"
-                                                                token="HBD"
-                                                                :tokenuser="focus"
-                                                                :account="account"
-                                                                :tokenstats="hivestats"
-                                                                @modalsign="sendIt($event)"
-                                                                type="hive"
-                                                                v-slot:trigger>
+                                                                func="transfer" :mypfp="mypfp" token="HBD"
+                                                                :tokenuser="focus" :account="account"
+                                                                :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                type="hive" v-slot:trigger>
                                                                 <span class="text-nowrap" slot="trigger"><i
                                                                         class="fas fa-paper-plane me-2 trigger"></i>Send</span>
                                                             </modal-vue></button>
@@ -1968,47 +1937,42 @@
                                                                 class="btn btn-light dropdown-toggle"
                                                                 data-bs-toggle="dropdown" aria-haspopup="true"
                                                                 aria-expanded="false"></button>
-                                                            <div class="dropdown-menu bg-black dropdown-menu-end text-white"
+                                                            <ul class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                 aria-labelledby="btnGroupDrop1">
-                                                                <modal-vue 
-                                                                v-if="focus.id && hivestats.content_reward_percent"
-                                                                func="convert" 
-                                                                :mypfp="mypfp"
-                                                                token="HBD"
-                                                                :tokenuser="focus"
-                                                                :account="account"
-                                                                :tokenstats="hivestats"
-                                                                @modalsign="sendIt($event)"
-                                                                type="hive"
-                                                                v-slot:trigger
-                                                                class="dropdown-menu-item">
-                                                                    <span class="text-nowrap trigger dropdown-item" slot="trigger" :disabled="!parseF(focus.hbd_balance)"><i
+                                                                <modal-vue
+                                                                    v-if="focus.id && hivestats.content_reward_percent"
+                                                                    func="convert" :mypfp="mypfp" token="HBD"
+                                                                    :tokenuser="focus" :account="account"
+                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                    type="hive" v-slot:trigger
+                                                                    class="dropdown-menu-item">
+                                                                    <button class="text-nowrap trigger dropdown-item"
+                                                                        slot="trigger"
+                                                                        :disabled="!parseF(focus.hbd_balance)"><i
                                                                             class="fas fa-random fa-fw me-2"></i>Convert
                                                                         to
-                                                                        HIVE</span>
-                                                                    </modal-vue>
-                                                                    <modal-vue 
+                                                                        HIVE</button>
+                                                                </modal-vue>
+                                                                <modal-vue
                                                                     v-if="focus.id && hivestats.content_reward_percent"
-                                                                    func="transfer_to_savings" 
-                                                                    :mypfp="mypfp"
-                                                                    token="HBD"
-                                                                    :tokenuser="focus"
-                                                                    :account="account"
-                                                                    :tokenstats="hivestats"
-                                                                    @modalsign="sendIt($event)"
-                                                                    type="hive"
-                                                                    v-slot:trigger
+                                                                    func="transfer_to_savings" :mypfp="mypfp"
+                                                                    token="HBD" :tokenuser="focus" :account="account"
+                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                    type="hive" v-slot:trigger
                                                                     class="dropdown-menu-item">
-                                                                        <span class="text-nowrap trigger dropdown-item" slot="trigger" :disabled="!parseF(focus.hbd_balance)"><i
+                                                                    <button class="text-nowrap trigger dropdown-item"
+                                                                        slot="trigger"
+                                                                        :disabled="!parseF(focus.hbd_balance)"><i
                                                                             class="fas fa-lock fa-fw me-2"></i>
-                                                                        Transfer to HBD Savings</span>
-                                                                        </modal-vue>
+                                                                        Transfer to HBD Savings</button>
+                                                                </modal-vue>
                                                                 <div class="dropdown-divider"></div>
                                                                 <div class="dropdown-menu-item">
-                                                                    <a class="dropdown-item " href="https://hivehub.dev/market/swap"><i
+                                                                    <a class="dropdown-item "
+                                                                        href="https://hivehub.dev/market/swap"><i
                                                                             class="fas fa-store fa-fw me-2"></i>Market</a>
                                                                 </div>
-                                                            </div>
+                                                            </ul>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -2061,20 +2025,16 @@
                                                     </h5>
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="HIVE Actions">
-                                                        <button type="button" class="btn btn-light text-nowrap" :disabled="!parseF(focus.savings_hbd_balance)" >
-                                                            <modal-vue 
+                                                        <button type="button" class="btn btn-light text-nowrap"
+                                                            :disabled="!parseF(focus.savings_hbd_balance)">
+                                                            <modal-vue
                                                                 v-if="focus.id && hivestats.content_reward_percent"
-                                                                func="transfer" 
-                                                                :mypfp="mypfp"
-                                                                token="HBD"
-                                                                :tokenuser="focus"
-                                                                :account="account"
-                                                                :tokenstats="hivestats"
-                                                                @modalsign="sendIt($event)"
-                                                                type="hive"
-                                                                v-slot:trigger>
+                                                                func="transfer" :mypfp="mypfp" token="HBD"
+                                                                :tokenuser="focus" :account="account"
+                                                                :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                type="hive" v-slot:trigger>
                                                                 <span class="text-nowrap" slot="trigger"><i
-                                                                class="fas fa-money-bill-transfer fa-fw me-2"></i>Withdraw</span></modal-vue></button>
+                                                                        class="fas fa-money-bill-transfer fa-fw me-2"></i>Withdraw</span></modal-vue></button>
 
                                                     </div>
                                                 </div>
@@ -2125,12 +2085,13 @@
                                                             <i class="fa-solid fa-lock"></i>
                                                         </span>
                                                     </h5>
-                                                    <div class="btn-group"
-                                                        v-if="me && hbdclaim[focus.name]?.canClaimInterest" role="group"
+                                                    <div class="btn-group" v-show="me" role="group"
                                                         aria-label="HIVE Actions">
-                                                        <button type="button" class="btn btn-light text-nowrap" disabled
-                                                            title="Coming soon!" style="pointer-events: none;"><i
-                                                                class="fas fa-plus-circle fa-fw me-2"></i>Claim</button>
+                                                        <button type="button" class="btn btn-light text-nowrap"
+                                                            :disabled="!hbdclaim[focus.name]?.canClaimInterest"
+                                                            title="Claim HBD interest"><i
+                                                                class="fas fa-plus-circle fa-fw me-2"></i>Claim
+                                                        </button>
 
                                                     </div>
                                                 </div>
