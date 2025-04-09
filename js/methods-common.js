@@ -179,6 +179,28 @@ export default {
     this.$emit('tosign', op)
     this.toSign = op
   },
+  stopHP(from, to){
+    var op = {
+      type: "raw",
+      op: [
+        [
+          "delegate_vesting_shares",
+          {
+            "delegator": from,
+            "delegatee": to,
+            "vesting_shares": "0.000000 VESTS"
+          }
+        ]
+      ],
+      key: "active",
+      id: `Remove delegation to ${to}`,
+      msg: `Remove delegation to ${to}`,
+      ops: ["fetchDelegationsData"],
+      txid: opid
+  };
+    this.$emit('tosign', op)
+    this.toSign = op
+  },
   simpleCJ(id, params, options){
 
     var op = {

@@ -1650,7 +1650,7 @@
                                                                 func="delegate_vesting_shares" :mypfp="mypfp" token="HP"
                                                                 :tokenuser="focus" :account="account"
                                                                 :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                type="hive" v-slot:trigger class="">
+                                                                v-slot:trigger class="">
                                                                 <span class="text-nowrap trigger" slot="trigger"
                                                                     :disabled="!parseF(focus.vesting_shares)"><i
                                                                         class="fas fa-user-friends fa-fw me-2"></i>Delegate
@@ -1671,7 +1671,7 @@
                                                                     func="withdraw_vesting" :mypfp="mypfp" token="HP"
                                                                     :tokenuser="focus" :account="account"
                                                                     :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                    type="hive" v-slot:trigger
+                                                                    v-slot:trigger
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
                                                                         slot="trigger"
@@ -1827,10 +1827,17 @@
                                                                         <div class="d-flex ms-auto">
                                                                             <button type="button"
                                                                                 class="ms-1 btn btn-sm btn-secondary">
-                                                                                <i class="fas fa-fw fa-user-edit"></i>
+                                                                                <modal-vue
+                                                                v-if="focus.id && hivestats.content_reward_percent"
+                                                                func="delegate_vesting_shares" :mypfp="mypfp" token="HP"
+                                                                :tokenuser="focus" :account="account"
+                                                                :type="delegation.delegatee"
+                                                                :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                v-slot:trigger>
+                                                                <span class="trigger"><i class="fas fa-fw fa-user-edit"></i></span></modal-vue>
                                                                             </button>
                                                                             <button type="button"
-                                                                                class="ms-1 btn btn-sm btn-danger ms-1">
+                                                                                class="ms-1 btn btn-sm btn-danger ms-1" @click="stopHP(account, delegation.delegatee)">
                                                                                 <i class="fas fa-fw fa-trash-alt"></i>
                                                                             </button>
                                                                         </div>
@@ -1921,10 +1928,9 @@
                                                                 func="delegate_rc" :mypfp="mypfp" token="RC"
                                                                 :tokenuser="focus" :account="account"
                                                                 :tokenstats="hivestats" 
-                                                                :to_account="delegation.to"
+                                                                :type="delegation.to"
                                                                 :rc-info="rcAccount"
-                                                                @modalsign="sendIt($event)"
-                                                                type="hive" v-slot:trigger><span class="trigger"><i class="fas fa-fw fa-user-edit"></i></span></modal-vue>
+                                                                @modalsign="sendIt($event)"v-slot:trigger><span class="trigger"><i class="fas fa-fw fa-user-edit"></i></span></modal-vue>
                                                                             </button>
                                                                             <button type="button"
                                                                                 class="ms-1 btn btn-sm btn-danger ms-1"
