@@ -167,6 +167,23 @@ export default {
     out = out.replace(/\.?0+$/, "");
     return out + post;
   },
+  simpleCJ(id, params, options){
+
+    var op = {
+      id
+    }
+    op.type = options.key === "posting" ? 'cj' : 'cja';
+    op.cj = {}
+    const pairs = params.split(',')
+    for (var i = 0; i < pairs.length; i++) {
+      op.cj[pairs[i].split(':')[0]] = pairs[i].split(':')[1]
+    }
+    op.msg = options.msg
+    op.ops = options.ops || [];
+    op.api = options.api || "";
+    op.txid = id + '_' + Date.now();
+    this.$emit(options.broadcast ? options.broadcast : 'modalsign', op)
+  },
   toFixed(n, digits) {
     return parseFloat(n).toFixed(digits)
   },

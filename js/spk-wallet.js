@@ -303,8 +303,8 @@ export default {
                                         type="button">
                                         CHANGE</button>
                                 </modal-vue>
-                                <button class="btn btn-sm btn-outline-danger ms-2 trigger"
-                                        type="button">
+                                <button class="btn btn-sm btn-outline-danger ms-2"
+                                        type="button" @click="simpleCJ('spkccT_spk_power_down', 'amount:0', {'broadcast':'tosign'})">
                                         STOP</button>
                         </div>
                     </small>
@@ -598,8 +598,8 @@ export default {
                                         type="button">
                                         CHANGE</button>
                                 </modal-vue>
-                                <button class="btn btn-sm btn-outline-danger ms-2 trigger"
-                                        type="button">
+                                <button class="btn btn-sm btn-outline-danger ms-2"
+                                        type="button" @click="simpleCJ('spkccT_broca_power_down', 'amount:0', {'broadcast':'tosign'})">
                                         STOP</button>
                         </div>
                     </small>
@@ -888,8 +888,8 @@ export default {
                                         type="button">
                                         CHANGE</button>
                                 </modal-vue>
-                                <button class="btn btn-sm btn-outline-danger ms-2 trigger"
-                                        type="button">
+                                <button class="btn btn-sm btn-outline-danger ms-2"
+                                        type="button" @click="simpleCJ('spkccT_power_down', 'amount:0', {'broadcast':'tosign'})">
                                         STOP</button>
                         </div>
                     </small>
