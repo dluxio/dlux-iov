@@ -84,6 +84,14 @@ createApp({
   },
   data() {
     return {
+      rcAccount: null,
+      hpDelegationsOut: [],
+      hpDelegationsIn: [],
+      rcDelegationsOut: [],
+      rcDelegationsIn: [],
+      delegationsFetched: false,
+      isLoading: false,
+      error: null,
       fileRequests: {},
       protocol: {},
       videosrc: null,
@@ -291,12 +299,12 @@ PORT=3000
         const clients = ENV.clients
           ? ENV.clients.split(" ")
           : [
-              "https://api.deathwing.me/",
               "https://hive-api.dlux.io/",
+              "https://api.deathwing.me/",
+              "https://api.hive.blog/",
               "https://rpc.ecency.com/",
               "https://hived.emre.sh/",
               "https://rpc.ausbit.dev/",
-              "https://hive-api.dlux.io/",
             ];
         
         //!!!!!!! -- THESE ARE COMMUNITY CONSTANTS -- !!!!!!!!!//
@@ -1652,6 +1660,33 @@ PORT=3000
         }
       }
     },
+    hiveApiCall(method, params) {
+      const body = JSON.stringify({
+        jsonrpc: '2.0',
+        method: method,
+        params: params,
+        id: 1
+      });
+      return fetch(this.hapi, {
+        body: body,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: 'POST'
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            console.error(`Error in ${method}:`, data.error);
+            throw new Error(data.error.message);
+          }
+          return data.result; // Resolve with the result
+        })
+        .catch(error => {
+          console.error(`Error in ${method}:`, error);
+          throw error; // Propagate the error
+        });
+    },
     dragFile(e) {
       for (var i = 0; i < e.dataTransfer.files.length; i++) {
         var reader = new FileReader();
@@ -2084,7 +2119,7 @@ PORT=3000
       this.validateHeaders(this.account + this.newAccount.name).then(res => {
         this.newAccount.password = res
         this.newAccount.msg = 'Password Generated'
-        fetch("https://hive-api.dlux.io", {
+        fetch(this.hapi, {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_chain_properties", "params":[], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -3184,7 +3219,7 @@ function buyNFT(setname, uid, price, type, callback){
     },
     getReplies(a, p, c) {
       return new Promise((resolve, reject) => {
-        fetch('https://hive-api.dlux.io', {
+        fetch('https://api.hive.blog', {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content_replies", "params":["${a}","${p}"], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -3241,7 +3276,7 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     accountRelations(name) {
-      fetch("https://hive-api.dlux.io", {
+      fetch(this.hapi, {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"bridge.get_relationship_between_accounts\", \"params\":[\"${this.account}\",\"${name}\"], \"id\":5}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -3259,7 +3294,7 @@ function buyNFT(setname, uid, price, type, callback){
     },
     checkAccount(name, key) {
       console.log('Checking:', name)
-      fetch("https://hive-api.dlux.io", {
+      fetch(this.hapi, {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${key == 'newAccountDeets' ? name : this[name]}\"]], \"id\":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -3492,7 +3527,7 @@ function buyNFT(setname, uid, price, type, callback){
         !this.postSelect[this.postSelect.entry].p
       ) {
         this.postSelect[this.postSelect.entry].p = true;
-        fetch("https://hive-api.dlux.io", {
+        fetch(this.hapi, {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_blog_entries", "params":["${this.pageAccount
             }",${this.postSelect[this.postSelect.entry].o},${this.postSelect[this.postSelect.entry].a
             }], "id":1}`,
@@ -3559,7 +3594,7 @@ function buyNFT(setname, uid, price, type, callback){
     },
     getContent(a, p, modal) {
       if (a && p) {
-        fetch('https://hive-api.dlux.io', {
+        fetch('https://api.hive.blog', {
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":["${a}", "${p}"], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -4339,17 +4374,11 @@ function buyNFT(setname, uid, price, type, callback){
         });
     },
     getHiveStats() {
-      fetch(this.hapi, {
-        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_dynamic_global_properties", "params":[], "id":1}`,
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        method: "POST",
+      this.hiveApiCall('condenser_api.get_dynamic_global_properties', [])
+      .then(result => {
+        this.hivestats = result;
       })
-        .then((r) => r.json())
-        .then((r) => {
-          this.hivestats = r.result;
-        });
+      .catch(error => {console.error('Failed to fetch Hive stats:', error);});
     },
     getHiveAuthors(users) {
       var q = "";
@@ -4372,6 +4401,65 @@ function buyNFT(setname, uid, price, type, callback){
             }
           });
       }
+    },
+    getRcAccount(account) {
+      this.hiveApiCall('rc_api.find_rc_accounts', { accounts: [account] })
+        .then(result => {
+          console.log(result)
+          this.rcAccount = result.rc_accounts[0];
+        });
+    },
+    getHpDelegationsOut(account) {
+      this.hiveApiCall('condenser_api.get_vesting_delegations', [account, '', 100])
+        .then(result => {
+          this.hpDelegationsOut = result;
+        });
+    },
+    getHpDelegationsIn(account) {
+      this.hiveApiCall('database_api.list_vesting_delegations', {
+        start: [account, ''],
+        limit: 100,
+        order: 'by_delegationing'
+      })
+        .then(result => {
+          this.hpDelegationsIn = result.delegations.filter(delegation => delegation.delegatee === account);
+        });
+    },
+    fetchDelegationsData() {
+      if (this.delegationsFetched) return;
+      this.isLoading = true;
+      this.getRcAccount(this.focus.name)
+      Promise.all([
+        this.hiveApiCall('condenser_api.get_vesting_delegations', [this.focus.name, '', 100]),
+        this.hiveApiCall('database_api.list_vesting_delegations', {
+          start: [this.focus.name, ''],
+          limit: 100,
+          order: 'by_delegation'
+        }),
+        this.hiveApiCall('rc_api.list_rc_direct_delegations', {
+          start: [this.focus.name, ''],
+          limit: 100
+        })
+      ])
+        .then(([hpOutRes, hpInRes, rcOutRes]) => {
+          console.log(hpOutRes, hpInRes, rcOutRes)
+          this.hpDelegationsOut = hpOutRes;
+          this.hpDelegationsIn = hpInRes.delegations.filter(d => d.delegatee === this.focus.name);
+          this.rcDelegationsOut = rcOutRes.rc_direct_delegations.filter(d => d.from === this.focus.name);
+          this.rcDelegationsIn = rcOutRes.rc_direct_delegations.filter(d => d.to === this.focus.name);
+          this.delegationsFetched = true;
+        })
+        .catch(error => {
+          console.error('Failed to fetch delegations:', error);
+          this.error = 'Failed to load delegations';
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
+    },
+    calculateRcPercentage(a){
+      console.log(a)
+      return 100
     },
     pullScript(id) {
       return new Promise((resolve, reject) => {
@@ -4793,6 +4881,12 @@ function buyNFT(setname, uid, price, type, callback){
     },
     init(reset = false) {
       if (reset) {
+        this.delegationsFetched = false
+        this.rcAccount = null
+        this.hpDelegationsOut = []
+        this.hpDelegationsIn = []
+        this.rcDelegationsOut = []
+        this.rcDelegationsIn = []
         if (location.pathname.split("/@")[1]) {
           this.pageAccount = location.pathname.split("/@")[1]
           if (this.pageAccount.indexOf('/') > -1) {
