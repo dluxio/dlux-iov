@@ -4466,6 +4466,20 @@ function buyNFT(setname, uid, price, type, callback){
       const maxRc = parseInt(accountRCinfo.max_rc)
       return ((currentMana / maxRc) * 100).toFixed(2)
     },
+    calculateDelegatedRcPercentage(accountRCinfo, delegatedRc) {
+      if (!accountRCinfo) return 0
+      const delegatedMana = parseInt(delegatedRc)
+      const maxRc = parseInt(accountRCinfo.max_rc)
+      return ((delegatedMana / maxRc) * 100).toFixed(2)
+    },
+    calculateOwnRcPercentage(accountRCinfo, delegatedRc) {
+      if (!accountRCinfo) return 0
+      const currentMana = parseInt(accountRCinfo.rc_manabar.current_mana)
+      const delegatedMana = parseInt(delegatedRc)
+      const ownMana = Math.max(0, currentMana - delegatedMana)
+      const maxRc = parseInt(accountRCinfo.max_rc)
+      return ((ownMana / maxRc) * 100).toFixed(2)
+    },
     pullScript(id) {
       return new Promise((resolve, reject) => {
         fetch(`https://ipfs.dlux.io/ipfs/${id}`)
