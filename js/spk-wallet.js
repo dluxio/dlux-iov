@@ -282,6 +282,33 @@ export default {
                         </div>
                     </div>
                 </div>
+                <!-- SPK Power Down -->
+                <div class="alert alert-danger bg-img-none align-items-center mt-2" role="alert" style="background-color: #ffffff10;"
+                    :class="{'d-none': !when(saccountapi.spower_downs), 'd-flex': true, 'align-items-center': true}">
+                    <p class="mb-0 lead ">A Power Down is scheduled to happen in {{when(saccountapi.spower_downs)}} ({{when(saccountapi.spower_downs, true)}} installments remaining)</p>
+                    <small class="ms-auto">
+                        <div class="d-flex ms-2">    
+                            <modal-vue 
+                                    class="dropdown-menu-item"
+                                    v-if="protocolspk.head_block && saccountapi.head_block" func="powdn" 
+                                    token="poweredUp" 
+                                    :test="test"
+                                    :tokenuser="saccountapi" 
+                                    :account="account" 
+                                    :tokenprotocol="protocolspk"
+                                    :mypfp="mypfp" 
+                                    @modalsign="sendIt($event)" 
+                                    v-slot:trigger>
+                                    <button class="btn btn-sm btn-outline-light trigger"
+                                        type="button">
+                                        CHANGE</button>
+                                </modal-vue>
+                                <button class="btn btn-sm btn-outline-danger ms-2 trigger"
+                                        type="button">
+                                        STOP</button>
+                        </div>
+                    </small>
+                </div>
                 <div class="collapse mt-3 bg-dark rounded" id="collapseVote">
                     <div class="card card-body">
                         <div class="col col-lg-6 mx-auto">
@@ -550,6 +577,33 @@ export default {
                         </div>
                     </div>
                 </div>
+                <!-- Broca Power Down -->
+                <div class="alert alert-danger bg-img-none align-items-center mt-2" role="alert" style="background-color: #ffffff10;"
+                    :class="{'d-none': !when(saccountapi.bpower_downs), 'd-flex': true, 'align-items-center': true}">
+                    <p class="mb-0 lead ">A Power Down is scheduled to happen in {{when(saccountapi.bpower_downs)}} ({{when(saccountapi.bpower_downs, true)}} installments remaining)</p>
+                    <small class="ms-auto">
+                        <div class="d-flex ms-2">    
+                            <modal-vue 
+                                    class="dropdown-menu-item"
+                                    v-if="protocolbroca.head_block && saccountapi.head_block" func="powdn" 
+                                    token="poweredUp" 
+                                    :test="test"
+                                    :tokenuser="saccountapi" 
+                                    :account="account" 
+                                    :tokenprotocol="protocolbroca"
+                                    :mypfp="mypfp" 
+                                    @modalsign="sendIt($event)" 
+                                    v-slot:trigger>
+                                    <button class="btn btn-sm btn-outline-light trigger"
+                                        type="button">
+                                        CHANGE</button>
+                                </modal-vue>
+                                <button class="btn btn-sm btn-outline-danger ms-2 trigger"
+                                        type="button">
+                                        STOP</button>
+                        </div>
+                    </small>
+                </div>
                 </div>
                 <div class="card-group mb-3 mt-2 rounded">
                     <div class="card bg-img-none text-center">
@@ -808,39 +862,36 @@ export default {
                                             class="dropdown-item trigger" 
                                             type="button"><i class="fas fa-angle-double-down fa-fw me-2"></i>Power Down</button>
                                     </modal-vue>
-                                    <modal-vue :test="test" class="dropdown-menu-item"
-                                        v-if="when(saccountapi.power_downs)"
-                                        type="confirm" token="LARYNX"
-                                        func="powercancel" :account="account"
-                                        @modalsign="sendIt($event)"
-                                        v-slot:trigger>
-                                        <button class="dropdown-item trigger"
-                                            type="button">
-                                            <i class="fa-solid fa-xmark fa-fw me-2"></i>Cancel Power Down</button>
-                                    </modal-vue>
                                 </ul>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div
+                <!-- Larynx Power Down -->
+                <div class="alert alert-danger bg-img-none align-items-center mt-2" role="alert" style="background-color: #ffffff10;"
                     :class="{'d-none': !when(saccountapi.power_downs), 'd-flex': true, 'align-items-center': true}">
-                    <b>A power down is scheduled to happen in {{when(saccountapi.power_downs)}} ({{when(saccountapi.power_downs, true)}} installments remaining)</b><small class="ms-2">
-                        <modal-vue 
-                            class="dropdown-menu-item"
-                            v-if="protocollarynx.head_block && saccountapi.head_block" func="powdn" 
-                            token="poweredUp" 
-                            :test="test"
-                            :tokenuser="saccountapi" 
-                            :account="account" 
-                            :tokenprotocol="protocollarynx"
-                            :mypfp="mypfp" 
-                            @modalsign="sendIt($event)" 
-                            v-slot:trigger>
-                            <button class="btn btn-sm btn-outline-danger trigger"
-                                type="button">
-                                STOP</button>
-                        </modal-vue>
+                    <p class="mb-0 lead ">A Power Down is scheduled to happen in {{when(saccountapi.power_downs)}} ({{when(saccountapi.power_downs, true)}} installments remaining)</p>
+                    <small class="ms-auto">
+                        <div class="d-flex ms-2">    
+                            <modal-vue 
+                                    class="dropdown-menu-item"
+                                    v-if="protocollarynx.head_block && saccountapi.head_block" func="powdn" 
+                                    token="poweredUp" 
+                                    :test="test"
+                                    :tokenuser="saccountapi" 
+                                    :account="account" 
+                                    :tokenprotocol="protocollarynx"
+                                    :mypfp="mypfp" 
+                                    @modalsign="sendIt($event)" 
+                                    v-slot:trigger>
+                                    <button class="btn btn-sm btn-outline-light trigger"
+                                        type="button">
+                                        CHANGE</button>
+                                </modal-vue>
+                                <button class="btn btn-sm btn-outline-danger ms-2 trigger"
+                                        type="button">
+                                        STOP</button>
+                        </div>
                     </small>
                 </div>
             </div>
