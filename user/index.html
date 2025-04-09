@@ -1729,9 +1729,9 @@
                                                                         </p>
                                                                         <div class="d-flex mx-auto">
                                                                             <div class="progress" role="progressbar" style="width: 200px;" aria-label="Basic example"
-                                                                                :aria-valuenow="calculateRcPercentage(delegation)" aria-valuemin="0" aria-valuemax="100">
-                                                                                <div class="progress-bar progress-bar-striped text-dark bg-success" :style="{ width: calculateRcPercentage(delegation) + '%' }">
-                                                                                    {{calculateRcPercentage(delegation)}}%
+                                                                                :aria-valuenow="calculateRcPercentage(rcAccounts[delegation.to])" aria-valuemin="0" aria-valuemax="100">
+                                                                                <div class="progress-bar progress-bar-striped text-dark bg-success" :style="{ width: calculateRcPercentage(rcAccounts[delegation.to]) + '%' }">
+                                                                                    {{calculateRcPercentage(rcAccounts[delegation.to])}}%
                                                                                 </div>
                                                                             </div>
                                                                         </div>

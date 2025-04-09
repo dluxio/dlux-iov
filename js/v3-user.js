@@ -90,6 +90,7 @@ createApp({
       rcDelegationsOut: [],
       rcDelegationsIn: [],
       delegationsFetched: false,
+      rcAccounts: {},
       isLoading: false,
       error: null,
       fileRequests: {},
@@ -4375,10 +4376,10 @@ function buyNFT(setname, uid, price, type, callback){
     },
     getHiveStats() {
       this.hiveApiCall('condenser_api.get_dynamic_global_properties', [])
-      .then(result => {
-        this.hivestats = result;
-      })
-      .catch(error => {console.error('Failed to fetch Hive stats:', error);});
+        .then(result => {
+          this.hivestats = result;
+        })
+        .catch(error => { console.error('Failed to fetch Hive stats:', error); });
     },
     getHiveAuthors(users) {
       var q = "";
@@ -4431,22 +4432,23 @@ function buyNFT(setname, uid, price, type, callback){
       this.getRcAccount(this.focus.name)
       Promise.all([
         this.hiveApiCall('condenser_api.get_vesting_delegations', [this.focus.name, '', 100]),
-        this.hiveApiCall('database_api.list_vesting_delegations', {
-          start: [this.focus.name, ''],
-          limit: 100,
-          order: 'by_delegation'
-        }),
         this.hiveApiCall('rc_api.list_rc_direct_delegations', {
           start: [this.focus.name, ''],
           limit: 100
         })
       ])
-        .then(([hpOutRes, hpInRes, rcOutRes]) => {
-          console.log(hpOutRes, hpInRes, rcOutRes)
+        .then(([hpOutRes, rcOutRes]) => {
           this.hpDelegationsOut = hpOutRes;
-          this.hpDelegationsIn = hpInRes.delegations.filter(d => d.delegatee === this.focus.name);
           this.rcDelegationsOut = rcOutRes.rc_direct_delegations.filter(d => d.from === this.focus.name);
-          this.rcDelegationsIn = rcOutRes.rc_direct_delegations.filter(d => d.to === this.focus.name);
+          const uniqueToAccounts = [...new Set(this.rcDelegationsOut.map(d => d.to))];
+          this.delegationsFetched = true;
+          return this.hiveApiCall('rc_api.find_rc_accounts', { accounts: uniqueToAccounts });
+        })
+        .then(result => {
+          this.rcAccounts = {};
+          result.rc_accounts.forEach(acc => {
+            this.rcAccounts[acc.account] = acc;
+          });
           this.delegationsFetched = true;
         })
         .catch(error => {
@@ -4457,9 +4459,12 @@ function buyNFT(setname, uid, price, type, callback){
           this.isLoading = false;
         });
     },
-    calculateRcPercentage(a){
-      console.log(a)
-      return 100
+    calculateRcPercentage(accountRCinfo) {
+      if (!accountRCinfo) return 0
+      console.log(accountRCinfo)
+      const currentMana = parseInt(accountRCinfo.rc_manabar.current_mana)
+      const maxRc = parseInt(accountRCinfo.max_rc)
+      return ((currentMana / maxRc) * 100).toFixed(2)
     },
     pullScript(id) {
       return new Promise((resolve, reject) => {
