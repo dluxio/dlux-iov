@@ -23,6 +23,7 @@ export default {
         tokenuser: {
             default: () => ({ head_block: 0 }),
         },
+        to_account: String,
         smarkets: Object,
         type: { default: "move" },
         mypfp: String,
@@ -54,7 +55,7 @@ export default {
                 :mypfp="mypfp"
                 :token="token" 
                 :tokenuser="tokenuser"
-                :to_account="type"
+                :to_account="to_account"
                 :reqid="type"
                 :tokenstats="tokenstats"
                 @open-modal="openModal($event)"
