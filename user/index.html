@@ -1761,7 +1761,9 @@
                                                                 <modal-vue
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="withdraw_vesting" :mypfp="mypfp" token="HP"
-                                                                    :tokenuser="focus" :account="account"
+                                                                    :tokenuser="focus" 
+                                                                    type="HIVE"
+                                                                    :account="account"
                                                                     :tokenstats="hivestats" @modalsign="sendIt($event)"
                                                                     v-slot:trigger class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
@@ -1775,6 +1777,7 @@
                                                                     <button class="dropdown-item"><modal-vue
                                                                             v-if="focus.id && hivestats.content_reward_percent"
                                                                             func="delegate_rc" :mypfp="mypfp" token="RC"
+                                                                            
                                                                             :tokenuser="focus" :account="account"
                                                                             :tokenstats="hivestats" :rc-info="rcAccount"
                                                                             @modalsign="sendIt($event)" type="hive"
