@@ -821,7 +821,8 @@ export default {
                             aria-label="LARYNX Actions">
                             <button class="btn btn-light p-0" type="button">
                                 <modal-vue 
-                                        v-if="protocollarynx.head_block && saccountapi.head_block" func="powdel"
+                                        v-if="protocollarynx.head_block && saccountapi.head_block" 
+                                        func="powdel"
                                         :test="test"
                                         :tokenuser="saccountapi" 
                                         :account="account" 
@@ -831,7 +832,7 @@ export default {
                                         @modalsign="sendIt($event)" 
                                         v-slot:trigger
                                         class="text-nowrap p-2 trigger">
-                                        <span><i class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
+                                        <span class="trigger"><i class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
                                 </modal-vue>
                             </button>
                             <button type="button"
