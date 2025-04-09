@@ -795,7 +795,7 @@ export default {
                                     <modal-vue 
                                         class="dropdown-menu-item"
                                         v-if="protocollarynx.head_block && saccountapi.head_block" func="powdn" 
-                                        token="pow_broca" 
+                                        token="poweredUp" 
                                         :test="test"
                                         :tokenuser="saccountapi" 
                                         :account="account" 
@@ -826,10 +826,17 @@ export default {
                 <div
                     :class="{'d-none': !when(saccountapi.power_downs), 'd-flex': true, 'align-items-center': true}">
                     <b>A power down is scheduled to happen in {{when(saccountapi.power_downs)}} ({{when(saccountapi.power_downs, true)}} installments remaining)</b><small class="ms-2">
-                        <modal-vue type="confirm" token="LARYNX" 
-                            func="powercancel" :account="account"
-                            @modalsign="sendIt($event)"
-                            :test="test" v-slot:trigger>
+                        <modal-vue 
+                            class="dropdown-menu-item"
+                            v-if="protocollarynx.head_block && saccountapi.head_block" func="powdn" 
+                            token="poweredUp" 
+                            :test="test"
+                            :tokenuser="saccountapi" 
+                            :account="account" 
+                            :tokenprotocol="protocollarynx"
+                            :mypfp="mypfp" 
+                            @modalsign="sendIt($event)" 
+                            v-slot:trigger>
                             <button class="btn btn-sm btn-outline-danger trigger"
                                 type="button">
                                 STOP</button>
