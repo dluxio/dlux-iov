@@ -288,9 +288,8 @@ export default {
                     class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
                 role="alert" style="background-color: #ffffff01;">
                     <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
-                    <p class="mb-0 lead ">A Power Down of
-                    #amount SPK
-                     is scheduled in {{when(saccountapi.spower_downs)}} 
+                    <p class="mb-0 lead ">A #amount SPK
+                    Power Down is scheduled in {{when(saccountapi.spower_downs)}} 
                      with {{when(saccountapi.spower_downs, true)}} installment<span v-if="when(saccountapi.spower_downs, true) > 1">s</span> remaining</p>
                     <small class="ms-lg-auto">
                         <div class="d-flex ms-lg-2">    
@@ -954,28 +953,28 @@ export default {
                         </div>
                     </div>
                     <div class="collapse" id="delegationslarynx">
-                         <div class="d-flex flex-column text-start border border-white-50 rounded mt-3 mb-1"
+                         <div class="d-flex flex-column text-start border border-white-50 rounded mt-3"
                             style="background-color: rgba(0, 0, 0, 0.3);">
                                <!-- LARYNX Delegations Status -->
                                 <div
-                                    class="d-flex flex-row flex-wrap align-items-center mx-auto mb-2 w-100 justify-content-center">
+                                    class="d-flex flex-wrap align-items-center mx-auto my-2 w-100 justify-content-center">
                                     <div
-                                        class="d-flex flex-column flex-md-row align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 my-1">
+                                        class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 my-1">
                                         <span><i class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
                                         <span class="ms-1">
                                             {{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}} LARYNX
                                         </span>
                                     </div>
                                     <div
-                                        class="d-flex flex-column flex-md-row align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 my-1">
+                                        class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 my-1">
                                         <span><i class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
                                         <span class="ms-1">{{formatNumber((saccountapi.granted.t)/1000, 3,'.', ',')}} LARYNX
                                         </span>
                                     </div>
                                 </div>
-                                <!-- Delegations Repeats -->
+                                <!-- LARYNX Delegations Repeats -->
                                 <div class="px-1 px-lg-2">
-                                <!-- Delegations Out -->
+                                    <!-- LARYNX Delegations Out -->
                                     <h5 class="mt-2 mb-1">
                                         Delegated: (# accounts)
                                     </h5>
@@ -986,13 +985,13 @@ export default {
                                             No LARYNX Granting
                                         </div>
                                     </div>
-                                    <!-- Repeat HP Delegations Out -->
+                                    <!-- Repeat LARYNX Delegations Out -->
                                     <div v-for="(a,b,c) in saccountapi.granting">
-                                        <div class="d-flex flex-column flex-sm-row gap-1 gap-lg-3 align-items-center border-top border-white-50 py-2"
+                                        <div class="d-flex flex-column flex-sm-row gap-1 gap-sm-2 align-items-center border-top border-white-50 py-2"
                                             v-if="b != 't'">
-                                            <a :href="'https://www.dlux.io/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>
+                                            <a :href="'/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>
                                             <p class="ms-sm-auto mb-0">{{formatNumber((a)/1000, 3, '.', ',')}} LARYNX</p>
-                                            <div class="d-flex ">
+                                            <div class="d-flex">
                                                 <modal-vue type="delegate" 
                                                     :smarkets="smarkets.node" token="LARYNX"
                                                     :to="b" :amount="a" :stats="spkStats"
@@ -1019,7 +1018,7 @@ export default {
                                         </div>
                                     </div>
                                 
-                                    <!-- Delegations In -->
+                                    <!-- LARYNX Delegations In -->
                                     <h5 class="mt-2 mb-1">
                                         Received: (# accounts)
                                     </h5>
@@ -1030,11 +1029,11 @@ export default {
                                             No LARYNX Granted
                                         </div>
                                     </div>
-                                    <!-- Repeat HP Delegations In -->
+                                    <!-- Repeat LARYNX Delegations In -->
                                     <div v-for="(a,b,c) in saccountapi.granted" >
-                                        <div class="d-flex flex-column flex-sm-row gap-1 gap-lg-3 align-items-center border-top border-white-50 py-2"
+                                        <div class="d-flex flex-column flex-sm-row gap-1 gap-sm-2 align-items-center border-top border-white-50 py-2"
                                             v-if="b != 't'">
-                                            <a :href="'https://www.dlux.io/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>
+                                            <a :href="'/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>
                                             <p class="mb-0 ms-sm-auto">{{formatNumber((a)/1000, 3, '.', ',')}} LARYNX</p>
                                         </div>
                                     </div>

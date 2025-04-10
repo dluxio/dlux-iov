@@ -1225,36 +1225,24 @@
                                                                                         class="fas fa-angle-double-down fa-fw me-2"></i>Power
                                                                                     Down</button>
                                                                             </modal-vue>
-                                                                            <!-- <modal-vue
-                                                                                v-if="when(saccountapi.powerDowns)"
-                                                                                type="confirm" token="LARYNX"
-                                                                                func="powercancel" :account="account"
-                                                                                @modalsign="sendIt($event)"
-                                                                                v-slot:trigger
-                                                                                class="dropdown-menu-item">
-                                                                                <button class="dropdown-item trigger"
-                                                                                    slot="trigger" type="button">
-                                                                                    <i
-                                                                                        class="fa-solid fa-xmark fa-fw me-2"></i>Cancel
-                                                                                    Power Down</button>
-                                                                            </modal-vue> -->
-
                                                                         </ul>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <!-- LARYNX Power Down -->
-                                                        <div class="alert alert-danger bg-img-none align-items-center mt-2"
-                                                            role="alert" style="background-color: #ffffff01;"
-                                                            :class="{'d-none': !when(saccountapi.powerDowns), 'd-flex': true, 'align-items-center': true}">
-                                                            <p class="mb-0 lead ">A power down is scheduled
+                                                        <div v-if="when(saccountapi.powerDowns)"
+                                                            class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
+                                                            role="alert" style="background-color: #ffffff01;">
+                                                            <p class="mb-0 lead ">A #amount LARYNX power down is
+                                                                scheduled
                                                                 to happen in {{when(saccountapi.powerDowns)}}
-                                                                ({{saccountapi.powerDowns.length}} installments
-                                                                remaining)
+                                                                with {{saccountapi.powerDowns.length}} installment<span
+                                                                    v-if="saccountapi.powerDowns.length > 1">s</span>
+                                                                remaining
                                                             </p>
-                                                            <small class="ms-auto">
-                                                                <div class="d-flex ms-2">
+                                                            <small class="ms-lg-auto">
+                                                                <div class="d-flex ms-lg-2">
                                                                     <!--  <modal-vue class="dropdown-menu-item"
                                                         v-if="protocolspk.head_block && saccountapi.head_block"
                                                         func="powdn" token="poweredUp" :test="test"
@@ -1265,7 +1253,7 @@
                                                                         class="btn btn-sm rounded-pill btn-outline-light trigger"
                                                                         type="button">
                                                                         CHANGE</button>
-                                                                    </modal-vue>
+                                                                    <!--  </modal-vue> -->
                                                                     <button
                                                                         class="btn btn-sm rounded-pill btn-outline-danger ms-2"
                                                                         type="button"
@@ -1276,7 +1264,7 @@
                                                         </div>
                                                     </div>
                                                     <!--delegated larynx power-->
-                                                    <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                                    <div class="py-4 py-lg-3">
                                                         <div
                                                             class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center ">
                                                             <div class="text-center position-relative">
@@ -1335,42 +1323,55 @@
                                                             </div>
                                                         </div>
                                                         <div class="collapse" id="delegationsspk">
-                                                            <div
-                                                                class="d-flex flex-column text-start border border-secondary rounded p-4 my-4">
-                                                                <h4 class="border-bottom border-secondary py-2">
-                                                                    Delegated:
-                                                                    {{formatNumber((saccountapi.granting.t)/1000, 3,
-                                                                    '.', ',')}} LP</h4>
-                                                                <div v-for="(a,b,c) in saccountapi.granting">
-                                                                    <div class="d-flex align-items-center border-bottom border-secondary pb-2 my-1"
-                                                                        v-if="b != 't' && a > 0">
-                                                                        <p class="my-0">@{{b}}:
-                                                                            {{formatNumber((a)/1000, 3, '.', ',')}}
-                                                                            LP
-                                                                        </p>
-                                                                        <div class="d-flex ms-auto ">
-                                                                            <modal-vue
-                                                                                v-if="protocol?.larynx?.head_block && saccountapi.head_block"
-                                                                                func="powdel" :mypfp="mypfp"
-                                                                                token="poweredUp"
-                                                                                :tokenuser="saccountapi"
-                                                                                :account="account"
-                                                                                :tokenprotocol="protocol?.larynx"
-                                                                                @modalsign="sendIt($event)"
-                                                                                v-slot:trigger>
-                                                                                <modal-vue type="delegate"
-                                                                                    :smarkets="smarkets.node"
-                                                                                    token="LARYNX" :to="b" :amount="a"
-                                                                                    :stats="sstats"
-                                                                                    :balance="saccountapi.poweredUp"
-                                                                                    :account="account"
-                                                                                    @modalsign="sendIt($event)">
-                                                                                    <button slot="trigger trigger"
-                                                                                        type="button"
-                                                                                        class="ms-1 btn btn-secondary"><i
-                                                                                            class="fas fa-fw fa-user-edit"></i></button>
-                                                                                </modal-vue>
-                                                                                <modal-vue class="dropdown-menu-item"
+                                                            <div class="d-flex flex-column text-start border border-white-50 rounded mt-3 mb-1"
+                                                                style="background-color: rgba(0, 0, 0, 0.3);">
+                                                                <!-- LARYNX Delegations Status -->
+                                                                <div
+                                                                    class="d-flex flex-wrap align-items-center mx-auto my-2 w-100 justify-content-center">
+                                                                    <div
+                                                                        class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 my-1">
+                                                                        <span><i
+                                                                                class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
+                                                                        <span class="ms-1">
+                                                                            {{formatNumber((saccountapi.granting.t)/1000,
+                                                                            3,
+                                                                            '.', ',')}} LARYNX
+                                                                        </span>
+                                                                    </div>
+                                                                    <div
+                                                                        class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 my-1">
+                                                                        <span><i
+                                                                                class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
+                                                                        <span
+                                                                            class="ms-1">{{formatNumber((saccountapi.granted.t)/1000,
+                                                                            3,'.', ',')}} LARYNX
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <!-- LARYNX Delegations Repeats -->
+                                                                <div class="px-1 px-lg-2">
+                                                                    <!-- LARYNX Delegations Out -->
+                                                                    <h5 class="mt-2 mb-1">
+                                                                        Delegated: (#accounts)
+                                                                    </h5>
+                                                                    <!-- No LARYNX Delegations Out -->
+                                                                    <div v-if="saccountapi.granting.t == 0">
+                                                                        <div
+                                                                            class="border-top border-white-50 py-2 text-center fs-5">
+                                                                            No LARYNX Granting
+                                                                        </div>
+                                                                    </div>
+                                                                    <!-- Repeat LARYNX Delegations Out -->
+                                                                    <div v-for="(a,b,c) in saccountapi.granting">
+                                                                        <div class="d-flex flex-column flex-sm-row gap-1 gap-sm-2 align-items-center border-top border-white-50 py-2"
+                                                                            v-if="b != 't' && a > 0">
+                                                                            <a :href="'/@' + b " target="_blank"
+                                                                                class="text-info no-decoration">@{{b}}</a>
+                                                                            <p class="ms-sm-auto mb-0">
+                                                                                {{formatNumber((a)/1000, 3, '.', ',')}}
+                                                                                LARYNX</p>
+                                                                            <div class="d-flex">
+                                                                                <modal-vue
                                                                                     v-if="protocol?.larynx?.head_block && saccountapi.head_block"
                                                                                     func="powdel" :mypfp="mypfp"
                                                                                     token="poweredUp"
@@ -1380,26 +1381,41 @@
                                                                                     @modalsign="sendIt($event)"
                                                                                     v-slot:trigger>
                                                                                     <button
-                                                                                        class="ms-1 btn btn-danger ms-1 trigger"
-                                                                                        slot="trigger" type="button"><i
-                                                                                            class="fas fa-fw fa-trash-alt"></i></button>
+                                                                                        class="btn btn-secondary btn-sm trigger">
+                                                                                        <i
+                                                                                            class="fas fa-fw fa-user-edit"></i>
+                                                                                    </button>
                                                                                 </modal-vue>
+                                                                                <button
+                                                                                    class="ms-1 btn btn-sm btn-danger"
+                                                                                    type="button">
+                                                                                    <i
+                                                                                        class="fas fa-fw fa-trash-alt"></i>
+                                                                                </button>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
-                                                                <h4
-                                                                    class="border-bottom border-secondary py-2 mt-5 mb-0">
-                                                                    Received:
-                                                                    {{formatNumber((saccountapi.granted.t)/1000,
-                                                                    3,'.', ',')}} LP</h4>
-                                                                <div v-for="(a,b,c) in saccountapi.granted">
-                                                                    <div class="d-flex align-items-center border-top border-secondary py-2"
-                                                                        v-if="b != 't' && a > 0">
-                                                                        <p class="my-0">@{{b}}:
-                                                                            {{formatNumber((a)/1000, 3, '.', ',')}}
-                                                                            LP
-                                                                        </p>
-
+                                                                    <!-- LARYNX Delegations In -->
+                                                                    <h5 class="mt-2 mb-1">
+                                                                        Received: (#accounts)
+                                                                    </h5>
+                                                                    <!-- No LARYNX Delegations In -->
+                                                                    <div v-if="saccountapi.granted.t == 0">
+                                                                        <div
+                                                                            class="border-top border-white-50 py-2 text-center fs-5">
+                                                                            No LARYNX Granted
+                                                                        </div>
+                                                                    </div>
+                                                                    <!-- Repeat LARYNX Delegations In -->
+                                                                    <div v-for="(a,b,c) in saccountapi.granted">
+                                                                        <div class="d-flex flex-column flex-sm-row gap-1 gap-sm-2 align-items-center border-top border-white-50 py-2"
+                                                                            v-if="b != 't'">
+                                                                            <a :href="'/@' + b " target="_blank"
+                                                                                class="text-info no-decoration">@{{b}}</a>
+                                                                            <p class="mb-0 ms-sm-auto">
+                                                                                {{formatNumber((a)/1000, 3, '.', ',')}}
+                                                                                LARYNX</p>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -1496,15 +1512,13 @@
                                                             </div>
                                                         </div>
                                                         <!-- LARYNX Unlock -->
-                                                        <div class="alert alert-danger bg-img-none align-items-center mt-2 d-flex"
+                                                        <div class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
                                                             role="alert" style="background-color: #ffffff01;">
-                                                            <!-- :class="{'d-none': !when(focus.next_vesting_withdrawl), 'd-flex': true, 'align-items-center': true}" -->
-                                                            <p class="mb-0 lead ">An Unlock is scheduled to happen in
-                                                                <!--  {{when(saccountapi.spower_downs)}} ({{when(saccountapi.spower_downs,true)}}  -->
-                                                                (installments remaining)
+                                                            <p class="mb-0 lead">A #amount unlock is scheduled in #days
+                                                                with #number installments remaining
                                                             </p>
-                                                            <small class="ms-auto">
-                                                                <div class="d-flex ms-2">
+                                                            <small class="ms-lg-auto">
+                                                                <div class="d-flex ms-lg-2">
                                                                     <!--  <modal-vue class="dropdown-menu-item"
                                                         v-if="protocolspk.head_block && saccountapi.head_block"
                                                         func="powdn" token="poweredUp" :test="test"
@@ -1515,7 +1529,7 @@
                                                                         class="btn btn-sm rounded-pill btn-outline-light trigger"
                                                                         type="button">
                                                                         CHANGE</button>
-                                                                    </modal-vue>
+                                                                    <!-- </modal-vue> -->
                                                                     <button
                                                                         class="btn btn-sm rounded-pill btn-outline-danger ms-2"
                                                                         type="button"
@@ -1703,25 +1717,33 @@
                                             <div v-if="focus?.hive_transfers?.length"
                                                 class="alert alert-primary bg-img-none d-flex flex-column mt-4 mt-lg-3"
                                                 role="alert" style="background-color: #ffffff01;">
-                                                <div class="d-flex w-100 text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center">
+                                                <div
+                                                    class="d-flex w-100 text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center">
                                                     <i class="fa-solid fa-rotate-right fs-1 text-primary"></i>
                                                     <span class="lead">
-                                                        You have <span v-if="focus?.hive_transfers?.length == 1">a</span> recurring transfer<span v-if="focus?.hive_transfers?.length > 1">s</span>
+                                                        You have <span
+                                                            v-if="focus?.hive_transfers?.length == 1">a</span>
+                                                        recurring transfer<span
+                                                            v-if="focus?.hive_transfers?.length > 1">s</span>
                                                     </span>
                                                     <a class="ms-lg-auto text-nowrap no-decoration border border-light rounded-pill px-2 py-1"
                                                         data-bs-toggle="collapse" href="#hiveRecurringTransfers"
                                                         role="button" aria-expanded="false"
                                                         aria-controls="hiveRecurringTransfers">
-                                                        {{focus.hive_transfers.length}} Recurring Transfer<span v-if="focus?.hive_transfers?.length > 1">s</span>
+                                                        {{focus.hive_transfers.length}} Recurring Transfer<span
+                                                            v-if="focus?.hive_transfers?.length > 1">s</span>
                                                         <i class="ms-2 fa-solid fa-search"></i>
                                                     </a>
                                                 </div>
                                                 <div class="collapse w-100 mt-2" id="hiveRecurringTransfers">
                                                     <div v-for="xfr in focus.hive_transfers"
                                                         class="d-flex w-100 flex-column flex-md-row gap-2 gap-md-3 align-items-center border-top border-white-50 py-2">
-                                                        <div class="flex-grow-1 text-center text-md-start">{{precision(xfr.amount.amount,
-                                                            xfr.amount.precision)}} HIVE to @{{xfr.to}} {{timeUntil(xfr.trigger_date, xfr.recurrence, true)}}.
-                                                            {{xfr.remaining_executions}} transfer<span v-if="xfr.remaining_executions > 1">s</span> remaining.
+                                                        <div class="flex-grow-1 text-center text-md-start">
+                                                            {{precision(xfr.amount.amount,
+                                                            xfr.amount.precision)}} HIVE to @{{xfr.to}}
+                                                            {{timeUntil(xfr.trigger_date, xfr.recurrence, true)}}.
+                                                            {{xfr.remaining_executions}} transfer<span
+                                                                v-if="xfr.remaining_executions > 1">s</span> remaining.
                                                         </div>
                                                         <small class="ms-md-auto">
                                                             <div class="d-flex ms-md-2">
@@ -1908,7 +1930,7 @@
                                             </div>
                                         </div>
                                         <!-- Delegated HIVE Power -->
-                                        <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                        <div class="border-bottom border-white-50 py-4 py-lg-3">
                                             <div
                                                 class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
                                                 <div class="text-center position-relative">
@@ -1975,6 +1997,7 @@
                                             <div class="collapse" id="delegationshive">
                                                 <div class="d-flex flex-column text-start border border-white-50 rounded mt-3"
                                                     style="background-color: rgba(0, 0, 0, 0.3);">
+                                                    <!-- HP / RC Tab Nav -->
                                                     <div
                                                         class="d-flex w-100 justify-content-center py-2 bg-card rounded-top">
                                                         <ul class="nav nav-tabs">
@@ -1989,17 +2012,19 @@
                                                             </li>
                                                         </ul>
                                                     </div>
-                                                    <div class="tab-content px-1 pt-1 pb-0 px-md-2 pt-md-2">
-                                                        <!-- HP Delegations -->
+                                                    <!-- HP / RC Tab Content -->
+                                                    <div class="tab-content px-1 px-lg-2">
+                                                        <!-- HP Content -->
                                                         <div role="tabpanel" class="tab-pane show active"
                                                             id="hp-delegations" aria-labelledby="hp-delegations">
                                                             <div class="d-flex flex-column">
-                                                                <!-- HP Delegations Status -->
+                                                                <!-- HP Status -->
                                                                 <div
-                                                                    class="d-flex flex-column flex-lg-row flex-wrap align-items-center mx-auto mb-2">
+                                                                    class="d-flex flex-wrap align-items-center mx-auto my-2">
                                                                     <div
-                                                                        class="d-flex flex-column flex-md-row flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
-                                                                        <span><i class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
+                                                                        class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
+                                                                        <span><i
+                                                                                class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
                                                                         <span class="ms-1">{{formatNumber(
                                                                             (parseFloat(focus.received_vesting_shares) /
                                                                             parseFloat(hivestats.total_vesting_shares))
@@ -2010,8 +2035,9 @@
                                                                         </span>
                                                                     </div>
                                                                     <div
-                                                                        class="d-flex flex-column flex-md-row flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
-                                                                        <span><i class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
+                                                                        class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
+                                                                        <span><i
+                                                                                class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
                                                                         <span class="ms-1">
                                                                             {{formatNumber(
                                                                             (parseFloat(focus.delegated_vesting_shares)
@@ -2028,7 +2054,8 @@
                                                                 <h5 class="mb-1">HP Delegations:
                                                                     <span v-if="hpDelegationsOut.length > 0">
                                                                         ({{hpDelegationsOut.length}}
-                                                                        account<span v-if="hpDelegationsOut.length > 1">s</span>)
+                                                                        account<span
+                                                                            v-if="hpDelegationsOut.length > 1">s</span>)
                                                                     </span>
                                                                 </h5>
                                                                 <!-- No HP Delegations Out -->
@@ -2042,7 +2069,7 @@
                                                                 <div v-for="delegation in hpDelegationsOut"
                                                                     :key="delegation.delegator + delegation.delegatee">
                                                                     <div
-                                                                        class="d-flex flex-column flex-lg-row gap-1 gap-lg-3 justify-content-between align-items-center border-top border-white-50 py-2">
+                                                                        class="d-flex flex-column flex-sm-row gap-1 gap-sm-2 justify-content-between align-items-center border-top border-white-50 py-2">
                                                                         <p class="my-0">
                                                                             <a :href="'/@' + delegation.delegatee"
                                                                                 target="_blank"
@@ -2093,10 +2120,11 @@
                                                             <div class="d-flex flex-column">
                                                                 <!-- RC Delegations Status -->
                                                                 <div
-                                                                    class="d-flex flex-column flex-lg-row flex-wrap align-items-center mx-auto mb-2">
+                                                                    class="d-flex flex-wrap align-items-center mx-auto my-2">
                                                                     <div
-                                                                        class="d-flex flex-column flex-md-row flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
-                                                                        <span><i class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
+                                                                        class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
+                                                                        <span><i
+                                                                                class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
                                                                         <span class="ms-1">{{formatNumber(rcAccount ?
                                                                             rcAccount.received_delegated_rc : 0, 0, '.',
                                                                             ',')}}
@@ -2104,8 +2132,9 @@
                                                                         </span>
                                                                     </div>
                                                                     <div
-                                                                        class="d-flex flex-column flex-md-row flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
-                                                                        <span><i class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
+                                                                        class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
+                                                                        <span><i
+                                                                                class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
                                                                         <span class="ms-1">
                                                                             {{formatNumber(rcAccount ?
                                                                             rcAccount.delegated_rc : 0, 0, '.', ',')}}
@@ -2131,7 +2160,7 @@
                                                                 <div v-for="delegation in rcDelegationsOut"
                                                                     :key="delegation.from + delegation.to">
                                                                     <div
-                                                                        class="d-flex flex-column flex-lg-row gap-1 gap-lg-3 align-items-center border-top border-white-50 py-2">
+                                                                        class="d-flex flex-column flex-md-row gap-1 gap-md-3 align-items-center border-top border-white-50 py-2">
                                                                         <p class="my-0 flex-grow-1">
                                                                             <a :href="'/@' + delegation.to"
                                                                                 target="_blank"
@@ -2268,21 +2297,26 @@
                                             <div v-if="focus?.hive_pendingWithdrawals?.length"
                                                 class="alert alert-danger d-flex flex-column bg-img-none align-items-center mt-4 mt-lg-3"
                                                 role="alert" style="background-color: #ffffff01;">
-                                                <div class="d-flex w-100 text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 align-items-center">
+                                                <div
+                                                    class="d-flex w-100 text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 align-items-center">
                                                     <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
-                                                    <span class="lead">Pending HIVE Savings Withdrawl of {{formatNumber(focus.hive_pendingWithdrawal_tot, 3, '.',',')}} HIVE</span>
+                                                    <span class="lead">Pending HIVE Savings Withdrawl of
+                                                        {{formatNumber(focus.hive_pendingWithdrawal_tot, 3, '.',',')}}
+                                                        HIVE</span>
                                                     <a class="ms-lg-auto no-decoration text-nowrap border border-light rounded-pill px-2 py-1"
                                                         data-bs-toggle="collapse" href="#hiveSavingsWithdrawls"
                                                         role="button" aria-expanded="false"
                                                         aria-controls="hiveSavingsWithdrawls">
-                                                        {{focus?.hive_pendingWithdrawals?.length}} Withdrawl<span v-if="focus?.hive_pendingWithdrawals?.length > 1">s</span>
+                                                        {{focus?.hive_pendingWithdrawals?.length}} Withdrawl<span
+                                                            v-if="focus?.hive_pendingWithdrawals?.length > 1">s</span>
                                                         <i class="ms-2 fa-solid fa-search fa-fw"></i>
                                                     </a>
                                                 </div>
                                                 <div class="collapse w-100 mt-2" id="hiveSavingsWithdrawls">
                                                     <div v-for="xfr in focus?.hive_pendingWithdrawals"
                                                         class="d-flex w-100 align-items-center border-top border-white-50 py-2">
-                                                        <div class="flex-grow-1">{{xfr.amount}} to @{{xfr.to}} {{timeUntil(xfr.complete)}}</div>
+                                                        <div class="flex-grow-1">{{xfr.amount}} to @{{xfr.to}}
+                                                            {{timeUntil(xfr.complete)}}</div>
                                                         <small class="ms-auto">
                                                             <div class="d-flex ms-2">
                                                                 <button
@@ -2402,31 +2436,39 @@
                                             <div v-if="focus?.hbd_transfers?.length"
                                                 class="alert alert-primary bg-img-none d-flex flex-column mt-4 mt-lg-3"
                                                 role="alert" style="background-color: #ffffff01;">
-                                                <div class="d-flex w-100 text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center">
+                                                <div
+                                                    class="d-flex w-100 text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center">
                                                     <i class="fa-solid fa-rotate-right fs-1 text-primary"></i>
                                                     <span class="lead">
-                                                        You have <span v-if="focus?.hbd_transfers?.length == 1">a</span> recurring transfer<span v-if="focus?.hbd_transfers?.length > 1">s</span>
+                                                        You have <span v-if="focus?.hbd_transfers?.length == 1">a</span>
+                                                        recurring transfer<span
+                                                            v-if="focus?.hbd_transfers?.length > 1">s</span>
                                                     </span>
                                                     <a class="ms-lg-auto text-nowrap no-decoration border border-light rounded-pill px-2 py-1"
                                                         data-bs-toggle="collapse" href="#hbdRecurringTransfers"
                                                         role="button" aria-expanded="false"
                                                         aria-controls="hbdRecurringTransfers">
-                                                        {{focus.hbd_transfers.length}} Recurring Transfer<span v-if="focus?.hbd_transfers?.length > 1">s</span>
+                                                        {{focus.hbd_transfers.length}} Recurring Transfer<span
+                                                            v-if="focus?.hbd_transfers?.length > 1">s</span>
                                                         <i class="ms-2 fa-solid fa-search"></i>
                                                     </a>
                                                 </div>
                                                 <div class="collapse w-100 mt-2" id="hbdRecurringTransfers">
                                                     <div v-for="xfr in focus.hbd_transfers"
                                                         class="d-flex w-100 flex-column flex-md-row gap-2 gap-lg-3 align-items-center border-top border-white-50 py-2">
-                                                        <div class="flex-grow-1 text-center text-md-start">{{precision(xfr.amount.amount,
-                                                            xfr.amount.precision)}} HBD to @{{xfr.to}} {{timeUntil(xfr.trigger_date, xfr.recurrence, true)}}.
-                                                            {{xfr.remaining_executions}} transfer<span v-if="xfr.remaining_executions > 1">s</span> remaining.</div>
+                                                        <div class="flex-grow-1 text-center text-md-start">
+                                                            {{precision(xfr.amount.amount,
+                                                            xfr.amount.precision)}} HBD to @{{xfr.to}}
+                                                            {{timeUntil(xfr.trigger_date, xfr.recurrence, true)}}.
+                                                            {{xfr.remaining_executions}} transfer<span
+                                                                v-if="xfr.remaining_executions > 1">s</span> remaining.
+                                                        </div>
                                                         <small class="ms-md-auto">
                                                             <div class="d-flex ms-md-2">
                                                                 <modal-vue
                                                                     v-if="focus.id && hivestats.content_reward_percent"
-                                                                    func="recurrent_transfer" :mypfp="mypfp"
-                                                                    token="HBD" :tokenuser="focus" :account="account"
+                                                                    func="recurrent_transfer" :mypfp="mypfp" token="HBD"
+                                                                    :tokenuser="focus" :account="account"
                                                                     :tokenstats="hivestats" @modalsign="sendIt($event)"
                                                                     :type="xfr" v-slot:trigger><button
                                                                         class="btn btn-sm rounded-pill btn-outline-light trigger"
@@ -2516,21 +2558,27 @@
                                             <div v-if="focus?.hbd_pendingWithdrawals?.length"
                                                 class="alert alert-danger bg-img-none d-flex flex-column align-items-center mt-4 mt-lg-3"
                                                 role="alert" style="background-color: #ffffff01;">
-                                                <div class="d-flex w-100 align-items-center text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 ">
+                                                <div
+                                                    class="d-flex w-100 align-items-center text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 ">
                                                     <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
-                                                    <p class="mb-0 lead">Pending HBD Savings Withdrawl of {{formatNumber(focus.hbd_pendingWithdrawal_tot, 3, '.',',')}} HBD</p>
+                                                    <p class="mb-0 lead">Pending HBD Savings Withdrawl of
+                                                        {{formatNumber(focus.hbd_pendingWithdrawal_tot, 3, '.',',')}}
+                                                        HBD
+                                                    </p>
                                                     <a class="ms-lg-auto text-nowrap no-decoration border border-light rounded-pill px-2 py-1"
                                                         data-bs-toggle="collapse" href="#hbdSavingsWithdrawls"
                                                         role="button" aria-expanded="false"
                                                         aria-controls="hbdSavingsWithdrawls">
-                                                        {{focus?.hbd_pendingWithdrawals?.length}} Withdrawl<span v-if="focus?.hbd_pendingWithdrawals?.length > 1">s</span><i
+                                                        {{focus?.hbd_pendingWithdrawals?.length}} Withdrawl<span
+                                                            v-if="focus?.hbd_pendingWithdrawals?.length > 1">s</span><i
                                                             class="ms-2 fa-solid fa-search fa-fw"></i>
                                                     </a>
                                                 </div>
                                                 <div class="collapse w-100 mt-2" id="hbdSavingsWithdrawls">
                                                     <div v-for="xfr in focus?.hbd_pendingWithdrawals"
                                                         class="d-flex w-100 align-items-center border-top border-white-50 py-2">
-                                                        <div class="flex-grow-1">{{xfr.amount}} to @{{xfr.to}} {{timeUntil(xfr.complete)}}</div>
+                                                        <div class="flex-grow-1">{{xfr.amount}} to @{{xfr.to}}
+                                                            {{timeUntil(xfr.complete)}}</div>
                                                         <small class="ms-auto">
                                                             <div class="d-flex ms-2">
                                                                 <button
