@@ -14,61 +14,15 @@ export default {
         return {
           precision: 0,
           prefix: "spkccT_",
-          token: "SPK",
+          token: "spk",
           features: {
-            channel_open: {
-              "string": "Create Contract",
+            vote: {
+              "string": "Parameter Voting",
               "json": {
-                "to": {
-                  "string": "Account to Upload File",
-                  "type": "S",
-                  "req": true,
-                  "check": "AC",
-                },
-                "amount": {
-                  "string": "Amount",
-                  "type": "I",
-                  "req": true,
-                  "min": 100,
-                  "step": 1,
-                  "max": "balance",
-                },
-                "broker": {
-                  "string": "Service Provider",
-                  "type": "O",
-                  "req": true,
-                  "options": "ipfsproviders",
-                  "icon": "fa-solid fa-server"
-                },
-                "contract": {
-                  "string": "",
-                  "type": "O",
-                  "req": true,
-                  "options": {
-                    "0": "Standard",
-                    "1": "Beneficiary"
-                  },
-                  "icon": "fa-solid fa-file-contract"
-                },
-                "ben_to": {
-                  "string": "Beneficiary Account",
-                  "type": "S",
-                  "req": false,
-                  "check": "AC",
-                },
-                "ben_amount": {
-                  "string": "Beneficiary Percentage",
-                  "type": "I",
-                  "req": false,
-                  "min": 0,
-                  "max": 100,
-                  "step": 0.01,
-                  "icon": "fa-solid fa-percent"
-                }
               },
               "auth": "active",
-              "id": "channel_open",
-              "msg": "Creating a new contract..."
+              "id": "vote",
+              "msg": "Voting on parameters..."
             },
           },
         };
@@ -170,26 +124,15 @@ export default {
             </div>`,
   data() {
     return {
-      availableProvidersCount: 0,
       debouncedValidateField: null,
-      filteredBrokerOptions: {},
       feat: {
         string: 'loading',
         json: {},
       },
       form: {
-        contract: "0",
-        to: "",
-        amount: "",
-        broker: "",
-        ben_to: "",
-        ben_amount: ""
       },
-      func: "channel_open",
-      ipfsProviders: {},
+      func: "vote",
       isLoading: true,
-      pfp: {},
-      providerStats: {},
       validations: {},
     };
   },

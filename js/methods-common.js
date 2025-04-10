@@ -96,36 +96,42 @@ export default {
     }
     return `${this.toFixed(bytes, 2)} ${p[counter]}B`
   },
-  timeUntil(dateString){
-  const targetDate = new Date(dateString + 'Z')
-  const now = new Date()
-  const diffMs = targetDate.getTime() - now.getTime()
-  const absDiffSeconds = Math.abs(diffMs) / 1000
-  if (absDiffSeconds < 1) {
-    return 'now'
-  }
-  const units = [
-    { name: 'year', seconds: 31536000 },  // 36
-    { name: 'month', seconds: 2592000 },  // 30 days
-    { name: 'day', seconds: 86400 },      // 24 hours
-    { name: 'hour', seconds: 3600 },      // 60 minutes
-    { name: 'minute', seconds: 60 },      // 60 seconds
-    { name: 'second', seconds: 1 }
-  ]
-  for (const unit of units) {
-    if (absDiffSeconds >= unit.seconds) {
-      const value = Math.floor(absDiffSeconds / unit.seconds)
-      const unitName = value === 1 ? unit.name : unit.name + 's'
-      if (diffMs > 0) {
-        return `in ${value} ${unitName}`
-      } else {
-        return `${value} ${unitName} ago`
+  timeUntil(dateString, plusHours = 0, recurrent = false) {
+    const targetDate = new Date(dateString + 'Z')
+    const targetMS = targetDate.getTime()
+    const now = new Date()
+    const nowMS = now.getTime()
+    var addTime = (plusHours * 60 * 60 * 1000)
+    if (addTime && recurrent) while (targetMS + addTime < nowMS) {
+      addTime += (plusHours * 60 * 60 * 1000)
+    }
+    const diffMs = (targetMS + addTime) - nowMS
+    const absDiffSeconds = Math.abs(diffMs) / 1000
+    if (absDiffSeconds < 1) {
+      return 'now'
+    }
+    const units = [
+      { name: 'year', seconds: 31536000 },  // 36
+      { name: 'month', seconds: 2592000 },  // 30 days
+      { name: 'day', seconds: 86400 },      // 24 hours
+      { name: 'hour', seconds: 3600 },      // 60 minutes
+      { name: 'minute', seconds: 60 },      // 60 seconds
+      { name: 'second', seconds: 1 }
+    ]
+    for (const unit of units) {
+      if (absDiffSeconds >= unit.seconds) {
+        const value = Math.floor(absDiffSeconds / unit.seconds)
+        const unitName = value === 1 ? unit.name : unit.name + 's'
+        if (diffMs > 0) {
+          return `in ${value} ${unitName}`
+        } else {
+          return `${value} ${unitName} ago`
+        }
       }
     }
-  }
 
-  // Fallback (shouldn't occur due to seconds unit)
-  return 'unknown';
+    // Fallback (shouldn't occur due to seconds unit)
+    return 'unknown';
   },
   formatNumber(t, n, r, e) {
     if (typeof t != "number") t = parseFloat(t);
@@ -224,19 +230,19 @@ export default {
     out = out.replace(/\.?0+$/, "");
     return out + post;
   },
-  stopRC(from, to){
+  stopRC(from, to) {
     var op = {
       id: "rc"
     }
     op.type = 'cj'
-    op.cj = ["delegate_rc",{"from":from,"delegatees":[to],"max_rc":0}]
+    op.cj = ["delegate_rc", { "from": from, "delegatees": [to], "max_rc": 0 }]
     op.msg = "Removing RC delegation to @" + to
     op.ops = ["fetchDelegationsData"];
     op.txid = 'rc_del_' + to
     this.$emit('tosign', op)
     this.toSign = op
   },
-  stopHP(from, to){
+  stopHP(from, to) {
     var op = {
       type: "raw",
       op: [
@@ -254,11 +260,11 @@ export default {
       msg: `Remove delegation to ${to}`,
       ops: ["fetchDelegationsData"],
       txid: `Remove delegation to ${to}`
-  };
+    };
     this.$emit('tosign', op)
     this.toSign = op
   },
-  stopPD(from){
+  stopPD(from) {
     var op = {
       type: "raw",
       op: [
@@ -275,11 +281,11 @@ export default {
       msg: `Stop Down Power`,
       ops: ["init"],
       txid: `Stop Down Power`
-  };
+    };
     this.$emit('tosign', op)
     this.toSign = op
   },
-  stopRT(from, to, type = "HIVE"){
+  stopRT(from, to, type = "HIVE") {
     var op = {
       type: "raw",
       op: [
@@ -300,11 +306,11 @@ export default {
       msg: `Stop Recurring Transfer to ` + to,
       ops: ["init"],
       txid: `Stop Recurring Transfer to ` + to
-  };
+    };
     this.$emit('tosign', op)
     this.toSign = op
   },
-  stopSW(from, request_id){
+  stopSW(from, request_id) {
     var op = {
       type: "raw",
       op: [
@@ -321,11 +327,11 @@ export default {
       msg: `Stop Savings Withdrawl` + request_id,
       ops: ["init"],
       txid: `Stop Savings Withdrawl` + request_id,
-  };
+    };
     this.$emit('tosign', op)
     this.toSign = op
   },
-  simpleCJ(id, params, options){
+  simpleCJ(id, params, options) {
 
     var op = {
       id
