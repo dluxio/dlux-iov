@@ -300,11 +300,11 @@ export default {
                                     :mypfp="mypfp" 
                                     @modalsign="sendIt($event)" 
                                     v-slot:trigger>
-                                    <button class="btn btn-sm btn-outline-light trigger"
+                                    <button class="btn btn-sm rounded-pill btn-outline-light trigger"
                                         type="button">
                                         CHANGE</button>
                                 </modal-vue>
-                                <button class="btn btn-sm btn-outline-danger ms-2"
+                                <button class="btn btn-sm rounded-pill btn-outline-danger ms-2"
                                         type="button" @click="simpleCJ('spkccT_spk_power_down', 'amount:0', {'broadcast':'tosign'})">
                                         STOP</button>
                         </div>
@@ -595,11 +595,11 @@ export default {
                                     :mypfp="mypfp" 
                                     @modalsign="sendIt($event)" 
                                     v-slot:trigger>
-                                    <button class="btn btn-sm btn-outline-light trigger"
+                                    <button class="btn btn-sm rounded-pill btn-outline-light trigger"
                                         type="button">
                                         CHANGE</button>
                                 </modal-vue>
-                                <button class="btn btn-sm btn-outline-danger ms-2"
+                                <button class="btn btn-sm rounded-pill btn-outline-danger ms-2"
                                         type="button" @click="simpleCJ('spkccT_broca_power_down', 'amount:0', {'broadcast':'tosign'})">
                                         STOP</button>
                         </div>
@@ -831,9 +831,8 @@ export default {
                                         token="poweredUp"
                                         :mypfp="mypfp" 
                                         @modalsign="sendIt($event)" 
-                                        v-slot:trigger
-                                        class="text-nowrap p-2 trigger">
-                                        <span class="trigger"><i class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
+                                        v-slot:trigger>
+                                        <span class="text-nowrap p-2 trigger"><i class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
                                 </modal-vue>
                             </button>
                             <button type="button"
@@ -886,11 +885,11 @@ export default {
                                     :mypfp="mypfp" 
                                     @modalsign="sendIt($event)" 
                                     v-slot:trigger>
-                                    <button class="btn btn-sm btn-outline-light trigger"
+                                    <button class="btn btn-sm rounded-pill btn-outline-light trigger"
                                         type="button">
                                         CHANGE</button>
                                 </modal-vue>
-                                <button class="btn btn-sm btn-outline-danger ms-2"
+                                <button class="btn btn-sm rounded-pill btn-outline-danger ms-2"
                                         type="button" @click="simpleCJ('spkccT_power_down', 'amount:0', {'broadcast':'tosign'})">
                                         STOP</button>
                         </div>
@@ -933,58 +932,97 @@ export default {
                             <div class="btn-group" role="group"
                                 aria-label="DLP Actions">
                                 <!-- Details collapse button -->
-                                <button class="dropdown btn btn-light text-nowrap" href="#" role="button" id="delegationsbtn" data-bs-toggle="collapse" data-bs-target="#delegationsspk" aria-expanded="false" aria-controls="Show Delegations">
+                                <button class="dropdown btn btn-light text-nowrap" href="#" role="button" id="delegationsLarynxbtn" data-bs-toggle="collapse" data-bs-target="#delegationslarynx" aria-expanded="false" aria-controls="Show Delegations">
                                     <i class="me-2 fa-solid fa-search"></i>Details</button>
                             </div>
                         </div>
                     </div>
-                    <div class="collapse" id="delegationsspk">
-                        <div class="d-flex flex-column text-start border border-secondary rounded px-1 px-lg-2 pt-1 mt-3" style="background-color: rgba(0, 0, 0, 0.5);">
-                            <div class="mb-3">    
-                                <h4 class="py-2 m-0">
-                                    Delegated: {{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}} LP</h4>
-                                <div v-for="(a,b,c) in saccountapi.granting">
-                                    <div class="d-flex align-items-center border-top border-secondary py-2"
-                                        v-if="b != 't'">
-                                        <p class="my-0"><a :href="'https://www.dlux.io/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>: {{formatNumber((a)/1000, 3, '.', ',')}} LP</p>
-                                        <div class="d-flex ms-auto ">
-                                            <modal-vue type="delegate" 
-                                                :smarkets="smarkets.node" token="LARYNX"
-                                                :to="b" :amount="a" :stats="spkStats"
-                                                :balance="saccountapi.poweredUp"
-                                                :account="account"
-                                                @modalsign="sendIt($event)"
-                                                :test="test" v-slot:trigger>
-                                                <button type="button"
-                                                    class="ms-1 btn btn-sm btn-secondary trigger"><i
-                                                        class="fas fa-fw fa-user-edit"></i></button>
-                                            </modal-vue>
-                                            <modal-vue type="delegate" 
-                                                :smarkets="smarkets.node" token="LARYNX"
-                                                :to="b" amount="0" :stats="spkStats"
-                                                :balance="saccountapi.poweredUp"
-                                                :account="account"
-                                                :test="test"
-                                                @modalsign="sendIt($event)" v-slot:trigger>
-                                                <button class="ms-1 btn btn-sm btn-danger ms-1 trigger"
-                                                    type="button"><i
-                                                        class="fas fa-fw fa-trash-alt"></i></button>
-                                            </modal-vue>
+                    <div class="collapse" id="delegationslarynx">
+                         <div class="d-flex flex-column text-start border border-white-50 rounded mt-3 mx-1 mb-1"
+                            style="background-color: rgba(0, 0, 0, 0.3);">
+                               <!-- LARYNX Delegations Status -->
+                                <div
+                                    class="d-flex flex-column flex-lg-row align-items-center mx-auto mb-2 bg-card w-100 rounded-top justify-content-center">
+                                    <div
+                                        class="d-flex flex-column flex-lg-row align-items-center lead rounded bg-darkg mx-1 px-2 py-1 my-1">
+                                        <span>Delegated</span>
+                                        <span class="ms-1">
+                                            {{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}} LARYNX
+                                        </span>
+                                    </div>
+                                    <div
+                                        class="d-flex flex-column flex-lg-row align-items-center lead rounded bg-darkg mx-1 px-2 py-1 my-1">
+                                        <span>Received</span>
+                                        <span class="ms-1">{{formatNumber((saccountapi.granted.t)/1000, 3,'.', ',')}} LARYNX
+                                        </span>
+                                    </div>
+                                </div>
+                                <!-- Delegations Repeats -->
+                                <div class="px-1 px-lg-2">
+                                <!-- Delegations Out -->
+                                    <h5 class="mt-2 mb-1">
+                                        Delegated: (# accounts)
+                                    </h5>
+                                    <!-- No LARYNX Delegations Out -->
+                                    <div v-if="saccountapi.granting.t == 0">
+                                        <div
+                                            class="border-top border-white-50 py-2 text-center fs-5">
+                                            No LARYNX Granting
+                                        </div>
+                                    </div>
+                                    <!-- Repeat HP Delegations Out -->
+                                    <div v-for="(a,b,c) in saccountapi.granting">
+                                        <div class="d-flex flex-column flex-lg-row gap-1 gap-lg-3 align-items-center border-top border-white-50 py-2"
+                                            v-if="b != 't'">
+                                            <a :href="'https://www.dlux.io/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>
+                                            <p class="ms-lg-auto mb-0">{{formatNumber((a)/1000, 3, '.', ',')}} LARYNX</p>
+                                            <div class="d-flex ">
+                                                <modal-vue type="delegate" 
+                                                    :smarkets="smarkets.node" token="LARYNX"
+                                                    :to="b" :amount="a" :stats="spkStats"
+                                                    :balance="saccountapi.poweredUp"
+                                                    :account="account"
+                                                    @modalsign="sendIt($event)"
+                                                    :test="test" v-slot:trigger>
+                                                    <button type="button"
+                                                        class="ms-1 btn btn-sm btn-secondary trigger"><i
+                                                            class="fas fa-fw fa-user-edit"></i></button>
+                                                </modal-vue>
+                                                <modal-vue type="delegate" 
+                                                    :smarkets="smarkets.node" token="LARYNX"
+                                                    :to="b" amount="0" :stats="spkStats"
+                                                    :balance="saccountapi.poweredUp"
+                                                    :account="account"
+                                                    :test="test"
+                                                    @modalsign="sendIt($event)" v-slot:trigger>
+                                                    <button class="ms-1 btn btn-sm btn-danger ms-1 trigger"
+                                                        type="button"><i
+                                                            class="fas fa-fw fa-trash-alt"></i></button>
+                                                </modal-vue>
+                                            </div>
+                                        </div>
+                                    </div>
+                                
+                                    <!-- Delegations In -->
+                                    <h5 class="mt-2 mb-1">
+                                        Received: (# accounts)
+                                    </h5>
+                                    <!-- No LARYNX Delegations In -->
+                                    <div v-if="saccountapi.granted.t == 0">
+                                        <div
+                                            class="border-top border-white-50 py-2 text-center fs-5">
+                                            No LARYNX Granted
+                                        </div>
+                                    </div>
+                                    <!-- Repeat HP Delegations In -->
+                                    <div v-for="(a,b,c) in saccountapi.granted" >
+                                        <div class="d-flex flex-column flex-lg-row gap-1 gap-lg-3 align-items-center border-top border-white-50 py-2"
+                                            v-if="b != 't'">
+                                            <a :href="'https://www.dlux.io/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>
+                                            <p class="mb-0 ms-lg-auto">{{formatNumber((a)/1000, 3, '.', ',')}} LARYNX</p>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="">
-                                <h4 class="py-2 m-0">
-                                    Received: {{formatNumber((saccountapi.granted.t)/1000, 3,'.', ',')}} LP</h4>
-                                <div v-for="(a,b,c) in saccountapi.granted" >
-                                    <div class="d-flex align-items-center border-top border-secondary py-2"
-                                        v-if="b != 't'">
-                                        <p class="my-0"><a :href="'https://www.dlux.io/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>: {{formatNumber((a)/1000, 3, '.', ',')}} LP</p>
-
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
