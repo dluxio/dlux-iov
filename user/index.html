@@ -1706,7 +1706,7 @@
                                                 <div class="d-flex w-100 text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center">
                                                     <i class="fa-solid fa-rotate-right fs-1 text-primary"></i>
                                                     <span class="lead">
-                                                        You have recurring transfers of #amount
+                                                        You have <span v-if="focus?.hive_transfers?.length == 1">a</span> recurring transfer<span v-if="focus?.hive_transfers?.length > 1">s</span>
                                                     </span>
                                                     <a class="ms-lg-auto text-nowrap no-decoration border border-light rounded-pill px-2 py-1"
                                                         data-bs-toggle="collapse" href="#hiveRecurringTransfers"
@@ -2405,7 +2405,7 @@
                                                 <div class="d-flex w-100 text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center">
                                                     <i class="fa-solid fa-rotate-right fs-1 text-primary"></i>
                                                     <span class="lead">
-                                                        You have recurring transfers of #amount
+                                                        You have <span v-if="focus?.hbd_transfers?.length == 1">a</span> recurring transfer<span v-if="focus?.hbd_transfers?.length > 1">s</span>
                                                     </span>
                                                     <a class="ms-lg-auto text-nowrap no-decoration border border-light rounded-pill px-2 py-1"
                                                         data-bs-toggle="collapse" href="#hbdRecurringTransfers"
