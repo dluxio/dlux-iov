@@ -497,7 +497,7 @@
                                                     <!-- DLUX Power Down -->
                                                     <div v-if="focus.weeklyHiveWithdrawal > 0"
                                                         class="alert alert-danger bg-img-none align-items-center mt-2 d-flex"
-                                                        role="alert" style="background-color: #ffffff10;">
+                                                        role="alert" style="background-color: #ffffff01;">
                                                         <!-- :class="{'d-none': !when(focus.next_vesting_withdrawl), 'd-flex': true, 'align-items-center': true}" -->
                                                         <p class="mb-0 lead ">A Power Down of
                                                             {{focus.weeklyHiveWithdrawal}} HP is scheduled for
@@ -699,7 +699,7 @@
                                                     </div>
                                                     <!-- DLUX Unlock Gov -->
                                                     <div class="alert alert-danger bg-img-none align-items-center mt-2 d-flex"
-                                                        role="alert" style="background-color: #ffffff10;">
+                                                        role="alert" style="background-color: #ffffff01;">
                                                         <!-- :class="{'d-none': !when(focus.next_vesting_withdrawl), 'd-flex': true, 'align-items-center': true}" -->
                                                         <p class="mb-0 lead ">An Unlock is scheduled to happen in
                                                             <!--  {{when(saccountapi.spower_downs)}} ({{when(saccountapi.spower_downs,true)}}  -->
@@ -750,7 +750,7 @@
                                     <div role="tabpanel" class="tab-pane" id="spk" aria-labelledby="spktab">
                                         <div>
                                             <div class="alert py-1 mb-4 alert-info bg-img-none d-flex align-items-center justify-content-center flex-wrap"
-                                                role="alert" style="background-color: #ffffff10;">
+                                                role="alert" style="background-color: #ffffff01;">
                                                 <div class="d-flex flex-column flex-grow-1">
                                                     <div class="fs-3 fw-light">The SPK Files Test Net is live
                                                     </div>
@@ -1246,7 +1246,7 @@
                                                         </div>
                                                         <!-- LARYNX Power Down -->
                                                         <div class="alert alert-danger bg-img-none align-items-center mt-2"
-                                                            role="alert" style="background-color: #ffffff10;"
+                                                            role="alert" style="background-color: #ffffff01;"
                                                             :class="{'d-none': !when(saccountapi.powerDowns), 'd-flex': true, 'align-items-center': true}">
                                                             <p class="mb-0 lead ">A power down is scheduled
                                                                 to happen in {{when(saccountapi.powerDowns)}}
@@ -1497,7 +1497,7 @@
                                                         </div>
                                                         <!-- LARYNX Unlock -->
                                                         <div class="alert alert-danger bg-img-none align-items-center mt-2 d-flex"
-                                                            role="alert" style="background-color: #ffffff10;">
+                                                            role="alert" style="background-color: #ffffff01;">
                                                             <!-- :class="{'d-none': !when(focus.next_vesting_withdrawl), 'd-flex': true, 'align-items-center': true}" -->
                                                             <p class="mb-0 lead ">An Unlock is scheduled to happen in
                                                                 <!--  {{when(saccountapi.spower_downs)}} ({{when(saccountapi.spower_downs,true)}}  -->
@@ -1701,49 +1701,54 @@
                                             </div>
                                             <!-- HIVE Recurring Transfers -->
                                             <div v-if="focus?.hive_transfers?.length"
-                                                class="alert alert-primary bg-img-none align-items-center mt-2 d-flex flex-column"
-                                                role="alert" style="background-color: #ffffff10;">
-                                                <!-- :class="{'d-none': !when(saccountapi.spower_downs), 'd-flex': true, 'align-items-center': true}" -->
-                                                <div class="d-flex w-100 align-items-center"><span class="lead">
-                                                        You have recurring transfers
+                                                class="alert alert-primary bg-img-none d-flex flex-column mt-4 mt-lg-3"
+                                                role="alert" style="background-color: #ffffff01;">
+                                                <div class="d-flex w-100 text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center">
+                                                    <i class="fa-solid fa-rotate-right fs-1 text-primary"></i>
+                                                    <span class="lead">
+                                                        You have recurring transfers of #amount
                                                     </span>
-                                                    <a class="ms-auto no-decoration border border-light rounded-pill px-2 py-1"
+                                                    <a class="ms-lg-auto text-nowrap no-decoration border border-light rounded-pill px-2 py-1"
                                                         data-bs-toggle="collapse" href="#hiveRecurringTransfers"
                                                         role="button" aria-expanded="false"
                                                         aria-controls="hiveRecurringTransfers">
-                                                        {{focus.hive_transfers.length}} Recurring Transfers<i
-                                                            class="ms-2 fa-solid fa-search"></i>
+                                                        {{focus.hive_transfers.length}} Recurring Transfer<span v-if="focus?.hive_transfers?.length > 1">s</span>
+                                                        <i class="ms-2 fa-solid fa-search"></i>
                                                     </a>
                                                 </div>
                                                 <div class="collapse w-100 mt-2" id="hiveRecurringTransfers">
                                                     <div v-for="xfr in focus.hive_transfers"
-                                                        class="d-flex w-100 align-items-center border-top border-white-50 py-2">
-                                                        <div class="flex-grow-1">{{precision(xfr.amount.amount,
-                                                            xfr.amount.precision)}} HIVE to @{{xfr.to}}. {{xfr.remaining_executions}} transfers remaining.
+                                                        class="d-flex w-100 flex-column flex-md-row gap-2 gap-md-3 align-items-center border-top border-white-50 py-2">
+                                                        <div class="flex-grow-1 text-center text-md-start">{{precision(xfr.amount.amount,
+                                                            xfr.amount.precision)}} HIVE to @{{xfr.to}}.
+                                                            {{xfr.remaining_executions}} transfer<span v-if="xfr.remaining_executions > 1">s</span> remaining.
                                                         </div>
-                                                        <small class="ms-auto">
-                                                            <div class="d-flex ms-2">
+                                                        <small class="ms-md-auto">
+                                                            <div class="d-flex ms-md-2">
                                                                 <modal-vue
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="recurrent_transfer" :mypfp="mypfp"
                                                                     token="HIVE" :tokenuser="focus" :account="account"
                                                                     :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                    :type="xfr" v-slot:trigger><button
+                                                                    :type="xfr" v-slot:trigger>
+                                                                    <button
                                                                         class="btn btn-sm rounded-pill btn-outline-light trigger"
                                                                         type="button">
-                                                                        CHANGE</button>
+                                                                        CHANGE
+                                                                    </button>
                                                                 </modal-vue>
                                                                 <button
                                                                     class="btn btn-sm btn-outline-danger rounded-pill ms-2"
                                                                     type="button" @click="stopRT(account, xfr.to)">
-                                                                    STOP</button>
+                                                                    STOP
+                                                                </button>
                                                             </div>
                                                         </small>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- hive power -->
+                                        <!-- HIVE Power -->
                                         <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
                                             <div
                                                 class="d-flex align-items-center flex-column flex-lg-row justify-content-between gap-3 gap-lg-4">
@@ -1798,9 +1803,10 @@
                                                                 :tokenstats="hivestats" @modalsign="sendIt($event)"
                                                                 v-slot:trigger class="">
                                                                 <span class="text-nowrap trigger p-2" slot="trigger"
-                                                                    :disabled="!parseF(focus.vesting_shares)"><i
-                                                                        class="fas fa-user-friends fa-fw me-2"></i>Delegate
-                                                                    HP</span>
+                                                                    :disabled="!parseF(focus.vesting_shares)">
+                                                                    <i class="fas fa-user-friends fa-fw me-2"></i>
+                                                                    Delegate HP
+                                                                </span>
                                                             </modal-vue>
                                                         </button>
                                                         <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
@@ -1814,6 +1820,18 @@
                                                                 aria-labelledby="btnGroupDrop1">
                                                                 <modal-vue
                                                                     v-if="focus.id && hivestats.content_reward_percent"
+                                                                    func="delegate_rc" :mypfp="mypfp" token="RC"
+                                                                    :tokenuser="focus" :account="account"
+                                                                    :tokenstats="hivestats" :rc-info="rcAccount"
+                                                                    @modalsign="sendIt($event)" type="hive"
+                                                                    v-slot:trigger class="dropdown-menu-item">
+                                                                    <button class="text-nowrap dropdown-item trigger">
+                                                                        <i class="fas fa-microchip fa-fw me-2"></i>
+                                                                        Delegate RC
+                                                                    </button>
+                                                                </modal-vue>
+                                                                <modal-vue
+                                                                    v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="withdraw_vesting" :mypfp="mypfp" token="HP"
                                                                     :tokenuser="focus" type="HIVE" :account="account"
                                                                     :tokenstats="hivestats" @modalsign="sendIt($event)"
@@ -1822,33 +1840,11 @@
                                                                         slot="trigger"
                                                                         :disabled="!parseF(focus.vesting_shares)">
                                                                         <i
-                                                                            class="fas fa-angle-double-down fa-fw me-2"></i>Power
-                                                                        Down</button>
+                                                                            class="fas fa-angle-double-down fa-fw me-2"></i>
+                                                                        Power Down
+                                                                    </button>
                                                                 </modal-vue>
-                                                                <div class="dropdown-menu-item">
-                                                                    <button class="dropdown-item"><modal-vue
-                                                                            v-if="focus.id && hivestats.content_reward_percent"
-                                                                            func="delegate_rc" :mypfp="mypfp" token="RC"
-                                                                            :tokenuser="focus" :account="account"
-                                                                            :tokenstats="hivestats" :rc-info="rcAccount"
-                                                                            @modalsign="sendIt($event)" type="hive"
-                                                                            v-slot:trigger><span class="trigger"><i
-                                                                                    class="fas fa-microchip fa-fw me-2"></i>Delegate
-                                                                                RC</span></button>
-                                                                </div>
                                                                 <div class="dropdown-divider"></div>
-                                                                <modal-vue
-                                                                    v-if="focus.id && hivestats.content_reward_percent"
-                                                                    func="claim_account" :mypfp="mypfp" token="HP"
-                                                                    :tokenuser="focus" :account="account"
-                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                    type="hive" v-slot:trigger
-                                                                    class="dropdown-menu-item">
-                                                                    <button class="text-nowrap trigger dropdown-item"
-                                                                        slot="trigger"
-                                                                        :disabled="!(parseF(focus.vesting_shares) > 1000000)">Claim
-                                                                        Account Creation Token</button>
-                                                                </modal-vue>
                                                                 <modal-vue
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="set_withdraw_vesting_route" :mypfp="mypfp"
@@ -1856,10 +1852,24 @@
                                                                     :account="account" :tokenstats="hivestats"
                                                                     @modalsign="sendIt($event)" v-slot:trigger
                                                                     class="dropdown-menu-item">
-                                                                    <button class="text-nowrap trigger dropdown-item"
+                                                                    <button class="text-nowrap dropdown-item trigger"
                                                                         slot="trigger"
                                                                         :disabled="!parseF(focus.vesting_shares)">
-                                                                        Set Withdrawl Route</button>
+                                                                        Set Withdrawl Route
+                                                                    </button>
+                                                                </modal-vue>
+                                                                <modal-vue
+                                                                    v-if="focus.id && hivestats.content_reward_percent"
+                                                                    func="claim_account" :mypfp="mypfp" token="HP"
+                                                                    :tokenuser="focus" :account="account"
+                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                    type="hive" v-slot:trigger
+                                                                    class="dropdown-menu-item">
+                                                                    <button class="text-nowrap dropdown-item trigger"
+                                                                        slot="trigger"
+                                                                        :disabled="!(parseF(focus.vesting_shares) > 1000000)">Claim
+                                                                        Account Creation Token
+                                                                    </button>
                                                                 </modal-vue>
                                                             </div>
                                                         </div>
@@ -1868,8 +1878,9 @@
                                             </div>
                                             <!-- HIVE Power Down -->
                                             <div v-if="focus.remainingHiveToWithdraw"
-                                                class="alert alert-danger bg-img-none align-items-center mt-2 d-flex"
-                                                role="alert" style="background-color: #ffffff10;">
+                                                class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
+                                                role="alert" style="background-color: #ffffff01;">
+                                                <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
                                                 <p class="mb-0 lead ">A Power Down of
                                                     {{formatNumber(focus.weeklyHiveWithdrawal, 3, '.',',')}} HP
                                                     is scheduled {{timeUntil(focus.nextWithdrawalDate)}}.
@@ -1877,8 +1888,8 @@
                                                     focus.weeklyHiveWithdrawal,0,'','')}}
                                                     weeks remaining)
                                                 </p>
-                                                <small class="ms-auto">
-                                                    <div class="d-flex ms-2">
+                                                <small class="ms-lg-auto">
+                                                    <div class="d-flex ms-lg-2">
                                                         <modal-vue v-if="focus.id && hivestats.content_reward_percent"
                                                             func="withdraw_vesting" :mypfp="mypfp" token="HP"
                                                             :tokenuser="focus" type="HIVE" :account="account"
@@ -1985,21 +1996,22 @@
                                                             <div class="d-flex flex-column">
                                                                 <!-- HP Delegations Status -->
                                                                 <div
-                                                                    class="d-flex flex-column flex-lg-row align-items-center mx-auto mb-2">
+                                                                    class="d-flex flex-column flex-lg-row flex-wrap align-items-center mx-auto mb-2">
                                                                     <div
-                                                                        class="d-flex flex-column flex-md-row align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
-                                                                        <span>Received</span>
+                                                                        class="d-flex flex-column flex-md-row flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
+                                                                        <span><i class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
                                                                         <span class="ms-1">{{formatNumber(
                                                                             (parseFloat(focus.received_vesting_shares) /
                                                                             parseFloat(hivestats.total_vesting_shares))
                                                                             *
                                                                             parseFloat(hivestats.total_vesting_fund_hive),
                                                                             3, '.', ','
-                                                                            )}} HP</span>
+                                                                            )}} HP
+                                                                        </span>
                                                                     </div>
                                                                     <div
-                                                                        class="d-flex flex-column flex-md-row align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
-                                                                        <span>Delegated</span>
+                                                                        class="d-flex flex-column flex-md-row flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
+                                                                        <span><i class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
                                                                         <span class="ms-1">
                                                                             {{formatNumber(
                                                                             (parseFloat(focus.delegated_vesting_shares)
@@ -2008,15 +2020,16 @@
                                                                             *
                                                                             parseFloat(hivestats.total_vesting_fund_hive),
                                                                             3, '.', ','
-                                                                            )}} HP </span>
-
+                                                                            )}} HP
+                                                                        </span>
                                                                     </div>
                                                                 </div>
                                                                 <!-- HP Delegations Out -->
-                                                                <h5 class="mb-1">HP Delegations: <span
-                                                                        v-if="hpDelegationsOut.length > 0">({{hpDelegationsOut.length}}
-                                                                        account<span
-                                                                            v-if="hpDelegationsOut.length > 1">s</span>)</span>
+                                                                <h5 class="mb-1">HP Delegations:
+                                                                    <span v-if="hpDelegationsOut.length > 0">
+                                                                        ({{hpDelegationsOut.length}}
+                                                                        account<span v-if="hpDelegationsOut.length > 1">s</span>)
+                                                                    </span>
                                                                 </h5>
                                                                 <!-- No HP Delegations Out -->
                                                                 <div v-if="!hpDelegationsOut.length">
@@ -2031,7 +2044,7 @@
                                                                     <div
                                                                         class="d-flex flex-column flex-lg-row gap-1 gap-lg-3 justify-content-between align-items-center border-top border-white-50 py-2">
                                                                         <p class="my-0">
-                                                                            <a :href="'https://www.dlux.io/@' + delegation.delegatee"
+                                                                            <a :href="'/@' + delegation.delegatee"
                                                                                 target="_blank"
                                                                                 class="text-info no-decoration">
                                                                                 @{{delegation.delegatee}}
@@ -2050,7 +2063,7 @@
                                                                             {{delegation.min_delegation_time}}</p>
                                                                         <div class="d-flex">
                                                                             <button type="button"
-                                                                                class="ms-1 btn btn-sm btn-secondary">
+                                                                                class="ms-1 btn btn-sm btn-secondary p-0">
                                                                                 <modal-vue
                                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                                     func="delegate_vesting_shares"
@@ -2061,7 +2074,7 @@
                                                                                     :tokenstats="hivestats"
                                                                                     @modalsign="sendIt($event)"
                                                                                     v-slot:trigger>
-                                                                                    <span class="trigger"><i
+                                                                                    <span class="p-1 trigger"><i
                                                                                             class="fas fa-fw fa-user-edit"></i></span></modal-vue>
                                                                             </button>
                                                                             <button type="button"
@@ -2073,7 +2086,6 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-
                                                         </div>
                                                         <!-- RC Delegations -->
                                                         <div role="tabpanel" class="tab-pane" id="rc-delegations"
@@ -2081,10 +2093,10 @@
                                                             <div class="d-flex flex-column">
                                                                 <!-- RC Delegations Status -->
                                                                 <div
-                                                                    class="d-flex flex-column flex-lg-row align-items-center mx-auto mb-2">
+                                                                    class="d-flex flex-column flex-lg-row flex-wrap align-items-center mx-auto mb-2">
                                                                     <div
-                                                                        class="d-flex flex-column flex-lg-row align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
-                                                                        <span>Received</span>
+                                                                        class="d-flex flex-column flex-md-row flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
+                                                                        <span><i class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
                                                                         <span class="ms-1">{{formatNumber(rcAccount ?
                                                                             rcAccount.received_delegated_rc : 0, 0, '.',
                                                                             ',')}}
@@ -2092,8 +2104,8 @@
                                                                         </span>
                                                                     </div>
                                                                     <div
-                                                                        class="d-flex flex-column flex-lg-row align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
-                                                                        <span>Delegated</span>
+                                                                        class="d-flex flex-column flex-md-row flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
+                                                                        <span><i class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
                                                                         <span class="ms-1">
                                                                             {{formatNumber(rcAccount ?
                                                                             rcAccount.delegated_rc : 0, 0, '.', ',')}}
@@ -2102,10 +2114,13 @@
                                                                     </div>
                                                                 </div>
                                                                 <!-- RC Delegations Out -->
-                                                                <h5 class="mb-1">RC Delegations: <span
-                                                                        v-if="rcDelegationsOut.length > 0">({{rcDelegationsOut.length}}
+                                                                <h5 class="mb-1">
+                                                                    RC Delegations:
+                                                                    <span v-if="rcDelegationsOut.length > 0">
+                                                                        ({{rcDelegationsOut.length}}
                                                                         account<span
-                                                                            v-if="rcDelegationsOut.length > 1">s</span>)</span>
+                                                                            v-if="rcDelegationsOut.length > 1">s</span>)
+                                                                    </span>
                                                                 </h5>
                                                                 <div v-if="!rcDelegationsOut.length">
                                                                     <div
@@ -2118,7 +2133,7 @@
                                                                     <div
                                                                         class="d-flex flex-column flex-lg-row gap-1 gap-lg-3 align-items-center border-top border-white-50 py-2">
                                                                         <p class="my-0 flex-grow-1">
-                                                                            <a :href="'https://www.dlux.io/@' + delegation.to"
+                                                                            <a :href="'/@' + delegation.to"
                                                                                 target="_blank"
                                                                                 class="text-info no-decoration">
                                                                                 @{{delegation.to}}
@@ -2135,7 +2150,7 @@
                                                                                 aria-label="RC Mana Breakdown"
                                                                                 aria-valuemin="0" aria-valuemax="100">
                                                                                 <!-- Recipient's Own RC Mana -->
-                                                                                <div class="progress-bar progress-bar-striped text-dark bg-success"
+                                                                                <div class="progress-bar progress-bar-striped text-dark bg-primary"
                                                                                     :style="{ width: calculateOwnRcPercentage(rcAccounts[delegation.to], delegation.delegated_rc) + '%' }">
                                                                                     {{
                                                                                     calculateOwnRcPercentage(rcAccounts[delegation.to],
@@ -2143,7 +2158,7 @@
                                                                                     Own
                                                                                 </div>
                                                                                 <!-- Your Delegated RC Mana -->
-                                                                                <div class="progress-bar progress-bar-striped text-dark bg-warning"
+                                                                                <div class="progress-bar progress-bar-striped text-dark bg-orange"
                                                                                     :style="{ width: calculateDelegatedRcPercentage(rcAccounts[delegation.to], delegation.delegated_rc) + '%' }">
                                                                                     {{
                                                                                     calculateDelegatedRcPercentage(rcAccounts[delegation.to],
@@ -2153,8 +2168,9 @@
                                                                             </div>
                                                                         </div>
                                                                         <div class="d-flex">
+                                                                            <!-- Change RC Delegation-->
                                                                             <button type="button"
-                                                                                class="ms-1 btn btn-sm btn-secondary">
+                                                                                class="ms-1 btn btn-sm p-0 btn-secondary">
                                                                                 <modal-vue
                                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                                     func="delegate_rc" :mypfp="mypfp"
@@ -2164,10 +2180,14 @@
                                                                                     :type="delegation.to"
                                                                                     :rc-info="rcAccount"
                                                                                     @modalsign="sendIt($event)"
-                                                                                    v-slot:trigger><span
-                                                                                        class="trigger"><i
-                                                                                            class="fas fa-fw fa-user-edit"></i></span></modal-vue>
+                                                                                    v-slot:trigger>
+                                                                                    <span class="p-1 trigger">
+                                                                                        <i
+                                                                                            class="fas fa-fw fa-user-edit"></i>
+                                                                                    </span>
+                                                                                </modal-vue>
                                                                             </button>
+                                                                            <!-- Delete RC Delegation-->
                                                                             <button type="button"
                                                                                 class="ms-1 btn btn-sm btn-danger ms-1"
                                                                                 @click="stopRC(account, delegation.to)">
@@ -2177,7 +2197,6 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-
                                                         </div>
                                                     </div>
                                                 </div>
@@ -2220,17 +2239,15 @@
                                                         <li class="invisible"></li>
                                                     </ul>
                                                 </div>
-                                                <div id="dluxgactions" class="text-center text-lg-end">
-                                                    <h5 id="govbalance"
+                                                <div id="hivesavings" class="text-center text-lg-end">
+                                                    <h5 id="hivesavingsbal"
                                                         class="d-flex align-items-center justify-content-center justify-content-lg-end">
-                                                        <!--  {{formatNumber((accountapi.gov)/1000, 3, '.', ',')}} -->
                                                         {{formatNumber(focus.savings_balance,3,'.', ',')}}
                                                         <span class="ms-2 text-primary">HIVE</span><span
                                                             class="ms-1 badge badge-type-append bg-primary text-dark d-flex align-items-center justify-content-center rounded-circle">
                                                             <i class="fa-solid fa-lock"></i>
                                                         </span>
                                                     </h5>
-
                                                     <button type="button" class="btn btn-light p-0" v-if="me"
                                                         :disabled="!parseF(focus.savings_balance)">
                                                         <modal-vue v-if="focus.id && hivestats.content_reward_percent"
@@ -2242,22 +2259,24 @@
                                                                 slot="trigger">
                                                                 <i class="fas fa-money-bill-transfer fa-fw me-2"></i>
                                                                 Withdraw
-
                                                             </span>
                                                         </modal-vue>
                                                     </button>
-
                                                 </div>
                                             </div>
                                             <!-- HIVE Savings Withdrawl -->
-                                            <div v-if="focus?.hive_pendingWithdrawals?.length" class="alert alert-danger bg-img-none align-items-center mt-2 d-flex flex-column"
-                                                role="alert" style="background-color: #ffffff10;">
-                                                <div class="d-flex w-100 align-items-center"><span class="lead">!!Pending HIVE Savings Withdrawls!!</span>
-                                                    <a class="ms-auto no-decoration border border-light rounded-pill px-2 py-1"
+                                            <div v-if="focus?.hive_pendingWithdrawals?.length"
+                                                class="alert alert-danger d-flex flex-column bg-img-none align-items-center mt-4 mt-lg-3"
+                                                role="alert" style="background-color: #ffffff01;">
+                                                <div class="d-flex w-100 text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 align-items-center">
+                                                    <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
+                                                    <span class="lead">Pending HIVE Savings Withdrawl of #amount</span>
+                                                    <a class="ms-lg-auto no-decoration text-nowrap border border-light rounded-pill px-2 py-1"
                                                         data-bs-toggle="collapse" href="#hiveSavingsWithdrawls"
                                                         role="button" aria-expanded="false"
                                                         aria-controls="hiveSavingsWithdrawls">
-                                                        {{focus?.hive_pendingWithdrawals?.length}} Withdrawls<i class="ms-2 fa-solid fa-search"></i>
+                                                        {{focus?.hive_pendingWithdrawals?.length}} Withdrawl<span v-if="focus?.hive_pendingWithdrawals?.length > 1">s</span>
+                                                        <i class="ms-2 fa-solid fa-search fa-fw"></i>
                                                     </a>
                                                 </div>
                                                 <div class="collapse w-100 mt-2" id="hiveSavingsWithdrawls">
@@ -2277,14 +2296,14 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- hbd banner -->
+                                        <!-- HBD Banner -->
                                         <div
                                             class="d-flex mt-3 justify-content-center align-items-center bg-dark mb-3 p-2 rounded">
                                             <img src="/img/hbd_green.svg" class="img-fluid" alt="HBD Logomark"
                                                 style="height: 70px;">
                                             <span class="nav-logotype ms-1" style="font-size:6ch;">HBD</span>
                                         </div>
-                                        <!-- hbd token -->
+                                        <!-- HBD Token -->
                                         <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
                                             <div
                                                 class="d-flex align-items-center flex-column flex-lg-row justify-content-between gap-3 gap-lg-4">
@@ -2303,7 +2322,8 @@
                                                         token
                                                         is
                                                         pegged
-                                                        to the US Dollar</p>
+                                                        to the US Dollar
+                                                    </p>
                                                 </div>
                                                 <div id="hbdactions" class="text-center text-lg-end">
                                                     <h5 id="hbdbalance"
@@ -2316,7 +2336,7 @@
                                                         </span>
                                                     </h5>
                                                     <div class="btn-group" v-if="me" role="group"
-                                                        aria-label="DLUX Actions">
+                                                        aria-label="HBD Actions">
                                                         <button type="button" class="btn btn-light p-0">
                                                             <modal-vue
                                                                 v-if="focus.id && hivestats.content_reward_percent"
@@ -2324,9 +2344,12 @@
                                                                 :tokenuser="focus" :account="account"
                                                                 :tokenstats="hivestats" @modalsign="sendIt($event)"
                                                                 type="hive" v-slot:trigger>
-                                                                <span class="text-nowrap trigger p-2"><i
-                                                                        class="fas fa-paper-plane me-2 trigger"></i>Send</span>
-                                                            </modal-vue></button>
+                                                                <span class="text-nowrap trigger p-2">
+                                                                    <i class="fas fa-paper-plane me-2 trigger"></i>
+                                                                    Send
+                                                                </span>
+                                                            </modal-vue>
+                                                        </button>
                                                         <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
                                                             disabled></button>
                                                         <div class="btn-group" role="group">
@@ -2345,10 +2368,10 @@
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
                                                                         slot="trigger"
-                                                                        :disabled="!parseF(focus.hbd_balance)"><i
-                                                                            class="fas fa-random fa-fw me-2"></i>Convert
-                                                                        to
-                                                                        HIVE</button>
+                                                                        :disabled="!parseF(focus.hbd_balance)">
+                                                                        <i class="fas fa-random fa-fw me-2"></i>
+                                                                        Convert to HIVE
+                                                                    </button>
                                                                 </modal-vue>
                                                                 <modal-vue
                                                                     v-if="focus.id && hivestats.content_reward_percent"
@@ -2359,9 +2382,10 @@
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
                                                                         slot="trigger"
-                                                                        :disabled="!parseF(focus.hbd_balance)"><i
-                                                                            class="fas fa-lock fa-fw me-2"></i>
-                                                                        Transfer to HBD Savings</button>
+                                                                        :disabled="!parseF(focus.hbd_balance)">
+                                                                        <i class="fas fa-lock fa-fw me-2"></i>
+                                                                        Transfer to HBD Savings
+                                                                    </button>
                                                                 </modal-vue>
                                                                 <div class="dropdown-divider"></div>
                                                                 <div class="dropdown-menu-item">
@@ -2376,37 +2400,39 @@
                                             </div>
                                             <!-- HBD Recurring Transfers -->
                                             <div v-if="focus?.hbd_transfers?.length"
-                                                class="alert alert-primary bg-img-none align-items-center mt-2 d-flex flex-column"
-                                                role="alert" style="background-color: #ffffff10;">
-                                                <!-- :class="{'d-none': !when(saccountapi.spower_downs), 'd-flex': true, 'align-items-center': true}" -->
-                                                <div class="d-flex w-100 align-items-center"><span class="lead">
-                                                        You have recurring transfers
+                                                class="alert alert-primary bg-img-none d-flex flex-column mt-4 mt-lg-3"
+                                                role="alert" style="background-color: #ffffff01;">
+                                                <div class="d-flex w-100 text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center">
+                                                    <i class="fa-solid fa-rotate-right fs-1 text-primary"></i>
+                                                    <span class="lead">
+                                                        You have recurring transfers of #amount
                                                     </span>
-                                                    <a class="ms-auto no-decoration border border-light rounded-pill px-2 py-1"
+                                                    <a class="ms-lg-auto text-nowrap no-decoration border border-light rounded-pill px-2 py-1"
                                                         data-bs-toggle="collapse" href="#hbdRecurringTransfers"
                                                         role="button" aria-expanded="false"
                                                         aria-controls="hbdRecurringTransfers">
-                                                        {{focus.hbd_transfers.length}} Recurring Transfers<i
-                                                            class="ms-2 fa-solid fa-search"></i>
+                                                        {{focus.hbd_transfers.length}} Recurring Transfer<span v-if="focus?.hbd_transfers?.length > 1">s</span>
+                                                        <i class="ms-2 fa-solid fa-search"></i>
                                                     </a>
                                                 </div>
                                                 <div class="collapse w-100 mt-2" id="hbdRecurringTransfers">
                                                     <div v-for="xfr in focus.hbd_transfers"
-                                                        class="d-flex w-100 align-items-center border-top border-white-50 py-2">
-                                                        <div class="flex-grow-1">{{precision(xfr.amount.amount,
-                                                            xfr.amount.precision)}} HBD to @{{xfr.to}}. {{xfr.remaining_executions}} transfers remaining.</div>
-                                                        <small class="ms-auto">
-                                                            <div class="d-flex ms-2">
+                                                        class="d-flex w-100 flex-column flex-md-row gap-2 gap-lg-3 align-items-center border-top border-white-50 py-2">
+                                                        <div class="flex-grow-1 text-center text-md-start">{{precision(xfr.amount.amount,
+                                                            xfr.amount.precision)}} HBD to @{{xfr.to}}.
+                                                            {{xfr.remaining_executions}} transfer<span v-if="xfr.remaining_executions > 1">s</span> remaining.</div>
+                                                        <small class="ms-md-auto">
+                                                            <div class="d-flex ms-md-2">
                                                                 <modal-vue
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="recurrent_transfer" :mypfp="mypfp"
                                                                     token="HIVE" :tokenuser="focus" :account="account"
                                                                     :tokenstats="hivestats" @modalsign="sendIt($event)"
                                                                     :type="xfr" v-slot:trigger><button
-                                                                    class="btn btn-sm rounded-pill btn-outline-light trigger"
-                                                                    type="button">
-                                                                    CHANGE</button>
-                                                                    </modal-vue>
+                                                                        class="btn btn-sm rounded-pill btn-outline-light trigger"
+                                                                        type="button">
+                                                                        CHANGE</button>
+                                                                </modal-vue>
                                                                 <button
                                                                     class="btn btn-sm btn-outline-danger rounded-pill ms-2"
                                                                     type="button"
@@ -2418,7 +2444,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- hbd savings -->
+                                        <!-- HBD Savings -->
                                         <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
                                             <div
                                                 class="d-flex align-items-center flex-column flex-lg-row justify-content-between gap-3 gap-lg-4">
@@ -2466,7 +2492,7 @@
                                                         </span>
                                                     </h5>
                                                     <div class="btn-group" v-if="me" role="group"
-                                                        aria-label="HIVE Actions">
+                                                        aria-label="HBD Actions">
                                                         <button type="button" class="btn btn-light text-nowrap p-0"
                                                             :disabled="!parseF(focus.savings_hbd_balance)">
                                                             <modal-vue
@@ -2476,24 +2502,29 @@
                                                                 :tokenstats="hivestats" @modalsign="sendIt($event)"
                                                                 type="hive" v-slot:trigger class="d-flex">
                                                                 <span class="text-nowrap btn-padding trigger"
-                                                                    slot="trigger"><i
-                                                                        class="fas fa-money-bill-transfer fa-fw me-2"></i>Withdraw</span></modal-vue></button>
-
+                                                                    slot="trigger">
+                                                                    <i
+                                                                        class="fas fa-money-bill-transfer fa-fw me-2"></i>
+                                                                    Withdraw
+                                                                </span>
+                                                            </modal-vue>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
                                             <!-- HBD Savings Withdrawl -->
-                                            <div 
-                                            v-if="focus?.hbd_pendingWithdrawals?.length" 
-                                            class="alert alert-danger bg-img-none align-items-center mt-2 d-flex flex-column"
-                                                role="alert" style="background-color: #ffffff10;">
-                                                <!-- :class="{'d-none': !when(saccountapi.spower_downs), 'd-flex': true, 'align-items-center': true}" -->
-                                                <div class="d-flex w-100 align-items-center"><span class="lead">!!Pending HIVE Savings Withdrawls!!</span>
-                                                    <a class="ms-auto no-decoration border border-light rounded-pill px-2 py-1"
+                                            <div v-if="focus?.hbd_pendingWithdrawals?.length"
+                                                class="alert alert-danger bg-img-none d-flex flex-column align-items-center mt-4 mt-lg-3"
+                                                role="alert" style="background-color: #ffffff01;">
+                                                <div class="d-flex w-100 align-items-center text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 ">
+                                                    <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
+                                                    <p class="mb-0 lead">Pending HBD Savings Withdrawl of #amount</p>
+                                                    <a class="ms-lg-auto text-nowrap no-decoration border border-light rounded-pill px-2 py-1"
                                                         data-bs-toggle="collapse" href="#hbdSavingsWithdrawls"
                                                         role="button" aria-expanded="false"
                                                         aria-controls="hbdSavingsWithdrawls">
-                                                        {{focus?.hbd_pendingWithdrawals?.length}} Withdrawls<i class="ms-2 fa-solid fa-search"></i>
+                                                        {{focus?.hbd_pendingWithdrawals?.length}} Withdrawl<span v-if="focus?.hbd_pendingWithdrawals?.length > 1">s</span><i
+                                                            class="ms-2 fa-solid fa-search fa-fw"></i>
                                                     </a>
                                                 </div>
                                                 <div class="collapse w-100 mt-2" id="hbdSavingsWithdrawls">
@@ -2513,7 +2544,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- hbd savings claimable -->
+                                        <!-- HBD Savings Claimable -->
                                         <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
                                             <div
                                                 class="d-flex align-items-center flex-column flex-lg-row justify-content-between gap-3 gap-lg-4">
@@ -2560,7 +2591,7 @@
                                                         </span>
                                                     </h5>
                                                     <div class="btn-group" v-show="me" role="group"
-                                                        aria-label="HIVE Actions">
+                                                        aria-label="HBD Actions">
                                                         <button type="button" class="btn btn-light text-nowrap"
                                                             :disabled="!hbdclaim[focus.name]?.canClaimInterest || hbdclaim[focus.name].pendingInterestHbd === 0"
                                                             title="Claim HBD interest"><i
@@ -2571,7 +2602,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- account value -->
+                                        <!-- Account Value -->
                                         <div class="d-flex align-items-center p-3 bg-dark rounded mt-3">
                                             <div>
                                                 <div class="d-flex align-items-start">

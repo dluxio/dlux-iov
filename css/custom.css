@@ -12907,6 +12907,10 @@ td {
   color: orange;
 }
 
+.bg-orange {
+  background-color: orange;
+}
+
 .text-yellow {
   color: yellow;
 }
