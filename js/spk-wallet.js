@@ -284,11 +284,16 @@ export default {
                     </div>
                 </div>
                 <!-- SPK Power Down -->
-                <div class="alert alert-danger bg-img-none align-items-center mt-2" role="alert" style="background-color: #ffffff10;"
-                    :class="{'d-none': !when(saccountapi.spower_downs), 'd-flex': true, 'align-items-center': true}">
-                    <p class="mb-0 lead ">A Power Down is scheduled to happen in {{when(saccountapi.spower_downs)}} ({{when(saccountapi.spower_downs, true)}} installments remaining)</p>
-                    <small class="ms-auto">
-                        <div class="d-flex ms-2">    
+                <div v-if="when(saccountapi.spower_downs)"
+                    class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
+                role="alert" style="background-color: #ffffff01;">
+                    <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
+                    <p class="mb-0 lead ">A Power Down of
+                    #amount SPK
+                     is scheduled in {{when(saccountapi.spower_downs)}} 
+                     with {{when(saccountapi.spower_downs, true)}} installment<span v-if="when(saccountapi.spower_downs, true) > 1">s</span> remaining</p>
+                    <small class="ms-lg-auto">
+                        <div class="d-flex ms-lg-2">    
                             <modal-vue 
                                     class="dropdown-menu-item"
                                     v-if="protocolspk.head_block && saccountapi.head_block" func="powdn" 
@@ -579,11 +584,16 @@ export default {
                     </div>
                 </div>
                 <!-- Broca Power Down -->
-                <div class="alert alert-danger bg-img-none align-items-center mt-2" role="alert" style="background-color: #ffffff10;"
-                    :class="{'d-none': !when(saccountapi.bpower_downs), 'd-flex': true, 'align-items-center': true}">
-                    <p class="mb-0 lead ">A Power Down is scheduled to happen in {{when(saccountapi.bpower_downs)}} ({{when(saccountapi.bpower_downs, true)}} installments remaining)</p>
-                    <small class="ms-auto">
-                        <div class="d-flex ms-2">    
+                <div v-if="when(saccountapi.bpower_downs)"
+                     class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
+                     role="alert" style="background-color: #ffffff01;">
+                     <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
+                     <p class="mb-0 lead ">A Power Down of 
+                     #amount BROCA
+                     is scheduled in {{when(saccountapi.bpower_downs)}} 
+                     with {{when(saccountapi.bpower_downs, true)}} installment<span v-if="when(saccountapi.bpower_downs, true) > 1">s</span> remaining</p>
+                    <small class="ms-lg-auto">
+                        <div class="d-flex ms-lg-2">    
                             <modal-vue 
                                     class="dropdown-menu-item"
                                     v-if="protocolbroca.head_block && saccountapi.head_block" func="powdn" 
@@ -869,11 +879,17 @@ export default {
                     </div>
                 </div>
                 <!-- Larynx Power Down -->
-                <div class="alert alert-danger bg-img-none align-items-center mt-2" role="alert" style="background-color: #ffffff10;"
-                    :class="{'d-none': !when(saccountapi.power_downs), 'd-flex': true, 'align-items-center': true}">
-                    <p class="mb-0 lead ">A Power Down is scheduled to happen in {{when(saccountapi.power_downs)}} ({{when(saccountapi.power_downs, true)}} installments remaining)</p>
-                    <small class="ms-auto">
-                        <div class="d-flex ms-2">    
+                <div v-if="when(saccountapi.power_downs)" 
+                    class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
+                     role="alert" style="background-color: #ffffff01;">
+                    <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
+                    <p class="mb-0 lead ">A Power Down of 
+                        #amount LARYNX
+                        is scheduled in {{when(saccountapi.power_downs)}} 
+                        with {{when(saccountapi.power_downs, true)}} installment<span v-if="when(saccountapi.power_downs, true) > 1">s</span> remaining
+                    </p>
+                    <small class="ms-lg-auto">
+                        <div class="d-flex ms-lg-2">    
                             <modal-vue 
                                     class="dropdown-menu-item"
                                     v-if="protocollarynx.head_block && saccountapi.head_block" func="powdn" 
@@ -897,7 +913,7 @@ export default {
                 </div>
             </div>
             <!-- Delegated LARYNX Power -->
-            <div class="border-top border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+            <div class="border-top border-white-50 px-0 py-4 py-lg-3">
                 <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
                         <div class="text-center position-relative">
                             <div class="ratio ratio-1x1 wallet-token-img">
@@ -938,21 +954,21 @@ export default {
                         </div>
                     </div>
                     <div class="collapse" id="delegationslarynx">
-                         <div class="d-flex flex-column text-start border border-white-50 rounded mt-3 mx-1 mb-1"
+                         <div class="d-flex flex-column text-start border border-white-50 rounded mt-3 mb-1"
                             style="background-color: rgba(0, 0, 0, 0.3);">
                                <!-- LARYNX Delegations Status -->
                                 <div
-                                    class="d-flex flex-column flex-lg-row align-items-center mx-auto mb-2 bg-card w-100 rounded-top justify-content-center">
+                                    class="d-flex flex-row flex-wrap align-items-center mx-auto mb-2 w-100 justify-content-center">
                                     <div
-                                        class="d-flex flex-column flex-lg-row align-items-center lead rounded bg-darkg mx-1 px-2 py-1 my-1">
-                                        <span>Delegated</span>
+                                        class="d-flex flex-column flex-md-row align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 my-1">
+                                        <span><i class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
                                         <span class="ms-1">
                                             {{formatNumber((saccountapi.granting.t)/1000, 3, '.', ',')}} LARYNX
                                         </span>
                                     </div>
                                     <div
-                                        class="d-flex flex-column flex-lg-row align-items-center lead rounded bg-darkg mx-1 px-2 py-1 my-1">
-                                        <span>Received</span>
+                                        class="d-flex flex-column flex-md-row align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 my-1">
+                                        <span><i class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
                                         <span class="ms-1">{{formatNumber((saccountapi.granted.t)/1000, 3,'.', ',')}} LARYNX
                                         </span>
                                     </div>
@@ -972,10 +988,10 @@ export default {
                                     </div>
                                     <!-- Repeat HP Delegations Out -->
                                     <div v-for="(a,b,c) in saccountapi.granting">
-                                        <div class="d-flex flex-column flex-lg-row gap-1 gap-lg-3 align-items-center border-top border-white-50 py-2"
+                                        <div class="d-flex flex-column flex-sm-row gap-1 gap-lg-3 align-items-center border-top border-white-50 py-2"
                                             v-if="b != 't'">
                                             <a :href="'https://www.dlux.io/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>
-                                            <p class="ms-lg-auto mb-0">{{formatNumber((a)/1000, 3, '.', ',')}} LARYNX</p>
+                                            <p class="ms-sm-auto mb-0">{{formatNumber((a)/1000, 3, '.', ',')}} LARYNX</p>
                                             <div class="d-flex ">
                                                 <modal-vue type="delegate" 
                                                     :smarkets="smarkets.node" token="LARYNX"
@@ -1016,10 +1032,10 @@ export default {
                                     </div>
                                     <!-- Repeat HP Delegations In -->
                                     <div v-for="(a,b,c) in saccountapi.granted" >
-                                        <div class="d-flex flex-column flex-lg-row gap-1 gap-lg-3 align-items-center border-top border-white-50 py-2"
+                                        <div class="d-flex flex-column flex-sm-row gap-1 gap-lg-3 align-items-center border-top border-white-50 py-2"
                                             v-if="b != 't'">
                                             <a :href="'https://www.dlux.io/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>
-                                            <p class="mb-0 ms-lg-auto">{{formatNumber((a)/1000, 3, '.', ',')}} LARYNX</p>
+                                            <p class="mb-0 ms-sm-auto">{{formatNumber((a)/1000, 3, '.', ',')}} LARYNX</p>
                                         </div>
                                     </div>
                                 </div>
