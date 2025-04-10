@@ -304,6 +304,27 @@ export default {
     this.$emit('tosign', op)
     this.toSign = op
   },
+  stopSW(from, request_id){
+    var op = {
+      type: "raw",
+      op: [
+        [
+          "cancel_transfer_from_savings",
+          {
+            from,
+            request_id
+          }
+        ]
+      ],
+      key: "active",
+      id: `Stop Savings Withdrawl` + request_id,
+      msg: `Stop Savings Withdrawl` + request_id,
+      ops: ["init"],
+      txid: `Stop Savings Withdrawl` + request_id,
+  };
+    this.$emit('tosign', op)
+    this.toSign = op
+  },
   simpleCJ(id, params, options){
 
     var op = {

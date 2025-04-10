@@ -3243,6 +3243,24 @@ function buyNFT(setname, uid, price, type, callback){
         throw error;
       }
     },
+    async getPendingSavingsWithdrawals(username, key) {
+      try {
+        const pendingWithdrawals = await this.hiveApiCall('condenser_api.get_savings_withdraw_from', [username])
+        console.log({ pendingWithdrawals })
+        var hbds = []
+        var hives = []
+        for (var i = 0; i < pendingWithdrawals.length; i++) {
+          if (pendingWithdrawals[i].amount.split(' ')[1] == "HIVE") hives.push(pendingWithdrawals[i])
+          else hbds.push(pendingWithdrawals[i])
+        }
+        console.log({hives, hbds})
+        this[key].hive_pendingWithdrawals = hives
+        this[key].hbd_pendingWithdrawals = hbds
+      } catch (error) {
+        console.error('Error fetching pending savings withdrawals:', error);
+        throw error;
+      }
+    },
     checkAccount(name, key) {
       console.log('Checking:', name)
       fetch(this.hapi, {
@@ -3274,6 +3292,9 @@ function buyNFT(setname, uid, price, type, callback){
             this[key].hbd_transfers = []
             this[key].hive_transfers = []
             this.getRecurrentTransfers(key == 'newAccountDeets' ? name : this[name], key)
+            this[key].hive_pendingWithdrawals = []
+            this[key].hbd_pendingWithdrawals = []
+            if (rez.savings_withdraw_requests) this.getPendingSavingsWithdrawals(key == 'newAccountDeets' ? name : this[name], key)
             const totalVestingShares = parseFloat(rez.vesting_shares)
             const toWithdraw = parseFloat(rez.to_withdraw) / 1e6
             const withdrawn = parseFloat(rez.withdrawn)
