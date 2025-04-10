@@ -2380,7 +2380,7 @@
                                                             :disabled="!parseF(focus.savings_hbd_balance)">
                                                             <modal-vue
                                                                 v-if="focus.id && hivestats.content_reward_percent"
-                                                                func="transfer" :mypfp="mypfp" token="HBD"
+                                                                func="transfer_from_savings" :mypfp="mypfp" token="HBD"
                                                                 :tokenuser="focus" :account="account"
                                                                 :tokenstats="hivestats" @modalsign="sendIt($event)"
                                                                 type="hive" v-slot:trigger class="d-flex">

@@ -1,5 +1,5 @@
 if (window.location.hostname.includes('dlux') && 'serviceWorker' in navigator) {
-    const version = '2025.04.09.21';
+    const version = '2025.04.09.22';
     console.log('Registering service worker with version:', version);
 
     navigator.serviceWorker.getRegistration('/')
