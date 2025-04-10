@@ -309,7 +309,7 @@
                                                 </div>
                                                 <!--dlux token-->
                                                 <div
-                                                    class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                                    class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
                                                     <div
                                                         class="d-flex flex-column flex-lg-row align-items-center justify-content-between gap-3 gap-lg-4">
 
@@ -403,7 +403,7 @@
                                                 </div>
                                                 <!--dlux power-->
                                                 <div
-                                                    class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                                    class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
                                                     <div
                                                         class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
                                                         <div class="text-center position-relative">
@@ -496,17 +496,15 @@
                                                     </div>
                                                     <!-- DLUX Power Down -->
                                                     <div v-if="focus.weeklyHiveWithdrawal > 0"
-                                                        class="alert alert-danger bg-img-none align-items-center mt-2 d-flex"
+                                                        class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
                                                         role="alert" style="background-color: #ffffff01;">
-                                                        <!-- :class="{'d-none': !when(focus.next_vesting_withdrawl), 'd-flex': true, 'align-items-center': true}" -->
-                                                        <p class="mb-0 lead ">A Power Down of
-                                                            {{focus.weeklyHiveWithdrawal}} HP is scheduled for
-                                                            {{focus.nextWithdrawalDate}}. ({{focus.weeklyHiveWithdrawal
-                                                            / focus.remainingHiveToWithdraw}} weeks remaining)
-                                                            <!--  {{when(saccountapi.spower_downs)}} ({{when(saccountapi.spower_downs,true)}}  -->
+                                                        <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
+                                                         <p class="mb-0 lead ">A {{focus.weeklyHiveWithdrawal}} HP
+                                                            power down is scheduled {{focus.nextWithdrawalDate}}. 
+                                                            ({{focus.weeklyHiveWithdrawal / focus.remainingHiveToWithdraw}} weeks remaining)
                                                         </p>
-                                                        <small class="ms-auto">
-                                                            <div class="d-flex ms-2">
+                                                        <small class="ms-lg-auto">
+                                                            <div class="d-flex ms-lg-2">
                                                                 <!--  <modal-vue class="dropdown-menu-item"
                                                         v-if="protocolspk.head_block && saccountapi.head_block"
                                                         func="powdn" token="poweredUp" :test="test"
@@ -529,7 +527,7 @@
                                                 </div>
                                                 <!--delegated dlux power -->
                                                 <div
-                                                    class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                                    class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
                                                     <div
                                                         class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
                                                         <div class="position-relative text-center">
@@ -608,7 +606,7 @@
                                                     </div>
                                                 </div>
                                                 <!-- dlux governance -->
-                                                <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                                <div class=" px-3 py-4 px-lg-1 py-lg-3">
                                                     <div
                                                         class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
                                                         <div class="text-center position-relative">
@@ -698,15 +696,17 @@
                                                         </div>
                                                     </div>
                                                     <!-- DLUX Unlock Gov -->
-                                                    <div class="alert alert-danger bg-img-none align-items-center mt-2 d-flex"
+                                                    <div class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
                                                         role="alert" style="background-color: #ffffff01;">
                                                         <!-- :class="{'d-none': !when(focus.next_vesting_withdrawl), 'd-flex': true, 'align-items-center': true}" -->
-                                                        <p class="mb-0 lead ">An Unlock is scheduled to happen in
+                                                        <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
+                                                        <p class="mb-0 lead ">A #amount DLUX
+                                                             unlock is scheduled 
                                                             <!--  {{when(saccountapi.spower_downs)}} ({{when(saccountapi.spower_downs,true)}}  -->
                                                             (installments remaining)
                                                         </p>
-                                                        <small class="ms-auto">
-                                                            <div class="d-flex ms-2">
+                                                        <small class="ms-lg-auto">
+                                                            <div class="d-flex ms-lg-2">
                                                                 <!--  <modal-vue class="dropdown-menu-item"
                                                         v-if="protocolspk.head_block && saccountapi.head_block"
                                                         func="powdn" token="poweredUp" :test="test"
@@ -963,7 +963,7 @@
                                                             alt="SPK Logomark" style="height: 70px;">
                                                     </div>
                                                     <!--spk token-->
-                                                    <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                                    <div class=" px-3 py-4 px-lg-1 py-lg-3">
                                                         <div
                                                             class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
                                                             <div class="text-center position-relative">
@@ -1036,7 +1036,7 @@
                                                     </div>
                                                     <!--larynx token-->
                                                     <div
-                                                        class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                                        class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
                                                         <div
                                                             class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
                                                             <div class="text-center position-relative">
@@ -1132,7 +1132,7 @@
                                                     </div>
                                                     <!--larynx power-->
                                                     <div
-                                                        class=" border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                                        class=" border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
                                                         <div
                                                             class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
                                                             <div class="text-center position-relative">
@@ -1264,7 +1264,7 @@
                                                         </div>
                                                     </div>
                                                     <!--delegated larynx power-->
-                                                    <div class="py-4 py-lg-3">
+                                                    <div class="py-4 px-lg-1 py-lg-3">
                                                         <div
                                                             class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center ">
                                                             <div class="text-center position-relative">
@@ -1327,9 +1327,9 @@
                                                                 style="background-color: rgba(0, 0, 0, 0.3);">
                                                                 <!-- LARYNX Delegations Status -->
                                                                 <div
-                                                                    class="d-flex flex-wrap align-items-center mx-auto my-2 w-100 justify-content-center">
+                                                                    class="d-flex flex-wrap align-items-center my-2 w-100 justify-content-center">
                                                                     <div
-                                                                        class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 my-1">
+                                                                        class="d-flex flex-wrap align-items-center justify-content-center lead rounded border border-white-50 mx-1 px-2 py-1 my-1">
                                                                         <span><i
                                                                                 class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
                                                                         <span class="ms-1">
@@ -1339,7 +1339,7 @@
                                                                         </span>
                                                                     </div>
                                                                     <div
-                                                                        class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 my-1">
+                                                                        class="d-flex flex-wrap align-items-center justify-content-center lead rounded border border-white-50 mx-1 px-2 py-1 my-1">
                                                                         <span><i
                                                                                 class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
                                                                         <span
@@ -1424,7 +1424,7 @@
 
                                                     <!--locked larynx-->
                                                     <div
-                                                        class="border-top border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                                        class="border-top border-white-50  px-3 py-4 px-lg-1 py-lg-3">
                                                         <div
                                                             class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
                                                             <div class="text-center position-relative">
@@ -1614,7 +1614,7 @@
                                             <span class="nav-logotype ms-1" style="font-size:6ch;">HIVE</span>
                                         </div>
                                         <!-- hive token -->
-                                        <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                        <div class="border-bottom border-white-50 px-3 py-4 px-lg-1 py-lg-3">
                                             <div
                                                 class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
                                                 <div class="text-center position-relative">
@@ -1771,7 +1771,7 @@
                                             </div>
                                         </div>
                                         <!-- HIVE Power -->
-                                        <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                        <div class="border-bottom border-white-50 px-3 py-4 px-lg-1 py-lg-3">
                                             <div
                                                 class="d-flex align-items-center flex-column flex-lg-row justify-content-between gap-3 gap-lg-4">
                                                 <div class="text-center position-relative">
@@ -1902,10 +1902,9 @@
                                             <div v-if="focus.remainingHiveToWithdraw"
                                                 class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
                                                 role="alert" style="background-color: #ffffff01;">
-                                                <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
-                                                <p class="mb-0 lead ">A Power Down of
-                                                    {{formatNumber(focus.weeklyHiveWithdrawal, 3, '.',',')}} HP
-                                                    is scheduled {{timeUntil(focus.nextWithdrawalDate)}}.
+                                                
+                                                <p class="mb-0 lead ">A {{formatNumber(focus.weeklyHiveWithdrawal, 3, '.',',')}} HP
+                                                    Power Down is scheduled {{timeUntil(focus.nextWithdrawalDate)}}.
                                                     ({{formatNumber(focus.remainingHiveToWithdraw /
                                                     focus.weeklyHiveWithdrawal,0,'','')}}
                                                     weeks remaining)
@@ -1930,7 +1929,7 @@
                                             </div>
                                         </div>
                                         <!-- Delegated HIVE Power -->
-                                        <div class="border-bottom border-white-50 py-4 py-lg-3">
+                                        <div class="border-bottom border-white-50 py-4 px-lg-1 py-lg-3">
                                             <div
                                                 class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
                                                 <div class="text-center position-relative">
@@ -2020,9 +2019,9 @@
                                                             <div class="d-flex flex-column">
                                                                 <!-- HP Status -->
                                                                 <div
-                                                                    class="d-flex flex-wrap align-items-center mx-auto my-2">
+                                                                    class="d-flex flex-wrap align-items-center justify-content-center my-2">
                                                                     <div
-                                                                        class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
+                                                                        class="d-flex flex-wrap justify-content-center align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
                                                                         <span><i
                                                                                 class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
                                                                         <span class="ms-1">{{formatNumber(
@@ -2035,7 +2034,7 @@
                                                                         </span>
                                                                     </div>
                                                                     <div
-                                                                        class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
+                                                                        class="d-flex flex-wrap justify-content-center align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
                                                                         <span><i
                                                                                 class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
                                                                         <span class="ms-1">
@@ -2120,7 +2119,7 @@
                                                             <div class="d-flex flex-column">
                                                                 <!-- RC Delegations Status -->
                                                                 <div
-                                                                    class="d-flex flex-wrap align-items-center mx-auto my-2">
+                                                                    class="d-flex flex-wrap align-items-center justify-content-center my-2">
                                                                     <div
                                                                         class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
                                                                         <span><i
@@ -2232,7 +2231,7 @@
                                             </div>
                                         </div>
                                         <!-- HIVE Savings -->
-                                        <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                        <div class=" px-3 py-4 px-lg-1 py-lg-3">
                                             <div
                                                 class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
                                                 <div class="text-center position-relative">
@@ -2338,7 +2337,7 @@
                                             <span class="nav-logotype ms-1" style="font-size:6ch;">HBD</span>
                                         </div>
                                         <!-- HBD Token -->
-                                        <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                        <div class="border-bottom border-white-50 px-3 py-4 px-lg-1 py-lg-3">
                                             <div
                                                 class="d-flex align-items-center flex-column flex-lg-row justify-content-between gap-3 gap-lg-4">
                                                 <div class="text-center position-relative">
@@ -2487,7 +2486,7 @@
                                             </div>
                                         </div>
                                         <!-- HBD Savings -->
-                                        <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                        <div class="border-bottom border-white-50 px-3 py-4 px-lg-1 py-lg-3">
                                             <div
                                                 class="d-flex align-items-center flex-column flex-lg-row justify-content-between gap-3 gap-lg-4">
                                                 <div class="text-center position-relative">
@@ -2593,7 +2592,7 @@
                                             </div>
                                         </div>
                                         <!-- HBD Savings Claimable -->
-                                        <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+                                        <div class=" px-3 py-4 px-lg-1 py-lg-3">
                                             <div
                                                 class="d-flex align-items-center flex-column flex-lg-row justify-content-between gap-3 gap-lg-4">
                                                 <div class="text-center position-relative">

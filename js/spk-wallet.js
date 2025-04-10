@@ -108,7 +108,7 @@ export default {
                 <img src="/img/spknetwork/spk_logomark.png" class="img-fluid" alt="SPK Logomark" style="height: 70px;">
             </div>
             <!-- Liquid SPK -->
-            <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+            <div class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
                 <div
                     class="d-flex flex-wrap flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
                     <div class="text-center position-relative">
@@ -190,7 +190,7 @@ export default {
                 </div>
             </div>
             <!-- SPK Power -->
-            <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+            <div class=" px-3 py-4 px-lg-1 py-lg-3">
                 <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
                     <div class="text-center position-relative">
                         <div class="ratio ratio-1x1 wallet-token-img">
@@ -402,7 +402,7 @@ export default {
                 <img src="/img/spknetwork/broca_logomark.png" class="img-fluid" alt="BROCA Logomark" style="height: 70px;">
             </div>
             <!-- Liquid BROCA -->
-            <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+            <div class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
                 <div
                     class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
                     <div class="text-center position-relative">
@@ -484,7 +484,7 @@ export default {
                 </div>
             </div>
             <!-- Broca Power-->
-            <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+            <div class=" px-3 py-4 px-lg-1 py-lg-3">
                 <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
                         <div class="text-center position-relative">
                             <div class="ratio ratio-1x1 wallet-token-img">
@@ -668,7 +668,7 @@ export default {
                 <img src="/img/spknetwork/larynx_logomark.png" class="img-fluid" alt="LARYNX Logomark" style="height: 70px;">
             </div>
             <!--larynx token-->
-            <div class="border-bottom border-white-50 px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+            <div class="border-bottom border-white-50 px-3 py-4 px-lg-1 py-lg-3">
                 <div
                     class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
                     <div class="text-center position-relative">    
@@ -792,7 +792,7 @@ export default {
                 </div>
             </div>
             <!--larynx power-->
-            <div class="px-2 py-4 p-sm-5 px-lg-1 py-lg-3">
+            <div class=" px-3 py-4 px-lg-1 py-lg-3">
                 <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 text-start align-items-center">
                     <div class="text-center position-relative">
                         <div class="ratio ratio-1x1 wallet-token-img">
@@ -912,7 +912,7 @@ export default {
                 </div>
             </div>
             <!-- Delegated LARYNX Power -->
-            <div class="border-top border-white-50 px-0 py-4 py-lg-3">
+            <div class="border-top border-white-50 py-4 px-lg-1 py-lg-3">
                 <div class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
                         <div class="text-center position-relative">
                             <div class="ratio ratio-1x1 wallet-token-img">
@@ -957,7 +957,7 @@ export default {
                             style="background-color: rgba(0, 0, 0, 0.3);">
                                <!-- LARYNX Delegations Status -->
                                 <div
-                                    class="d-flex flex-wrap align-items-center mx-auto my-2 w-100 justify-content-center">
+                                    class="d-flex flex-wrap align-items-center my-2 w-100 justify-content-center">
                                     <div
                                         class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 my-1">
                                         <span><i class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
