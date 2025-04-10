@@ -66,7 +66,7 @@ export default {
                             :min="field.type === 'N' ? '0' : null"
                             :max="field.type === 'N' && key === 'max_rc' ? getMaxRc() : null"
                         >
-        <input v-else v-show="field.type !== 'func'"
+        <input v-else v-show="field.type !== 'func' || field.type !== 'static'"
             :type="getInputType(field.type)"
             :class="['form-control', 'text-white', 'bg-dark', 'border-dark', field.check === 'AC' ? 'ps-4' : '', field.type === 'amount' ? 'pe-5' : '']"
             :placeholder="'Enter ' + field.string"
@@ -99,7 +99,7 @@ export default {
         <button class="btn btn-secondary" type="button" @click="openModal('set_withdraw_vesting_route')">
         Set Withdrawal Route</button>
     </div>
-<div v-if="func === 'transfer'" class="form-check">
+<div v-if="func === 'transfer' || func === 'recurrent_transfer'" class="form-check">
             <input class="form-check-input" type="checkbox" v-model="isRecurrent" id="recurrentTransfer">
             <label class="form-check-label" for="recurrentTransfer">Make this a recurrent transfer</label>
           </div>
@@ -573,6 +573,33 @@ export default {
         }, 300);
     },
     watch: {
+        isRecurrent(newBool){
+            if(newBool){
+                const oldForm = this.form
+                const feature = this.tokenprotocol.features[newBool ? 'recurrent_transfer' : 'transfer']
+            if (feature) {
+            this.feat = feature
+            for (const key in feature.json) {
+                if (feature.json[key].type === "B") {
+                    this.form[key] = false
+                } else if (feature.json[key].type === "percent") {
+                    this.form[key] = ""
+                } else if (feature.json[key].type !== "self") {
+                    this.form[key] = "";
+                }
+                if (feature.json[key]?.check == "AC") {
+                    this.pfp[key] = '/img/no-user.png'
+                    this.validations[key] = false
+                }
+            }
+            const newKeys = Object.keys(this.form)
+            for(var key in newKeys){
+                this.form[key] = oldForm[key] || ""
+            }
+
+        }
+            }
+        },
         func(newFunc) {
             const feature = this.tokenprotocol.features[this.func]
             if (feature) {
