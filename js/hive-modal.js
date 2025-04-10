@@ -202,7 +202,7 @@ export default {
                     delegate_rc: {
                         id: "delegate_rc",
                         key: "posting",
-                        string: "Delegate RC",
+                        string: "Delegate",
                         info: "Delegate Resource Credits to another account.",
                         json: {
                             from: { type: "self" },
