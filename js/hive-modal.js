@@ -573,32 +573,30 @@ export default {
         }, 300);
     },
     watch: {
-        isRecurrent(newBool){
-            if(newBool){
-                const oldForm = this.form
-                const feature = this.tokenprotocol.features[newBool ? 'recurrent_transfer' : 'transfer']
+        isRecurrent(newBool) {
+            const oldForm = this.form
+            const feature = this.tokenprotocol.features[newBool ? 'recurrent_transfer' : 'transfer']
             if (feature) {
-            this.feat = feature
-            this.form = {}
-            for (const key in feature.json) {
-                if (feature.json[key].type === "B") {
-                    this.form[key] = false
-                } else if (feature.json[key].type === "percent") {
-                    this.form[key] = ""
-                } else if (feature.json[key].type !== "self") {
-                    this.form[key] = "";
+                this.feat = feature
+                this.form = {}
+                for (const key in feature.json) {
+                    if (feature.json[key].type === "B") {
+                        this.form[key] = false
+                    } else if (feature.json[key].type === "percent") {
+                        this.form[key] = ""
+                    } else if (feature.json[key].type !== "self") {
+                        this.form[key] = "";
+                    }
+                    if (feature.json[key]?.check == "AC") {
+                        this.pfp[key] = '/img/no-user.png'
+                        this.validations[key] = false
+                    }
                 }
-                if (feature.json[key]?.check == "AC") {
-                    this.pfp[key] = '/img/no-user.png'
-                    this.validations[key] = false
+                const newKeys = Object.keys(this.form)
+                for (var key in newKeys) {
+                    this.form[key] = oldForm[key] || ""
                 }
-            }
-            const newKeys = Object.keys(this.form)
-            for(var key in newKeys){
-                this.form[key] = oldForm[key] || ""
-            }
 
-        }
             }
         },
         func(newFunc) {
