@@ -96,6 +96,37 @@ export default {
     }
     return `${this.toFixed(bytes, 2)} ${p[counter]}B`
   },
+  timeUntil(dateString){
+  const targetDate = new Date(dateString + 'Z')
+  const now = new Date()
+  const diffMs = targetDate.getTime() - now.getTime()
+  const absDiffSeconds = Math.abs(diffMs) / 1000
+  if (absDiffSeconds < 1) {
+    return 'now'
+  }
+  const units = [
+    { name: 'year', seconds: 31536000 },  // 36
+    { name: 'month', seconds: 2592000 },  // 30 days
+    { name: 'day', seconds: 86400 },      // 24 hours
+    { name: 'hour', seconds: 3600 },      // 60 minutes
+    { name: 'minute', seconds: 60 },      // 60 seconds
+    { name: 'second', seconds: 1 }
+  ]
+  for (const unit of units) {
+    if (absDiffSeconds >= unit.seconds) {
+      const value = Math.floor(absDiffSeconds / unit.seconds)
+      const unitName = value === 1 ? unit.name : unit.name + 's'
+      if (diffMs > 0) {
+        return `in ${value} ${unitName}`
+      } else {
+        return `${value} ${unitName} ago`
+      }
+    }
+  }
+
+  // Fallback (shouldn't occur due to seconds unit)
+  return 'unknown';
+  },
   formatNumber(t, n, r, e) {
     if (typeof t != "number") t = parseFloat(t);
     if (isNaN(t)) return "0";
@@ -222,7 +253,53 @@ export default {
       id: `Remove delegation to ${to}`,
       msg: `Remove delegation to ${to}`,
       ops: ["fetchDelegationsData"],
-      txid: opid
+      txid: `Remove delegation to ${to}`
+  };
+    this.$emit('tosign', op)
+    this.toSign = op
+  },
+  stopPD(from){
+    var op = {
+      type: "raw",
+      op: [
+        [
+          "withdraw_vesting",
+          {
+            "account": from,
+            "vesting_shares": "0.000000 VESTS"
+          }
+        ]
+      ],
+      key: "active",
+      id: `Stop Down Power`,
+      msg: `Stop Down Power`,
+      ops: ["init"],
+      txid: `Stop Down Power`
+  };
+    this.$emit('tosign', op)
+    this.toSign = op
+  },
+  stopRT(from, to, type = "HIVE"){
+    var op = {
+      type: "raw",
+      op: [
+        [
+          "recurrent_transfer",
+          {
+            "from": from,
+            "to": to,
+            "amount": "0.000 " + type,
+            "executions": 2,
+            "recurrence": 2,
+            "memo": ""
+          }
+        ]
+      ],
+      key: "active",
+      id: `Stop Recurring Transfer to ` + to,
+      msg: `Stop Recurring Transfer to ` + to,
+      ops: ["init"],
+      txid: `Stop Recurring Transfer to ` + to
   };
     this.$emit('tosign', op)
     this.toSign = op

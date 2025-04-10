@@ -2433,50 +2433,8 @@ PORT=3000
             onComplete
           });
         }
-        // var formdata = new FormData();
-        // console.log(this.FileInfo[name].path)
-        // console.log(document.getElementById(this.FileInfo[name].path))
-        // formdata.append('file', document.getElementById(this.FileInfo[name].path).files[0]);
-        // formdata.append(
-        //   "path",
-        //   `/${headers.split(":")[0]}/${headers.split(":")[1]}.${this.account}`
-        // );
-        // for (const value of formdata.values()) {
-        //   console.log(value);
-        // }
-        // var myHeaders = new Headers()
-        // myHeaders.append("Content-Type", "multipart/form-data")
-        // var requestOptions = {
-        //   method: "POST",
-        //   body: formdata,
-        //   headers: myHeaders,
-        //   connection: 'keep-alive', 
-        //   mode: 'cors',
-        //   redirect: "follow",
-        //   //credentials: 'include',
-        // };
-        // fetch(
-        //   `https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
-        //   //`https://ipfs.dlux.io/api/v0/add?stream-channels=true&pin=false&wrap-with-directory=false&progress=true&account=${this.account}&cid=${headers.split(":")[0]}&sig=${headers.split(":")[1]}`,
-        //   requestOptions
-        // )
-        //   .then((response) => {
-        //     response.text()
-        //     console.log(response)
-        //   })
-        //   .then((result) => console.log(result))
-        //   .catch((error) => console.log("error", error));
       });
     },
-    /*
-function buyFT(setname, uid, price, type,  callback){
-     price = parseInt(price * 1000)
-     if(type == 'HIVE')broadcastTransfer({ to: 'dlux-cc', hive: bid_amount, memo:`NFTbuy ${setname}:${uid}`}, `Buying on ${setname}:${uid}`)
-     else if(type == 'HBD')broadcastTransfer({ to: 'dlux-cc', hbd: bid_amount, memo:`NFTbuy ${setname}:${uid}`}, `Buying ${setname}:${uid}`)
-     else broadcastCJA({set: setname, uid, price}, 'dlux_ft_buy', `Trying to buy ${setname} mint token`)
- }
-
-    */
     buyFT(uid, set) {
       var cja = {
         set: set || this.focusSetname,
@@ -2492,13 +2450,6 @@ function buyFT(setname, uid, price, type,  callback){
         txid: `${set}:${uid}_ft_buy`,
       };
     },
-    /*
-function bidFT(setname, uid, callback){
-    var bid_amount = document.getElementById(`${setname}-${uid}-bid`).value
-    bid_amount = parseInt(bid_amount * 1000)
-    broadcastCJA({set: setname, uid, bid_amount}, 'dlux_ft_bid', `Trying to bid on ${setname} mint token.`) 
- }
-    */
     bidFT(uid, set, price, type) {
       bid_amount = parseInt(price * 1000);
       var cja = {
@@ -2516,15 +2467,6 @@ function bidFT(setname, uid, callback){
         txid: `${set}:${uid}_ft_buy`,
       };
     },
-    /*
-function giveFT(setname, to, qty, callback){
-    checkAccount(to)
-    .then(r => {
-        broadcastCJA({set: setname, to, qty}, "dlux_ft_transfer", `Trying to give ${setname} mint token to ${to}`) 
-    })
-    .catch(e=>alert(`${to} is not a valid hive account`))
- }
-    */
     giveFT() {
       var cja = {
         set: this.mint_detail.setname,
@@ -2703,15 +2645,6 @@ function giveFT(setname, to, qty, callback){
         txid: `${item.setname}:${item.uid}_nft_delete`,
       };
     },
-    /*
-function giveNFT(setname, uid, to, callback){
-    checkAccount(to)
-    .then(r => {
-        broadcastCJA({set: setname, uid, to}, "dlux_nft_transfer", `Trying to give ${setname}:${uid} to ${to}`) 
-    })
-    .catch(e=>alert(`${to} is not a valid hive account`))
- }
-*/
     giveNFT(item) {
       if (this.nftTradeAllowed) {
         var cja = {
@@ -3293,6 +3226,23 @@ function buyNFT(setname, uid, price, type, callback){
           this.relations = rez
         });
     },
+    async getRecurrentTransfers(username, key) {
+      try {
+        const transfers = await this.hiveApiCall('database_api.find_recurrent_transfers', { from: username });
+        if (!transfers.recurrent_transfers.length) return
+        var hbd_transfers = []
+        var hive_transfers = []
+        for (var i = 0; i < transfers.recurrent_transfers.length; i++) {
+          if (transfers.recurrent_transfers[i].amount.nai == "@@000000021") hive_transfers.push(transfers.recurrent_transfers[i])
+          else hbd_transfers.push(transfers.recurrent_transfers[i])
+        }
+        this[key].hbd_transfers = hbd_transfers
+        this[key].hive_transfers = hive_transfers
+      } catch (error) {
+        console.error('Error fetching recurrent transfers:', error);
+        throw error;
+      }
+    },
     checkAccount(name, key) {
       console.log('Checking:', name)
       fetch(this.hapi, {
@@ -3321,6 +3271,27 @@ function buyNFT(setname, uid, price, type, callback){
           }
           if (re.result.length) {
             this[key] = rez;
+            this[key].hbd_transfers = []
+            this[key].hive_transfers = []
+            this.getRecurrentTransfers(key == 'newAccountDeets' ? name : this[name], key)
+            const totalVestingShares = parseFloat(rez.vesting_shares)
+            const toWithdraw = parseFloat(rez.to_withdraw) / 1e6
+            const withdrawn = parseFloat(rez.withdrawn)
+            this[key].remainingToWithdraw = toWithdraw - withdrawn
+            this[key].weeklyWithdrawal = toWithdraw / 13
+            this[key].nextWithdrawalDate = rez.next_vesting_withdrawal
+            const calcWithStats = (key, rez) => {
+              if (!this.hivestats?.content_reward_percent) {
+                setTimeout(() => calcWithStats(key, rez), 500)
+              } else {
+                const totalVestingFundHive = parseFloat(this.hivestats.total_vesting_fund_hive)
+                const totalVestingSharesGlobal = parseFloat(this.hivestats.total_vesting_shares)
+                const hivePerVest = totalVestingFundHive / totalVestingSharesGlobal
+                this[key].weeklyHiveWithdrawal = this[key].weeklyWithdrawal * hivePerVest
+                this[key].remainingHiveToWithdraw = this[key].remainingToWithdraw * hivePerVest
+              }
+            }
+            calcWithStats(key, rez)
             this.calculateHbdSavingsInterest(this[key])
             if (key == "newAccountDeets") this.newAccount.msg = "Account Found"
           } else {

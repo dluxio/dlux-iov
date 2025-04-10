@@ -13,6 +13,7 @@ export default {
         token: { type: String, default: 'HIVE' },
         tokenstats: Object,
         tokenuser: Object,
+        type: Object,
     },
     template: `
   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -323,6 +324,7 @@ export default {
                             },
                             request_id: {
                                 type: "func",
+                                name: "buildID"
                             },
                         }
                     },
@@ -463,7 +465,7 @@ export default {
             return asset === "VESTS" ? this.vestsToHP(rawBalance) : rawBalance;
         },
         moveTokens() {
-            const opid = this.feat.id;
+            var opid = this.feat.id;
             if (this.func === 'transfer' && this.isRecurrent) {
                 opid = 'recurrent_transfer';
             }
@@ -525,16 +527,35 @@ export default {
         },
         prefillToField() {
             if (this.to_account && (this.func === 'delegate_vesting_shares' || this.func === 'transfer' || this.func === 'delegate_rc')) {
-                const toKey = this.func === 'delegate_vesting_shares' ? 'delegatee' : this.func === 'delegate_rc' ? 'delegatees' : 'to';
+                const toKey = this.func === 'delegate_vesting_shares' ? 'delegatee' : this.func === 'delegate_rc' ? 'delegatees' : 'to'
                 if (this.feat.json[toKey]) {
-                    this.form[toKey] = this.to_account;
-                    this.validateField(toKey);
+                    this.form[toKey] = this.to_account
+                    this.validateField(toKey)
                 }
+            } else if (this.reqid && this.func === 'cancel_transfer_from_savings') {
+                this.form.request_id = this.reqid
+                this.validateField("request_id")
+            } else if (this.type && this.func === "recurrent_transfer") {
+                this.isRecurrent = true
+                for (var key in this.type) {
+                    if (key == "amount") {
+                        this.form[key] = this.type[key].amount / this.pf(this.type[key].precision)
+                        this.validateField(key)
+                    } else if (key == "remaining_executions") {
+                        this.form.executions = this.type[key]
+                        this.validateField("executions")
+                    } else {
+                        this.form[key] = this.type[key]
+                        this.validateField(key)
+                    }
+                }
+
             }
         },
         validateField(key) {
             this.validations[key] = false
             const field = this.feat.json[key];
+            if(!field)return
             if (field.check === 'AC') {
                 if (this.account == this.form[key]) {
                     this.validations[key] = false;
@@ -574,7 +595,10 @@ export default {
     },
     watch: {
         isRecurrent(newBool) {
-            const oldForm = this.form
+            const oldForm = {}
+            for (var key in this.form) {
+                oldForm[key] = this.form[key]
+            }
             const feature = this.tokenprotocol.features[newBool ? 'recurrent_transfer' : 'transfer']
             if (feature) {
                 this.feat = feature
@@ -585,18 +609,19 @@ export default {
                     } else if (feature.json[key].type === "percent") {
                         this.form[key] = ""
                     } else if (feature.json[key].type !== "self") {
-                        this.form[key] = "";
+                        this.form[key] = ""
                     }
-                    if (feature.json[key]?.check == "AC") {
+                    if (feature.json[key]?.check === "AC") {
                         this.pfp[key] = '/img/no-user.png'
                         this.validations[key] = false
                     }
                 }
                 const newKeys = Object.keys(this.form)
-                for (var key in newKeys) {
-                    this.form[key] = oldForm[key] || ""
+                for (const key of newKeys) {
+                    if (oldForm.hasOwnProperty(key)) {
+                        this.form[key] = oldForm[key]
+                    }
                 }
-
             }
         },
         func(newFunc) {

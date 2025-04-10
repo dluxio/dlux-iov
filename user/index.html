@@ -495,12 +495,15 @@
                                                         </div>
                                                     </div>
                                                     <!-- DLUX Power Down -->
-                                                    <div class="alert alert-danger bg-img-none align-items-center mt-2 d-flex"
+                                                    <div v-if="focus.weeklyHiveWithdrawal > 0"
+                                                        class="alert alert-danger bg-img-none align-items-center mt-2 d-flex"
                                                         role="alert" style="background-color: #ffffff10;">
                                                         <!-- :class="{'d-none': !when(focus.next_vesting_withdrawl), 'd-flex': true, 'align-items-center': true}" -->
-                                                        <p class="mb-0 lead ">A Power Down is scheduled to happen in
+                                                        <p class="mb-0 lead ">A Power Down of
+                                                            {{focus.weeklyHiveWithdrawal}} HP is scheduled for
+                                                            {{focus.nextWithdrawalDate}}. ({{focus.weeklyHiveWithdrawal
+                                                            / focus.remainingHiveToWithdraw}} weeks remaining)
                                                             <!--  {{when(saccountapi.spower_downs)}} ({{when(saccountapi.spower_downs,true)}}  -->
-                                                            (installments remaining)
                                                         </p>
                                                         <small class="ms-auto">
                                                             <div class="d-flex ms-2">
@@ -510,11 +513,13 @@
                                                         :tokenuser="saccountapi" :account="account"
                                                         :tokenprotocol="protocolspk" :mypfp="mypfp"
                                                         @modalsign="sendIt($event)" v-slot:trigger> -->
-                                                                <button class="btn btn-sm btn-outline-light rounded-pill trigger"
+                                                                <button
+                                                                    class="btn btn-sm btn-outline-light rounded-pill trigger"
                                                                     type="button">
                                                                     CHANGE</button>
                                                                 </modal-vue>
-                                                                <button class="btn btn-sm btn-outline-danger rounded-pill ms-2"
+                                                                <button
+                                                                    class="btn btn-sm btn-outline-danger rounded-pill ms-2"
                                                                     type="button"
                                                                     @click="simpleCJ('spkccT_spk_power_down', 'amount:0', {'broadcast':'tosign'})">
                                                                     STOP</button>
@@ -708,11 +713,13 @@
                                                         :tokenuser="saccountapi" :account="account"
                                                         :tokenprotocol="protocolspk" :mypfp="mypfp"
                                                         @modalsign="sendIt($event)" v-slot:trigger> -->
-                                                                <button class="btn btn-sm btn-outline-light rounded-pill trigger"
+                                                                <button
+                                                                    class="btn btn-sm btn-outline-light rounded-pill trigger"
                                                                     type="button">
                                                                     CHANGE</button>
                                                                 </modal-vue>
-                                                                <button class="btn btn-sm btn-outline-danger rounded-pill ms-2"
+                                                                <button
+                                                                    class="btn btn-sm btn-outline-danger rounded-pill ms-2"
                                                                     type="button"
                                                                     @click="simpleCJ('spkccT_spk_power_down', 'amount:0', {'broadcast':'tosign'})">
                                                                     STOP</button>
@@ -1254,11 +1261,13 @@
                                                         :tokenuser="saccountapi" :account="account"
                                                         :tokenprotocol="protocolspk" :mypfp="mypfp"
                                                         @modalsign="sendIt($event)" v-slot:trigger> -->
-                                                                    <button class="btn btn-sm rounded-pill btn-outline-light trigger"
+                                                                    <button
+                                                                        class="btn btn-sm rounded-pill btn-outline-light trigger"
                                                                         type="button">
                                                                         CHANGE</button>
                                                                     </modal-vue>
-                                                                    <button class="btn btn-sm rounded-pill btn-outline-danger ms-2"
+                                                                    <button
+                                                                        class="btn btn-sm rounded-pill btn-outline-danger ms-2"
                                                                         type="button"
                                                                         @click="simpleCJ('spkccT_spk_power_down', 'amount:0', {'broadcast':'tosign'})">
                                                                         STOP</button>
@@ -1502,11 +1511,13 @@
                                                         :tokenuser="saccountapi" :account="account"
                                                         :tokenprotocol="protocolspk" :mypfp="mypfp"
                                                         @modalsign="sendIt($event)" v-slot:trigger> -->
-                                                                    <button class="btn btn-sm rounded-pill btn-outline-light trigger"
+                                                                    <button
+                                                                        class="btn btn-sm rounded-pill btn-outline-light trigger"
                                                                         type="button">
                                                                         CHANGE</button>
                                                                     </modal-vue>
-                                                                    <button class="btn btn-sm rounded-pill btn-outline-danger ms-2"
+                                                                    <button
+                                                                        class="btn btn-sm rounded-pill btn-outline-danger ms-2"
                                                                         type="button"
                                                                         @click="simpleCJ('spkccT_spk_power_down', 'amount:0', {'broadcast':'tosign'})">
                                                                         STOP</button>
@@ -1689,7 +1700,8 @@
                                                 </div>
                                             </div>
                                             <!-- HIVE Recurring Transfers -->
-                                            <div class="alert alert-primary bg-img-none align-items-center mt-2 d-flex flex-column"
+                                            <div v-if="focus?.hive_transfers?.length"
+                                                class="alert alert-primary bg-img-none align-items-center mt-2 d-flex flex-column"
                                                 role="alert" style="background-color: #ffffff10;">
                                                 <!-- :class="{'d-none': !when(saccountapi.spower_downs), 'd-flex': true, 'align-items-center': true}" -->
                                                 <div class="d-flex w-100 align-items-center"><span class="lead">
@@ -1699,24 +1711,31 @@
                                                         data-bs-toggle="collapse" href="#hiveRecurringTransfers"
                                                         role="button" aria-expanded="false"
                                                         aria-controls="hiveRecurringTransfers">
-                                                        3 Recurring Transfers<i class="ms-2 fa-solid fa-search"></i>
+                                                        {{focus.hive_transfers.length}} Recurring Transfers<i
+                                                            class="ms-2 fa-solid fa-search"></i>
                                                     </a>
                                                 </div>
                                                 <div class="collapse w-100 mt-2" id="hiveRecurringTransfers">
-                                                    <div
+                                                    <div v-for="xfr in focus.hive_transfers"
                                                         class="d-flex w-100 align-items-center border-top border-white-50 py-2">
-                                                        <div class="flex-grow-1">transfer amount and to account
-                                                            here</div>
+                                                        <div class="flex-grow-1">{{precision(xfr.amount.amount,
+                                                            xfr.amount.precision)}} HIVE to @{{xfr.to}}. {{xfr.remaining_executions}} transfers remaining.
+                                                        </div>
                                                         <small class="ms-auto">
                                                             <div class="d-flex ms-2">
-                                                                <button
-                                                                    class="btn btn-sm rounded-pill btn-outline-light trigger"
-                                                                    type="button">
-                                                                    CHANGE</button>
+                                                                <modal-vue
+                                                                    v-if="focus.id && hivestats.content_reward_percent"
+                                                                    func="recurrent_transfer" :mypfp="mypfp"
+                                                                    token="HIVE" :tokenuser="focus" :account="account"
+                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                    :type="xfr" v-slot:trigger><button
+                                                                        class="btn btn-sm rounded-pill btn-outline-light trigger"
+                                                                        type="button">
+                                                                        CHANGE</button>
+                                                                </modal-vue>
                                                                 <button
                                                                     class="btn btn-sm btn-outline-danger rounded-pill ms-2"
-                                                                    type="button"
-                                                                    @click="simpleCJ('spkccT_spk_power_down', 'amount:0', {'broadcast':'tosign'})">
+                                                                    type="button" @click="stopRT(account, xfr.to)">
                                                                     STOP</button>
                                                             </div>
                                                         </small>
@@ -1848,29 +1867,30 @@
                                                 </div>
                                             </div>
                                             <!-- HIVE Power Down -->
-                                            <div class="alert alert-danger bg-img-none align-items-center mt-2 d-flex"
+                                            <div v-if="focus.remainingHiveToWithdraw"
+                                                class="alert alert-danger bg-img-none align-items-center mt-2 d-flex"
                                                 role="alert" style="background-color: #ffffff10;">
-                                                <!-- :class="{'d-none': !when(focus.next_vesting_withdrawl), 'd-flex': true, 'align-items-center': true}" -->
-                                                <p class="mb-0 lead ">A Power Down is scheduled to happen in
-                                                    <!--  {{when(saccountapi.spower_downs)}} ({{when(saccountapi.spower_downs,true)}}  -->
-                                                    (installments remaining)
+                                                <p class="mb-0 lead ">A Power Down of
+                                                    {{formatNumber(focus.weeklyHiveWithdrawal, 3, '.',',')}} HP
+                                                    is scheduled {{timeUntil(focus.nextWithdrawalDate)}}.
+                                                    ({{formatNumber(focus.remainingHiveToWithdraw /
+                                                    focus.weeklyHiveWithdrawal,0,'','')}}
+                                                    weeks remaining)
                                                 </p>
                                                 <small class="ms-auto">
                                                     <div class="d-flex ms-2">
-                                                        <!--  <modal-vue class="dropdown-menu-item"
-                                                            v-if="protocolspk.head_block && saccountapi.head_block"
-                                                            func="powdn" token="poweredUp" :test="test"
-                                                            :tokenuser="saccountapi" :account="account"
-                                                            :tokenprotocol="protocolspk" :mypfp="mypfp"
-                                                            @modalsign="sendIt($event)" v-slot:trigger> -->
-                                                        <button
-                                                            class="btn btn-sm rounded-pill btn-outline-light trigger"
-                                                            type="button">
-                                                            CHANGE</button>
+                                                        <modal-vue v-if="focus.id && hivestats.content_reward_percent"
+                                                            func="withdraw_vesting" :mypfp="mypfp" token="HP"
+                                                            :tokenuser="focus" type="HIVE" :account="account"
+                                                            :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                            v-slot:trigger>
+                                                            <button
+                                                                class="btn btn-sm rounded-pill btn-outline-light trigger"
+                                                                type="button">
+                                                                CHANGE</button>
                                                         </modal-vue>
                                                         <button class="btn btn-sm rounded-pill btn-outline-danger ms-2"
-                                                            type="button"
-                                                            @click="simpleCJ('spkccT_spk_power_down', 'amount:0', {'broadcast':'tosign'})">
+                                                            type="button" @click="stopPD(account)">
                                                             STOP</button>
                                                     </div>
                                                 </small>
@@ -2363,7 +2383,8 @@
                                                 </div>
                                             </div>
                                             <!-- HBD Recurring Transfers -->
-                                            <div class="alert alert-primary bg-img-none align-items-center mt-2 d-flex flex-column"
+                                            <div v-if="focus?.hbd_transfers?.length"
+                                                class="alert alert-primary bg-img-none align-items-center mt-2 d-flex flex-column"
                                                 role="alert" style="background-color: #ffffff10;">
                                                 <!-- :class="{'d-none': !when(saccountapi.spower_downs), 'd-flex': true, 'align-items-center': true}" -->
                                                 <div class="d-flex w-100 align-items-center"><span class="lead">
@@ -2373,24 +2394,31 @@
                                                         data-bs-toggle="collapse" href="#hbdRecurringTransfers"
                                                         role="button" aria-expanded="false"
                                                         aria-controls="hbdRecurringTransfers">
-                                                        3 Recurring Transfers<i class="ms-2 fa-solid fa-search"></i>
+                                                        {{focus.hbd_transfers.length}} Recurring Transfers<i
+                                                            class="ms-2 fa-solid fa-search"></i>
                                                     </a>
                                                 </div>
                                                 <div class="collapse w-100 mt-2" id="hbdRecurringTransfers">
-                                                    <div
+                                                    <div v-for="xfr in focus.hbd_transfers"
                                                         class="d-flex w-100 align-items-center border-top border-white-50 py-2">
-                                                        <div class="flex-grow-1">transfer amount and to account
-                                                            here</div>
+                                                        <div class="flex-grow-1">{{precision(xfr.amount.amount,
+                                                            xfr.amount.precision)}} HBD to @{{xfr.to}}. {{xfr.remaining_executions}} transfers remaining.</div>
                                                         <small class="ms-auto">
                                                             <div class="d-flex ms-2">
-                                                                <button
+                                                                <modal-vue
+                                                                    v-if="focus.id && hivestats.content_reward_percent"
+                                                                    func="recurrent_transfer" :mypfp="mypfp"
+                                                                    token="HIVE" :tokenuser="focus" :account="account"
+                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
+                                                                    :type="xfr" v-slot:trigger><button
                                                                     class="btn btn-sm rounded-pill btn-outline-light trigger"
                                                                     type="button">
                                                                     CHANGE</button>
+                                                                    </modal-vue>
                                                                 <button
                                                                     class="btn btn-sm btn-outline-danger rounded-pill ms-2"
                                                                     type="button"
-                                                                    @click="simpleCJ('spkccT_spk_power_down', 'amount:0', {'broadcast':'tosign'})">
+                                                                    @click="stopRT(account, xfr.to, 'HBD')">
                                                                     STOP</button>
                                                             </div>
                                                         </small>

@@ -26,6 +26,7 @@ export default {
         to_account: String,
         smarkets: Object,
         type: { default: "move" },
+        reqid: String,
         mypfp: String,
     },
     data() {
@@ -56,7 +57,8 @@ export default {
                 :token="token" 
                 :tokenuser="tokenuser"
                 :to_account="to_account"
-                :reqid="type"
+                :reqid="reqid"
+                :type="type"
                 :tokenstats="tokenstats"
                 @open-modal="openModal($event)"
                 @modalsign="$emit('modalsign', $event)" />
