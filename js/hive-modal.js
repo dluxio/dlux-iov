@@ -66,7 +66,7 @@ export default {
                             :min="field.type === 'N' ? '0' : null"
                             :max="field.type === 'N' && key === 'max_rc' ? getMaxRc() : null"
                         >
-        <input v-else v-show="field.type !== 'func' || field.type !== 'static'"
+        <input v-else v-show="!(field.type == 'func' || field.type == 'static')"
             :type="getInputType(field.type)"
             :class="['form-control', 'text-white', 'bg-dark', 'border-dark', field.check === 'AC' ? 'ps-4' : '', field.type === 'amount' ? 'pe-5' : '']"
             :placeholder="'Enter ' + field.string"
@@ -579,6 +579,7 @@ export default {
                 const feature = this.tokenprotocol.features[newBool ? 'recurrent_transfer' : 'transfer']
             if (feature) {
             this.feat = feature
+            this.form = {}
             for (const key in feature.json) {
                 if (feature.json[key].type === "B") {
                     this.form[key] = false
