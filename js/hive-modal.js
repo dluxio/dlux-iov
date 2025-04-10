@@ -620,6 +620,7 @@ export default {
                 for (const key of newKeys) {
                     if (oldForm.hasOwnProperty(key)) {
                         this.form[key] = oldForm[key]
+                        this.validateField(key)
                     }
                 }
             }
