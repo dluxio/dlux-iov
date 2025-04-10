@@ -1619,14 +1619,14 @@
                                                     </h5>
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="DLUX Actions">
-                                                        <button type="button" class="btn btn-light">
+                                                        <button type="button" class="btn btn-light p-0">
                                                             <modal-vue
                                                                 v-if="focus.id && hivestats.content_reward_percent"
                                                                 func="transfer" :mypfp="mypfp" token="HIVE"
                                                                 :tokenuser="focus" :account="account"
                                                                 :tokenstats="hivestats" @modalsign="sendIt($event)"
                                                                 type="hive" v-slot:trigger>
-                                                                <span class="text-nowrap trigger" slot="trigger"><i
+                                                                <span class="text-nowrap trigger p-2" slot="trigger"><i
                                                                         class="fas fa-paper-plane me-2 "></i>Send</span>
                                                             </modal-vue></button>
                                                         <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
@@ -1736,14 +1736,14 @@
                                                     </h5>
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="DLUX Actions">
-                                                        <button type="button" class="btn btn-light text-nowrap">
+                                                        <button type="button" class="btn btn-light text-nowrap p-0">
                                                             <modal-vue
                                                                 v-if="focus.id && hivestats.content_reward_percent"
                                                                 func="delegate_vesting_shares" :mypfp="mypfp" token="HP"
                                                                 :tokenuser="focus" :account="account" type="HIVE"
                                                                 :tokenstats="hivestats" @modalsign="sendIt($event)"
                                                                 v-slot:trigger class="">
-                                                                <span class="text-nowrap trigger" slot="trigger"
+                                                                <span class="text-nowrap trigger p-2" slot="trigger"
                                                                     :disabled="!parseF(focus.vesting_shares)"><i
                                                                         class="fas fa-user-friends fa-fw me-2"></i>Delegate
                                                                     HP</span>
@@ -1761,9 +1761,7 @@
                                                                 <modal-vue
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="withdraw_vesting" :mypfp="mypfp" token="HP"
-                                                                    :tokenuser="focus" 
-                                                                    type="HIVE"
-                                                                    :account="account"
+                                                                    :tokenuser="focus" type="HIVE" :account="account"
                                                                     :tokenstats="hivestats" @modalsign="sendIt($event)"
                                                                     v-slot:trigger class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
@@ -1777,7 +1775,6 @@
                                                                     <button class="dropdown-item"><modal-vue
                                                                             v-if="focus.id && hivestats.content_reward_percent"
                                                                             func="delegate_rc" :mypfp="mypfp" token="RC"
-
                                                                             :tokenuser="focus" :account="account"
                                                                             :tokenstats="hivestats" :rc-info="rcAccount"
                                                                             @modalsign="sendIt($event)" type="hive"
@@ -1800,12 +1797,11 @@
                                                                 </modal-vue>
                                                                 <modal-vue
                                                                     v-if="focus.id && hivestats.content_reward_percent"
-                                                                    func="set_withdraw_vesting_route" :mypfp="mypfp" token="HP"
-                                                                    :tokenuser="focus" 
-                                                                    type="HIVE"
-                                                                    :account="account"
-                                                                    :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                    v-slot:trigger class="dropdown-menu-item">
+                                                                    func="set_withdraw_vesting_route" :mypfp="mypfp"
+                                                                    token="HP" :tokenuser="focus" type="HIVE"
+                                                                    :account="account" :tokenstats="hivestats"
+                                                                    @modalsign="sendIt($event)" v-slot:trigger
+                                                                    class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
                                                                         slot="trigger"
                                                                         :disabled="!parseF(focus.vesting_shares)">
@@ -2177,21 +2173,25 @@
                                                             <i class="fa-solid fa-lock"></i>
                                                         </span>
                                                     </h5>
-                                                    <div class="btn-group" v-if="me" role="group"
-                                                        aria-label="HIVE Actions">
-                                                        <button type="button" class="btn btn-light text-nowrap"
+                                                    
+                                                        <button type="button" class="btn btn-light p-0" v-if="me"
                                                             :disabled="!parseF(focus.savings_balance)">
                                                             <modal-vue
                                                                 v-if="focus.id && hivestats.content_reward_percent"
                                                                 func="transfer_from_savings" :mypfp="mypfp" token="HIVE"
                                                                 :tokenuser="focus" :account="account"
                                                                 :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                type="hive" v-slot:trigger>
-                                                                <span class="text-nowrap trigger" slot="trigger"><i
-                                                                        class="fas fa-money-bill-transfer fa-fw me-2"></i>Withdraw</button>
-                                                        </span>
-                                                        </modal-vue>
-                                                    </div>
+                                                                type="hive" v-slot:trigger
+                                                                class="d-flex">
+                                                                <span class="text-nowrap btn-padding trigger" slot="trigger">
+                                                                    <i
+                                                                        class="fas fa-money-bill-transfer fa-fw me-2"></i>
+                                                                    Withdraw
+
+                                                                </span>
+                                                            </modal-vue>
+                                                        </button>
+                                                   
                                                 </div>
                                             </div>
                                             <!-- HIVE Savings Withdrawl -->
@@ -2219,7 +2219,7 @@
                                                             here</div>
                                                         <small class="ms-auto">
                                                             <div class="d-flex ms-2">
-                                                                <button class="btn btn-sm btn-outline-danger ms-2"
+                                                                <button class="btn btn-sm rounded-pill btn-outline-danger ms-2"
                                                                     type="button"
                                                                     @click="simpleCJ('spkccT_spk_power_down', 'amount:0', {'broadcast':'tosign'})">
                                                                     STOP</button>
@@ -2269,14 +2269,14 @@
                                                     </h5>
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="DLUX Actions">
-                                                        <button type="button" class="btn btn-light">
+                                                        <button type="button" class="btn btn-light p-0">
                                                             <modal-vue
                                                                 v-if="focus.id && hivestats.content_reward_percent"
                                                                 func="transfer" :mypfp="mypfp" token="HBD"
                                                                 :tokenuser="focus" :account="account"
                                                                 :tokenstats="hivestats" @modalsign="sendIt($event)"
                                                                 type="hive" v-slot:trigger>
-                                                                <span class="text-nowrap trigger"><i
+                                                                <span class="text-nowrap trigger p-2"><i
                                                                         class="fas fa-paper-plane me-2 trigger"></i>Send</span>
                                                             </modal-vue></button>
                                                         <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0"
@@ -2376,15 +2376,15 @@
                                                     </h5>
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="HIVE Actions">
-                                                        <button type="button" class="btn btn-light text-nowrap"
+                                                        <button type="button" class="btn btn-light text-nowrap p-0"
                                                             :disabled="!parseF(focus.savings_hbd_balance)">
                                                             <modal-vue
                                                                 v-if="focus.id && hivestats.content_reward_percent"
                                                                 func="transfer" :mypfp="mypfp" token="HBD"
                                                                 :tokenuser="focus" :account="account"
                                                                 :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                type="hive" v-slot:trigger>
-                                                                <span class="text-nowrap" slot="trigger"><i
+                                                                type="hive" v-slot:trigger class="d-flex">
+                                                                <span class="text-nowrap btn-padding trigger" slot="trigger"><i
                                                                         class="fas fa-money-bill-transfer fa-fw me-2"></i>Withdraw</span></modal-vue></button>
 
                                                     </div>
@@ -2415,7 +2415,7 @@
                                                             here</div>
                                                         <small class="ms-auto">
                                                             <div class="d-flex ms-2">
-                                                                <button class="btn btn-sm btn-outline-danger ms-2"
+                                                                <button class="btn btn-sm btn-outline-danger rounded-pill ms-2"
                                                                     type="button"
                                                                     @click="simpleCJ('spkccT_spk_power_down', 'amount:0', {'broadcast':'tosign'})">
                                                                     STOP</button>

@@ -14751,4 +14751,8 @@ body[data-touch=false] .dropdown-extra:hover {
 .nav-link2.active {
   background-color: #39cbfb !important;
   color: #212529 !important;
+}
+
+.btn-padding {
+  padding: 12px 24px;
 }/*# sourceMappingURL=custom.css.map */

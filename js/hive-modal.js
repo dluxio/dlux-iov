@@ -99,12 +99,12 @@ export default {
         <button class="btn btn-secondary" type="button" @click="openModal('set_withdraw_vesting_route')">
         Set Withdrawal Route</button>
     </div>
-<div v-if="func === 'transfer'" class="form-check mb-3">
+<div v-if="func === 'transfer'" class="form-check">
             <input class="form-check-input" type="checkbox" v-model="isRecurrent" id="recurrentTransfer">
             <label class="form-check-label" for="recurrentTransfer">Make this a recurrent transfer</label>
           </div>
           </div>
-          <span>{{feat.info}}</span>
+          <div class="mx-2 mb-2 bg-darkg rounded px-2 py-1 text-white-50">{{feat.info}}</div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="openModal('')">Cancel</button>
             <button :disabled="!isFormValid" type="submit" class="btn btn-primary" data-bs-dismiss="modal">{{ feat.string }}</button>
