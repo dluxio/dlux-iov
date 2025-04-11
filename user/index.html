@@ -620,7 +620,7 @@
                                                                     Delegated: ({{typeof accountapi?.granting == "object" ? (Object.keys(accountapi?.granting).length - 1 > 0 ? Object.keys(accountapi?.granting).length - 1 : 0) : 0 }})
                                                                 </h5>
                                                                 <!-- No DLUX Delegations Out -->
-                                                                <div v-if="accountapi?.granting?.t == 0">
+                                                                <div v-if="!accountapi?.granting?.t">
                                                                     <div
                                                                         class="border-top border-white-50 py-2 text-center fs-5">
                                                                         No DLUX Granting
@@ -665,7 +665,7 @@
                                                                     Received: ({{typeof accountapi.granted == "object" ? (Object.keys(accountapi.granted).length - 1 > 0 ? Object.keys(accountapi.granted).length - 1 : 0 ) : 0}})
                                                                 </h5>
                                                                 <!-- No DLUX Delegations In -->
-                                                                <div v-if="accountapi?.granted?.t == 0">
+                                                                <div v-if="!accountapi?.granted?.t">
                                                                     <div
                                                                         class="border-top border-white-50 py-2 text-center fs-5">
                                                                         No DLUX Granted
