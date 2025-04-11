@@ -407,7 +407,6 @@ export default {
             return Math.floor(Math.random() * 100000000);
         },
         async fetchWithdrawalRoutes() {
-            console.log('outgoing', this.account)
             try {
                 const routes = await this.hiveApiCall('condenser_api.get_withdraw_routes', [this.account, 'outgoing'], 'https://api.hive.blog')
                 this.withdrawalRoutes = routes

@@ -42,7 +42,6 @@ export default {
       element: this.$refs.mde,
       dragDrop: false
     });
-    console.log(this.insert, 'insert')
     this.insertText(this.insert)
     this.mde.codemirror.on("change", () => {
       this.$emit("data", this.mde.value())

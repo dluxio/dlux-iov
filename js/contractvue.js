@@ -1137,24 +1137,20 @@ export default {
                     const childGroup = parts[0] === 'wallet' ? '#wallettabs' : parts[0] === 'drive' ? '#drivetabs' : null;
 
                     parentTab = parentGroup ? document.querySelector(`${parentGroup} a[href="#${parts[0]}"]`) : null;
-                    console.log('Parent Tab:', parentTab);
 
                     childTab = childGroup ? document.querySelector(`${childGroup} a[href="#${parts[1]}"]`) : null;
 
                     if (parentTab) {
                         const parentTabInstance = new bootstrap.Tab(parentTab);
-                        console.log('Activating parent tab:', parentTab);
                         parentTabInstance.show();
 
                         if (parentTab.classList.contains('active')) {
-                            console.log('Parent tab already active, directly activating child tab.');
                             if (childTab) {
                                 const childTabInstance = new bootstrap.Tab(childTab);
                                 childTabInstance.show();
                             }
                         } else {
                             parentTab.addEventListener('shown.bs.tab', () => {
-                                console.log('Parent tab activated. Now activating child tab.');
                                 if (childTab) {
                                     const childTabInstance = new bootstrap.Tab(childTab);
                                     childTabInstance.show();
@@ -1178,8 +1174,6 @@ export default {
                         const parentActiveTab = document.querySelector('#usertabs .active').getAttribute('href');
                         newUrl = url.split('#')[0] + parentActiveTab + '/' + hash.substring(1);
                     }
-
-                    console.log('Updating URL to:', newUrl);
                     history.replaceState(null, null, newUrl);
                 });
             });

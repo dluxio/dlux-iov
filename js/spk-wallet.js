@@ -1412,7 +1412,6 @@ export default {
                 var total = parseFloat(this.saccountapi.tick_spk * st)
                 total += parseFloat(this.saccountapi.tick * lt)
                 total += parseFloat(this.saccountapi.tick_broca * bt)
-                console.log({total, st, bt, lt}, this.hiveprice.hive.usd)
                 return (this.hiveprice.hive.usd * total).toFixed(2)
             }
         },

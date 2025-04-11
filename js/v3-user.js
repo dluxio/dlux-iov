@@ -64,14 +64,13 @@ if (location.search) {
 if (!lapi) {
   lapi = "https://token.dlux.io";
 }
-if (
-  lapi == "https://token.dlux.io" ||
-  lapi == "https://spkinstant.hivehoneycomb.com" ||
-  lapi == "https://inconceivable.hivehoneycomb.com"
-) {
-  console.log("using defaults");
-  //window.history.replaceState(null, null, "dex");
-}
+// if (
+//   lapi == "https://token.dlux.io" ||
+//   lapi == "https://spkinstant.hivehoneycomb.com" ||
+//   lapi == "https://inconceivable.hivehoneycomb.com"
+// ) {
+//   //window.history.replaceState(null, null, "dex");
+// }
 let user = localStorage.getItem("user") || "GUEST";
 let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
 
@@ -1592,7 +1591,6 @@ PORT=3000
       })
     },
     getSPKUser() {
-      console.log('SPK User Update')
       if (this.account) fetch("https://spktest.dlux.io/@" + this.account)
         .then((response) => response.json())
         .then((data) => {
@@ -1864,7 +1862,6 @@ PORT=3000
           return r.json();
         })
         .then((re) => {
-          console.log(re.costs)
           for (var i = 0; i < re.costs.length; i++) {
             this.rcCost[re.costs[i].operation] = re.costs[i].rc_needed
           }
@@ -2269,13 +2266,10 @@ PORT=3000
       }
     },
     getMARKETS() {
-      console.log('Getting Markets')
       fetch("https://spktest.dlux.io/services/MARKET")
         .then((response) => response.json())
         .then((data) => {
-          console.log(data)
           for (var listing = 0; listing < data.services.length; listing++) {
-            console.log(data.services[listing])
             var ids = Object.keys(data.services[listing])
 
             this.services[`${data.services[listing][ids[0]].b}`] = {
@@ -3275,7 +3269,6 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     checkAccount(name, key) {
-      console.log('Checking:', name)
       fetch(this.hapi, {
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${key == 'newAccountDeets' ? name : this[name]}\"]], \"id\":1}`,
         headers: {
@@ -3523,7 +3516,6 @@ function buyNFT(setname, uid, price, type, callback){
         this.posturls = {};
       }
       if (this.postSelect.bitMask != bitMask || reset) {
-        console.log("resetting")
         this.postSelect.bitMask = bitMask;
         this.displayPosts = [];
         this[this.postSelect.entry] = [];
@@ -3882,7 +3874,6 @@ function buyNFT(setname, uid, price, type, callback){
             this.hiveprice = JSON.parse(data);
           } else try {
             this.hiveprice = data;
-            console.log(JSON.stringify(data))
             localStorage.setItem("hiveprice", JSON.stringify(data));
           } catch (e) {
             const data = localStorage.getItem("hiveprice") || '{"hive": {"usd": 0}}';
@@ -4328,7 +4319,6 @@ function buyNFT(setname, uid, price, type, callback){
       return Math.floor(seconds) + " seconds";
     },
     getHiveUser(user = this.account) {
-      console.log('hive info', user)
       fetch(hapi, {
         body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${user}"]], "id":1}`,
         headers: {
@@ -4468,7 +4458,6 @@ function buyNFT(setname, uid, price, type, callback){
     },
     calculateRcPercentage(accountRCinfo) {
       if (!accountRCinfo) return 0
-      console.log(accountRCinfo)
       const currentMana = parseInt(accountRCinfo.rc_manabar.current_mana)
       const maxRc = parseInt(accountRCinfo.max_rc)
       return ((currentMana / maxRc) * 100).toFixed(2)
@@ -4512,7 +4501,7 @@ function buyNFT(setname, uid, price, type, callback){
         if (this.serviceWorker) {
           this.callSWfunction('callScript', o).then((r) => {
             resolve(r)
-          }).catch((e) => { console.log('Service Worker not found', e); this.serviceWorker = false; this.callScript(o).then((r) => { resolve(r) }) })
+          }).catch((e) => { this.serviceWorker = false; this.callScript(o).then((r) => { resolve(r) }) })
         } else if (this.nftscripts[o.script]) {
           const code = `(//${this.nftscripts[o.script]}\n)("${o.uid ? o.uid : 0
             }")`;

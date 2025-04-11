@@ -209,7 +209,6 @@ export default {
         fetch(this.api + "/api/protocol")
         .then((response) => response.json())
         .then((data) => {
-          console.log(data)
           this.protocol.prefix = data.prefix;
           this.protocol.multisig = data.multisig;
           this.protocol.jsontoken = data.jsontoken;
