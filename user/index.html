@@ -577,11 +577,12 @@
                                                             <div class="btn-group" v-if="me" role="group"
                                                                 aria-label="DLUX Actions">
                                                                 <button class="dropdown btn btn-light text-nowrap"
-                                                                    :disabled="!(accountapi.granting?.t || accountapi.granted?.t)"
+                                                                    
                                                                     href="#" role="button" id="delegationsbtn"
                                                                     data-bs-toggle="collapse"
                                                                     data-bs-target="#delegations" aria-expanded="false"
                                                                     aria-controls="Show Delegations">
+                                                                    <!-- :disabled="!(accountapi.granting?.t || accountapi.granted?.t)" -->
                                                                     <i
                                                                         class="me-2 fa-solid fa-search"></i>Details</button>
                                                             </div>
@@ -1271,7 +1272,7 @@
                                                             <div id="larynxgactions" class="text-center text-lg-end">
                                                                 <h5
                                                                     class="d-flex align-items-center justify-content-center justify-content-lg-end">
-                                                                    {{formatNumber((saccountapi.poweredUp)/1000, 3,
+                                                                    {{formatNumber((saccountapi.poweredDown)/1000, 3,
                                                                     '.',
                                                                     ',')}}
                                                                     <span class="text-warning ms-2">LARYNX</span><span
@@ -1600,7 +1601,7 @@
                                                                                 @modalsign="sendIt($event)"
                                                                                 v-slot:trigger>
                                                                                 <button class="dropdown-item trigger"
-                                                                                    slot="trigger" type="button"><i
+                                                                                    slot="trigger" disabled type="button"><i
                                                                                         class="fas fa-lock-open fa-fw me-2"></i>Unlock
                                                                                     Liquidity</button>
                                                                             </modal-vue>
@@ -1610,7 +1611,7 @@
                                                             </div>
                                                         </div>
                                                         <!-- LARYNX Unlock -->
-                                                        <div class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
+                                                        <div class="d-none alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
                                                             role="alert" style="background-color: #ffffff01;">
                                                             <p class="mb-0 lead">A #amount unlock is scheduled in #days
                                                                 with #number installments remaining
@@ -1821,7 +1822,7 @@
                                                     <span class="lead">
                                                         You have <span
                                                             v-if="focus?.hive_transfers?.length == 1">a</span>
-                                                        recurring transfer<span
+                                                        recurring HIVE transfer<span
                                                             v-if="focus?.hive_transfers?.length > 1">s</span>
                                                     </span>
                                                     <a class="ms-lg-auto text-nowrap no-decoration border border-light rounded-pill px-2 py-1"
@@ -2533,7 +2534,7 @@
                                                     <i class="fa-solid fa-rotate-right fs-1 text-primary"></i>
                                                     <span class="lead">
                                                         You have <span v-if="focus?.hbd_transfers?.length == 1">a</span>
-                                                        recurring transfer<span
+                                                        recurring HBD transfer<span
                                                             v-if="focus?.hbd_transfers?.length > 1">s</span>
                                                     </span>
                                                     <a class="ms-lg-auto text-nowrap no-decoration border border-light rounded-pill px-2 py-1"
