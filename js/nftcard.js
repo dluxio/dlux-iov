@@ -118,7 +118,7 @@ export default {
                    -webkit-text-fill-color: transparent; 
                    -moz-background-clip: text;
                    -moz-text-fill-color: transparent;">
-              <span>Open sealed NFT{{item.qty > 1 ? 's' : ''}}</span>
+              <span>Open sealed NFT</span>
             </button>
       </div>
     </div>

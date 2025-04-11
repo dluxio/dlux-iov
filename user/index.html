@@ -2779,9 +2779,10 @@
 
                         <!-- inventory tab -->
                         <div role="tabpanel" class="tab-pane fade show" id="inventory" aria-labelledby="inventorytab">
-                            <div class="container ">
+                            <div class="container card bg-img-none pt-0 px-1 px-md-3 mb-4"
+                            style="background-color: rgba(61, 61, 61, 0.708);">
                                 <div v-if="FTtrades.length || NFTtrades.length"
-                                    class="mt-5 border-bottom border-light border-3">
+                                    class="my-4 border-bottom border-light border-3">
                                     <h2 class="mb-1">PENDING TRADES</h2>
                                 </div>
                                 <div v-if="FTtrades.length || NFTtrades.length"
@@ -2805,7 +2806,7 @@
                                             @detail="modalIndex('itemModal', $event, 'NFTtrades');itemModal.hidden = false" />
                                     </div>
                                 </div>
-                                <div v-if="accountRNFTs.length" class="border-bottom border-3 border-light mt-5">
+                                <div v-if="accountRNFTs.length" class="border-bottom border-3 border-light my-4">
                                     <h2 class="mb-1">UNOPENED MINTS</h2>
                                 </div>
                                 <!-- MINT INVENTORY -->
@@ -2822,7 +2823,7 @@
                                     </div>
                                 </div>
                                 <!-- NFT INVENTORY -->
-                                <div class="border-bottom border-3 border-light mt-5">
+                                <div class="border-bottom border-3 border-light my-4">
                                     <h2 class="mb-1">NFT COLLECTION</h2>
                                 </div>
 
