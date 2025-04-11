@@ -367,6 +367,37 @@ export default {
     this.$emit('tosign', op)
     this.toSign = op
   },
+  claimHBD(from) {
+    var op = {
+      type: "raw",
+      op: [
+        [
+          "transfer_from_savings",
+          {
+            "from": from,
+            "to": from,
+            "amount": "0.001 HBD",
+            "memo": "Claim HBD interest",
+            "request_id": 7249336
+          }
+        ],
+        [
+          "cancel_transfer_from_savings",
+          {
+            "from": from,
+            "request_id": 7249336
+          }
+        ]
+      ],
+      key: "active",
+      id: `Stop Savings Withdrawl 7249336`,
+      msg: `Stop Savings Withdrawl 7249336`,
+      ops: ["init"],
+      txid: `Stop Savings Withdrawl 7249336`,
+    };
+    this.$emit('tosign', op)
+    this.toSign = op
+  },
   simpleCJ(id, params, options) {
     console.log('SCJ', id)
     var op = {

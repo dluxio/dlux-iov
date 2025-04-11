@@ -2742,7 +2742,7 @@
                                                     </h5>
                                                     <div class="btn-group" v-show="me" role="group"
                                                         aria-label="HBD Actions">
-                                                        <button type="button" class="btn btn-light text-nowrap"
+                                                        <button type="button" class="btn btn-light text-nowrap" @click="claimHBD(account)"
                                                             :disabled="!hbdclaim[focus.name]?.canClaimInterest || hbdclaim[focus.name].pendingInterestHbd === 0"
                                                             title="Claim HBD interest"><i
                                                                 class="fas fa-plus-circle fa-fw me-2"></i>Claim
