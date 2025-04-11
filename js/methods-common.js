@@ -105,7 +105,12 @@ export default {
     return `${this.toFixed(bytes, 2)} ${p[counter]}`
   },
   timeUntil(dateString, plusHours = 0, recurrent = false, nowier = false) {
-    const targetDate = new Date(dateString + 'Z')
+    const timezoneRegex = /(Z|[+-]\d{2}:?\d{2})$/;
+    if (!timezoneRegex.test(dateString)) {
+      // If no timezone is present, append 'Z'
+      return dateString + 'Z';
+    }
+    const targetDate = new Date(dateString)
     const targetMS = targetDate.getTime()
     const now = new Date()
     const nowMS = now.getTime()
