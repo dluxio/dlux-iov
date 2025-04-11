@@ -2256,7 +2256,7 @@ PORT=3000
       const canClaimInterest = timeSinceLastPayment > 30 * 24 * 3600
       let nextClaimDate = null
         const nextClaimTime = savingsHbdLastInterestPayment + 30 * 24 * 3600
-        nextClaimDate = new Date(nextClaimTime * 1000).toISOString().split('T')[0]
+      if(nextClaimDate > 1000)nextClaimDate = new Date(nextClaimTime * 1000).toISOString()
       this.hbdclaim[focus.name] = {
         pendingInterestHbd: parseFloat(pendingInterestHbd),
         canClaimInterest: canClaimInterest,
