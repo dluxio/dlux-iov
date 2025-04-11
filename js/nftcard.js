@@ -83,9 +83,31 @@ export default {
   <!-- FOOTER -->
   <div class="card-footer px-1 pb-1 pt-0 border-0">
 
-    <!-- TRADE -->
-    <a href="#transferModal" class="no-decoration" data-bs-toggle="modal" @click="modalIndex('details'); $emit('focusitem', item)">
-      <div class="text-white text-center" v-if="trade">
+    <!-- TRADE Mints-->
+    <a href="#transferModal" class="no-decoration" data-bs-toggle="modal" @click="modalIndex('details'); $emit('focusitem', item)" v-if="trade && mint">
+      <div class="text-white text-center">
+        <div class="bg-dark rounded">
+          <div class="mt-1 text-center rounded-top bg-info-50">
+            <h5 id="timer-set-uid" class="mb-0 lead">
+              <p class="no-decoration text-white" v-if="item.to != account">To @{{item.to}}</p>
+              <p class="no-decoration text-white" v-if="item.to == account">From @{{item.from}}</p>
+            </h5>
+          </div>
+          <div class="d-flex rounded-bottom p-2">
+            <div class="fs-6">
+              {{formatNumber(item.price/1000,3,'.',',')}}
+            </div>
+            <div class="fs-6 text-uppercase ms-auto">
+              {{item.token}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- TRADE NFTs-->
+    <a href="#itemModal" class="no-decoration" data-bs-toggle="modal" @click="modalIndex('details'); $emit('focusitem', item)" v-if="trade && !mint">
+      <div class="text-white text-center">
         <div class="bg-dark rounded">
           <div class="mt-1 text-center rounded-top bg-info-50">
             <h5 id="timer-set-uid" class="mb-0 lead">
