@@ -108,22 +108,18 @@ export default {
     <!-- INVENTORY -->
     <div class="text-white" v-if="inventory">
       <div class="bg-dark rounded mt-1">
-        <div class="d-flex p-1">
-          <div class="fs-5 ms-auto me-auto">
-            <span v-if="!mint" :style="{'background-image': colors}" style="-webkit-background-clip: text;
+            <a href="#itemModal" data-bs-toggle="modal" @click="modalIndex('details')" class="btn w-100" v-if="!mint" :style="{'background-image': colors}" style="-webkit-background-clip: text;
                    -webkit-text-fill-color: transparent; 
                    -moz-background-clip: text;
                    -moz-text-fill-color: transparent;">
               <span>#{{uid}}</span>
-            </span>
-            <span v-if="mint" @click="openNFT()" :style="{'background-image': colors}" style="-webkit-background-clip: text;
+            </a>
+            <button class="btn w-100" v-if="mint" @click="openNFT()" :style="{'background-image': colors}" style="-webkit-background-clip: text;
                    -webkit-text-fill-color: transparent; 
                    -moz-background-clip: text;
                    -moz-text-fill-color: transparent;">
-              <span v-if="mint">sealed NFT{{item.qty > 1 ? 's' : ''}}</span>
-            </span>
-          </div>
-        </div>
+              <span>Open sealed NFT{{item.qty > 1 ? 's' : ''}}</span>
+            </button>
       </div>
     </div>
 
