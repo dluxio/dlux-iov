@@ -104,7 +104,7 @@ export default {
     }
     return `${this.toFixed(bytes, 2)} ${p[counter]}`
   },
-  timeUntil(dateString, plusHours = 0, recurrent = false) {
+  timeUntil(dateString, plusHours = 0, recurrent = false, nowier = false) {
     const targetDate = new Date(dateString + 'Z')
     const targetMS = targetDate.getTime()
     const now = new Date()
@@ -133,6 +133,7 @@ export default {
         if (diffMs > 0) {
           return `in ${value} ${unitName}`
         } else {
+          if(nowier) return 'now'
           return `${value} ${unitName} ago`
         }
       }
