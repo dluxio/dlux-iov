@@ -525,10 +525,10 @@ export default {
             this.$emit('open-modal', pass)
         },
         prefillToField() {
-            if (this.to_account && (this.func === 'delegate_vesting_shares' || this.func === 'transfer' || this.func === 'delegate_rc')) {
+            if (this.type && (this.func === 'delegate_vesting_shares' || this.func === 'transfer' || this.func === 'delegate_rc')) {
                 const toKey = this.func === 'delegate_vesting_shares' ? 'delegatee' : this.func === 'delegate_rc' ? 'delegatees' : 'to'
                 if (this.feat.json[toKey]) {
-                    this.form[toKey] = this.to_account
+                    this.form[toKey] = this.type
                     this.validateField(toKey)
                 }
             } else if (this.reqid && this.func === 'cancel_transfer_from_savings') {
