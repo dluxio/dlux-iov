@@ -567,7 +567,7 @@
                                                         <div id="dluxactions" class="text-center text-lg-end">
                                                             <h5 id="dluxbalance"
                                                                 class="d-flex align-items-center justify-content-center justify-content-lg-end">
-                                                                {{formatNumber((accountapi.granting?.t ? accountapi.granting?.t : 0)/1000, 3,
+                                                                {{formatNumber((accountapi?.granting?.t ? accountapi.granting?.t : 0)/1000, 3,
                                                                 '.', ',')}}
                                                                 <span class="ms-2 text-warning">DLUX</span><span
                                                                     class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
@@ -598,7 +598,7 @@
                                                                     <span><i
                                                                             class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
                                                                     <span class="ms-1">
-                                                                        {{formatNumber((accountapi.granting.t)/1000,
+                                                                        {{formatNumber((accountapi?.granting?.t)/1000 ? accountapi?.granting?.t/1000 : 0,
                                                                         3,
                                                                         '.', ',')}} DLUX
                                                                     </span>
@@ -608,7 +608,7 @@
                                                                     <span><i
                                                                             class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
                                                                     <span
-                                                                        class="ms-1">{{formatNumber((accountapi.granted.t)/1000,
+                                                                        class="ms-1">{{formatNumber(accountapi?.granted?.t? (accountapi?.granted?.t)/1000 : 0,
                                                                         3,'.', ',')}} DLUX
                                                                     </span>
                                                                 </div>
@@ -617,10 +617,10 @@
                                                             <div class="px-1 px-lg-2">
                                                                 <!-- DLUX Delegations Out -->
                                                                 <h5 class="mt-2 mb-1">
-                                                                    Delegated: ({{Object.keys(accountapi.granting).length - 1 > 0 ? Object.keys(accountapi.granting).length - 1 : 0 }})
+                                                                    Delegated: ({{typeof accountapi?.granting == "object" ? (Object.keys(accountapi?.granting).length - 1 > 0 ? Object.keys(accountapi?.granting).length - 1 : 0) : 0 }})
                                                                 </h5>
                                                                 <!-- No DLUX Delegations Out -->
-                                                                <div v-if="accountapi.granting.t == 0">
+                                                                <div v-if="accountapi?.granting?.t == 0">
                                                                     <div
                                                                         class="border-top border-white-50 py-2 text-center fs-5">
                                                                         No DLUX Granting
@@ -662,10 +662,10 @@
                                                                 </div>
                                                                 <!-- DLUX Delegations In -->
                                                                 <h5 class="mt-2 mb-1">
-                                                                    Received: ({{Object.keys(accountapi.granted).length - 1 > 0 ? Object.keys(accountapi.granted).length - 1 : 0 }})
+                                                                    Received: ({{typeof accountapi.granted == "object" ? (Object.keys(accountapi.granted).length - 1 > 0 ? Object.keys(accountapi.granted).length - 1 : 0 ) : 0}})
                                                                 </h5>
                                                                 <!-- No DLUX Delegations In -->
-                                                                <div v-if="accountapi.granted.t == 0">
+                                                                <div v-if="accountapi?.granted?.t == 0">
                                                                     <div
                                                                         class="border-top border-white-50 py-2 text-center fs-5">
                                                                         No DLUX Granted
@@ -1431,7 +1431,7 @@
                                                                         <span><i
                                                                                 class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
                                                                         <span class="ms-1">
-                                                                            {{formatNumber((saccountapi.granting.t)/1000,
+                                                                            {{formatNumber((saccountapi.granting?.t)/1000,
                                                                             3,
                                                                             '.', ',')}} LARYNX
                                                                         </span>
@@ -1453,7 +1453,7 @@
                                                                         Delegated: ({{Object.keys(saccountapi.granting).length - 1 > 0 ? Object.keys(saccountapi.granting).length - 1 : 0 }})
                                                                     </h5>
                                                                     <!-- No LARYNX Delegations Out -->
-                                                                    <div v-if="saccountapi.granting.t == 0">
+                                                                    <div v-if="saccountapi.granting?.t == 0">
                                                                         <div
                                                                             class="border-top border-white-50 py-2 text-center fs-5">
                                                                             No LARYNX Granting
