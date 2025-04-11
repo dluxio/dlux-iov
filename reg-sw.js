@@ -1,5 +1,6 @@
+var activeWorker = null
 if (window.location.hostname.includes('dlux') && 'serviceWorker' in navigator) {
-    const version = '2025.04.11.9';
+    const version = '2025.04.11.10';
     console.log('Registering service worker with version:', version);
 
     navigator.serviceWorker.getRegistration('/')
@@ -20,6 +21,7 @@ if (window.location.hostname.includes('dlux') && 'serviceWorker' in navigator) {
             return navigator.serviceWorker.register(`/sw.js?v=${version}`, { scope: '/' });
         })
         .then(reg => {
+            activeWorker = reg
             console.log('Service worker registered successfully. Scope:', reg.scope);
         })
         .catch(error => {

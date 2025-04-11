@@ -1748,7 +1748,7 @@
                                                                 func="transfer" :mypfp="mypfp" token="HIVE"
                                                                 :tokenuser="focus" :account="account"
                                                                 :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                type="hive" v-slot:trigger>
+                                                                :type="{}" v-slot:trigger>
                                                                 <span class="text-nowrap trigger p-2" slot="trigger"><i
                                                                         class="fas fa-paper-plane me-2 "></i>Send</span>
                                                             </modal-vue></button>
@@ -1766,7 +1766,7 @@
                                                                     func="transfer_to_vesting" :mypfp="mypfp"
                                                                     token="HIVE" :tokenuser="focus" :account="account"
                                                                     :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                    type="hive" v-slot:trigger
+                                                                    :type="{}" v-slot:trigger
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
                                                                         slot="trigger"
@@ -1779,7 +1779,7 @@
                                                                     func="collateralized_convert" :mypfp="mypfp"
                                                                     token="HIVE" :tokenuser="focus" :account="account"
                                                                     :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                    type="hive" v-slot:trigger
+                                                                    :type="{}" v-slot:trigger
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
                                                                         slot="trigger"
@@ -1792,7 +1792,7 @@
                                                                     func="transfer_to_savings" :mypfp="mypfp"
                                                                     token="HIVE" :tokenuser="focus" :account="account"
                                                                     :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                    type="hive" v-slot:trigger
+                                                                    :type="{}" v-slot:trigger
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
                                                                         slot="trigger"
@@ -1919,7 +1919,7 @@
                                                             <modal-vue
                                                                 v-if="focus.id && hivestats.content_reward_percent"
                                                                 func="delegate_vesting_shares" :mypfp="mypfp" token="HP"
-                                                                :tokenuser="focus" :account="account" type="HIVE"
+                                                                :tokenuser="focus" :account="account" :type="{}"
                                                                 :tokenstats="hivestats" @modalsign="sendIt($event)"
                                                                 v-slot:trigger class="">
                                                                 <span class="text-nowrap trigger p-2" slot="trigger"
@@ -1943,7 +1943,7 @@
                                                                     func="delegate_rc" :mypfp="mypfp" token="RC"
                                                                     :tokenuser="focus" :account="account"
                                                                     :tokenstats="hivestats" :rc-info="rcAccount"
-                                                                    @modalsign="sendIt($event)" type="hive"
+                                                                    @modalsign="sendIt($event)" :type="{}"
                                                                     v-slot:trigger class="dropdown-menu-item">
                                                                     <button class="text-nowrap dropdown-item trigger">
                                                                         <i class="fas fa-microchip fa-fw me-2"></i>
@@ -1953,7 +1953,7 @@
                                                                 <modal-vue
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="withdraw_vesting" :mypfp="mypfp" token="HP"
-                                                                    :tokenuser="focus" type="HIVE" :account="account"
+                                                                    :tokenuser="focus" :type="{}" :account="account"
                                                                     :tokenstats="hivestats" @modalsign="sendIt($event)"
                                                                     v-slot:trigger class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
@@ -1968,7 +1968,7 @@
                                                                 <modal-vue
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="set_withdraw_vesting_route" :mypfp="mypfp"
-                                                                    token="HP" :tokenuser="focus" type="HIVE"
+                                                                    token="HP" :tokenuser="focus" :type="{}"
                                                                     :account="account" :tokenstats="hivestats"
                                                                     @modalsign="sendIt($event)" v-slot:trigger
                                                                     class="dropdown-menu-item">
@@ -1983,7 +1983,7 @@
                                                                     func="claim_account" :mypfp="mypfp" token="HP"
                                                                     :tokenuser="focus" :account="account"
                                                                     :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                    type="hive" v-slot:trigger
+                                                                    :type="{}" v-slot:trigger
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap dropdown-item trigger"
                                                                         slot="trigger"
@@ -2011,7 +2011,7 @@
                                                     <div class="d-flex ms-lg-2">
                                                         <modal-vue v-if="focus.id && hivestats.content_reward_percent"
                                                             func="withdraw_vesting" :mypfp="mypfp" token="HP"
-                                                            :tokenuser="focus" type="HIVE" :account="account"
+                                                            :tokenuser="focus" :type="{}" :account="account"
                                                             :tokenstats="hivestats" @modalsign="sendIt($event)"
                                                             v-slot:trigger>
                                                             <button
@@ -2375,7 +2375,7 @@
                                                             func="transfer_from_savings" :mypfp="mypfp" token="HIVE"
                                                             :tokenuser="focus" :account="account"
                                                             :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                            type="hive" v-slot:trigger class="d-flex">
+                                                            :type="{}" v-slot:trigger class="d-flex">
                                                             <span class="text-nowrap btn-padding trigger"
                                                                 slot="trigger">
                                                                 <i class="fas fa-money-bill-transfer fa-fw me-2"></i>
@@ -2469,7 +2469,7 @@
                                                                 func="transfer" :mypfp="mypfp" token="HBD"
                                                                 :tokenuser="focus" :account="account"
                                                                 :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                type="hive" v-slot:trigger>
+                                                                :type="{}" v-slot:trigger>
                                                                 <span class="text-nowrap trigger p-2">
                                                                     <i class="fas fa-paper-plane me-2 trigger"></i>
                                                                     Send
@@ -2490,7 +2490,7 @@
                                                                     func="convert" :mypfp="mypfp" token="HBD"
                                                                     :tokenuser="focus" :account="account"
                                                                     :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                    type="hive" v-slot:trigger
+                                                                    :type="{}" v-slot:trigger
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
                                                                         slot="trigger"
@@ -2504,7 +2504,7 @@
                                                                     func="transfer_to_savings" :mypfp="mypfp"
                                                                     token="HBD" :tokenuser="focus" :account="account"
                                                                     :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                    type="hive" v-slot:trigger
+                                                                    :type="{}" v-slot:trigger
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
                                                                         slot="trigger"
@@ -2634,7 +2634,7 @@
                                                                 func="transfer_from_savings" :mypfp="mypfp" token="HBD"
                                                                 :tokenuser="focus" :account="account"
                                                                 :tokenstats="hivestats" @modalsign="sendIt($event)"
-                                                                type="hive" v-slot:trigger class="d-flex">
+                                                                :type="{}" v-slot:trigger class="d-flex">
                                                                 <span class="text-nowrap btn-padding trigger"
                                                                     slot="trigger">
                                                                     <i

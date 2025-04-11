@@ -2227,6 +2227,7 @@ PORT=3000
       if (!focus.name) return
       if (!focus.savings_hbd_seconds_last_update || !this.hivestats.time || !this.hivestats.hbd_interest_rate) {
         setTimeout(() => { this.calculateHbdSavingsInterest(focus) }, 1000)
+        return
       }
       const currentTime = this.isoToUnix(this.hivestats.time)
       const savingsHbdSecondsLastUpdate = this.isoToUnix(focus.savings_hbd_seconds_last_update)
