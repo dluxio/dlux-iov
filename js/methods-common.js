@@ -105,6 +105,7 @@ export default {
     return `${this.toFixed(bytes, 2)} ${p[counter]}`
   },
   timeUntil(dateString, plusHours = 0, recurrent = false, nowier = false) {
+    if(typeof dateString != "string")return "unknown"
     const timezoneRegex = /(Z|[+-]\d{2}:?\d{2})$/;
     if (!timezoneRegex.test(dateString)) {
       // If no timezone is present, append 'Z'
