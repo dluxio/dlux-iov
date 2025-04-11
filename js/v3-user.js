@@ -2257,7 +2257,7 @@ PORT=3000
       let nextClaimDate = null
       const nextClaimTime = savingsHbdLastInterestPayment + 30 * 24 * 3600
       nextClaimDate = new Date(nextClaimTime * 1000).toISOString()
-      if(nextClaimDate.split('-')[0] == '1970')nextClaimDate = null
+      if (nextClaimDate.split('-')[0] == '1970') nextClaimDate = null
       this.hbdclaim[focus.name] = {
         pendingInterestHbd: parseFloat(pendingInterestHbd),
         canClaimInterest: canClaimInterest,
@@ -3249,15 +3249,15 @@ function buyNFT(setname, uid, price, type, callback){
           if (pendingWithdrawals[i].amount.split(' ')[1] == "HIVE") hives.push(pendingWithdrawals[i])
           else hbds.push(pendingWithdrawals[i])
         }
-        console.log({hives, hbds})
+        console.log({ hives, hbds })
         this[key].hive_pendingWithdrawals = hives
         this[key].hbd_pendingWithdrawals = hbds
         var totalDs = 0
         var totalHs = 0
-        for(var i = 0; i < hives.length; i++){
+        for (var i = 0; i < hives.length; i++) {
           totalHs += parseFloat(hives[i].amount)
         }
-        for(var i = 0; i < hbds.length; i++){
+        for (var i = 0; i < hbds.length; i++) {
           totalDs += parseFloat(hbds[i].amount)
         }
         this[key].hbd_pendingWithdrawal_tot = totalDs
@@ -4528,6 +4528,12 @@ function buyNFT(setname, uid, price, type, callback){
       return 0;
     },
     newme(user) {
+      this.delegationsFetched = false
+      this.rcAccount = null
+      this.hpDelegationsOut = []
+      this.hpDelegationsIn = []
+      this.rcDelegationsOut = []
+      this.rcDelegationsIn = []
       this.posturls = {};
       this.FTtrades = []
       this.NFTtrades = []
