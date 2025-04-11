@@ -288,7 +288,7 @@ export default {
                     class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
                 role="alert" style="background-color: #ffffff01;">
                     <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
-                    <p class="mb-0 lead ">A #amount SPK
+                    <p class="mb-0 lead ">A {{formatNumber(saccountapi?.spower_downs[Object.keys(saccountapi?.spower_downs)[0]].amount / 1000, 3, '.', ',')}} SPK
                     Power Down is scheduled in {{when(saccountapi.spower_downs)}} 
                      with {{when(saccountapi.spower_downs, true)}} installment<span v-if="when(saccountapi.spower_downs, true) > 1">s</span> remaining</p>
                     <small class="ms-lg-auto">
@@ -588,7 +588,7 @@ export default {
                      role="alert" style="background-color: #ffffff01;">
                      <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
                      <p class="mb-0 lead ">A Power Down of 
-                     #amount BROCA
+                     {{formatNumber(saccountapi?.bpower_downs[Object.keys(saccountapi?.bpower_downs)[0]].amount / 1000, 3, '.', ',')}} BROCA
                      is scheduled in {{when(saccountapi.bpower_downs)}} 
                      with {{when(saccountapi.bpower_downs, true)}} installment<span v-if="when(saccountapi.bpower_downs, true) > 1">s</span> remaining</p>
                     <small class="ms-lg-auto">
@@ -883,7 +883,7 @@ export default {
                      role="alert" style="background-color: #ffffff01;">
                     <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
                     <p class="mb-0 lead ">A Power Down of 
-                        #amount LARYNX
+                        {{formatNumber(saccountapi?.power_downs[Object.keys(saccountapi?.power_downs)[0]].amount / 1000, 3, '.', ',')}} LARYNX
                         is scheduled in {{when(saccountapi.power_downs)}} 
                         with {{when(saccountapi.power_downs, true)}} installment<span v-if="when(saccountapi.power_downs, true) > 1">s</span> remaining
                     </p>
@@ -976,7 +976,7 @@ export default {
                                 <div class="px-1 px-lg-2">
                                     <!-- LARYNX Delegations Out -->
                                     <h5 class="mt-2 mb-1">
-                                        Delegated: (# accounts)
+                                        Delegated: ({{Object.keys(saccountapi.granting).length - 1 > 0 ? Object.keys(saccountapi.granting).length - 1 : 0 }})
                                     </h5>
                                     <!-- No LARYNX Delegations Out -->
                                     <div v-if="saccountapi.granting.t == 0">
@@ -992,35 +992,29 @@ export default {
                                             <a :href="'/@' + b " target="_blank" class="text-info no-decoration">@{{b}}</a>
                                             <p class="ms-sm-auto mb-0">{{formatNumber((a)/1000, 3, '.', ',')}} LARYNX</p>
                                             <div class="d-flex">
-                                                <modal-vue type="delegate" 
-                                                    :smarkets="smarkets.node" token="LARYNX"
-                                                    :to="b" :amount="a" :stats="spkStats"
-                                                    :balance="saccountapi.poweredUp"
+                                                <modal-vue
+                                                    v-if="protocollarynx.head_block && saccountapi.head_block"
+                                                    func="powdel" :mypfp="mypfp"
+                                                    token="poweredUp"
+                                                    :tokenuser="saccountapi"
                                                     :account="account"
+                                                    :tokenprotocol="protocollarynx"
                                                     @modalsign="sendIt($event)"
-                                                    :test="test" v-slot:trigger>
+                                                    v-slot:trigger>
                                                     <button type="button"
                                                         class="ms-1 btn btn-sm btn-secondary trigger"><i
                                                             class="fas fa-fw fa-user-edit"></i></button>
                                                 </modal-vue>
-                                                <modal-vue type="delegate" 
-                                                    :smarkets="smarkets.node" token="LARYNX"
-                                                    :to="b" amount="0" :stats="spkStats"
-                                                    :balance="saccountapi.poweredUp"
-                                                    :account="account"
-                                                    :test="test"
-                                                    @modalsign="sendIt($event)" v-slot:trigger>
-                                                    <button class="ms-1 btn btn-sm btn-danger ms-1 trigger"
-                                                        type="button"><i
-                                                            class="fas fa-fw fa-trash-alt"></i></button>
-                                                </modal-vue>
+                                                <button class="ms-1 btn btn-sm btn-danger ms-1 trigger" @click="simpleCJ('spkccT_power_grant', 'amount:0,to:' + b , {'broadcast':'tosign'})"
+                                                    type="button"><i
+                                                        class="fas fa-fw fa-trash-alt"></i></button>
                                             </div>
                                         </div>
                                     </div>
                                 
                                     <!-- LARYNX Delegations In -->
                                     <h5 class="mt-2 mb-1">
-                                        Received: (# accounts)
+                                        Received: ({{Object.keys(saccountapi.granted).length - 1 > 0 ? Object.keys(saccountapi.granted).length - 1 : 0 }})
                                     </h5>
                                     <!-- No LARYNX Delegations In -->
                                     <div v-if="saccountapi.granted.t == 0">

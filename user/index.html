@@ -1233,7 +1233,7 @@
                                                         <div v-if="when(saccountapi.powerDowns)"
                                                             class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
                                                             role="alert" style="background-color: #ffffff01;">
-                                                            <p class="mb-0 lead ">A #amount LARYNX power down is
+                                                            <p class="mb-0 lead ">A {{formatNumber(saccountapi?.power_downs[Object.keys(saccountapi?.power_downs)[0]].amount / 1000, 3, '.', ',')}} LARYNX power down is
                                                                 scheduled
                                                                 to happen in {{when(saccountapi.powerDowns)}}
                                                                 with {{saccountapi.powerDowns.length}} installment<span
@@ -1351,7 +1351,7 @@
                                                                 <div class="px-1 px-lg-2">
                                                                     <!-- LARYNX Delegations Out -->
                                                                     <h5 class="mt-2 mb-1">
-                                                                        Delegated: (#accounts)
+                                                                        Delegated: ({{Object.keys(saccountapi.granting).length - 1 > 0 ? Object.keys(saccountapi.granting).length - 1 : 0 }})
                                                                     </h5>
                                                                     <!-- No LARYNX Delegations Out -->
                                                                     <div v-if="saccountapi.granting.t == 0">
@@ -1396,7 +1396,7 @@
                                                                     </div>
                                                                     <!-- LARYNX Delegations In -->
                                                                     <h5 class="mt-2 mb-1">
-                                                                        Received: (#accounts)
+                                                                        Received: ({{Object.keys(saccountapi.granted).length - 1 > 0 ? Object.keys(saccountapi.granted).length - 1 : 0 }})
                                                                     </h5>
                                                                     <!-- No LARYNX Delegations In -->
                                                                     <div v-if="saccountapi.granted.t == 0">
