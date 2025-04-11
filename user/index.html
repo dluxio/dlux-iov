@@ -2724,9 +2724,9 @@
                                                 <div class="text-center text-lg-start flex-grow-1">
                                                     <h4>HBD Savings Claimable</h4>
                                                     <ul class="text-white-50 text-start">
-                                                        <li>Claim every 30 days</li>
-                                                        <li>Next claim {{timeUntil(hbdclaim[focus.name] ?
-                                                            hbdclaim[focus.name].nextClaimDate : '0', 0, 0, true)}}</li>
+                                                        <li v-if="formatNumber(focus.savings_hbd_balance ,3,'.',
+                                                        ',') == 0">Add HBD to Savings to start earning</li>
+                                                        <li>Claim interest every 30 days</li>
                                                     </ul>
                                                 </div>
                                                 <div id="savingsactions" class="text-center text-lg-end">
@@ -2745,7 +2745,9 @@
                                                         <button type="button" class="btn btn-light text-nowrap" @click="claimHBD(account)"
                                                             :disabled="!hbdclaim[focus.name]?.canClaimInterest || hbdclaim[focus.name].pendingInterestHbd === 0"
                                                             title="Claim HBD interest"><i
-                                                                class="fas fa-plus-circle fa-fw me-2"></i>Claim
+                                                                class="fas fa-plus-circle fa-fw me-2"></i>Claim <span v-if="timeUntil(hbdclaim[focus.name] ?
+                                                                    hbdclaim[focus.name].nextClaimDate : '0', 0, 0, true) != 'unknown'">{{timeUntil(hbdclaim[focus.name] ?
+                                                                    hbdclaim[focus.name].nextClaimDate : '0', 0, 0, true)}}</span>
                                                         </button>
 
                                                     </div>

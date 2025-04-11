@@ -122,7 +122,7 @@ export default {
     const diffMs = (targetMS + addTime) - nowMS
     const absDiffSeconds = Math.abs(diffMs) / 1000
     if (absDiffSeconds < 1) {
-      return 'now'
+      return 'Now'
     }
     const units = [
       { name: 'year', seconds: 31536000 },  // 36
@@ -139,7 +139,7 @@ export default {
         if (diffMs > 0) {
           return `in ${value} ${unitName}`
         } else {
-          if(nowier) return 'now'
+          if(nowier) return 'Now'
           return `${value} ${unitName} ago`
         }
       }
