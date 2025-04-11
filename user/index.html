@@ -2123,10 +2123,8 @@
                                                                         class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
                                                                         <span><i
                                                                                 class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
-                                                                        <span class="ms-1">{{formatNumber(rcAccount ?
-                                                                            rcAccount.received_delegated_rc : 0, 0, '.',
-                                                                            ',')}}
-                                                                            RC
+                                                                        <span class="ms-1">{{fancyRounding(rcAccount ?
+                                                                            rcAccount.received_delegated_rc : 0)}}RC
                                                                         </span>
                                                                     </div>
                                                                     <div
@@ -2134,9 +2132,8 @@
                                                                         <span><i
                                                                                 class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
                                                                         <span class="ms-1">
-                                                                            {{formatNumber(rcAccount ?
-                                                                            rcAccount.delegated_rc : 0, 0, '.', ',')}}
-                                                                            RC
+                                                                            {{fancyRounding(rcAccount ?
+                                                                            rcAccount.delegated_rc : 0)}}RC
                                                                         </span>
                                                                     </div>
                                                                 </div>
@@ -2167,9 +2164,7 @@
                                                                             </a>
                                                                         </p>
                                                                         <p class="mb-0">
-                                                                            {{formatNumber(delegation.delegated_rc,
-                                                                            0,
-                                                                            '.', ',')}} RC
+                                                                            {{fancyRounding(delegation.delegated_rc)}}RC
                                                                         </p>
                                                                         <div class="d-flex my-1">
                                                                             <div class="progress" role="progressbar"

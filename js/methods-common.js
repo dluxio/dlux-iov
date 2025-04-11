@@ -96,6 +96,14 @@ export default {
     }
     return `${this.toFixed(bytes, 2)} ${p[counter]}B`
   },
+  fancyRounding(bytes) {
+    var counter = 0, p = ['', 'K', 'M', 'B', 'T', 'Q', 'E', 'Z', 'Y']
+    while (bytes > 1000) {
+      bytes = bytes / 1000
+      counter++
+    }
+    return `${this.toFixed(bytes, 2)} ${p[counter]}`
+  },
   timeUntil(dateString, plusHours = 0, recurrent = false) {
     const targetDate = new Date(dateString + 'Z')
     const targetMS = targetDate.getTime()
