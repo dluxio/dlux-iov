@@ -588,6 +588,104 @@
                                                         </div>
                                                     </div>
                                                     <div class="collapse" id="delegations">
+                                                        <div class="d-flex flex-column text-start border border-white-50 rounded mt-3 mb-1"
+                                                            style="background-color: rgba(0, 0, 0, 0.3);">
+                                                            <!-- DLUX Delegations Status -->
+                                                            <div
+                                                                class="d-flex flex-wrap align-items-center my-2 w-100 justify-content-center">
+                                                                <div
+                                                                    class="d-flex flex-wrap align-items-center justify-content-center lead rounded border border-white-50 mx-1 px-2 py-1 my-1">
+                                                                    <span><i
+                                                                            class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
+                                                                    <span class="ms-1">
+                                                                        {{formatNumber((accountapi.granting.t)/1000,
+                                                                        3,
+                                                                        '.', ',')}} DLUX
+                                                                    </span>
+                                                                </div>
+                                                                <div
+                                                                    class="d-flex flex-wrap align-items-center justify-content-center lead rounded border border-white-50 mx-1 px-2 py-1 my-1">
+                                                                    <span><i
+                                                                            class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
+                                                                    <span
+                                                                        class="ms-1">{{formatNumber((accountapi.granted.t)/1000,
+                                                                        3,'.', ',')}} DLUX
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <!-- DLUX Delegations Repeats -->
+                                                            <div class="px-1 px-lg-2">
+                                                                <!-- DLUX Delegations Out -->
+                                                                <h5 class="mt-2 mb-1">
+                                                                    Delegated: ({{Object.keys(accountapi.granting).length - 1 > 0 ? Object.keys(accountapi.granting).length - 1 : 0 }})
+                                                                </h5>
+                                                                <!-- No DLUX Delegations Out -->
+                                                                <div v-if="accountapi.granting.t == 0">
+                                                                    <div
+                                                                        class="border-top border-white-50 py-2 text-center fs-5">
+                                                                        No DLUX Granting
+                                                                    </div>
+                                                                </div>
+                                                                <!-- Repeat DLUX Delegations Out -->
+                                                                <div v-for="(a,b,c) in accountapi.granting">
+                                                                    <div class="d-flex flex-column flex-sm-row gap-1 gap-sm-2 align-items-center border-top border-white-50 py-2"
+                                                                        v-if="b != 't' && a > 0">
+                                                                        <a :href="'/@' + b " target="_blank"
+                                                                            class="text-info no-decoration">@{{b}}</a>
+                                                                        <p class="ms-sm-auto mb-0">
+                                                                            {{formatNumber((a)/1000, 3, '.', ',')}}
+                                                                            DLUX</p>
+                                                                        <div class="d-flex">
+                                                                            <modal-vue
+                                                                                v-if="protocol?.dlux?.head_block && accountapi.head_block"
+                                                                                func="powdel" :mypfp="mypfp"
+                                                                                token="poweredUp"
+                                                                                :tokenuser="accountapi"
+                                                                                :account="account"
+                                                                                :tokenprotocol="protocol?.dlux"
+                                                                                @modalsign="sendIt($event)"
+                                                                                v-slot:trigger>
+                                                                                <button
+                                                                                    class="btn btn-secondary btn-sm trigger" @click="simpleCJ('spkccT_power_grant', 'amount:0,to:' + b , {'broadcast':'tosign'})">
+                                                                                    <i
+                                                                                        class="fas fa-fw fa-user-edit"></i>
+                                                                                </button>
+                                                                            </modal-vue>
+                                                                            <button
+                                                                                class="ms-1 btn btn-sm btn-danger"
+                                                                                type="button">
+                                                                                <i
+                                                                                    class="fas fa-fw fa-trash-alt"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <!-- DLUX Delegations In -->
+                                                                <h5 class="mt-2 mb-1">
+                                                                    Received: ({{Object.keys(accountapi.granted).length - 1 > 0 ? Object.keys(accountapi.granted).length - 1 : 0 }})
+                                                                </h5>
+                                                                <!-- No DLUX Delegations In -->
+                                                                <div v-if="accountapi.granted.t == 0">
+                                                                    <div
+                                                                        class="border-top border-white-50 py-2 text-center fs-5">
+                                                                        No DLUX Granted
+                                                                    </div>
+                                                                </div>
+                                                                <!-- Repeat DLUX Delegations In -->
+                                                                <div v-for="(a,b,c) in accountapi.granted">
+                                                                    <div class="d-flex flex-column flex-sm-row gap-1 gap-sm-2 align-items-center border-top border-white-50 py-2"
+                                                                        v-if="b != 't'">
+                                                                        <a :href="'/@' + b " target="_blank"
+                                                                            class="text-info no-decoration">@{{b}}</a>
+                                                                        <p class="mb-0 ms-sm-auto">
+                                                                            {{formatNumber((a)/1000, 3, '.', ',')}}
+                                                                            DLUX</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- <div class="collapse" id="delegations">
                                                         <div class="mt-3 bg-dark p-2 rounded border border-white-50">
                                                             <div v-for="item in accountapi.granting"
                                                                 class="border-bottom border-white-50 py-1">
@@ -605,7 +703,7 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    </div> -->
                                                 </div>
                                                 <!-- dlux governance -->
                                                 <div class=" px-3 py-4 px-lg-1 py-lg-3">
@@ -722,7 +820,7 @@
                                                             </modal-vue>
                                                             <button class="btn btn-sm rounded-pill btn-outline-danger ms-2"
                                                                     type="button" @click="simpleCJ('dlux_gov_down', 'amount:0', {'broadcast':'tosign'})">
-                                                                    STOP</button
+                                                                    STOP</button>
                                                             </div>
                                                         </small>
                                                     </div>
