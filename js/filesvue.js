@@ -1360,7 +1360,7 @@ export default {
                     })
                     const slots = this.contract[id].m.split(",")
                     for (var i = 0; i < filesNames.length; i++) {
-                        const flags = slots[i * 4 + 4]
+                        const flags = slots[i * 4 + 4] || ""
                         this.newMeta[id][filesNames[i]] = {
                             name: slots[i * 4 + 1],
                             type: slots[i * 4 + 2],
