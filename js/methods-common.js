@@ -368,7 +368,7 @@ export default {
     this.toSign = op
   },
   simpleCJ(id, params, options) {
-
+    console.log('SCJ', id)
     var op = {
       id
     }
@@ -382,7 +382,9 @@ export default {
     op.ops = options.ops || [];
     op.api = options.api || "";
     op.txid = id + '_' + Date.now();
+    console.log(op)
     this.$emit(options.broadcast ? options.broadcast : 'modalsign', op)
+    this.toSign = op
   },
   toFixed(n, digits) {
     return parseFloat(n).toFixed(digits)
