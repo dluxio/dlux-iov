@@ -649,14 +649,15 @@
                                                                                 @modalsign="sendIt($event)"
                                                                                 v-slot:trigger>
                                                                                 <button
-                                                                                    class="btn btn-secondary btn-sm trigger" @click="simpleCJ('dlux_power_grant', 'amount:0,to:' + b , {'broadcast':'tosign'})">
+                                                                                    class="btn btn-secondary btn-sm trigger">
                                                                                     <i
                                                                                         class="fas fa-fw fa-user-edit"></i>
                                                                                 </button>
                                                                             </modal-vue>
                                                                             <button
                                                                                 class="ms-1 btn btn-sm btn-danger"
-                                                                                type="button">
+                                                                                type="button"
+                                                                                @click="simpleCJ('dlux_power_grant', 'amount:0,to:' + b , {'broadcast':'tosign'})">
                                                                                 <i
                                                                                     class="fas fa-fw fa-trash-alt"></i>
                                                                             </button>
@@ -1336,7 +1337,7 @@
                                                         <div v-if="when(saccountapi.powerDowns)"
                                                             class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
                                                             role="alert" style="background-color: #ffffff01;">
-                                                            <p class="mb-0 lead ">A {{formatNumber(saccountapi?.power_downs[Object.keys(saccountapi?.power_downs)[0]].amount / 1000, 3, '.', ',')}} LARYNX power down is
+                                                            <p class="mb-0 lead ">A LARYNX power down is
                                                                 scheduled
                                                                 to happen in {{when(saccountapi.powerDowns)}}
                                                                 with {{saccountapi.powerDowns.length}} installment<span
@@ -1346,21 +1347,20 @@
                                                             <small class="ms-lg-auto">
                                                                 <div class="d-flex ms-lg-2">
                                                                     
-                                                        <!-- <modal-vue 
+                                                        <modal-vue 
                                                         v-if="protocolspk.head_block && saccountapi.head_block" func="powdn" 
                                                         token="poweredUp" 
                                                         :tokenuser="saccountapi"
-                                                        :to_account="{'amount':saccountapi?.power_downs[Object.keys(accountapi?.power_downs)[0]].amount * 4}"
                                                         :account="account" 
                                                         :tokenprotocol="protocol?.dlux"
                                                         :mypfp="mypfp" 
                                                         @modalsign="sendIt($event)" 
-                                                        v-slot:trigger> -->
+                                                        v-slot:trigger>
                                                                     <button
                                                                         class="btn btn-sm rounded-pill btn-outline-light trigger"
                                                                         type="button">
                                                                         CHANGE</button>
-                                                                    <!-- </modal-vue> -->
+                                                                    </modal-vue>
                                                                     <button
                                                                         class="btn btn-sm rounded-pill btn-outline-danger ms-2"
                                                                         type="button"
