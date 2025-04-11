@@ -2204,7 +2204,7 @@
                                                                                     :mypfp="mypfp" token="HP"
                                                                                     :tokenuser="focus"
                                                                                     :account="account"
-                                                                                    :type="delegation.delegatee"
+                                                                                    :to_account="delegation.delegatee"
                                                                                     :tokenstats="hivestats"
                                                                                     @modalsign="sendIt($event)"
                                                                                     v-slot:trigger>
@@ -2308,7 +2308,7 @@
                                                                                     token="RC" :tokenuser="focus"
                                                                                     :account="account"
                                                                                     :tokenstats="hivestats"
-                                                                                    :type="delegation.to"
+                                                                                    :to_account="delegation.to"
                                                                                     :rc-info="rcAccount"
                                                                                     @modalsign="sendIt($event)"
                                                                                     v-slot:trigger>
