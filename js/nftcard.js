@@ -106,16 +106,21 @@ export default {
     </a>
 
     <!-- INVENTORY -->
-    <div class="text-white d-none" v-if="inventory">
+    <div class="text-white" v-if="inventory">
       <div class="bg-dark rounded mt-1">
         <div class="d-flex p-1">
           <div class="fs-5 ms-auto me-auto">
-            <span :style="{'background-image': colors}" style="-webkit-background-clip: text;
+            <span v-if="!mint" :style="{'background-image': colors}" style="-webkit-background-clip: text;
                    -webkit-text-fill-color: transparent; 
                    -moz-background-clip: text;
                    -moz-text-fill-color: transparent;">
-              <span v-if="!mint">#{{uid}}</span>
-              <span v-if="mint">sealed NFT</span>
+              <span>#{{uid}}</span>
+            </span>
+            <span v-if="mint" @click="openNFT()" :style="{'background-image': colors}" style="-webkit-background-clip: text;
+                   -webkit-text-fill-color: transparent; 
+                   -moz-background-clip: text;
+                   -moz-text-fill-color: transparent;">
+              <span v-if="mint">sealed NFT{{item.qty > 1 ? 's' : ''}}</span>
             </span>
           </div>
         </div>
