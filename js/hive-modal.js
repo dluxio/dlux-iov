@@ -556,11 +556,7 @@ export default {
             const field = this.feat.json[key];
             if(!field)return
             if (field.check === 'AC') {
-                if (this.account == this.form[key]) {
-                    this.validations[key] = false;
-                    this.pfp[key] = this.mypfp
-                }
-                else this.accountCheck(this.form[key]).then(result => {
+                this.accountCheck(this.form[key]).then(result => {
                     if (result) {
                         this.validations[key] = true;
                         if (result === true) this.pfp[key] = '/img/no-user.png'
