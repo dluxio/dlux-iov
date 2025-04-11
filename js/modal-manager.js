@@ -23,7 +23,7 @@ export default {
         tokenuser: {
             default: () => ({ head_block: 0 }),
         },
-        to_account: String,
+        to_account: { default: "" },
         smarkets: Object,
         type: { default: "move" },
         reqid: String,
@@ -47,6 +47,7 @@ export default {
                 :api="api"
                 :mypfp="mypfp"
                 :token="token"
+                :to_account="to_account"
                 :tokenprotocol="tokenprotocol" 
                 :tokenuser="tokenuser" 
                 @modalsign="$emit('modalsign', $event)" />

@@ -509,7 +509,8 @@
                                                         <modal-vue 
                                                         v-if="protocol?.dlux?.head_block && accountapi.head_block" func="powdn" 
                                                         token="poweredUp" 
-                                                        :tokenuser="accountapi" 
+                                                        :tokenuser="accountapi"
+                                                        :to_account="{'amount':accountapi?.power_downs[Object.keys(accountapi?.power_downs)[0]].amount * 4}"
                                                         :account="account" 
                                                         :tokenprotocol="protocol?.dlux"
                                                         :mypfp="mypfp" 
@@ -642,6 +643,7 @@
                                                                                 func="powdel" :mypfp="mypfp"
                                                                                 token="poweredUp"
                                                                                 :tokenuser="accountapi"
+                                                                                :to_account="{'amount':a,'to':b}"
                                                                                 :account="account"
                                                                                 :tokenprotocol="protocol?.dlux"
                                                                                 @modalsign="sendIt($event)"
@@ -811,6 +813,7 @@
                                                                 token="gov" 
                                                                 :tokenuser="accountapi" 
                                                                 :account="account" 
+                                                                :to_account="{'amount':accountapi?.gov_downs[Object.keys(accountapi?.gov_downs)[0]].amount * 4}"
                                                                 :tokenprotocol="protocol?.dlux"
                                                                 :mypfp="mypfp" 
                                                                 @modalsign="sendIt($event)" 
@@ -1342,17 +1345,22 @@
                                                             </p>
                                                             <small class="ms-lg-auto">
                                                                 <div class="d-flex ms-lg-2">
-                                                                    <!--  <modal-vue class="dropdown-menu-item"
-                                                        v-if="protocolspk.head_block && saccountapi.head_block"
-                                                        func="powdn" token="poweredUp" :test="test"
-                                                        :tokenuser="saccountapi" :account="account"
-                                                        :tokenprotocol="protocolspk" :mypfp="mypfp"
-                                                        @modalsign="sendIt($event)" v-slot:trigger> -->
+                                                                    
+                                                        <!-- <modal-vue 
+                                                        v-if="protocolspk.head_block && saccountapi.head_block" func="powdn" 
+                                                        token="poweredUp" 
+                                                        :tokenuser="saccountapi"
+                                                        :to_account="{'amount':saccountapi?.power_downs[Object.keys(accountapi?.power_downs)[0]].amount * 4}"
+                                                        :account="account" 
+                                                        :tokenprotocol="protocol?.dlux"
+                                                        :mypfp="mypfp" 
+                                                        @modalsign="sendIt($event)" 
+                                                        v-slot:trigger> -->
                                                                     <button
                                                                         class="btn btn-sm rounded-pill btn-outline-light trigger"
                                                                         type="button">
                                                                         CHANGE</button>
-                                                                    <!--  </modal-vue> -->
+                                                                    <!-- </modal-vue> -->
                                                                     <button
                                                                         class="btn btn-sm rounded-pill btn-outline-danger ms-2"
                                                                         type="button"
@@ -1475,6 +1483,7 @@
                                                                                     func="powdel" :mypfp="mypfp"
                                                                                     token="poweredUp"
                                                                                     :tokenuser="saccountapi"
+                                                                                    :to_account="{'amount':a,'to':b}"
                                                                                     :account="account"
                                                                                     :tokenprotocol="protocol?.larynx"
                                                                                     @modalsign="sendIt($event)"

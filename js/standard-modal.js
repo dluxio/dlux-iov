@@ -8,6 +8,7 @@ export default {
       api: String,
       mypfp: String,
       func: { type: String, default: 'send' },
+      to_account: { default: "" },
       token: { type: String, default: 'balance' },
       tokenprotocol: {
         type: Object,
@@ -126,6 +127,14 @@ export default {
             this.$emit('modalsign', op)
 
         },
+        prefillToField() {
+          if (typeof this.to_account == "object" && (this.func === 'powdel' || this.func === 'powdn' || this.func === 'govdn')) {
+            for (var key in this.to_account) {
+              this.form[key] = this.to_account[key]
+              this.validateField(key)
+          }
+          }
+      },
         validateField(key) {
           this.validations[key] = false
           const field = this.feat.json[key];
@@ -177,6 +186,7 @@ export default {
             this.validations[key] = false;
           }
         }
+        this.prefillToField()
       } else {
         this.error = "Feature not found";
       }
