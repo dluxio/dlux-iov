@@ -712,6 +712,34 @@ export default {
     },
     statusPinger(txid, api, r) {
       if (r > 30) return;
+      if (!api) {
+        setTimeout(
+          function () {
+            for (var i = 0; i < this.ops.length; i++) {
+              if (this.ops[i].txid == txid) {
+                console.log("Found Op");
+                var op = this.ops[i];
+                op.status = "Confirmed.";
+                op.msg = json.status;
+                //this.cleanOps();
+                for (var j = 0; j < op.ops.length; j++) {
+                  console.log(op.ops[j]);
+                  this.$emit("refresh", op.ops[j]);
+                }
+                break;
+              }
+            }
+          }.bind(this),
+          5000
+        );
+        setTimeout(
+          function () {
+            this.cleanOps(txid);
+          }.bind(this),
+          10000
+        );
+        return
+      }
       fetch(api + "/api/status/" + txid)
         .then((re) => re.json())
         .then((json) => {
@@ -744,7 +772,7 @@ export default {
                 function () {
                   this.cleanOps(txid);
                 }.bind(this),
-                30000
+                10000
               );
             }
           } else {
