@@ -1020,6 +1020,22 @@ export default {
                 txid: `${this.itemmodal.item.setname}:${this.itemmodal.item.uid}_nft_cancel`
             });
         },
+        acceptXfr(){
+         const toSign = {
+            type: "cja",
+            cj: {
+                set: this.itemmodal.item.setname,
+                uid: this.itemmodal.item.uid,
+            },
+            id: `${this.itemmodal.item.token}_nft_reserve_complete`,
+            msg: `Finishing ${this.itemmodal.item.setname}:${this.itemmodal.item.uid} trade...`,
+            ops: ["getTokenUser"],
+            api: this.chains[this.itemmodal.item.token].api,
+            txid: `${this.itemmodal.item.token}_nft_reserve_complete`,
+          }
+          console.log(toSign);
+          this.$emit('tosign', toSign)
+        },
         cancelXfr(){
          const toSign = {
             type: "cja",
