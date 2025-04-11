@@ -495,13 +495,13 @@
                                                         </div>
                                                     </div>
                                                     <!-- DLUX Power Down -->
-                                                    <div v-if="focus.weeklyHiveWithdrawal > 0"
+                                                    <div v-if="Object.keys(accountapi?.power_downs).length > 0"
                                                         class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
                                                         role="alert" style="background-color: #ffffff01;">
                                                         <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
-                                                         <p class="mb-0 lead ">A {{focus.weeklyHiveWithdrawal}} HP
-                                                            power down is scheduled {{focus.nextWithdrawalDate}}. 
-                                                            ({{focus.weeklyHiveWithdrawal / focus.remainingHiveToWithdraw}} weeks remaining)
+                                                         <p class="mb-0 lead ">A {{formatNumber(accountapi?.power_downs[Object.keys(accountapi?.power_downs)[0]].amount / 1000, 3, '.', ',')}} DLUX
+                                                            power down is scheduled {{timeUntilBlocks((accountapi?.power_downs[Object.keys(accountapi?.power_downs)[0]].block - accountapi.head_block)*3000)}}. 
+                                                            ({{Object.keys(accountapi?.power_downs).length}} weeks remaining)
                                                         </p>
                                                         <small class="ms-lg-auto">
                                                             <div class="d-flex ms-lg-2">
@@ -566,7 +566,7 @@
                                                         <div id="dluxactions" class="text-center text-lg-end">
                                                             <h5 id="dluxbalance"
                                                                 class="d-flex align-items-center justify-content-center justify-content-lg-end">
-                                                                {{formatNumber((accountapi.granting)/1000, 3,
+                                                                {{formatNumber((accountapi.granting?.t ? accountapi.granting?.t : 0)/1000, 3,
                                                                 '.', ',')}}
                                                                 <span class="ms-2 text-warning">DLUX</span><span
                                                                     class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
@@ -576,6 +576,7 @@
                                                             <div class="btn-group" v-if="me" role="group"
                                                                 aria-label="DLUX Actions">
                                                                 <button class="dropdown btn btn-light text-nowrap"
+                                                                    :disabled="!(accountapi.granting?.t || accountapi.granted?.t)"
                                                                     href="#" role="button" id="delegationsbtn"
                                                                     data-bs-toggle="collapse"
                                                                     data-bs-target="#delegations" aria-expanded="false"
@@ -587,7 +588,7 @@
                                                     </div>
                                                     <div class="collapse" id="delegations">
                                                         <div class="mt-3 bg-dark p-2 rounded border border-white-50">
-                                                            <div v-for="item in saccountapi.granting"
+                                                            <div v-for="item in accountapi.granting"
                                                                 class="border-bottom border-white-50 py-1">
                                                                 <div v-if="item != 't'"
                                                                     class="d-flex align-items-center">
@@ -696,14 +697,12 @@
                                                         </div>
                                                     </div>
                                                     <!-- DLUX Unlock Gov -->
-                                                    <div class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
+                                                    <div v-if="Object.keys(accountapi?.gov_downs).length > 0" class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
                                                         role="alert" style="background-color: #ffffff01;">
-                                                        <!-- :class="{'d-none': !when(focus.next_vesting_withdrawl), 'd-flex': true, 'align-items-center': true}" -->
                                                         <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
-                                                        <p class="mb-0 lead ">A #amount DLUX
-                                                             unlock is scheduled 
-                                                            <!--  {{when(saccountapi.spower_downs)}} ({{when(saccountapi.spower_downs,true)}}  -->
-                                                            (installments remaining)
+                                                        <p class="mb-0 lead ">A {{formatNumber(accountapi?.gov_downs[Object.keys(accountapi?.gov_downs)[0]].amount / 1000, 3, '.', ',')}} DLUX
+                                                            power down is scheduled {{timeUntilBlocks((accountapi?.gov_downs[Object.keys(accountapi?.gov_downs)[0]].block - accountapi.head_block)*3000)}}. 
+                                                            ({{Object.keys(accountapi?.gov_downs).length}} weeks remaining)
                                                         </p>
                                                         <small class="ms-lg-auto">
                                                             <div class="d-flex ms-lg-2">

@@ -133,6 +133,34 @@ export default {
     // Fallback (shouldn't occur due to seconds unit)
     return 'unknown';
   },
+  timeUntilBlocks(diffMs) {
+    const absDiffSeconds = Math.abs(diffMs) / 1000
+    if (absDiffSeconds < 1) {
+      return 'now'
+    }
+    const units = [
+      { name: 'year', seconds: 31536000 },  // 36
+      { name: 'month', seconds: 2592000 },  // 30 days
+      { name: 'day', seconds: 86400 },      // 24 hours
+      { name: 'hour', seconds: 3600 },      // 60 minutes
+      { name: 'minute', seconds: 60 },      // 60 seconds
+      { name: 'second', seconds: 1 }
+    ]
+    for (const unit of units) {
+      if (absDiffSeconds >= unit.seconds) {
+        const value = Math.floor(absDiffSeconds / unit.seconds)
+        const unitName = value === 1 ? unit.name : unit.name + 's'
+        if (diffMs > 0) {
+          return `in ${value} ${unitName}`
+        } else {
+          return `${value} ${unitName} ago`
+        }
+      }
+    }
+
+    // Fallback (shouldn't occur due to seconds unit)
+    return 'unknown';
+  },
   formatNumber(t, n, r, e) {
     if (typeof t != "number") t = parseFloat(t);
     if (isNaN(t)) return "0";
