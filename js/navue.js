@@ -701,8 +701,8 @@ export default {
         return;
       }
       if (response.success == true) {
-        obj.status = "Hive TX Success:\nAwaiting Layer 2 confirmation...";
-        obj.delay = 100000;
+        obj.status = obj.api ? "Hive TX Success:\nAwaiting Layer 2 confirmation..." : "Recorded."
+        obj.delay = 15000;
         obj.link = "https://hivehub.dev/tx/" + response.result.id;
         obj.txid = response.result.id;
         this.ops.push(obj);
