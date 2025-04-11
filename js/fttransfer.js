@@ -1119,6 +1119,21 @@ export default {
           }
           this.$emit('tosign', toSign)
         },
+        acceptXfr(){
+         const toSign = {
+            type: "cja",
+            cj: {
+               set: this.item.set,
+               uid: this.item.uid,
+            },
+            id: `${this.item.token}_ft_escrow_complete`,
+            msg: `Finishing trade of ${this.item.set} mint token...`,
+            ops: ["getTokenUser"],
+            api: this.api,
+            txid: `${this.item.token}_ft_complete`,
+          }
+          this.$emit('tosign', toSign)
+        },
         buyFT(sale){
          var toSign = {}
          if(sale.token == 'hive' || sale.token == 'hbd') {
