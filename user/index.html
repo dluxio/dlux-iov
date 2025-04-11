@@ -507,7 +507,6 @@
                                                             <div class="d-flex ms-lg-2">
                                                                 
                                                         <modal-vue 
-                                                        class="dropdown-menu-item"
                                                         v-if="protocol?.dlux?.head_block && accountapi.head_block" func="powdn" 
                                                         token="poweredUp" 
                                                         :tokenuser="accountapi" 
@@ -708,22 +707,22 @@
                                                         </p>
                                                         <small class="ms-lg-auto">
                                                             <div class="d-flex ms-lg-2">
-                                                                <!--  <modal-vue class="dropdown-menu-item"
-                                                        v-if="protocolspk.head_block && saccountapi.head_block"
-                                                        func="powdn" token="poweredUp" :test="test"
-                                                        :tokenuser="saccountapi" :account="account"
-                                                        :tokenprotocol="protocolspk" :mypfp="mypfp"
-                                                        @modalsign="sendIt($event)" v-slot:trigger> -->
-                                                                <button
-                                                                    class="btn btn-sm btn-outline-light rounded-pill trigger"
+                                                                <modal-vue 
+                                                                v-if="protocol?.dlux?.head_block && accountapi.head_block" func="govdn" 
+                                                                token="gov" 
+                                                                :tokenuser="accountapi" 
+                                                                :account="account" 
+                                                                :tokenprotocol="protocol?.dlux"
+                                                                :mypfp="mypfp" 
+                                                                @modalsign="sendIt($event)" 
+                                                                v-slot:trigger>
+                                                                <button class="btn btn-sm rounded-pill btn-outline-light trigger"
                                                                     type="button">
                                                                     CHANGE</button>
-                                                                </modal-vue>
-                                                                <button
-                                                                    class="btn btn-sm btn-outline-danger rounded-pill ms-2"
-                                                                    type="button"
-                                                                    @click="simpleCJ('spkccT_spk_power_down', 'amount:0', {'broadcast':'tosign'})">
-                                                                    STOP</button>
+                                                            </modal-vue>
+                                                            <button class="btn btn-sm rounded-pill btn-outline-danger ms-2"
+                                                                    type="button" @click="simpleCJ('dlux_gov_down', 'amount:0', {'broadcast':'tosign'})">
+                                                                    STOP</button
                                                             </div>
                                                         </small>
                                                     </div>
