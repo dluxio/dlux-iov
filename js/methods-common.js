@@ -97,7 +97,7 @@ export default {
     return `${this.toFixed(bytes, 2)} ${p[counter]}B`
   },
   fancyRounding(bytes) {
-    var counter = 0, p = ['', 'K', 'M', 'B', 'T', 'Q', 'E', 'Z', 'Y']
+    var counter = 0, p = ['', 'K', 'M', 'B', 'T', 'Q', 'KQ', 'S', 'KS']
     while (bytes > 1000) {
       bytes = bytes / 1000
       counter++
@@ -427,4 +427,38 @@ export default {
   toFixed(n, digits) {
     return parseFloat(n).toFixed(digits)
   },
+  votePowerCalc(accountinfo, vote_weight = 10000, now = false){
+    const hive_price = this.hiveprice.hive.usd
+    const dgp = this.hivestats //dynamic global properties
+    const effective_VS = parseFloat(accountinfo.vesting_shares) + parseFloat(accountinfo.received_vesting_shares) - parseFloat(accountinfo.delegated_vesting_shares)
+    var currentMana = 10000
+    if(now){
+      const mana = accountinfo.voting_manabar
+      // adjust currentMana as appropriate
+    }
+    const votingPower = (currentMana/ effective_VS) * 10000
+    const rshares = effective_VS * (votingPower/10000) * (vote_weight/10000)
+    const reward_per_rshare = parseFloat(dgp.pending_rewarded_vesting_hive) / parseFloat(dgp.pending_rewarded_vesting_shares)
+    const vote_value_hive = rshares * reward_per_rshare
+    const vote_value_usd = vote_value_hive * hive_price / 12
+    console.log({accountinfo, dgp, hive_price, effective_VS, votingPower, rshares, reward_per_rshare, vote_value_hive, vote_value_usd})
+    return vote_value_usd > 1 ? "$" + vote_value_usd.toFixed(2) : (vote_value_usd * 100).toFixed(1) + '¢'
+  },
+  dailyReturn(accountinfo, vote_weight = 10000, now = false){
+    const hive_price = this.hiveprice.hive.usd
+    const dgp = this.hivestats //dynamic global properties
+    const effective_VS = parseFloat(accountinfo.vesting_shares) + parseFloat(accountinfo.received_vesting_shares) - parseFloat(accountinfo.delegated_vesting_shares)
+    var currentMana = 10000
+    if(now){
+      const mana = accountinfo.voting_manabar
+      // adjust currentMana as appropriate
+    }
+    const votingPower = (currentMana/ effective_VS) * 10000
+    const rshares = effective_VS * (votingPower/10000) * (vote_weight/10000)
+    const reward_per_rshare = parseFloat(dgp.pending_rewarded_vesting_hive) / parseFloat(dgp.pending_rewarded_vesting_shares)
+    const vote_value_hive = rshares * reward_per_rshare
+    const vote_value_usd = vote_value_hive * hive_price / 6
+    console.log({accountinfo, dgp, hive_price, effective_VS, votingPower, rshares, reward_per_rshare, vote_value_hive, vote_value_usd})
+    return vote_value_usd > 1 ? "$" + vote_value_usd.toFixed(2) : (vote_value_usd * 100).toFixed(1) + '¢'
+  }
 };

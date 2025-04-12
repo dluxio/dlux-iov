@@ -4425,7 +4425,6 @@ function buyNFT(setname, uid, price, type, callback){
     fetchDelegationsData() {
       if (this.delegationsFetched) return;
       this.isLoading = true;
-      this.getRcAccount(this.focus.name)
       Promise.all([
         this.hiveApiCall('condenser_api.get_vesting_delegations', [this.focus.name, '', 100]),
         this.hiveApiCall('rc_api.list_rc_direct_delegations', {
@@ -4530,6 +4529,7 @@ function buyNFT(setname, uid, price, type, callback){
     newme(user) {
       this.delegationsFetched = false
       this.rcAccount = null
+      this.getRcAccount(this.focus.name)
       this.hpDelegationsOut = []
       this.hpDelegationsIn = []
       this.rcDelegationsOut = []
@@ -4941,6 +4941,7 @@ function buyNFT(setname, uid, price, type, callback){
         //this.getTokenUser(this.pageAccount, false);
         //this.getNFTs(this.pageAccount);
       }
+      this.getRcAccount(this.pageAccount)
       if (!this.builder) {
         deepLink();
         this.activeTab = hash?.[1] || 'blog'
