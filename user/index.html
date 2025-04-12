@@ -132,7 +132,7 @@
                                         </div>
                                     </div>
                                     <div class="col-md-4 text-center m-auto"> <a target="_blank"
-                                            class="btn btn-outline-danger btn-lg m-1" role="button"
+                                            class="d-none btn btn-outline-danger btn-lg m-1" role="button"
                                             :href="'/vr/@' + pageAccount">VR Page<i
                                                 class="fas fa-vr-cardboard mx-2 fa-lg"></i></a>
                                         <button type="button" v-show="!me && account"
@@ -154,24 +154,29 @@
                                         </div>
                                     </div>
                                 </div>
+                                <!-- User Tabs Nav -->
                                 <div class="d-flex">
                                     <ul id="usertabs" class="nav nav-tabs mx-auto mb-2 rounded" role="tablist"
                                         style="background-color: rgb(52, 55, 61);">
+                                        <!-- Blog -->
                                         <li class="nav-item"> <a class="nav-link active" id="blogtab" role="tab"
                                                 data-bs-toggle="tab" aria-controls="blog" aria-expanded="true"
                                                 @click="activeTab = 'blog'" href="#blog">Blog</a>
                                         </li>
-                                        <li class="nav-item"> <a class="nav-link" id="wallettab" role="tab"
-                                                data-bs-toggle="tab" @click="activeTab = 'wallet'"
-                                                aria-controls="wallet" aria-expanded="true" href="#wallet">Wallet</a>
-                                        </li>
+                                        <!-- Inventory -->
                                         <li class="nav-item"> <a class="nav-link" id="inventorytab" role="tab"
                                                 @click="activeTab = 'inventory'" data-bs-toggle="tab"
                                                 aria-controls="inventory" aria-expanded="true"
                                                 href="#inventory">Inventory</a></li>
+                                        <!-- Drive -->
                                         <li class="nav-item"> <a class="nav-link" id="drivetab" role="tab"
                                                 data-bs-toggle="tab" @click="activeTab = 'drive'" aria-controls="drive"
                                                 aria-expanded="true" href="#drive">Drive</a></li>
+                                        <!-- Wallet -->
+                                        <li class="nav-item"> <a class="nav-link" id="wallettab" role="tab"
+                                                data-bs-toggle="tab" @click="activeTab = 'wallet'"
+                                                aria-controls="wallet" aria-expanded="true" href="#wallet">Wallet</a>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>
@@ -896,11 +901,11 @@
                                                 <div class="text-center my-3">
                                                     <ul class="nav nav-pills border border-info bg-dark-1 rounded-pill">
                                                         <li class="nav-item">
-                                                            <a class="nav-link nav-link2 active" data-bs-toggle="tab"
+                                                            <a class="nav-link nav-link2" data-bs-toggle="tab"
                                                                 aria-current="page" href="#spk-base">OFF</a>
                                                         </li>
                                                         <li class="nav-item">
-                                                            <a class="nav-link nav-link2" data-bs-toggle="tab"
+                                                            <a class="nav-link nav-link2 active" data-bs-toggle="tab"
                                                                 href="#spk-test">ON</a>
                                                         </li>
                                                         </li>
@@ -912,7 +917,7 @@
 
                                         <div class="tab-content">
                                             <!-- spk base wallet -->
-                                            <div role="tabpanel" class="tab-pane show active" id="spk-base"
+                                            <div role="tabpanel" class="tab-pane" id="spk-base"
                                                 aria-labelledby="spkbasetab">
                                                 <div class="">
                                                     <div class="d-flex align-items-center mb-1">
@@ -1690,7 +1695,7 @@
                                             </div>
 
                                             <!-- spk test wallet -->
-                                            <div role="tabpanel" class="tab-pane" id="spk-test"
+                                            <div role="tabpanel" class="tab-pane show active" id="spk-test"
                                                 aria-labelledby="spktesttab">
                                                 <spk-vue v-if="reloaded" node="false" :account="account" :test="true"
                                                     @tosign="toSign=$event;log($event)" />
@@ -2309,12 +2314,15 @@
                                                                             rcAccount.received_delegated_rc : 0)}}RC
                                                                         </span>
                                                                     </div>
-                                                                    
+
                                                                     <!-- RC Total -->
                                                                     <div
                                                                         class="d-flex flex-wrap justify-content-center align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
                                                                         <span class="d-flex align-items-center"><span
                                                                                 class="me-2 badge badge-blank-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                                                <i class="fa-solid fa-microchip fa-fw"
+                                                                                    style="font-size: 0.7rem;"></i>
+                                                                            </span>Total #amount RC
                                                                                 <i
                                                                                     class="fa-solid fa-microchip fa-fw" style="font-size: 0.7rem;"></i>
                                                                             </span>Remaining {{fancyRounding(rcAccount?.max_rc)}}RC
@@ -2882,7 +2890,7 @@
                         </div>
 
                         <!-- inventory tab -->
-                        <div role="tabpanel" class="tab-pane fade show" id="inventory" aria-labelledby="inventorytab">
+                        <div role="tabpanel" class="tab-pane fade" id="inventory" aria-labelledby="inventorytab">
                             <div class="container card bg-img-none pt-0 px-1 px-md-3 mb-4"
                                 style="background-color: rgba(61, 61, 61, 0.708);">
                                 <div v-if="FTtrades.length || NFTtrades.length"
@@ -3011,10 +3019,10 @@
                         </div>
                         <!-- drive tab -->
                         <div role="tabpanel" ref="driveTab" class="tab-pane fade" id="drive" aria-labelledby="drivetab">
-                            <div class="container p-0">
-                                <div class="mt-3 mb-4">
-                                    <div class="card bg-img-none pt-1"
-                                        style="background-color: rgba(146, 146, 146, 0.3);">
+                            <div class="container card bg-img-none pt-0 px-1 px-md-3 mb-4"
+                            style="background-color: rgba(61, 61, 61, 0.708);">
+                                <div class="mb-3">
+                                    <div>
                                         <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
                                             @tosign="toSign=$event" :prop_contracts="contracts"
                                             :accountinfo="accountinfo" :spkapi="spkapi" @done="getSapi"></contract-vue>

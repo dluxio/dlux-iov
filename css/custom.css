@@ -14401,6 +14401,11 @@ html {
   height: 1.25rem !important;
 }
 
+.alert-dot {
+  width: 0.8rem !important;
+  height: 0.8rem !important;
+}
+
 /* Large screens (≥ 992px) */
 @media (min-width: 992px) {
   .wallet-token-img {

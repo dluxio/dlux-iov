@@ -141,16 +141,17 @@ export default {
             <h5 class="mb-0"> {{filesArray.length}} File{{filesArray.length == 1 ? '' : 's'}}</h5>
             <div class="ms-auto">
                 <div class="btn-group"> 
-                    <input type="radio" class="btn-check" :name=" bid + 'smView' + (cc ? 'cc' : '')" :id=" bid + 'setSingle' + (cc ? 'cc' : '')" autocomplete="off" @click="viewOpts.list = true" :checked="viewOpts.list" />
-                    <label class="btn btn-outline-warning" :for=" bid + 'setSingle' + (cc ? 'cc' : '')"><i class="fa-solid fa-table-list fa-fw"></i></label>
+                    
                     <input type="radio" class="btn-check" :name=" bid + 'smView' + (cc ? 'cc' : '')" :id=" bid + 'setDouble' + (cc ? 'cc' : '')" autocomplete="off" @click="viewOpts.list = false" :checked="!viewOpts.list" />
-                    <label class="btn btn-outline-warning" :for=" bid + 'setDouble' + (cc ? 'cc' : '')"><i class="fa-solid fa-table-cells-large fa-fw"></i></label>
+                    <label class="btn btn-outline-light" :for=" bid + 'setDouble' + (cc ? 'cc' : '')"><i class="fa-solid fa-table-cells-large fa-fw"></i></label>
+                    <input type="radio" class="btn-check" :name=" bid + 'smView' + (cc ? 'cc' : '')" :id=" bid + 'setSingle' + (cc ? 'cc' : '')" autocomplete="off" @click="viewOpts.list = true" :checked="viewOpts.list" />
+                    <label class="btn btn-outline-light" :for=" bid + 'setSingle' + (cc ? 'cc' : '')"><i class="fa-solid fa-table-list fa-fw"></i></label>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="bg-dark rounded-bottom">
+    <div class="">
 
         <div class="text-center" role="table" aria-label="Files" v-if="viewOpts.list">
             <div class="d-flex flex-wrap align-items-center fw-bold justify-content-end border-top border-start border-end border-dark" role="rowgroup" style="background-color: #1976D2">
@@ -163,7 +164,7 @@ export default {
                 <div class="py-1 border-start border-bottom border-dark" role="columnheader" style="width:146px">Expiration</div>
                 <div class="py-1 border-start border-bottom border-dark" role="columnheader" style="width:120px">&nbsp;</div>
             </div>
-            <div class="flex-table d-flex flex-wrap align-items-center justify-content-end" role="rowgroup" v-for="file in filesArray">
+            <div class="flex-table bg-dark-2 d-flex flex-wrap align-items-center justify-content-end" role="rowgroup" v-for="file in filesArray">
                 <div class="" role="cell">
                     <div style="width: 70px;">
                         
@@ -273,9 +274,6 @@ export default {
                 </div>
             </div>
         </div>
-
-        <p></p>
-
         <div class="d-none table-container" role="table" aria-label="Destinations" v-if="viewOpts.list">
             <div class="flex-table header" role="rowgroup">
                 <div class="flex-row order-md-first" role="columnheader"></div>
@@ -748,7 +746,7 @@ export default {
             },
             contract: {},
             viewOpts: {
-                list: true,
+                list: false,
             },
             newMeta: {},
             decoded: false,
