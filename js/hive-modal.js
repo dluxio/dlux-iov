@@ -13,7 +13,7 @@ export default {
         token: { type: String, default: 'HIVE' },
         tokenstats: Object,
         tokenuser: Object,
-        type: String,
+        type: Object,
     },
     template: `
   <div class="modal-dialog modal-dialog-centered" role="document">
