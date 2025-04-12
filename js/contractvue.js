@@ -19,33 +19,34 @@ export default {
     },
     template: `
     <div class="d-flex flex-column">
-    <div class="d-flex align-items-center px-2 py-3">
-     <div class="hero-subtitle">IPFS Drive</div>
-     <div class="ms-auto">
-                    <ul id="drivetabs" class="nav nav-tabs rounded mx-2 fs-5 " role="tablist" style="background-color: rgb(0,0,0,0.3)">
-                    <li v-if="!cc" class="nav-item">
-                            <a class="nav-link active px-4" aria-current="page" href="#files" id="filestab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
-                                aria-controls="filestab" aria-expanded="false">FILES</a>
-                        </li>
-                        <li v-if="cc" class="nav-item">
-                            <a class="nav-link active px-4" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
-                                aria-controls="cctab" aria-expanded="false">FILES</a>
-                        </li>
-                     
+        <div class="d-flex flex-column align-items-center px-2 py-3">
+            
+            <div class="mx-auto">
+                <ul id="drivetabs" class="nav nav-pills rounded mx-2 " role="tablist">
+                <li v-if="!cc" class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#files" id="filestab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
+                            aria-controls="filestab" aria-expanded="false">FILES</a>
+                    </li>
+                    <li v-if="cc" class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
+                            aria-controls="cctab" aria-expanded="false">FILES</a>
+                    </li>
+                    
+                <li class="nav-item">
+                        <a class="nav-link" href="#contracts" id="contractstab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
+                            aria-controls="contractstab" aria-expanded="false">CONTRACTS</a>
+                    </li>
                     <li class="nav-item">
-                            <a class="nav-link px-4" href="#contracts" id="contractstab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
-                                aria-controls="contractstab" aria-expanded="false">CONTRACTS</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link px-4" href="#status" id="statustab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
-                                aria-controls="statustab" aria-expanded="true">SPK</a>
-                        </li>   
-                    </ul>
-                </div>
+                        <a class="nav-link" href="#status" id="statustab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
+                            aria-controls="statustab" aria-expanded="true">BROCA</a>
+                    </li>   
+                </ul>
+            </div>
         </div>
         
     <!-- register account -->
     <div v-if="saccountapi.pubKey == 'NA'">
+        <div class="hero-subtitle mt-3 me-auto">SPK Network IPFS Drive</div>
         <div class="mx-xl-5">
             <div class="card p-1 p-md-3 mx-lg-5">
                 <div class="card-body text-center">
@@ -144,15 +145,17 @@ export default {
 
             <!-- spk status -->
             <div role="tabpanel" class="tab-pane" id="status" aria-labelledby="statustab">
-                    <div class="border-bottom-0" v-if="!nodeview && saccountapi.pubKey != 'NA'">
-          <div class="container pt-1">
+            <div class="hero-subtitle d-flex align-items-top mb-3 me-auto">Resource Credits <span class="ms-2 fs-5">(Regenerative)</span></div>
+                <div class="border-bottom-0" v-if="!nodeview && saccountapi.pubKey != 'NA'">
+                    <div class="container pt-1">
+                      
             <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-4" >
-                <!-- spk token widget -->
+                <!-- BROCA token widget -->
                 <div class="order-lg-3 order-xl-0 mb-3 col spk-widg">
-                    <div class="card-header d-flex align-items-center border-bottom border-1 px-2 py-1 fs-4"><i class="fa-solid fa-atom me-1"></i><span>SPK Token</span></div>
+                    <div class="card-header d-flex align-items-center border-bottom border-1 px-2 py-1 fs-4"><i class="fa-solid fa-atom me-1"></i><span>BROCA Token</span></div>
                     <div class="card-body px-2 py-1">
                         <div class="d-flex flex-column">
-                            <div class="mb-1 fw-light d-flex justify-content-center" style="font-size: 1.1rem !important;">{{formatNumber((saccountapi.spk/1000),'3','.',',')}} SPK</div>
+                            <div class="mb-1 fw-light d-flex justify-content-center" style="font-size: 1.1rem !important;">{{formatNumber((saccountapi.spk/1000),'3','.',',')}} BROCA</div>
                             <div class="d-flex justify-content-center mt-1">
                                 <!-- spk wallet button -->
                                 <button v-if="!nodeview" type="button" class="btn btn-sm btn-dark border-secondary text-secondary d-flex justify-content-center me-1" data-bs-toggle="modal" data-bs-target="#spkWalletModal" style="width:110px;">
@@ -171,12 +174,12 @@ export default {
                         </div>    
                     </div>
                 </div>           
-                <!-- spk power widget -->
+                <!-- BROCA power widget -->
                 <div class="order-lg-0 order-xl-1 mb-3 col spk-widg">
                     <div class="card-header d-flex align-items-center border-bottom border-1 px-2 py-1 fs-4"><i class="fa-solid fa-bolt me-1"></i>
-                    <span class="d-flex align-items-center">SPK Power</span></div>
+                    <span class="d-flex align-items-center">BROCA Power</span></div>
                     <div class="d-flex flex-column card-body px-2 py-1">
-                        <div class="mb-1 fw-light text-center " style="font-size: 1.1rem !important;">{{formatNumber(saccountapi.spk_power/1000,'3','.',',')}} SPK Power</div>
+                        <div class="mb-1 fw-light text-center " style="font-size: 1.1rem !important;">{{formatNumber(saccountapi.spk_power/1000,'3','.',',')}} BROCA Power</div>
                         <div class="progress mb-1 is-danger" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
                             <div class="progress-bar" :style="{'width':  saccountapi.spk_power ? (broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100 + '%' : '0%' }">{{ formatNumber((broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100,'2','.',',') }}%</div>
                         </div>
@@ -199,7 +202,7 @@ export default {
                     <div class="card-header d-flex align-items-center border-bottom border-1 px-2 py-1 fs-4"><i class="fa-solid fa-cloud-arrow-up me-1"></i><span>Contract</span></div>
                         <div class="card-body px-2 py-1">
                             <div class="d-flex flex-column">
-                                <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">Pin your files</div>
+                                <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">Pin your files on IPFS</div>
                                 <div class="d-flex justify-content-center mt-1">
                                     <!-- new contract button -->
                                     <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
@@ -232,6 +235,7 @@ export default {
 
             <!-- cc -->
             <div v-if="cc" role="tabpanel show active" class="tab-pane" id="ccTab" aria-labelledby="cctab">
+             <div class="hero-subtitle d-flex align-items-top mb-3 me-auto">IPFS Drive<span class="ms-2 fs-5">(SPK Network)</span></div>
                  <!-- no files -->
                 <div v-if="hasFiles" class="ms-auto me-auto text-center">
                     <div class="ms-auto me-auto card px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
@@ -256,7 +260,7 @@ export default {
             
             <!-- files -->
             <div v-else role="tabpanel" class="tab-pane show active" id="files" aria-labelledby="filestab">
-                
+                <div class="hero-subtitle d-flex align-items-top mb-3 me-auto">SPK Network IPFS Drive</div>
                 <!-- no files -->
                 <div v-show="!contracts.length"> 
                     <div class="ms-auto me-auto d-flex justify-content-center">
@@ -290,18 +294,13 @@ export default {
                 
                 <!-- has files -->
                 <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center">
-                    
                         <files-vue :assets="assets" @addassets="addAssets($event)" :account="saccountapi.name" :current="saccountapi.head_block"
                             :contracts="contracts" :nodeview="nodeview" :bid="title + 2"></files-vue>
-                   
                 </div>
             </div>
-
-            
-            
             <!-- contracts -->
             <div role="tabpanel" class="tab-pane " id="contracts" aria-labelledby="contractstab">
-                
+                <div class="hero-subtitle d-flex align-items-top mb-3 me-auto">Pinning Contracts</div>
                 <div class="card-body p-0">
                     <!-- registered -->
                     <div v-if="saccountapi.pubKey != 'NA'">

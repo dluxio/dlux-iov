@@ -1182,10 +1182,6 @@ export default {
                 Blog</span></a>
           </li>
           <li>
-            <a class="dropdown-item subnav-title" href="/me#wallet/" @click="showTab('wallet')">Wallet<span
-                class="subnav-subtitle">Honeycomb Tokens</span></a>
-          </li>
-          <li>
             <a class="dropdown-item subnav-title" href="/me#inventory/" @click="showTab('inventory')">Inventory<span
                 class="subnav-subtitle">NFT Collection</span></a>
           </li>
@@ -1193,6 +1189,10 @@ export default {
             <a class="dropdown-item subnav-title" href="/me#drive/" @click="showTab('drive')">IPFS Drive<span
                 class="subnav-subtitle">SPK
                 Network</span></a>
+          </li>
+          <li>
+            <a class="dropdown-item subnav-title" href="/me#wallet/" @click="showTab('wallet')">Wallet<span
+                class="subnav-subtitle">Honeycomb Tokens</span></a>
           </li>
           <li class="subnav-extra-top">
             <a class="dropdown-extra" role="button" href="#/" @click="toggleChat"
