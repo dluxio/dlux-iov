@@ -1584,14 +1584,15 @@
                                                                     </button>
                                                                     <button type="button"
                                                                         class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                                                        disabled></button>
+                                                                        disabled>
+                                                                    </button>
                                                                     <div class="btn-group" role="group">
                                                                         <button id="btnGroupDrop1" type="button"
                                                                             class="btn btn-light dropdown-toggle"
                                                                             data-bs-toggle="dropdown"
                                                                             aria-haspopup="true"
-                                                                            aria-expanded="false"></button>
-
+                                                                            aria-expanded="false">
+                                                                        </button>
                                                                         <ul class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                             aria-labelledby="btnGroupDrop1">
                                                                             <modal-vue class="dropdown-menu-item"
@@ -1613,33 +1614,6 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                        <!-- LARYNX Unlock -->
-                                                        <div class="d-none alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
-                                                            role="alert" style="background-color: #ffffff01;">
-                                                            <p class="mb-0 lead">A #amount unlock is scheduled in #days
-                                                                with #number installments remaining
-                                                            </p>
-                                                            <small class="ms-lg-auto">
-                                                                <div class="d-flex ms-lg-2">
-                                                                    <!--  <modal-vue class="dropdown-menu-item"
-                                                        v-if="protocolspk.head_block && saccountapi.head_block"
-                                                        func="powdn" token="poweredUp" :test="test"
-                                                        :tokenuser="saccountapi" :account="account"
-                                                        :tokenprotocol="protocolspk" :mypfp="mypfp"
-                                                        @modalsign="sendIt($event)" v-slot:trigger> -->
-                                                                    <button
-                                                                        class="btn btn-sm rounded-pill btn-outline-light trigger"
-                                                                        type="button">
-                                                                        CHANGE</button>
-                                                                    <!-- </modal-vue> -->
-                                                                    <button
-                                                                        class="btn btn-sm rounded-pill btn-outline-danger ms-2"
-                                                                        type="button"
-                                                                        @click="simpleCJ('spkccT_spk_power_down', 'amount:0', {'broadcast':'tosign'})">
-                                                                        STOP</button>
-                                                                </div>
-                                                            </small>
                                                         </div>
                                                     </div>
                                                     <!--account value-->
@@ -1691,9 +1665,8 @@
                                                     <h4 class="m-0">Claim Rewards</h4>
                                                     <p class="m-0">You have some pending rewards to claim</p>
                                                 </div>
-                                                <div id="claimlarynxrewardbtn" class="ms-auto text-end">
-                                                    <h5><!-- {{formatNumber((saccountapi.claim)/1000, 3, '.',
-                                                        ',')}} -->
+                                                <div id="claimlarynxrewardbtn" class="text-center text-lg-end">
+                                                    <h5>
                                                         {{accountinfo.reward_hbd_balance}} |
                                                         {{accountinfo.reward_hive_balance}} |
                                                         {{accountinfo.reward_vesting_hive
