@@ -4529,7 +4529,7 @@ function buyNFT(setname, uid, price, type, callback){
     newme(user) {
       this.delegationsFetched = false
       this.rcAccount = null
-      this.getRcAccount(this.focus.name)
+      this.getRcAccount(this.account)
       this.hpDelegationsOut = []
       this.hpDelegationsIn = []
       this.rcDelegationsOut = []
