@@ -3989,6 +3989,11 @@ function buyNFT(setname, uid, price, type, callback){
         .then((data) => {
           this.protocol[data.jsontoken] = data
         });
+        fetch("https://spktest.dlux.io/broca/api/protocol")
+        .then((response) => response.json())
+        .then((data) => {
+          this.protocol[data.jsontoken] = data
+        });
     },
     removeUser() {
       this.balance = 0;

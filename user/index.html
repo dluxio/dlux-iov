@@ -2979,7 +2979,7 @@
                                 style="background-color: rgba(61, 61, 61, 0.708);">
                                 <div class="mb-3">
                                     <div>
-                                        <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
+                                        <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount" :mypfp="mypfp" :protocol="protocol.broca" :stats="spkStats"
                                             @tosign="toSign=$event" :prop_contracts="contracts"
                                             :accountinfo="accountinfo" :spkapi="spkapi" @done="getSapi"></contract-vue>
                                     </div>

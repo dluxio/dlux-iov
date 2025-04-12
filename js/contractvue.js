@@ -2,7 +2,7 @@ import Pop from "/js/pop.js";
 import ExtensionVue from "/js/extensionvue.js";
 import FilesVue from "/js/filesvue.js";
 import UploadVue from "/js/uploadvue.js";
-import ModalVue from "/js/modalvue.js";
+import ModalVue from "/js/modal-manager.js";
 import PostVue from "/js/postvue.js";
 import ChoicesVue from '/js/choices-vue.js';
 
@@ -163,11 +163,15 @@ export default {
                                     <span class="my-auto">Wallet</span>
                                     <span class="badge small text-bg-light text-black ms-1 mb-auto" style="font-size: 0.5em;">Test</span>
                                 </button>
-                                <modal-vue type="power" token="SPK" test="test"
-                                        func="Power Up" :balance="saccountapi.spk"
-                                        :account="account"
-                                        @modalsign="sendIt($event)" v-slot:trigger>
-                                        <button class="btn btn-sm btn-dark border-warning text-warning trigger ms-1"
+                                <modal-vue 
+                                    v-if="protocol?.head_block && saccountapi?.head_block"
+                                    func="powup" :mypfp="mypfp"
+                                    token="liq_broca" :tokenuser="saccountapi"
+                                    :account="account"
+                                    :tokenprotocol="protocol"
+                                    @modalsign="sendIt($event)"
+                                    v-slot:trigger>
+                                <button class="btn btn-sm btn-dark border-warning text-warning trigger ms-1"
                                             type="button" style="width:110px;"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button>
                                     </modal-vue>
                             </div>
@@ -207,9 +211,10 @@ export default {
                                     <!-- new contract button -->
                                     <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
                                         class="btn btn-sm btn-dark border-info text-info me-1" style="width:110px;">
-                                        <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
-                                            :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
-                                            v-slot:trigger>
+                                        <modal-vue v-if="protocol?.head_block && saccountapi?.head_block" type="contract"
+                                    :api="sapi" :mypfp="mypfp" token="balance" :test="test" :tokenstats="stats"
+                                    :tokenprotocol="protocol" :tokenuser="saccountapi" :account="account"
+                                    @modalsign="sendIt($event)" v-slot:trigger>
                                             <span slot="trigger" class="trigger"><i
                                                     class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
                                         </modal-vue>
@@ -270,10 +275,10 @@ export default {
                             <p class="lead mb-1" v-if="!nodeview || title == 'new'" v-show="saccountapi.spk_power">
                             Click 
                                 <a class="btn btn-sm btn-dark border-info text-info no-decoration small" style="font-size: 0.6em; width: 72px;" role="button" data-bs-toggle="modal" data-bs-target="#contractModal">
-                                    <modal-vue type="build" token="BROCA"
-                                        :balance="broca_calc(saccountapi.broca)" :account="account"
-                                        @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
-                                        v-slot:trigger>
+                                    <modal-vue v-if="protocol?.head_block && saccountapi?.head_block" type="contract"
+                                    :api="sapi" :mypfp="mypfp" token="balance" :test="test" :tokenstats="stats"
+                                    :tokenprotocol="protocol" :tokenuser="saccountapi" :account="account"
+                                    @modalsign="sendIt($event)" v-slot:trigger>
                                         <span slot="trigger" class="trigger"><i
                                                 class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
                                     </modal-vue>
@@ -314,10 +319,10 @@ export default {
                                     <p class="lead mb-1" v-show="saccountapi.spk_power" v-if="!nodeview || title == 'new'">Click <a
                                                 class="btn btn-sm btn-dark border-info text-info no-decoration small" style="font-size: 0.6em; width: 72px;"
                                                 role="button" data-bs-toggle="modal" data-bs-target="#contractModal">
-                                                <modal-vue type="build" token="BROCA"
-                                                    :balance="broca_calc(saccountapi.broca)" :account="account"
-                                                    @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
-                                                    v-slot:trigger>
+                                                <modal-vue v-if="protocol?.head_block && saccountapi?.head_block" type="contract"
+                                    :api="sapi" :mypfp="mypfp" token="balance" :test="test" :tokenstats="stats"
+                                    :tokenprotocol="protocol" :tokenuser="saccountapi" :account="account"
+                                    @modalsign="sendIt($event)" v-slot:trigger>
                                                     <span slot="trigger" class="trigger"><i
                                                             class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
                                                 </modal-vue></a>
@@ -337,9 +342,10 @@ export default {
                                     <!-- new contract button -->
                                     <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
                                         class="btn btn-sm btn-dark border-info text-info me-1" style="width:110px;">
-                                        <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
-                                            :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
-                                            v-slot:trigger>
+                                        <modal-vue v-if="protocol?.head_block && saccountapi?.head_block" type="contract"
+                                    :api="sapi" :mypfp="mypfp" token="balance" :test="test" :tokenstats="stats"
+                                    :tokenprotocol="protocol" :tokenuser="spkapi" :account="account"
+                                    @modalsign="sendIt($event)" v-slot:trigger>
                                             <span slot="trigger" class="trigger"><i
                                                     class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
                                         </modal-vue>
@@ -962,6 +968,7 @@ export default {
             default: 'Storage Contracts',
             required: false
         },
+        mypfp: String,
         postpage: {
             default: false,
             required: false
@@ -972,7 +979,19 @@ export default {
             },
             required: false
         },
+        stats: {
+            default: function () {
+                return {}
+            },
+            required: false
+        },
         spkapi: {
+            default: function () {
+                return {}
+            },
+            required: false
+        },
+        protocol: {
             default: function () {
                 return {}
             },
@@ -2204,12 +2223,10 @@ export default {
     },
     watch: {
         'account'(newValue, o) {
-            console.log(newValue, o)
             if (this.loaded == true) {
                 if (!this.nodeview) {
                     this.contracts = []
                     this.contractIDs = {}
-                    console.log('triggered')
                 }
                 this.saccountapi = {
                     spk: 0,
