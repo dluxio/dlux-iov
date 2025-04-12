@@ -441,7 +441,6 @@ export default {
     const reward_per_rshare = parseFloat(dgp.pending_rewarded_vesting_hive) / parseFloat(dgp.pending_rewarded_vesting_shares)
     const vote_value_hive = rshares * reward_per_rshare
     const vote_value_usd = vote_value_hive * hive_price / 12
-    console.log({accountinfo, dgp, hive_price, effective_VS, votingPower, rshares, reward_per_rshare, vote_value_hive, vote_value_usd})
     return vote_value_usd > 1 ? "$" + vote_value_usd.toFixed(2) : (vote_value_usd * 100).toFixed(1) + '¢'
   },
   dailyReturn(accountinfo, vote_weight = 10000, now = false){
@@ -458,7 +457,6 @@ export default {
     const reward_per_rshare = parseFloat(dgp.pending_rewarded_vesting_hive) / parseFloat(dgp.pending_rewarded_vesting_shares)
     const vote_value_hive = rshares * reward_per_rshare
     const vote_value_usd = vote_value_hive * hive_price / 2
-    console.log({accountinfo, dgp, hive_price, effective_VS, votingPower, rshares, reward_per_rshare, vote_value_hive, vote_value_usd})
     return vote_value_usd > 1 ? "$" + vote_value_usd.toFixed(2) : (vote_value_usd * 100).toFixed(1) + '¢'
   }
 };
