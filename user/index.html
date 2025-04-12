@@ -448,7 +448,7 @@
                                                             {{formatNumber((accountapi.poweredUp)/1000, 3, '.',
                                                             ',')}}
                                                             <span class="ms-2 text-warning">DLUX</span>
-    
+
                                                             <span
                                                                 class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
                                                                 <i class="fa-solid fa-bolt-lightning"></i>
@@ -1912,17 +1912,27 @@
                                                     </ul>
                                                 </div>
                                                 <div id="hivepactions" class="text-center text-lg-end">
-                                                    <h5 id="hpbal"
-                                                        class="d-flex align-items-center justify-content-center justify-content-lg-end">
-                                                        {{formatNumber(((pFloat(hivestats.total_vesting_fund_hive)*pFloat(focus.vesting_shares))/pFloat(hivestats.total_vesting_shares)),3,
-                                                        '.', ',')}}
-                                                        <span class="ms-2 text-warning">HP</span><span
-                                                            class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
-                                                            <i class="fa-solid fa-bolt-lightning"></i>
-                                                        </span>
-                                                    </h5>
-                                                    {{formatNumber(((pFloat(hivestats.total_vesting_fund_hive)*(pFloat(focus.vesting_shares) + pFloat(focus.received_vesting_shares) - pFloat(focus.delegated_vesting_shares)))/pFloat(hivestats.total_vesting_shares)),3,
-                                                        '.', ',')}}
+                                                    <div class="mb-2">
+                                                        <h5 id="hpbal"
+                                                            class="mb-0 d-flex align-items-center justify-content-center justify-content-lg-end">
+                                                            {{formatNumber(((pFloat(hivestats.total_vesting_fund_hive)*pFloat(focus.vesting_shares))/pFloat(hivestats.total_vesting_shares)),3,
+                                                            '.', ',')}}
+                                                            <span class="ms-2 text-warning">HP</span><span
+                                                                class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                                <i class="fa-solid fa-bolt-lightning"></i>
+                                                            </span>
+                                                        </h5>
+                                                        <h6
+                                                            class="mb-0 mt-1 d-flex align-items-center text-white-50 justify-content-center justify-content-lg-end">
+                                                           
+                                                            {{formatNumber(((pFloat(hivestats.total_vesting_fund_hive)*(pFloat(focus.vesting_shares)
+                                                            + pFloat(focus.received_vesting_shares) -
+                                                            pFloat(focus.delegated_vesting_shares)))/pFloat(hivestats.total_vesting_shares)),3,
+                                                            '.', ',')}}
+                                                            <span class="ms-2 ">EHP</span>
+                                                            
+                                                        </h6>
+                                                    </div>
                                                     <div class="btn-group" v-if="me" role="group"
                                                         aria-label="DLUX Actions">
                                                         <button type="button" class="btn btn-light text-nowrap p-0">
@@ -2285,7 +2295,8 @@
                                                                             </span>
 
                                                                         </span>Remaining
-                                                                        {{fancyRounding(rcAccount?.max_rc - rcAccount?.received_delegated_rc)}}RC
+                                                                        {{fancyRounding(rcAccount?.max_rc -
+                                                                        rcAccount?.received_delegated_rc)}}RC
                                                                         </span>
                                                                     </div>
                                                                 </div>
