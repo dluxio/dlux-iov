@@ -1182,13 +1182,13 @@ export default {
                 Blog</span></a>
           </li>
           <li>
-            <a class="dropdown-item subnav-title" href="/me#inventory/" @click="showTab('inventory')">Inventory<span
-                class="subnav-subtitle">NFT Collection</span></a>
-          </li>
-          <li>
             <a class="dropdown-item subnav-title" href="/me#drive/" @click="showTab('drive')">IPFS Drive<span
                 class="subnav-subtitle">SPK
                 Network</span></a>
+          </li>
+          <li>
+            <a class="dropdown-item subnav-title" href="/me#inventory/" @click="showTab('inventory')">Inventory<span
+                class="subnav-subtitle">NFT Collection</span></a>
           </li>
           <li>
             <a class="dropdown-item subnav-title" href="/me#wallet/" @click="showTab('wallet')">Wallet<span

@@ -54,10 +54,11 @@ export default {
                     network
                     infrastructure that rewards service operators</p>
             </div>
-            <!--claim  rewards-->
+            <!--claim spk rewards-->
             <div class="bg-special border border-4 border-dark rounded mt-3"
                 id="larynxclaimrewards" v-if="(saccountapi.claim_spk > 0 || saccountapi.claim > 0) && me">
-            <div class="d-flex text-dark flex-column flex-lg-row gap-3 justify-content-between align-items-center p-3" style="background-color: #00000020">
+            <div class="d-flex text-dark flex-column flex-lg-row gap-3 justify-content-between align-items-center p-3" 
+                style="background-color: #00000020">
                 <div class="text-center text-lg-start flex-grow-1">
                         <h4 class="m-0">Claim Rewards</h4>
                     <p class="m-0">Claimable rewards
@@ -65,7 +66,7 @@ export default {
                          service
                         node</p>
                 </div>
-                <div id="claimlarynxrewardbtn" class="ms-auto text-end">
+                <div id="claimlarynxrewardbtn" class="text-center text-lg-end">
                 <h5 v-if="saccountapi.claim_spk
  > 0">{{formatNumber((saccountapi.claim_spk
 )/1000, 3, '.', ',')}} SPK
