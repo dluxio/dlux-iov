@@ -549,7 +549,10 @@ export default {
                     }
                 }
 
-            }
+            } else if (this.func ===  'transfer_to_vesting' || this.func ===  'transfer_from_savings' || this.func ===  'transfer_to_savings'){
+                this.form.to = this.account
+                this.validateField("to")
+            } 
         },
         validateField(key) {
             this.validations[key] = false
