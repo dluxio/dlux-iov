@@ -371,6 +371,7 @@ export default {
         }
       }
     },
+    propfiles: Object,
     dataurls: {
       type: Object,
       default: function () {
@@ -382,6 +383,14 @@ export default {
     dataurls(old, n) {
       for(var i = 0; i < n.length; i++){
         if(old.length < (i - 1))this.addDataURL(n[i][1], n[i][0], n[i][2])
+      }
+    },
+    propfiles: {
+      immediate: true,
+      handler(newFiles) {
+        if (newFiles.target) {
+          this.uploadFile(newFiles);
+        }
       }
     }
   },

@@ -9,6 +9,8 @@ export default {
     api: String,
     mypfp: String,
     token: "broca",
+    to_amount: Number,
+    to_broker: String,
     tokenprotocol: {
       default: function () {
         return {
@@ -200,6 +202,7 @@ export default {
       this.validateField(key);
     }, 300);
   },
+  emits: ["modalsign"],
   methods: {
     ...MCommon,
     ...MModals,
@@ -308,7 +311,7 @@ export default {
         this.filteredBrokerOptions = this.ipfsProviders;
         this.availableProvidersCount = Object.keys(this.ipfsProviders).length;
       }
-      if (!this.ipfsProviders[this.form.broker])this.form.broker = ""
+      if (!this.ipfsProviders[this.form.broker]) this.form.broker = ""
     },
     handleCheck(key) {
       const field = this.feat.json[key];
@@ -330,6 +333,18 @@ export default {
       const max = BigInt(stats.StorageMax)
       const freeSpace = max - BigInt(stats.RepoSize);
       return freeSpace < BigInt(requiredSize * 2);
+    },
+    prefillToField() {
+      if(this.to_broker){
+        this.form.broker = this.to_broker
+        this.validateField("broker")
+      }
+      if(this.to_amount){
+        this.form.amount = this.to_amount
+        this.validateField("amount")
+      }
+      this.form.to = this.account
+      this.validateField("to")
     },
     shouldShowField(key) {
       if (key === 'ben_to' || key === 'ben_amount') {
@@ -421,6 +436,7 @@ export default {
       this.filteredBrokerOptions = { ...this.ipfsProviders };
       this.availableProvidersCount = Object.keys(this.ipfsProviders).length;
       this.isLoading = false;
+      this.prefillToField()
     });
   }
 };

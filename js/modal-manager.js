@@ -67,7 +67,9 @@ export default {
                 :account="account"
                 :api="api"
                 :mypfp="mypfp"
-                :tokenuser="tokenuser" 
+                :tokenuser="tokenuser"
+                :to_amount="to_account?.amount"
+                :to_broker="to_account?.broker"
                 :tokenstats="tokenstats"
                 @modalsign="$emit('modalsign', $event)" />
             <Election v-if="type === 'election' && tokenprotocol.head_block && tokenuser.head_block" 
@@ -81,7 +83,7 @@ export default {
     </teleport>
   </div>`,
     methods: {
-        modalsign(op) {
+        modalSign(op) {
             this.$emit("modalsign", op)
         },
         openModal(data){

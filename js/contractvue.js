@@ -1,10 +1,11 @@
-import Pop from "/js/pop.js";
-import ExtensionVue from "/js/extensionvue.js";
-import FilesVue from "/js/filesvue.js";
-import UploadVue from "/js/uploadvue.js";
-import ModalVue from "/js/modal-manager.js";
-import PostVue from "/js/postvue.js";
-import ChoicesVue from '/js/choices-vue.js';
+import Pop from "/js/pop.js"
+import ExtensionVue from "/js/extensionvue.js"
+import FilesVue from "/js/filesvue.js"
+import UploadVue from "/js/uploadvue.js"
+import ModalVue from "/js/modal-manager.js"
+import PostVue from "/js/postvue.js"
+import ChoicesVue from '/js/choices-vue.js'
+import UploadEverywhere from '/js/upload-everywhere.js'
 
 
 export default {
@@ -15,7 +16,8 @@ export default {
         "upload-vue": UploadVue,
         "modal-vue": ModalVue,
         "post-vue": PostVue,
-        "choices-vue": ChoicesVue
+        "choices-vue": ChoicesVue,
+        "upload-everywhere": UploadEverywhere,
     },
     template: `
     <div class="d-flex flex-column">
@@ -145,10 +147,18 @@ export default {
 
             <!-- spk status -->
             <div role="tabpanel" class="tab-pane" id="status" aria-labelledby="statustab">
-            <div class="hero-subtitle d-flex align-items-top mb-3 me-auto">Resource Credits <span class="ms-2 fs-5">(Regenerative)</span></div>
+            <div class="hero-subtitle d-flex align-items-top mb-3 me-auto">Storage Resource Credits <span class="ms-2 fs-5">(Regenerative)</span></div>
                 <div class="border-bottom-0" v-if="!nodeview && saccountapi.pubKey != 'NA'">
                     <div class="container pt-1">
-                      
+            <upload-everywhere
+                :account="account"
+                :sapi="sapi"
+                :mypfp="mypfp"
+                :protocol="protocol"
+                :stats="stats"
+                :saccountapi="saccountapi"
+                @tosign="sendIt($event)"
+            />        
             <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-4" >
                 <!-- BROCA token widget -->
                 <div class="order-lg-3 order-xl-0 mb-3 col spk-widg">
@@ -1012,6 +1022,7 @@ export default {
             postBodyAdder: {},
             newMeta: {},
             state2contracts: [],
+            test: true,
             tick: "1",
             toSign: {},
             larynxbehind: 999999,
