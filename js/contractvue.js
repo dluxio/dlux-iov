@@ -34,7 +34,7 @@ export default {
                     
                 <li class="nav-item">
                         <a class="nav-link position-relative" href="#contracts" id="contractstab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
-                            aria-controls="contractstab" aria-expanded="false">CONTRACTS<span v-if="contracts.length > 0" class="position-absolute top-0 end-0 alert-dot border border-light rounded-circle bg-danger"><span class="visually-hidden">unread messages</span></span></a>
+                            aria-controls="contractstab" aria-expanded="false">CONTRACTS<span v-if="red_light" class="position-absolute top-0 end-0 alert-dot border border-light rounded-circle bg-danger"><span class="visually-hidden">unread messages</span></span></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#status" id="statustab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
@@ -2260,6 +2260,12 @@ export default {
     computed: {
         hasFiles() {
             return Object.keys(this.files).length > 0;
+        },
+        red_light() {
+            for(var i = 0; i < this.contracts.length; i++){
+                if(this.contracts[i].c < 3)return true
+            }
+            return false
         },
     },
     mounted() {
