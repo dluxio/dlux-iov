@@ -1002,6 +1002,7 @@ export default {
             usedBytes: 0,
             availableBytes: 0,
             sstats: {},
+            loaded: false,
             links: {},
             contractIDs: {},
             saccountapi: {
@@ -2300,6 +2301,6 @@ export default {
         window.addEventListener('hashchange', () => {
             this.deepLink(location.hash);
         });
-
+        this.loaded = true
     },
 };
