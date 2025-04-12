@@ -23,22 +23,23 @@ export default {
      <div class="hero-subtitle">IPFS Drive</div>
      <div class="ms-auto">
                     <ul id="drivetabs" class="nav nav-tabs rounded mx-2 fs-5 " role="tablist" style="background-color: rgb(0,0,0,0.3)">
-                    <li class="nav-item">
-                            <a class="nav-link active px-4" href="#status" id="statustab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
-                                aria-controls="statustab" aria-expanded="true">SPK</a>
-                        </li>    
+                    <li v-if="!cc" class="nav-item">
+                            <a class="nav-link active px-4" aria-current="page" href="#files" id="filestab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
+                                aria-controls="filestab" aria-expanded="false">FILES</a>
+                        </li>
+                        <li v-if="cc" class="nav-item">
+                            <a class="nav-link active px-4" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
+                                aria-controls="cctab" aria-expanded="false">FILES</a>
+                        </li>
+                     
                     <li class="nav-item">
                             <a class="nav-link px-4" href="#contracts" id="contractstab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
                                 aria-controls="contractstab" aria-expanded="false">CONTRACTS</a>
                         </li>
-                        <li v-if="!cc" class="nav-item">
-                            <a class="nav-link px-4" aria-current="page" href="#files" id="filestab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
-                                aria-controls="filestab" aria-expanded="false">FILES</a>
-                        </li>
-                        <li v-if="cc" class="nav-item">
-                            <a class="nav-link px-4" aria-current="page" href="#ccTab" role="tab" data-bs-toggle="tab"
-                                aria-controls="cctab" aria-expanded="false">FILES</a>
-                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-4" href="#status" id="statustab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
+                                aria-controls="statustab" aria-expanded="true">SPK</a>
+                        </li>   
                     </ul>
                 </div>
         </div>
@@ -141,8 +142,8 @@ export default {
         <!-- tabs -->
         <div class="tab-content">
 
-            <!-- status -->
-            <div role="tabpanel" class="tab-pane show active" id="status" aria-labelledby="statustab">
+            <!-- spk status -->
+            <div role="tabpanel" class="tab-pane" id="status" aria-labelledby="statustab">
                     <div class="border-bottom-0" v-if="!nodeview && saccountapi.pubKey != 'NA'">
           <div class="container pt-1">
             <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-4" >
@@ -198,7 +199,7 @@ export default {
                     <div class="card-header d-flex align-items-center border-bottom border-1 px-2 py-1 fs-4"><i class="fa-solid fa-cloud-arrow-up me-1"></i><span>Contract</span></div>
                         <div class="card-body px-2 py-1">
                             <div class="d-flex flex-column">
-                                <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">Contracts store files</div>
+                                <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;">Pin your files</div>
                                 <div class="d-flex justify-content-center mt-1">
                                     <!-- new contract button -->
                                     <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
@@ -230,7 +231,7 @@ export default {
             </div>
 
             <!-- cc -->
-            <div v-if="cc" role="tabpanel" class="tab-pane" id="ccTab" aria-labelledby="cctab">
+            <div v-if="cc" role="tabpanel show active" class="tab-pane" id="ccTab" aria-labelledby="cctab">
                  <!-- no files -->
                 <div v-if="hasFiles" class="ms-auto me-auto text-center">
                     <div class="ms-auto me-auto card px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
@@ -254,7 +255,7 @@ export default {
         
             
             <!-- files -->
-            <div v-else role="tabpanel" class="tab-pane" id="files" aria-labelledby="filestab">
+            <div v-else role="tabpanel" class="tab-pane show active" id="files" aria-labelledby="filestab">
                 
                 <!-- no files -->
                 <div v-show="!contracts.length"> 
