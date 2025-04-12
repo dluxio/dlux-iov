@@ -308,8 +308,7 @@
                                                     <span class="nav-logotype ms-1" style="font-size:6ch;">DLUX</span>
                                                 </div>
                                                 <!--dlux token-->
-                                                <div
-                                                    class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
+                                                <div class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
                                                     <div
                                                         class="d-flex flex-column flex-lg-row align-items-center justify-content-between gap-3 gap-lg-4">
 
@@ -402,8 +401,7 @@
                                                     </div>
                                                 </div>
                                                 <!--dlux power-->
-                                                <div
-                                                    class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
+                                                <div class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
                                                     <div
                                                         class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
                                                         <div class="text-center position-relative">
@@ -498,38 +496,44 @@
                                                     <div v-if="Object.keys(accountapi?.power_downs).length > 0"
                                                         class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
                                                         role="alert" style="background-color: #ffffff01;">
-                                                        <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
-                                                         <p class="mb-0 lead ">A {{formatNumber(accountapi?.power_downs[Object.keys(accountapi?.power_downs)[0]].amount / 1000, 3, '.', ',')}} DLUX
-                                                            power down is scheduled {{timeUntilBlocks((accountapi?.power_downs[Object.keys(accountapi?.power_downs)[0]].block - accountapi.head_block)*3000)}}. 
-                                                            ({{Object.keys(accountapi?.power_downs).length}} weeks remaining)
+                                                        <i
+                                                            class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
+                                                        <p class="mb-0 lead ">A
+                                                            {{formatNumber(accountapi?.power_downs[Object.keys(accountapi?.power_downs)[0]].amount
+                                                            / 1000, 3, '.', ',')}} DLUX
+                                                            power down is scheduled
+                                                            {{timeUntilBlocks((accountapi?.power_downs[Object.keys(accountapi?.power_downs)[0]].block
+                                                            - accountapi.head_block)*3000)}}.
+                                                            ({{Object.keys(accountapi?.power_downs).length}} weeks
+                                                            remaining)
                                                         </p>
                                                         <small class="ms-lg-auto">
                                                             <div class="d-flex ms-lg-2">
-                                                                
-                                                        <modal-vue 
-                                                        v-if="protocol?.dlux?.head_block && accountapi.head_block" func="powdn" 
-                                                        token="poweredUp" 
-                                                        :tokenuser="accountapi"
-                                                        :to_account="{'amount':(accountapi?.power_downs[Object.keys(accountapi?.power_downs)[0]].amount * 4)/1000}"
-                                                        :account="account" 
-                                                        :tokenprotocol="protocol?.dlux"
-                                                        :mypfp="mypfp" 
-                                                        @modalsign="sendIt($event)" 
-                                                        v-slot:trigger>
-                                                        <button class="btn btn-sm rounded-pill btn-outline-light trigger"
-                                                            type="button">
-                                                            CHANGE</button>
-                                                    </modal-vue>
-                                                    <button class="btn btn-sm rounded-pill btn-outline-danger ms-2"
-                                                            type="button" @click="simpleCJ('dlux_power_down', 'amount:0', {'broadcast':'tosign'})">
-                                                            STOP</button>
+
+                                                                <modal-vue
+                                                                    v-if="protocol?.dlux?.head_block && accountapi.head_block"
+                                                                    func="powdn" token="poweredUp"
+                                                                    :tokenuser="accountapi"
+                                                                    :to_account="{'amount':(accountapi?.power_downs[Object.keys(accountapi?.power_downs)[0]].amount * 4)/1000}"
+                                                                    :account="account" :tokenprotocol="protocol?.dlux"
+                                                                    :mypfp="mypfp" @modalsign="sendIt($event)"
+                                                                    v-slot:trigger>
+                                                                    <button
+                                                                        class="btn btn-sm rounded-pill btn-outline-light trigger"
+                                                                        type="button">
+                                                                        CHANGE</button>
+                                                                </modal-vue>
+                                                                <button
+                                                                    class="btn btn-sm rounded-pill btn-outline-danger ms-2"
+                                                                    type="button"
+                                                                    @click="simpleCJ('dlux_power_down', 'amount:0', {'broadcast':'tosign'})">
+                                                                    STOP</button>
                                                             </div>
                                                         </small>
                                                     </div>
                                                 </div>
                                                 <!--delegated dlux power -->
-                                                <div
-                                                    class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
+                                                <div class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
                                                     <div
                                                         class="d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 gap-lg-4">
                                                         <div class="position-relative text-center">
@@ -568,7 +572,8 @@
                                                         <div id="dluxactions" class="text-center text-lg-end">
                                                             <h5 id="dluxbalance"
                                                                 class="d-flex align-items-center justify-content-center justify-content-lg-end">
-                                                                {{formatNumber((accountapi?.granting?.t ? accountapi.granting?.t : 0)/1000, 3,
+                                                                {{formatNumber((accountapi?.granting?.t ?
+                                                                accountapi.granting?.t : 0)/1000, 3,
                                                                 '.', ',')}}
                                                                 <span class="ms-2 text-warning">DLUX</span><span
                                                                     class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
@@ -578,7 +583,6 @@
                                                             <div class="btn-group" v-if="me" role="group"
                                                                 aria-label="DLUX Actions">
                                                                 <button class="dropdown btn btn-light text-nowrap"
-                                                                    
                                                                     href="#" role="button" id="delegationsbtn"
                                                                     data-bs-toggle="collapse"
                                                                     data-bs-target="#delegations" aria-expanded="false"
@@ -600,7 +604,8 @@
                                                                     <span><i
                                                                             class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
                                                                     <span class="ms-1">
-                                                                        {{formatNumber((accountapi?.granting?.t)/1000 ? accountapi?.granting?.t/1000 : 0,
+                                                                        {{formatNumber((accountapi?.granting?.t)/1000 ?
+                                                                        accountapi?.granting?.t/1000 : 0,
                                                                         3,
                                                                         '.', ',')}} DLUX
                                                                     </span>
@@ -610,7 +615,8 @@
                                                                     <span><i
                                                                             class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
                                                                     <span
-                                                                        class="ms-1">{{formatNumber(accountapi?.granted?.t? (accountapi?.granted?.t)/1000 : 0,
+                                                                        class="ms-1">{{formatNumber(accountapi?.granted?.t?
+                                                                        (accountapi?.granted?.t)/1000 : 0,
                                                                         3,'.', ',')}} DLUX
                                                                     </span>
                                                                 </div>
@@ -619,7 +625,10 @@
                                                             <div class="px-1 px-lg-2">
                                                                 <!-- DLUX Delegations Out -->
                                                                 <h5 class="mt-2 mb-1">
-                                                                    Delegated: ({{typeof accountapi?.granting == "object" ? (Object.keys(accountapi?.granting).length - 1 > 0 ? Object.keys(accountapi?.granting).length - 1 : 0) : 0 }})
+                                                                    Delegated: ({{typeof accountapi?.granting ==
+                                                                    "object" ? (Object.keys(accountapi?.granting).length
+                                                                    - 1 > 0 ? Object.keys(accountapi?.granting).length -
+                                                                    1 : 0) : 0 }})
                                                                 </h5>
                                                                 <!-- No DLUX Delegations Out -->
                                                                 <div v-if="!accountapi?.granting?.t">
@@ -654,19 +663,20 @@
                                                                                         class="fas fa-fw fa-user-edit"></i>
                                                                                 </button>
                                                                             </modal-vue>
-                                                                            <button
-                                                                                class="ms-1 btn btn-sm btn-danger"
+                                                                            <button class="ms-1 btn btn-sm btn-danger"
                                                                                 type="button"
                                                                                 @click="simpleCJ('dlux_power_grant', 'amount:0,to:' + b , {'broadcast':'tosign'})">
-                                                                                <i
-                                                                                    class="fas fa-fw fa-trash-alt"></i>
+                                                                                <i class="fas fa-fw fa-trash-alt"></i>
                                                                             </button>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                                 <!-- DLUX Delegations In -->
                                                                 <h5 class="mt-2 mb-1">
-                                                                    Received: ({{typeof accountapi.granted == "object" ? (Object.keys(accountapi.granted).length - 1 > 0 ? Object.keys(accountapi.granted).length - 1 : 0 ) : 0}})
+                                                                    Received: ({{typeof accountapi.granted == "object" ?
+                                                                    (Object.keys(accountapi.granted).length - 1 > 0 ?
+                                                                    Object.keys(accountapi.granted).length - 1 : 0 ) :
+                                                                    0}})
                                                                 </h5>
                                                                 <!-- No DLUX Delegations In -->
                                                                 <div v-if="!accountapi?.granted?.t">
@@ -800,31 +810,38 @@
                                                         </div>
                                                     </div>
                                                     <!-- DLUX Unlock Gov -->
-                                                    <div v-if="Object.keys(accountapi?.gov_downs).length > 0" class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
+                                                    <div v-if="Object.keys(accountapi?.gov_downs).length > 0"
+                                                        class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
                                                         role="alert" style="background-color: #ffffff01;">
-                                                        <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
-                                                        <p class="mb-0 lead ">A {{formatNumber(accountapi?.gov_downs[Object.keys(accountapi?.gov_downs)[0]].amount / 1000, 3, '.', ',')}} DLUX
-                                                            power down is scheduled {{timeUntilBlocks((accountapi?.gov_downs[Object.keys(accountapi?.gov_downs)[0]].block - accountapi.head_block)*3000)}}. 
-                                                            ({{Object.keys(accountapi?.gov_downs).length}} weeks remaining)
+                                                        <i
+                                                            class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
+                                                        <p class="mb-0 lead ">A
+                                                            {{formatNumber(accountapi?.gov_downs[Object.keys(accountapi?.gov_downs)[0]].amount
+                                                            / 1000, 3, '.', ',')}} DLUX
+                                                            power down is scheduled
+                                                            {{timeUntilBlocks((accountapi?.gov_downs[Object.keys(accountapi?.gov_downs)[0]].block
+                                                            - accountapi.head_block)*3000)}}.
+                                                            ({{Object.keys(accountapi?.gov_downs).length}} weeks
+                                                            remaining)
                                                         </p>
                                                         <small class="ms-lg-auto">
                                                             <div class="d-flex ms-lg-2">
-                                                                <modal-vue 
-                                                                v-if="protocol?.dlux?.head_block && accountapi.head_block" func="govdn" 
-                                                                token="gov" 
-                                                                :tokenuser="accountapi" 
-                                                                :account="account" 
-                                                                :to_account="{'amount':(accountapi?.gov_downs[Object.keys(accountapi?.gov_downs)[0]].amount * 4)/1000}"
-                                                                :tokenprotocol="protocol?.dlux"
-                                                                :mypfp="mypfp" 
-                                                                @modalsign="sendIt($event)" 
-                                                                v-slot:trigger>
-                                                                <button class="btn btn-sm rounded-pill btn-outline-light trigger"
-                                                                    type="button">
-                                                                    CHANGE</button>
-                                                            </modal-vue>
-                                                            <button class="btn btn-sm rounded-pill btn-outline-danger ms-2"
-                                                                    type="button" @click="simpleCJ('dlux_gov_down', 'amount:0', {'broadcast':'tosign'})">
+                                                                <modal-vue
+                                                                    v-if="protocol?.dlux?.head_block && accountapi.head_block"
+                                                                    func="govdn" token="gov" :tokenuser="accountapi"
+                                                                    :account="account"
+                                                                    :to_account="{'amount':(accountapi?.gov_downs[Object.keys(accountapi?.gov_downs)[0]].amount * 4)/1000}"
+                                                                    :tokenprotocol="protocol?.dlux" :mypfp="mypfp"
+                                                                    @modalsign="sendIt($event)" v-slot:trigger>
+                                                                    <button
+                                                                        class="btn btn-sm rounded-pill btn-outline-light trigger"
+                                                                        type="button">
+                                                                        CHANGE</button>
+                                                                </modal-vue>
+                                                                <button
+                                                                    class="btn btn-sm rounded-pill btn-outline-danger ms-2"
+                                                                    type="button"
+                                                                    @click="simpleCJ('dlux_gov_down', 'amount:0', {'broadcast':'tosign'})">
                                                                     STOP</button>
                                                             </div>
                                                         </small>
@@ -1346,20 +1363,17 @@
                                                             </p>
                                                             <small class="ms-lg-auto">
                                                                 <div class="d-flex ms-lg-2">
-                                                                    
-                                                        <modal-vue 
-                                                        v-if="protocol?.spk?.head_block && saccountapi.head_block" func="powdn" 
-                                                        token="poweredUp" 
-                                                        :tokenuser="saccountapi"
-                                                        :account="account" 
-                                                        :tokenprotocol="protocol?.dlux"
-                                                        :mypfp="mypfp" 
-                                                        @modalsign="sendIt($event)" 
-                                                        v-slot:trigger>
-                                                                    <button
-                                                                        class="btn btn-sm rounded-pill btn-outline-light trigger"
-                                                                        type="button">
-                                                                        CHANGE</button>
+
+                                                                    <modal-vue
+                                                                        v-if="protocol?.spk?.head_block && saccountapi.head_block"
+                                                                        func="powdn" token="poweredUp"
+                                                                        :tokenuser="saccountapi" :account="account"
+                                                                        :tokenprotocol="protocol?.dlux" :mypfp="mypfp"
+                                                                        @modalsign="sendIt($event)" v-slot:trigger>
+                                                                        <button
+                                                                            class="btn btn-sm rounded-pill btn-outline-light trigger"
+                                                                            type="button">
+                                                                            CHANGE</button>
                                                                     </modal-vue>
                                                                     <button
                                                                         class="btn btn-sm rounded-pill btn-outline-danger ms-2"
@@ -1459,7 +1473,10 @@
                                                                 <div class="px-1 px-lg-2">
                                                                     <!-- LARYNX Delegations Out -->
                                                                     <h5 class="mt-2 mb-1">
-                                                                        Delegated: ({{Object.keys(saccountapi.granting).length - 1 > 0 ? Object.keys(saccountapi.granting).length - 1 : 0 }})
+                                                                        Delegated:
+                                                                        ({{Object.keys(saccountapi.granting).length - 1
+                                                                        > 0 ? Object.keys(saccountapi.granting).length -
+                                                                        1 : 0 }})
                                                                     </h5>
                                                                     <!-- No LARYNX Delegations Out -->
                                                                     <div v-if="saccountapi.granting?.t == 0">
@@ -1489,7 +1506,8 @@
                                                                                     @modalsign="sendIt($event)"
                                                                                     v-slot:trigger>
                                                                                     <button
-                                                                                        class="btn btn-secondary btn-sm trigger" @click="simpleCJ('spkccT_power_grant', 'amount:0,to:' + b , {'broadcast':'tosign'})">
+                                                                                        class="btn btn-secondary btn-sm trigger"
+                                                                                        @click="simpleCJ('spkccT_power_grant', 'amount:0,to:' + b , {'broadcast':'tosign'})">
                                                                                         <i
                                                                                             class="fas fa-fw fa-user-edit"></i>
                                                                                     </button>
@@ -1505,7 +1523,10 @@
                                                                     </div>
                                                                     <!-- LARYNX Delegations In -->
                                                                     <h5 class="mt-2 mb-1">
-                                                                        Received: ({{Object.keys(saccountapi.granted).length - 1 > 0 ? Object.keys(saccountapi.granted).length - 1 : 0 }})
+                                                                        Received:
+                                                                        ({{Object.keys(saccountapi.granted).length - 1 >
+                                                                        0 ? Object.keys(saccountapi.granted).length - 1
+                                                                        : 0 }})
                                                                     </h5>
                                                                     <!-- No LARYNX Delegations In -->
                                                                     <div v-if="saccountapi.granted.t == 0">
@@ -1531,8 +1552,7 @@
                                                     </div>
 
                                                     <!--locked larynx-->
-                                                    <div
-                                                        class="border-top border-white-50  px-3 py-4 px-lg-1 py-lg-3">
+                                                    <div class="border-top border-white-50  px-3 py-4 px-lg-1 py-lg-3">
                                                         <div
                                                             class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
                                                             <div class="text-center position-relative">
@@ -1610,7 +1630,8 @@
                                                                                 @modalsign="sendIt($event)"
                                                                                 v-slot:trigger>
                                                                                 <button class="dropdown-item trigger"
-                                                                                    slot="trigger" disabled type="button"><i
+                                                                                    slot="trigger" disabled
+                                                                                    type="button"><i
                                                                                         class="fas fa-lock-open fa-fw me-2"></i>Unlock
                                                                                     Liquidity</button>
                                                                             </modal-vue>
@@ -2010,8 +2031,9 @@
                                             <div v-if="focus.remainingHiveToWithdraw"
                                                 class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
                                                 role="alert" style="background-color: #ffffff01;">
-                                                
-                                                <p class="mb-0 lead ">A {{formatNumber(focus.weeklyHiveWithdrawal, 3, '.',',')}} HP
+
+                                                <p class="mb-0 lead ">A {{formatNumber(focus.weeklyHiveWithdrawal, 3,
+                                                    '.',',')}} HP
                                                     Power Down is scheduled {{timeUntil(focus.nextWithdrawalDate)}}.
                                                     ({{formatNumber(focus.remainingHiveToWithdraw /
                                                     focus.weeklyHiveWithdrawal,0,'','')}}
@@ -2125,26 +2147,14 @@
                                                         <div role="tabpanel" class="tab-pane show active"
                                                             id="hp-delegations" aria-labelledby="hp-delegations">
                                                             <div class="d-flex flex-column">
-                                                                <!-- HP Status -->
+                                                                <!-- HP Calculation -->
                                                                 <div
                                                                     class="d-flex flex-wrap align-items-center justify-content-center my-2">
+                                                                    <!-- HP Delegated -->
                                                                     <div
                                                                         class="d-flex flex-wrap justify-content-center align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
                                                                         <span><i
-                                                                                class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
-                                                                        <span class="ms-1">{{formatNumber(
-                                                                            (parseFloat(focus.received_vesting_shares) /
-                                                                            parseFloat(hivestats.total_vesting_shares))
-                                                                            *
-                                                                            parseFloat(hivestats.total_vesting_fund_hive),
-                                                                            3, '.', ','
-                                                                            )}} HP
-                                                                        </span>
-                                                                    </div>
-                                                                    <div
-                                                                        class="d-flex flex-wrap justify-content-center align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
-                                                                        <span><i
-                                                                                class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
+                                                                                class="fa-solid fa-circle-minus fa-fw text-orange me-2"></i>Delegated</span>
                                                                         <span class="ms-1">
                                                                             {{formatNumber(
                                                                             (parseFloat(focus.delegated_vesting_shares)
@@ -2155,6 +2165,48 @@
                                                                             3, '.', ','
                                                                             )}} HP
                                                                         </span>
+                                                                    </div>
+                                                                    <!-- HP Received -->
+                                                                    <div
+                                                                        class="d-flex flex-wrap justify-content-center align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
+                                                                        <span><i
+                                                                                class="fa-solid fa-circle-plus fa-fw me-2 text-success"></i>Received</span>
+                                                                        <span class="ms-1">{{formatNumber(
+                                                                            (parseFloat(focus.received_vesting_shares) /
+                                                                            parseFloat(hivestats.total_vesting_shares))
+                                                                            *
+                                                                            parseFloat(hivestats.total_vesting_fund_hive),
+                                                                            3, '.', ','
+                                                                            )}} HP
+                                                                        </span>
+                                                                    </div>
+                                                                    <!-- HP Total -->
+                                                                    <div
+                                                                        class="d-flex flex-wrap justify-content-center align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
+                                                                        <span class="d-flex align-items-center"><span
+                                                                                class="me-2 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                                                <i
+                                                                                    class="fa-solid fa-bolt-lightning"></i>
+                                                                            </span>Total #amount HP
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <!-- HP Mana Bar -->
+                                                                <div
+                                                                    class="d-flex flex-column flex-sm-row gap-1 gap-sm-2 align-items-center justify-content-center mb-3">
+                                                                    <h5 class="mb-0 card-title">
+                                                                        HP
+                                                                    </h5>
+                                                                    <div class="flex-grow-1"
+                                                                        style="min-width: 300px; max-width: 400px;">
+                                                                        <div class="progress bg-dark-4"
+                                                                            role="progressbar"
+                                                                            aria-label="Example 20px high"
+                                                                            aria-valuenow="25" aria-valuemin="0"
+                                                                            aria-valuemax="100" style="height: 20px">
+                                                                            <div class="progress-bar progress-bar-striped"
+                                                                                style="width: 60%">60%</div>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                                 <!-- HP Delegations Out -->
@@ -2194,7 +2246,8 @@
                                                                             )}} HP
                                                                         </p>
                                                                         <p class="my-0">
-                                                                            {{timeUntil(delegation.min_delegation_time)}}</p>
+                                                                            {{timeUntil(delegation.min_delegation_time)}}
+                                                                        </p>
                                                                         <div class="d-flex">
                                                                             <button type="button"
                                                                                 class="ms-1 btn btn-sm btn-secondary p-0">
@@ -2203,8 +2256,7 @@
                                                                                     func="delegate_vesting_shares"
                                                                                     :mypfp="mypfp" token="HP"
                                                                                     :tokenuser="focus"
-                                                                                    :account="account"
-                                                                                    type="hive"
+                                                                                    :account="account" type="hive"
                                                                                     :to_account="delegation.delegatee"
                                                                                     :tokenstats="hivestats"
                                                                                     @modalsign="sendIt($event)"
@@ -2229,22 +2281,53 @@
                                                                 <!-- RC Delegations Status -->
                                                                 <div
                                                                     class="d-flex flex-wrap align-items-center justify-content-center my-2">
+                                                                    <!-- RC Delegated -->
                                                                     <div
                                                                         class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
                                                                         <span><i
-                                                                                class="fa-solid fa-circle-dot fa-fw text-success me-2"></i>Received</span>
-                                                                        <span class="ms-1">{{fancyRounding(rcAccount ?
-                                                                            rcAccount.received_delegated_rc : 0)}}RC
-                                                                        </span>
-                                                                    </div>
-                                                                    <div
-                                                                        class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
-                                                                        <span><i
-                                                                                class="fa-solid fa-circle-dot fa-fw text-orange me-2"></i>Delegated</span>
+                                                                                class="fa-solid fa-circle-minus fa-fw text-orange me-2"></i>Delegated</span>
                                                                         <span class="ms-1">
                                                                             {{fancyRounding(rcAccount ?
                                                                             rcAccount.delegated_rc : 0)}}RC
                                                                         </span>
+                                                                    </div>
+                                                                    <!-- RC Received -->
+                                                                    <div
+                                                                        class="d-flex flex-wrap align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
+                                                                        <span><i
+                                                                                class="fa-solid fa-circle-plus fa-fw text-success me-2"></i>Received</span>
+                                                                        <span class="ms-1">{{fancyRounding(rcAccount ?
+                                                                            rcAccount.received_delegated_rc : 0)}}RC
+                                                                        </span>
+                                                                    </div>
+                                                                    
+                                                                    <!-- RC Total -->
+                                                                    <div
+                                                                        class="d-flex flex-wrap justify-content-center align-items-center lead rounded border border-white-50 mx-1 px-2 py-1 mb-1">
+                                                                        <span class="d-flex align-items-center"><span
+                                                                                class="me-2 badge badge-blank-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                                                <i
+                                                                                    class="fa-solid fa-microchip fa-fw" style="font-size: 0.7rem;"></i>
+                                                                            </span>Total #amount RC
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <!-- RC Mana Bar -->
+                                                                <div
+                                                                    class="d-flex flex-column flex-sm-row gap-1 gap-sm-2 align-items-center justify-content-center mb-3">
+                                                                    <h5 class="mb-0 card-title">
+                                                                        RC
+                                                                    </h5>
+                                                                    <div class="flex-grow-1"
+                                                                        style="min-width: 300px; max-width: 400px;">
+                                                                        <div class="progress bg-dark-4"
+                                                                            role="progressbar"
+                                                                            aria-label="Example 20px high"
+                                                                            aria-valuenow="25" aria-valuemin="0"
+                                                                            aria-valuemax="100" style="height: 20px">
+                                                                            <div class="progress-bar progress-bar-striped"
+                                                                                style="width: 60%">60%</div>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                                 <!-- RC Delegations Out -->
@@ -2308,8 +2391,7 @@
                                                                                     func="delegate_rc" :mypfp="mypfp"
                                                                                     token="RC" :tokenuser="focus"
                                                                                     :account="account"
-                                                                                    :tokenstats="hivestats"
-                                                                                    type="hive"
+                                                                                    :tokenstats="hivestats" type="hive"
                                                                                     :to_account="delegation.to"
                                                                                     :rc-info="rcAccount"
                                                                                     @modalsign="sendIt($event)"
@@ -2729,6 +2811,7 @@
                                                         <li v-if="formatNumber(focus.savings_hbd_balance ,3,'.',
                                                         ',') == 0">Add HBD to Savings to start earning</li>
                                                         <li>Claim interest every 30 days</li>
+                                                        <li>{{timeUntil(focus.savings_hbd_last_interest_payment)}}</li>
                                                     </ul>
                                                 </div>
                                                 <div id="savingsactions" class="text-center text-lg-end">
@@ -2744,12 +2827,16 @@
                                                     </h5>
                                                     <div class="btn-group" v-show="me" role="group"
                                                         aria-label="HBD Actions">
-                                                        <button type="button" class="btn btn-light text-nowrap" @click="claimHBD(account)"
+                                                        <button type="button" class="btn btn-light text-nowrap"
+                                                            @click="claimHBD(account)"
                                                             :disabled="!hbdclaim[focus.name]?.canClaimInterest || hbdclaim[focus.name].pendingInterestHbd === 0"
                                                             title="Claim HBD interest"><i
-                                                                class="fas fa-plus-circle fa-fw me-2"></i>Claim <span v-if="timeUntil(hbdclaim[focus.name] ?
-                                                                    hbdclaim[focus.name].nextClaimDate : '0', 0, 0, true) != 'unknown'">{{timeUntil(hbdclaim[focus.name] ?
-                                                                    hbdclaim[focus.name].nextClaimDate : '0', 0, 0, true)}}</span>
+                                                                class="fas fa-plus-circle fa-fw me-2"></i>Claim <span
+                                                                v-if="timeUntil(hbdclaim[focus.name] ?
+                                                                    hbdclaim[focus.name].nextClaimDate : '0', 0, 0, true) != 'unknown'">{{timeUntil(hbdclaim[focus.name]
+                                                                ?
+                                                                hbdclaim[focus.name].nextClaimDate : '0', 0, 0,
+                                                                true)}}</span>
                                                         </button>
 
                                                     </div>
@@ -2784,7 +2871,7 @@
                         <!-- inventory tab -->
                         <div role="tabpanel" class="tab-pane fade show" id="inventory" aria-labelledby="inventorytab">
                             <div class="container card bg-img-none pt-0 px-1 px-md-3 mb-4"
-                            style="background-color: rgba(61, 61, 61, 0.708);">
+                                style="background-color: rgba(61, 61, 61, 0.708);">
                                 <div v-if="FTtrades.length || NFTtrades.length"
                                     class="my-4 border-bottom border-light border-3">
                                     <h2 class="mb-1">PENDING TRADES</h2>
@@ -2806,7 +2893,8 @@
                                         <nftcard :item="item" trade="true" :account="account"
                                             :multisig="chains[item.token].multisig" :uid="Base64toNumber(item.uid)"
                                             :oicon="getIcon(item.script)" @tosign="toSign = $event"
-                                            :ocolors="getSetDetailsColors(item.script)" @focusitem="activeIndex = named;numitems=NFTtrades.length;focusItem = $event;"
+                                            :ocolors="getSetDetailsColors(item.script)"
+                                            @focusitem="activeIndex = named;numitems=NFTtrades.length;focusItem = $event;"
                                             @detail="modalIndex('itemModal', $event, 'NFTtrades');itemModal.hidden = false" />
                                     </div>
                                 </div>

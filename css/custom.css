@@ -14396,6 +14396,11 @@ html {
   font-size: 0.5rem !important;
 }
 
+.badge-blank-append {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+}
+
 /* Large screens (≥ 992px) */
 @media (min-width: 992px) {
   .wallet-token-img {
