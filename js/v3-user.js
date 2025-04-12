@@ -4534,7 +4534,8 @@ function buyNFT(setname, uid, price, type, callback){
       this.hpDelegationsIn = []
       this.rcDelegationsOut = []
       this.rcDelegationsIn = []
-      this.posturls = {};
+      this.contracts = []
+      this.posturls = {}
       this.FTtrades = []
       this.NFTtrades = []
       this.accountNFTs = []

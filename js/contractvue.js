@@ -2203,11 +2203,13 @@ export default {
         },
     },
     watch: {
-        'account'(newValue) {
+        'account'(newValue, o) {
+            console.log(newValue, o)
             if (this.loaded == true) {
                 if (!this.nodeview) {
                     this.contracts = []
                     this.contractIDs = {}
+                    console.log('triggered')
                 }
                 this.saccountapi = {
                     spk: 0,
@@ -2301,6 +2303,5 @@ export default {
         window.addEventListener('hashchange', () => {
             this.deepLink(location.hash);
         });
-        this.loaded = true
     },
 };
