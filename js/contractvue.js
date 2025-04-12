@@ -46,7 +46,7 @@ export default {
         
     <!-- register account -->
     <div v-if="saccountapi.pubKey == 'NA'">
-        <div class="hero-subtitle mt-3 me-auto">SPK Network IPFS Drive</div>
+        
         <div class="mx-xl-5">
             <div class="card p-1 p-md-3 mx-lg-5">
                 <div class="card-body text-center">
