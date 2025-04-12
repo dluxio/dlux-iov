@@ -33,8 +33,8 @@ export default {
                     </li>
                     
                 <li class="nav-item">
-                        <a class="nav-link" href="#contracts" id="contractstab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
-                            aria-controls="contractstab" aria-expanded="false">CONTRACTS</a>
+                        <a class="nav-link position-relative" href="#contracts" id="contractstab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
+                            aria-controls="contractstab" aria-expanded="false">CONTRACTS<span v-if="contracts.length > 0" class="position-absolute top-0 end-0 alert-dot border border-light rounded-circle bg-danger"><span class="visually-hidden">unread messages</span></span></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#status" id="statustab" @click="activeTab = 'drive'" role="tab" data-bs-toggle="tab"
@@ -51,7 +51,7 @@ export default {
             <div class="card p-1 p-md-3 mx-lg-5">
                 <div class="card-body text-center">
                     <div class="fs-4 lead mb-3">
-                        Register your account on SPK Network for free<br>to start storing your files on IPFS
+                        Register your account on SPK Network for free<br>to start pinning your files on IPFS
                     </div>
                     <button type="button" class="btn btn-primary my-3" @click="updatePubkey()">
                         <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
