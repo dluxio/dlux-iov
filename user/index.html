@@ -1895,7 +1895,14 @@
                                                                 <i class="fa-solid fa-bolt-lightning"></i>
                                                             </span>
                                                         </h5>
-                                                        <h6
+                                                        <h6 v-if="formatNumber(((pFloat(hivestats.total_vesting_fund_hive)*(pFloat(focus.vesting_shares)
+                                                        + pFloat(focus.received_vesting_shares) -
+                                                        pFloat(focus.delegated_vesting_shares)))/pFloat(hivestats.total_vesting_shares)),3,
+                                                        '.', ',') != '0.000' && formatNumber(((pFloat(hivestats.total_vesting_fund_hive)*(pFloat(focus.vesting_shares)
+                                                        + pFloat(focus.received_vesting_shares) -
+                                                        pFloat(focus.delegated_vesting_shares)))/pFloat(hivestats.total_vesting_shares)),3,
+                                                        '.', ',') != formatNumber(((pFloat(hivestats.total_vesting_fund_hive)*pFloat(focus.vesting_shares))/pFloat(hivestats.total_vesting_shares)),3,
+                                                        '.', ',')"
                                                             class="mb-0 mt-1 d-flex align-items-center text-white-50 justify-content-center justify-content-lg-end">
                                                            
                                                             {{formatNumber(((pFloat(hivestats.total_vesting_fund_hive)*(pFloat(focus.vesting_shares)
