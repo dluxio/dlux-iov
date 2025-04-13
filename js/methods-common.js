@@ -366,10 +366,10 @@ export default {
         ]
       ],
       key: "active",
-      id: `Stop Savings Withdrawl` + request_id,
-      msg: `Stop Savings Withdrawl` + request_id,
+      id: `Stop Savings Withdrawal` + request_id,
+      msg: `Stop Savings Withdrawal` + request_id,
       ops: ["init"],
-      txid: `Stop Savings Withdrawl` + request_id,
+      txid: `Stop Savings Withdrawal` + request_id,
     };
     this.$emit('tosign', op)
     this.toSign = op
@@ -397,10 +397,10 @@ export default {
         ]
       ],
       key: "active",
-      id: `Stop Savings Withdrawl 7249336`,
-      msg: `Stop Savings Withdrawl 7249336`,
+      id: `Stop Savings Withdrawal 7249336`,
+      msg: `Stop Savings Withdrawal 7249336`,
       ops: ["init"],
-      txid: `Stop Savings Withdrawl 7249336`,
+      txid: `Stop Savings Withdrawal 7249336`,
     };
     this.$emit('tosign', op)
     this.toSign = op

@@ -131,7 +131,7 @@ export default {
                         id: "cancel_transfer_from_savings",
                         key: "active",
                         string: "Cancel Transfer From Savings",
-                        info: "Any unexecuted withdrawl can be canceled to protect funds.",
+                        info: "Any unexecuted withdrawal can be canceled to protect funds.",
                         json: {
                             from: {
                                 type: "self",
