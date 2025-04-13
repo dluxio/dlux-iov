@@ -85,7 +85,7 @@ export default {
   </template>
   </div>
 </div>
-<div v-if="func === 'withdraw_vesting'" class="mt-3">
+<div v-if="func === 'withdraw_vesting'" class="mt-3 d-flex flex-column border border-3 border-dark px-2 py-1 rounded">
         <div v-if="withdrawalRoutes.length > 0">
             <h6>Withdrawal Routes:</h6>
             <ul>
@@ -97,8 +97,8 @@ export default {
         <div v-else>
             <p>No withdrawal routes set. Setting a route allows you to automatically transfer withdrawn funds to another account.</p>
         </div>
-        <button class="btn btn-secondary" type="button" @click="openModal('set_withdraw_vesting_route')">
-        Set Withdrawal Route</button>
+        <button class="btn btn-dark text-center" type="button" @click="openModal('set_withdraw_vesting_route')">
+        Edit Withdrawal Route</button>
     </div>
 <div v-if="func === 'transfer' || func === 'recurrent_transfer'" class="form-check">
             <input class="form-check-input" type="checkbox" v-model="isRecurrent" id="recurrentTransfer">

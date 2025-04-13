@@ -249,7 +249,7 @@ export default {
             <!-- SPK Power Down -->
             <div v-if="when(saccountapi.spower_downs)"
                 class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
-                role="alert" style="background-color: #ffffff01;">
+                role="alert" style="background-color: #ffffff10;">
                 <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
                 <p class="mb-0 lead ">A
                     {{formatNumber(saccountapi?.spower_downs[Object.keys(saccountapi?.spower_downs)[0]].amount / 1000,
@@ -499,7 +499,7 @@ export default {
             <!-- Broca Power Down -->
             <div v-if="when(saccountapi.bpower_downs)"
                 class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
-                role="alert" style="background-color: #ffffff01;">
+                role="alert" style="background-color: #ffffff10;">
                 <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
                 <p class="mb-0 lead ">A Power Down of
                     {{formatNumber(saccountapi?.bpower_downs[Object.keys(saccountapi?.bpower_downs)[0]].amount / 1000,
@@ -748,7 +748,7 @@ export default {
             <!-- Larynx Power Down -->
             <div v-if="when(saccountapi.power_downs)"
                 class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
-                role="alert" style="background-color: #ffffff01;">
+                role="alert" style="background-color: #ffffff10;">
                 <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
                 <p class="mb-0 lead ">A Power Down of
                     {{formatNumber(saccountapi?.power_downs[Object.keys(saccountapi?.power_downs)[0]].amount / 1000, 3,

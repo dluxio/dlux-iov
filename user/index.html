@@ -499,7 +499,7 @@
                                                 <!-- DLUX Power Down -->
                                                 <div v-if="Object.keys(accountapi?.power_downs).length > 0"
                                                     class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
-                                                    role="alert" style="background-color: #ffffff01;">
+                                                    role="alert" style="background-color: #ffffff10;">
                                                     <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
                                                     <p class="mb-0 lead ">A
                                                         {{formatNumber(accountapi?.power_downs[Object.keys(accountapi?.power_downs)[0]].amount
@@ -787,7 +787,7 @@
                                                 <!-- DLUX Unlock Gov -->
                                                 <div v-if="Object.keys(accountapi?.gov_downs).length > 0"
                                                     class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
-                                                    role="alert" style="background-color: #ffffff01;">
+                                                    role="alert" style="background-color: #ffffff10;">
                                                     <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
                                                     <p class="mb-0 lead ">A
                                                         {{formatNumber(accountapi?.gov_downs[Object.keys(accountapi?.gov_downs)[0]].amount
@@ -844,7 +844,7 @@
                                     <div role="tabpanel" class="tab-pane" id="spk" aria-labelledby="spktab">
                                         <div>
                                             <div class="alert py-1 mb-4 alert-info bg-img-none d-flex align-items-center justify-content-center flex-wrap"
-                                                role="alert" style="background-color: #ffffff01;">
+                                                role="alert" style="background-color: #ffffff10;">
                                                 <div class="d-flex flex-column flex-grow-1">
                                                     <div class="fs-3 fw-light">The SPK Files Test Net is live
                                                     </div>
@@ -1328,7 +1328,7 @@
                                                         <!-- LARYNX Power Down -->
                                                         <div v-if="when(saccountapi.powerDowns)"
                                                             class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
-                                                            role="alert" style="background-color: #ffffff01;">
+                                                            role="alert" style="background-color: #ffffff10;">
                                                             <p class="mb-0 lead ">A LARYNX power down is
                                                                 scheduled
                                                                 to happen in {{when(saccountapi.powerDowns)}}
@@ -1792,7 +1792,7 @@
                                             <!-- HIVE Recurring Transfers -->
                                             <div v-if="focus?.hive_transfers?.length"
                                                 class="alert alert-primary bg-img-none d-flex flex-column mt-4 mt-lg-3"
-                                                role="alert" style="background-color: #ffffff01;">
+                                                role="alert" style="background-color: #ffffff10;">
                                                 <div
                                                     class="d-flex w-100 text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center">
                                                     <i class="fa-solid fa-rotate-right fs-1 text-primary"></i>
@@ -1997,7 +1997,7 @@
                                             <!-- HIVE Power Down -->
                                             <div v-if="focus.remainingHiveToWithdraw"
                                                 class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
-                                                role="alert" style="background-color: #ffffff01;">
+                                                role="alert" style="background-color: #ffffff10;">
 
                                                 <p class="mb-0 lead ">A {{formatNumber(focus.weeklyHiveWithdrawal, 3,
                                                     '.',',')}} HP
@@ -2466,7 +2466,7 @@
                                             <!-- HIVE Savings Withdrawl -->
                                             <div v-if="focus?.hive_pendingWithdrawals?.length"
                                                 class="alert alert-danger d-flex flex-column bg-img-none align-items-center mt-4 mt-lg-3"
-                                                role="alert" style="background-color: #ffffff01;">
+                                                role="alert" style="background-color: #ffffff10;">
                                                 <div
                                                     class="d-flex w-100 text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 align-items-center">
                                                     <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
@@ -2605,7 +2605,7 @@
                                             <!-- HBD Recurring Transfers -->
                                             <div v-if="focus?.hbd_transfers?.length"
                                                 class="alert alert-primary bg-img-none d-flex flex-column mt-4 mt-lg-3"
-                                                role="alert" style="background-color: #ffffff01;">
+                                                role="alert" style="background-color: #ffffff10;">
                                                 <div
                                                     class="d-flex w-100 text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center">
                                                     <i class="fa-solid fa-rotate-right fs-1 text-primary"></i>
@@ -2727,7 +2727,7 @@
                                             <!-- HBD Savings Withdrawl -->
                                             <div v-if="focus?.hbd_pendingWithdrawals?.length"
                                                 class="alert alert-danger bg-img-none d-flex flex-column align-items-center mt-4 mt-lg-3"
-                                                role="alert" style="background-color: #ffffff01;">
+                                                role="alert" style="background-color: #ffffff10;">
                                                 <div
                                                     class="d-flex w-100 align-items-center text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 ">
                                                     <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
