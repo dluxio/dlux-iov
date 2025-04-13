@@ -1,4 +1,4 @@
-this.version = "2025.04.13.2";
+this.version = "2025.04.13.3";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -138,6 +138,7 @@ var urlsToCache = [
   `/js/dd.js`,
   `/js/detailvue.js`,
   `/js/dexvue.js`,
+  `/js/diff.js`,
   `/js/drag-drop.js`,
   `/js/drag-sort.js`,
   `/js/election-modal.js`,

@@ -333,7 +333,7 @@
                                                         <h4>DLUX</h4>
                                                         <p class="text-white-50">The utility token for content
                                                             distribution,
-                                                            smart contracts, and NFT creation.</p>
+                                                            smart contracts, and NFT creation</p>
                                                     </div>
                                                     <div id="dluxactions" class="text-center text-lg-end">
                                                         <h5 id="dluxbalance"
@@ -1591,8 +1591,7 @@
                                                                         <button id="btnGroupDrop1" type="button"
                                                                             class="btn btn-light dropdown-toggle"
                                                                             data-bs-toggle="dropdown"
-                                                                            aria-haspopup="true"
-                                                                            aria-expanded="false">
+                                                                            aria-haspopup="true" aria-expanded="false">
                                                                         </button>
                                                                         <ul class="dropdown-menu bg-black dropdown-menu-end text-white"
                                                                             aria-labelledby="btnGroupDrop1">
@@ -1881,7 +1880,7 @@
                                                         </li>
                                                         <li>Increased rewards from curation: up to
                                                             {{dailyReturn(focus)}} daily</li>
-                                                        <li>Increased resource credits: upto {{ (rcAccount?.max_rc /
+                                                        <li>Increased resource credits: up to {{ (rcAccount?.max_rc /
                                                             rcCost?.comment_operation).toFixed(0) }} comments</li>
                                                     </ul>
                                                 </div>
@@ -1901,14 +1900,15 @@
                                                         pFloat(focus.delegated_vesting_shares)))/pFloat(hivestats.total_vesting_shares)),3,
                                                         '.', ',') != formatNumber(((pFloat(hivestats.total_vesting_fund_hive)*pFloat(focus.vesting_shares))/pFloat(hivestats.total_vesting_shares)),3,
                                                         '.', ',')"
-                                                            class="mb-0 mt-1 d-flex align-items-center text-white-50 justify-content-center justify-content-lg-end" title="Effective HIVE Power">
-                                                           
+                                                            class="mb-0 mt-1 d-flex align-items-center text-white-50 justify-content-center justify-content-lg-end"
+                                                            title="Effective HIVE Power">
+
                                                             {{formatNumber(((pFloat(hivestats.total_vesting_fund_hive)*(pFloat(focus.vesting_shares)
                                                             + pFloat(focus.received_vesting_shares) -
                                                             pFloat(focus.delegated_vesting_shares)))/pFloat(hivestats.total_vesting_shares)),3,
                                                             '.', ',')}}
                                                             <span class="ms-2 ">EHP</span>
-                                                            
+
                                                         </h6>
                                                     </div>
                                                     <div class="btn-group" v-if="me" role="group"
@@ -2191,46 +2191,52 @@
                                                                     :key="delegation.delegator + delegation.delegatee">
                                                                     <div
                                                                         class="d-flex flex-column flex-sm-row gap-1 gap-sm-2 justify-content-between align-items-center border-top border-white-50 py-2">
-                                                                        <p class="my-0">
+                                                                        <div>
                                                                             <a :href="'/@' + delegation.delegatee"
                                                                                 target="_blank"
                                                                                 class="text-info no-decoration">
                                                                                 @{{delegation.delegatee}}
                                                                             </a>
-                                                                        </p>
-                                                                        <p class="my-0">
-                                                                            {{formatNumber(
-                                                                            (parseFloat(delegation.vesting_shares) /
-                                                                            parseFloat(hivestats.total_vesting_shares))
-                                                                            *
-                                                                            parseFloat(hivestats.total_vesting_fund_hive),
-                                                                            3, '.', ','
-                                                                            )}} HP
-                                                                        </p>
-                                                                        <p class="my-0">
-                                                                            {{timeUntil(delegation.min_delegation_time)}}
-                                                                        </p>
-                                                                        <div class="d-flex">
-                                                                            <button type="button"
-                                                                                class="ms-1 btn btn-sm btn-secondary p-0">
-                                                                                <modal-vue
-                                                                                    v-if="focus.id && hivestats.content_reward_percent"
-                                                                                    func="delegate_vesting_shares"
-                                                                                    :mypfp="mypfp" token="HP"
-                                                                                    :tokenuser="focus"
-                                                                                    :account="account" type="hive"
-                                                                                    :to_account="delegation.delegatee"
-                                                                                    :tokenstats="hivestats"
-                                                                                    @modalsign="sendIt($event)"
-                                                                                    v-slot:trigger>
-                                                                                    <span class="p-1 trigger"><i
-                                                                                            class="fas fa-fw fa-user-edit"></i></span></modal-vue>
-                                                                            </button>
-                                                                            <button type="button"
-                                                                                class="ms-1 btn btn-sm btn-danger ms-1"
-                                                                                @click="stopHP(account, delegation.delegatee)">
-                                                                                <i class="fas fa-fw fa-trash-alt"></i>
-                                                                            </button>
+                                                                        </div>
+                                                                        <div
+                                                                            class="d-flex flex-grow-1 justify-content-center gap-5">
+                                                                            <div class="text-start">
+                                                                                {{formatNumber(
+                                                                                (parseFloat(delegation.vesting_shares) /
+                                                                                parseFloat(hivestats.total_vesting_shares))
+                                                                                *
+                                                                                parseFloat(hivestats.total_vesting_fund_hive),
+                                                                                3, '.', ','
+                                                                                )}} HP
+                                                                            </div>
+                                                                            <div class="text-start">
+                                                                                {{timeUntil(delegation.min_delegation_time)}}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div>
+                                                                            <div class="d-flex">
+                                                                                <button type="button"
+                                                                                    class="ms-1 btn btn-sm btn-secondary p-0">
+                                                                                    <modal-vue
+                                                                                        v-if="focus.id && hivestats.content_reward_percent"
+                                                                                        func="delegate_vesting_shares"
+                                                                                        :mypfp="mypfp" token="HP"
+                                                                                        :tokenuser="focus"
+                                                                                        :account="account" type="hive"
+                                                                                        :to_account="delegation.delegatee"
+                                                                                        :tokenstats="hivestats"
+                                                                                        @modalsign="sendIt($event)"
+                                                                                        v-slot:trigger>
+                                                                                        <span class="p-1 trigger"><i
+                                                                                                class="fas fa-fw fa-user-edit"></i></span></modal-vue>
+                                                                                </button>
+                                                                                <button type="button"
+                                                                                    class="ms-1 btn btn-sm btn-danger ms-1"
+                                                                                    @click="stopHP(account, delegation.delegatee)">
+                                                                                    <i
+                                                                                        class="fas fa-fw fa-trash-alt"></i>
+                                                                                </button>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -2789,7 +2795,7 @@
                                                         <li v-if="formatNumber(focus.savings_hbd_balance ,3,'.',
                                                         ',') == 0">Add HBD to Savings to start earning</li>
                                                         <li>Claim interest every 30 days</li>
-                                                        <li>{{timeUntil(focus.savings_hbd_last_interest_payment)}}</li>
+                                                        <li>Last claim was {{timeUntil(focus.savings_hbd_last_interest_payment)}}</li>
                                                     </ul>
                                                 </div>
                                                 <div id="savingsactions" class="text-center text-lg-end">
@@ -2980,7 +2986,8 @@
                                 style="background-color: rgba(61, 61, 61, 0.708);">
                                 <div class="mb-3">
                                     <div>
-                                        <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount" :mypfp="mypfp" :protocol="protocol.broca" :stats="spkStats"
+                                        <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
+                                            :mypfp="mypfp" :protocol="protocol.broca" :stats="spkStats"
                                             @tosign="toSign=$event" :prop_contracts="contracts"
                                             :accountinfo="accountinfo" :spkapi="spkapi" @done="getSapi"></contract-vue>
                                     </div>
