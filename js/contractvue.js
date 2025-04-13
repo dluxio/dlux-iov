@@ -147,7 +147,7 @@ export default {
 
             <!-- spk status -->
             <div role="tabpanel" class="tab-pane" id="status" aria-labelledby="statustab">
-            <div class="hero-subtitle d-flex align-items-top mb-3 me-auto">Storage Resource Credits <span class="ms-2 fs-5">(Regenerative)</span></div>
+            <div class="hero-subtitle d-flex align-items-top mb-3 me-auto">Storage Credits</div>
                 <div class="border-bottom-0" v-if="!nodeview && saccountapi.pubKey != 'NA'">
                     <div class="container pt-1">
             <upload-everywhere
