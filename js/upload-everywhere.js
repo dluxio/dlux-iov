@@ -32,7 +32,7 @@ export default {
 
     <!-- Contract Modal Trigger -->
     <modal-vue
-      v-if="showContractButton && (requiredBroca <= contractSize)"
+      v-if="(showContractButton && ! contractSize) ||  (showContractButton && requiredBroca <= contractSize)"
       type="contract"
       :to_account="{'amount':requiredBroca,'broker':'dlux-io'}"
       :account="account"
