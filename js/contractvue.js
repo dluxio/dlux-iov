@@ -1405,31 +1405,107 @@ export default {
             }
             if (this.newMeta[contract].contract.m != enc_string) return true
         },
+        // update_meta(contract) {
+        //     return new Promise((resolve, reject) => {
+        //         console.log(this.newMeta[contract], contract)
+        //         var enc_string = ''
+        //         for (var acc in this.contractIDs[contract].encryption.accounts) {
+        //             if (this.contractIDs[contract].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
+        //         }
+        //         //remove last ;
+        //         enc_string = `${this.newMeta[contract].contract.autoRenew ? '1' : '0'}${enc_string.slice(0, -1)}`
+        //         this.newMeta[contract].contract.enc_string = enc_string
+        //         var cids = Object.keys(this.newMeta[contract])
+        //         cids = cids.sort((a, b) => {
+        //             if (a > b) return 1
+        //             else if (a < b) return -1
+        //             else return 0
+        //         })
+        //         for (var i = 0; i < cids.length; i++) {
+        //             if (cids[i] != 'contract') {
+        //                 enc_string += `,${this.newMeta[contract][cids[i]].name},${this.newMeta[contract][cids[i]].type},${this.newMeta[contract][cids[i]].thumb},${this.newMeta[contract][cids[i]].flags}-${this.newMeta[contract][cids[i]].license}-${this.newMeta[contract][cids[i]].labels}`
+        //             }
+        //         }
+        //         var cja = {
+        //             id: contract,
+        //             m: enc_string
+        //         };
+        //         const removeSave = new Promise((res, rej) => {
+        //             this.toSign = {
+        //                 type: "cja",
+        //                 cj: cja,
+        //                 id: `spkccT_update_metadata`,
+        //                 msg: `Updating Metadata for Contract: ${contract}`,
+        //                 ops: [],
+        //                 callbacks: [res, rej],
+        //                 api: this.sapi,
+        //                 txid: `spkccT_update_meta`,
+        //             };
+        //         })
+        //         removeSave.then(() => {
+        //             this.contractIDs[contract].m = cja.m
+        //             console.log(this.contractIDs[contract].m, cja.m)
+        //             resolve('OK')
+        //         }).catch(e => {
+        //             reject(e)
+        //         })
+        //     })
+        // },
         update_meta(contract) {
             return new Promise((resolve, reject) => {
-                console.log(this.newMeta[contract], contract)
-                var enc_string = ''
+                console.log(this.newMeta[contract], contract);
+                var enc_string = '';
                 for (var acc in this.contractIDs[contract].encryption.accounts) {
-                    if (this.contractIDs[contract].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
-                }
-                //remove last ;
-                enc_string = `${this.newMeta[contract].contract.autoRenew ? '1' : '0'}${enc_string.slice(0, -1)}`
-                this.newMeta[contract].contract.enc_string = enc_string
-                var cids = Object.keys(this.newMeta[contract])
-                cids = cids.sort((a, b) => {
-                    if (a > b) return 1
-                    else if (a < b) return -1
-                    else return 0
-                })
-                for (var i = 0; i < cids.length; i++) {
-                    if (cids[i] != 'contract') {
-                        enc_string += `,${this.newMeta[contract][cids[i]].name},${this.newMeta[contract][cids[i]].type},${this.newMeta[contract][cids[i]].thumb},${this.newMeta[contract][cids[i]].flags}-${this.newMeta[contract][cids[i]].license}-${this.newMeta[contract][cids[i]].labels}`
+                    if (this.contractIDs[contract].encryption.accounts[acc].enc_key) {
+                        enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`;
                     }
                 }
+                // Remove last semicolon and prepend autoRenew flag
+                enc_string = `${this.newMeta[contract].contract.autoRenew ? '1' : '0'}${enc_string.slice(0, -1)}`;
+                this.newMeta[contract].contract.enc_string = enc_string;
+                var cids = Object.keys(this.newMeta[contract]);
+                cids = cids.sort((a, b) => {
+                    if (a > b) return 1;
+                    else if (a < b) return -1;
+                    else return 0;
+                });
+                for (var i = 0; i < cids.length; i++) {
+                    if (cids[i] !== 'contract') {
+                        enc_string += `,${this.newMeta[contract][cids[i]].name},${this.newMeta[contract][cids[i]].type},${this.newMeta[contract][cids[i]].thumb},${this.newMeta[contract][cids[i]].flags}-${this.newMeta[contract][cids[i]].license}-${this.newMeta[contract][cids[i]].labels}`;
+                    }
+                }
+        
+                // Get existing metadata
+                const existingMeta = this.contractIDs[contract].m || '';
+                // Generate diff
+                const diff = jsdiff.createPatch(
+                    contract, // File name (used in diff header)
+                    existingMeta, // Old metadata
+                    enc_string, // New metadata
+                    'Current Metadata', // Old header
+                    'Updated Metadata' // New header
+                );
+        
+                // Extract unified diff body (remove headers if desired)
+                const diffBody = diff
+                    .split('\n')
+                    .slice(4) // Skip headers: ---, +++, @@, etc.
+                    .join('\n')
+                    .trim();
+        
                 var cja = {
-                    id: contract,
-                    m: enc_string
+                    id: contract
                 };
+        
+                // Decide whether to send diff or full metadata
+                if (existingMeta && diffBody && diffBody !== enc_string) {
+                    // Send diff if there’s existing metadata and a non-trivial diff
+                    cja.diff = diffBody;
+                } else {
+                    // Send full metadata if no existing metadata or diff is equivalent to full string
+                    cja.m = enc_string;
+                }
+        
                 const removeSave = new Promise((res, rej) => {
                     this.toSign = {
                         type: "cja",
@@ -1441,15 +1517,17 @@ export default {
                         api: this.sapi,
                         txid: `spkccT_update_meta`,
                     };
-                })
+                });
+        
                 removeSave.then(() => {
-                    this.contractIDs[contract].m = cja.m
-                    console.log(this.contractIDs[contract].m, cja.m)
-                    resolve('OK')
+                    // Update local metadata
+                    this.contractIDs[contract].m = enc_string;
+                    console.log(this.contractIDs[contract].m, cja.m || cja.diff);
+                    resolve('OK');
                 }).catch(e => {
-                    reject(e)
-                })
-            })
+                    reject(e);
+                });
+            });
         },
         done() {
             this.$emit('done')
