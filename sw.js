@@ -1,4 +1,4 @@
-this.version = "2025.04.13.4";
+this.version = "2025.04.13.5";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -13,6 +13,10 @@ var urlsToCache = [
   `/chat/gpt.html`,
   `/chat/index.html`,
   `/create/index.html`,
+  `/css/bootstrap/bootstrap-grid.css`,
+  `/css/bootstrap/bootstrap-reboot.css`,
+  `/css/bootstrap/bootstrap-utilities.css`,
+  `/css/bootstrap/bootstrap.css`,
   `/css/bootstrap/tests/jasmine.js`,
   `/css/bootstrap/tests/sass-true/register.js`,
   `/css/bootstrap/tests/sass-true/runner.js`,
@@ -22,6 +26,7 @@ var urlsToCache = [
   `/css/custom.css`,
   `/css/customaf.css`,
   `/css/drag-sort.css`,
+  `/css/scss/custom.css`,
   `/css/simplemde-bs-dark.css`,
   `/css/smde-comment.css`,
   `/css/smde.css`,
