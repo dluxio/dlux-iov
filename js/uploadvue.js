@@ -388,7 +388,7 @@ export default {
     propfiles: {
       immediate: true,
       handler(newFiles) {
-        if (newFiles.target) {
+        if (newFiles?.target) {
           this.uploadFile(newFiles);
         }
       }

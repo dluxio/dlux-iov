@@ -1,4 +1,4 @@
-this.version = "2025.04.12.24";
+this.version = "2025.04.12.25";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -190,6 +190,7 @@ var urlsToCache = [
   `/js/tagifyvue.js`,
   `/js/toastvue.js`,
   `/js/trading-vue.min.js`,
+  `/js/upload-everywhere.js`,
   `/js/uploadvue-old.js`,
   `/js/uploadvue.js`,
   `/js/uuidv.js`,

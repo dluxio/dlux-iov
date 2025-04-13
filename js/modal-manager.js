@@ -71,7 +71,7 @@ export default {
                 :to_amount="to_account?.amount"
                 :to_broker="to_account?.broker"
                 :tokenstats="tokenstats"
-                @modalsign="$emit('modalsign', $event)" />
+                @modalsign="modalSign" />
             <Election v-if="type === 'election' && tokenprotocol.head_block && tokenuser.head_block" 
                 :account="account"
                 :api="api"
@@ -84,6 +84,7 @@ export default {
   </div>`,
     methods: {
         modalSign(op) {
+            console.log('mm')
             this.$emit("modalsign", op)
         },
         openModal(data){

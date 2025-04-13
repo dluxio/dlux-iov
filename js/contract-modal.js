@@ -167,7 +167,7 @@ export default {
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary" :disabled="!isFormValid" data-bs-dismiss="modal">Propose</button>
+            <button type="submit" class="btn btn-primary" :disabled="!isFormValid">Propose</button>
           </div>
         </form>
       </div>
@@ -208,6 +208,7 @@ export default {
     ...MModals,
     ...MSpk,
     createContract() {
+      console.log('CC')
       const op = {
         type: "cj",
         cj: {
@@ -218,14 +219,18 @@ export default {
         },
         id: `${this.tokenprotocol.prefix}${this.feat.id}`,
         msg: `Preparing a file store for ${this.form.to}`,
-        ops: ["getSapi", "refreshComponents"],
+        ops: ["getSapi"],
         api: this.api,
         txid: `${this.func}_${Date.now()}`
       };
       if (op.cj.contract === "1") {
         op.cj.slots = `${this.form.ben_to},${parseInt(this.form.ben_amount * 100)}`;
       }
+      console.log({ op })
       this.$emit("modalsign", op);
+      const modalElement = this.$el.closest('.modal');
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      modalInstance.hide();
     },
     fetchProviderStats() {
       for (var i = 0; i < this.ipfsServices.length; i++) {
@@ -335,12 +340,13 @@ export default {
       return freeSpace < BigInt(requiredSize * 2);
     },
     prefillToField() {
-      if(this.to_broker){
+      if (this.to_broker) {
         this.form.broker = this.to_broker
         this.validateField("broker")
       }
-      if(this.to_amount){
+      if (this.to_amount) {
         this.form.amount = this.to_amount
+        if(this.form.amount < 100)this.form.amount = 100
         this.validateField("amount")
       }
       this.form.to = this.account

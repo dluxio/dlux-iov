@@ -157,7 +157,7 @@ export default {
                 :protocol="protocol"
                 :stats="stats"
                 :saccountapi="saccountapi"
-                @tosign="sendIt($event)"
+                @modalsign="sendIt($event)"
             />        
             <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-4" >
                 <!-- BROCA token widget -->
@@ -1213,6 +1213,7 @@ export default {
             return string.split(del)[index] ? string.split(del)[index] : ''
         },
         sendIt(event) {
+            console.log('CV', event)
             this.$emit('tosign', event)
         },
         getImgData(id, cid) {
