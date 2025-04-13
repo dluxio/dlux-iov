@@ -108,7 +108,7 @@ export default {
           <div class="mx-2 mb-2 bg-darkg rounded px-2 py-1 text-white-50">{{feat.info}}</div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="openModal('')">Cancel</button>
-            <button :disabled="!isFormValid" type="submit" class="btn btn-primary" data-bs-dismiss="modal">{{ feat.string }}</button>
+            <button :disabled="!isFormValid" type="submit" class="btn btn-primary">{{ feat.string }}</button>
           </div>
         </form>
       </div>
@@ -517,6 +517,9 @@ export default {
                 };
                 this.$emit('modalsign', op);
                 this.$emit('open-modal', "")
+                const modalElement = this.$el.closest('.modal');
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                modalInstance.hide();
             }
 
         },
@@ -549,15 +552,15 @@ export default {
                     }
                 }
 
-            } else if (this.func ===  'transfer_to_vesting' || this.func ===  'transfer_from_savings' || this.func ===  'transfer_to_savings'){
+            } else if (this.func === 'transfer_to_vesting' || this.func === 'transfer_from_savings' || this.func === 'transfer_to_savings') {
                 this.form.to = this.account
                 this.validateField("to")
-            } 
+            }
         },
         validateField(key) {
             this.validations[key] = false
             const field = this.feat.json[key];
-            if(!field)return
+            if (!field) return
             if (field.check === 'AC') {
                 this.accountCheck(this.form[key]).then(result => {
                     if (result) {

@@ -2,27 +2,27 @@ import MCommon from '/js/methods-common.js'
 import MModals from '/js/methods-modals.js'
 
 export default {
-    name: 'Standard',
-    props: {
-      account: String,
-      api: String,
-      mypfp: String,
-      func: { type: String, default: 'send' },
-      to_account: { default: "" },
-      token: { type: String, default: 'balance' },
-      tokenprotocol: {
-        type: Object,
-        default: () => ({
-          precision: 3,
-          token: 'HIVE',
-          features: {}
-        })
-      },
-      // tokenstats: Object,
-      tokenuser: Object,
-      test: { type: Boolean, default: false },
+  name: 'Standard',
+  props: {
+    account: String,
+    api: String,
+    mypfp: String,
+    func: { type: String, default: 'send' },
+    to_account: { default: "" },
+    token: { type: String, default: 'balance' },
+    tokenprotocol: {
+      type: Object,
+      default: () => ({
+        precision: 3,
+        token: 'HIVE',
+        features: {}
+      })
     },
-    template: `
+    // tokenstats: Object,
+    tokenuser: Object,
+    test: { type: Boolean, default: false },
+  },
+  template: `
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content bg-darker text-white">
       <div class="modal-header">
@@ -81,114 +81,117 @@ export default {
             <label>Test Network Only</label>
           </div>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button :disabled="!isFormValid" type="submit" class="btn btn-primary" data-bs-dismiss="modal">{{feat.string}}</button>
+          <button :disabled="!isFormValid" type="submit" class="btn btn-primary">{{feat.string}}</button>
         </div>
       </form>
     </div>
   </div>`,
-    data() {
-        return {
-            debouncedValidateField: null,
-            error: "",
-            feat: {},
-            form: {},
-            pfp: {},
-            testTx: false,
-            valid: false,
-            validations: {}
-        };
+  data() {
+    return {
+      debouncedValidateField: null,
+      error: "",
+      feat: {},
+      form: {},
+      pfp: {},
+      testTx: false,
+      valid: false,
+      validations: {}
+    };
+  },
+  methods: {
+    ...MCommon,
+    ...MModals,
+    getIcon(key) {
+      if (key === 'to') return 'fa-at';
+      return '';
     },
-    methods: {
-        ...MCommon,
-        ...MModals,
-        getIcon(key) {
-          if (key === 'to') return 'fa-at';
-          return '';
-        },
-        isValid(){
-            if(this.ac)this.valid = true
-        },
-        moveTokens() {
-          const op = {};
-            op.type = this.feat.auth === "posting" ? 'cj' : 'cja';
-            op.cj = {}
-            for (const key in this.form) {
-              if (key === 'amount') {
-                op.cj[key] = parseInt(parseFloat(this.form[key]) * this.pf(this.tokenprotocol.precision));
-              } else {
-                op.cj[key] = this.form[key];
-              }
-            }
-            op.id = `${this.tokenprotocol.prefix}${this.feat.id}`;
-            op.msg = this.feat.msg
-            op.ops = ['getTokenUser'];
-            op.api = this.api;
-            op.txid = this.func + '_' + Date.now();
-            this.$emit('modalsign', op)
+    isValid() {
+      if (this.ac) this.valid = true
+    },
+    moveTokens() {
+      const op = {};
+      op.type = this.feat.auth === "posting" ? 'cj' : 'cja';
+      op.cj = {}
+      for (const key in this.form) {
+        if (key === 'amount') {
+          op.cj[key] = parseInt(parseFloat(this.form[key]) * this.pf(this.tokenprotocol.precision));
+        } else {
+          op.cj[key] = this.form[key];
+        }
+      }
+      op.id = `${this.tokenprotocol.prefix}${this.feat.id}`;
+      op.msg = this.feat.msg
+      op.ops = ['getTokenUser'];
+      op.api = this.api;
+      op.txid = this.func + '_' + Date.now();
+      this.$emit('modalsign', op)
+      const modalElement = this.$el.closest('.modal');
+      const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      modalInstance.hide();
 
-        },
-        prefillToField() {
-          if (typeof this.to_account == "object" && (this.func === 'powdel' || this.func === 'powdn' || this.func === 'govdn')) {
-            for (var key in this.to_account) {
-              this.form[key] = this.to_account[key]
-              this.validateField(key)
-          }
-          }
-      },
-        validateField(key) {
-          this.validations[key] = false
-          const field = this.feat.json[key];
-          if (field.check === 'AC') {
-            if(this.account == this.form[key]){
-              this.validations[key] = false;
-              this.pfp[key] = this.mypfp
-            }
-            else this.accountCheck(this.form[key]).then(result => {
-              if (result) {
-                this.validations[key] = true;
-                if(result === true)this.pfp[key] = '/img/no-user.png'
-                else this.pfp[key] = result
-              } else {
-                  
-                this.pfp[key] = '/img/no-user.png'
-              }
-            }).catch(() => {
-              this.validations[key] = false;
-              this.pfp[key] = '/img/no-user.png'
-            });
-          }
-        }
     },
-    computed: {
-      isFormValid() {
-        if (!this.feat || !this.feat.json) return false;
-        for (const key in this.feat.json) {
-          const field = this.feat.json[key];
-          if (field.req && !this.form[key]) return false;
-          if (field.check === 'AC' && !this.validations[key]) return false;
+    prefillToField() {
+      if (typeof this.to_account == "object" && (this.func === 'powdel' || this.func === 'powdn' || this.func === 'govdn')) {
+        for (var key in this.to_account) {
+          this.form[key] = this.to_account[key]
+          this.validateField(key)
         }
-        return true;
       }
     },
-    created() {
-      this.debouncedValidateField = this.debounce((key) => {
-        this.validateField(key);
-      }, 300);
-    },
-    mounted() {
-      const feature = this.tokenprotocol.features[this.func]
-      if (feature) {
-        this.feat = feature;
-        for (const key in feature.json) {
-          this.form[key]= ""
-          if(feature.json[key]?.check == "AC"){
-            this.pfp[key] = '/img/no-user.png'
-            this.validations[key] = false;
-          }
+    validateField(key) {
+      this.validations[key] = false
+      const field = this.feat.json[key];
+      if (field.check === 'AC') {
+        if (this.account == this.form[key]) {
+          this.validations[key] = false;
+          this.pfp[key] = this.mypfp
         }
-        this.prefillToField()
-      } else {
-        this.error = "Feature not found";
+        else this.accountCheck(this.form[key]).then(result => {
+          if (result) {
+            this.validations[key] = true;
+            if (result === true) this.pfp[key] = '/img/no-user.png'
+            else this.pfp[key] = result
+          } else {
+
+            this.pfp[key] = '/img/no-user.png'
+          }
+        }).catch(() => {
+          this.validations[key] = false;
+          this.pfp[key] = '/img/no-user.png'
+        });
       }
     }
+  },
+  computed: {
+    isFormValid() {
+      if (!this.feat || !this.feat.json) return false;
+      for (const key in this.feat.json) {
+        const field = this.feat.json[key];
+        if (field.req && !this.form[key]) return false;
+        if (field.check === 'AC' && !this.validations[key]) return false;
+      }
+      return true;
+    }
+  },
+  created() {
+    this.debouncedValidateField = this.debounce((key) => {
+      this.validateField(key);
+    }, 300);
+  },
+  mounted() {
+    const feature = this.tokenprotocol.features[this.func]
+    if (feature) {
+      this.feat = feature;
+      for (const key in feature.json) {
+        this.form[key] = ""
+        if (feature.json[key]?.check == "AC") {
+          this.pfp[key] = '/img/no-user.png'
+          this.validations[key] = false;
+        }
+      }
+      this.prefillToField()
+    } else {
+      this.error = "Feature not found";
+    }
+  }
 };
