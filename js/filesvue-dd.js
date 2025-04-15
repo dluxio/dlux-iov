@@ -9,7 +9,7 @@ export default {
     template: `
 <div ref="container" class="d-flex flex-grow-1 flex-column rounded" @contextmenu.prevent="showContextMenu($event, 'background', null)">
     <div class="pt-1">
-        <!-- USER INPUT -->
+<!-- USER INPUT -->
         <div v-if="cc" class="d-flex flex-column flex-grow-1 mb-1 mx-1">
             <label class="fs-5 fw-light mb-1">View other users' files, use <i
                     class="fa-brands fa-creative-commons fa-fw"></i> and <i
@@ -29,7 +29,7 @@ export default {
             </div>
 
             <div class="d-flex flex-wrap d-xl-flex mb-1" v-if="owners.length > 1">
-                <!-- Active Filters -->
+<!-- Active Filters -->
                 <div v-for="owner in owners" class="btn-group btn-group me-1 mb-1" style="height:50px">
                     <a :href="'/@' + owner" target="_blank" class="btn btn-light rounded-start align-content-center">
                         <span>{{owner}}</span>
@@ -57,11 +57,11 @@ export default {
 
 
 
-        <!-- ACTION BAR -->
+<!-- ACTION BAR -->
         <div class="d-flex border-bottom border-white-50">
             <div class="d-flex flex-wrap align-items-center justify-content-center mx-1 flex-grow-1">
 
-                <!-- Search -->
+<!-- Search -->
                 <div class="position-relative flex-grow-1 mb-1 me-1">
                     <span class="position-absolute top-50 translate-middle-y ps-2"><i
                             class="fa-solid fa-magnifying-glass fa-fw"></i></span>
@@ -70,7 +70,7 @@ export default {
                         v-model="filesSelect.search">
                 </div>
 
-                <!-- choices-js-->
+<!-- choices-js-->
                 <div class=" mb-1 mx-1" style="min-width: 300px !important;">
 
                     <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_function="search" prop_type="tags"
@@ -82,7 +82,7 @@ export default {
                         prop_type="labels" @data="handleLabel($event)"></choices-vue>
                 </div>
 
-                <!-- Sort -->
+<!-- Sort -->
                 <div class="dropdown ms-1 mb-1">
                     <button class="btn btn-dark w-100"
                         style="padding-top: 11px !important; padding-bottom: 11px !important;" type="button"
@@ -170,10 +170,16 @@ export default {
             </div>
         </div>
 
-        <!-- change view list / grid -->
+<!-- change view list / grid -->
         <div class="d-flex align-items-center my-1 mx-1">
             <h5 v-if="viewOpts.view === 'grid' || viewOpts.view === 'list'" class="mb-0">{{filesArray.length}} File{{filesArray.length > 1 ? 's' : ''}}</h5>
             <h5 v-else class="mb-0">{{ getSubfolderCount }} Folder{{ getSubfolderCount === 1 ? '' : 's' }} & {{ currentFileCount }} File{{ currentFileCount === 1 ? '' : 's' }}</h5>
+<!-- Save Changes Button -->
+            <div v-if="Object.keys(pendingChanges).length > 0" class="fixed-bottom p-3">
+                <button class="btn btn-warning" @click="saveChanges">Save Changes ({{ Object.keys(pendingChanges).length
+                    }}
+                    contracts affected)</button>
+            </div>
             <div class="ms-auto">
                 <div class="ms-auto">
                     <div class="btn-group">
@@ -198,13 +204,13 @@ export default {
             </div>
         </div>
     </div>
-        <!-- Folder view -->
+<!-- Folder view -->
     <div v-if="viewOpts.view === 'folder' && selectedUser">
         <h3>@{{ selectedUser }}</h3>
         <div class="breadcrumb d-flex align-items-center">
-            <span @click="navigateTo('')" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">/</span>
+            <span @click="navigateTo('')" @dragover.prevent @drop="dropOnBreadcrumb('')" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">/</span>
             <template v-for="(part, index) in currentFolderPath.split('/').filter(Boolean)" :key="index">
-                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">{{ part }}</span>
+                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragover.prevent @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'))" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">{{ part }}</span>
                 <span class="mx-1">/</span>
             </template>
         </div>
@@ -218,8 +224,8 @@ export default {
                 <button class="btn btn-outline-light ms-1"><i class="fa-solid fa-gear"></i></button>
             </div>
         </div>
-        <div class="files">
-            <!-- List Mode -->
+        <div class="files" @contextmenu.prevent="showContextMenu($event, 'background', null)" @dragover="dragOverBackground($event)" @drop="dropOnBackground($event)">
+<!-- List Mode -->
             <div v-if="viewOpts.fileView === 'list'">
                 <table class="table table-dark table-striped table-hover">
                     <thead>
@@ -232,15 +238,13 @@ export default {
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Subfolders -->
-                        <tr v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" class="folder-row" @click="navigateTo(folder.path)">
+                        <tr v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" class="folder-row" @click="navigateTo(folder.path)" @contextmenu.prevent="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)">
                             <td><i class="fa-solid fa-folder"></i></td>
                             <td>{{ folder.name }}</td>
                             <td></td>
                             <td></td>
                             <td></td>
                         </tr>
-                        <!-- Files -->
                         <tr v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" draggable="true" @dragstart="dragStartFile($event, file)" @contextmenu.prevent="showContextMenu($event, 'file', file)">
                             <td>
                                 <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="50" />
@@ -257,14 +261,12 @@ export default {
                     </tbody>
                 </table>
             </div>
-            <!-- Grid Mode -->
+<!-- Grid Mode -->
             <div v-if="viewOpts.fileView === 'grid'" class="d-flex flex-wrap">
-                <!-- Subfolders -->
-                <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" class="file-grid m-1 p-2 bg-dark rounded" @click="navigateTo(folder.path)">
+                <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" class="file-grid m-1 p-2 bg-dark rounded" @click="navigateTo(folder.path)" @contextmenu.prevent="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)">
                     <i class="fa-solid fa-folder fa-2x"></i>
                     <div>{{ folder.name }}</div>
                 </div>
-                <!-- Files -->
                 <div v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" class="file-grid m-1 p-2 bg-dark rounded" draggable="true" @dragstart="dragStartFile($event, file)" @contextmenu.prevent="showContextMenu($event, 'file', file)">
                     <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="100" />
                     <span v-else>{{ newMeta[file.i][file.f].type }}</span>
@@ -274,51 +276,71 @@ export default {
             </div>
         </div>
     </div>
-    <!-- Add icon view -->
+<!-- Icon View -->
     <div v-else-if="viewOpts.view === 'icon' && selectedUser" class="d-flex flex-wrap">
         <h3>@{{ selectedUser }}</h3>
         <div class="breadcrumb d-flex align-items-center">
-            <span @click="navigateTo('')" @dragover.prevent @drop="dropOnBreadcrumb('')" class="px-1" style="cursor: pointer;">/</span>
+            <span @click="navigateTo('')" @dragover.prevent @drop="dropOnBreadcrumb('')" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">/</span>
             <template v-for="(part, index) in currentFolderPath.split('/').filter(Boolean)" :key="index">
-                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragover.prevent @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'))" class="px-1" style="cursor: pointer;">{{ part }}</span>
-                <span>/</span>
+                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragover.prevent @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'))" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">{{ part }}</span>
+                <span class="mx-1">/</span>
             </template>
         </div>
-        <!-- Toggle buttons and gear button removed -->
-        <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="folder.path" class="m-2 text-center" @dblclick="navigateTo(folder.path)" @contextmenu.prevent="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)">
-            <i class="fa-solid fa-folder fa-3x"></i>
-            <div>{{ folder.name }}</div>
-        </div>
-        <div v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" class="m-2 text-center" draggable="true" @dragstart="dragStartFile($event, file)" @contextmenu.prevent="showContextMenu($event, 'file', file)">
-            <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="100" />
-            <i v-else class="fa-solid fa-file fa-3x"></i>
-            <div>{{ newMeta[file.i][file.f].name || file.f }}</div>
-            <small>@{{ file.o }}</small>
-        </div>
-        <!-- Context menu -->
-        <Teleport to="body">
-            <div v-if="contextMenu.show"
-                :style="{ position: 'fixed', left: contextMenu.x + 'px', top: contextMenu.y + 'px', zIndex: 1000 }"
-                class="bg-dark text-white p-2 rounded shadow" @click.stop>
-                <ul class="list-unstyled m-0">
-                    <li v-if="contextMenu.type === 'background'" class="p-1" @click="createNewFolder">New Folder</li>
-                    <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)" class="p-1"
-                        @click="renameItem(contextMenu.item, 'file')">Rename File</li>
-                    <li v-if="contextMenu.type === 'folder' && isEditableFolder(contextMenu.item)" class="p-1"
-                        @click="renameItem(contextMenu.item, 'folder')">Rename Folder</li>
-                        <!-- Add more options like Delete if needed -->
-                </ul>
+        <div class="ms-2 d-flex align-items-center">
+            <i class="fa-solid fa-file me-2" style="color: white;"></i>
+            <div class="btn-group">
+                <input type="radio" class="btn-check" :name="bid + 'fileView'" :id="bid + 'fileGrid'" autocomplete="off" @click="viewOpts.fileView = 'grid'" :checked="viewOpts.fileView === 'grid'" />
+                <label class="btn btn-outline-light" :for="bid + 'fileGrid'"><i class="fa-solid fa-table-cells-large"></i></label>
+                <input type="radio" class="btn-check" :name="bid + 'fileView'" :id="bid + 'fileList'" autocomplete="off" @click="viewOpts.fileView = 'list'" :checked="viewOpts.fileView === 'list'" />
+                <label class="btn btn-outline-light" :for="bid + 'fileList'"><i class="fa-solid fa-table-list"></i></label>
+                <button class="btn btn-outline-light ms-1"><i class="fa-solid fa-gear"></i></button>
             </div>
-        </Teleport>
-
-        <!-- Save Changes Button -->
-        <div v-if="Object.keys(pendingChanges).length > 0" class="fixed-bottom p-3">
-            <button class="btn btn-warning" @click="saveChanges">Save Changes ({{ Object.keys(pendingChanges).length
-                }}
-                contracts affected)</button>
+        </div>
+        <div class="files" @contextmenu.prevent="showContextMenu($event, 'background', null)" @dragover="dragOverBackground($event)" @drop="dropOnBackground($event)">
+            <div v-if="viewOpts.fileView === 'grid'" class="d-flex flex-wrap">
+                <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="folder.path" class="file-grid m-2 p-2 bg-dark rounded text-center" @dblclick="navigateTo(folder.path)" @contextmenu.prevent="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)">
+                    <i class="fa-solid fa-folder fa-3x"></i>
+                    <div>{{ folder.name }}</div>
+                </div>
+                <div v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" class="file-grid m-2 p-2 bg-dark rounded text-center" draggable="true" @dragstart="dragStartFile($event, file)" @contextmenu.prevent="showContextMenu($event, 'file', file)">
+                    <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="100" />
+                    <i v-else class="fa-solid fa-file fa-3x"></i>
+                    <div>{{ newMeta[file.i][file.f].name || file.f }}</div>
+                    <small>@{{ file.o }}</small>
+                </div>
+            </div>
+            <div v-if="viewOpts.fileView === 'list'">
+                <table class="table table-dark table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Preview</th>
+                            <th>Filename</th>
+                            <th>Owner</th>
+                            <th>Size</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" class="folder-row" @dblclick="navigateTo(folder.path)" @contextmenu.prevent="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)">
+                            <td><i class="fa-solid fa-folder"></i></td>
+                            <td>{{ folder.name }}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" draggable="true" @dragstart="dragStartFile($event, file)" @contextmenu.prevent="showContextMenu($event, 'file', file)">
+                            <td>
+                                <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="50" />
+                                <span v-else>{{ newMeta[file.i][file.f].type }}</span>
+                            </td>
+                            <td>{{ newMeta[file.i][file.f].name || file.f }}</td>
+                            <td>@{{ file.o }}</td>
+                            <td>{{ fancyBytes(file.s) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-    <!-- list view -->
+<!-- list view -->
 
     <div class="text-center" role="table" aria-label="Files" v-else-if="viewOpts.view === 'list'">
         <div class="d-flex flex-wrap align-items-center fw-bold justify-content-end border-top border-start border-end border-dark"
@@ -392,12 +414,12 @@ export default {
                     <div
                         class="d-flex flex-wrap align-items-center justify-content-center bg-darkg rounded px-1 py-05 m-1">
                         <div>&nbsp;</div>
-                        <!-- colors -->
+<!-- colors -->
                         <div v-if="file.lc" class="d-flex me-1 align-items-center" style="margin-left: 15px">
                             <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa"
                                 :style="'margin-left: ' + -15 +'px !important;'"></i>
                         </div>
-                        <!-- labels -->
+<!-- labels -->
                         <div class="me-1" v-for="label in labelsDecode(file.ll)">
                             <span class="d-flex align-items-center">
                                 <pop-vue :id=" bid + 'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')"
@@ -406,10 +428,10 @@ export default {
                                 </pop-vue>
                             </span>
                         </div>
-                        <!-- flags -->
+<!-- flags -->
                         <div class="d-flex align-items-center">
                             <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)">
-                                <!-- title="Labels"  -->
+<!-- title="Labels"  -->
                                 <pop-vue :id=" bid + 'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')"
                                     :title="flag.l" trigger="hover">
                                     <i :class="flag.fa"></i>
@@ -454,34 +476,34 @@ export default {
             <div class="" role="cell">
                 <div class="" style="width: 120px;">
                     <div class="m-1">
-                        <!-- link -->
+<!-- link -->
                         <div v-if="!newMeta[file.i][file.f].encrypted">
                             <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank"
                                 class="w-100 btn btn-sm btn-info my-1 mx-auto"><span
                                     class="d-flex align-items-center">URL<i
                                         class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                         </div>
-                        <!-- decrypt  -->
+<!-- decrypt  -->
                         <div v-if="newMeta[file.i][file.f].encrypted && !contract[file.i].encryption.key">
                             <button type="button" class="w-100 btn btn-sm btn-primary my-1 mx-auto"
                                 @click="decode(file.i)"><span class="d-flex align-items-center w-100">Decrypt<i
                                         class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
                         </div>
-                        <!-- download enc -->
+<!-- download enc -->
                         <div v-if="newMeta[file.i][file.f].encrypted && contract[file.i].encryption.key">
                             <button type="button" class="w-100 btn btn-sm btn-primary my-1 mx-auto"
                                 @click="downloadFile(file.f, file.i)"><span
                                     class="d-flex align-items-center w-100">Download<i
                                         class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                         </div>
-                        <!-- add to post -->
+<!-- add to post -->
                         <div v-if="assets">
                             <button type="button" class="w-100 btn btn-sm btn-purp my-1 mx-auto"
                                 @click="addToPost(file.f, contract.i, index)"><span
                                     class="d-flex align-items-center w-100"><span class="d-sm-none">Add to</span>
                                     Post<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                         </div>
-                        <!-- add to asset -->
+<!-- add to asset -->
                         <div v-if="assets">
                             <button type="button" class="w-100 btn btn-sm btn-purp my-1 mx-auto"
                                 @click="addAsset(file, contract)"><span
@@ -540,12 +562,12 @@ export default {
             <div class="flex-row " role="cell">@{{contract[file.i].t}}</div>
             <div class="flex-row" role="cell">
                 <div class="d-flex flex-wrap align-items-center justify-content-center">
-                    <!-- colors -->
+<!-- colors -->
                     <div v-if="file.lc" class="d-flex me-1 align-items-center" style="margin-left: 15px">
                         <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa"
                             :style="'margin-left: ' + -15 +'px !important;'"></i>
                     </div>
-                    <!-- labels -->
+<!-- labels -->
                     <div class="me-1" v-for="label in labelsDecode(file.ll)">
                         <span class="d-flex align-items-center">
                             <pop-vue :id=" bid + 'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')"
@@ -554,10 +576,10 @@ export default {
                             </pop-vue>
                         </span>
                     </div>
-                    <!-- flags -->
+<!-- flags -->
                     <div class="d-flex align-items-center">
                         <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)">
-                            <!-- title="Labels"  -->
+<!-- title="Labels"  -->
                             <pop-vue :id=" bid + 'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')"
                                 :title="flag.l" trigger="hover">
                                 <i :class="flag.fa"></i>
@@ -579,34 +601,34 @@ export default {
                     class="fa-solid fa-arrows-rotate text-success fa-fw"></i></div>
             <div class="flex-row" role="cell">
                 <div class="mt-1">
-                    <!-- link -->
+<!-- link -->
                     <div v-if="!newMeta[file.i][file.f].encrypted">
                         <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank"
                             class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span
                                 class="d-flex align-items-center">URL<i
                                     class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                     </div>
-                    <!-- decrypt  -->
+<!-- decrypt  -->
                     <div v-if="newMeta[file.i][file.f].encrypted && !contract[file.i].encryption.key">
                         <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
                             @click="decode(file.i)"><span class="d-flex align-items-center w-100">Decrypt<i
                                     class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
                     </div>
-                    <!-- download enc -->
+<!-- download enc -->
                     <div v-if="newMeta[file.i][file.f].encrypted && contract[file.i].encryption.key">
                         <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
                             @click="downloadFile(file.f, file.i)"><span
                                 class="d-flex align-items-center w-100">Download<i
                                     class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                     </div>
-                    <!-- add to post -->
+<!-- add to post -->
                     <div v-if="assets">
                         <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
                             @click="addToPost(file.f, contract.i, index)"><span
                                 class="d-flex align-items-center w-100">Add to Post<i
                                     class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                     </div>
-                    <!-- add to asset -->
+<!-- add to asset -->
                     <div v-if="assets">
                         <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
                             @click="addAsset(file, contract)"><span class="d-flex align-items-center w-100">Add
@@ -616,15 +638,15 @@ export default {
             </div>
 
 
-            <!-- item table -->
+<!-- item table -->
             <table class="table table-dark table-striped table-hover  align-middle mb-0">
                 <thead>
                     <tr>
-                        <!-- thumb -->
+<!-- thumb -->
                         <th scope="col" class="col-1">
 
                         </th>
-                        <!-- name -->
+<!-- name -->
                         <th scope="col" class="col-2">
                             <div class="d-flex flex-wrap align-items-center">
                                 <div class="d-flex flex-wrap align-items-center">
@@ -641,7 +663,7 @@ export default {
                                 </div>
                             </div>
                         </th>
-                        <!-- owners -->
+<!-- owners -->
                         <th scope="col" class="col-2" v-if="owners.length > 1">
                             <div class="d-flex flex-wrap align-items-center">
                                 <div class="d-flex flex-wrap align-items-center">
@@ -657,7 +679,7 @@ export default {
                                 </div>
                             </div>
                         </th>
-                        <!-- tags & labels -->
+<!-- tags & labels -->
                         <th scope="col" class="col-2">
                             <div class="d-flex flex-wrap align-items-center">
                                 <div class="d-flex flex-wrap align-items-center">
@@ -673,7 +695,7 @@ export default {
                                 </div>
                             </div>
                         </th>
-                        <!-- size -->
+<!-- size -->
                         <th scope="col" class="col-1">
                             <div class="d-flex flex-wrap align-items-center">
                                 <div class="d-flex flex-wrap align-items-center">
@@ -689,7 +711,7 @@ export default {
                                 </div>
                             </div>
                         </th>
-                        <!-- created -->
+<!-- created -->
                         <th scope="col" class="col-1">
                             <div class="d-flex flex-wrap align-items-center">
                                 <div class="d-flex flex-wrap align-items-center">
@@ -705,7 +727,7 @@ export default {
                                 </div>
                             </div>
                         </th>
-                        <!-- expires -->
+<!-- expires -->
                         <th scope="col" class="col-1">
                             <div class="d-flex flex-wrap align-items-center">
                                 <div class="d-flex flex-wrap align-items-center">
@@ -721,7 +743,7 @@ export default {
                                 </div>
                             </div>
                         </th>
-                        <!-- buttons -->
+<!-- buttons -->
                         <th scope="col" class="col-1">
 
                         </th>
@@ -791,7 +813,7 @@ export default {
 
                                 <div class="d-flex align-items-center">
                                     <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)">
-                                        <!-- title="Labels"  -->
+<!-- title="Labels"  -->
                                         <pop-vue
                                             :id=" bid + 'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')"
                                             :title="flag.l" trigger="hover">
@@ -812,35 +834,35 @@ export default {
                                 class="fa-solid fa-arrows-rotate text-success fa-fw fa-spin"></i></td>
                         <td class="col-1">
                             <div class="mt-1">
-                                <!-- link -->
+<!-- link -->
                                 <div v-if="!newMeta[file.i][file.f].encrypted">
                                     <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank"
                                         class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span
                                             class="d-flex align-items-center">URL<i
                                                 class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                                 </div>
-                                <!-- decrypt  -->
+<!-- decrypt  -->
                                 <div v-if="newMeta[file.i][file.f].encrypted && !contract[file.i].encryption.key">
                                     <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
                                         @click="decode(file.i)"><span
                                             class="d-flex align-items-center w-100">Decrypt<i
                                                 class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
                                 </div>
-                                <!-- download enc -->
+<!-- download enc -->
                                 <div v-if="newMeta[file.i][file.f].encrypted && contract[file.i].encryption.key">
                                     <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
                                         @click="downloadFile(file.f, file.i)"><span
                                             class="d-flex align-items-center w-100">Download<i
                                                 class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                                 </div>
-                                <!-- add to post -->
+<!-- add to post -->
                                 <div v-if="assets">
                                     <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
                                         @click="addToPost(file.f, contract.i, index)"><span
                                             class="d-flex align-items-center w-100">Add to Post<i
                                                 class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                                 </div>
-                                <!-- add to asset -->
+<!-- add to asset -->
                                 <div v-if="assets">
                                     <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
                                         @click="addAsset(file, contract)"><span
@@ -854,7 +876,7 @@ export default {
             </table>
         </div>
     </div>
-    <!-- item grid -->
+<!-- item grid -->
     <div class="d-flex flex-wrap" v-else-if="viewOpts.view === 'grid'">
         <div class="file-grid" v-for="file in filesArray">
             <div class="card bg-blur-darkg m-05 p-05 text-start">
@@ -898,34 +920,34 @@ export default {
 
 
                 <div class="mt-1">
-                    <!-- link -->
+<!-- link -->
                     <div v-if="!newMeta[file.i][file.f].encrypted">
                         <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank"
                             class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span
                                 class="d-flex align-items-center">URL<i
                                     class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                     </div>
-                    <!-- decrypt  -->
+<!-- decrypt  -->
                     <div v-if="newMeta[file.i][file.f].encrypted && !contract[file.i].encryption.key">
                         <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
                             @click="decode(file.i)"><span class="d-flex align-items-center w-100">Decrypt<i
                                     class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
                     </div>
-                    <!-- download enc -->
+<!-- download enc -->
                     <div v-if="newMeta[file.i][file.f].encrypted && contract[file.i].encryption.key">
                         <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
                             @click="downloadFile(file.f, file.i)"><span
                                 class="d-flex align-items-center w-100">Download<i
                                     class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                     </div>
-                    <!-- add to post -->
+<!-- add to post -->
                     <div v-if="assets">
                         <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
                             @click="addToPost(file.f, contract.i, index)"><span
                                 class="d-flex align-items-center w-100">Add to Post<i
                                     class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                     </div>
-                    <!-- add to asset -->
+<!-- add to asset -->
                     <div v-if="assets">
                         <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
                             @click="addAsset(file, contract)"><span class="d-flex align-items-center w-100">Add
@@ -936,7 +958,7 @@ export default {
 
 
                 <div class="d-flex flex-column rounded p-1" style="background-color: rgba(0, 0, 0, 0.6);">
-                    <!-- Edit Button -->
+<!-- Edit Button -->
                     <div v-if="!(file.l.length || file.lf)" class="ms-auto me-auto text-muted">
 
                     </div>
@@ -966,7 +988,7 @@ export default {
                                 <i :class="lic.fa"></i>
                             </pop-vue>
                             <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags)">
-                                <!-- title="Labels"  -->
+<!-- title="Labels"  -->
                                 <pop-vue :id=" bid + 'popper-' + (cc ? 'cc' : '') + file.i + file.index + flag.l"
                                     :title="flag.l" trigger="hover">
                                     <i :class="flag.fa"></i>
@@ -984,6 +1006,56 @@ export default {
             </div>
         </div>
     </div>
+<!-- Context menu -->
+    <Teleport to="body">
+  <div
+    v-if="contextMenu.show"
+    :style="{ position: 'fixed', left: contextMenu.x + 'px', top: contextMenu.y + 'px', zIndex: 1000 }"
+    class="bg-dark text-white p-2 rounded shadow"
+    @click.stop
+  >
+    <ul class="list-unstyled m-0">
+      <!-- Background Options -->
+      <li
+        v-if="contextMenu.type === 'background' && selectedUser === account"
+        class="p-1"
+        @click="createNewFolder"
+      >
+        New Folder
+      </li>
+      <!-- File Options -->
+      <li
+        v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)"
+        class="p-1"
+        @click="renameItem(contextMenu.item, 'file')"
+      >
+        Rename File
+      </li>
+      <li
+        v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)"
+        class="p-1"
+        @click="deleteFile(contextMenu.item)"
+      >
+        Delete File
+      </li>
+      <!-- Folder Options -->
+      <li
+        v-if="contextMenu.type === 'folder' && isEditableFolder(contextMenu.item)"
+        class="p-1"
+        @click="renameItem(contextMenu.item, 'folder')"
+      >
+        Rename Folder
+      </li>
+      <li
+        v-if="contextMenu.type === 'folder' && isEditableFolder(contextMenu.item)"
+        class="p-1"
+        @click="deleteFolder(contextMenu.item)"
+      >
+        Delete Folder
+      </li>
+    </ul>
+  </div>
+</Teleport>
 </div>
    `,
     props: {
@@ -1395,6 +1467,24 @@ export default {
                 }
             };
         },
+        dragOverBackground(event) {
+            event.preventDefault();
+        },
+        dropOnBackground(event) {
+            event.preventDefault();
+            const fileId = event.dataTransfer.getData("fileId");
+            const file = this.files[fileId];
+            if (file && this.isEditable(file) && file.folderPath !== this.currentFolderPath) {
+                this.pendingChanges[file.i] = this.pendingChanges[file.i] || {};
+                this.pendingChanges[file.i][file.f] = {
+                    folderPath: this.currentFolderPath,
+                    name: this.newMeta[file.i][file.f].name || file.f,
+                };
+                file.folderPath = this.currentFolderPath;
+                this.buildFolderTrees();
+                this.render();
+            }
+        },
         download(fileInfo, data = false, MIME_TYPE = "image/png") {
             if (data) {
                 var blob = new Blob([data], { type: MIME_TYPE });
@@ -1477,7 +1567,7 @@ export default {
             return current;
         },
         getFiles(user, path) {
-            return Object.values(this.files).filter(file => file.o === user && file.folderPath === path);
+            return Object.values(this.files).filter(file => !file.is_thumb && file.folderPath === path);
         },
         showContextMenu(event, type, item) {
             this.contextMenu = {
@@ -1497,7 +1587,6 @@ export default {
             return file.o === this.account; // Only current user's files are editable
         },
         isEditableFolder(folder) {
-            const files = this.getFiles(this.selectedUser, folder.path);
             return files.some(file => file.o === this.account);
         },
         renameItem(item, type) {
@@ -1857,7 +1946,7 @@ export default {
                 const file = this.files[fileId];
                 const user = file.o;
                 if (!filesByUser[user]) filesByUser[user] = [];
-                filesByUser[user].push(file);
+                if(!file.is_thumb)filesByUser[user].push(file);
             }
 
             this.userFolderTrees = {};

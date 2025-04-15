@@ -63,7 +63,7 @@ export default {
                       <label for="sendmirror">Test Network Only</label>
                     </div>
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> 
-                  <button :disabled="!valid" type="submit" class="btn btn-primary" @click="send" data-bs-dismiss="modal">Send</button> 
+                  <button :disabled="!valid" type="submit" class="btn btn-primary" @click="send" >Send</button> 
                   </div>
               </form>
           </div>
