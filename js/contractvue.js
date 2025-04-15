@@ -1,6 +1,6 @@
 import Pop from "/js/pop.js"
 import ExtensionVue from "/js/extensionvue.js"
-import FilesVue from "/js/filesvue.js"
+import FilesVue from "/js/filesvue-dd.js"
 import UploadVue from "/js/uploadvue.js"
 import ModalVue from "/js/modal-manager.js"
 import PostVue from "/js/postvue.js"
