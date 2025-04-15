@@ -7,7 +7,7 @@ export default {
         "choices-vue": ChoicesVue
     },
     template: `
-<div ref="container" class="d-flex flex-grow-1 flex-column rounded">
+<div ref="container" class="d-flex flex-grow-1 flex-column rounded" @contextmenu.prevent="showContextMenu($event, 'background', null)">
     <div class="pt-1">
         <!-- USER INPUT -->
         <div v-if="cc" class="d-flex flex-column flex-grow-1 mb-1 mx-1">
@@ -172,7 +172,8 @@ export default {
 
         <!-- change view list / grid -->
         <div class="d-flex align-items-center my-1 mx-1">
-            <h5 class="mb-0"> {{filesArray.length}} File{{filesArray.length == 1 ? '' : 's'}}</h5>
+            <h5 v-if="viewOpts.view === 'grid' || viewOpts.view === 'list'" class="mb-0">{{filesArray.length}} File{{filesArray.length > 1 ? 's' : ''}}</h5>
+            <h5 v-else class="mb-0">{{ getSubfolderCount }} Folder{{ getSubfolderCount === 1 ? '' : 's' }} & {{ currentFileCount }} File{{ currentFileCount === 1 ? '' : 's' }}</h5>
             <div class="ms-auto">
                 <div class="ms-auto">
                     <div class="btn-group">
@@ -197,365 +198,200 @@ export default {
             </div>
         </div>
     </div>
-
-    <div class="">
         <!-- Folder view -->
-        <div v-if="viewOpts.view === 'folder' && selectedUser">
-            <h3>@{{ selectedUser }}</h3>
-            <div class="d-flex align-items-center mb-2">
-                <button class="btn btn-light me-2" @click="navigateTo('')" v-if="currentFolderPath">Back to /</button>
-                <span class="breadcrumb">{{ currentFolderPath || '/' }}</span>
-                <div class="ms-auto btn-group" v-if="currentFolderPath">
-                    <input type="radio" class="btn-check" :name="bid + 'fileView'" :id="bid + 'fileGrid'"
-                        @click="viewOpts.fileView = 'grid'" :checked="viewOpts.fileView === 'grid'" />
-                    <label class="btn btn-outline-light" :for="bid + 'fileGrid'"><i
-                            class="fa-solid fa-table-cells-large fa-fw"></i></label>
-                    <input type="radio" class="btn-check" :name="bid + 'fileView'" :id="bid + 'fileList'"
-                        @click="viewOpts.fileView = 'list'" :checked="viewOpts.fileView === 'list'" />
-                    <label class="btn btn-outline-light" :for="bid + 'fileList'"><i
-                            class="fa-solid fa-table-list fa-fw"></i></label>
-                </div>
+    <div v-if="viewOpts.view === 'folder' && selectedUser">
+        <h3>@{{ selectedUser }}</h3>
+        <div class="breadcrumb d-flex align-items-center">
+            <span @click="navigateTo('')" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">/</span>
+            <template v-for="(part, index) in currentFolderPath.split('/').filter(Boolean)" :key="index">
+                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">{{ part }}</span>
+                <span class="mx-1">/</span>
+            </template>
+        </div>
+        <div class="ms-2 d-flex align-items-center">
+            <i class="fa-solid fa-file me-2" style="color: white;"></i>
+            <div class="btn-group">
+                <input type="radio" class="btn-check" :name="bid + 'fileView'" :id="bid + 'fileGrid'" autocomplete="off" @click="viewOpts.fileView = 'grid'" :checked="viewOpts.fileView === 'grid'" />
+                <label class="btn btn-outline-light" :for="bid + 'fileGrid'"><i class="fa-solid fa-table-cells-large"></i></label>
+                <input type="radio" class="btn-check" :name="bid + 'fileView'" :id="bid + 'fileList'" autocomplete="off" @click="viewOpts.fileView = 'list'" :checked="viewOpts.fileView === 'list'" />
+                <label class="btn btn-outline-light" :for="bid + 'fileList'"><i class="fa-solid fa-table-list"></i></label>
+                <button class="btn btn-outline-light ms-1"><i class="fa-solid fa-gear"></i></button>
             </div>
-            <div class="folders mb-3">
-                <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="folder.path"
-                    class="folder d-inline-block p-2 m-1 bg-dark rounded" @click="navigateTo(folder.path)"
-                    @contextmenu.prevent="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)"
-                    @drop="dropOnFolder($event, folder)">
+        </div>
+        <div class="files">
+            <!-- List Mode -->
+            <div v-if="viewOpts.fileView === 'list'">
+                <table class="table table-dark table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Preview</th>
+                            <th>Filename</th>
+                            <th>Owner</th>
+                            <th>Size</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Subfolders -->
+                        <tr v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" class="folder-row" @click="navigateTo(folder.path)">
+                            <td><i class="fa-solid fa-folder"></i></td>
+                            <td>{{ folder.name }}</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <!-- Files -->
+                        <tr v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" draggable="true" @dragstart="dragStartFile($event, file)" @contextmenu.prevent="showContextMenu($event, 'file', file)">
+                            <td>
+                                <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="50" />
+                                <span v-else>{{ newMeta[file.i][file.f].type }}</span>
+                            </td>
+                            <td>{{ newMeta[file.i][file.f].name || file.f }}</td>
+                            <td>@{{ file.o }}</td>
+                            <td>{{ fancyBytes(file.s) }}</td>
+                            <td>
+                                <a v-if="!newMeta[file.i][file.f].encrypted" :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="btn btn-sm btn-info">URL</a>
+                                <button v-if="newMeta[file.i][file.f].encrypted && contract[file.i].encryption.key" class="btn btn-sm btn-primary" @click="downloadFile(file.f, file.i)">Download</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Grid Mode -->
+            <div v-if="viewOpts.fileView === 'grid'" class="d-flex flex-wrap">
+                <!-- Subfolders -->
+                <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" class="file-grid m-1 p-2 bg-dark rounded" @click="navigateTo(folder.path)">
                     <i class="fa-solid fa-folder fa-2x"></i>
                     <div>{{ folder.name }}</div>
                 </div>
-            </div>
-            <div class="files">
-                <div v-if="viewOpts.fileView === 'list'">
-                    <table class="table table-dark table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th>Preview</th>
-                                <th>Filename</th>
-                                <th>Owner</th>
-                                <th>Size</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" draggable="true"
-                                @dragstart="dragStartFile($event, file)"
-                                @contextmenu.prevent="showContextMenu($event, 'file', file)">
-                                <td>
-                                    <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
-                                        :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid"
-                                        width="50" />
-                                    <span v-else>{{ newMeta[file.i][file.f].type }}</span>
-                                </td>
-                                <td>{{ newMeta[file.i][file.f].name || file.f }}</td>
-                                <td>@{{ file.o }}</td>
-                                <td>{{ fancyBytes(file.s) }}</td>
-                                <td>
-                                    <a v-if="!newMeta[file.i][file.f].encrypted"
-                                        :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank"
-                                        class="btn btn-sm btn-info">URL</a>
-                                    <button v-if="newMeta[file.i][file.f].encrypted && contract[file.i].encryption.key"
-                                        class="btn btn-sm btn-primary"
-                                        @click="downloadFile(file.f, file.i)">Download</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div v-if="viewOpts.fileView === 'grid'" class="d-flex flex-wrap">
-                    <div v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f"
-                        class="file-grid m-1 p-2 bg-dark rounded" draggable="true"
-                        @dragstart="dragStartFile($event, file)"
-                        @contextmenu.prevent="showContextMenu($event, 'file', file)">
-                        <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
-                            :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="100" />
-                        <span v-else>{{ newMeta[file.i][file.f].type }}</span>
-                        <div>{{ newMeta[file.i][file.f].name || file.f }}</div>
-                        <small>@{{ file.o }}</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Add icon view -->
-        <div v-else-if="viewOpts.view === 'icon' && selectedUser" class="d-flex flex-wrap">
-            <h3>@{{ selectedUser }}</h3>
-                <div class="d-flex align-items-center mb-2">
-                    <button class="btn btn-light me-2" @click="navigateTo('')" v-if="currentFolderPath">Back to /</button>
-                    <span class="breadcrumb">{{ currentFolderPath || '/' }}</span>
-                    <div class="ms-auto btn-group" v-if="currentFolderPath">
-                        <input type="radio" class="btn-check" :name="bid + 'fileView'" :id="bid + 'fileGrid'"
-                            @click="viewOpts.fileView = 'grid'" :checked="viewOpts.fileView === 'grid'" />
-                        <label class="btn btn-outline-light" :for="bid + 'fileGrid'"><i
-                                class="fa-solid fa-table-cells-large fa-fw"></i></label>
-                        <input type="radio" class="btn-check" :name="bid + 'fileView'" :id="bid + 'fileList'"
-                            @click="viewOpts.fileView = 'list'" :checked="viewOpts.fileView === 'list'" />
-                        <label class="btn btn-outline-light" :for="bid + 'fileList'"><i
-                                class="fa-solid fa-table-list fa-fw"></i></label>
-                    </div>
-                </div> 
-            <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="folder.path"
-                class="m-2 text-center" @dblclick="navigateTo(folder.path)"
-                @contextmenu.prevent="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)"
-                @drop="dropOnFolder($event, folder)">
-                <i class="fa-solid fa-folder fa-3x"></i>
-                <div>{{ folder.name }}</div>
-            </div>
-            <Teleport to="body">
-                <div v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" class="m-2 text-center"
-                    draggable="true" @dragstart="dragStartFile($event, file)"
-                    @contextmenu.prevent="showContextMenu($event, 'file', file)">
-                    <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
-                        :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="100" />
-                    <i v-else class="fa-solid fa-file fa-3x"></i>
+                <!-- Files -->
+                <div v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" class="file-grid m-1 p-2 bg-dark rounded" draggable="true" @dragstart="dragStartFile($event, file)" @contextmenu.prevent="showContextMenu($event, 'file', file)">
+                    <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="100" />
+                    <span v-else>{{ newMeta[file.i][file.f].type }}</span>
                     <div>{{ newMeta[file.i][file.f].name || file.f }}</div>
                     <small>@{{ file.o }}</small>
                 </div>
-            </Teleport>
-
-
-            <!-- Context menu -->
+            </div>
+        </div>
+    </div>
+    <!-- Add icon view -->
+    <div v-else-if="viewOpts.view === 'icon' && selectedUser" class="d-flex flex-wrap">
+        <h3>@{{ selectedUser }}</h3>
+        <div class="breadcrumb d-flex align-items-center">
+            <span @click="navigateTo('')" @dragover.prevent @drop="dropOnBreadcrumb('')" class="px-1" style="cursor: pointer;">/</span>
+            <template v-for="(part, index) in currentFolderPath.split('/').filter(Boolean)" :key="index">
+                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragover.prevent @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'))" class="px-1" style="cursor: pointer;">{{ part }}</span>
+                <span>/</span>
+            </template>
+        </div>
+        <!-- Toggle buttons and gear button removed -->
+        <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="folder.path" class="m-2 text-center" @dblclick="navigateTo(folder.path)" @contextmenu.prevent="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)">
+            <i class="fa-solid fa-folder fa-3x"></i>
+            <div>{{ folder.name }}</div>
+        </div>
+        <div v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" class="m-2 text-center" draggable="true" @dragstart="dragStartFile($event, file)" @contextmenu.prevent="showContextMenu($event, 'file', file)">
+            <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="100" />
+            <i v-else class="fa-solid fa-file fa-3x"></i>
+            <div>{{ newMeta[file.i][file.f].name || file.f }}</div>
+            <small>@{{ file.o }}</small>
+        </div>
+        <!-- Context menu -->
+        <Teleport to="body">
             <div v-if="contextMenu.show"
-                :style="{ position: 'absolute', left: contextMenu.x + 'px', top: contextMenu.y + 'px', zIndex: 1000 }"
+                :style="{ position: 'fixed', left: contextMenu.x + 'px', top: contextMenu.y + 'px', zIndex: 1000 }"
                 class="bg-dark text-white p-2 rounded shadow" @click.stop>
                 <ul class="list-unstyled m-0">
-                    <li>Context Menu</li>    
+                    <li v-if="contextMenu.type === 'background'" class="p-1" @click="createNewFolder">New Folder</li>
                     <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)" class="p-1"
                         @click="renameItem(contextMenu.item, 'file')">Rename File</li>
                     <li v-if="contextMenu.type === 'folder' && isEditableFolder(contextMenu.item)" class="p-1"
                         @click="renameItem(contextMenu.item, 'folder')">Rename Folder</li>
-                    <!-- Add more options like Delete if needed -->
+                        <!-- Add more options like Delete if needed -->
                 </ul>
             </div>
+        </Teleport>
 
-            <!-- Save Changes Button -->
-            <div v-if="Object.keys(pendingChanges).length > 0" class="fixed-bottom p-3">
-                <button class="btn btn-warning" @click="saveChanges">Save Changes ({{ Object.keys(pendingChanges).length
-                    }}
-                    contracts affected)</button>
+        <!-- Save Changes Button -->
+        <div v-if="Object.keys(pendingChanges).length > 0" class="fixed-bottom p-3">
+            <button class="btn btn-warning" @click="saveChanges">Save Changes ({{ Object.keys(pendingChanges).length
+                }}
+                contracts affected)</button>
+        </div>
+    </div>
+    <!-- list view -->
+
+    <div class="text-center" role="table" aria-label="Files" v-else-if="viewOpts.view === 'list'">
+        <div class="d-flex flex-wrap align-items-center fw-bold justify-content-end border-top border-start border-end border-dark"
+            role="rowgroup" style="background-color: #1976D2">
+            <div class="py-1 border-bottom border-dark" role="columnheader" style="width:70px">&nbsp;</div>
+            <div class="py-1 border-start border-bottom border-dark flex-grow-1 first" role="columnheader"
+                style="max-width:480px">Filename</div>
+            <div class="py-1 border-start border-bottom border-dark" role="columnheader" style="width:150px">Tags &
+                Labels</div>
+            <div class="py-1 border-start border-bottom border-dark" role="columnheader" style="width:150px">Owner
+            </div>
+            <div class="py-1 border-start border-bottom border-dark" role="columnheader" style="width:80px">Size
+            </div>
+            <div class="py-1 border-start border-bottom border-dark" role="columnheader" style="width:100px">Created
+            </div>
+            <div class="py-1 border-start border-bottom border-dark" role="columnheader" style="width:146px">
+                Expiration</div>
+            <div class="py-1 border-start border-bottom border-dark" role="columnheader" style="width:120px">&nbsp;
             </div>
         </div>
-        <!-- list view -->
-
-        <div class="text-center" role="table" aria-label="Files" v-else-if="viewOpts.view === 'list'">
-            <div class="d-flex flex-wrap align-items-center fw-bold justify-content-end border-top border-start border-end border-dark"
-                role="rowgroup" style="background-color: #1976D2">
-                <div class="py-1 border-bottom border-dark" role="columnheader" style="width:70px">&nbsp;</div>
-                <div class="py-1 border-start border-bottom border-dark flex-grow-1 first" role="columnheader"
-                    style="max-width:480px">Filename</div>
-                <div class="py-1 border-start border-bottom border-dark" role="columnheader" style="width:150px">Tags &
-                    Labels</div>
-                <div class="py-1 border-start border-bottom border-dark" role="columnheader" style="width:150px">Owner
-                </div>
-                <div class="py-1 border-start border-bottom border-dark" role="columnheader" style="width:80px">Size
-                </div>
-                <div class="py-1 border-start border-bottom border-dark" role="columnheader" style="width:100px">Created
-                </div>
-                <div class="py-1 border-start border-bottom border-dark" role="columnheader" style="width:146px">
-                    Expiration</div>
-                <div class="py-1 border-start border-bottom border-dark" role="columnheader" style="width:120px">&nbsp;
-                </div>
-            </div>
-            <div class="flex-table bg-dark-2 d-flex flex-wrap align-items-center justify-content-end" role="rowgroup"
-                v-for="file in filesArray">
-                <div class="" role="cell">
-                    <div style="width: 70px;">
+        <div class="flex-table bg-dark-2 d-flex flex-wrap align-items-center justify-content-end" role="rowgroup"
+            v-for="file in filesArray">
+            <div class="" role="cell">
+                <div style="width: 70px;">
 
 
-                        <div class="d-flex bg-light position-relative rounded first m-1" style="width: 50px;">
-                            <div v-if="flagsDecode(newMeta[file.i][file.f].flags, 1).length"
-                                class="position-absolute bottom-0 end-0 bg-dark rounded-circle small px-05">
-                                <i class="fa-solid fa-lock"></i>
-                            </div>
-                            <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
-                                class="img-fluid rounded" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)">
-                            <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800"
-                                style="enable-background:new 0 0 800 800;" xml:space="preserve">
-                                <g>
-                                    <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
-                                        S655.5,210,650,210z" />
-                                    <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
-                                        s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
-                                        C660,305.2,655.5,309.7,650,309.7z" />
-                                    <path class="st0"
-                                        d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
-                                        c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
-                                    <path class="st0"
-                                        d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
-                                    <path class="st0"
-                                        d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
-                                    <path class="st0"
-                                        d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
-                                        c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
-                                        c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
-                                    <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2"
-                                        style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
-                                </g>
-                            </svg>
+                    <div class="d-flex bg-light position-relative rounded first m-1" style="width: 50px;">
+                        <div v-if="flagsDecode(newMeta[file.i][file.f].flags, 1).length"
+                            class="position-absolute bottom-0 end-0 bg-dark rounded-circle small px-05">
+                            <i class="fa-solid fa-lock"></i>
                         </div>
-
-                    </div>
-                </div>
-                <div class="flex-grow-1 first" role="cell">
-                    <div style="max-width:480px;">
-                        <div class="text-start text-break m-1">{{newMeta[file.i][file.f].name ||
-                            file.f}}{{newMeta[file.i][file.f].thumb ? '.' + newMeta[file.i][file.f].type : ''}}</div>
-                    </div>
-                </div>
-
-                <div class="" role="cell">
-                    <div style="width:150px;">
-                        <div
-                            class="d-flex flex-wrap align-items-center justify-content-center bg-darkg rounded px-1 py-05 m-1">
-                            <div>&nbsp;</div>
-                            <!-- colors -->
-                            <div v-if="file.lc" class="d-flex me-1 align-items-center" style="margin-left: 15px">
-                                <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa"
-                                    :style="'margin-left: ' + -15 +'px !important;'"></i>
-                            </div>
-                            <!-- labels -->
-                            <div class="me-1" v-for="label in labelsDecode(file.ll)">
-                                <span class="d-flex align-items-center">
-                                    <pop-vue :id=" bid + 'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')"
-                                        :title="label.l" trigger="hover">
-                                        <i :class="label.fa"></i>
-                                    </pop-vue>
-                                </span>
-                            </div>
-                            <!-- flags -->
-                            <div class="d-flex align-items-center">
-                                <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)">
-                                    <!-- title="Labels"  -->
-                                    <pop-vue :id=" bid + 'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')"
-                                        :title="flag.l" trigger="hover">
-                                        <i :class="flag.fa"></i>
-                                    </pop-vue>
-                                </div>
-                            </div>
-                            <div>
-                                <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa"
-                                    :id=" bid + 'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic"
-                                    :title="lic.l" trigger="hover">
-                                    <i :class="lic.fa"></i>
-                                </pop-vue>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="" role="cell">
-                    <div style="width:150px">
-                        <div class="m-1"><a :href="'/@' + contract[file.i].t">@{{contract[file.i].t}}</a></div>
-                    </div>
-                </div>
-                <div class="" role="cell">
-                    <div style="width:80px">
-                        <div class="m-1">{{fancyBytes(file.s)}}</div>
-                    </div>
-                </div>
-                <div class="" role="cell">
-                    <div style="width:100px">
-                        <div class="m-1">{{blockToTime(file.c)}}</div>
-                    </div>
-                </div>
-                <div class="">
-                    <div style="width: 146px;" role="cell">
-                        <div class="border rounded px-1 py-05 m-1"
-                            :class="{'border-success': newMeta[file.i].contract.autoRenew, 'border-warning': !newMeta[file.i].contract.autoRenew}">
-                            {{blockToTime(file.e)}}
-                            <i :class="{'text-success': newMeta[file.i].contract.autoRenew, 'text-warning': !newMeta[file.i].contract.autoRenew}"
-                                class="ms-05 fa-solid fa-arrows-rotate fa-fw"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="" role="cell">
-                    <div class="" style="width: 120px;">
-                        <div class="m-1">
-                            <!-- link -->
-                            <div v-if="!newMeta[file.i][file.f].encrypted">
-                                <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank"
-                                    class="w-100 btn btn-sm btn-info my-1 mx-auto"><span
-                                        class="d-flex align-items-center">URL<i
-                                            class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
-                            </div>
-                            <!-- decrypt  -->
-                            <div v-if="newMeta[file.i][file.f].encrypted && !contract[file.i].encryption.key">
-                                <button type="button" class="w-100 btn btn-sm btn-primary my-1 mx-auto"
-                                    @click="decode(file.i)"><span class="d-flex align-items-center w-100">Decrypt<i
-                                            class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
-                            </div>
-                            <!-- download enc -->
-                            <div v-if="newMeta[file.i][file.f].encrypted && contract[file.i].encryption.key">
-                                <button type="button" class="w-100 btn btn-sm btn-primary my-1 mx-auto"
-                                    @click="downloadFile(file.f, file.i)"><span
-                                        class="d-flex align-items-center w-100">Download<i
-                                            class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
-                            </div>
-                            <!-- add to post -->
-                            <div v-if="assets">
-                                <button type="button" class="w-100 btn btn-sm btn-purp my-1 mx-auto"
-                                    @click="addToPost(file.f, contract.i, index)"><span
-                                        class="d-flex align-items-center w-100"><span class="d-sm-none">Add to</span>
-                                        Post<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
-                            </div>
-                            <!-- add to asset -->
-                            <div v-if="assets">
-                                <button type="button" class="w-100 btn btn-sm btn-purp my-1 mx-auto"
-                                    @click="addAsset(file, contract)"><span
-                                        class="d-flex align-items-center w-100"><span class="d-sm-none">Add to
-                                        </span>Asset<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-            <div class="flex-table header" role="rowgroup">
-                <div class="flex-row order-md-first" role="columnheader"></div>
-                <div class="flex-row order-first first flex-grow-1" role="columnheader">Filename</div>
-                <div class="flex-row" role="columnheader">Owner</div>
-                <div class="flex-row" role="columnheader">Tags & Labels</div>
-                <div class="flex-row" role="columnheader">Size</div>
-                <div class="flex-row" role="columnheader">Created</div>
-                <div class="flex-row" role="columnheader">Expiration</div>
-                <div class="flex-row" role="columnheader"></div>
-            </div>
-            <div class="flex-table row" role="rowgroup" v-for="file in filesArray">
-                <div class="flex-row order-md-first" role="cell">
-                    <div class="bg-light mx-auto" style="width:50px;">
                         <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
-                            class="mx-auto img-fluid rounded bg-light"
-                            :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" width="50px">
+                            class="img-fluid rounded" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)">
                         <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg"
                             xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800"
                             style="enable-background:new 0 0 800 800;" xml:space="preserve">
                             <g>
                                 <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
-                                S655.5,210,650,210z" />
+                                    S655.5,210,650,210z" />
                                 <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
-                                s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
-                                C660,305.2,655.5,309.7,650,309.7z" />
+                                    s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
+                                    C660,305.2,655.5,309.7,650,309.7z" />
                                 <path class="st0"
                                     d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
-                                c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
+                                    c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
                                 <path class="st0"
                                     d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
                                 <path class="st0"
                                     d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
                                 <path class="st0"
                                     d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
-                                c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
-                                c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
+                                    c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
+                                    c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
                                 <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2"
                                     style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
                             </g>
                         </svg>
                     </div>
+
                 </div>
-                <div class="flex-row order-first first flex-grow-1" role="cell">{{newMeta[file.i][file.f].name ||
-                    file.f}}{{newMeta[file.i][file.f].thumb ? '.' + newMeta[file.i][file.f].type : ''}}</div>
-                <div class="flex-row " role="cell">@{{contract[file.i].t}}</div>
-                <div class="flex-row" role="cell">
-                    <div class="d-flex flex-wrap align-items-center justify-content-center">
+            </div>
+            <div class="flex-grow-1 first" role="cell">
+                <div style="max-width:480px;">
+                    <div class="text-start text-break m-1">{{newMeta[file.i][file.f].name ||
+                        file.f}}{{newMeta[file.i][file.f].thumb ? '.' + newMeta[file.i][file.f].type : ''}}</div>
+                </div>
+            </div>
+
+            <div class="" role="cell">
+                <div style="width:150px;">
+                    <div
+                        class="d-flex flex-wrap align-items-center justify-content-center bg-darkg rounded px-1 py-05 m-1">
+                        <div>&nbsp;</div>
                         <!-- colors -->
                         <div v-if="file.lc" class="d-flex me-1 align-items-center" style="margin-left: 15px">
                             <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa"
@@ -589,415 +425,562 @@ export default {
                         </div>
                     </div>
                 </div>
-                <div class="flex-row" role="cell">{{fancyBytes(file.s)}}</div>
-                <div class="flex-row" role="cell">{{blockToTime(file.c)}}</div>
-                <div class="flex-row" role="cell">{{blockToTime(file.e)}}<i v-if="newMeta[file.i].contract.autoRenew"
-                        class="fa-solid fa-arrows-rotate text-success fa-fw"></i></div>
-                <div class="flex-row" role="cell">
-                    <div class="mt-1">
+            </div>
+            <div class="" role="cell">
+                <div style="width:150px">
+                    <div class="m-1"><a :href="'/@' + contract[file.i].t">@{{contract[file.i].t}}</a></div>
+                </div>
+            </div>
+            <div class="" role="cell">
+                <div style="width:80px">
+                    <div class="m-1">{{fancyBytes(file.s)}}</div>
+                </div>
+            </div>
+            <div class="" role="cell">
+                <div style="width:100px">
+                    <div class="m-1">{{blockToTime(file.c)}}</div>
+                </div>
+            </div>
+            <div class="">
+                <div style="width: 146px;" role="cell">
+                    <div class="border rounded px-1 py-05 m-1"
+                        :class="{'border-success': newMeta[file.i].contract.autoRenew, 'border-warning': !newMeta[file.i].contract.autoRenew}">
+                        {{blockToTime(file.e)}}
+                        <i :class="{'text-success': newMeta[file.i].contract.autoRenew, 'text-warning': !newMeta[file.i].contract.autoRenew}"
+                            class="ms-05 fa-solid fa-arrows-rotate fa-fw"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="" role="cell">
+                <div class="" style="width: 120px;">
+                    <div class="m-1">
                         <!-- link -->
                         <div v-if="!newMeta[file.i][file.f].encrypted">
                             <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank"
-                                class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span
+                                class="w-100 btn btn-sm btn-info my-1 mx-auto"><span
                                     class="d-flex align-items-center">URL<i
                                         class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                         </div>
                         <!-- decrypt  -->
                         <div v-if="newMeta[file.i][file.f].encrypted && !contract[file.i].encryption.key">
-                            <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
+                            <button type="button" class="w-100 btn btn-sm btn-primary my-1 mx-auto"
                                 @click="decode(file.i)"><span class="d-flex align-items-center w-100">Decrypt<i
                                         class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
                         </div>
                         <!-- download enc -->
                         <div v-if="newMeta[file.i][file.f].encrypted && contract[file.i].encryption.key">
-                            <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
+                            <button type="button" class="w-100 btn btn-sm btn-primary my-1 mx-auto"
                                 @click="downloadFile(file.f, file.i)"><span
                                     class="d-flex align-items-center w-100">Download<i
                                         class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
                         </div>
                         <!-- add to post -->
                         <div v-if="assets">
-                            <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
+                            <button type="button" class="w-100 btn btn-sm btn-purp my-1 mx-auto"
                                 @click="addToPost(file.f, contract.i, index)"><span
-                                    class="d-flex align-items-center w-100">Add to Post<i
-                                        class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                                    class="d-flex align-items-center w-100"><span class="d-sm-none">Add to</span>
+                                    Post<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                         </div>
                         <!-- add to asset -->
                         <div v-if="assets">
-                            <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
-                                @click="addAsset(file, contract)"><span class="d-flex align-items-center w-100">Add
-                                    asset<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                            <button type="button" class="w-100 btn btn-sm btn-purp my-1 mx-auto"
+                                @click="addAsset(file, contract)"><span
+                                    class="d-flex align-items-center w-100"><span class="d-sm-none">Add to
+                                    </span>Asset<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                         </div>
                     </div>
                 </div>
 
-
-                <!-- item table -->
-                <table class="table table-dark table-striped table-hover  align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <!-- thumb -->
-                            <th scope="col" class="col-1">
-
-                            </th>
-                            <!-- name -->
-                            <th scope="col" class="col-2">
-                                <div class="d-flex flex-wrap align-items-center">
-                                    <div class="d-flex flex-wrap align-items-center">
-                                        <i class="fa-solid fa-file fa-fw"></i>
-                                        <span class="m-1">Filename</span>
-                                    </div>
-                                    <div class="d-none d-flex align-items-center">
-                                        <button class="btn btn-sm btn-secondary ms-1"
-                                            @click="sortContracts('c','asc')"><i
-                                                class="fa-solid fa-caret-up"></i></button>
-                                        <button class="btn btn-sm btn-secondary ms-1"
-                                            @click="sortContracts('c','dec')"><i
-                                                class="fa-solid fa-caret-down"></i></button>
-                                    </div>
-                                </div>
-                            </th>
-                            <!-- owners -->
-                            <th scope="col" class="col-2" v-if="owners.length > 1">
-                                <div class="d-flex flex-wrap align-items-center">
-                                    <div class="d-flex flex-wrap align-items-center">
-                                        <i class="fa-solid fa-tag fa-fw"></i>
-                                        <span class="m-1">File Owner</span>
-                                    </div>
-                                    <div class="d-none d-flex align-items-center">
-                                        <button class="btn btn-sm btn-secondary" @click="sortContracts('e','dec')"><i
-                                                class="fa-solid fa-caret-up"></i></button>
-                                        <button class="btn btn-sm btn-secondary ms-1"
-                                            @click="sortContracts('e','asc')"><i
-                                                class="fa-solid fa-caret-down"></i></button>
-                                    </div>
-                                </div>
-                            </th>
-                            <!-- tags & labels -->
-                            <th scope="col" class="col-2">
-                                <div class="d-flex flex-wrap align-items-center">
-                                    <div class="d-flex flex-wrap align-items-center">
-                                        <i class="fa-solid fa-tag fa-fw"></i>
-                                        <span class="m-1">Tags & Labels</span>
-                                    </div>
-                                    <div class="d-none d-flex align-items-center">
-                                        <button class="btn btn-sm btn-secondary" @click="sortContracts('e','dec')"><i
-                                                class="fa-solid fa-caret-up"></i></button>
-                                        <button class="btn btn-sm btn-secondary ms-1"
-                                            @click="sortContracts('e','asc')"><i
-                                                class="fa-solid fa-caret-down"></i></button>
-                                    </div>
-                                </div>
-                            </th>
-                            <!-- size -->
-                            <th scope="col" class="col-1">
-                                <div class="d-flex flex-wrap align-items-center">
-                                    <div class="d-flex flex-wrap align-items-center">
-                                        <i class="fa-solid fa-database fa-fw"></i>
-                                        <span class="m-1">Size</span>
-                                    </div>
-                                    <div class="d-none d-flex align-items-center">
-                                        <button class="btn btn-sm btn-secondary" @click="sortContracts('e','dec')"><i
-                                                class="fa-solid fa-caret-up"></i></button>
-                                        <button class="btn btn-sm btn-secondary ms-1"
-                                            @click="sortContracts('e','asc')"><i
-                                                class="fa-solid fa-caret-down"></i></button>
-                                    </div>
-                                </div>
-                            </th>
-                            <!-- created -->
-                            <th scope="col" class="col-1">
-                                <div class="d-flex flex-wrap align-items-center">
-                                    <div class="d-flex flex-wrap align-items-center">
-                                        <i class="fa-solid fa-calendar-days fa-fw"></i>
-                                        <span class="m-1">Created</span>
-                                    </div>
-                                    <div class="d-none d-flex align-items-center">
-                                        <button class="btn btn-sm btn-secondary" @click="sortContracts('e','dec')"><i
-                                                class="fa-solid fa-caret-up"></i></button>
-                                        <button class="btn btn-sm btn-secondary ms-1"
-                                            @click="sortContracts('e','asc')"><i
-                                                class="fa-solid fa-caret-down"></i></button>
-                                    </div>
-                                </div>
-                            </th>
-                            <!-- expires -->
-                            <th scope="col" class="col-1">
-                                <div class="d-flex flex-wrap align-items-center">
-                                    <div class="d-flex flex-wrap align-items-center">
-                                        <i class="fa-solid fa-clock fa-fw"></i>
-                                        <span class="m-1">Expires</span>
-                                    </div>
-                                    <div class="d-none d-flex align-items-center">
-                                        <button class="btn btn-sm btn-secondary" @click="sortContracts('e','dec')"><i
-                                                class="fa-solid fa-caret-up"></i></button>
-                                        <button class="btn btn-sm btn-secondary ms-1"
-                                            @click="sortContracts('e','asc')"><i
-                                                class="fa-solid fa-caret-down"></i></button>
-                                    </div>
-                                </div>
-                            </th>
-                            <!-- buttons -->
-                            <th scope="col" class="col-1">
-
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="file in filesArray">
-                            <th scope="row" class="col-1">
-                                <div class="bg-light" style="width:50px;">
-                                    <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
-                                        class="mx-auto img-fluid rounded bg-light"
-                                        :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" width="50px">
-                                    <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                        xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800"
-                                        style="enable-background:new 0 0 800 800;" xml:space="preserve">
-                                        <g>
-                                            <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
-                                        S655.5,210,650,210z" />
-                                            <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
-                                        s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
-                                        C660,305.2,655.5,309.7,650,309.7z" />
-                                            <path class="st0"
-                                                d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
-                                        c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
-                                            <path class="st0"
-                                                d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
-                                            <path class="st0"
-                                                d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
-                                            <path class="st0"
-                                                d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
-                                        c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
-                                        c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
-                                            <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2"
-                                                style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
-                                        </g>
-                                    </svg>
-                                </div>
-                            </th>
-                            <td class="col-2">
-                                <div class="text-break">{{newMeta[file.i][file.f].name ||
-                                    file.f}}{{newMeta[file.i][file.f].thumb ? '.' + newMeta[file.i][file.f].type : ''}}
-                                </div>
-                            </td>
-                            <td class="col-2" v-if="owners.length > 1">
-                                <div class="text-break">@{{contract[file.i].t}}</div>
-                            </td>
-                            <td class="col-2">
-                                <div class="d-flex flex-wrap align-items-center">
-
-
-                                    <div v-if="file.lc" class="d-flex me-1 align-items-center"
-                                        style="margin-left: 15px">
-                                        <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa"
-                                            :style="'margin-left: ' + -15 +'px !important;'"></i>
-                                    </div>
-
-
-                                    <div class="me-1" v-for="label in labelsDecode(file.ll)">
-                                        <span class="d-flex align-items-center">
-                                            <pop-vue
-                                                :id=" bid + 'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')"
-                                                :title="label.l" trigger="hover">
-                                                <i :class="label.fa"></i>
-                                            </pop-vue>
-                                        </span>
-                                    </div>
-
-                                    <div class="d-flex align-items-center">
-                                        <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)">
-                                            <!-- title="Labels"  -->
-                                            <pop-vue
-                                                :id=" bid + 'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')"
-                                                :title="flag.l" trigger="hover">
-                                                <i :class="flag.fa"></i>
-                                            </pop-vue>
-                                        </div>
-                                    </div>
-                                    <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa"
-                                        :id=" bid + 'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic"
-                                        :title="lic.l" trigger="hover">
-                                        <i :class="lic.fa"></i>
-                                    </pop-vue>
-                                </div>
-                            </td>
-                            <td class="col-1">{{fancyBytes(file.s)}}</td>
-                            <td class="col-1">{{blockToTime(file.c)}}</td>
-                            <td class="col-1">{{blockToTime(file.e)}}<i v-if="newMeta[file.i].contract.autoRenew"
-                                    class="fa-solid fa-arrows-rotate text-success fa-fw fa-spin"></i></td>
-                            <td class="col-1">
-                                <div class="mt-1">
-                                    <!-- link -->
-                                    <div v-if="!newMeta[file.i][file.f].encrypted">
-                                        <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank"
-                                            class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span
-                                                class="d-flex align-items-center">URL<i
-                                                    class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
-                                    </div>
-                                    <!-- decrypt  -->
-                                    <div v-if="newMeta[file.i][file.f].encrypted && !contract[file.i].encryption.key">
-                                        <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
-                                            @click="decode(file.i)"><span
-                                                class="d-flex align-items-center w-100">Decrypt<i
-                                                    class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
-                                    </div>
-                                    <!-- download enc -->
-                                    <div v-if="newMeta[file.i][file.f].encrypted && contract[file.i].encryption.key">
-                                        <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
-                                            @click="downloadFile(file.f, file.i)"><span
-                                                class="d-flex align-items-center w-100">Download<i
-                                                    class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
-                                    </div>
-                                    <!-- add to post -->
-                                    <div v-if="assets">
-                                        <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
-                                            @click="addToPost(file.f, contract.i, index)"><span
-                                                class="d-flex align-items-center w-100">Add to Post<i
-                                                    class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
-                                    </div>
-                                    <!-- add to asset -->
-                                    <div v-if="assets">
-                                        <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
-                                            @click="addAsset(file, contract)"><span
-                                                class="d-flex align-items-center w-100">Add asset<i
-                                                    class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
-        <!-- item grid -->
-        <div class="d-flex flex-wrap" v-else-if="viewOpts.view === 'grid'">
-            <div class="file-grid" v-for="file in filesArray">
-                <div class="card bg-blur-darkg m-05 p-05 text-start">
-                    <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="no-decoration">
-                        <div class="text-black text-truncate">{{newMeta[file.i][file.f].name || file.f}}</div>
-                    </a>
-                    <h5 class="m-0 ms-auto align-self-end"><span
-                            class="d-none badge square rounded-top border border-bottom-0 bg-info border-light-50"
-                            :class="smartColor(file.lc)"><i :class="smartIcon(file.l)"></i>{{
-                            newMeta[file.i][file.f].type }}</span></h5>
-                    <div class="bg-light d-flex ratio ratio-1x1 rounded">
-                        <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
-                            class="mx-auto img-fluid rounded bg-light"
-                            :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" width="128px">
-                        <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg"
-                            xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800"
-                            style="enable-background:new 0 0 800 800;" xml:space="preserve">
-                            <g>
-                                <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
+        <div class="flex-table header" role="rowgroup">
+            <div class="flex-row order-md-first" role="columnheader"></div>
+            <div class="flex-row order-first first flex-grow-1" role="columnheader">Filename</div>
+            <div class="flex-row" role="columnheader">Owner</div>
+            <div class="flex-row" role="columnheader">Tags & Labels</div>
+            <div class="flex-row" role="columnheader">Size</div>
+            <div class="flex-row" role="columnheader">Created</div>
+            <div class="flex-row" role="columnheader">Expiration</div>
+            <div class="flex-row" role="columnheader"></div>
+        </div>
+        <div class="flex-table row" role="rowgroup" v-for="file in filesArray">
+            <div class="flex-row order-md-first" role="cell">
+                <div class="bg-light mx-auto" style="width:50px;">
+                    <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
+                        class="mx-auto img-fluid rounded bg-light"
+                        :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" width="50px">
+                    <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800"
+                        style="enable-background:new 0 0 800 800;" xml:space="preserve">
+                        <g>
+                            <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
+                            S655.5,210,650,210z" />
+                            <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
+                            s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
+                            C660,305.2,655.5,309.7,650,309.7z" />
+                            <path class="st0"
+                                d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
+                            c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
+                            <path class="st0"
+                                d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
+                            <path class="st0"
+                                d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
+                            <path class="st0"
+                                d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
+                            c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
+                            c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
+                            <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2"
+                                style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+            <div class="flex-row order-first first flex-grow-1" role="cell">{{newMeta[file.i][file.f].name ||
+                file.f}}{{newMeta[file.i][file.f].thumb ? '.' + newMeta[file.i][file.f].type : ''}}</div>
+            <div class="flex-row " role="cell">@{{contract[file.i].t}}</div>
+            <div class="flex-row" role="cell">
+                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                    <!-- colors -->
+                    <div v-if="file.lc" class="d-flex me-1 align-items-center" style="margin-left: 15px">
+                        <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa"
+                            :style="'margin-left: ' + -15 +'px !important;'"></i>
+                    </div>
+                    <!-- labels -->
+                    <div class="me-1" v-for="label in labelsDecode(file.ll)">
+                        <span class="d-flex align-items-center">
+                            <pop-vue :id=" bid + 'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')"
+                                :title="label.l" trigger="hover">
+                                <i :class="label.fa"></i>
+                            </pop-vue>
+                        </span>
+                    </div>
+                    <!-- flags -->
+                    <div class="d-flex align-items-center">
+                        <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)">
+                            <!-- title="Labels"  -->
+                            <pop-vue :id=" bid + 'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')"
+                                :title="flag.l" trigger="hover">
+                                <i :class="flag.fa"></i>
+                            </pop-vue>
+                        </div>
+                    </div>
+                    <div>
+                        <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa"
+                            :id=" bid + 'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic"
+                            :title="lic.l" trigger="hover">
+                            <i :class="lic.fa"></i>
+                        </pop-vue>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-row" role="cell">{{fancyBytes(file.s)}}</div>
+            <div class="flex-row" role="cell">{{blockToTime(file.c)}}</div>
+            <div class="flex-row" role="cell">{{blockToTime(file.e)}}<i v-if="newMeta[file.i].contract.autoRenew"
+                    class="fa-solid fa-arrows-rotate text-success fa-fw"></i></div>
+            <div class="flex-row" role="cell">
+                <div class="mt-1">
+                    <!-- link -->
+                    <div v-if="!newMeta[file.i][file.f].encrypted">
+                        <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank"
+                            class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span
+                                class="d-flex align-items-center">URL<i
+                                    class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
+                    </div>
+                    <!-- decrypt  -->
+                    <div v-if="newMeta[file.i][file.f].encrypted && !contract[file.i].encryption.key">
+                        <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
+                            @click="decode(file.i)"><span class="d-flex align-items-center w-100">Decrypt<i
+                                    class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
+                    </div>
+                    <!-- download enc -->
+                    <div v-if="newMeta[file.i][file.f].encrypted && contract[file.i].encryption.key">
+                        <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
+                            @click="downloadFile(file.f, file.i)"><span
+                                class="d-flex align-items-center w-100">Download<i
+                                    class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
+                    </div>
+                    <!-- add to post -->
+                    <div v-if="assets">
+                        <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
+                            @click="addToPost(file.f, contract.i, index)"><span
+                                class="d-flex align-items-center w-100">Add to Post<i
+                                    class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                    </div>
+                    <!-- add to asset -->
+                    <div v-if="assets">
+                        <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
+                            @click="addAsset(file, contract)"><span class="d-flex align-items-center w-100">Add
+                                asset<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- item table -->
+            <table class="table table-dark table-striped table-hover  align-middle mb-0">
+                <thead>
+                    <tr>
+                        <!-- thumb -->
+                        <th scope="col" class="col-1">
+
+                        </th>
+                        <!-- name -->
+                        <th scope="col" class="col-2">
+                            <div class="d-flex flex-wrap align-items-center">
+                                <div class="d-flex flex-wrap align-items-center">
+                                    <i class="fa-solid fa-file fa-fw"></i>
+                                    <span class="m-1">Filename</span>
+                                </div>
+                                <div class="d-none d-flex align-items-center">
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('c','asc')"><i
+                                            class="fa-solid fa-caret-up"></i></button>
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('c','dec')"><i
+                                            class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </th>
+                        <!-- owners -->
+                        <th scope="col" class="col-2" v-if="owners.length > 1">
+                            <div class="d-flex flex-wrap align-items-center">
+                                <div class="d-flex flex-wrap align-items-center">
+                                    <i class="fa-solid fa-tag fa-fw"></i>
+                                    <span class="m-1">File Owner</span>
+                                </div>
+                                <div class="d-none d-flex align-items-center">
+                                    <button class="btn btn-sm btn-secondary" @click="sortContracts('e','dec')"><i
+                                            class="fa-solid fa-caret-up"></i></button>
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('e','asc')"><i
+                                            class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </th>
+                        <!-- tags & labels -->
+                        <th scope="col" class="col-2">
+                            <div class="d-flex flex-wrap align-items-center">
+                                <div class="d-flex flex-wrap align-items-center">
+                                    <i class="fa-solid fa-tag fa-fw"></i>
+                                    <span class="m-1">Tags & Labels</span>
+                                </div>
+                                <div class="d-none d-flex align-items-center">
+                                    <button class="btn btn-sm btn-secondary" @click="sortContracts('e','dec')"><i
+                                            class="fa-solid fa-caret-up"></i></button>
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('e','asc')"><i
+                                            class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </th>
+                        <!-- size -->
+                        <th scope="col" class="col-1">
+                            <div class="d-flex flex-wrap align-items-center">
+                                <div class="d-flex flex-wrap align-items-center">
+                                    <i class="fa-solid fa-database fa-fw"></i>
+                                    <span class="m-1">Size</span>
+                                </div>
+                                <div class="d-none d-flex align-items-center">
+                                    <button class="btn btn-sm btn-secondary" @click="sortContracts('e','dec')"><i
+                                            class="fa-solid fa-caret-up"></i></button>
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('e','asc')"><i
+                                            class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </th>
+                        <!-- created -->
+                        <th scope="col" class="col-1">
+                            <div class="d-flex flex-wrap align-items-center">
+                                <div class="d-flex flex-wrap align-items-center">
+                                    <i class="fa-solid fa-calendar-days fa-fw"></i>
+                                    <span class="m-1">Created</span>
+                                </div>
+                                <div class="d-none d-flex align-items-center">
+                                    <button class="btn btn-sm btn-secondary" @click="sortContracts('e','dec')"><i
+                                            class="fa-solid fa-caret-up"></i></button>
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('e','asc')"><i
+                                            class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </th>
+                        <!-- expires -->
+                        <th scope="col" class="col-1">
+                            <div class="d-flex flex-wrap align-items-center">
+                                <div class="d-flex flex-wrap align-items-center">
+                                    <i class="fa-solid fa-clock fa-fw"></i>
+                                    <span class="m-1">Expires</span>
+                                </div>
+                                <div class="d-none d-flex align-items-center">
+                                    <button class="btn btn-sm btn-secondary" @click="sortContracts('e','dec')"><i
+                                            class="fa-solid fa-caret-up"></i></button>
+                                    <button class="btn btn-sm btn-secondary ms-1"
+                                        @click="sortContracts('e','asc')"><i
+                                            class="fa-solid fa-caret-down"></i></button>
+                                </div>
+                            </div>
+                        </th>
+                        <!-- buttons -->
+                        <th scope="col" class="col-1">
+
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="file in filesArray">
+                        <th scope="row" class="col-1">
+                            <div class="bg-light" style="width:50px;">
+                                <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
+                                    class="mx-auto img-fluid rounded bg-light"
+                                    :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" width="50px">
+                                <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800"
+                                    style="enable-background:new 0 0 800 800;" xml:space="preserve">
+                                    <g>
+                                        <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
                                     S655.5,210,650,210z" />
-                                <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
+                                        <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
                                     s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
                                     C660,305.2,655.5,309.7,650,309.7z" />
-                                <path class="st0"
-                                    d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
+                                        <path class="st0"
+                                            d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
                                     c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
-                                <path class="st0"
-                                    d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
-                                <path class="st0"
-                                    d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
-                                <path class="st0"
-                                    d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
+                                        <path class="st0"
+                                            d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
+                                        <path class="st0"
+                                            d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
+                                        <path class="st0"
+                                            d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
                                     c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
                                     c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
-                                <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2"
-                                    style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
-                            </g>
-                        </svg>
-                    </div>
+                                        <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2"
+                                            style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
+                                    </g>
+                                </svg>
+                            </div>
+                        </th>
+                        <td class="col-2">
+                            <div class="text-break">{{newMeta[file.i][file.f].name ||
+                                file.f}}{{newMeta[file.i][file.f].thumb ? '.' + newMeta[file.i][file.f].type : ''}}
+                            </div>
+                        </td>
+                        <td class="col-2" v-if="owners.length > 1">
+                            <div class="text-break">@{{contract[file.i].t}}</div>
+                        </td>
+                        <td class="col-2">
+                            <div class="d-flex flex-wrap align-items-center">
 
 
-
-                    <div class="mt-1">
-                        <!-- link -->
-                        <div v-if="!newMeta[file.i][file.f].encrypted">
-                            <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank"
-                                class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span
-                                    class="d-flex align-items-center">URL<i
-                                        class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
-                        </div>
-                        <!-- decrypt  -->
-                        <div v-if="newMeta[file.i][file.f].encrypted && !contract[file.i].encryption.key">
-                            <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
-                                @click="decode(file.i)"><span class="d-flex align-items-center w-100">Decrypt<i
-                                        class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
-                        </div>
-                        <!-- download enc -->
-                        <div v-if="newMeta[file.i][file.f].encrypted && contract[file.i].encryption.key">
-                            <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
-                                @click="downloadFile(file.f, file.i)"><span
-                                    class="d-flex align-items-center w-100">Download<i
-                                        class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
-                        </div>
-                        <!-- add to post -->
-                        <div v-if="assets">
-                            <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
-                                @click="addToPost(file.f, contract.i, index)"><span
-                                    class="d-flex align-items-center w-100">Add to Post<i
-                                        class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
-                        </div>
-                        <!-- add to asset -->
-                        <div v-if="assets">
-                            <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
-                                @click="addAsset(file, contract)"><span class="d-flex align-items-center w-100">Add
-                                    asset<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
-                        </div>
-                    </div>
-
-
-
-                    <div class="d-flex flex-column rounded p-1" style="background-color: rgba(0, 0, 0, 0.6);">
-                        <!-- Edit Button -->
-                        <div v-if="!(file.l.length || file.lf)" class="ms-auto me-auto text-muted">
-
-                        </div>
-
-                        <div class="d-flex align-items-center justify-content-between">
-                            &nbsp;
-                            <div class="me-1">
-                                <div class="d-flex align-items-center" style="margin-left: 15px">
+                                <div v-if="file.lc" class="d-flex me-1 align-items-center"
+                                    style="margin-left: 15px">
                                     <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa"
                                         :style="'margin-left: ' + -15 +'px !important;'"></i>
                                 </div>
-                            </div>
 
-                            <div class="mx-auto" v-for="(label, index) in labelsDecode(file.ll, 0)">
-                                <span class="d-flex align-items-center w-100">
-                                    <pop-vue :id=" bid + 'popperL-' + (cc ? 'cc' : '') + file.i + index + label.l"
-                                        title="Labels" trigger="hover">
-                                        <i :class="label.fa"></i>
-                                    </pop-vue>
-                                </span>
-                            </div>
 
-                            <div class="d-flex align-items-center ms-auto ms-1">
+                                <div class="me-1" v-for="label in labelsDecode(file.ll)">
+                                    <span class="d-flex align-items-center">
+                                        <pop-vue
+                                            :id=" bid + 'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')"
+                                            :title="label.l" trigger="hover">
+                                            <i :class="label.fa"></i>
+                                        </pop-vue>
+                                    </span>
+                                </div>
+
+                                <div class="d-flex align-items-center">
+                                    <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)">
+                                        <!-- title="Labels"  -->
+                                        <pop-vue
+                                            :id=" bid + 'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')"
+                                            :title="flag.l" trigger="hover">
+                                            <i :class="flag.fa"></i>
+                                        </pop-vue>
+                                    </div>
+                                </div>
                                 <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa"
                                     :id=" bid + 'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic"
                                     :title="lic.l" trigger="hover">
                                     <i :class="lic.fa"></i>
                                 </pop-vue>
-                                <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags)">
-                                    <!-- title="Labels"  -->
-                                    <pop-vue :id=" bid + 'popper-' + (cc ? 'cc' : '') + file.i + file.index + flag.l"
-                                        :title="flag.l" trigger="hover">
-                                        <i :class="flag.fa"></i>
-                                    </pop-vue>
+                            </div>
+                        </td>
+                        <td class="col-1">{{fancyBytes(file.s)}}</td>
+                        <td class="col-1">{{blockToTime(file.c)}}</td>
+                        <td class="col-1">{{blockToTime(file.e)}}<i v-if="newMeta[file.i].contract.autoRenew"
+                                class="fa-solid fa-arrows-rotate text-success fa-fw fa-spin"></i></td>
+                        <td class="col-1">
+                            <div class="mt-1">
+                                <!-- link -->
+                                <div v-if="!newMeta[file.i][file.f].encrypted">
+                                    <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank"
+                                        class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span
+                                            class="d-flex align-items-center">URL<i
+                                                class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
                                 </div>
+                                <!-- decrypt  -->
+                                <div v-if="newMeta[file.i][file.f].encrypted && !contract[file.i].encryption.key">
+                                    <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
+                                        @click="decode(file.i)"><span
+                                            class="d-flex align-items-center w-100">Decrypt<i
+                                                class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
+                                </div>
+                                <!-- download enc -->
+                                <div v-if="newMeta[file.i][file.f].encrypted && contract[file.i].encryption.key">
+                                    <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
+                                        @click="downloadFile(file.f, file.i)"><span
+                                            class="d-flex align-items-center w-100">Download<i
+                                                class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
+                                </div>
+                                <!-- add to post -->
+                                <div v-if="assets">
+                                    <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
+                                        @click="addToPost(file.f, contract.i, index)"><span
+                                            class="d-flex align-items-center w-100">Add to Post<i
+                                                class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                                </div>
+                                <!-- add to asset -->
+                                <div v-if="assets">
+                                    <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
+                                        @click="addAsset(file, contract)"><span
+                                            class="d-flex align-items-center w-100">Add asset<i
+                                                class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- item grid -->
+    <div class="d-flex flex-wrap" v-else-if="viewOpts.view === 'grid'">
+        <div class="file-grid" v-for="file in filesArray">
+            <div class="card bg-blur-darkg m-05 p-05 text-start">
+                <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank" class="no-decoration">
+                    <div class="text-black text-truncate">{{newMeta[file.i][file.f].name || file.f}}</div>
+                </a>
+                <h5 class="m-0 ms-auto align-self-end"><span
+                        class="d-none badge square rounded-top border border-bottom-0 bg-info border-light-50"
+                        :class="smartColor(file.lc)"><i :class="smartIcon(file.l)"></i>{{
+                        newMeta[file.i][file.f].type }}</span></h5>
+                <div class="bg-light d-flex ratio ratio-1x1 rounded">
+                    <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
+                        class="mx-auto img-fluid rounded bg-light"
+                        :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" width="128px">
+                    <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800"
+                        style="enable-background:new 0 0 800 800;" xml:space="preserve">
+                        <g>
+                            <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
+                                S655.5,210,650,210z" />
+                            <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
+                                s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
+                                C660,305.2,655.5,309.7,650,309.7z" />
+                            <path class="st0"
+                                d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
+                                c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
+                            <path class="st0"
+                                d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
+                            <path class="st0"
+                                d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
+                            <path class="st0"
+                                d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
+                                c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
+                                c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
+                            <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2"
+                                style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
+                        </g>
+                    </svg>
+                </div>
+
+
+
+                <div class="mt-1">
+                    <!-- link -->
+                    <div v-if="!newMeta[file.i][file.f].encrypted">
+                        <a :href="'https://ipfs.dlux.io/ipfs/' + file.f" target="_blank"
+                            class="w-100 btn btn-sm btn-info mb-1 mx-auto"><span
+                                class="d-flex align-items-center">URL<i
+                                    class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
+                    </div>
+                    <!-- decrypt  -->
+                    <div v-if="newMeta[file.i][file.f].encrypted && !contract[file.i].encryption.key">
+                        <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
+                            @click="decode(file.i)"><span class="d-flex align-items-center w-100">Decrypt<i
+                                    class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
+                    </div>
+                    <!-- download enc -->
+                    <div v-if="newMeta[file.i][file.f].encrypted && contract[file.i].encryption.key">
+                        <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
+                            @click="downloadFile(file.f, file.i)"><span
+                                class="d-flex align-items-center w-100">Download<i
+                                    class="fa-solid fa-download fa-fw ms-auto"></i></span></button>
+                    </div>
+                    <!-- add to post -->
+                    <div v-if="assets">
+                        <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
+                            @click="addToPost(file.f, contract.i, index)"><span
+                                class="d-flex align-items-center w-100">Add to Post<i
+                                    class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                    </div>
+                    <!-- add to asset -->
+                    <div v-if="assets">
+                        <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
+                            @click="addAsset(file, contract)"><span class="d-flex align-items-center w-100">Add
+                                asset<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                    </div>
+                </div>
+
+
+
+                <div class="d-flex flex-column rounded p-1" style="background-color: rgba(0, 0, 0, 0.6);">
+                    <!-- Edit Button -->
+                    <div v-if="!(file.l.length || file.lf)" class="ms-auto me-auto text-muted">
+
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between">
+                        &nbsp;
+                        <div class="me-1">
+                            <div class="d-flex align-items-center" style="margin-left: 15px">
+                                <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa"
+                                    :style="'margin-left: ' + -15 +'px !important;'"></i>
                             </div>
                         </div>
 
-                    </div>
+                        <div class="mx-auto" v-for="(label, index) in labelsDecode(file.ll, 0)">
+                            <span class="d-flex align-items-center w-100">
+                                <pop-vue :id=" bid + 'popperL-' + (cc ? 'cc' : '') + file.i + index + label.l"
+                                    title="Labels" trigger="hover">
+                                    <i :class="label.fa"></i>
+                                </pop-vue>
+                            </span>
+                        </div>
 
-                    <div class="d-flex align-items-center justify-content-center text-break small text-muted">
-                        {{fancyBytes(file.s)}}
+                        <div class="d-flex align-items-center ms-auto ms-1">
+                            <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa"
+                                :id=" bid + 'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic"
+                                :title="lic.l" trigger="hover">
+                                <i :class="lic.fa"></i>
+                            </pop-vue>
+                            <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags)">
+                                <!-- title="Labels"  -->
+                                <pop-vue :id=" bid + 'popper-' + (cc ? 'cc' : '') + file.i + file.index + flag.l"
+                                    :title="flag.l" trigger="hover">
+                                    <i :class="flag.fa"></i>
+                                </pop-vue>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
+
+                <div class="d-flex align-items-center justify-content-center text-break small text-muted">
+                    {{fancyBytes(file.s)}}
+                </div>
+
             </div>
         </div>
     </div>
@@ -1049,6 +1032,7 @@ export default {
     data() {
         return {
             files: {},
+            userFolderTrees: {},
             owners: [],
             contractIDs: {},
             newUser: '',
@@ -1214,6 +1198,32 @@ export default {
             this.owners = this.owners.filter(o => o != user)
             this.render()
         },
+        createNewFolder() {
+            const folderName = prompt("Enter new folder name:", "New Folder");
+            if (folderName) {
+                const newFolder = {
+                    name: folderName,
+                    path: this.currentFolderPath ? `${this.currentFolderPath}/${folderName}` : folderName,
+                    subfolders: [],
+                    files: [],
+                };
+                const userFolders = this.userFolderTrees[this.selectedUser] || [];
+                if (!this.currentFolderPath) {
+                    userFolders.push(newFolder);
+                } else {
+                    const pathParts = this.currentFolderPath.split("/").filter(Boolean);
+                    let current = userFolders;
+                    for (const part of pathParts) {
+                        const subfolder = current.find(f => f.name === part);
+                        if (!subfolder) return; // Shouldn’t happen, but safety check
+                        current = subfolder.subfolders;
+                    }
+                    current.push(newFolder);
+                }
+                this.userFolderTrees[this.selectedUser] = [...userFolders];
+                this.$forceUpdate(); // Ensure UI updates
+            }
+        },
         appendUserFiles() {
             const newUser = this.newUser
             this.newUser = ''
@@ -1365,6 +1375,26 @@ export default {
             }
             this.render()
         },
+        dragOverBreadcrumb(event) {
+            event.preventDefault(); // Required to allow dropping
+        },
+        dropOnBreadcrumb(path) {
+            return (event) => {
+                event.preventDefault();
+                const fileId = event.dataTransfer.getData("fileId");
+                const file = this.files[fileId];
+                if (file && this.isEditable(file) && file.folderPath !== path) {
+                    this.pendingChanges[file.i] = this.pendingChanges[file.i] || {};
+                    this.pendingChanges[file.i][file.f] = {
+                        folderPath: path,
+                        name: this.newMeta[file.i][file.f].name || file.f,
+                    };
+                    file.folderPath = path;
+                    this.buildFolderTrees();
+                    this.render();
+                }
+            };
+        },
         download(fileInfo, data = false, MIME_TYPE = "image/png") {
             if (data) {
                 var blob = new Blob([data], { type: MIME_TYPE });
@@ -1450,21 +1480,10 @@ export default {
             return Object.values(this.files).filter(file => file.o === user && file.folderPath === path);
         },
         showContextMenu(event, type, item) {
-            let x, y, positionStyle = 'fixed'; // Default to fixed positioning
-            if (this.$refs.container) {
-                const rect = this.$refs.container.getBoundingClientRect();
-                x = event.clientX - rect.left;
-                y = event.clientY - rect.top;
-                positionStyle = 'absolute'; // Use absolute positioning if container is available
-            } else {
-                console.warn('Container ref not found, falling back to fixed positioning');
-                x = event.clientX;
-                y = event.clientY;
-            }
             this.contextMenu = {
                 show: true,
-                x: event.clientX || 0,
-                y: event.clientY || 0,
+                x: event.clientX,
+                y: event.clientY,
                 type,
                 item,
             };
@@ -1981,6 +2000,12 @@ export default {
     computed: {
         hasFiles() {
             return Object.keys(this.files).length > 0;
+        },
+        currentFileCount() {
+            return this.getFiles(this.selectedUser, this.currentFolderPath).length;
+        },
+        getSubfolderCount() {
+            return this.getSubfolders(this.selectedUser, this.currentFolderPath).length
         }
     },
     watch: {
