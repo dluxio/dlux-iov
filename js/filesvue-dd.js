@@ -208,9 +208,9 @@ export default {
     <div v-if="viewOpts.view === 'folder' && selectedUser">
         <h3>@{{ selectedUser }}</h3>
         <div class="breadcrumb d-flex align-items-center">
-            <span @click="navigateTo('')" @dragover.prevent @drop="dropOnBreadcrumb('')" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">/</span>
+            <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">/</span>
             <template v-for="(part, index) in currentFolderPath.split('/').filter(Boolean)" :key="index">
-                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragover.prevent @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'))" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">{{ part }}</span>
+                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'), $event)" @dragenter="handleDragEnterBreadcrumb($event, currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">{{ part }}</span>
                 <span class="mx-1">/</span>
             </template>
         </div>
@@ -224,7 +224,7 @@ export default {
                 <button class="btn btn-outline-light ms-1"><i class="fa-solid fa-gear"></i></button>
             </div>
         </div>
-        <div class="files" @contextmenu.prevent="showContextMenu($event, 'background', null)" @dragover="dragOverBackground($event)" @drop="dropOnBackground($event)">
+        <div class="files" @contextmenu.prevent="showContextMenu($event, 'background', null)" @dragover="dragOverBackground($event)" @drop="dropOnBackground($event)" style="position: relative;">
 <!-- List Mode -->
             <div v-if="viewOpts.fileView === 'list'">
                 <table class="table table-dark table-striped table-hover">
@@ -238,14 +238,14 @@ export default {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" class="folder-row" @click="navigateTo(folder.path)" @contextmenu.prevent="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)">
+                        <tr v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" class="folder-row" @click="navigateTo(folder.path)" @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)" @dragenter="handleDragEnterFolder($event, folder)" @dragleave="handleDragLeave">
                             <td><i class="fa-solid fa-folder"></i></td>
                             <td>{{ folder.name }}</td>
                             <td></td>
                             <td></td>
                             <td></td>
                         </tr>
-                        <tr v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" draggable="true" @dragstart="dragStartFile($event, file)" @contextmenu.prevent="showContextMenu($event, 'file', file)">
+                        <tr v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" draggable="true" @dragstart="dragStartFile($event, file)">
                             <td>
                                 <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="50" />
                                 <span v-else>{{ newMeta[file.i][file.f].type }}</span>
@@ -263,15 +263,21 @@ export default {
             </div>
 <!-- Grid Mode -->
             <div v-if="viewOpts.fileView === 'grid'" class="d-flex flex-wrap">
-                <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" class="file-grid m-1 p-2 bg-dark rounded" @click="navigateTo(folder.path)" @contextmenu.prevent="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)">
+                <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" class="file-grid m-1 p-2 bg-dark rounded" @click="navigateTo(folder.path)" @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)" @dragenter="handleDragEnterFolder($event, folder)" @dragleave="handleDragLeave">
                     <i class="fa-solid fa-folder fa-2x"></i>
                     <div>{{ folder.name }}</div>
                 </div>
-                <div v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" class="file-grid m-1 p-2 bg-dark rounded" draggable="true" @dragstart="dragStartFile($event, file)" @contextmenu.prevent="showContextMenu($event, 'file', file)">
+                <div v-for="file in getFiles(selectedUser, currentFolderPath)" 
+                     :key="file.f" 
+                     class="file-grid m-1 p-2 rounded" 
+                     :class="{ 'bg-dark': !isFileSelected(file), 'bg-primary': isFileSelected(file) }"
+                     draggable="true" 
+                     @dragstart="dragStartFile($event, file)" 
+                     @click="handleFileClick($event, file)"
+                     @contextmenu.prevent.stop="showContextMenu($event, 'file', file)">
                     <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="100" />
                     <span v-else>{{ newMeta[file.i][file.f].type }}</span>
                     <div>{{ newMeta[file.i][file.f].name || file.f }}</div>
-                    <small>@{{ file.o }}</small>
                 </div>
             </div>
         </div>
@@ -280,36 +286,64 @@ export default {
     <div v-else-if="viewOpts.view === 'icon' && selectedUser" class="d-flex flex-wrap">
         <h3>@{{ selectedUser }}</h3>
         <div class="breadcrumb d-flex align-items-center">
-            <span @click="navigateTo('')" @dragover.prevent @drop="dropOnBreadcrumb('')" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">/</span>
+            <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">/</span>
             <template v-for="(part, index) in currentFolderPath.split('/').filter(Boolean)" :key="index">
-                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragover.prevent @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'))" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">{{ part }}</span>
+                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'), $event)" @dragenter="handleDragEnterBreadcrumb($event, currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">{{ part }}</span>
                 <span class="mx-1">/</span>
             </template>
         </div>
-        <div class="ms-2 d-flex align-items-center">
-            <i class="fa-solid fa-file me-2" style="color: white;"></i>
-            <div class="btn-group">
-                <input type="radio" class="btn-check" :name="bid + 'fileView'" :id="bid + 'fileGrid'" autocomplete="off" @click="viewOpts.fileView = 'grid'" :checked="viewOpts.fileView === 'grid'" />
-                <label class="btn btn-outline-light" :for="bid + 'fileGrid'"><i class="fa-solid fa-table-cells-large"></i></label>
-                <input type="radio" class="btn-check" :name="bid + 'fileView'" :id="bid + 'fileList'" autocomplete="off" @click="viewOpts.fileView = 'list'" :checked="viewOpts.fileView === 'list'" />
-                <label class="btn btn-outline-light" :for="bid + 'fileList'"><i class="fa-solid fa-table-list"></i></label>
-                <button class="btn btn-outline-light ms-1"><i class="fa-solid fa-gear"></i></button>
+        <div class="d-flex justify-content-end w-100 my-2">
+            <button class="btn btn-secondary btn-sm" @click="createNewFolder">New Folder</button>
+            <div class="btn-group ms-2">
+                <button class="btn btn-sm" :class="viewOpts.fileView === 'grid' ? 'btn-primary' : 'btn-secondary'" @click="viewOpts.fileView = 'grid'"><i class="fa-solid fa-th-large"></i></button>
+                <button class="btn btn-sm" :class="viewOpts.fileView === 'list' ? 'btn-primary' : 'btn-secondary'" @click="viewOpts.fileView = 'list'"><i class="fa-solid fa-list"></i></button>
             </div>
         </div>
-        <div class="files" @contextmenu.prevent="showContextMenu($event, 'background', null)" @dragover="dragOverBackground($event)" @drop="dropOnBackground($event)">
+        <div class="files" @contextmenu.prevent="showContextMenu($event, 'background', null)" 
+             @dragover="dragOverBackground($event)" 
+             @drop="dropOnBackground($event)"
+             @mousedown="startSelectionBox($event)"
+             @mousemove="updateSelectionBox($event)"
+             @mouseup="endSelectionBox"
+             style="position: relative;">
+            <!-- Remove the template-based selection box overlay -->
+            
             <div v-if="viewOpts.fileView === 'grid'" class="d-flex flex-wrap">
-                <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="folder.path" class="file-grid m-2 p-2 bg-dark rounded text-center" @dblclick="navigateTo(folder.path)" @contextmenu.prevent="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)">
+                <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="folder.path" 
+                     class="file-grid m-2 p-2 rounded text-center" 
+                     :class="{ 'bg-dark': !isFolderSelected(folder), 'bg-primary': isFolderSelected(folder) }"
+                     :data-key="folder.path"  
+                     :data-type="'folder'"
+                     draggable="true"
+                     @dragstart="dragStartItem($event, folder, 'folder')"
+                     @dblclick="navigateTo(folder.path)" 
+                     @click="handleFolderClick($event, folder)"
+                     @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)" 
+                     @dragover="dragOverFolder($event)" 
+                     @drop="dropOnFolder($event, folder)" 
+                     @dragenter="handleDragEnterFolder($event, folder)" 
+                     @dragleave="handleDragLeave">
                     <i class="fa-solid fa-folder fa-3x"></i>
                     <div>{{ folder.name }}</div>
                 </div>
-                <div v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" class="file-grid m-2 p-2 bg-dark rounded text-center" draggable="true" @dragstart="dragStartFile($event, file)" @contextmenu.prevent="showContextMenu($event, 'file', file)">
-                    <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="100" />
-                    <i v-else class="fa-solid fa-file fa-3x"></i>
-                    <div>{{ newMeta[file.i][file.f].name || file.f }}</div>
-                    <small>@{{ file.o }}</small>
+                <div v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" 
+                     class="file-grid m-2 p-2 rounded text-center" 
+                     :class="{ 'bg-primary': isFileSelected(file) }"
+                     :data-key="file.f"  
+                     :data-type="'file'"
+                     :data-file-id="file.f"
+                     draggable="true" 
+                     @dragstart="dragStartItem($event, file, 'file')" 
+                     @click="handleFileClick($event, file)"
+                     @contextmenu.prevent.stop="showContextMenu($event, 'file', file)">
+                    <div class="file-icon-container d-flex align-items-center justify-content-center" style="height: 70px; width: 100%;">
+                        <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" style="max-height: 70px; max-width: 100%;" />
+                        <i v-else :class="'fa-solid ' + smartIcon(file.a) + ' fa-3x'" :style="{ color: smartColor(file.a) }"></i>
                 </div>
+                    <div class="file-name mt-2 text-truncate" style="max-width: 120px;">{{ newMeta[file.i][file.f].name || file.f }}</div>
             </div>
-            <div v-if="viewOpts.fileView === 'list'">
+            </div>
+            <div v-else class="table-responsive">
                 <table class="table table-dark table-striped table-hover">
                     <thead>
                         <tr>
@@ -317,16 +351,23 @@ export default {
                             <th>Filename</th>
                             <th>Owner</th>
                             <th>Size</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" class="folder-row" @dblclick="navigateTo(folder.path)" @contextmenu.prevent="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)">
+                        <tr v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" class="folder-row" @dblclick="navigateTo(folder.path)" @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)" @dragenter="handleDragEnterFolder($event, folder)" @dragleave="handleDragLeave">
                             <td><i class="fa-solid fa-folder"></i></td>
                             <td>{{ folder.name }}</td>
                             <td></td>
                             <td></td>
+                            <td></td>
                         </tr>
-                        <tr v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" draggable="true" @dragstart="dragStartFile($event, file)" @contextmenu.prevent="showContextMenu($event, 'file', file)">
+                        <tr v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" 
+                            :class="{ 'table-primary': isFileSelected(file) }"
+                            draggable="true" 
+                            @dragstart="dragStartItem($event, file, 'file')" 
+                            @click="handleFileClick($event, file)"
+                            @contextmenu.prevent.stop="showContextMenu($event, 'file', file)">
                             <td>
                                 <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="50" />
                                 <span v-else>{{ newMeta[file.i][file.f].type }}</span>
@@ -630,7 +671,7 @@ export default {
                     </div>
 <!-- add to asset -->
                     <div v-if="assets">
-                        <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
+                        <button type="button" class="w-100 btn btn-sm btn-purp my-1 mx-auto"
                             @click="addAsset(file, contract)"><span class="d-flex align-items-center w-100">Add
                                 asset<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                     </div>
@@ -761,6 +802,7 @@ export default {
                                     style="enable-background:new 0 0 800 800;" xml:space="preserve">
                                     <g>
                                         <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
+                                        S655.5,210,650,210z" />
                                     S655.5,210,650,210z" />
                                         <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
                                     s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
@@ -831,7 +873,7 @@ export default {
                         <td class="col-1">{{fancyBytes(file.s)}}</td>
                         <td class="col-1">{{blockToTime(file.c)}}</td>
                         <td class="col-1">{{blockToTime(file.e)}}<i v-if="newMeta[file.i].contract.autoRenew"
-                                class="fa-solid fa-arrows-rotate text-success fa-fw fa-spin"></i></td>
+                                class="fa-solid fa-arrows-rotate text-success fa-fw"></i></td>
                         <td class="col-1">
                             <div class="mt-1">
 <!-- link -->
@@ -844,8 +886,7 @@ export default {
 <!-- decrypt  -->
                                 <div v-if="newMeta[file.i][file.f].encrypted && !contract[file.i].encryption.key">
                                     <button type="button" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"
-                                        @click="decode(file.i)"><span
-                                            class="d-flex align-items-center w-100">Decrypt<i
+                                        @click="decode(file.i)"><span class="d-flex align-items-center w-100">Decrypt<i
                                                 class="fa-solid fa-fw ms-auto fa-lock-open"></i></span></button>
                                 </div>
 <!-- download enc -->
@@ -865,9 +906,8 @@ export default {
 <!-- add to asset -->
                                 <div v-if="assets">
                                     <button type="button" class="w-100 btn btn-sm btn-purp mb-1 mx-auto"
-                                        @click="addAsset(file, contract)"><span
-                                            class="d-flex align-items-center w-100">Add asset<i
-                                                class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
+                                        @click="addAsset(file, contract)"><span class="d-flex align-items-center w-100">Add
+                                            asset<i class="fa-solid fa-plus fa-fw ms-auto"></i></span></button>
                                 </div>
                             </div>
                         </td>
@@ -1139,71 +1179,24 @@ export default {
             newMeta: {},
             decoded: false,
             debounce: null,
+            dragHoverTimeout: null, // Timeout ID for drag hover navigation
+            dragHoverTargetPath: null, // Path of the element being hovered over
+            selectedFiles: [], // Array of selected file IDs
+            selectionBox: {
+                active: false,
+                startX: 0,
+                startY: 0,
+                endX: 0,
+                endY: 0
+            }, // For rubber-band selection
+            initialSelection: [], // Added: To store selection state at drag start
             labels: {
-                ["0"]: { fa: "fa-solid fa-sink fa-fw", l: "Miscellaneous", c: 0 },
-                ["1"]: { fa: "fa-solid fa-exclamation fa-fw", l: "Important", c: 0 },
-                ["2"]: { fa: "fa-solid fa-star fa-fw", l: "Favorite", c: 0 },
-                ["3"]: { fa: "fa-solid fa-dice fa-fw", l: "Random", c: 0 },
-                ["4"]: { fa: "fa-solid fa-circle fa-fw text-red", l: "Red", c: 1 },
-                ["5"]: { fa: "fa-solid fa-circle fa-fw text-orange", l: "Orange", c: 1 },
-                ["6"]: { fa: "fa-solid fa-circle fa-fw text-yellow", l: "Yellow", c: 1 },
-                ["7"]: { fa: "fa-solid fa-circle fa-fw text-green", l: "Green", c: 1 },
-                ["8"]: { fa: "fa-solid fa-circle fa-fw text-blue", l: "Blue", c: 1 },
-                ["9"]: { fa: "fa-solid fa-circle fa-fw text-purple", l: "Purple", c: 1 },
-                ["A"]: { fa: "fa-solid fa-circle fa-fw text-grey", l: "Grey", c: 1 },
-                ["B"]: { fa: "fa-solid fa-briefcase fa-fw", l: "Work", c: 0 },
-                ["C"]: { fa: "fa-solid fa-heart fa-fw", l: "Personal", c: 0 },
-                ["D"]: { fa: "fa-solid fa-people-roof fa-fw", l: "Family", c: 0 },
-                ["E"]: { fa: "fa-solid fa-people-group fa-fw", l: "Friends", c: 0 },
-                ["F"]: { fa: "fa-solid fa-rocket fa-fw", l: "Projects", c: 0 },
-                ["G"]: { fa: "fa-solid fa-piggy-bank fa-fw", l: "Finance", c: 0 },
-                ["H"]: { fa: "fa-solid fa-kit-medical fa-fw", l: "Health", c: 0 },
-                ["I"]: { fa: "fa-solid fa-graduation-cap fa-fw", l: "Education", c: 0 },
-                ["J"]: { fa: "fa-solid fa-compass fa-fw", l: "Travel", c: 0 },
-                ["K"]: { fa: "fa-regular fa-calendar-days fa-fw", l: "Events", c: 0 },
-                ["L"]: { fa: "fa-solid fa-camera fa-fw", l: "Photography", c: 0 },
-                ["M"]: { fa: "fa-solid fa-gamepad fa-fw", l: "Gaming", c: 0 },
-                ["N"]: { fa: "fa-solid fa-volleyball fa-fw", l: "Sports", c: 0 },
-                ["O"]: { fa: "fa-solid fa-feather fa-fw", l: "Blogging", c: 0 },
-                ["P"]: { fa: "fa-solid fa-crown fa-fw", l: "Meme", c: 0 },
-                ["Q"]: { fa: "fa-solid fa-music fa-fw", l: "Music", c: 0 },
-                ["R"]: { fa: "fa-solid fa-video fa-fw", l: "Video", c: 0 },
-                ["S"]: { fa: "fa-solid fa-microphone fa-fw", l: "Audio", c: 0 },
-                ["T"]: { fa: "fa-solid fa-newspaper fa-fw", l: "News", c: 0 },
-                ["U"]: { fa: "fa-solid fa-code fa-fw", l: "Development", c: 0 },
-                ["V"]: { fa: "fa-solid fa-hat-cowboy fa-fw", l: "Fashion", c: 0 },
-                ["W"]: { fa: "fa-solid fa-burger fa-fw", l: "Food", c: 0 },
-                ["X"]: { fa: "fa-solid fa-utensils fa-fw", l: "Cooking", c: 0 },
-                ["Y"]: { fa: "fa-solid fa-toolbox fa-fw", l: "DIY", c: 0 },
-                ["Z"]: { fa: "fa-solid fa-paintbrush fa-fw", l: "Art", c: 0 },
-                ["a"]: { fa: "fa-solid fa-swatchbook fa-fw", l: "Design", c: 0 },
-                ["b"]: { fa: "fa-solid fa-microchip fa-fw", l: "Technology", c: 0 },
-                ["c"]: { fa: "fa-solid fa-cross fa-fw", l: "Religion", c: 0 },
-                ["d"]: { fa: "fa-solid fa-scale-balanced fa-fw", l: "Government", c: 0 },
-                ["e"]: { fa: "fa-solid fa-landmark-dome fa-fw", l: "Politics", c: 0 },
-                ["f"]: { fa: "fa-solid fa-vial fa-fw", l: "Science", c: 0 },
-                ["g"]: { fa: "fa-solid fa-magnifying-glass fa-fw", l: "Research", c: 0 },
-                ["h"]: { fa: "fa-solid fa-receipt fa-fw", l: "Receipts", c: 0 },
-                ["i"]: { fa: "fa-solid fa-envelope-open-text fa-fw", l: "Correspondence", c: 0 },
-                ["j"]: { fa: "fa-solid fa-copy fa-fw", l: "Templates", c: 0 },
-                ["k"]: { fa: "fa-solid fa-file-lines fa-fw", l: "Resources", c: 0 },
-                ["l"]: { fa: "fa-solid fa-book-bookmark fa-fw", l: "Reference", c: 0 },
-                ["m"]: { fa: "fa-solid fa-floppy-disk fa-fw", l: "Backups", c: 0 },
-                ["n"]: { fa: "fa-solid fa-box-archive fa-fw", l: "Archive", c: 0 },
-                ["o"]: { fa: "fa-solid fa-compass-drafting fa-fw", l: "Drafts", c: 0 },
-                ["p"]: { fa: "fa-solid fa-flag-checkered fa-fw", l: "Finished", c: 0 },
-                ["q"]: { fa: "fa-solid fa-paper-plane fa-fw", l: "Sent", c: 0 },
-                ["r"]: { fa: "fa-solid fa-clock fa-fw", l: "Pending", c: 0 },
-                ["s"]: { fa: "fa-solid fa-thumbs-up fa-fw", l: "Approved", c: 0 },
-                ["t"]: { fa: "fa-solid fa-thumbs-down fa-fw", l: "Rejected", c: 0 },
-                ["u"]: { fa: "fa-solid fa-lightbulb fa-fw", l: "Ideas", c: 0 },
-                ["v"]: { fa: "fa-solid fa-bullseye fa-fw", l: "Goals", c: 0 },
-                ["w"]: { fa: "fa-solid fa-list-check fa-fw", l: "Tasks", c: 0 },
-                ["x"]: { fa: "fa-solid fa-gavel fa-fw", l: "Legal", c: 0 },
-                ["y"]: { fa: "fa-solid fa-handshake fa-fw", l: "Networking", c: 0 },
-                ["z"]: { fa: "fa-solid fa-comments fa-fw", l: "Feedback", c: 0 },
-                ["+"]: { fa: "fa-solid fa-square-poll-vertical fa-fw", l: "Surveys", c: 0 },
-                ["="]: { fa: "fa-solid fa-user-secret fa-fw", l: "Classified", c: 0 }
+                "0": { fa: "fa-solid fa-sink fa-fw", l: "Miscellaneous", c: 0 },
+                "1": { fa: "fa-solid fa-exclamation fa-fw", l: "Important", c: 0 },
+                "2": { fa: "fa-solid fa-trash fa-fw", l: "Trash", c: 0 },
+                "3": { fa: "fa-solid fa-lock fa-fw", l: "Sensitive", c: 0 },
+                "4": { fa: "fa-solid fa-earth-americas fa-fw", l: "World", c: 0 },
+                "5": { fa: "fa-solid fa-star fa-fw", l: "Favourite", c: 0 }
             },
             licenses: {
                 ["1"]: {
@@ -1272,28 +1265,55 @@ export default {
         },
         createNewFolder() {
             const folderName = prompt("Enter new folder name:", "New Folder");
-            if (folderName) {
-                const newFolder = {
-                    name: folderName,
-                    path: this.currentFolderPath ? `${this.currentFolderPath}/${folderName}` : folderName,
-                    subfolders: [],
-                    files: [],
-                };
-                const userFolders = this.userFolderTrees[this.selectedUser] || [];
-                if (!this.currentFolderPath) {
-                    userFolders.push(newFolder);
+            // Ensure user is the current logged-in account and folderName is valid
+            if (folderName && this.selectedUser === this.account) {
+                const newPath = this.currentFolderPath ? `${this.currentFolderPath}/${folderName}` : folderName;
+
+                // --- Prevent creating folder if it already exists (check pending and current) ---
+                 const userTree = this.userFolderTrees[this.selectedUser] || [];
+                 const findFolder = (nodes, pathParts) => {
+                     if (!pathParts.length) return null; // Should target a folder name
+                     let currentLevel = nodes;
+                     let node = null;
+                     for(const part of pathParts) {
+                         node = currentLevel.find(n => n.name === part);
+                         if (!node) return null; // Path segment not found
+                         currentLevel = node.subfolders;
+                     }
+                     return node; // Return the found node
+                 };
+                 const parts = newPath.split('/').filter(Boolean);
+                 if (findFolder(userTree, parts)) {
+                     alert(`Folder "${folderName}" already exists at this level.`);
+                     return;
+                 }
+                 // Also check pending changes (more complex, maybe skip for now or add later)
+
+                // --- Stage in Pending Changes ---
+                const userContractId = Object.keys(this.contract).find(id => this.contract[id].t === this.selectedUser);
+
+                if (userContractId) {
+                    this.pendingChanges[userContractId] = this.pendingChanges[userContractId] || {};
+                    this.pendingChanges[userContractId]['__newFolders__'] = this.pendingChanges[userContractId]['__newFolders__'] || [];
+                    if (!this.pendingChanges[userContractId]['__newFolders__'].includes(newPath)) {
+                         this.pendingChanges[userContractId]['__newFolders__'].push(newPath);
+                         console.log("Pending Changes after staging new folder:", JSON.parse(JSON.stringify(this.pendingChanges)));
+
+                         // --- Trigger UI update by rebuilding tree ---
+                         // No direct UI manipulation needed now, buildFolderTrees will handle it
+                         this.buildFolderTrees();
+                         // Optional: Force update if reactivity is sometimes slow, but ideally not needed
+                         // this.$forceUpdate();
                 } else {
-                    const pathParts = this.currentFolderPath.split("/").filter(Boolean);
-                    let current = userFolders;
-                    for (const part of pathParts) {
-                        const subfolder = current.find(f => f.name === part);
-                        if (!subfolder) return; // Shouldn’t happen, but safety check
-                        current = subfolder.subfolders;
+                         alert(`Folder "${folderName}" is already pending creation.`);
                     }
-                    current.push(newFolder);
+                } else {
+                    console.error("Cannot add new folder to pending changes: No contract found for user", this.selectedUser);
+                    alert("Could not stage folder creation for saving. No contract found.");
                 }
-                this.userFolderTrees[this.selectedUser] = [...userFolders];
-                this.$forceUpdate(); // Ensure UI updates
+
+            } else if (folderName && this.selectedUser !== this.account) {
+                 alert("Cannot create folders for other users.");
             }
         },
         appendUserFiles() {
@@ -1529,7 +1549,25 @@ export default {
             return current;
         },
         getFiles(user, path) {
-            return Object.values(this.files).filter(file => !file.is_thumb && file.folderPath === path);
+            // Normalize empty paths
+            const normalizedPath = path === undefined ? '' : path;
+            
+            // Get all files for this user that match the path
+            return Object.values(this.files).filter(file => {
+                // Check if owner matches
+                const ownerMatch = file.o === user;
+                
+                // Normalize file path
+                const filePathNormalized = file.folderPath === undefined ? '' : file.folderPath;
+                
+                // Check if path matches
+                const pathMatch = filePathNormalized === normalizedPath;
+                
+                // Skip thumbnails
+                const notThumb = !file.is_thumb;
+                
+                return ownerMatch && pathMatch && notThumb;
+            });
         },
         showContextMenu(event, type, item) {
             this.contextMenu = {
@@ -1549,7 +1587,15 @@ export default {
             return file.o === this.account; // Only current user's files are editable
         },
         isEditableFolder(folder) {
-            return files.some(file => file.o === this.account);
+            // Preset folders can't be renamed
+            if (folder.isPreset) {
+                return false;
+            }
+            
+            // Check if *any* loaded file belongs to the current user
+            // This might need refinement if folder ownership becomes a thing
+            // For now, assume if the user owns *any* files, they can manage folders
+            return this.owners.includes(this.account);
         },
         renameItem(item, type) {
             const oldName = type === "file" ? (this.newMeta[item.i][item.f].name || item.f) : item.name;
@@ -1584,115 +1630,473 @@ export default {
             }
         },
         dragStartFile(event, file) {
-            if (!this.isEditable(file)) return;
+            console.log('Drag start file:', file);
+            
+            // If dragging a selected file and there are multiple files selected
+            if (this.isFileSelected(file) && this.selectedFiles.length > 1) {
+                // Include all selected files in the drag data
+                event.dataTransfer.setData("fileids", JSON.stringify(this.selectedFiles));
+                console.log('Dragging multiple files:', this.selectedFiles);
+            } else {
+                // Single file drag (traditional behavior)
+                this.selectedFiles = [file.f]; // Select only this file
             event.dataTransfer.setData("fileid", file.f);
-            event.dataTransfer.effectAllowed = "move"
-            event.dataTransfer.dropEffect = "move"
+            }
+            
+            event.dataTransfer.setData("contractid", file.i);
+            
+            // Use text/plain as a fallback
+            event.dataTransfer.setData("text/plain", file.f);
+            
+            // Set drag image
+            const dragIcon = document.createElement('div');
+            dragIcon.style.position = 'absolute';
+            dragIcon.style.top = '-1000px'; // Position off-screen initially
+            dragIcon.style.maxWidth = '200px'; // Limit width
+            
+            if (this.selectedFiles.length > 1) {
+                // Show count for multiple files
+                dragIcon.innerHTML = `<div style="padding: 10px; background: rgba(0,0,0,0.7); color: white; border-radius: 4px; display: flex; align-items: center; max-width: 200px; white-space: nowrap;">
+                    <i class="fa-solid fa-files fa-lg me-2"></i> 
+                    <span>${this.selectedFiles.length} files</span>
+                </div>`;
+            } else {
+                // Show single file icon
+                const fileName = this.newMeta[file.i][file.f].name || file.f;
+                const truncatedName = fileName.length > 15 ? fileName.substring(0, 15) + '...' : fileName;
+                
+                dragIcon.innerHTML = `<div style="padding: 10px; background: rgba(0,0,0,0.7); color: white; border-radius: 4px; display: flex; align-items: center; max-width: 200px; white-space: nowrap;">
+                    <i class="fa-solid ${this.smartIcon(file.a)} fa-lg me-2"></i> 
+                    <span>${truncatedName}</span>
+                </div>`;
+            }
+            
+            document.body.appendChild(dragIcon);
+            event.dataTransfer.setDragImage(dragIcon, 0, 0);
+            
+            // Clean up the drag image element after drag starts
+            setTimeout(() => {
+                document.body.removeChild(dragIcon);
+            }, 0);
         },
         dragOverFolder(event) {
             event.preventDefault();
         },
         dropOnFolder(event, folder) {
             event.preventDefault();
-            const fileId = event.dataTransfer.getData("fileid");
-            console.log('DoF',{event, folder, fileId})
-            const file = this.files[fileId];
-            if (file && this.isEditable(file) && file.folderPath !== folder.path) {
-                this.pendingChanges[file.i] = this.pendingChanges[file.i] || {};
-                this.pendingChanges[file.i][file.f] = {
-                    folderPath: folder.path,
-                    name: this.newMeta[file.i][file.f].name || file.f,
-                };
-                this.files[fileId].folderPath = folder.path;
-                console.log(this.files[fileId].folderPath)
-                this.buildFolderTrees();
-                this.render();
+            event.stopPropagation(); 
+            let itemIds = [];
+            
+            // Check for multiple items being dragged
+            const itemIdsStr = event.dataTransfer.getData("itemids"); 
+            if (itemIdsStr) {
+                try {
+                    itemIds = JSON.parse(itemIdsStr);
+                } catch (e) {
+                    // Fallback to text/plain if parsing fails
+                    const textData = event.dataTransfer.getData("text/plain");
+                    if(textData) itemIds = textData.split('\n');
+                }
+            } else {
+                 // Fallback to text/plain if itemids is missing
+                 const textData = event.dataTransfer.getData("text/plain");
+                 if(textData) itemIds = textData.split('\n');
             }
+            
+            // Get contract ID if available (may not be for folder-only drags)
+            const contractId = event.dataTransfer.getData("contractid"); 
+            
+            if (!itemIds.length) {
+                return;
+            }
+            
+            const targetPath = folder.path;
+            
+            // Process each item
+            itemIds.forEach(itemId => {
+                if (itemId.startsWith('folder-')) {
+                    // --- Handle Folder Drop ---
+                    const folderPathToMove = itemId.substring('folder-'.length);
+                    
+                    // Skip if moving to itself
+                    if (folderPathToMove === targetPath) {
+                        return;
+                    }
+                    
+                    // Check if this is a preset folder - don't allow moving preset folders
+                    if (this.isPresetFolder(folderPathToMove)) {
+                        console.warn("Cannot move preset folders");
+                        return;
+                    }
+                    
+                    // Check if we're dropping into a subfolder of the folder being moved
+                    // This would create a recursive loop and is not allowed
+                    if (targetPath.startsWith(folderPathToMove + '/')) {
+                        console.warn('Cannot move a folder into its own subfolder');
+                        return;
+                    }
+                    
+                    // Find all files that are in the folder being moved or its subfolders
+                    const filesInFolder = Object.values(this.files).filter(file => 
+                        file.folderPath === folderPathToMove || file.folderPath.startsWith(folderPathToMove + '/')
+                    );
+                    
+                    if (filesInFolder.length === 0) {
+                        // This is an empty folder, perhaps a newly created one
+                        // We'll need to update any pending folder creation
+                        for (const cid in this.pendingChanges) {
+                            if (this.pendingChanges[cid].__newFolders__) {
+                                // Find the index of the folder in the pending folders array
+                                const index = this.pendingChanges[cid].__newFolders__.indexOf(folderPathToMove);
+                                if (index !== -1) {
+                                    // Remove the old path
+                                    this.pendingChanges[cid].__newFolders__.splice(index, 1);
+                                    
+                                    // Add the new path
+                                    const newPath = targetPath + '/' + folderPathToMove.split('/').pop();
+                                    this.pendingChanges[cid].__newFolders__.push(newPath);
+                                }
+                            }
+                        }
+                    } else {
+                        // Move all files to the new location, preserving subfolder structure
+                        filesInFolder.forEach(file => {
+                            // Only process files we can edit
+                            if (!this.isEditable(file)) {
+                                return;
+                            }
+                            
+                            // Calculate new path
+                            // If the file is directly in the moved folder:
+                            //    folderPathToMove = "docs"
+                            //    file.folderPath = "docs"
+                            //    targetPath = "personal"
+                            //    => newPath = "personal"
+                            //
+                            // If the file is in a subfolder:
+                            //    folderPathToMove = "docs"
+                            //    file.folderPath = "docs/reports"
+                            //    targetPath = "personal"
+                            //    => newPath = "personal/reports"
+                            let newPath;
+                            
+                            if (file.folderPath === folderPathToMove) {
+                                // File is directly in the folder being moved
+                                newPath = targetPath;
+                            } else {
+                                // File is in a subfolder of the folder being moved
+                                const relativePath = file.folderPath.substring(folderPathToMove.length + 1);
+                                newPath = `${targetPath}/${relativePath}`;
+                            }
+                            
+                            const fileId = file.f;
+                            const currentContractId = file.i;
+                            
+                            // Skip if the file is already at the target path
+                            if (file.folderPath === newPath) {
+                                return;
+                            }
+                            
+                            // Update the file's folder path
+                            file.folderPath = newPath;
+                            
+                            // Update metadata
+                            if (this.newMeta[currentContractId] && this.newMeta[currentContractId][fileId]) {
+                                this.newMeta[currentContractId][fileId].folderPath = newPath;
+                            }
+                            
+                            // Update pending changes
+                            this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
+                            this.pendingChanges[currentContractId][fileId] = {
+                                ...(this.pendingChanges[currentContractId][fileId] || {}), 
+                                folderPath: newPath,
+                                name: this.newMeta[currentContractId]?.[fileId]?.name || fileId, 
+                            };
+                        });
+                    }
+                } else {
+                    // --- Handle File Drop ---
+                    const fileId = itemId;
+            const file = this.files[fileId];
+                    if (!file) {
+                        return;
+                    }
+                    
+                    // Use the contractId obtained earlier if available, otherwise try to get from file
+                    const currentContractId = contractId || file.i;
+                    if (!currentContractId) {
+                        return; 
+                    }
+                    
+                    if (!this.isEditable(file)) {
+                        return;
+                    }
+                    
+                    const originalPath = file.folderPath || '';
+                    const newPath = folder.path;
+                    
+                    if (originalPath === newPath) {
+                        return;
+                    }
+                    
+                    // Update the file's folder path
+                    file.folderPath = newPath;
+                    
+                    // Update metadata in newMeta
+                    if (this.newMeta[currentContractId] && this.newMeta[currentContractId][fileId]) {
+                        this.newMeta[currentContractId][fileId].folderPath = newPath;
+                    }
+                    
+                    // Update pending changes
+                    this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
+                    this.pendingChanges[currentContractId][fileId] = {
+                        ...(this.pendingChanges[currentContractId][fileId] || {}), 
+                        folderPath: newPath,
+                        name: this.newMeta[currentContractId]?.[fileId]?.name || fileId, 
+                    };
+                }
+            });
+            
+                this.buildFolderTrees();
+            this.$nextTick(() => {
+                this.render();
+            });
         },
         dragOverBreadcrumb(event) {
-            event.preventDefault(); // Required to allow dropping
+            event.preventDefault();
         },
-        dropOnBreadcrumb(path) {
-            return (event) => {
+        dropOnBreadcrumb(path, event) {
                 event.preventDefault();
-                const fileId = event.dataTransfer.getData("fileid");
-                console.log('DoB',{path, fileId})
-                const file = this.files[fileId];
-                if (file && this.isEditable(file) && file.folderPath !== path) {
-                    this.pendingChanges[file.i] = this.pendingChanges[file.i] || {};
-                    this.pendingChanges[file.i][file.f] = {
-                        folderPath: path,
-                        name: this.newMeta[file.i][file.f].name || file.f,
-                    };
-                    file.folderPath = path;
-                    this.buildFolderTrees();
-                    this.render();
-                }
-            };
-        },
-        dragOverBackground(event) {
-            event.preventDefault();
-        },
-        dropOnBackground(event) {
-            event.preventDefault();
-            const fileId = event.dataTransfer.getData("fileid");
-            const file = this.files[fileId];
-            if (file && this.isEditable(file) && file.folderPath !== this.currentFolderPath) {
-                this.pendingChanges[file.i] = this.pendingChanges[file.i] || {};
-                this.pendingChanges[file.i][file.f] = {
-                    folderPath: this.currentFolderPath,
-                    name: this.newMeta[file.i][file.f].name || file.f,
-                };
-                file.folderPath = this.currentFolderPath;
-                this.buildFolderTrees();
-                this.render();
+            let itemIds = [];
+            
+            // Check for multiple items
+            const itemIdsStr = event.dataTransfer.getData("itemids");
+             if (itemIdsStr) {
+                 try {
+                     itemIds = JSON.parse(itemIdsStr);
+                 } catch (e) {
+                     const textData = event.dataTransfer.getData("text/plain");
+                     if(textData) itemIds = textData.split('\n');
+                 }
+             } else {
+                  const textData = event.dataTransfer.getData("text/plain");
+                  if(textData) itemIds = textData.split('\n');
+             }
+            
+            const contractId = event.dataTransfer.getData("contractid"); 
+            const targetPath = path == null ? '' : path; 
+            
+            if (!itemIds.length) {
+                return;
             }
+            
+            // Process each item
+            itemIds.forEach(itemId => {
+                 if (itemId.startsWith('folder-')) {
+                      // --- Handle Folder Drop ---
+                     const folderPathToMove = itemId.substring('folder-'.length);
+                     
+                     // Skip if moving to itself
+                     if (folderPathToMove === targetPath) {
+                         return;
+                     }
+                     
+                     // Check if this is a preset folder - don't allow moving preset folders
+                     if (this.isPresetFolder(folderPathToMove)) {
+                         console.warn("Cannot move preset folders");
+                         return;
+                     }
+                     
+                     // Check if we're dropping into a subfolder of the folder being moved
+                     if (targetPath.startsWith(folderPathToMove + '/')) {
+                         console.warn('Cannot move a folder into its own subfolder');
+                         return;
+                     }
+                     
+                     // Find all files that are in the folder being moved or its subfolders
+                     const filesInFolder = Object.values(this.files).filter(file => 
+                         file.folderPath === folderPathToMove || file.folderPath.startsWith(folderPathToMove + '/')
+                     );
+                     
+                     if (filesInFolder.length === 0) {
+                         // This is an empty folder, perhaps a newly created one
+                         // We'll need to update any pending folder creation
+                         for (const cid in this.pendingChanges) {
+                             if (this.pendingChanges[cid].__newFolders__) {
+                                 // Find the index of the folder in the pending folders array
+                                 const index = this.pendingChanges[cid].__newFolders__.indexOf(folderPathToMove);
+                                 if (index !== -1) {
+                                     // Remove the old path
+                                     this.pendingChanges[cid].__newFolders__.splice(index, 1);
+                                     
+                                     // Add the new path, keeping the folder name but changing the parent location
+                                     const folderName = folderPathToMove.split('/').pop();
+                                     const newPath = targetPath ? `${targetPath}/${folderName}` : folderName;
+                                     this.pendingChanges[cid].__newFolders__.push(newPath);
+                                 }
+                             }
+                         }
+                     } else {
+                         // Move all files to the new location, preserving subfolder structure
+                         filesInFolder.forEach(file => {
+                             // Only process files we can edit
+                             if (!this.isEditable(file)) {
+                                 return;
+                             }
+                             
+                             // Calculate new path
+                             let newPath;
+                             
+                             if (file.folderPath === folderPathToMove) {
+                                 // File is directly in the folder being moved
+                                 newPath = targetPath;
+                             } else {
+                                 // File is in a subfolder of the folder being moved
+                                 const relativePath = file.folderPath.substring(folderPathToMove.length + 1);
+                                 newPath = targetPath ? `${targetPath}/${relativePath}` : relativePath;
+                             }
+                             
+                             const fileId = file.f;
+                             const currentContractId = file.i;
+                             
+                             // Skip if the file is already at the target path
+                             if (file.folderPath === newPath) {
+                                 return;
+                             }
+                             
+                             // Update the file's folder path
+                             file.folderPath = newPath;
+                             
+                             // Update metadata
+                             if (this.newMeta[currentContractId] && this.newMeta[currentContractId][fileId]) {
+                                 this.newMeta[currentContractId][fileId].folderPath = newPath;
+                             }
+                             
+                             // Update pending changes
+                             this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
+                             this.pendingChanges[currentContractId][fileId] = {
+                                 ...(this.pendingChanges[currentContractId][fileId] || {}), 
+                                 folderPath: newPath,
+                                 name: this.newMeta[currentContractId]?.[fileId]?.name || fileId, 
+                             };
+                         });
+                     }
+                 } else {
+                      // --- Handle File Drop ---
+                      const fileId = itemId;
+                const file = this.files[fileId];
+                      if (!file) {
+                           return;
+                      }
+                      
+                      const currentContractId = contractId || file.i;
+                      if (!currentContractId) {
+                           return;
+                      }
+                      
+                      if (!this.isEditable(file)) {
+                           return;
+                      }
+                      
+                      const originalPath = file.folderPath || '';
+                      
+                      if (originalPath === targetPath) {
+                           return;
+                      }
+                      
+                      // Update the canonical file object
+                      file.folderPath = targetPath;
+                      
+                      // Update newMeta (if it exists)
+                      if (this.newMeta[currentContractId]?.[fileId]) {
+                           this.newMeta[currentContractId][fileId].folderPath = targetPath;
+                      }
+                      
+                      // Update pending changes
+                      this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
+                      this.pendingChanges[currentContractId][fileId] = {
+                           ...(this.pendingChanges[currentContractId][fileId] || {}),
+                           folderPath: targetPath,
+                           name: this.pendingChanges[currentContractId]?.[fileId]?.name || this.newMeta[currentContractId]?.[fileId]?.name || fileId,
+                      };
+                 }
+            });
+            
+                    this.buildFolderTrees();
+            this.$nextTick(() => {
+                    this.render();
+            });
         },
         saveChanges() {
             for (const contractId in this.pendingChanges) {
                 const m = this.contract[contractId].m || "";
                 // Handle the actual metadata format
-                let contractData = m.split(',')[0]
+                let contractData = m.split(',')[0];
                 let parts = contractData.split("|");
                 let encData = parts[0] || "";
-                let folderListStr = parts.length > 1 ? parts.slice(1).join('|') : contractId.split(':')[2]
-                let fileMetadata = m
+                let folderListStr = parts.length > 1 ? parts.slice(1).join('|') : contractId.split(':')[2];
+                let fileMetadata = m;
 
-                // Fallback for non-pipe-separated metadata
-                if (parts.length === 1 && m.includes(",")) {
-                    const temp = m.split(";");
-                    encData = temp[0] || "";
-                    folderListStr = contractId.split(':')[2]; // No folder data in this format
-                }
-
-                const indexToPath = this.parseFolderList(folderListStr)
-                const originalMeta = contractData
-                const folderList = originalMeta[1].split("|").filter(Boolean);
+                // Extract folderList from existing metadata
+                const indexToPath = this.parseFolderList(folderListStr);
                 const pathToIndex = Object.fromEntries(Object.entries(indexToPath).map(([k, v]) => [v, k]));
 
+                // Process file changes
                 const newFiles = [];
                 const filesNames = Object.keys(this.contract[contractId].df);
-                const slots = originalMeta.slice(2).join("|").split(",");
+                
                 for (let i = 0; i < filesNames.length; i++) {
                     const fileName = filesNames[i];
+                    if (fileName === 'folderStructure') continue;
+                    
                     const changes = this.pendingChanges[contractId][fileName] || {};
-                    const meta = this.newMeta[contractId][fileName];
-                    const folderPath = changes.folderPath || meta.folderPath;
-                    const folderIndex = pathToIndex[folderPath] || "1"; // Default to root if not found
-                    const name = changes.name || meta.name || fileName;
-                    const type = meta.type || "";
-                    const thumb = meta.thumb || "";
-                    const flags = `${this.NumberToBase64(meta.flags || 0)}-${meta.license || ""}-${meta.labels || ""}`;
+                    const meta = this.newMeta[contractId][fileName] || {};
+                    
+                    // Determine folder path - use changes first, then metadata, then empty
+                    const folderPath = changes.folderPath || (meta ? meta.folderPath : '') || '';
+                    
+                    // Get folder index, or create if it doesn't exist
+                    let folderIndex;
+                    if (folderPath && !pathToIndex[folderPath]) {
+                        // This is a new path, needs to be added to folderListStr
+                        // First find the parent path
+                        const pathParts = folderPath.split('/');
+                        if (pathParts.length === 1) {
+                            // Root level folder
+                            folderListStr += `|${folderPath}`;
+                            // Assign a new index (Base58 method in the parseFolderList)
+                            // For simplicity, we'll just use '1' as root
+                            folderIndex = '1';
+                        } else {
+                            // This is a subfolder
+                            const folderName = pathParts[pathParts.length - 1];
+                            const parentPath = pathParts.slice(0, -1).join('/');
+                            const parentIndex = pathToIndex[parentPath] || '1';
+                            folderListStr += `|${parentIndex}/${folderName}`;
+                            // We'll use parent index for now since we'll rebuild this
+                            folderIndex = parentIndex;
+                        }
+                    } else {
+                        // Use existing folder index
+                        folderIndex = pathToIndex[folderPath] || '1'; // Default to root if not found
+                    }
+                    
+                    const name = changes.name || (meta ? meta.name : '') || fileName;
+                    const type = meta ? meta.type || "" : "";
+                    const thumb = meta ? meta.thumb || "" : "";
+                    const flags = meta ? `${this.NumberToBase64(meta.flags || 0)}-${meta.license || ""}-${meta.labels || ""}` : "0--";
                     newFiles.push(`${name},${type}.${folderIndex},${thumb},${flags}`);
                 }
 
-                const newMetaString = `${originalMeta[0]}|${originalMeta[1]}|${newFiles.join(",")}`;
+                // Build updated metadata
+                const newMetaString = `${encData}|${folderListStr}|${newFiles.join(",")}`;
+                
                 if (newMetaString.length > 8000) {
                     alert("Metadata size exceeds 8000 bytes. Please save fewer changes at a time.");
                     return;
                 }
 
-                // Simulate metadata update (actual implementation depends on backend)
+                // Update contract metadata
                 console.log(`Updating contract ${contractId} with metadata: ${newMetaString}`);
                 this.contract[contractId].m = newMetaString;
             }
@@ -1921,43 +2325,175 @@ export default {
             return indexToPath;
         },
         buildFolderTree(files) {
-            const root = { name: "", path: "", files: [], subfolders: {} };
-            for (const file of files) {
-                const pathParts = file.folderPath.split("/").filter(Boolean);
-                let current = root;
-                let currentPath = "";
-                for (const part of pathParts) {
+            // Root node acts as a temporary container
+            const rootNode = { name: '__root__', path: '', files: [], subfolders: {} }; // Use object for subfolders for quick lookup
+
+            // Helper to find or create folder nodes based on path parts
+            const ensureNodePath = (path) => {
+                let currentNode = rootNode;
+                const parts = path.split('/').filter(Boolean);
+                let currentPath = '';
+                for (const part of parts) {
                     currentPath = currentPath ? `${currentPath}/${part}` : part;
-                    if (!current.subfolders[part]) {
-                        current.subfolders[part] = { name: part, path: currentPath, files: [], subfolders: {} };
+                    if (!currentNode.subfolders[part]) {
+                        currentNode.subfolders[part] = {
+                            name: part,
+                            path: currentPath,
+                            files: [],
+                            subfolders: {} // Still use object here
+                        };
                     }
-                    current = current.subfolders[part];
+                    currentNode = currentNode.subfolders[part];
                 }
-                current.files.push(file);
+                return currentNode;
+            };
+
+            // Populate tree with files
+            for (const file of files) {
+                const folderPath = file.folderPath || ''; // Default to root
+                const targetNode = ensureNodePath(folderPath);
+                targetNode.files.push(file);
             }
 
-            const convertToArray = (folder) => {
-                folder.subfolders = Object.values(folder.subfolders).map(sub => ({
-                    ...sub,
-                    subfolders: convertToArray(sub),
-                }));
-                return folder.subfolders;
+            // Recursive function to convert the temp structure (objects) to the final array structure
+            const convertNode = (node) => {
+                 // Sort files?
+                 node.files.sort((a,b) => (a.n || a.f).localeCompare(b.n || b.f));
+
+                const subfoldersArray = Object.values(node.subfolders)
+                    .map(convertNode) // Convert children first
+                    .sort((a, b) => a.name.localeCompare(b.name)); // Sort converted children by name
+
+                return {
+                    name: node.name,
+                    path: node.path,
+                    files: node.files,
+                    subfolders: subfoldersArray // Final structure uses array
+                };
             };
-            return convertToArray(root);
+
+            // Convert the subfolders of the temporary root node
+            // The rootNode itself is not part of the final tree array
+            const finalTree = Object.values(rootNode.subfolders)
+                .map(convertNode)
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            return finalTree; // This is the array of top-level folders
         },
+
         buildFolderTrees() {
+            console.log("Building folder trees...");
             const filesByUser = {};
             for (const fileId in this.files) {
                 const file = this.files[fileId];
+                if (file.is_thumb) continue;
                 const user = file.o;
                 if (!filesByUser[user]) filesByUser[user] = [];
-                if(!file.is_thumb)filesByUser[user].push(file);
+                file.folderPath = file.folderPath || ''; // Ensure it exists
+                filesByUser[user].push(file);
             }
 
-            this.userFolderTrees = {};
-            for (const user in filesByUser) {
-                this.userFolderTrees[user] = this.buildFolderTree(filesByUser[user]);
-            }
+            const newUserFolderTrees = {};
+            const relevantUsers = new Set(Object.keys(filesByUser));
+
+             // Add users who have pending folder changes even if they have no files currently loaded
+             for (const contractId in this.pendingChanges) {
+                  if (this.pendingChanges[contractId]?.__newFolders__ && this.contract[contractId]?.t) {
+                      relevantUsers.add(this.contract[contractId].t);
+                  }
+             }
+             relevantUsers.delete(undefined);
+
+             for (const user of relevantUsers) {
+                 if(!user) continue;
+
+                 // 1. Build tree based on files for this user
+                 const userFiles = filesByUser[user] || [];
+                 const fileBasedTreeArray = this.buildFolderTree(userFiles); // Returns array of top-level folders
+
+                 // 2. Get pending new folders for this user
+                 let pendingFolderPaths = [];
+                 const userContractIds = Object.keys(this.contract).filter(id => this.contract[id]?.t === user);
+                 for(const contractId of userContractIds) {
+                      if (this.pendingChanges[contractId]?.__newFolders__) {
+                          pendingFolderPaths = [...pendingFolderPaths, ...this.pendingChanges[contractId]['__newFolders__']];
+                      }
+                 }
+                 pendingFolderPaths = [...new Set(pendingFolderPaths)]; // Unique paths
+
+                 // 3. Merge pending new folders into the file-based tree array
+                 const mergeFoldersIntoTree = (treeArray, paths) => {
+                      for (const fullPath of paths) {
+                           const parts = fullPath.split('/').filter(Boolean);
+                           let currentLevelArray = treeArray; // Start with the top-level array
+                           let currentPath = '';
+
+                           for (let i = 0; i < parts.length; i++) {
+                                const part = parts[i];
+                                currentPath = currentPath ? `${currentPath}/${part}` : part;
+                                let folderNode = currentLevelArray.find(node => node.name === part /* && node.path === currentPath */ ); // Find existing node
+
+                                if (!folderNode) {
+                                     folderNode = { name: part, path: currentPath, files: [], subfolders: [] };
+                                     currentLevelArray.push(folderNode);
+                                     // Sort siblings after adding
+                                     currentLevelArray.sort((a, b) => a.name.localeCompare(b.name));
+                                }
+
+                                // Descend to the subfolder array of the found/created node
+                                currentLevelArray = folderNode.subfolders;
+                           }
+                      }
+                      return treeArray; // Return the potentially modified tree array
+                 };
+
+                 // 4. Add the preset folders to ensure they're always present
+                 const presetFolders = [
+                     "Documents",
+                     "Images",
+                     "Videos",
+                     "Music",
+                     "Archives",
+                     "Code",
+                     "Designs",
+                     "Misc"
+                 ];
+                 
+                 // Add preset folders if they don't exist
+                 const treeWithPresets = [...fileBasedTreeArray]; // Start with existing folders
+                 
+                 for (const presetName of presetFolders) {
+                     if (!treeWithPresets.some(folder => folder.name === presetName)) {
+                         treeWithPresets.push({
+                             name: presetName,
+                             path: presetName,
+                             files: [],
+                             subfolders: [],
+                             isPreset: true // Mark as preset to prevent moving/renaming
+                         });
+                     } else {
+                         // Mark existing preset folder
+                         const existingPreset = treeWithPresets.find(folder => folder.name === presetName);
+                         if (existingPreset) {
+                             existingPreset.isPreset = true;
+                         }
+                     }
+                 }
+                 
+                 // Sort alphabetically, but make 'Documents' first
+                 treeWithPresets.sort((a, b) => {
+                     if (a.name === "Documents") return -1;
+                     if (b.name === "Documents") return 1;
+                     return a.name.localeCompare(b.name);
+                 });
+                 
+                 // Merge any pending folders that aren't presets
+                 const finalTree = mergeFoldersIntoTree(treeWithPresets, pendingFolderPaths);
+                 newUserFolderTrees[user] = finalTree;
+             }
+
+            // Update the main userFolderTrees object
+            this.userFolderTrees = newUserFolderTrees;
         },
         init() {
             var contracts = [];
@@ -2089,7 +2625,1706 @@ export default {
             this.owners = [...new Set(this.owners)];
             this.buildFolderTrees();
             this.render();
-        }
+        },
+        dragOverBackground(event) {
+            event.preventDefault();
+        },
+        dropOnBackground(event) {
+            event.preventDefault();
+            const fileId = event.dataTransfer.getData("fileid");
+            console.log('Background drop - fileId:', fileId);
+            
+            // Find the file by ID
+            const file = this.files[fileId];
+            console.log('Background drop - Found file:', file);
+            
+            if (!file) {
+                console.error('Background drop - File not found with ID:', fileId);
+                return;
+            }
+            
+            if (!this.isEditable(file)) {
+                console.warn('Background drop - File not editable:', file);
+                return;
+            }
+            
+            // Skip if folder path is the same
+            if (file.folderPath === this.currentFolderPath) {
+                console.log('Background drop - File already in this folder');
+                return;
+            }
+            
+            // Store original path for debugging
+            const originalPath = file.folderPath;
+            console.log('Background drop - Original path:', originalPath, 'New path:', this.currentFolderPath);
+            
+            // Update file folder path
+                this.pendingChanges[file.i] = this.pendingChanges[file.i] || {};
+                this.pendingChanges[file.i][file.f] = {
+                    folderPath: this.currentFolderPath,
+                    name: this.newMeta[file.i][file.f].name || file.f,
+                };
+            
+            // Important: Actually update the file object's folderPath
+                file.folderPath = this.currentFolderPath;
+            console.log('Background drop - Updated file:', file);
+            
+            // Force folder path into metadata if needed
+            if (this.newMeta[file.i] && this.newMeta[file.i][file.f]) {
+                this.newMeta[file.i][file.f].folderPath = this.currentFolderPath;
+            }
+            
+            // Rebuild and render
+                this.buildFolderTrees();
+                this.render();
+        },
+        handleDragEnterFolder(event, folder) {
+            clearTimeout(this.dragHoverTimeout);
+            this.dragHoverTargetPath = folder.path;
+            console.log('Entering folder:', folder.path);
+            this.dragHoverTimeout = setTimeout(() => {
+                if (this.dragHoverTargetPath === folder.path) {
+                    console.log('Navigating due to hover on folder:', folder.path);
+                    this.navigateTo(folder.path);
+                    this.dragHoverTargetPath = null; // Reset after navigation
+                }
+            }, 1000); // 1 second delay
+        },
+        handleDragEnterBreadcrumb(event, path) {
+            clearTimeout(this.dragHoverTimeout);
+            this.dragHoverTargetPath = path;
+             console.log('Entering breadcrumb:', path);
+            this.dragHoverTimeout = setTimeout(() => {
+                if (this.dragHoverTargetPath === path) {
+                    console.log('Navigating due to hover on breadcrumb:', path);
+                    this.navigateTo(path);
+                    this.dragHoverTargetPath = null; // Reset after navigation
+                }
+            }, 1000); // 1 second delay
+        },
+        handleDragLeave(event) {
+            // Only clear the timeout if we're truly leaving the element
+            // Check if the related target (what we're moving to) is a child of the current target (what we're leaving)
+            const currentTarget = event.currentTarget;
+            const relatedTarget = event.relatedTarget;
+            
+            // If relatedTarget is null or not a descendant of currentTarget, we're truly leaving
+            if (!relatedTarget || !currentTarget.contains(relatedTarget)) {
+                clearTimeout(this.dragHoverTimeout);
+                console.log('Truly leaving hover target:', this.dragHoverTargetPath);
+                this.dragHoverTargetPath = null;
+            } else {
+                console.log('Moving within the same element, not clearing timeout');
+            }
+        },
+        isFileSelected(file) {
+            return this.selectedFiles.includes(file.f);
+        },
+        handleFileClick(event, file) {
+            // Multi-select with Alt/Ctrl key
+            if (event.altKey || event.ctrlKey) {
+                if (this.isFileSelected(file)) {
+                    // Deselect if already selected
+                    this.selectedFiles = this.selectedFiles.filter(id => id !== file.f);
+                } else {
+                    // Add to selection
+                    this.selectedFiles.push(file.f);
+                }
+            } else {
+                // Single select
+                this.selectedFiles = [file.f];
+            }
+        },
+        
+        // Add a method to check if a folder is selected
+        isFolderSelected(folder) {
+            // Simple check if the folder's ID is in the selection
+            const id = `folder-${folder.path}`;
+            return this.selectedFiles.includes(id);
+        },
+        
+        // Add a helper method for folder click
+        handleFolderClick(event, folder) {
+            // If Alt/Ctrl is pressed, select folder instead of navigating
+            if (event.altKey || event.ctrlKey) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                const folderId = `folder-${folder.path}`;
+                
+                if (this.selectedFiles.includes(folderId)) {
+                    // Deselect if already selected
+                    this.selectedFiles = this.selectedFiles.filter(id => id !== folderId);
+                } else {
+                    // Add to selection
+                    this.selectedFiles.push(folderId);
+                }
+                
+                return false; // Prevent navigation
+            }
+            
+            // Otherwise allow normal navigation
+            return true;
+        },
+        
+        startSelectionBox(event) {
+            // Only start selection box on left click on background (not on files/folders)
+            if (event.button !== 0 || event.target.closest('.file-grid') || event.target.closest('tr')) {
+                return;
+            }
+
+            // Stop propagation and prevent default text selection
+            event.stopPropagation(); 
+            event.preventDefault();
+
+            // Store viewport coordinates
+            this.selectionBox = {
+                active: true,
+                startX: event.clientX,
+                startY: event.clientY,
+                endX: event.clientX,
+                endY: event.clientY
+            };
+            
+            // Store initial selection state if Alt/Ctrl is pressed
+            this.initialSelection = (event.altKey || event.ctrlKey) ? [...this.selectedFiles] : [];
+
+            // Clear current selection if *not* holding Alt/Ctrl
+            if (!event.altKey && !event.ctrlKey) {
+                this.selectedFiles = [];
+            }
+
+            // ANTI-FREEZE: Temporarily disable pointer events on folders to prevent freeze
+            document.querySelectorAll('.files .file-grid, .files .folder-row').forEach(el => {
+                if (el.dataset.type === 'folder') {
+                    // Store original pointer-events style
+                    el.dataset.originalPointerEvents = el.style.pointerEvents || '';
+                    // Disable pointer events
+                    el.style.pointerEvents = 'none';
+                }
+            });
+
+            // Create a single selection box overlay
+            const selectionOverlay = document.createElement('div');
+            selectionOverlay.id = 'selection-box-overlay';
+            selectionOverlay.style.position = 'fixed'; // Use fixed for viewport positioning
+            selectionOverlay.style.backgroundColor = 'rgba(13, 110, 253, 0.2)'; // Bootstrap primary color with transparency
+            selectionOverlay.style.border = '1px solid #0d6efd'; // Bootstrap primary color
+            selectionOverlay.style.zIndex = '10000'; // Ensure it's on top
+            selectionOverlay.style.pointerEvents = 'none';
+            document.body.appendChild(selectionOverlay);
+
+            // ANTI-FREEZE: Add document-level mouseup listener
+            document.addEventListener('mouseup', this.endSelectionBox, { once: true });
+        },
+
+        updateSelectionBox(event) {
+            if (!this.selectionBox.active) return;
+
+            // Prevent default and stop propagation
+            event.preventDefault();
+            event.stopPropagation();
+
+            // Update end viewport coordinates
+            this.selectionBox.endX = event.clientX;
+            this.selectionBox.endY = event.clientY;
+
+            // Calculate selection box viewport coordinates
+            const selLeft = Math.min(this.selectionBox.startX, this.selectionBox.endX);
+            const selTop = Math.min(this.selectionBox.startY, this.selectionBox.endY);
+            const selRight = Math.max(this.selectionBox.startX, this.selectionBox.endX);
+            const selBottom = Math.max(this.selectionBox.startY, this.selectionBox.endY);
+
+            // Update the selection box overlay
+            const selectionOverlay = document.getElementById('selection-box-overlay');
+            if (selectionOverlay) {
+                selectionOverlay.style.left = `${selLeft}px`;
+                selectionOverlay.style.top = `${selTop}px`;
+                selectionOverlay.style.width = `${selRight - selLeft}px`;
+                selectionOverlay.style.height = `${selBottom - selTop}px`;
+            }
+
+            this.$nextTick(() => {
+                // Get the files container
+                const filesContainer = this.$refs.container.querySelector('.files'); 
+                if (!filesContainer) {
+                    return;
+                }
+                
+                // Get all selectable elements with their type clearly marked
+                const allElements = [];
+                
+                // Get files and folders in grid view
+                if (this.viewOpts.fileView === 'grid') {
+                    // Get all .file-grid elements with data-type
+                    const gridItems = Array.from(filesContainer.querySelectorAll('.file-grid[data-type]'));
+                    allElements.push(...gridItems);
+                } else {
+                    // Get all tr elements with data-type in list view
+                    const listItems = Array.from(filesContainer.querySelectorAll('tbody tr[data-type]'));
+                    allElements.push(...listItems);
+                }
+                
+                // Count files and folders for debug
+                const fileCount = allElements.filter(el => el.dataset.type === 'file').length;
+                const folderCount = allElements.filter(el => el.dataset.type === 'folder').length;
+                
+                // Process all elements
+                const selectedItems = [];
+                allElements.forEach(element => {
+                    // Get element's viewport position
+                    const rect = element.getBoundingClientRect();
+                    
+                    // Get element data attributes for type and key
+                    const elementType = element.dataset.type; // 'file' or 'folder'
+                    const elementKey = element.dataset.key;
+                    
+                    // Intersection test using viewport coordinates
+                    const overlapHoriz = !(rect.right < selLeft || rect.left > selRight);
+                    const overlapVert = !(rect.bottom < selTop || rect.top > selBottom);
+                    const intersects = overlapHoriz && overlapVert;
+                    
+                    // Alternative test - check if center point is inside selection (viewport)
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    const centerInSelection = 
+                        centerX >= selLeft && 
+                        centerX <= selRight && 
+                        centerY >= selTop && 
+                        centerY <= selBottom;
+                        
+                    // If we have a valid element that intersects with the selection
+                    if ((intersects || centerInSelection) && elementKey) {
+                        let itemId;
+                        if (elementType === 'folder') {
+                            itemId = `folder-${elementKey}`;
+                        } else { // file
+                            itemId = elementKey; // Files use CID directly
+                        }
+                        
+                        if (itemId) {
+                            selectedItems.push(itemId);
+                        }
+                    }
+                });
+                
+                // Final selection combining initial selection if Alt/Ctrl was held
+                const combinedSelection = new Set([...this.initialSelection, ...selectedItems]);
+                this.selectedFiles = Array.from(combinedSelection);
+                
+                // Force re-render to update visual highlighting
+                this.$forceUpdate();
+            });
+        },
+        
+        endSelectionBox() {
+            if (!this.selectionBox.active) {
+                return; // Don't do anything if not active
+            }
+            
+            this.selectionBox.active = false;
+            this.initialSelection = []; // Clear initial selection state
+            
+            // Remove the selection overlay
+            const selectionOverlay = document.getElementById('selection-box-overlay');
+            if (selectionOverlay) {
+                selectionOverlay.remove();
+            }
+
+            // ANTI-FREEZE: Re-enable pointer events on folders
+            document.querySelectorAll('.files .file-grid, .files .folder-row').forEach(el => {
+                if (el.dataset.originalPointerEvents !== undefined) {
+                    el.style.pointerEvents = el.dataset.originalPointerEvents;
+                    delete el.dataset.originalPointerEvents;
+                }
+            });
+            
+            // ANTI-FREEZE: Remove document-level mouseup listener if it was added externally
+            document.removeEventListener('mouseup', this.endSelectionBox);
+            
+            // Force re-render to ensure visual state reflects the selection
+            this.$forceUpdate();
+        },
+        dragStartItem(event, item, type) {
+            console.log(`Drag start ${type}:`, item);
+            
+            let dragDataIds = [];
+            let isDraggingSelected = false;
+
+            if (type === 'file') {
+                isDraggingSelected = this.isFileSelected(item);
+            } else if (type === 'folder') {
+                // Check if this is a preset folder - don't allow dragging preset folders
+                if (item.isPreset) {
+                    console.warn("Cannot drag preset folders");
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+                
+                isDraggingSelected = this.isFolderSelected(item);
+            }
+
+            // If dragging a selected item and multiple items are selected
+            if (isDraggingSelected && this.selectedFiles.length > 1) {
+                // Include all selected file and folder IDs in the drag data
+                dragDataIds = [...this.selectedFiles]; 
+                console.log('Dragging multiple items:', dragDataIds);
+                event.dataTransfer.setData("itemids", JSON.stringify(dragDataIds)); // Use a generic name
+            } else {
+                // Single item drag (traditional behavior)
+                // Clear selection and select only this item
+                let singleId;
+                if (type === 'file') {
+                    singleId = item.f;
+                } else { // folder
+                    singleId = `folder-${item.path}`; 
+                }
+                this.selectedFiles = [singleId];
+                dragDataIds = [singleId];
+                console.log(`Dragging single ${type}:`, singleId);
+                event.dataTransfer.setData("itemids", JSON.stringify(dragDataIds)); // Still use generic name
+            }
+
+            // Set fallback text data (might be useful for external drops)
+            event.dataTransfer.setData("text/plain", dragDataIds.join('\n')); 
+
+            // **Important**: Need contract ID(s) if files are involved
+            // For simplicity now, just use the contract ID of the first file found in selection
+            let representativeContractId = null;
+            const firstFileId = dragDataIds.find(id => !id.startsWith('folder-'));
+            if(firstFileId && this.files[firstFileId]){
+                 representativeContractId = this.files[firstFileId].i;
+                 event.dataTransfer.setData("contractid", representativeContractId);
+                 console.log("Using contractId:", representativeContractId);
+            } else {
+                console.warn("No file found in selection to determine contractId.");
+                // Optionally set a placeholder or handle folder-only drags differently later
+            }
+           
+            // Set drag image
+            const dragIcon = document.createElement('div');
+            dragIcon.style.position = 'absolute';
+            dragIcon.style.top = '-1000px'; 
+            dragIcon.style.maxWidth = '200px'; 
+
+            if (dragDataIds.length > 1) {
+                // Show count for multiple items
+                dragIcon.innerHTML = `<div style="padding: 10px; background: rgba(0,0,0,0.7); color: white; border-radius: 4px; display: flex; align-items: center; max-width: 200px; white-space: nowrap;">
+                    <i class="fa-solid fa-copy fa-lg me-2"></i> 
+                    <span>${dragDataIds.length} items</span>
+                </div>`;
+            } else {
+                // Show single item icon
+                let itemName = '';
+                let itemIconClass = 'fa-solid fa-question'; // Default icon
+                if (type === 'file') {
+                    itemName = this.newMeta[item.i][item.f].name || item.f;
+                    itemIconClass = `fa-solid ${this.smartIcon(item.a)}`; // Use smartIcon for files
+                } else { // folder
+                    itemName = item.name;
+                    itemIconClass = 'fa-solid fa-folder'; // Folder icon
+                }
+                
+                const truncatedName = itemName.length > 15 ? itemName.substring(0, 15) + '...' : itemName;
+                
+                dragIcon.innerHTML = `<div style="padding: 10px; background: rgba(0,0,0,0.7); color: white; border-radius: 4px; display: flex; align-items-center; max-width: 200px; white-space: nowrap;">
+                    <i class="${itemIconClass} fa-lg me-2"></i> 
+                    <span>${truncatedName}</span>
+                </div>`;
+            }
+            
+            document.body.appendChild(dragIcon);
+            event.dataTransfer.setDragImage(dragIcon, 0, 0);
+            
+            // Clean up the drag image element
+            setTimeout(() => {
+                if (document.body.contains(dragIcon)) {
+                    document.body.removeChild(dragIcon);
+                }
+            }, 0);
+        },
+        dragOverFolder(event) {
+            event.preventDefault();
+        },
+        dropOnFolder(event, folder) {
+            event.preventDefault();
+            event.stopPropagation(); 
+            let itemIds = [];
+            
+            // Check for multiple items being dragged
+            const itemIdsStr = event.dataTransfer.getData("itemids"); 
+            if (itemIdsStr) {
+                try {
+                    itemIds = JSON.parse(itemIdsStr);
+                } catch (e) {
+                    // Fallback to text/plain if parsing fails
+                    const textData = event.dataTransfer.getData("text/plain");
+                    if(textData) itemIds = textData.split('\n');
+                }
+            } else {
+                 // Fallback to text/plain if itemids is missing
+                 const textData = event.dataTransfer.getData("text/plain");
+                 if(textData) itemIds = textData.split('\n');
+            }
+            
+            // Get contract ID if available (may not be for folder-only drags)
+            const contractId = event.dataTransfer.getData("contractid"); 
+            
+            if (!itemIds.length) {
+                return;
+            }
+            
+            const targetPath = folder.path;
+            
+            // Process each item
+            itemIds.forEach(itemId => {
+                if (itemId.startsWith('folder-')) {
+                    // --- Handle Folder Drop ---
+                    const folderPathToMove = itemId.substring('folder-'.length);
+                    
+                    // Skip if moving to itself
+                    if (folderPathToMove === targetPath) {
+                        return;
+                    }
+                    
+                    // Check if this is a preset folder - don't allow moving preset folders
+                    if (this.isPresetFolder(folderPathToMove)) {
+                        console.warn("Cannot move preset folders");
+                        return;
+                    }
+                    
+                    // Check if we're dropping into a subfolder of the folder being moved
+                    // This would create a recursive loop and is not allowed
+                    if (targetPath.startsWith(folderPathToMove + '/')) {
+                        console.warn('Cannot move a folder into its own subfolder');
+                        return;
+                    }
+                    
+                    // Find all files that are in the folder being moved or its subfolders
+                    const filesInFolder = Object.values(this.files).filter(file => 
+                        file.folderPath === folderPathToMove || file.folderPath.startsWith(folderPathToMove + '/')
+                    );
+                    
+                    if (filesInFolder.length === 0) {
+                        // This is an empty folder, perhaps a newly created one
+                        // We'll need to update any pending folder creation
+                        for (const cid in this.pendingChanges) {
+                            if (this.pendingChanges[cid].__newFolders__) {
+                                // Find the index of the folder in the pending folders array
+                                const index = this.pendingChanges[cid].__newFolders__.indexOf(folderPathToMove);
+                                if (index !== -1) {
+                                    // Remove the old path
+                                    this.pendingChanges[cid].__newFolders__.splice(index, 1);
+                                    
+                                    // Add the new path
+                                    const newPath = targetPath + '/' + folderPathToMove.split('/').pop();
+                                    this.pendingChanges[cid].__newFolders__.push(newPath);
+                                }
+                            }
+                        }
+                    } else {
+                        // Move all files to the new location, preserving subfolder structure
+                        filesInFolder.forEach(file => {
+                            // Only process files we can edit
+                            if (!this.isEditable(file)) {
+                                return;
+                            }
+                            
+                            // Calculate new path
+                            // If the file is directly in the moved folder:
+                            //    folderPathToMove = "docs"
+                            //    file.folderPath = "docs"
+                            //    targetPath = "personal"
+                            //    => newPath = "personal"
+                            //
+                            // If the file is in a subfolder:
+                            //    folderPathToMove = "docs"
+                            //    file.folderPath = "docs/reports"
+                            //    targetPath = "personal"
+                            //    => newPath = "personal/reports"
+                            let newPath;
+                            
+                            if (file.folderPath === folderPathToMove) {
+                                // File is directly in the folder being moved
+                                newPath = targetPath;
+                            } else {
+                                // File is in a subfolder of the folder being moved
+                                const relativePath = file.folderPath.substring(folderPathToMove.length + 1);
+                                newPath = `${targetPath}/${relativePath}`;
+                            }
+                            
+                            const fileId = file.f;
+                            const currentContractId = file.i;
+                            
+                            // Skip if the file is already at the target path
+                            if (file.folderPath === newPath) {
+                                return;
+                            }
+                            
+                            // Update the file's folder path
+                            file.folderPath = newPath;
+                            
+                            // Update metadata
+                            if (this.newMeta[currentContractId] && this.newMeta[currentContractId][fileId]) {
+                                this.newMeta[currentContractId][fileId].folderPath = newPath;
+                            }
+                            
+                            // Update pending changes
+                            this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
+                            this.pendingChanges[currentContractId][fileId] = {
+                                ...(this.pendingChanges[currentContractId][fileId] || {}), 
+                                folderPath: newPath,
+                                name: this.newMeta[currentContractId]?.[fileId]?.name || fileId, 
+                            };
+                        });
+                    }
+                } else {
+                    // --- Handle File Drop ---
+                    const fileId = itemId;
+                    const file = this.files[fileId];
+                    if (!file) {
+                        return;
+                    }
+                    
+                    // Use the contractId obtained earlier if available, otherwise try to get from file
+                    const currentContractId = contractId || file.i;
+                    if (!currentContractId) {
+                        return; 
+                    }
+                    
+                    if (!this.isEditable(file)) {
+                        return;
+                    }
+                    
+                    const originalPath = file.folderPath || '';
+                    const newPath = folder.path;
+                    
+                    if (originalPath === newPath) {
+                        return;
+                    }
+                    
+                    // Update the file's folder path
+                    file.folderPath = newPath;
+                    
+                    // Update metadata in newMeta
+                    if (this.newMeta[currentContractId] && this.newMeta[currentContractId][fileId]) {
+                        this.newMeta[currentContractId][fileId].folderPath = newPath;
+                    }
+                    
+                    // Update pending changes
+                    this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
+                    this.pendingChanges[currentContractId][fileId] = {
+                        ...(this.pendingChanges[currentContractId][fileId] || {}), 
+                        folderPath: newPath,
+                        name: this.newMeta[currentContractId]?.[fileId]?.name || fileId, 
+                    };
+                }
+            });
+            
+            this.buildFolderTrees();
+            this.$nextTick(() => {
+                this.render();
+            });
+        },
+        dragOverBreadcrumb(event) {
+            event.preventDefault();
+        },
+        dropOnBreadcrumb(path, event) {
+            event.preventDefault();
+            let itemIds = [];
+            
+            // Check for multiple items
+            const itemIdsStr = event.dataTransfer.getData("itemids");
+             if (itemIdsStr) {
+                 try {
+                     itemIds = JSON.parse(itemIdsStr);
+                 } catch (e) {
+                     const textData = event.dataTransfer.getData("text/plain");
+                     if(textData) itemIds = textData.split('\n');
+                 }
+             } else {
+                  const textData = event.dataTransfer.getData("text/plain");
+                  if(textData) itemIds = textData.split('\n');
+             }
+            
+            const contractId = event.dataTransfer.getData("contractid"); 
+            const targetPath = path == null ? '' : path; 
+            
+            if (!itemIds.length) {
+                return;
+            }
+            
+            // Process each item
+            itemIds.forEach(itemId => {
+                 if (itemId.startsWith('folder-')) {
+                      // --- Handle Folder Drop ---
+                     const folderPathToMove = itemId.substring('folder-'.length);
+                     
+                     // Skip if moving to itself
+                     if (folderPathToMove === targetPath) {
+                         return;
+                     }
+                     
+                     // Check if this is a preset folder - don't allow moving preset folders
+                     if (this.isPresetFolder(folderPathToMove)) {
+                         console.warn("Cannot move preset folders");
+                         return;
+                     }
+                     
+                     // Check if we're dropping into a subfolder of the folder being moved
+                     if (targetPath.startsWith(folderPathToMove + '/')) {
+                         console.warn('Cannot move a folder into its own subfolder');
+                         return;
+                     }
+                     
+                     // Find all files that are in the folder being moved or its subfolders
+                     const filesInFolder = Object.values(this.files).filter(file => 
+                         file.folderPath === folderPathToMove || file.folderPath.startsWith(folderPathToMove + '/')
+                     );
+                     
+                     if (filesInFolder.length === 0) {
+                         // This is an empty folder, perhaps a newly created one
+                         // We'll need to update any pending folder creation
+                         for (const cid in this.pendingChanges) {
+                             if (this.pendingChanges[cid].__newFolders__) {
+                                 // Find the index of the folder in the pending folders array
+                                 const index = this.pendingChanges[cid].__newFolders__.indexOf(folderPathToMove);
+                                 if (index !== -1) {
+                                     // Remove the old path
+                                     this.pendingChanges[cid].__newFolders__.splice(index, 1);
+                                     
+                                     // Add the new path, keeping the folder name but changing the parent location
+                                     const folderName = folderPathToMove.split('/').pop();
+                                     const newPath = targetPath ? `${targetPath}/${folderName}` : folderName;
+                                     this.pendingChanges[cid].__newFolders__.push(newPath);
+                                 }
+                             }
+                         }
+                     } else {
+                         // Move all files to the new location, preserving subfolder structure
+                         filesInFolder.forEach(file => {
+                             // Only process files we can edit
+                             if (!this.isEditable(file)) {
+                                 return;
+                             }
+                             
+                             // Calculate new path
+                             let newPath;
+                             
+                             if (file.folderPath === folderPathToMove) {
+                                 // File is directly in the folder being moved
+                                 newPath = targetPath;
+                             } else {
+                                 // File is in a subfolder of the folder being moved
+                                 const relativePath = file.folderPath.substring(folderPathToMove.length + 1);
+                                 newPath = targetPath ? `${targetPath}/${relativePath}` : relativePath;
+                             }
+                             
+                             const fileId = file.f;
+                             const currentContractId = file.i;
+                             
+                             // Skip if the file is already at the target path
+                             if (file.folderPath === newPath) {
+                                 return;
+                             }
+                             
+                             // Update the file's folder path
+                             file.folderPath = newPath;
+                             
+                             // Update metadata
+                             if (this.newMeta[currentContractId] && this.newMeta[currentContractId][fileId]) {
+                                 this.newMeta[currentContractId][fileId].folderPath = newPath;
+                             }
+                             
+                             // Update pending changes
+                             this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
+                             this.pendingChanges[currentContractId][fileId] = {
+                                 ...(this.pendingChanges[currentContractId][fileId] || {}), 
+                                 folderPath: newPath,
+                                 name: this.newMeta[currentContractId]?.[fileId]?.name || fileId, 
+                             };
+                         });
+                     }
+                 } else {
+                      // --- Handle File Drop ---
+                      const fileId = itemId;
+                      const file = this.files[fileId];
+                      if (!file) {
+                           return;
+                      }
+                      
+                      const currentContractId = contractId || file.i;
+                      if (!currentContractId) {
+                           return;
+                      }
+                      
+                      if (!this.isEditable(file)) {
+                           return;
+                      }
+                      
+                      const originalPath = file.folderPath || '';
+                      
+                      if (originalPath === targetPath) {
+                           return;
+                      }
+                      
+                      // Update the canonical file object
+                      file.folderPath = targetPath;
+                      
+                      // Update newMeta (if it exists)
+                      if (this.newMeta[currentContractId]?.[fileId]) {
+                           this.newMeta[currentContractId][fileId].folderPath = targetPath;
+                      }
+                      
+                      // Update pending changes
+                      this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
+                      this.pendingChanges[currentContractId][fileId] = {
+                           ...(this.pendingChanges[currentContractId][fileId] || {}),
+                           folderPath: targetPath,
+                           name: this.pendingChanges[currentContractId]?.[fileId]?.name || this.newMeta[currentContractId]?.[fileId]?.name || fileId,
+                      };
+                 }
+            });
+            
+            this.buildFolderTrees();
+            this.$nextTick(() => {
+                this.render();
+            });
+        },
+        saveChanges() {
+            for (const contractId in this.pendingChanges) {
+                const m = this.contract[contractId].m || "";
+                // Handle the actual metadata format
+                let contractData = m.split(',')[0];
+                let parts = contractData.split("|");
+                let encData = parts[0] || "";
+                let folderListStr = parts.length > 1 ? parts.slice(1).join('|') : contractId.split(':')[2];
+                let fileMetadata = m;
+
+                // Extract folderList from existing metadata
+                const indexToPath = this.parseFolderList(folderListStr);
+                const pathToIndex = Object.fromEntries(Object.entries(indexToPath).map(([k, v]) => [v, k]));
+
+                // Process file changes
+                const newFiles = [];
+                const filesNames = Object.keys(this.contract[contractId].df);
+                
+                for (let i = 0; i < filesNames.length; i++) {
+                    const fileName = filesNames[i];
+                    if (fileName === 'folderStructure') continue;
+                    
+                    const changes = this.pendingChanges[contractId][fileName] || {};
+                    const meta = this.newMeta[contractId][fileName] || {};
+                    
+                    // Determine folder path - use changes first, then metadata, then empty
+                    const folderPath = changes.folderPath || (meta ? meta.folderPath : '') || '';
+                    
+                    // Get folder index, or create if it doesn't exist
+                    let folderIndex;
+                    if (folderPath && !pathToIndex[folderPath]) {
+                        // This is a new path, needs to be added to folderListStr
+                        // First find the parent path
+                        const pathParts = folderPath.split('/');
+                        if (pathParts.length === 1) {
+                            // Root level folder
+                            folderListStr += `|${folderPath}`;
+                            // Assign a new index (Base58 method in the parseFolderList)
+                            // For simplicity, we'll just use '1' as root
+                            folderIndex = '1';
+                        } else {
+                            // This is a subfolder
+                            const folderName = pathParts[pathParts.length - 1];
+                            const parentPath = pathParts.slice(0, -1).join('/');
+                            const parentIndex = pathToIndex[parentPath] || '1';
+                            folderListStr += `|${parentIndex}/${folderName}`;
+                            // We'll use parent index for now since we'll rebuild this
+                            folderIndex = parentIndex;
+                        }
+                    } else {
+                        // Use existing folder index
+                        folderIndex = pathToIndex[folderPath] || '1'; // Default to root if not found
+                    }
+                    
+                    const name = changes.name || (meta ? meta.name : '') || fileName;
+                    const type = meta ? meta.type || "" : "";
+                    const thumb = meta ? meta.thumb || "" : "";
+                    const flags = meta ? `${this.NumberToBase64(meta.flags || 0)}-${meta.license || ""}-${meta.labels || ""}` : "0--";
+                    newFiles.push(`${name},${type}.${folderIndex},${thumb},${flags}`);
+                }
+
+                // Build updated metadata
+                const newMetaString = `${encData}|${folderListStr}|${newFiles.join(",")}`;
+                
+                if (newMetaString.length > 8000) {
+                    alert("Metadata size exceeds 8000 bytes. Please save fewer changes at a time.");
+                    return;
+                }
+
+                // Update contract metadata
+                console.log(`Updating contract ${contractId} with metadata: ${newMetaString}`);
+                this.contract[contractId].m = newMetaString;
+            }
+            this.pendingChanges = {};
+            this.init();
+        },
+        smartIcon(flags = "") {
+            if (!flags[0]) return 'fa-solid fa-file'
+            const flag = this.flagDecode(flags[0])
+            if (flag.enc) return 'fa-solid fa-file-shield'
+            else if (flag.nsfw) return 'fa-solid fa-triangle-exclamation'
+            else if (flag.executable) return 'fa-solid fa-cog'
+            else return 'fa-solid fa-file'
+        },
+        smartColor(flags = "") {
+            if (!flags[0]) return 'bg-info'
+            const flag = this.flagDecode(flags[0])
+            if (flag.nsfw) return 'bg-danger'
+            else if (flag.executable) return 'bg-warning'
+            else if (flag.enc) return 'bg-dark'
+            else return 'bg-info'
+        },
+        smartThumb(contract, cid) {
+            if (this.newMeta[contract][cid].thumb.includes('https://')) {
+                return this.newMeta[contract][cid].thumb
+            } else if (this.newMeta[contract][cid].thumb.includes('Qm')) {
+                return `https://ipfs.dlux.io/ipfs/${this.newMeta[contract][cid].thumb}`
+            } else return false
+        },
+        blockToTime(block) {
+            const now = new Date().getTime()
+            const then = new Date(now - ((this.current - block) * 3000))
+            // simple ago or until format
+
+            return then.toLocaleDateString()
+        },
+        fancyBytes(bytes, decimals = 0) {
+            var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
+            while (bytes > 1024) {
+                bytes = bytes / 1024
+                counter++
+            }
+            return `${this.toFixed(bytes, decimals)} ${p[counter]}B`
+        },
+        toFixed(n, digits) {
+            return parseFloat(n).toFixed(digits)
+        },
+        copyText(text) {
+            navigator.clipboard.writeText(text)
+        },
+        flagDecode(flags = "") {
+            var num = this.Base64toNumber(flags[0])
+            var out = {
+                enc: num & 1,
+                autoRenew: num & 2,
+                nsfw: num & 4,
+                executable: num & 8
+            }
+            return out
+        },
+        flagsDecode(flags = "", only = 0, omit = 0) {
+            var num = typeof flags == "string" ? this.Base64toNumber(flags[0]) : flags
+            var out = []
+            if (only) num = num & only
+            if (omit) num = num & ~omit
+            if (num & 1) out.push({ fa: 'fa-solid fa-lock text-primary fa-fw', l: "Encrypted" })
+            if (num & 2) out.push({ fa: 'fa-solid fa-arrows-rotate text-success fa-fw fa-spin', l: "Thumbnail" })
+            if (num & 4) out.push({ fa: 'fa-solid fa-radiation text-warning fa-fw', l: "NSFW" })
+            if (num & 8) out.push({ fa: 'fa-regular fa-file-code text-info fa-fw', l: "Executable" })
+            return out
+        },
+        labelsDecode(flags = "", only = -1) {
+            var arr = []
+            if (flags.length == 0) return arr
+            const len = only >= 0 ? 1 : flags.length
+            for (var i = (only >= 0 ? only : 0); i < len; i++) {
+                arr.push(this.labels[flags[i]])
+            }
+            arr = new Set(arr)
+            return new Array(...arr)
+        },
+        Base64toNumber(chars = "0") {
+            if (typeof chars != 'string') {
+                return 0
+            }
+            const glyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+            var result = 0;
+            chars = chars.split("");
+            for (var e = 0; e < chars.length; e++) {
+                result = result * 64 + glyphs.indexOf(chars[e]);
+            }
+            return result;
+        },
+        NumberToBase64(num) {
+            const glyphs = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
+            var result = "";
+            while (num > 0) {
+                result = glyphs[num % 64] + result;
+                num = Math.floor(num / 64);
+            }
+            return result;
+        },
+        decode(id) {
+            return new Promise((resolve, reject) => {
+                const key = this.contract[id].encryption.accounts[this.account].enc_key;
+                hive_keychain.requestVerifyKey(this.account, key, 'Memo', (response) => {
+                    if (response.success) {
+                        this.contract[id].encryption.key = response.result.split('#')[1]
+                        resolve("OK")
+                    } else {
+                        reject(response.message);
+                    }
+                });
+            })
+        },
+        render() {
+            this.filesArray = []
+            for (var i in this.files) {
+                if (!this.files[i].is_thumb)
+                    this.filesArray.push(this.files[i])
+            }
+            // filterFlags: "=",
+            // filterLabels: "",
+            // filesSelect: {
+            //     sort: "time",
+            //     dir: "dec",
+            //     search: "",
+            // },
+            this.filesArray = this.filesArray.filter((file) => {
+                if (this.filterFlags && !(this.filterFlags & file.lf)) return false
+                if (this.filterLabels) {
+                    const arr = this.filterLabels.split('')
+                    for (var j = 0; j < arr.length; j++) {
+                        if (file.l.indexOf(arr[j]) == -1) return false
+
+                    }
+                }
+                switch (this.filesSelect.addusers[file.o]) {
+                    case false:
+                        return false
+                    case 'lock':
+                        if (!(file.lf & 1) && !this.contract[file.i].encryption.accounts[this.account]) return false
+                        break
+                    case 'cc':
+                        if (!file.lic) return false
+                    case true:
+                        break
+                    default:
+                        return false
+                }
+                if (this.filesSelect.cc_only && (!file.lic && file.o != this.account)) return false
+                if (this.filesSelect.search && file.n.toLowerCase().indexOf(this.filesSelect.search.toLowerCase()) == -1) return false
+                return true
+            })
+            this.filesArray.sort((a, b) => {
+                if (this.filesSelect.sort == 'time') {
+                    if (this.filesSelect.dir == 'dec') return a.c - b.c
+                    else return b.c - a.c
+                } else if (this.filesSelect.sort == 'size') {
+                    if (this.filesSelect.dir == 'dec') return a.s - b.s
+                    else return b.s - a.s
+                } else if (this.filesSelect.sort == 'name') {
+                    if (this.filesSelect.dir == 'dec') return a.n.localeCompare(b.n)
+                    else return b.n.localeCompare(a.n)
+                } else if (this.filesSelect.sort == 'type') {
+                    if (this.filesSelect.dir == 'dec') return a.y - b.y
+                    else return b.s - a.s
+                } else if (this.filesSelect.sort == 'exp') {
+                    if (this.filesSelect.dir == 'dec') return a.e - b.e
+                    else return b.e - a.e
+                } else {
+                    return 0
+                }
+            })
+
+        },
+        getImgData(id, cid) {
+            var string = this.smartThumb(id, cid)
+            if (string.includes("https://")) fetch(string).then(response => response.text()).then(data => {
+                if (data.indexOf('data:image/') >= 0) this.newMeta[id][cid].thumb_data = data
+                else this.newMeta[id][cid].thumb_data = string
+            }).catch(e => {
+                console.log("caught", e)
+                this.newMeta[id][cid].thumb_data = string
+            })
+        },
+        toBase58(num) {
+            const glyphs = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+            let result = "";
+            while (num > 0) {
+                result = glyphs[num % 58] + result;
+                num = Math.floor(num / 58);
+            }
+            return result || "1";
+        },
+        parseFolderList(folderListStr) {
+            var folderEntries = folderListStr.split("|").filter(Boolean);
+            const indexToPath = {
+                "1": folderEntries[0],
+                "2": "Documents",
+                "3": "Images",
+                "4": "Videos",
+                "5": "Music",
+                "6": "Archives",
+                "7": "Code",
+                "8": "Designs",
+                "9": "Misc",
+            };
+            folderEntries = folderEntries.splice(1)
+            let currentIndex = 10;
+
+            for (const entry of folderEntries) {
+                let fullPath;
+                if (entry.includes("/")) {
+                    const [parentIndex, subfolderName] = entry.split("/");
+                    const parentPath = indexToPath[parentIndex];
+                    if (!parentPath) throw new Error(`Parent index ${parentIndex} not found`);
+                    fullPath = `${parentPath}/${subfolderName}`;
+                } else {
+                    fullPath = entry;
+                }
+                const index = this.toBase58(currentIndex);
+                indexToPath[index] = fullPath;
+                currentIndex++;
+            }
+            return indexToPath;
+        },
+        buildFolderTree(files) {
+            // Root node acts as a temporary container
+            const rootNode = { name: '__root__', path: '', files: [], subfolders: {} }; // Use object for subfolders for quick lookup
+
+            // Helper to find or create folder nodes based on path parts
+            const ensureNodePath = (path) => {
+                let currentNode = rootNode;
+                const parts = path.split('/').filter(Boolean);
+                let currentPath = '';
+                for (const part of parts) {
+                    currentPath = currentPath ? `${currentPath}/${part}` : part;
+                    if (!currentNode.subfolders[part]) {
+                        currentNode.subfolders[part] = {
+                            name: part,
+                            path: currentPath,
+                            files: [],
+                            subfolders: {} // Still use object here
+                        };
+                    }
+                    currentNode = currentNode.subfolders[part];
+                }
+                return currentNode;
+            };
+
+            // Populate tree with files
+            for (const file of files) {
+                const folderPath = file.folderPath || ''; // Default to root
+                const targetNode = ensureNodePath(folderPath);
+                targetNode.files.push(file);
+            }
+
+            // Recursive function to convert the temp structure (objects) to the final array structure
+            const convertNode = (node) => {
+                 // Sort files?
+                 node.files.sort((a,b) => (a.n || a.f).localeCompare(b.n || b.f));
+
+                const subfoldersArray = Object.values(node.subfolders)
+                    .map(convertNode) // Convert children first
+                    .sort((a, b) => a.name.localeCompare(b.name)); // Sort converted children by name
+
+                return {
+                    name: node.name,
+                    path: node.path,
+                    files: node.files,
+                    subfolders: subfoldersArray // Final structure uses array
+                };
+            };
+
+            // Convert the subfolders of the temporary root node
+            // The rootNode itself is not part of the final tree array
+            const finalTree = Object.values(rootNode.subfolders)
+                .map(convertNode)
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            return finalTree; // This is the array of top-level folders
+        },
+
+        buildFolderTrees() {
+            console.log("Building folder trees...");
+            const filesByUser = {};
+            for (const fileId in this.files) {
+                const file = this.files[fileId];
+                if (file.is_thumb) continue;
+                const user = file.o;
+                if (!filesByUser[user]) filesByUser[user] = [];
+                file.folderPath = file.folderPath || ''; // Ensure it exists
+                filesByUser[user].push(file);
+            }
+
+            const newUserFolderTrees = {};
+            const relevantUsers = new Set(Object.keys(filesByUser));
+
+             // Add users who have pending folder changes even if they have no files currently loaded
+             for (const contractId in this.pendingChanges) {
+                  if (this.pendingChanges[contractId]?.__newFolders__ && this.contract[contractId]?.t) {
+                      relevantUsers.add(this.contract[contractId].t);
+                  }
+             }
+             relevantUsers.delete(undefined);
+
+             for (const user of relevantUsers) {
+                 if(!user) continue;
+
+                 // 1. Build tree based on files for this user
+                 const userFiles = filesByUser[user] || [];
+                 const fileBasedTreeArray = this.buildFolderTree(userFiles); // Returns array of top-level folders
+
+                 // 2. Get pending new folders for this user
+                 let pendingFolderPaths = [];
+                 const userContractIds = Object.keys(this.contract).filter(id => this.contract[id]?.t === user);
+                 for(const contractId of userContractIds) {
+                      if (this.pendingChanges[contractId]?.__newFolders__) {
+                          pendingFolderPaths = [...pendingFolderPaths, ...this.pendingChanges[contractId]['__newFolders__']];
+                      }
+                 }
+                 pendingFolderPaths = [...new Set(pendingFolderPaths)]; // Unique paths
+
+                 // 3. Merge pending new folders into the file-based tree array
+                 const mergeFoldersIntoTree = (treeArray, paths) => {
+                      for (const fullPath of paths) {
+                           const parts = fullPath.split('/').filter(Boolean);
+                           let currentLevelArray = treeArray; // Start with the top-level array
+                           let currentPath = '';
+
+                           for (let i = 0; i < parts.length; i++) {
+                                const part = parts[i];
+                                currentPath = currentPath ? `${currentPath}/${part}` : part;
+                                let folderNode = currentLevelArray.find(node => node.name === part /* && node.path === currentPath */ ); // Find existing node
+
+                                if (!folderNode) {
+                                     folderNode = { name: part, path: currentPath, files: [], subfolders: [] };
+                                     currentLevelArray.push(folderNode);
+                                     // Sort siblings after adding
+                                     currentLevelArray.sort((a, b) => a.name.localeCompare(b.name));
+                                }
+
+                                // Descend to the subfolder array of the found/created node
+                                currentLevelArray = folderNode.subfolders;
+                           }
+                      }
+                      return treeArray; // Return the potentially modified tree array
+                 };
+
+                 // 4. Add the preset folders to ensure they're always present
+                 const presetFolders = [
+                     "Documents",
+                     "Images",
+                     "Videos",
+                     "Music",
+                     "Archives",
+                     "Code",
+                     "Designs",
+                     "Misc"
+                 ];
+                 
+                 // Add preset folders if they don't exist
+                 const treeWithPresets = [...fileBasedTreeArray]; // Start with existing folders
+                 
+                 for (const presetName of presetFolders) {
+                     if (!treeWithPresets.some(folder => folder.name === presetName)) {
+                         treeWithPresets.push({
+                             name: presetName,
+                             path: presetName,
+                             files: [],
+                             subfolders: [],
+                             isPreset: true // Mark as preset to prevent moving/renaming
+                         });
+                     } else {
+                         // Mark existing preset folder
+                         const existingPreset = treeWithPresets.find(folder => folder.name === presetName);
+                         if (existingPreset) {
+                             existingPreset.isPreset = true;
+                         }
+                     }
+                 }
+                 
+                 // Sort alphabetically, but make 'Documents' first
+                 treeWithPresets.sort((a, b) => {
+                     if (a.name === "Documents") return -1;
+                     if (b.name === "Documents") return 1;
+                     return a.name.localeCompare(b.name);
+                 });
+                 
+                 // Merge any pending folders that aren't presets
+                 const finalTree = mergeFoldersIntoTree(treeWithPresets, pendingFolderPaths);
+                 newUserFolderTrees[user] = finalTree;
+             }
+
+            // Update the main userFolderTrees object
+            this.userFolderTrees = newUserFolderTrees;
+        },
+        init() {
+            var contracts = [];
+            // Handle contracts as an array or object
+            if (Array.isArray(this.contracts)) {
+                contracts = this.contracts.slice();
+            } else {
+                for (var id in this.contracts) {
+                    contracts.push(this.contracts[id]);
+                }
+            }
+            if (this.nodeview) {
+                contracts.forEach(contract => {
+                    this.filesSelect.addusers[contract.t] = true;
+                });
+            }
+            for (var user in this.filesSelect.addusers) {
+                for (var id in this.contractIDs[user]) {
+                    contracts.push(this.contractIDs[user][id]);
+                }
+            }
+
+            this.files = {};
+            this.userFolderTrees = {};
+
+            for (var i in contracts) {
+                if (contracts[i].c == 1) continue;
+                const id = contracts[i].i;
+                this.contract[id] = contracts[i];
+                this.owners.push(contracts[i].t);
+
+                const m = contracts[i].m || "";
+                // Handle the actual metadata format
+                let contractData = contracts[i].m.split(',')[0]
+                let parts = contractData.split("|");
+                let encData = parts[0] || "";
+                let folderListStr = parts.length > 1 ? parts.slice(1).join('|') : id.split(':')[2]
+                let fileMetadata = m
+
+                // Fallback for non-pipe-separated metadata
+                if (parts.length === 1 && m.includes(",")) {
+                    const temp = m.split(";");
+                    encData = temp[0] || "";
+                    folderListStr = id.split(':')[2]; // No folder data in this format
+                }
+
+                const indexToPath = this.parseFolderList(folderListStr)
+
+                var renew = this.Base64toNumber(encData[0] || "0") & 1 ? true : false;
+                var encrypted = encData.includes("#");
+                this.newMeta[id] = { contract: { autoRenew: renew, encrypted, m: m } };
+
+                var filesNames = this.contract[id]?.df ? Object.keys(this.contract[id].df) : [];
+                if (!fileMetadata && !folderListStr) {
+                    // Fallback: Add files with minimal metadata
+                    for (var j = 0; j < filesNames.length; j++) {
+                        this.newMeta[id][filesNames[j]] = {
+                            name: filesNames[j],
+                            type: "",
+                            thumb: "",
+                            is_thumb: false,
+                            flags: 0,
+                            folderPath: "",
+                        };
+                        const f = {
+                            i: id,
+                            f: filesNames[j],
+                            c: id.split(":")[2].split("-")[0],
+                            e: this.contract[id].e.split(":")[0],
+                            n: filesNames[j],
+                            y: "",
+                            o: this.contract[id].t,
+                            folderPath: indexToPath["1"],
+                            s: this.contract[id].df[filesNames[j]],
+                            lf: 0,
+                            lic: "",
+                            l: "",
+                            is_thumb: false,
+                        };
+                        this.files[f.f] = f;
+                    }
+                } else {
+                    // Parse existing metadata
+                    const slots = fileMetadata.split(",") || [];
+                    for (var j = 0; j < filesNames.length; j++) {
+                        const name = slots[j * 4 + 1] || filesNames[j];
+                        const typeIndex = slots[j * 4 + 2] || "";
+                        const [type, folderIndex] = typeIndex.split(".");
+                        const thumb = slots[j * 4 + 3] || "";
+                        const flags = slots[j * 4 + 4] || "0";
+                        const folderPath = indexToPath[folderIndex] || indexToPath["1"];
+
+                        this.newMeta[id][filesNames[j]] = {
+                            name,
+                            type,
+                            thumb,
+                            thumb_data: thumb,
+                            is_thumb: false,
+                            flags: this.Base64toNumber(flags.split("-")[0]),
+                            folderPath,
+                            license: flags.includes("-") ? flags.split("-")[1] : "",
+                            labels: flags.includes("-") ? flags.split("-")[2] : flags.slice(1),
+                        };
+
+                        if (thumb) this.getImgData(id, filesNames[j]);
+                        if (this.newMeta[id][filesNames[j]].flags & 1) this.newMeta[id][filesNames[j]].encrypted = true;
+                        if (this.newMeta[id][filesNames[j]].flags & 2) this.newMeta[id][filesNames[j]].is_thumb = true
+
+                        const f = {
+                            i: id,
+                            f: filesNames[j],
+                            c: id.split(":")[2].split("-")[0],
+                            e: this.contract[id].e.split(":")[0],
+                            n: name || filesNames[j],
+                            y: type || "",
+                            o: this.contract[id].t,
+                            folderPath,
+                            is_thumb: this.newMeta[id][filesNames[j]].is_thumb,
+                            s: this.contract[id].df[filesNames[j]],
+                            lf: this.newMeta[id][filesNames[j]].flags,
+                            lic: this.newMeta[id][filesNames[j]].license,
+                            l: this.newMeta[id][filesNames[j]].labels,
+                        };
+                        this.files[f.f] = f;
+                    }
+                }
+            }
+
+            this.owners = [...new Set(this.owners)];
+            this.buildFolderTrees();
+            this.render();
+        },
+        dragOverBackground(event) {
+            event.preventDefault();
+        },
+        dropOnBackground(event) {
+            event.preventDefault();
+            const fileId = event.dataTransfer.getData("fileid");
+            console.log('Background drop - fileId:', fileId);
+            
+            // Find the file by ID
+            const file = this.files[fileId];
+            console.log('Background drop - Found file:', file);
+            
+            if (!file) {
+                console.error('Background drop - File not found with ID:', fileId);
+                return;
+            }
+            
+            if (!this.isEditable(file)) {
+                console.warn('Background drop - File not editable:', file);
+                return;
+            }
+            
+            // Skip if folder path is the same
+            if (file.folderPath === this.currentFolderPath) {
+                console.log('Background drop - File already in this folder');
+                return;
+            }
+            
+            // Store original path for debugging
+            const originalPath = file.folderPath;
+            console.log('Background drop - Original path:', originalPath, 'New path:', this.currentFolderPath);
+            
+            // Update file folder path
+            this.pendingChanges[file.i] = this.pendingChanges[file.i] || {};
+            this.pendingChanges[file.i][file.f] = {
+                folderPath: this.currentFolderPath,
+                name: this.newMeta[file.i][file.f].name || file.f,
+            };
+            
+            // Important: Actually update the file object's folderPath
+            file.folderPath = this.currentFolderPath;
+            console.log('Background drop - Updated file:', file);
+            
+            // Force folder path into metadata if needed
+            if (this.newMeta[file.i] && this.newMeta[file.i][file.f]) {
+                this.newMeta[file.i][file.f].folderPath = this.currentFolderPath;
+            }
+            
+            // Rebuild and render
+            this.buildFolderTrees();
+            this.render();
+        },
+        handleDragEnterFolder(event, folder) {
+            clearTimeout(this.dragHoverTimeout);
+            this.dragHoverTargetPath = folder.path;
+            console.log('Entering folder:', folder.path);
+            this.dragHoverTimeout = setTimeout(() => {
+                if (this.dragHoverTargetPath === folder.path) {
+                    console.log('Navigating due to hover on folder:', folder.path);
+                    this.navigateTo(folder.path);
+                    this.dragHoverTargetPath = null; // Reset after navigation
+                }
+            }, 1000); // 1 second delay
+        },
+        handleDragEnterBreadcrumb(event, path) {
+            clearTimeout(this.dragHoverTimeout);
+            this.dragHoverTargetPath = path;
+             console.log('Entering breadcrumb:', path);
+            this.dragHoverTimeout = setTimeout(() => {
+                if (this.dragHoverTargetPath === path) {
+                    console.log('Navigating due to hover on breadcrumb:', path);
+                    this.navigateTo(path);
+                    this.dragHoverTargetPath = null; // Reset after navigation
+                }
+            }, 1000); // 1 second delay
+        },
+        handleDragLeave(event) {
+            // Only clear the timeout if we're truly leaving the element
+            // Check if the related target (what we're moving to) is a child of the current target (what we're leaving)
+            const currentTarget = event.currentTarget;
+            const relatedTarget = event.relatedTarget;
+            
+            // If relatedTarget is null or not a descendant of currentTarget, we're truly leaving
+            if (!relatedTarget || !currentTarget.contains(relatedTarget)) {
+                clearTimeout(this.dragHoverTimeout);
+                console.log('Truly leaving hover target:', this.dragHoverTargetPath);
+                this.dragHoverTargetPath = null;
+            } else {
+                console.log('Moving within the same element, not clearing timeout');
+            }
+        },
+        isFileSelected(file) {
+            return this.selectedFiles.includes(file.f);
+        },
+        handleFileClick(event, file) {
+            // Multi-select with Alt/Ctrl key
+            if (event.altKey || event.ctrlKey) {
+                if (this.isFileSelected(file)) {
+                    // Deselect if already selected
+                    this.selectedFiles = this.selectedFiles.filter(id => id !== file.f);
+                } else {
+                    // Add to selection
+                    this.selectedFiles.push(file.f);
+                }
+            } else {
+                // Single select
+                this.selectedFiles = [file.f];
+            }
+        },
+        
+        // Add a method to check if a folder is selected
+        isFolderSelected(folder) {
+            // Simple check if the folder's ID is in the selection
+            const id = `folder-${folder.path}`;
+            return this.selectedFiles.includes(id);
+        },
+        
+        // Add a helper method for folder click
+        handleFolderClick(event, folder) {
+            // If Alt/Ctrl is pressed, select folder instead of navigating
+            if (event.altKey || event.ctrlKey) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                const folderId = `folder-${folder.path}`;
+                
+                if (this.selectedFiles.includes(folderId)) {
+                    // Deselect if already selected
+                    this.selectedFiles = this.selectedFiles.filter(id => id !== folderId);
+                } else {
+                    // Add to selection
+                    this.selectedFiles.push(folderId);
+                }
+                
+                return false; // Prevent navigation
+            }
+            
+            // Otherwise allow normal navigation
+            return true;
+        },
+        
+        startSelectionBox(event) {
+            // Only start selection box on left click on background (not on files/folders)
+            if (event.button !== 0 || event.target.closest('.file-grid') || event.target.closest('tr')) {
+                return;
+            }
+
+            // Stop propagation and prevent default text selection
+            event.stopPropagation(); 
+            event.preventDefault();
+
+            // Store viewport coordinates
+            this.selectionBox = {
+                active: true,
+                startX: event.clientX,
+                startY: event.clientY,
+                endX: event.clientX,
+                endY: event.clientY
+            };
+            
+            // Store initial selection state if Alt/Ctrl is pressed
+            this.initialSelection = (event.altKey || event.ctrlKey) ? [...this.selectedFiles] : [];
+
+            // Clear current selection if *not* holding Alt/Ctrl
+            if (!event.altKey && !event.ctrlKey) {
+                this.selectedFiles = [];
+            }
+
+            // ANTI-FREEZE: Temporarily disable pointer events on folders to prevent freeze
+            document.querySelectorAll('.files .file-grid, .files .folder-row').forEach(el => {
+                if (el.dataset.type === 'folder') {
+                    // Store original pointer-events style
+                    el.dataset.originalPointerEvents = el.style.pointerEvents || '';
+                    // Disable pointer events
+                    el.style.pointerEvents = 'none';
+                }
+            });
+
+            // Create a single selection box overlay
+            const selectionOverlay = document.createElement('div');
+            selectionOverlay.id = 'selection-box-overlay';
+            selectionOverlay.style.position = 'fixed'; // Use fixed for viewport positioning
+            selectionOverlay.style.backgroundColor = 'rgba(13, 110, 253, 0.2)'; // Bootstrap primary color with transparency
+            selectionOverlay.style.border = '1px solid #0d6efd'; // Bootstrap primary color
+            selectionOverlay.style.zIndex = '10000'; // Ensure it's on top
+            selectionOverlay.style.pointerEvents = 'none';
+            document.body.appendChild(selectionOverlay);
+
+            // ANTI-FREEZE: Add document-level mouseup listener
+            document.addEventListener('mouseup', this.endSelectionBox, { once: true });
+        },
+
+        updateSelectionBox(event) {
+            if (!this.selectionBox.active) return;
+
+            // Prevent default and stop propagation
+            event.preventDefault();
+            event.stopPropagation();
+
+            // Update end viewport coordinates
+            this.selectionBox.endX = event.clientX;
+            this.selectionBox.endY = event.clientY;
+
+            // Calculate selection box viewport coordinates
+            const selLeft = Math.min(this.selectionBox.startX, this.selectionBox.endX);
+            const selTop = Math.min(this.selectionBox.startY, this.selectionBox.endY);
+            const selRight = Math.max(this.selectionBox.startX, this.selectionBox.endX);
+            const selBottom = Math.max(this.selectionBox.startY, this.selectionBox.endY);
+
+            // Update the selection box overlay
+            const selectionOverlay = document.getElementById('selection-box-overlay');
+            if (selectionOverlay) {
+                selectionOverlay.style.left = `${selLeft}px`;
+                selectionOverlay.style.top = `${selTop}px`;
+                selectionOverlay.style.width = `${selRight - selLeft}px`;
+                selectionOverlay.style.height = `${selBottom - selTop}px`;
+            }
+
+            this.$nextTick(() => {
+                // Get the files container
+                const filesContainer = this.$refs.container.querySelector('.files'); 
+                if (!filesContainer) {
+                    return;
+                }
+                
+                // Get all selectable elements with their type clearly marked
+                const allElements = [];
+                
+                // Get files and folders in grid view
+                if (this.viewOpts.fileView === 'grid') {
+                    // Get all .file-grid elements with data-type
+                    const gridItems = Array.from(filesContainer.querySelectorAll('.file-grid[data-type]'));
+                    allElements.push(...gridItems);
+                } else {
+                    // Get all tr elements with data-type in list view
+                    const listItems = Array.from(filesContainer.querySelectorAll('tbody tr[data-type]'));
+                    allElements.push(...listItems);
+                }
+                
+                // Count files and folders for debug
+                const fileCount = allElements.filter(el => el.dataset.type === 'file').length;
+                const folderCount = allElements.filter(el => el.dataset.type === 'folder').length;
+                
+                // Process all elements
+                const selectedItems = [];
+                allElements.forEach(element => {
+                    // Get element's viewport position
+                    const rect = element.getBoundingClientRect();
+                    
+                    // Get element data attributes for type and key
+                    const elementType = element.dataset.type; // 'file' or 'folder'
+                    const elementKey = element.dataset.key;
+                    
+                    // Intersection test using viewport coordinates
+                    const overlapHoriz = !(rect.right < selLeft || rect.left > selRight);
+                    const overlapVert = !(rect.bottom < selTop || rect.top > selBottom);
+                    const intersects = overlapHoriz && overlapVert;
+                    
+                    // Alternative test - check if center point is inside selection (viewport)
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    const centerInSelection = 
+                        centerX >= selLeft && 
+                        centerX <= selRight && 
+                        centerY >= selTop && 
+                        centerY <= selBottom;
+                        
+                    // If we have a valid element that intersects with the selection
+                    if ((intersects || centerInSelection) && elementKey) {
+                        let itemId;
+                        if (elementType === 'folder') {
+                            itemId = `folder-${elementKey}`;
+                        } else { // file
+                            itemId = elementKey; // Files use CID directly
+                        }
+                        
+                        if (itemId) {
+                            selectedItems.push(itemId);
+                        }
+                    }
+                });
+                
+                // Final selection combining initial selection if Alt/Ctrl was held
+                const combinedSelection = new Set([...this.initialSelection, ...selectedItems]);
+                this.selectedFiles = Array.from(combinedSelection);
+                
+                // Force re-render to update visual highlighting
+                this.$forceUpdate();
+            });
+        },
+        
+        endSelectionBox() {
+            if (!this.selectionBox.active) {
+                return; // Don't do anything if not active
+            }
+            
+            this.selectionBox.active = false;
+            this.initialSelection = []; // Clear initial selection state
+            
+            // Remove the selection overlay
+            const selectionOverlay = document.getElementById('selection-box-overlay');
+            if (selectionOverlay) {
+                selectionOverlay.remove();
+            }
+
+            // ANTI-FREEZE: Re-enable pointer events on folders
+            document.querySelectorAll('.files .file-grid, .files .folder-row').forEach(el => {
+                if (el.dataset.originalPointerEvents !== undefined) {
+                    el.style.pointerEvents = el.dataset.originalPointerEvents;
+                    delete el.dataset.originalPointerEvents;
+                }
+            });
+            
+            // ANTI-FREEZE: Remove document-level mouseup listener if it was added externally
+            document.removeEventListener('mouseup', this.endSelectionBox);
+            
+            // Force re-render to ensure visual state reflects the selection
+            this.$forceUpdate();
+        },
+        isEditableFolder(folder) {
+            // Preset folders can't be renamed
+            if (folder.isPreset) {
+                return false;
+            }
+            
+            // Check if *any* loaded file belongs to the current user
+            // This might need refinement if folder ownership becomes a thing
+            // For now, assume if the user owns *any* files, they can manage folders
+            return this.owners.includes(this.account);
+        },
+        isPresetFolder(path) {
+            const presetFolders = ["Documents", "Images", "Videos", "Music", "Archives", "Code", "Designs", "Misc"];
+            return presetFolders.includes(path);
+        },
     },
     computed: {
         hasFiles() {
@@ -2138,5 +4373,13 @@ export default {
             this.selectedUser = this.account || this.owners[0];
         }
         this.init()
+
+        // Add window mouseup handler for selection box (emergency escape)
+        window.addEventListener('mouseup', (e) => {
+            if (this.selectionBox.active) {
+                console.log('Emergency ending selection box (window mouseup)');
+                this.endSelectionBox();
+            }
+        });
     },
 };
