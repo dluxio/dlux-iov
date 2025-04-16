@@ -1447,44 +1447,6 @@ export default {
             }
             this.render()
         },
-        dragOverBreadcrumb(event) {
-            event.preventDefault(); // Required to allow dropping
-        },
-        dropOnBreadcrumb(path) {
-            return (event) => {
-                event.preventDefault();
-                const fileId = event.dataTransfer.getData("fileId");
-                const file = this.files[fileId];
-                if (file && this.isEditable(file) && file.folderPath !== path) {
-                    this.pendingChanges[file.i] = this.pendingChanges[file.i] || {};
-                    this.pendingChanges[file.i][file.f] = {
-                        folderPath: path,
-                        name: this.newMeta[file.i][file.f].name || file.f,
-                    };
-                    file.folderPath = path;
-                    this.buildFolderTrees();
-                    this.render();
-                }
-            };
-        },
-        dragOverBackground(event) {
-            event.preventDefault();
-        },
-        dropOnBackground(event) {
-            event.preventDefault();
-            const fileId = event.dataTransfer.getData("fileId");
-            const file = this.files[fileId];
-            if (file && this.isEditable(file) && file.folderPath !== this.currentFolderPath) {
-                this.pendingChanges[file.i] = this.pendingChanges[file.i] || {};
-                this.pendingChanges[file.i][file.f] = {
-                    folderPath: this.currentFolderPath,
-                    name: this.newMeta[file.i][file.f].name || file.f,
-                };
-                file.folderPath = this.currentFolderPath;
-                this.buildFolderTrees();
-                this.render();
-            }
-        },
         download(fileInfo, data = false, MIME_TYPE = "image/png") {
             if (data) {
                 var blob = new Blob([data], { type: MIME_TYPE });
@@ -1623,14 +1585,17 @@ export default {
         },
         dragStartFile(event, file) {
             if (!this.isEditable(file)) return;
-            event.dataTransfer.setData("fileId", file.f);
+            event.dataTransfer.setData("fileid", file.f);
+            event.dataTransfer.effectAllowed = "move"
+            event.dataTransfer.dropEffect = "move"
         },
         dragOverFolder(event) {
             event.preventDefault();
         },
         dropOnFolder(event, folder) {
             event.preventDefault();
-            const fileId = event.dataTransfer.getData("fileId");
+            const fileId = event.dataTransfer.getData("fileid");
+            console.log('DoF',{event, folder, fileId})
             const file = this.files[fileId];
             if (file && this.isEditable(file) && file.folderPath !== folder.path) {
                 this.pendingChanges[file.i] = this.pendingChanges[file.i] || {};
@@ -1638,7 +1603,47 @@ export default {
                     folderPath: folder.path,
                     name: this.newMeta[file.i][file.f].name || file.f,
                 };
-                file.folderPath = folder.path;
+                this.files[fileId].folderPath = folder.path;
+                console.log(this.files[fileId].folderPath)
+                this.buildFolderTrees();
+                this.render();
+            }
+        },
+        dragOverBreadcrumb(event) {
+            event.preventDefault(); // Required to allow dropping
+        },
+        dropOnBreadcrumb(path) {
+            return (event) => {
+                event.preventDefault();
+                const fileId = event.dataTransfer.getData("fileid");
+                console.log('DoB',{path, fileId})
+                const file = this.files[fileId];
+                if (file && this.isEditable(file) && file.folderPath !== path) {
+                    this.pendingChanges[file.i] = this.pendingChanges[file.i] || {};
+                    this.pendingChanges[file.i][file.f] = {
+                        folderPath: path,
+                        name: this.newMeta[file.i][file.f].name || file.f,
+                    };
+                    file.folderPath = path;
+                    this.buildFolderTrees();
+                    this.render();
+                }
+            };
+        },
+        dragOverBackground(event) {
+            event.preventDefault();
+        },
+        dropOnBackground(event) {
+            event.preventDefault();
+            const fileId = event.dataTransfer.getData("fileid");
+            const file = this.files[fileId];
+            if (file && this.isEditable(file) && file.folderPath !== this.currentFolderPath) {
+                this.pendingChanges[file.i] = this.pendingChanges[file.i] || {};
+                this.pendingChanges[file.i][file.f] = {
+                    folderPath: this.currentFolderPath,
+                    name: this.newMeta[file.i][file.f].name || file.f,
+                };
+                file.folderPath = this.currentFolderPath;
                 this.buildFolderTrees();
                 this.render();
             }
