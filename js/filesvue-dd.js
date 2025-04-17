@@ -216,6 +216,7 @@ export default {
                      class="file-grid m-2 p-2 rounded text-center" 
                      :class="{ 'bg-dark': !isFolderSelected(folder), 'bg-primary': isFolderSelected(folder) }"
                      :data-key="folder.path"  
+                     :data-is-preset="folder.isPreset ? 'true' : null" 
                      :data-type="'folder'"
                      draggable="true"
                      @dragstart="dragStartItem($event, folder, 'folder')"
@@ -286,11 +287,22 @@ export default {
                             <th>Filename</th>
                             <th>Owner</th>
                             <th>Size</th>
-                            <th>Actions</th>
+                            <th>Labels & Tags</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" class="folder-row" @dblclick="navigateTo(folder.path)" @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)" @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)" @dragenter="handleDragEnterFolder($event, folder)" @dragleave="handleDragLeave">
+                        <tr v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" 
+                             class="folder-row" 
+                            :data-key="folder.path" 
+                            :data-type="'folder'" 
+                            :data-is-preset="folder.isPreset ? 'true' : null"
+                            @dblclick="navigateTo(folder.path)" 
+                            @click="handleFolderClick($event, folder)" 
+                            @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)" 
+                            @dragover="dragOverFolder($event)" 
+                            @drop="dropOnFolder($event, folder)" 
+                            @dragenter="handleDragEnterFolder($event, folder)" 
+                            @dragleave="handleDragLeave">
                             <td><i class="fa-solid fa-folder"></i></td>
                             <td>{{ folder.name }}</td>
                             <td></td>
@@ -329,6 +341,36 @@ export default {
                             <td>{{ newMeta[file.i][file.f].name || file.f }}</td>
                             <td>@{{ file.o }}</td>
                             <td>{{ fancyBytes(file.s) }}</td>
+                            <td>
+                                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                    <!-- colors -->
+                                    <div v-if="file.lc" class="d-flex me-1 align-items-center" style="margin-left: 15px">
+                                            <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :style="'margin-left: ' + -15 +'px !important;'"></i>
+                                    </div>
+                                    <!-- labels -->
+                                    <div class="me-1" v-for="label in labelsDecode(file.l)">
+                                        <span class="d-flex align-items-center">
+                                            <pop-vue :id="'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')" :title="label.l" trigger="hover">
+                                                <i :class="label.fa"></i>
+                                            </pop-vue>
+                                        </span>
+                                    </div>
+                                    <!-- flags -->
+                                    <div class="d-flex align-items-center">
+                                    <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)" >
+                                            <!-- title="Labels"  -->
+                                            <pop-vue :id="'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')" :title="flag.l" trigger="hover">
+                                                <i :class="flag.fa"></i>
+                                            </pop-vue>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id="'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
+                                            <i :class="lic.fa"></i>
+                                        </pop-vue>
+                                    </div>
+                                </div>
+                            </td>
                         </tr>
                         <!-- Empty state row for table view -->
                         <tr v-if="getSubfolders(selectedUser, currentFolderPath).length === 0 && getFiles(selectedUser, currentFolderPath).length === 0">
@@ -365,7 +407,8 @@ export default {
       <li
         v-if="contextMenu.type === 'background' && selectedUser === account"
         class="p-1"
-        @click="createNewFolder"
+        style="cursor: pointer;"
+        @click="createNewFolder; hideContextMenu();"
       >
         New Folder
       </li>
@@ -373,28 +416,42 @@ export default {
       <li
         v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)"
         class="p-1"
-        @click="renameItem(contextMenu.item, 'file')"
+        style="cursor: pointer;"
+        @click="renameItem(contextMenu.item, 'file'); hideContextMenu();"
       >
         Rename File
       </li>
       <li
         v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)"
         class="p-1"
-        @click="deleteFile(contextMenu.item)"
+        style="cursor: pointer;"
+        @click="deleteFile(contextMenu.item); hideContextMenu();"
       >
         Move to Trash
       </li>
+      <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)" class="dropdown-divider"></li>
+      <li
+        v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)"
+        class="p-1"
+        style="cursor: pointer;"
+        @click="openMetadataEditor(contextMenu.item); hideContextMenu();"
+      >
+        Edit Metadata
+      </li>
+      <li v-if="contextMenu.type === 'file'" class="dropdown-divider"></li>
       <li
         v-if="contextMenu.type === 'file' && flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length && !contract[contextMenu.item.i].encryption.key"
         class="p-1"
-        @click="decode(contextMenu.item.i)"
+        style="cursor: pointer;"
+        @click="decode(contextMenu.item.i); hideContextMenu();"
       >
         Decrypt 
       </li>
       <li
         v-if="contextMenu.type === 'file' && ( !flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length || (flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length && contract[contextMenu.item.i].encryption.key))"
         class="p-1"
-        @click="downloadFile(contextMenu.item)"
+        style="cursor: pointer;"
+        @click="downloadFile(contextMenu.item); hideContextMenu();"
       >
         Download File
       </li>
@@ -402,19 +459,68 @@ export default {
       <li
         v-if="contextMenu.type === 'folder' && isEditableFolder(contextMenu.item)"
         class="p-1"
-        @click="renameItem(contextMenu.item, 'folder')"
+        style="cursor: pointer;"
+        @click="renameItem(contextMenu.item, 'folder'); hideContextMenu();"
       >
         Rename Folder
       </li>
       <li
         v-if="contextMenu.type === 'folder' && isEditableFolder(contextMenu.item)"
         class="p-1"
-        @click="deleteFolder(contextMenu.item)"
+        style="cursor: pointer;"
+        @click="deleteFolder(contextMenu.item); hideContextMenu();"
       >
         Delete Folder
       </li>
     </ul>
   </div>
+</Teleport>
+
+<!-- Metadata Editor Overlay -->
+<Teleport to="body">
+    <div v-if="showMetadataEditor" 
+         class="metadata-editor-overlay d-flex justify-content-center align-items-center"
+         @click.self="closeMetadataEditor" 
+         style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.7); z-index: 1050;">
+        
+        <div class="bg-dark text-white p-4 rounded shadow-lg" style="min-width: 400px; max-width: 90%;">
+            <h5 class="mb-3">Edit Metadata for: <code class="text-info">{{ fileToEditMetadata?.n || fileToEditMetadata?.f }}</code></h5>
+            
+            <!-- Labels -->
+            <div class="mb-3">
+                <label class="form-label">Labels</label>
+                <choices-vue ref="editLabelsChoices" 
+                             prop_type="labels" 
+                             :prop_selections="tempMetadata.labels" 
+                             @data="handleTempLabel"></choices-vue>
+            </div>
+
+            <!-- License -->
+            <div class="mb-3">
+                <label class="form-label">License <a href="https://creativecommons.org/share-your-work/cclicenses/" target="_blank"><i class="fa-solid fa-section fa-xs"></i></a></label>
+                 <choices-vue ref="editLicenseChoices" 
+                              prop_type="license" 
+                              :prop_selections="tempMetadata.license" 
+                              :prop_max_items="1" 
+                              @data="handleTempLic"></choices-vue>
+            </div>
+
+            <!-- Flags -->
+            <div class="mb-3">
+                 <label class="form-label">Flags</label>
+                 <choices-vue ref="editFlagsChoices" 
+                              :prop_options="availableFlags" 
+                              :prop_selections="tempMetadata.flags"
+                              @data="handleTempFlag"></choices-vue>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex justify-content-end mt-4">
+                <button class="btn btn-secondary me-2" @click="closeMetadataEditor">Cancel</button>
+                <button class="btn btn-primary" @click="saveMetadataChanges">Save Changes</button>
+            </div>
+        </div>
+    </div>
 </Teleport>
 
 <!-- Save Changes Footer -->
@@ -567,6 +673,19 @@ export default {
             },
             dragHoverTargetPath: null,
             localStorageKey: '', // Added: Key for localStorage persistence
+            showMetadataEditor: false,
+            fileToEditMetadata: null,
+            tempMetadata: { // To hold temporary edits in the editor
+                labels: [], // Expecting array of keys like ['1', '5']
+                license: [], // Expecting single key in array like ['7'] or empty
+                flags: []   // Expecting array of flag numbers like [4, 8]
+            },
+            availableFlags: [
+                // value corresponds to the bit, label is display text
+                { value: 4, label: 'NSFW (Content Warning)', selected: false, customProperties: { icon: 'fa-solid fa-radiation text-warning' } },
+                { value: 8, label: 'Executable (May run code)', selected: false, customProperties: { icon: 'fa-regular fa-file-code text-info' } },
+                // Add other toggleable flags here if needed in the future
+            ],
         };
     },
     emits: ["addassets", "tosign"], // Ensure 'tosign' is included here
@@ -1186,7 +1305,7 @@ export default {
                 } else {
                     // --- Handle File Drop ---
                     const fileId = itemId;
-            const file = this.files[fileId];
+                const file = this.files[fileId];
                     if (!file) {
                         return;
                     }
@@ -2352,6 +2471,15 @@ export default {
         
         // Add a helper method for folder click
         handleFolderClick(event, folder) {
+            // Prevent selection of preset folders
+            if (folder.isPreset) {
+                // If it wasn't an Alt/Ctrl click, still allow navigation
+                if (!event.altKey && !event.ctrlKey) {
+                     this.navigateTo(folder.path);
+                }
+                return; // Stop further selection processing
+            }
+            
             // If Alt/Ctrl is pressed, select folder instead of navigating
             if (event.altKey || event.ctrlKey) {
                 event.preventDefault();
@@ -2371,7 +2499,7 @@ export default {
             }
             
             // Otherwise allow normal navigation
-            return true;
+            this.navigateTo(folder.path);
         },
         
         startSelectionBox(event) {
@@ -2501,7 +2629,8 @@ export default {
                         centerY <= selBottom;
                         
                     // If we have a valid element that intersects with the selection
-                    if ((intersects || centerInSelection) && elementKey) {
+                    // AND it's not a preset folder
+                    if ((intersects || centerInSelection) && elementKey && element.dataset.isPreset !== 'true') {
                         let itemId;
                         if (elementType === 'folder') {
                             itemId = `folder-${elementKey}`;
@@ -2575,7 +2704,7 @@ export default {
             // If dragging a selected item and multiple items are selected
             if (isDraggingSelected && this.selectedFiles.length > 1) {
                 // Include all selected file and folder IDs in the drag data
-                dragDataIds = [...this.selectedFiles]; 
+                dragDataIds = this.selectedFiles.filter(id => !id.startsWith('folder-') || !this.isPresetFolder(id.substring('folder-'.length)));
                 console.log('Dragging multiple items:', dragDataIds);
                 event.dataTransfer.setData("itemids", JSON.stringify(dragDataIds)); // Use a generic name
             } else {
@@ -2635,7 +2764,7 @@ export default {
                 
                 const truncatedName = itemName.length > 15 ? itemName.substring(0, 15) + '...' : itemName;
                 
-                dragIcon.innerHTML = `<div style="padding: 10px; background: rgba(0,0,0,0.7); color: white; border-radius: 4px; display: flex; align-items-center; max-width: 200px; white-space: nowrap;">
+                dragIcon.innerHTML = `<div style="padding: 10px; background: rgba(0,0,0,0.7); color: white; border-radius: 4px; display: flex; align-items: center; max-width: 200px; white-space: nowrap;">
                     <i class="${itemIconClass} fa-lg me-2"></i> 
                     <span>${truncatedName}</span>
                 </div>`;
@@ -3022,13 +3151,215 @@ export default {
                     if (savedChanges) {
                         this.pendingChanges = JSON.parse(savedChanges);
                         console.log("Loaded pending changes from localStorage");
-                        // Rebuild folder trees to reflect loaded changes
+
+                        // Update newMeta based on pendingChanges
+                        for (const contractId in this.pendingChanges) {
+                            const contractUpdates = this.pendingChanges[contractId];
+                            // Handle non-file specific changes like __newFolders__ if necessary
+                            if (contractUpdates.__newFolders__) {
+                                // No direct UI update needed here, buildFolderTrees handles it
+                            }
+
+                            for (const fileId in contractUpdates) {
+                                if (fileId === '__newFolders__') continue; // Skip special keys
+
+                                const change = contractUpdates[fileId];
+                                if (this.newMeta[contractId] && this.newMeta[contractId][fileId]) {
+                                    // Merge pending changes into newMeta for the specific file
+                                    // Ensure all relevant fields (name, folderPath, labels, license, flags) are updated
+                                    if(change.hasOwnProperty('name')) {
+                                        this.newMeta[contractId][fileId].name = change.name;
+                                    }
+                                    if(change.hasOwnProperty('folderPath')) {
+                                        this.newMeta[contractId][fileId].folderPath = change.folderPath;
+                                    }
+                                    if(change.hasOwnProperty('labels')) {
+                                        this.newMeta[contractId][fileId].labels = change.labels;
+                                    }
+                                    if(change.hasOwnProperty('license')) {
+                                        this.newMeta[contractId][fileId].license = change.license;
+                                    }
+                                    if(change.hasOwnProperty('flags')) {
+                                        this.newMeta[contractId][fileId].flags = change.flags;
+                                    }
+
+                                    // Also update the main file object if it exists (for UI binding)
+                                    if(this.files[fileId]) {
+                                        if(change.hasOwnProperty('name')) this.files[fileId].n = change.name;
+                                        if(change.hasOwnProperty('folderPath')) this.files[fileId].folderPath = change.folderPath;
+                                        if(change.hasOwnProperty('labels')) this.files[fileId].l = change.labels;
+                                        if(change.hasOwnProperty('license')) this.files[fileId].lic = change.license;
+                                        if(change.hasOwnProperty('flags')) this.files[fileId].lf = change.flags;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Rebuild folder trees to reflect loaded changes (folder path changes, new folders)
                         this.buildFolderTrees();
                     }
                 } catch (e) {
                     console.error("Error loading pending changes from localStorage:", e);
                 }
             }
+        },
+        hideContextMenu() {
+            if (this.contextMenu.show) {
+                this.contextMenu.show = false;
+                // Clean up the listener if it exists
+                if (this.clickOutsideListener) {
+                    document.removeEventListener("click", this.clickOutsideListener, { capture: true });
+                    this.clickOutsideListener = null; // Clear the reference
+                }
+            }
+        },
+        openMetadataEditor(file) {
+            if (!file || !this.newMeta[file.i] || !this.newMeta[file.i][file.f]) return;
+            this.hideContextMenu(); // Ensure context menu is closed
+            this.fileToEditMetadata = file;
+            const meta = this.newMeta[file.i][file.f];
+            
+            // Initialize tempMetadata based on the *current* state in newMeta
+            // This ensures pending changes loaded earlier are reflected
+            const currentFlags = meta.flags || 0; // Use the potentially updated meta.flags
+            this.tempMetadata = {
+                labels: (meta.labels || '').split('').filter(Boolean), // String '15' -> ['1', '5']
+                license: meta.license ? [meta.license] : [], // String '7' -> ['7'] or []
+                flags: this.availableFlags.filter(flag => (currentFlags & flag.value) !== 0).map(flag => flag.value)
+            };
+            
+            this.showMetadataEditor = true;
+            
+            // The choices-vue components should reactively update based on the
+            // :prop_selections binding when tempMetadata changes.
+            // Explicit method calls are not needed (and were causing errors).
+        },
+
+        saveMetadataChanges() {
+            if (!this.fileToEditMetadata) return;
+            
+            console.log('Saving metadata, current tempMetadata:', JSON.parse(JSON.stringify(this.tempMetadata)));
+            
+            const file = this.fileToEditMetadata;
+            const contractId = file.i;
+            const fileId = file.f;
+            
+            // --- Calculate final values --- 
+            // Labels: Join array back to string, ensure sorted
+            const finalLabels = this.tempMetadata.labels.sort().join(''); 
+            
+            // License: Get the single value from array or empty string
+            const finalLicense = this.tempMetadata.license[0] || ''; 
+            
+            // Flags: Combine selected flag values back into a number
+            // Start with existing non-editable flags (like encryption bit 1)
+            let finalFlagsNum = (this.newMeta[contractId][fileId].flags || 0) & 1; // Preserve encryption flag
+            this.tempMetadata.flags.forEach(flagVal => {
+                finalFlagsNum |= flagVal; // Add selected flags using bitwise OR
+            });
+
+            console.log('Calculated final values:', { finalLabels, finalLicense, finalFlagsNum });
+
+            // --- Update newMeta --- 
+            this.newMeta[contractId][fileId].labels = finalLabels;
+            this.newMeta[contractId][fileId].license = finalLicense;
+            this.newMeta[contractId][fileId].flags = finalFlagsNum;
+
+            // --- Update file object for reactivity --- 
+            file.l = finalLabels;
+            file.lic = finalLicense;
+            file.lf = finalFlagsNum;
+            
+            // --- Update pendingChanges --- 
+            this.pendingChanges[contractId] = this.pendingChanges[contractId] || {};
+            this.pendingChanges[contractId][fileId] = {
+                // Keep existing pending changes for this file if any
+                ...(this.pendingChanges[contractId][fileId] || {}),
+                // Overwrite with new metadata values
+                labels: finalLabels,
+                license: finalLicense,
+                flags: finalFlagsNum,
+                 // Ensure name and path are preserved from newMeta/pendingChanges
+                name: this.newMeta[contractId][fileId].name || fileId,
+                folderPath: this.newMeta[contractId][fileId].folderPath || '', 
+            };
+
+            console.log('Updated pendingChanges for', contractId, fileId, ':', JSON.parse(JSON.stringify(this.pendingChanges[contractId][fileId])));
+
+            // --- Close editor --- 
+            this.closeMetadataEditor();
+            
+            // Optional: Force update if UI doesn't refresh automatically
+            // this.$forceUpdate(); 
+        },
+
+        closeMetadataEditor() {
+            this.showMetadataEditor = false;
+            this.fileToEditMetadata = null;
+            this.tempMetadata = { labels: [], license: [], flags: [] }; // Reset temp data
+        },
+        
+        // Handlers for the choices-vue components in the editor
+        handleTempLabel(data) {
+            console.log('handleTempLabel received data:', data);
+            const currentLabels = [...this.tempMetadata.labels]; // Clone for modification
+            if (data.action === 'added') {
+                if (!currentLabels.includes(data.item)) {
+                    currentLabels.push(data.item);
+                }
+            } else if (data.action === 'remove') {
+                const index = currentLabels.indexOf(data.item);
+                if (index > -1) {
+                    currentLabels.splice(index, 1);
+                }
+            }
+            // Force reactivity by creating a new object with the updated array
+            this.tempMetadata = {
+                ...this.tempMetadata, 
+                labels: currentLabels.sort() // Keep it sorted
+            };
+            console.log('tempMetadata after label update:', JSON.parse(JSON.stringify(this.tempMetadata)));
+        },
+        handleTempLic(data) {
+            console.log('handleTempLic received data:', data);
+            let newLicense = [];
+            if (data.action === 'added') {
+                newLicense = [data.item]; // License allows only one selection
+            } else if (data.action === 'remove') {
+                newLicense = []; // Clear if removed
+            }
+            // Force reactivity
+            this.tempMetadata = {
+                ...this.tempMetadata, // Spread existing values
+                license: newLicense
+            };
+            console.log('tempMetadata after license update:', JSON.parse(JSON.stringify(this.tempMetadata)));
+        },
+        handleTempFlag(data) {
+            console.log('handleTempFlag received data:', data);
+            
+            // Initialize current flags as a bitwise number
+            let currentFlagsNum = this.tempMetadata.flags.reduce((acc, flag) => acc | flag, 0);
+            
+            if (data.action === 'added') {
+                currentFlagsNum |= data.item; // Add the flag using bitwise OR
+            } else if (data.action === 'remove') {
+                currentFlagsNum &= ~data.item; // Remove the flag using bitwise AND with negation
+            }
+            
+            // Convert back to an array of flags for tempMetadata
+            const newFlagsArray = [];
+            if (currentFlagsNum & 4) newFlagsArray.push(4); // NSFW
+            if (currentFlagsNum & 8) newFlagsArray.push(8); // Executable
+            // Add other flags as needed
+        
+            // Force reactivity
+            this.tempMetadata = {
+                ...this.tempMetadata,
+                flags: newFlagsArray.sort((a, b) => a - b) // Sort numerically
+            };
+            
+            console.log('tempMetadata after flag update:', JSON.parse(JSON.stringify(this.tempMetadata)));
         },
     },
     computed: {

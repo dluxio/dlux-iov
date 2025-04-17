@@ -485,6 +485,7 @@ export default {
   },
   methods: {
     Base64toNumber(chars = "") {
+      if(typeof chars !== 'string') return 0
       const glyphs =
         "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=";
       var result = 0;
