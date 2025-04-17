@@ -2234,6 +2234,7 @@ export default {
             this.owners = [...new Set(this.owners)];
             this.buildFolderTrees();
             this.render();
+            this.setView('icon')
         },
         dragOverBackground(event) {
             event.preventDefault();
