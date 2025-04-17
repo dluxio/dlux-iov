@@ -382,7 +382,14 @@ export default {
         class="p-1"
         @click="deleteFile(contextMenu.item)"
       >
-        Delete File
+        Move to Trash
+      </li>
+      <li
+        v-if="contextMenu.type === 'file'"
+        class="p-1"
+        @click="downloadFile(contextMenu.item)"
+      >
+        Download File
       </li>
       <!-- Folder Options -->
       <li
@@ -824,11 +831,11 @@ export default {
                     });
             }
         },
-        downloadFile(cid, id) {
+        downloadFile(cid) {
             fetch(`https://ipfs.dlux.io/ipfs/${cid}`)
                 .then((response) => response.text())
                 .then((blob) => {
-
+                    const id = this.files[cid].i
                     const name = this.newMeta[id][cid].name + '.' + this.newMeta[id][cid].type || 'file'
                     if (this.contract[id].encryption.key) {
                         blob = this.AESDecrypt(blob, this.contract[id].encryption.key);
