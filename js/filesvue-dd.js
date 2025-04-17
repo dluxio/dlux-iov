@@ -385,7 +385,14 @@ export default {
         Move to Trash
       </li>
       <li
-        v-if="contextMenu.type === 'file'"
+        v-if="contextMenu.type === 'file' && contract[contextMenu.item.i].encryption && !contract[contextMenu.item.i].encryption.key"
+        class="p-1"
+        @click="decode(contextMenu.item.i)"
+      >
+        Decrypt 
+      </li>
+      <li
+        v-if="contextMenu.type === 'file' && ( !contract[contextMenu.item.i].encryption || (contract[contextMenu.item.i].encryption && contract[contextMenu.item.i].encryption.key))"
         class="p-1"
         @click="downloadFile(contextMenu.item)"
       >
@@ -831,42 +838,43 @@ export default {
                     });
             }
         },
-        downloadFile(cid) {
+        downloadFile(file) {
+            const cid = file.f;
             fetch(`https://ipfs.dlux.io/ipfs/${cid}`)
-                .then((response) => response.text())
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.blob(); // Get the response as a Blob
+                })
                 .then((blob) => {
-                    const id = this.files[cid].i
-                    const name = this.newMeta[id][cid].name + '.' + this.newMeta[id][cid].type || 'file'
-                    if (this.contract[id].encryption.key) {
-                        blob = this.AESDecrypt(blob, this.contract[id].encryption.key);
-                        var byteString = atob(blob.split(',')[1])
-                        var mimeString = blob.split(',')[0].split(':')[1].split(';')[0];
-                        var ab = new ArrayBuffer(byteString.length);
-                        var ia = new Uint8Array(ab);
-                        for (var i = 0; i < byteString.length; i++) {
-                            ia[i] = byteString.charCodeAt(i);
-                        }
-                        blob = new Blob([ab], { type: mimeString });
-                    }
-                    try {
-                        var url = window.URL.createObjectURL(blob);
-                        var a = document.createElement('a');
-                        a.href = url;
-                        a.download = name;
-                        document.body.appendChild(a);
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                    } catch (e) {
-                        var url = window.URL.createObjectURL(response);
-                        var a = document.createElement('a');
-                        a.href = url;
-                        a.download = name;
-                        document.body.appendChild(a);
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                    }
+                    const id = file.i;
+                    const name = (this.newMeta[id] && this.newMeta[id][cid]) 
+                        ? `${this.newMeta[id][cid].name}.${this.newMeta[id][cid].type}` 
+                        : 'file';
 
+                    // Check if the file is encrypted
+                    if (this.contract[id].encryption && this.contract[id].encryption.key) {
+                        return this.AESDecrypt(blob, this.contract[id].encryption.key)
+                            .then(decryptedBlob => {
+                                this.triggerDownload(decryptedBlob, name);
+                            });
+                    } else {
+                        this.triggerDownload(blob, name);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Download failed:', error);
                 });
+        },
+        triggerDownload(blob, name) {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
         },
         setView(mode) {
             this.viewOpts.view = mode;
