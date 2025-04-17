@@ -421,13 +421,23 @@ export default {
       >
         Rename File
       </li>
+      <!-- Changed: Conditionally show Move to Trash -->
       <li
-        v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)"
+        v-if="contextMenu.type === 'file' && isEditable(contextMenu.item) && currentFolderPath !== 'Trash'"
         class="p-1"
         style="cursor: pointer;"
         @click="deleteFile(contextMenu.item); hideContextMenu();"
       >
         Move to Trash
+      </li>
+      <!-- Added: Restore option for Trash -->
+      <li
+        v-if="contextMenu.type === 'file' && isEditable(contextMenu.item) && currentFolderPath === 'Trash'"
+        class="p-1"
+        style="cursor: pointer;"
+        @click="restoreFile(contextMenu.item); hideContextMenu();"
+      >
+        Restore File
       </li>
       <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)" class="dropdown-divider"></li>
       <li
@@ -626,6 +636,12 @@ export default {
     </span>
   </button>
   <button class="btn btn-secondary" @click="revertPendingChanges">Revert Pending Changes</button>
+</div>
+
+<!-- Added: Warning Box for Trash Folder -->
+<div v-if="currentFolderPath === 'Trash'" class="alert alert-warning my-2 mx-1" role="alert">
+    <i class="fa-solid fa-triangle-exclamation fa-fw me-1"></i>
+    Files in Trash will be permanently deleted after their review/expiration date.
 </div>
 
 </div>
@@ -3595,6 +3611,50 @@ export default {
             // Update UI
             this.buildFolderTrees();
             this.render();
+        },
+
+        // Added: Method to restore a file from the Trash folder
+        restoreFile(file) {
+            if (!this.isEditable(file)) {
+                alert("You can only restore your own files.");
+                return;
+            }
+
+            if (file.folderPath !== 'Trash') {
+                // Safety check, should not happen if context menu logic is correct
+                console.warn("Attempted to restore a file not in Trash.");
+                return;
+            }
+
+            const contractId = file.i;
+            const fileId = file.f;
+            const restorePath = ""; // Restore to root directory
+
+            console.log(`Restoring file ${fileId} (contract ${contractId}) from Trash to root.`);
+
+            // Update the canonical file object in this.files
+            if (this.files[fileId]) {
+                this.files[fileId].folderPath = restorePath;
+            }
+
+            // Update newMeta
+            if (this.newMeta[contractId] && this.newMeta[contractId][fileId]) {
+                this.newMeta[contractId][fileId].folderPath = restorePath;
+            }
+
+            // Update pendingChanges
+            this.pendingChanges[contractId] = this.pendingChanges[contractId] || {};
+            this.pendingChanges[contractId][fileId] = {
+                ...(this.pendingChanges[contractId][fileId] || {}), // Preserve other pending changes
+                folderPath: restorePath, // Set/overwrite the folder path
+                name: this.newMeta[contractId]?.[fileId]?.name || fileId, // Ensure name is preserved
+            };
+
+            console.log('Updated pendingChanges for restore from trash:', JSON.parse(JSON.stringify(this.pendingChanges[contractId][fileId])));
+
+            // Rebuild folder trees and re-render the view
+            this.buildFolderTrees();
+            this.render(); // Ensure the UI updates to reflect the move
         },
     },
     computed: {
