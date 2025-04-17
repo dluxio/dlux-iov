@@ -472,6 +472,14 @@ export default {
       >
         Delete Folder
       </li>
+      <li
+        v-if="contextMenu.type === 'file'"
+        class="p-1"
+        style="cursor: pointer;"
+        @click="openDetailsViewer(contextMenu.item); hideContextMenu();"
+      >
+        View Details <!-- Added: New context menu item -->
+      </li>
     </ul>
   </div>
 </Teleport>
@@ -518,6 +526,88 @@ export default {
             <div class="d-flex justify-content-end mt-4">
                 <button class="btn btn-secondary me-2" @click="closeMetadataEditor">Cancel</button>
                 <button class="btn btn-primary" @click="saveMetadataChanges">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</Teleport>
+
+<!-- Added: Details Viewer Overlay -->
+<Teleport to="body">
+    <div v-if="showDetailsViewer && detailsData"
+         class="details-viewer-overlay d-flex justify-content-center align-items-center"
+         @click.self="closeDetailsViewer"
+         style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.8); z-index: 1055; overflow-y: auto; padding: 20px;">
+
+        <div class="bg-dark text-white p-4 rounded shadow-lg" style="min-width: 500px; max-width: 800px;">
+            <h5 class="mb-3 border-bottom pb-2">File Details: <code class="text-info">{{ detailsData.file.name }}</code></h5>
+
+            <div class="row">
+                <!-- File Info Column -->
+                <div class="col-md-6 mb-3">
+                    <h6>File Information</h6>
+                    <ul class="list-unstyled small">
+                        <li><strong>CID:</strong> <code class="text-break">{{ detailsData.file.cid }}</code> <i class="fa-regular fa-copy fa-fw ms-1" role="button" @click="copyText(detailsData.file.cid)"></i></li>
+                        <li><strong>Owner:</strong> @{{ detailsData.file.owner }}</li>
+                        <li><strong>Size:</strong> {{ detailsData.file.size }}</li>
+                        <li><strong>Path:</strong> {{ detailsData.file.path || '/' }}</li>
+                        <li><strong>Type:</strong> {{ detailsData.file.type }}</li>
+                        <li><strong>Encrypted:</strong> {{ detailsData.file.encrypted ? 'Yes' : 'No' }}</li>
+                        <li><strong>Created:</strong> {{ detailsData.file.creationTime }} (Block: {{ detailsData.file.creationBlock }})</li>
+                        <li><strong>Expires:</strong> Block {{ detailsData.file.expirationBlock }}</li>
+                        <li v-if="detailsData.file.thumbCid"><strong>Thumbnail CID:</strong> <code class="text-break">{{ detailsData.file.thumbCid }}</code> <i class="fa-regular fa-copy fa-fw ms-1" role="button" @click="copyText(detailsData.file.thumbCid)"></i></li>
+                        <li v-if="detailsData.file.thumbData" class="mt-2">
+                            <strong>Thumbnail:</strong><br>
+                            <img :src="detailsData.file.thumbData" class="img-fluid mt-1 border rounded" style="max-height: 100px; max-width: 100px; object-fit: contain;" />
+                        </li>
+                        <li v-if="detailsData.file.flags.length > 0" class="mt-2">
+                            <strong>Flags:</strong>
+                            <span v-for="flag in detailsData.file.flags" :key="flag.l" class="ms-2">
+                                <i :class="flag.fa" :title="flag.l"></i>
+                            </span>
+                        </li>
+                        <li v-if="detailsData.file.labels.length > 0" class="mt-2">
+                            <strong>Labels:</strong>
+                            <span v-for="label in detailsData.file.labels" :key="label.l" class="ms-2">
+                                <i :class="label.fa" :title="label.l"></i>
+                            </span>
+                        </li>
+                         <li v-if="detailsData.file.license" class="mt-2">
+                            <strong>License:</strong> {{ detailsData.file.license.name }}
+                            <span v-for="lic in detailsData.file.license.fa" :key="lic.l" class="ms-1">
+                                <i :class="lic.fa" :title="lic.l"></i>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Contract Info Column -->
+                <div class="col-md-6 mb-3">
+                     <h6>Contract Information</h6>
+                     <ul class="list-unstyled small">
+                        <li><strong>Contract ID:</strong> <code class="text-break">{{ detailsData.contract.id }}</code> <i class="fa-regular fa-copy fa-fw ms-1" role="button" @click="copyText(detailsData.contract.id)"></i></li>
+                        <li><strong>Contract Owner:</strong> @{{ detailsData.contract.owner }}</li>
+                        <li><strong>Storage Node:</strong> {{ detailsData.contract.node }}</li>
+                        <li><strong>Price/Block:</strong> {{ detailsData.contract.pricePerBlock }}</li>
+                        <li><strong>Extension:</strong> {{ detailsData.contract.extensionBlocks }} Blocks</li>
+                        <li><strong>Total Size Stored:</strong> {{ detailsData.contract.totalSizeStored }}</li>
+                        <li><strong>Auto-Renew:</strong> {{ detailsData.contract.autoRenew ? 'Yes' : 'No' }}</li>
+                        <li><strong>Contract Encrypted:</strong> {{ detailsData.contract.encrypted ? 'Yes' : 'No' }}</li>
+                        <li v-if="detailsData.contract.encrypted">
+                            <strong>Encryption Key Available:</strong> {{ detailsData.contract.encryptionKeyAvailable ? 'Yes (Decrypted)' : 'No' }}
+                        </li>
+                        <li v-if="detailsData.contract.encryptionAccounts.length > 0">
+                             <strong>Encrypted For:</strong>
+                             <ul>
+                                <li v-for="acc in detailsData.contract.encryptionAccounts" :key="acc">@{{ acc }}</li>
+                             </ul>
+                        </li>
+                     </ul>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex justify-content-end mt-3 border-top pt-3">
+                <button class="btn btn-secondary" @click="closeDetailsViewer">Close</button>
             </div>
         </div>
     </div>
@@ -686,6 +776,8 @@ export default {
                 { value: 8, label: 'Executable (May run code)', selected: false, customProperties: { icon: 'fa-regular fa-file-code text-info' } },
                 // Add other toggleable flags here if needed in the future
             ],
+            showDetailsViewer: false, // Added: Control visibility of details viewer
+            fileToViewDetails: null,  // Added: Store the file for the details viewer
         };
     },
     emits: ["tosign", "addassets"], // Ensure 'tosign' is included here
@@ -3381,6 +3473,19 @@ export default {
             
             console.log('tempMetadata after flag update:', JSON.parse(JSON.stringify(this.tempMetadata)));
         },
+        // Added: Method to open the details viewer
+        openDetailsViewer(file) {
+            if (!file || !this.newMeta[file.i] || !this.contract[file.i]) return;
+            this.hideContextMenu(); // Ensure context menu is closed
+            this.fileToViewDetails = file;
+            this.showDetailsViewer = true;
+        },
+
+        // Added: Method to close the details viewer
+        closeDetailsViewer() {
+            this.showDetailsViewer = false;
+            this.fileToViewDetails = null;
+        },
     },
     computed: {
         hasFiles() {
@@ -3421,6 +3526,55 @@ export default {
         updatesPayloadTooLarge() {
             const MAX_SIZE = 7500; // Maximum size in bytes
             return this.updatesPayloadSize > MAX_SIZE;
+        },
+        // Added: Computed property for details viewer data (optional, but can help clean up template)
+        detailsData() {
+            if (!this.showDetailsViewer || !this.fileToViewDetails) return null;
+
+            const file = this.fileToViewDetails;
+            const contract = this.contract[file.i];
+            const meta = this.newMeta[file.i]?.[file.f] || {};
+
+            // Need to check if helper methods exist before calling them
+            const fancyBytes = this.fancyBytes || ((bytes) => `${bytes} B`);
+            const flagsDecode = this.flagsDecode || ((flags) => []);
+            const labelsDecode = this.labelsDecode || ((labels) => []);
+            const blockToTime = this.blockToTime || ((block) => `Block ${block}`);
+            const Base64toNumber = this.Base64toNumber || ((str) => 0);
+            const isValidThumb = this.isValidThumb || ((data) => data && data.startsWith('data:image'));
+
+            return {
+                file: {
+                    cid: file.f,
+                    name: meta.name || file.f,
+                    owner: file.o,
+                    size: fancyBytes(file.s),
+                    path: meta.folderPath || file.folderPath || '/',
+                    type: meta.type || 'unknown',
+                    flags: flagsDecode(meta.flags),
+                    labels: labelsDecode(meta.labels),
+                    license: this.licenses[meta.license],
+                    thumbData: isValidThumb(meta.thumb_data) ? meta.thumb_data : null,
+                    thumbCid: meta.thumb,
+                    encrypted: meta.encrypted || (Base64toNumber(meta.flags) & 1),
+                    creationBlock: file.c,
+                    creationTime: blockToTime(file.c),
+                    expirationBlock: file.e,
+                    // expirationTime: blockToTime(file.e), // If needed
+                },
+                contract: {
+                    id: file.i,
+                    owner: contract.t,
+                    node: contract.u,
+                    pricePerBlock: contract.p,
+                    extensionBlocks: contract.extend,
+                    totalSizeStored: fancyBytes(contract.s || 0), // Assuming contract.s exists
+                    autoRenew: meta.contract?.autoRenew,
+                    encrypted: meta.contract?.encrypted,
+                    encryptionKeyAvailable: contract.encryption?.key ? true : false,
+                    encryptionAccounts: contract.encryption?.accounts ? Object.keys(contract.encryption.accounts) : [],
+                }
+            };
         }
     },
     watch: {
