@@ -688,7 +688,7 @@ export default {
             ],
         };
     },
-    emits: ["addassets", "tosign"], // Ensure 'tosign' is included here
+    emits: ["tosign", "addassets"], // Ensure 'tosign' is included here
     methods: {
         ...common,
         ...spk,
@@ -2342,6 +2342,26 @@ export default {
                             this.newMeta[id][filesNames[j]].name = pendingName; // Update the metadata object
                         }
 
+                        // Apply pending labels, license, and flags changes
+                        if (this.pendingChanges[id] && this.pendingChanges[id][filesNames[j]]) {
+                            const pendingFileChanges = this.pendingChanges[id][filesNames[j]];
+                            if (pendingFileChanges.hasOwnProperty('labels')) {
+                                const pendingLabels = pendingFileChanges.labels;
+                                f.l = pendingLabels;
+                                this.newMeta[id][filesNames[j]].labels = pendingLabels;
+                            }
+                            if (pendingFileChanges.hasOwnProperty('license')) {
+                                const pendingLicense = pendingFileChanges.license;
+                                f.lic = pendingLicense;
+                                this.newMeta[id][filesNames[j]].license = pendingLicense;
+                            }
+                            if (pendingFileChanges.hasOwnProperty('flags')) {
+                                const pendingFlags = pendingFileChanges.flags;
+                                f.lf = pendingFlags;
+                                this.newMeta[id][filesNames[j]].flags = pendingFlags;
+                            }
+                        }
+
                         this.files[f.f] = f;
                     }
                 }
@@ -3307,7 +3327,7 @@ export default {
                 if (!currentLabels.includes(data.item)) {
                     currentLabels.push(data.item);
                 }
-            } else if (data.action === 'remove') {
+            } else if (data.action === 'removed') {
                 const index = currentLabels.indexOf(data.item);
                 if (index > -1) {
                     currentLabels.splice(index, 1);
@@ -3325,7 +3345,7 @@ export default {
             let newLicense = [];
             if (data.action === 'added') {
                 newLicense = [data.item]; // License allows only one selection
-            } else if (data.action === 'remove') {
+            } else if (data.action === 'removed') {
                 newLicense = []; // Clear if removed
             }
             // Force reactivity
@@ -3343,7 +3363,7 @@ export default {
             
             if (data.action === 'added') {
                 currentFlagsNum |= data.item; // Add the flag using bitwise OR
-            } else if (data.action === 'remove') {
+            } else if (data.action === 'removed') {
                 currentFlagsNum &= ~data.item; // Remove the flag using bitwise AND with negation
             }
             
