@@ -138,7 +138,7 @@ broca_calc(last = '0,0', broca_refill = 144000, spk_power = 0, head_block = 0) {
           "5": "Music",
           "6": "Archives",
           "7": "Code",
-          "8": "Designs",
+          "8": "Trash",
           "9": "Misc",
       };
       
@@ -169,7 +169,7 @@ broca_calc(last = '0,0', broca_refill = 144000, spk_power = 0, head_block = 0) {
               // This entry is a top-level folder (child of root)
               fullPath = folderName;
               // Check if it's a preset name (already handled above), skip if so?
-              if (["Documents", "Images", "Videos", "Music", "Archives", "Code", "Designs", "Misc"].includes(folderName)) {
+              if (["Documents", "Images", "Videos", "Music", "Archives", "Code", "Trash", "Misc"].includes(folderName)) {
                   continue; // Presets are already mapped
               }
           }

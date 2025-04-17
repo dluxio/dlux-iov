@@ -2413,7 +2413,7 @@ export default {
                 const pathToIndex = {};
                 const presetFoldersMap = {
                     "Documents": "2", "Images": "3", "Videos": "4", "Music": "5",
-                    "Archives": "6", "Code": "7", "Designs": "8", "Misc": "9"
+                    "Archives": "6", "Code": "7", "Trash": "8", "Misc": "9"
                 };
                 let nextCustomIndex = 0;
                 let folderListEntries = [];
@@ -2466,16 +2466,9 @@ export default {
                     const fileState = finalFileStates[cid];
                     const folderPath = fileState?.folderPath || "";
                     // Ensure folderIndex is correctly retrieved or defaulted
-                    const folderIndex = folderPath ? pathToIndex[folderPath] : pathToIndex['']; // Use root index if path is empty
+                    let folderIndex = folderPath ? pathToIndex[folderPath] : pathToIndex['']; // Use root index if path is empty
                     if (folderIndex === undefined) {
-                         console.error(`Error: No index found for folderPath '${folderPath}' for file ${cid}. Defaulting to root.`);
-                         // Decide on fallback: default to root ('0') or skip?
-                         // For now, let's default to root index '0' (path '')
-                         // folderIndex = pathToIndex['']; // or perhaps skip this file?
-                         // To be safe, let's skip if the path existed but had no index
-                         if(folderPath) return;
-                         // Otherwise, if path was empty, use root index
-                         folderIndex = pathToIndex['']; 
+                         folderIndex = "1";
                     }
 
                     const flagsNum = fileState.flags || 0;
@@ -2484,7 +2477,7 @@ export default {
                     const labelsStr = fileState.labels || "";
                     const flagsCombined = `${flagsB64}-${licenseStr}-${labelsStr}`;
                     // Ensure folderIndex is a string before using it
-                    const folderIndexStr = typeof folderIndex === 'string' ? folderIndex : "0"; // Default to root index '0'
+                    const folderIndexStr = typeof folderIndex === 'string' ? folderIndex : "1"; // Default to root index '0'
                     const entry = `${fileState.name || ""},${fileState.type || 'unk'}${(folderIndexStr !== "1") ? '.' + folderIndexStr : ''},${fileState.thumb || ''},${flagsCombined}`;
                     newFilesMetadata.push(entry);
                 });
@@ -2797,7 +2790,7 @@ export default {
                 "5": "Music",
                 "6": "Archives",
                 "7": "Code",
-                "8": "Designs",
+                "8": "Trash",
                 "9": "Misc",
             };
             folderEntries = folderEntries.splice(1)
@@ -2950,7 +2943,7 @@ export default {
                      "Music",
                      "Archives",
                      "Code",
-                     "Designs",
+                     "Trash",
                      "Misc"
                  ];
                  
@@ -3914,7 +3907,7 @@ export default {
             return this.owners.includes(this.account);
         },
         isPresetFolder(path) {
-            const presetFolders = ["Documents", "Images", "Videos", "Music", "Archives", "Code", "Designs", "Misc"];
+            const presetFolders = ["Documents", "Images", "Videos", "Music", "Archives", "Code", "Trash", "Misc"];
             return presetFolders.includes(path);
         },
         // Add method to load pending changes from localStorage
