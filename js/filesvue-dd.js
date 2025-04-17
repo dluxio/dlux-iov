@@ -385,14 +385,14 @@ export default {
         Move to Trash
       </li>
       <li
-        v-if="contextMenu.type === 'file' && contract[contextMenu.item.i].encryption && !contract[contextMenu.item.i].encryption.key"
+        v-if="contextMenu.type === 'file' && flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length && !contract[contextMenu.item.i].encryption.key"
         class="p-1"
         @click="decode(contextMenu.item.i)"
       >
         Decrypt 
       </li>
       <li
-        v-if="contextMenu.type === 'file' && ( !contract[contextMenu.item.i].encryption || (contract[contextMenu.item.i].encryption && contract[contextMenu.item.i].encryption.key))"
+        v-if="contextMenu.type === 'file' && ( !flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length || (flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length && contract[contextMenu.item.i].encryption.key))"
         class="p-1"
         @click="downloadFile(contextMenu.item)"
       >
@@ -845,21 +845,36 @@ export default {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
-                    return response.blob(); // Get the response as a Blob
+                    return response.text(); // Get the response as a Blob
                 })
                 .then((blob) => {
                     const id = file.i;
                     const name = (this.newMeta[id] && this.newMeta[id][cid]) 
                         ? `${this.newMeta[id][cid].name}.${this.newMeta[id][cid].type}` 
                         : 'file';
-
                     // Check if the file is encrypted
                     if (this.contract[id].encryption && this.contract[id].encryption.key) {
-                        return this.AESDecrypt(blob, this.contract[id].encryption.key)
-                            .then(decryptedBlob => {
-                                this.triggerDownload(decryptedBlob, name);
-                            });
+                        blob = this.AESDecrypt(blob, this.contract[id].encryption.key);
+                        var byteString = atob(blob.split(',')[1])
+                        var mimeString = blob.split(',')[0].split(':')[1].split(';')[0];
+                        var ab = new ArrayBuffer(byteString.length);
+                        var ia = new Uint8Array(ab);
+                        for (var i = 0; i < byteString.length; i++) {
+                            ia[i] = byteString.charCodeAt(i);
+                        }
+                        blob = new Blob([ab], { type: mimeString });
+                                // Ensure decryptedData is in the correct format
+                                // const byteString = atob(decryptedData.split(',')[1]); // Assuming decryptedData is a base64 string
+                                // const mimeString = decryptedData.split(',')[0].split(':')[1].split(';')[0];
+                                // const ab = new ArrayBuffer(byteString.length);
+                                // const ia = new Uint8Array(ab);
+                                // for (let i = 0; i < byteString.length; i++) {
+                                //     ia[i] = byteString.charCodeAt(i);
+                                // }
+                                // const decryptedBlob = new Blob([ab], { type: mimeString });
+                                this.triggerDownload(blob, name);
                     } else {
+                        // Directly trigger download for plain files
                         this.triggerDownload(blob, name);
                     }
                 })
