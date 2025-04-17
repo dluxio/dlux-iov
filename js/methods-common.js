@@ -26,7 +26,7 @@ export default {
             }
             resolve(profilePicUrl); // Returns URL or false
           } else {
-            resolve(false); // Account doesn’t exist
+            resolve(false) // Account doesn't exist
           }
         })
         .catch(m => e(m))
@@ -88,13 +88,13 @@ export default {
   fallBackIMG(event, string) {
     event.target.src = 'https://images.hive.blog/u/' + string + '/avatar'
   },
-  fancyBytes(bytes) {
+  fancyBytes(bytes, decimals = 0) {
     var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
     while (bytes > 1024) {
       bytes = bytes / 1024
       counter++
     }
-    return `${this.toFixed(bytes, 2)} ${p[counter]}B`
+    return `${this.toFixed(bytes, decimals)} ${p[counter]}B`
   },
   fancyRounding(bytes) {
     var counter = 0, p = ['', 'K', 'M', 'B', 'T', 'Q', 'KQ', 'S', 'KS']
@@ -105,11 +105,11 @@ export default {
     return `${this.toFixed(bytes, 2)} ${p[counter]}`
   },
   timeUntil(dateString, plusHours = 0, recurrent = false, nowier = false) {
-    if(typeof dateString != "string")return "unknown"
+    if (typeof dateString != "string") return "unknown"
     const timezoneRegex = /(Z|[+-]\d{2}:?\d{2})$/;
     if (!timezoneRegex.test(dateString)) {
       // If no timezone is present, append 'Z'
-      dateString =  dateString + 'Z';
+      dateString = dateString + 'Z';
     }
     const targetDate = new Date(dateString)
     const targetMS = targetDate.getTime()
@@ -139,7 +139,7 @@ export default {
         if (diffMs > 0) {
           return `in ${value} ${unitName}`
         } else {
-          if(nowier) return 'Now'
+          if (nowier) return 'Now'
           return `${value} ${unitName} ago`
         }
       }
@@ -421,42 +421,89 @@ export default {
     op.api = options.api || "";
     op.txid = id + '_' + Date.now();
     console.log(op)
-    this.$emit(options.broadcast ? options.broadcast : 'modalsign', op)
+    this.$emit(options.broadcast ? options.broadcast : 'tosign', op)
     this.toSign = op
+  },
+  sendIt(event) {
+    console.log('CV', event)
+    this.toSign = event
+    this.$emit('tosign', event)
   },
   toFixed(n, digits) {
     return parseFloat(n).toFixed(digits)
   },
-  votePowerCalc(accountinfo, vote_weight = 10000, now = false){
+  votePowerCalc(accountinfo, vote_weight = 10000, now = false) {
     const hive_price = this.hiveprice.hive.usd
     const dgp = this.hivestats //dynamic global properties
     const effective_VS = parseFloat(accountinfo.vesting_shares) + parseFloat(accountinfo.received_vesting_shares) - parseFloat(accountinfo.delegated_vesting_shares)
     var currentMana = 10000
-    if(now){
+    if (now) {
       const mana = accountinfo.voting_manabar
       // adjust currentMana as appropriate
     }
-    const votingPower = (currentMana/ effective_VS) * 10000
-    const rshares = effective_VS * (votingPower/10000) * (vote_weight/10000)
+    const votingPower = (currentMana / effective_VS) * 10000
+    const rshares = effective_VS * (votingPower / 10000) * (vote_weight / 10000)
     const reward_per_rshare = parseFloat(dgp.pending_rewarded_vesting_hive) / parseFloat(dgp.pending_rewarded_vesting_shares)
     const vote_value_hive = rshares * reward_per_rshare
     const vote_value_usd = vote_value_hive * hive_price / 12
     return isNaN(vote_value_usd) ? '0¢' : (vote_value_usd > 1 ? "$" + vote_value_usd.toFixed(2) : (vote_value_usd * 100).toFixed(1) + '¢')
   },
-  dailyReturn(accountinfo, vote_weight = 10000, now = false){
+  dailyReturn(accountinfo, vote_weight = 10000, now = false) {
     const hive_price = this.hiveprice.hive.usd
     const dgp = this.hivestats //dynamic global properties
-    const effective_VS = parseFloat(accountinfo.vesting_shares) + parseFloat(accountinfo.received_vesting_shares) - parseFloat(accountinfo.delegated_vesting_shares)
+    const effective_VS = parseFloat(accountinfo.vesting_shares) + parseFloat(accountinfo.received_vesting_shares) - parseFloat
+      (accountinfo.delegated_vesting_shares)
     var currentMana = 10000
-    if(now){
+    if (now) {
       const mana = accountinfo.voting_manabar
       // adjust currentMana as appropriate
     }
-    const votingPower = (currentMana/ effective_VS) * 10000
-    const rshares = effective_VS * (votingPower/10000) * (vote_weight/10000)
+    const votingPower = (currentMana / effective_VS) * 10000
+    const rshares = effective_VS * (votingPower / 10000) * (vote_weight / 10000)
     const reward_per_rshare = parseFloat(dgp.pending_rewarded_vesting_hive) / parseFloat(dgp.pending_rewarded_vesting_shares)
     const vote_value_hive = rshares * reward_per_rshare
     const vote_value_usd = vote_value_hive * hive_price / 2
     return isNaN(vote_value_usd) ? '0¢' : (vote_value_usd > 1 ? "$" + vote_value_usd.toFixed(2) : (vote_value_usd * 100).toFixed(1) + '¢')
-  }
+  },
+  copyText(text) {
+    navigator.clipboard.writeText(text)
+  },
+  blockToTime(block, currentBlock) {
+    const now = new Date().getTime()
+    // Assumes 3 seconds per block for Hive/SPK
+    const then = new Date(now - ((currentBlock - block) * 3000))
+    return then.toLocaleDateString() // Simple date format
+  },
+  AESDecrypt(encryptedMessage, key) {
+    // Assumes CryptoJS is loaded globally or imported where this is used
+    const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
+    return bytes.toString(CryptoJS.enc.Utf8);
+  },
+  toBase58(num) {
+    const glyphs = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    let result = "";
+    while (num > 0) {
+      result = glyphs[num % 58] + result;
+      num = Math.floor(num / 58);
+    }
+    return result || "1"; // Return "1" for 0 or invalid input
+  },
+  numberToBase58(num) {
+    const base58Chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    if (num === 0) return base58Chars[0];
+    let result = "";
+    while (num > 0) {
+      result = base58Chars[num % 58] + result;
+      num = Math.floor(num / 58);
+    }
+    return result;
+  },
+  base58ToNumber(b58) {
+    const base58Chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    let num = 0;
+    for (let i = 0; i < b58.length; i++) {
+      num = num * 58 + base58Chars.indexOf(b58[i]);
+    }
+    return num;
+  },
 };

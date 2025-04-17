@@ -137,7 +137,7 @@ export default {
                         <button type="button" class="btn btn-light p-0">
                             <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="send"
                                 :mypfp="mypfp" token="spk" :test="test" :tokenuser="saccountapi" :account="account"
-                                :tokenprotocol="protocolspk" @modalsign="sendIt($event)" v-slot:trigger>
+                                :tokenprotocol="protocolspk" @tosign="sendIt($event)" v-slot:trigger>
                                 <span class="text-nowrap p-2 trigger">
                                     <i class="fas fa-paper-plane me-2"></i>Send
                                 </span>
@@ -152,7 +152,7 @@ export default {
                                 <modal-vue class="dropdown-menu-item"
                                     v-if="protocolspk.head_block && saccountapi.head_block" func="powup" token="spk"
                                     :test="test" :tokenuser="saccountapi" :account="account"
-                                    :tokenprotocol="protocolspk" :mypfp="mypfp" @modalsign="sendIt($event)"
+                                    :tokenprotocol="protocolspk" :mypfp="mypfp" @tosign="sendIt($event)"
                                     v-slot:trigger>
                                     <button class="dropdown-item trigger" type="button"><i
                                             class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
@@ -226,7 +226,7 @@ export default {
                                 <modal-vue class="dropdown-menu-item"
                                     v-if="protocolspk.head_block && saccountapi.head_block" func="powdn" :mypfp="mypfp"
                                     token="spk_power" :test="test" :tokenuser="saccountapi" :account="account"
-                                    :tokenprotocol="protocolspk" @modalsign="sendIt($event)" v-slot:trigger>
+                                    :tokenprotocol="protocolspk" @tosign="sendIt($event)" v-slot:trigger>
                                     <button class="dropdown-item trigger" type="button"><i
                                             class="fas fa-angle-double-down fa-fw me-2"></i>Power
                                         Down</button>
@@ -235,7 +235,7 @@ export default {
                                 <modal-vue class="dropdown-menu-item"
                                     v-if="protocollarynx.head_block && saccountapi.head_block" type="election"
                                     :mypfp="mypfp" token="spk" :test="test" :tokenuser="saccountapi" :account="account"
-                                    :tokenprotocol="protocolspk" :smarkets="smarkets.node" @modalsign="sendIt($event)"
+                                    :tokenprotocol="protocolspk" :smarkets="smarkets.node" @tosign="sendIt($event)"
                                     v-slot:trigger>
                                     <button class="dropdown-item trigger" type="button"><i
                                             class="fa-solid fa-plug fa-fw me-2"></i>Elect
@@ -263,7 +263,7 @@ export default {
                             func="powdn" token="poweredUp" :test="test"
                             :to_account="{'amount': (saccountapi?.spower_downs[Object.keys(saccountapi?.spower_downs)[0]].amount * 4)/1000}"
                             :tokenuser="saccountapi" :account="account" :tokenprotocol="protocolspk" :mypfp="mypfp"
-                            @modalsign="sendIt($event)" v-slot:trigger>
+                            @tosign="sendIt($event)" v-slot:trigger>
                             <button class="btn btn-sm rounded-pill btn-outline-light trigger" type="button">
                                 CHANGE</button>
                         </modal-vue>
@@ -378,7 +378,7 @@ export default {
                         <button type="button" class="btn btn-light p-0">
                             <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="send"
                                 :mypfp="mypfp" token="liq_broca" :test="test" :tokenuser="saccountapi"
-                                :account="account" :tokenprotocol="protocolbroca" @modalsign="sendIt($event)"
+                                :account="account" :tokenprotocol="protocolbroca" @tosign="sendIt($event)"
                                 v-slot:trigger>
                                 <span class="text-nowrap p-2 trigger">
                                     <i class="fas fa-paper-plane me-2"></i>Send
@@ -394,7 +394,7 @@ export default {
                                 <modal-vue class="dropdown-menu-item"
                                     v-if="protocolspk.head_block && saccountapi.head_block" func="powup"
                                     token="liq_broca" :test="test" :tokenuser="saccountapi" :account="account"
-                                    :tokenprotocol="protocolbroca" :mypfp="mypfp" @modalsign="sendIt($event)"
+                                    :tokenprotocol="protocolbroca" :mypfp="mypfp" @tosign="sendIt($event)"
                                     v-slot:trigger>
                                     <button class="dropdown-item trigger" type="button"><i
                                             class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
@@ -471,7 +471,7 @@ export default {
                                 <modal-vue v-if="protocolbroca.head_block && saccountapi.head_block" type="contract"
                                     :api="api" :mypfp="mypfp" token="balance" :test="test" :tokenstats="spkStats"
                                     :tokenprotocol="protocolbroca" :tokenuser="saccountapi" :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
+                                    @tosign="sendIt($event)" v-slot:trigger>
                                     <span class="text-nowrap p-2 trigger"><i
                                             class="fa-solid fa-file-contract fa-fw me-2"></i>Storage Contract</span>
                                 </modal-vue>
@@ -486,7 +486,7 @@ export default {
                                 <modal-vue class="dropdown-menu-item"
                                     v-if="protocolspk.head_block && saccountapi.head_block" func="powdn"
                                     token="pow_broca" :test="test" :tokenuser="saccountapi" :account="account"
-                                    :tokenprotocol="protocolbroca" :mypfp="mypfp" @modalsign="sendIt($event)"
+                                    :tokenprotocol="protocolbroca" :mypfp="mypfp" @tosign="sendIt($event)"
                                     v-slot:trigger>
                                     <button class="dropdown-item trigger" type="button"><i
                                             class="fas fa-angle-double-down fa-fw me-2"></i>Power Down</button>
@@ -512,7 +512,7 @@ export default {
                         <modal-vue class="dropdown-menu-item" v-if="protocolbroca.head_block && saccountapi.head_block"
                             func="powdn" token="poweredUp" :test="test" :tokenuser="saccountapi" :account="account"
                             :to_account="{'amount':(saccountapi?.bpower_downs[Object.keys(saccountapi?.bpower_downs)[0]].amount * 4) / 1000}"
-                            :tokenprotocol="protocolbroca" :mypfp="mypfp" @modalsign="sendIt($event)" v-slot:trigger>
+                            :tokenprotocol="protocolbroca" :mypfp="mypfp" @tosign="sendIt($event)" v-slot:trigger>
                             <button class="btn btn-sm rounded-pill btn-outline-light trigger" type="button">
                                 CHANGE</button>
                         </modal-vue>
@@ -614,7 +614,7 @@ export default {
                         <button type="button" class="btn btn-light p-0">
                             <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" func="send"
                                 :mypfp="mypfp" :test="test" :tokenuser="saccountapi" :account="account"
-                                :tokenprotocol="protocollarynx" @modalsign="sendIt($event)" v-slot:trigger>
+                                :tokenprotocol="protocollarynx" @tosign="sendIt($event)" v-slot:trigger>
                                 <span class="text-nowrap p-2 trigger"><i class="fas fa-paper-plane me-2"></i>Send</span>
                             </modal-vue>
                         </button>
@@ -626,7 +626,7 @@ export default {
                                 aria-labelledby="btnGroupDrop1">
                                 <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" func="powup"
                                     :mypfp="mypfp" :test="test" :tokenuser="saccountapi" :account="account"
-                                    :tokenprotocol="protocollarynx" @modalsign="sendIt($event)" v-slot:trigger
+                                    :tokenprotocol="protocollarynx" @tosign="sendIt($event)" v-slot:trigger
                                     class="dropdown-menu-item">
                                     <button class="dropdown-item trigger" type="button">
                                         <i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
@@ -634,7 +634,7 @@ export default {
 
                                 <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" type="register"
                                     :test="test" func="service" :account="account" class="dropdown-menu-item"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
+                                    @tosign="sendIt($event)" v-slot:trigger>
                                     <button class="dropdown-item trigger" type="button"><i
                                             :class="!saccountapi.balance ? 'disabled' : ''"
                                             class="fa fa-network-wired fa-fw me-2"></i>Register
@@ -643,7 +643,7 @@ export default {
                                 </modal-vue>
                                 <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" type="register"
                                     :test="test" func="type" :account="account" class="dropdown-menu-item"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
+                                    @tosign="sendIt($event)" v-slot:trigger>
                                     <button class="dropdown-item trigger" type="button"><i
                                             :class="!saccountapi.balance ? 'disabled' : ''"
                                             class="fa fa-network-wired fa-fw me-2"></i>Register
@@ -652,7 +652,7 @@ export default {
                                 </modal-vue>
                                 <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" type="register"
                                     :test="test" func="val" :account="account" class="dropdown-menu-item"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
+                                    @tosign="sendIt($event)" v-slot:trigger>
                                     <button :class="!isNode || isValidator ? 'disabled' : ''"
                                         class="dropdown-item trigger" type="button"><i
                                             class="fa fa-network-wired fa-fw me-2"></i>
@@ -719,7 +719,7 @@ export default {
                         <button class="btn btn-light p-0" type="button">
                             <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" func="powdel"
                                 :test="test" :tokenuser="saccountapi" :account="account" :tokenprotocol="protocollarynx"
-                                token="poweredUp" :mypfp="mypfp" @modalsign="sendIt($event)" v-slot:trigger>
+                                token="poweredUp" :mypfp="mypfp" @tosign="sendIt($event)" v-slot:trigger>
                                 <span class="text-nowrap p-2 trigger"><i
                                         class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
                             </modal-vue>
@@ -734,7 +734,7 @@ export default {
                                 <modal-vue class="dropdown-menu-item"
                                     v-if="protocollarynx.head_block && saccountapi.head_block" func="powdn"
                                     token="poweredUp" :test="test" :tokenuser="saccountapi" :account="account"
-                                    :tokenprotocol="protocollarynx" :mypfp="mypfp" @modalsign="sendIt($event)"
+                                    :tokenprotocol="protocollarynx" :mypfp="mypfp" @tosign="sendIt($event)"
                                     v-slot:trigger>
                                     <button :disabled="!saccountapi.poweredUp" class="dropdown-item trigger"
                                         type="button"><i class="fas fa-angle-double-down fa-fw me-2"></i>Power
@@ -762,7 +762,7 @@ export default {
                         <modal-vue class="dropdown-menu-item" v-if="protocollarynx.head_block && saccountapi.head_block"
                             func="powdn" token="poweredUp" :test="test" :tokenuser="saccountapi" :account="account"
                             :to_account="{'amount': (saccountapi?.power_downs[Object.keys(saccountapi?.power_downs)[0]].amount * 4)/1000}"
-                            :tokenprotocol="protocollarynx" :mypfp="mypfp" @modalsign="sendIt($event)" v-slot:trigger>
+                            :tokenprotocol="protocollarynx" :mypfp="mypfp" @tosign="sendIt($event)" v-slot:trigger>
                             <button class="btn btn-sm rounded-pill btn-outline-light trigger" type="button">
                                 CHANGE</button>
                         </modal-vue>
@@ -862,7 +862,7 @@ export default {
                                     <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" func="powdel"
                                         :mypfp="mypfp" token="poweredUp" :tokenuser="saccountapi" :account="account"
                                         :to_account="{'amount':a/1000,'to':b}" :tokenprotocol="protocollarynx"
-                                        @modalsign="sendIt($event)" v-slot:trigger>
+                                        @tosign="sendIt($event)" v-slot:trigger>
                                         <button type="button" class="ms-1 btn btn-sm btn-secondary trigger"><i
                                                 class="fas fa-fw fa-user-edit"></i></button>
                                     </modal-vue>

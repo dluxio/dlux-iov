@@ -391,7 +391,7 @@ export default {
         txid: "val_vote",
       };
       if (op) {
-        this.$emit("modalsign", op);
+        this.$emit("tosign", op);
       }
     },
     accountCheck() {
@@ -487,7 +487,7 @@ export default {
           };
       }
       if (op) {
-        this.$emit("modalsign", op);
+        this.$emit("tosign", op);
       }
     },
     build() {
@@ -514,7 +514,7 @@ export default {
           op.cj.slots = `${this.d.ben_to},${parseInt(this.d.ben_amount * 100)}`
         }
       if (op) {
-        this.$emit("modalsign", op);
+        this.$emit("tosign", op);
       }
     },
     send() {
@@ -586,7 +586,7 @@ export default {
           ops: ["getHiveUser"],
         };
       if (op) {
-        this.$emit("modalsign", op);
+        this.$emit("tosign", op);
       }
     },
     delegate() {
@@ -618,7 +618,7 @@ export default {
           txid: "delegate",
         };
       if (op) {
-        this.$emit("modalsign", op);
+        this.$emit("tosign", op);
       }
     },
     elect(){
@@ -636,7 +636,7 @@ export default {
           txid: "send",
         };
       if (op) {
-        this.$emit("modalsign", op);
+        this.$emit("tosign", op);
       }
     },
     vote(){
@@ -654,7 +654,7 @@ export default {
           txid: "send",
         };
       if (op) {
-        this.$emit("modalsign", op);
+        this.$emit("tosign", op);
       }
     },
     extend(){
@@ -675,7 +675,7 @@ export default {
           txid: "send",
         };
       if (op) {
-        this.$emit("modalsign", op);
+        this.$emit("tosign", op);
       }
     },
     power() {
@@ -831,11 +831,11 @@ export default {
           txid: "send",
         };
       if (op) {
-        this.$emit("modalsign", op);
+        this.$emit("tosign", op);
       }
     },
   },
-  emits: ["modalsign"],
+  emits: ["tosign"],
   props: {
     content: {
       required: false,

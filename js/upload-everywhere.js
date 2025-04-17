@@ -41,7 +41,7 @@ export default {
       :tokenuser="saccountapi"
       :tokenstats="stats"
       :tokenprotocol="protocol"
-      @modalsign="sendIt($event, 'contractBuilt')"
+      @tosign="sendIt($event, 'contractBuilt')"
       v-slot:trigger
     >
       <button class="btn btn-primary mt-3 trigger">
@@ -175,7 +175,7 @@ export default {
             this.$emit('tosign', op);
         },
         sendIt(event) {
-            this.$emit('modalsign', event)
+            this.$emit('tosign', event)
         },
         handleUploadDone() {
 

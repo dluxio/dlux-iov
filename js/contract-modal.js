@@ -202,7 +202,7 @@ export default {
       this.validateField(key);
     }, 300);
   },
-  emits: ["modalsign"],
+  emits: ["tosign"],
   methods: {
     ...MCommon,
     ...MModals,
@@ -227,7 +227,7 @@ export default {
         op.cj.slots = `${this.form.ben_to},${parseInt(this.form.ben_amount * 100)}`;
       }
       console.log({ op })
-      this.$emit("modalsign", op);
+      this.$emit("tosign", op);
       const modalElement = this.$el.closest('.modal');
       const modalInstance = bootstrap.Modal.getInstance(modalElement);
       modalInstance.hide();

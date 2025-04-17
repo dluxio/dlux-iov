@@ -113,7 +113,7 @@ export default {
         </form>
       </div>
     </div>`,
-    emits: ["open-modal", "modalsign"],
+    emits: ["open-modal", "tosign"],
     data() {
         return {
             debouncedValidateField: null,
@@ -503,7 +503,7 @@ export default {
                     ops: ["getHiveUser"],
                     txid: opid
                 };
-                this.$emit('modalsign', op);
+                this.$emit('tosign', op);
                 this.$emit('open-modal', "")
             } else {
                 const op = {
@@ -515,7 +515,7 @@ export default {
                     ops: ["getHiveUser"],
                     txid: opid
                 };
-                this.$emit('modalsign', op);
+                this.$emit('tosign', op);
                 this.$emit('open-modal', "")
                 const modalElement = this.$el.closest('.modal');
                 const modalInstance = bootstrap.Modal.getInstance(modalElement);

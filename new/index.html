@@ -328,12 +328,12 @@
                                     class="btn btn-secondary p-4 mb-2 border border-3 border-black">
                                 <div>
                                     <upload-vue v-if="videoUploadContract" :user="spkapi"
-                                        :propcontract="videoUploadContract" @tosign="toSign=$event" type="video"
+                                        :propcontract="videoUploadContract" @tosign="sendIt($event)" type="video"
                                         @done="done()" />
                                 </div>
                                 <div class="rounded bg-blur-darkg text-start p-2">
                                     <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens"
-                                        @tosign="toSign=$event" />
+                                        @tosign="sendIt($event)" />
                                 </div>
                             </div>
                         </div>
@@ -376,7 +376,7 @@
                                 </div>
                                 <div class="modal-body">
                                     <contract-vue :nodeview="false" :account="account" :cc="true"
-                                        @tosign="toSign=$event" @bens="addBens($event)" :postpage="true"
+                                        @tosign="sendIt($event)" @bens="addBens($event)" :postpage="true"
                                         :prop_contracts="contracts" :assets="true" @addasset="addAsset($event)"
                                         :accountinfo="accountinfo"></contract-vue>
                                 </div>
@@ -484,7 +484,7 @@
 
                                 <div class="modal-body" style="margin: top 170px;">
                                     <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens"
-                                        @tosign="toSign=$event" />
+                                        @tosign="sendIt($event)" />
                                 </div>
                             </div>
                         </div>
@@ -508,7 +508,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <spk-vue node="false" :account="account" @tosign="toSign=$event;log($event)" />
+                            <spk-vue node="false" :account="account" @tosign="sendIt($event);log($event)" />
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>

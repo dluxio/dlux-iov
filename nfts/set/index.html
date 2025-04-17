@@ -721,7 +721,7 @@
                   @focusitem="focusItem = $event" :multisig="chains[item.token].multisig"
                   :colors="getSetDetailsColors(item.script)" :index="index" :auction="item.auction" :sale="item.sale"
                   :account="account" @detail="modalIndex('itemModal', $event, 'displayNFTs');itemModal.hidden = false"
-                  @tosign="toSign = $event" />
+                  @tosign="sendIt($event)" />
               </div>
             </div>
           </div>
@@ -730,7 +730,7 @@
           <div>
             <nftdetail :sets="focusSet" :account="account" :denoms="denoms" :itemmodal="itemModal" :pfp="pfp"
               :item="focusItem" :chains="chains" @detail="modalIndex('itemModal', $event);itemModal.hidden = false"
-              @setpfp="setPFP($event)" @tosign="toSign=$event" />
+              @setpfp="setPFP($event)" @tosign="sendIt($event)" />
           </div>
 
           <!-- mint transfer modal -->
@@ -740,7 +740,7 @@
               :setdetail="chains[focusItem.token].sets[focusItem.set]" :api="chains[focusItem.token].api"
               :wrapped="chains[focusItem.token].sets[focusItem.set].computed.set.wrapped" :qty="mintsQty(focusItem)"
               :colors="'linear-gradient(' + chains[focusItem.token].sets[focusItem.set].computed.set.Color1 + ',' + chains[focusItem.token].sets[focusItem.set].computed.set.Color2 + ')'"
-              @tosign="toSign = $event" :info="chains[focusItem.token].sets[focusItem.set].computed.set.Description" />
+              @tosign="sendIt($event)" :info="chains[focusItem.token].sets[focusItem.set].computed.set.Description" />
           </div>
 
         </div>

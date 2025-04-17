@@ -124,7 +124,7 @@ export default {
       op.ops = ['getTokenUser'];
       op.api = this.api;
       op.txid = this.func + '_' + Date.now();
-      this.$emit('modalsign', op)
+      this.$emit('tosign', op)
       const modalElement = this.$el.closest('.modal');
       const modalInstance = bootstrap.Modal.getInstance(modalElement);
       modalInstance.hide();

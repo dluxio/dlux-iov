@@ -123,7 +123,7 @@ export default {
                     txid: this.func,
                 }
             }
-            this.$emit('modalsign', op)
+            this.$emit('tosign', op)
 
         }
     },

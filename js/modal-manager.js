@@ -50,7 +50,7 @@ export default {
                 :to_account="to_account"
                 :tokenprotocol="tokenprotocol" 
                 :tokenuser="tokenuser" 
-                @modalsign="$emit('modalsign', $event)" />
+                @tosign="$emit('tosign', $event)" />
             <Hive v-if="(token === 'HIVE' || token === 'HBD' || token === 'HP' || token === 'RC') && tokenstats?.content_reward_percent" 
                 :func="mutablefunc || func" 
                 :account="account"
@@ -62,7 +62,7 @@ export default {
                 :type="type"
                 :tokenstats="tokenstats"
                 @open-modal="openModal($event)"
-                @modalsign="$emit('modalsign', $event)" />
+                @tosign="$emit('tosign', $event)" />
             <Contract v-if="type === 'contract' && tokenuser.head_block" 
                 :account="account"
                 :api="api"
@@ -71,21 +71,21 @@ export default {
                 :to_amount="to_account?.amount"
                 :to_broker="to_account?.broker"
                 :tokenstats="tokenstats"
-                @modalsign="modalSign" />
+                @tosign="sendIt" />
             <Election v-if="type === 'election' && tokenprotocol.head_block && tokenuser.head_block" 
                 :account="account"
                 :api="api"
                 :tokenprotocol="tokenprotocol" 
                 :tokenuser="tokenuser" 
                 :smarkets="smarkets"
-                @modalsign="$emit('modalsign', $event)" />
+                @tosign="$emit('tosign', $event)" />
         </div>
     </teleport>
   </div>`,
     methods: {
-        modalSign(op) {
+        sendIt(op) {
             console.log('mm')
-            this.$emit("modalsign", op)
+            this.$emit("tosign", op)
         },
         openModal(data){
             console.log(data, 1234)
@@ -96,7 +96,7 @@ export default {
             }
           },
     },
-    emits: ["modalsign"],
+    emits: ["tosign"],
     computed: {
         canShowModal() {
             if (this.type === 'move') {

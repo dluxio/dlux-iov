@@ -75,7 +75,7 @@
                     :has_ipfs="spkapi.storage?.length ? true : false" :modal="false" :post_select="postSelect"
                     :voteval="voteVal" :head_block="sstats.head_block" :broca_refill="sstats.broca_refill"
                     :broca="spkapi.broca" :spk_power="spkapi.spk_power" :contracts="contracts" :extendcost="extendcost"
-                    @tosign="toSign=$event" @modalselect="modalSelect($event)" @reply="reply($event)"
+                    @tosign="sendIt($event)" @modalselect="modalSelect($event)" @reply="reply($event)"
                     @vote="vote($event)" class="my-3"></detail-vue>
             </div>
         </main>

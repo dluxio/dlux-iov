@@ -646,7 +646,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <contract-vue :nodeview="false" :account="pageAccount" @tosign="toSign=$event"
+                            <contract-vue :nodeview="false" :account="pageAccount" @tosign="sendIt($event)"
                                 :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
                                 @done="getSapi"></contract-vue>
                         </div>

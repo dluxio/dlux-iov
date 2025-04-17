@@ -1,5 +1,8 @@
 import ChoicesVue from '/js/choices-vue.js';
 import Pop from "/js/pop.js";
+import common from './methods-common.js';
+import spk from './methods-spk.js';
+
 
 export default {
     components: {
@@ -174,7 +177,18 @@ export default {
         <div class="d-flex align-items-center my-1 mx-1">
             <h5 v-if="viewOpts.view === 'grid' || viewOpts.view === 'list'" class="mb-0">{{filesArray.length}} File{{filesArray.length > 1 ? 's' : ''}}</h5>
             <h5 v-else class="mb-0">{{ getSubfolderCount }} Folder{{ getSubfolderCount === 1 ? '' : 's' }} & {{ currentFileCount }} File{{ currentFileCount === 1 ? '' : 's' }}</h5>
-            <button class="btn btn-success btn-sm ms-2" @click="saveChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-save me-1"></i>Save</button>
+            <button 
+                class="btn btn-success btn-sm ms-2" 
+                @click="saveChanges" 
+                v-if="Object.keys(pendingChanges).length > 0"
+                :disabled="updatesPayloadTooLarge"
+                :title="updatesPayloadTooLarge ? 'Payload size exceeds the maximum allowed size (7500 bytes)' : ''"
+            >
+                <i class="fa-solid fa-save me-1"></i>Save
+                <span v-if="updatesPayloadTooLarge" class="text-warning ms-1">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                </span>
+            </button>
             <button class="btn btn-danger btn-sm ms-2" @click="revertPendingChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-undo me-1"></i>Revert</button>
             <div class="ms-auto">
                 <div class="ms-auto">
@@ -219,7 +233,18 @@ export default {
                 <label class="btn btn-outline-light" :for="bid + 'fileList'"><i class="fa-solid fa-table-list"></i></label>
                 <button class="btn btn-outline-light ms-1"><i class="fa-solid fa-gear"></i></button>
             </div>
-            <button class="btn btn-success btn-sm ms-2" @click="saveChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-save me-1"></i>Save</button>
+            <button 
+                class="btn btn-success btn-sm ms-2" 
+                @click="saveChanges" 
+                v-if="Object.keys(pendingChanges).length > 0"
+                :disabled="updatesPayloadTooLarge"
+                :title="updatesPayloadTooLarge ? 'Payload size exceeds the maximum allowed size (7500 bytes)' : ''"
+            >
+                <i class="fa-solid fa-save me-1"></i>Save
+                <span v-if="updatesPayloadTooLarge" class="text-warning ms-1">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                </span>
+            </button>
             <button class="btn btn-danger btn-sm ms-2" @click="revertPendingChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-undo me-1"></i>Revert</button>
         </div>
         <div class="files" @contextmenu.prevent="showContextMenu($event, 'background', null)" @dragover="dragOverBackground($event)" @drop="dropOnBackground($event)" style="position: relative; min-height: 200px;">
@@ -513,7 +538,7 @@ export default {
                     <button class="btn btn-outline-secondary btn-sm mt-2" @click="createNewFolder">
                         <i class="fa-solid fa-folder-plus me-1"></i>New Folder
                     </button>
-            </div>
+                </div>
             </div>
             <div v-else class="table-responsive">
                 <table class="table table-dark table-striped table-hover">
@@ -1307,7 +1332,17 @@ export default {
 
 <!-- Save Changes Footer -->
 <div v-if="Object.keys(pendingChanges).length > 0" class="border-top bg-dark mt-3 p-3 d-flex justify-content-end">
-  <button class="btn btn-warning me-2" @click="saveChanges">Save Changes ({{ Object.keys(pendingChanges).length }} contracts affected)</button>
+  <button 
+    class="btn btn-warning me-2" 
+    @click="saveChanges" 
+    :disabled="updatesPayloadTooLarge"
+    :title="updatesPayloadTooLarge ? 'Payload size exceeds the maximum allowed size (7500 bytes)' : ''"
+  >
+    Save Changes ({{ Object.keys(pendingChanges).length }} contracts, ~{{ Math.round(updatesPayloadSize / 1024 * 10) / 10 }}KB)
+    <span v-if="updatesPayloadTooLarge" class="text-danger ms-1">
+        <i class="fa-solid fa-exclamation-triangle"></i>
+    </span>
+  </button>
   <button class="btn btn-secondary" @click="revertPendingChanges">Revert Pending Changes</button>
 </div>
 
@@ -1447,16 +1482,10 @@ export default {
             localStorageKey: '', // Added: Key for localStorage persistence
         };
     },
-    emits: ["addassets"],
+    emits: ["addassets", "tosign"], // Ensure 'tosign' is included here
     methods: {
-        isValidThumb(string) {
-            if (typeof string === 'string') {
-                if (string.startsWith("data:image/")) return string;
-                if (string.startsWith("https://")) return string;
-                else if (string.startsWith("Qm")) return `https://ipfs.dlux.io/ipfs/${string}`;
-            }
-            return "";
-        },
+        ...common,
+        ...spk,
         revertPendingChanges() {
             if (Object.keys(this.pendingChanges).length === 0) {
                 return; // Nothing to revert
@@ -1676,10 +1705,6 @@ export default {
                     this.init()
 
                 });
-        },
-        AESDecrypt(encryptedMessage, key) {
-            const bytes = CryptoJS.AES.decrypt(encryptedMessage, key);
-            return bytes.toString(CryptoJS.enc.Utf8);
         },
         handleLabel(m) {
             if (m.action == 'added') {
@@ -2269,74 +2294,45 @@ export default {
             });
         },
         saveChanges() {
-            console.log("Starting saveChanges...");
-            console.log("Initial pendingChanges:", JSON.parse(JSON.stringify(this.pendingChanges)));
-            console.log("Initial contract data:", JSON.parse(JSON.stringify(this.contract)));
-            console.log("Initial newMeta:", JSON.parse(JSON.stringify(this.newMeta)));
+            if (!this.account) {
+                alert("Please log in to save changes.");
+                return;
+            }
+
+            // Check if there are any pending changes
+            if (!this.pendingChanges || Object.keys(this.pendingChanges).length === 0) {
+                alert("No pending changes to save.");
+                return;
+            }
+
+            const transactionPayloads = []; // Collect payloads first
             
-            // Base58 characters for folder indexing
-            const base58Chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-            
-            // Helper to convert number to Base58
-            const numberToBase58 = (num) => {
-                if (num === 0) return base58Chars[0]; // Should not happen for indices >= 1
-                let result = "";
-                while (num > 0) {
-                    result = base58Chars[num % 58] + result;
-                    num = Math.floor(num / 58);
-                }
-                return result;
-            };
-            
-            // Helper to convert Base58 to number
-            const base58ToNumber = (b58) => {
-                let num = 0;
-                for (let i = 0; i < b58.length; i++) {
-                    num = num * 58 + base58Chars.indexOf(b58[i]);
-                }
-                return num;
-            };
-            
-            // Iterate through each contract with pending changes
+            // --- Logic to calculate payloads (as before) ---
             for (const contractId in this.pendingChanges) {
-                console.log(`Processing contract: ${contractId}`);
-                
                 if (!this.contract[contractId]) {
-                    console.warn(`Contract ${contractId} not found in this.contract. Skipping.`);
+                    // console.warn(`Contract ${contractId} not found in this.contract. Skipping.`);
                     continue;
                 }
                 
                 const contractChanges = this.pendingChanges[contractId];
                 const originalContract = this.contract[contractId];
                 const originalMeta = this.newMeta[contractId];
-                
-                // Extract the original metadata parts
                 const m = originalContract.m || "";
-                
                 let contractData = originalContract.m.split(',')[0]
                 let parts = contractData.split("|");
                 let encData = parts[0] || "1";
-
-                // Fallback for non-pipe-separated metadata
                 if (parts.length === 1 && m.includes(",")) {
                     const temp = m.split(",")
                     encData = temp[0] || "1"
                 }
-
-                // --- 1. Determine the final state of files for this contract ---
                 const finalFileStates = {};
                 const allFileCIDs = Object.keys(originalContract.df || {});
-                
-                // First, identify if there's a folder rename operation
                 let folderRename = null;
                 if (contractChanges.__newFolders__ && contractChanges.__newFolders__.length > 0) {
-                    // Check if this is a folder rename (one new folder with the same parent path)
                     const newFolders = contractChanges.__newFolders__;
                     if (newFolders.length === 1) {
                         const newFolderPath = newFolders[0];
                         const newFolderName = newFolderPath.split('/').pop();
-                        
-                        // Find the original folder path by looking at file paths
                         const originalPaths = new Set();
                         allFileCIDs.forEach(cid => {
                             const originalFileData = originalMeta?.[cid] || {};
@@ -2344,16 +2340,11 @@ export default {
                                 originalPaths.add(originalFileData.folderPath);
                             }
                         });
-                        
-                        // If we have exactly one original path, this is likely a rename
                         if (originalPaths.size === 1) {
                             const originalPath = Array.from(originalPaths)[0];
                             const originalName = originalPath.split('/').pop();
-                            
-                            // If the parent paths match, this is a rename
                             const originalParent = originalPath.split('/').slice(0, -1).join('/');
                             const newParent = newFolderPath.split('/').slice(0, -1).join('/');
-                            
                             if (originalParent === newParent) {
                                 folderRename = {
                                     from: originalPath,
@@ -2361,36 +2352,24 @@ export default {
                                     fromName: originalName,
                                     toName: newFolderName
                                 };
-                                console.log("Detected folder rename:", folderRename);
                             }
                         }
                     }
                 }
-                
-                // Process all files
                 allFileCIDs.forEach(cid => {
                     const originalFileData = originalMeta?.[cid] || {};
                     const changedFileData = contractChanges[cid] || {};
-                    
-                    // Determine final folderPath, considering changes first
-                    let finalFolderPath = originalFileData.folderPath || ''; // Default to root
-                    
-                    // If this is a folder rename, update the path
+                    let finalFolderPath = originalFileData.folderPath || '';
                     if (folderRename && finalFolderPath === folderRename.from) {
                         finalFolderPath = folderRename.to;
                     } else if (changedFileData.hasOwnProperty('folderPath')) {
                         finalFolderPath = changedFileData.folderPath;
                     }
-                    
-                    // Determine final name
                     const finalName = changedFileData.name || originalFileData.name || cid;
-                    
-                    // Keep other metadata from original unless changed
                     finalFileStates[cid] = {
-                        ...originalFileData, // Start with original data
+                        ...originalFileData,
                         name: finalName,
                         folderPath: finalFolderPath,
-                        // Include other necessary fields
                         type: originalFileData.type || "",
                         thumb: originalFileData.thumb || "",
                         thumb_data: originalFileData.thumb_data || "",
@@ -2401,17 +2380,11 @@ export default {
                         is_thumb: originalFileData.is_thumb || false,
                     };
                 });
-                
-                // --- 2. Build the Directory Tree for this contract ---
-                const allPaths = new Set(['']); // Include root path
-                
-                // Add all file paths
+                const allPaths = new Set(['']);
                 Object.values(finalFileStates).forEach(file => {
-                    if (file.is_thumb) return; // Skip thumbs
+                    if (file.is_thumb) return;
                     const path = file.folderPath || '';
                     allPaths.add(path);
-                    
-                    // Add all parent paths as well
                     const parts = path.split('/').filter(Boolean);
                     let current = '';
                     for (let i = 0; i < parts.length; i++) {
@@ -2419,8 +2392,6 @@ export default {
                         allPaths.add(current);
                     }
                 });
-                
-                // Also include newly created folders from pending changes
                 if (contractChanges.__newFolders__) {
                     contractChanges.__newFolders__.forEach(newPath => {
                         allPaths.add(newPath);
@@ -2432,74 +2403,52 @@ export default {
                         }
                     });
                 }
-                
-                // Sort paths by depth and then alphabetically
                 const sortedPaths = Array.from(allPaths).sort((a, b) => {
                     const depthA = a.split('/').length;
                     const depthB = b.split('/').length;
                     if (depthA !== depthB) return depthA - depthB;
                     return a.localeCompare(b);
                 });
-                
-                console.log("Sorted paths:", sortedPaths);
-                
-                // --- 3. Assign Indices and Build folderListStr ---
                 const indexToPath = {};
                 const pathToIndex = {};
-                const presetFoldersMap = { // Map preset names to their fixed indices 2-9
+                const presetFoldersMap = {
                     "Documents": "2", "Images": "3", "Videos": "4", "Music": "5",
                     "Archives": "6", "Code": "7", "Designs": "8", "Misc": "9"
                 };
-                let nextCustomIndex = 0; // Start custom indices from 10 (Base58 'A') (++ executes before next step)
+                let nextCustomIndex = 0;
                 let folderListEntries = [];
-                
-                // First, assign index to root
                 indexToPath["0"] = '';
                 pathToIndex[''] = "0";
-                folderListEntries.push(''); // Root entry is empty
-                
-                // Then process all other paths
+                folderListEntries.push('');
                 sortedPaths.forEach(path => {
-                    if (path === '') return; // Skip root, already processed
-                    
+                    if (path === '') return;
                     const parts = path.split('/');
                     const folderName = parts[parts.length - 1];
                     const parentPath = parts.slice(0, -1).join('/');
-                    
                     const parentIndex = pathToIndex[parentPath];
                     if (!parentIndex) {
                         console.error(`Error: Parent path '${parentPath}' for folder '${path}' not found in pathToIndex. Skipping.`);
-                        return; // Skip this folder if parent doesn't have an index yet
+                        return;
                     }
-                    if(nextCustomIndex == 1)nextCustomIndex = 9 //skip presets
+                    if(nextCustomIndex == 1) nextCustomIndex = 9;
                     let assignedIndex;
-                    // Check if it's a top-level preset folder
                     if (parts.length === 1 && presetFoldersMap[folderName]) {
                         assignedIndex = presetFoldersMap[folderName];
                     } else {
-                        // Assign next custom index
-                        assignedIndex = numberToBase58(nextCustomIndex++);
+                        assignedIndex = this.numberToBase58(nextCustomIndex++);
                     }
-                    
                     indexToPath[assignedIndex] = path;
                     pathToIndex[path] = assignedIndex;
-                    
-                    // Format: "parentIndex/folderName" for subfolders, "folderName" for top-level
                     const entry = (parentIndex === "0") ? folderName : `${parentIndex}/${folderName}`;
                     folderListEntries.push(entry);
                 });
-                
-                // Ensure preset folders are included in the list if they exist in paths but weren't added
                 Object.entries(presetFoldersMap).forEach(([name, index]) => {
                     if (allPaths.has(name) && !folderListEntries.some(entry => entry === name)) {
-                        // Find its correct alphabetical position among top-level folders
                         const topLevelFolders = folderListEntries.filter(e => e && !e.includes('/'));
                         topLevelFolders.push(name);
                         topLevelFolders.sort();
                         const insertIndex = topLevelFolders.indexOf(name);
-                        
-                        // Find the index in the main list *after* the root entry ('')
-                        let mainListInsertIndex = 1; // Start after root
+                        let mainListInsertIndex = 1;
                         let topLevelCount = 0;
                         while(mainListInsertIndex < folderListEntries.length && topLevelCount < insertIndex) {
                             if(folderListEntries[mainListInsertIndex] && !folderListEntries[mainListInsertIndex].includes('/')) {
@@ -2510,91 +2459,153 @@ export default {
                         folderListEntries.splice(mainListInsertIndex, 0, name);
                     }
                 });
-                
                 const newFolderListStr = folderListEntries.join("|");
-                console.log("Generated indexToPath:", indexToPath);
-                console.log("Generated pathToIndex:", pathToIndex);
-                console.log("Generated folderListStr:", newFolderListStr);
-                
-                // --- 4. Build File Metadata String ---
                 const newFilesMetadata = [];
-                // Ensure consistent order matching original contract.df keys
                 const sortedFileCIDs = Object.keys(originalContract.df || {}).sort();
-                
                 sortedFileCIDs.forEach(cid => {
                     const fileState = finalFileStates[cid];
-                    
                     const folderPath = fileState?.folderPath || "";
-                    const folderIndex = folderPath ? pathToIndex[folderPath] : 1
-                    
-                    
-                    // Combine flags, license, labels back into the compact string format
-                    // Convert numeric flags back to Base64
+                    // Ensure folderIndex is correctly retrieved or defaulted
+                    const folderIndex = folderPath ? pathToIndex[folderPath] : pathToIndex['']; // Use root index if path is empty
+                    if (folderIndex === undefined) {
+                         console.error(`Error: No index found for folderPath '${folderPath}' for file ${cid}. Defaulting to root.`);
+                         // Decide on fallback: default to root ('0') or skip?
+                         // For now, let's default to root index '0' (path '')
+                         // folderIndex = pathToIndex['']; // or perhaps skip this file?
+                         // To be safe, let's skip if the path existed but had no index
+                         if(folderPath) return;
+                         // Otherwise, if path was empty, use root index
+                         folderIndex = pathToIndex['']; 
+                    }
+
                     const flagsNum = fileState.flags || 0;
-                    const flagsB64 = this.NumberToBase64(flagsNum) || '0'; // Ensure '0' if flagsNum is 0
+                    const flagsB64 = this.NumberToBase64(flagsNum) || '0';
                     const licenseStr = fileState.license || "";
                     const labelsStr = fileState.labels || "";
                     const flagsCombined = `${flagsB64}-${licenseStr}-${labelsStr}`;
-                    
-                    // Format: name,type.folderIndex,thumb,flagsCombined
-                    const entry = `${fileState.name || ""},${fileState.type || 'unk'}${(typeof folderIndex == "string" && folderIndex != 1) ? '.' + folderIndex : ''},${fileState.thumb || ''},${flagsCombined}`;
+                    // Ensure folderIndex is a string before using it
+                    const folderIndexStr = typeof folderIndex === 'string' ? folderIndex : "0"; // Default to root index '0'
+                    const entry = `${fileState.name || ""},${fileState.type || 'unk'}${(folderIndexStr !== "1") ? '.' + folderIndexStr : ''},${fileState.thumb || ''},${flagsCombined}`;
                     newFilesMetadata.push(entry);
                 });
-                
                 const newFilesMetadataStr = newFilesMetadata.join(',');
-                console.log("Generated Files Metadata String:", newFilesMetadataStr);
-                
-                // --- 5. Construct Final Metadata String ---
-                // The correct format is: encData|folderListStr,fileMetadataStr
-                // Note: The folderListStr and fileMetadataStr are separated by a comma, not a pipe
-                // const newMetaString = `${encData}|${newFolderListStr},${newFilesMetadataStr}`; // Old incorrect concatenation
-
                 let finalMetaString;
                 if (encData) {
-                    // If encData exists, use it, add pipe, then folderList (minus its leading pipe if present), then comma, then fileMeta
                     const folderPart = newFolderListStr.startsWith('|') ? newFolderListStr : `|${newFolderListStr}`;
                     finalMetaString = `${encData}${folderPart},${newFilesMetadataStr}`;
                 } else {
-                    // If no encData, use folderListStr as is (which might start with '|' or be empty), then comma, then fileMeta
                     finalMetaString = `1${newFolderListStr},${newFilesMetadataStr}`;
                 }
-                const newMetaString = finalMetaString; // Assign to the variable used later
+                const newMetaString = finalMetaString;
 
-                console.log(`Final generated metadata for ${contractId}:`, newMetaString);
-                
                 if (newMetaString.length > 8000) {
                     alert(`Metadata size for contract ${contractId} exceeds 8000 bytes (${newMetaString.length}). Please save fewer changes at a time.`);
-                    continue; // Skip this contract
+                    continue;
                 }
                 
-                // --- 6. Prepare transaction (but don't send or update state yet) ---
-                const transactionPayload = {
+                // Add payload to the list for later emission
+                const originalMetadata = this.contract[contractId].m || '';
+                const newMetadata = newMetaString;
+                
+                // Create a diff using jsdiff
+                const metadataDiff = Diff.createPatch('metadata', originalMetadata, newMetadata);
+                
+                // Determine if using diff is more efficient (smaller)
+                const useDiff = metadataDiff.length < newMetadata.length;
+                
+                transactionPayloads.push({
                     contractId: contractId,
-                    metadata: newMetaString
-                };
-                
-                console.log("Prepared transaction payload (not sending):", transactionPayload);
-                
-                // TODO: Emit an event or return payload for Keychain signing
-                // Example: this.$emit('prepare-save', transactionPayload);
-                
-                // **IMPORTANT: State is NOT updated here anymore**
-                // this.contract[contractId].m = newMetaString; // Don't update local contract data yet
+                    metadata: useDiff ? undefined : newMetadata,
+                    diff: useDiff ? metadataDiff : undefined
+                });
             }
             
-            // **IMPORTANT: pendingChanges and localStorage are NOT cleared here anymore**
-            // They should only be cleared after successful confirmation from the blockchain/API
-            // this.pendingChanges = {};
-            // if (this.localStorageKey) {
-            //    localStorage.removeItem(this.localStorageKey);
-            //    console.log("Cleared pending changes from localStorage (commented out - should happen on success)");
-            // }
+            // Check if there are any payloads to send
+            if (transactionPayloads.length === 0) {
+                alert("No valid changes to save.");
+                return;
+            }
+
+            // --- Prepare single update object for multiple contracts --- 
+            const updates = {};
             
-            // **IMPORTANT: init() is NOT called here anymore**
-            // this.init();
+            transactionPayloads.forEach(payload => {
+                // Add either metadata or diff to the updates object, keyed by contractId
+                if (payload.metadata) {
+                    // Use full metadata update
+                    if (!updates[payload.contractId]) {
+                        updates[payload.contractId] = {};
+                    }
+                    updates[payload.contractId].m = payload.metadata;
+                } else if (payload.diff) {
+                    // Use diff update
+                    if (!updates[payload.contractId]) {
+                        updates[payload.contractId] = {};
+                    }
+                    updates[payload.contractId].diff = payload.diff;
+                }
+            });
             
-            alert("Changes prepared. Signing and state update will be handled later."); // Placeholder message
-            console.log("saveChanges finished preparing data. No state updated.");
+            // Check the size of the updates object
+            const updatesPayload = { updates: updates };
+            const payloadSize = JSON.stringify(updatesPayload).length;
+            const MAX_SIZE = 7500; // Maximum size in bytes
+            
+            if (payloadSize > MAX_SIZE) {
+                alert(`Updates payload size (${payloadSize} bytes) exceeds the maximum allowed size (${MAX_SIZE} bytes). Please save fewer changes at a time.`);
+                return;
+            }
+            
+            // Emit a single transaction with all updates bundled
+            const opData = {
+                type: 'cj', // Custom JSON
+                cj: updatesPayload, // All updates in one object
+                id: 'spkcc_update_metadata', // The required_posting_auths id for the custom_json
+                msg: `Updating metadata for ${Object.keys(updates).length} contracts`,
+                ops: ['clear_file_changes', ...Object.keys(updates)], // Custom ops array to trigger cleanup for all contracts
+                txid: `saveMeta_batch_${Date.now()}`, // Unique ID for tracking
+                key: 'Posting' // Specify Posting key
+            };
+            
+            console.log("Emitting tosign for batch update:", opData);
+            this.$emit('tosign', opData);
+            
+            // **DO NOT** clear pending changes or re-init here.
+            alert(`Preparing update for ${Object.keys(updates).length} contract(s) for signing to save changes.`);
+        },
+        handleChangesConfirmed(contractId) {
+            console.log(`Handling confirmed changes for contract: ${contractId}`);
+            if (this.pendingChanges[contractId]) {
+                // Remove the specific contract's changes from pendingChanges
+                delete this.pendingChanges[contractId];
+                
+                // Use Vue.delete for reactivity if pendingChanges is reactive
+                // this.$delete(this.pendingChanges, contractId);
+
+                // Create a new object to ensure reactivity if the above doesn't work
+                this.pendingChanges = { ...this.pendingChanges }; 
+
+                // Persist the updated pendingChanges to localStorage
+                if (this.localStorageKey) {
+                    try {
+                        if (Object.keys(this.pendingChanges).length > 0) {
+                            localStorage.setItem(this.localStorageKey, JSON.stringify(this.pendingChanges));
+                        } else {
+                            localStorage.removeItem(this.localStorageKey);
+                        }
+                        // console.log(`Updated localStorage after confirming changes for ${contractId}`);
+                    } catch (e) {
+                        console.error("Error saving updated pending changes to localStorage:", e);
+                    }
+                }
+
+                // Re-initialize data to reflect the saved state from the blockchain
+                this.init();
+                // console.log(`Re-initialized data after confirming changes for ${contractId}`);
+
+            } else {
+                console.warn(`Received confirmation for ${contractId}, but no pending changes found.`);
+            }
         },
         smartIcon(flags = "") {
             if (!flags[0]) return 'fa-solid fa-file'
@@ -2776,15 +2787,6 @@ export default {
                 this.newMeta[id][cid].thumb_data = string
             })
         },
-        toBase58(num) {
-            const glyphs = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-            let result = "";
-            while (num > 0) {
-                result = glyphs[num % 58] + result;
-                num = Math.floor(num / 58);
-            }
-            return result || "1";
-        },
         parseFolderList(folderListStr) {
             var folderEntries = folderListStr.split("|").filter(Boolean);
             const indexToPath = {
@@ -2811,7 +2813,7 @@ export default {
                 } else {
                     fullPath = entry;
                 }
-                const index = this.toBase58(currentIndex);
+                const index = this.numberToBase58(currentIndex);
                 indexToPath[index] = fullPath;
                 currentIndex++;
             }
@@ -3931,19 +3933,6 @@ export default {
                 }
             }
         },
-        findNextFolderIndex(indexToPathMap) {
-            const glyphs = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-            const existingIndices = Object.keys(indexToPathMap).map(idx => {
-                let num = 0;
-                for (let i = 0; i < idx.length; i++) {
-                    num = num * 58 + glyphs.indexOf(idx[i]);
-                }
-                return num;
-            });
-            // Find the maximum numeric value, default to 9 if only presets 1-9 exist
-            const maxExisting = existingIndices.length > 0 ? Math.max(...existingIndices) : 9;
-            return maxExisting + 1; // The next available numeric value
-        }
     },
     computed: {
         hasFiles() {
@@ -3954,6 +3943,36 @@ export default {
         },
         getSubfolderCount() {
             return this.getSubfolders(this.selectedUser, this.currentFolderPath).length
+        },
+        // Calculate the estimated size of the updates payload
+        updatesPayloadSize() {
+            if (!this.pendingChanges || Object.keys(this.pendingChanges).length === 0) {
+                return 0;
+            }
+            
+            // Create a test updates object similar to what would be sent
+            const testUpdates = {};
+            
+            for (const contractId in this.pendingChanges) {
+                if (this.contract && this.contract[contractId] && this.contract[contractId].m) {
+                    const originalMetadata = this.contract[contractId].m || '';
+                    
+                    // This is approximate - we're using the original metadata length as an estimate
+                    // The actual size would be calculated during saveChanges
+                    if (!testUpdates[contractId]) {
+                        testUpdates[contractId] = { m: originalMetadata };
+                    }
+                }
+            }
+            
+            // Estimate the size of the stringified updates
+            const payloadObj = { updates: testUpdates };
+            return JSON.stringify(payloadObj).length;
+        },
+        // Check if updates payload exceeds limit
+        updatesPayloadTooLarge() {
+            const MAX_SIZE = 7500; // Maximum size in bytes
+            return this.updatesPayloadSize > MAX_SIZE;
         }
     },
     watch: {

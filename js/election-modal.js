@@ -195,7 +195,7 @@ export default {
         };
       }
       if (op) {
-        this.$emit("modalsign", op);
+        this.$emit("tosign", op);
         const modalElement = this.$el.closest('.modal');
         const modalInstance = bootstrap.Modal.getInstance(modalElement);
         modalInstance.hide();

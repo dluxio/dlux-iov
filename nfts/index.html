@@ -519,7 +519,7 @@
                             :colors="getSetDetailsColors(item.script)" :index="index" :auction="item.auction"
                             :sale="item.sale" :account="account"
                             @detail="modalIndex('itemModal', $event, 'displayNFTs');itemModal.hidden = false"
-                            @tosign="toSign = $event" />
+                            @tosign="sendIt($event)" />
                     </div>
                 </div>
             </div>
@@ -778,7 +778,7 @@
             <div>
                 <nftdetail :sets="focusSet" :account="account" :denoms="denoms" :itemmodal="itemModal" :pfp="pfp"
                     :item="focusItem" :chains="chains"
-                    @detail="modalIndex('itemModal', $event);itemModal.hidden = false" @tosign="toSign=$event" />
+                    @detail="modalIndex('itemModal', $event);itemModal.hidden = false" @tosign="sendIt($event)" />
             </div>
             <!-- Mint Detail modal -->
             <div>
@@ -789,7 +789,7 @@
                     :wrapped="chains[focusItem.token].sets[focusItem.set].computed.set.wrapped"
                     :qty="mintsQty(focusItem)"
                     :colors="'linear-gradient(' + chains[focusItem.token].sets[focusItem.set].computed.set.Color1 + ',' + chains[focusItem.token].sets[focusItem.set].computed.set.Color2 + ')'"
-                    @tosign="toSign = $event"
+                    @tosign="sendIt($event)"
                     :info="chains[focusItem.token].sets[focusItem.set].computed.set.Description" />
             </div>
         </main>

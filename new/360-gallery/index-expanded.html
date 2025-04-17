@@ -188,7 +188,7 @@
                             </h2>
                             <div id="executedContracts" class="accordion-collapse collapse show">
                                 <div class="accordion-body p-0">
-                                    <contract-vue :nodeview="false" :account="account" @tosign="toSign=$event" @bens="addBens($event)" :postpage="true"
+                                    <contract-vue :nodeview="false" :account="account" @tosign="sendIt($event)" @bens="addBens($event)" :postpage="true"
                                         :prop_contracts="contracts" :assets="true" @addasset="addAsset($event)"></contract-vue>
                                 </div>
                             </div>
@@ -227,7 +227,7 @@
                                     </ul>
                                   </div>
                                 <div class="accordion-body">
-                                    <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens" @tosign="toSign=$event"/>
+                                    <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens" @tosign="sendIt($event)"/>
                                 </div>
                             </div>
                         </div>
@@ -285,7 +285,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <spk-vue node="false" :account="account" @tosign="toSign=$event;log($event)" />
+                            <spk-vue node="false" :account="account" @tosign="sendIt($event);log($event)" />
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>

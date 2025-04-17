@@ -6,6 +6,8 @@ import ModalVue from "/js/modal-manager.js"
 import PostVue from "/js/postvue.js"
 import ChoicesVue from '/js/choices-vue.js'
 import UploadEverywhere from '/js/upload-everywhere.js'
+import common from './methods-common.js';
+import spk from './methods-spk.js';
 
 
 export default {
@@ -157,7 +159,7 @@ export default {
                 :protocol="protocol"
                 :stats="stats"
                 :saccountapi="saccountapi"
-                @modalsign="sendIt($event)"
+                @tosign="sendIt($event)"
             />        
             <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-4" >
                 <!-- BROCA token widget -->
@@ -179,7 +181,7 @@ export default {
                                     token="liq_broca" :tokenuser="saccountapi"
                                     :account="account"
                                     :tokenprotocol="protocol"
-                                    @modalsign="sendIt($event)"
+                                    @tosign="sendIt($event)"
                                     v-slot:trigger>
                                 <button class="btn btn-sm btn-dark border-warning text-warning trigger ms-1"
                                             type="button" style="width:110px;"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button>
@@ -224,7 +226,7 @@ export default {
                                         <modal-vue v-if="protocol?.head_block && saccountapi?.head_block" type="contract"
                                     :api="sapi" :mypfp="mypfp" token="balance" :test="test" :tokenstats="stats"
                                     :tokenprotocol="protocol" :tokenuser="saccountapi" :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
+                                    @tosign="sendIt($event)" v-slot:trigger>
                                             <span slot="trigger" class="trigger"><i
                                                     class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
                                         </modal-vue>
@@ -267,7 +269,7 @@ export default {
                 <!-- has files -->
                 <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
                         <files-vue :assets="assets" @addassets="addAssets($event)" :account="saccountapi.name" :current="saccountapi.head_block" :cc="true"
-                            :contracts="contracts" :nodeview="nodeview" :bid="title"></files-vue>
+                            :contracts="contracts" :nodeview="nodeview" :bid="title" @tosign="sendIt($event)"></files-vue>
                    
                 </div>
             </div>
@@ -288,7 +290,7 @@ export default {
                                     <modal-vue v-if="protocol?.head_block && saccountapi?.head_block" type="contract"
                                     :api="sapi" :mypfp="mypfp" token="balance" :test="test" :tokenstats="stats"
                                     :tokenprotocol="protocol" :tokenuser="saccountapi" :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
+                                    @tosign="sendIt($event)" v-slot:trigger>
                                         <span slot="trigger" class="trigger"><i
                                                 class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
                                     </modal-vue>
@@ -332,7 +334,7 @@ export default {
                                                 <modal-vue v-if="protocol?.head_block && saccountapi?.head_block" type="contract"
                                     :api="sapi" :mypfp="mypfp" token="balance" :test="test" :tokenstats="stats"
                                     :tokenprotocol="protocol" :tokenuser="saccountapi" :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
+                                    @tosign="sendIt($event)" v-slot:trigger>
                                                     <span slot="trigger" class="trigger"><i
                                                             class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
                                                 </modal-vue></a>
@@ -355,7 +357,7 @@ export default {
                                         <modal-vue v-if="protocol?.head_block && saccountapi?.head_block" type="contract"
                                     :api="sapi" :mypfp="mypfp" token="balance" :test="test" :tokenstats="stats"
                                     :tokenprotocol="protocol" :tokenuser="spkapi" :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
+                                    @tosign="sendIt($event)" v-slot:trigger>
                                             <span slot="trigger" class="trigger"><i
                                                     class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
                                         </modal-vue>
@@ -619,14 +621,14 @@ export default {
                                                                                 :prop_uid="contract.i"
                                                                                 :prop_links="links[contract.i]"
                                                                                 :prop_insert="postBodyAdder[contract.i]"
-                                                                                @tosign="toSign=$event" />
+                                                                                @tosign="sendIt($event)" />
                                                                             </div>
                                                                         </div>
                                                                     </div>
 
                                                                     <!-- upload -->
                                                                     <div v-if="contract.c == 1" class="mx-1">
-                                                                        <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event" @done="done()" />
+                                                                        <upload-vue :user="saccountapi" :propcontract="contract" @tosign="sendIt($event)" @done="done()" />
                                                                     </div>
 
 
@@ -654,7 +656,7 @@ export default {
                                                                                             <extension-vue :node-view="nodeview"
                                                                                             :contract="contract" :sstats="sstats"
                                                                                             :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
-                                                                                            @tosign="toSign=$event"></extension-vue> 
+                                                                                            @tosign="sendIt($event)"></extension-vue> 
                                                                                 </div>
 
                                                                                 <!-- save button -->
@@ -745,7 +747,7 @@ export default {
                                                                                                 <div class="mb-1">
                                                                                                     <label class="mb-1">Thumbnail</label>
                                                                                                     <div class="position-relative has-validation">
-                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][cid].thumb" @change="getImgData(contract.i, cid)" placeholder="https://your-thumbnail-image.png" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control bg-dark border-0" :class="{'text-info': contract.t == account, 'text-white': contract.t != account}" :disabled="contract.t != account">
+                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][cid].thumb" @change="getImgData(contract.i, cid)" placeholder="https://your-thumbnail-image.png" pattern="(https:\/\/[a-z0-9.-\/]+)|(Qm[a-zA-Z0-9]+)" class="form-control bg-dark border-0" :class="{'text-info': contract.t == account, 'text-white': contract.t != account}" :disabled="contract.t != account">
                                                                                                     </div>
                                                                                                 </div>
 
@@ -1147,6 +1149,8 @@ export default {
     },
     emits: ['tosign', 'addasset', 'bens', 'done'],
     methods: {
+        ...common,
+        ...spk,
         isValidThumb(string) {
             if (string.indexOf(":") == -1) {
                 return false
@@ -1211,10 +1215,6 @@ export default {
         },
         getdelimed(string, del = ',', index = 0) {
             return string.split(del)[index] ? string.split(del)[index] : ''
-        },
-        sendIt(event) {
-            console.log('CV', event)
-            this.$emit('tosign', event)
         },
         getImgData(id, cid) {
             var string = this.smartThumb(id, cid)
@@ -1499,7 +1499,7 @@ export default {
         
                 // Decide whether to send diff or full metadata
                 if (existingMeta && diffBody && diffBody !== enc_string) {
-                    // Send diff if there’s existing metadata and a non-trivial diff
+                    // Send diff if there's existing metadata and a non-trivial diff
                     cja.diff = diffBody;
                 } else {
                     // Send full metadata if no existing metadata or diff is equivalent to full string

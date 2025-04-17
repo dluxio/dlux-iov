@@ -39,7 +39,7 @@ export default {
                             <modal-vue type="power" token="SPK" test="test"
                                     func="Power Up" :balance="saccountapi.spk"
                                     :account="account"
-                                    @modalsign="sendIt($event)" v-slot:trigger>
+                                    @tosign="sendIt($event)" v-slot:trigger>
                                     <button class="btn btn-sm btn-dark border-warning text-warning trigger"
                                         type="button" style="width:110px;"><i class="fa-solid fa-bolt fa-fw me-1"></i>Power Up</button>
                                 </modal-vue>
@@ -82,7 +82,7 @@ export default {
                                 <button v-if="saccountapi.pubKey != 'NA' && saccountapi.spk_power" type="button"
                                     class="btn btn-sm btn-dark border-info text-info" style="width:110px;">
                                     <modal-vue type="build" token="BROCA" :balance="broca_calc(saccountapi.broca)"
-                                        :account="account" @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
+                                        :account="account" @tosign="sendIt($event)" :ipfsproviders="ipfsProviders"
                                         v-slot:trigger>
                                         <span slot="trigger" class="trigger"><i
                                                 class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
@@ -187,7 +187,7 @@ export default {
                                 <a class="btn btn-sm btn-dark border-info text-info no-decoration small" style="font-size: 0.6em; width: 72px;" role="button" data-bs-toggle="modal" data-bs-target="#contractModal">
                                     <modal-vue type="build" token="BROCA"
                                         :balance="broca_calc(saccountapi.broca)" :account="account"
-                                        @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
+                                        @tosign="sendIt($event)" :ipfsproviders="ipfsProviders"
                                         v-slot:trigger>
                                         <span slot="trigger" class="trigger"><i
                                                 class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
@@ -235,7 +235,7 @@ export default {
                                                 role="button" data-bs-toggle="modal" data-bs-target="#contractModal">
                                                 <modal-vue type="build" token="BROCA"
                                                     :balance="broca_calc(saccountapi.broca)" :account="account"
-                                                    @modalsign="toSign=$event" :ipfsproviders="ipfsProviders"
+                                                    @tosign="sendIt($event)" :ipfsproviders="ipfsProviders"
                                                     v-slot:trigger>
                                                     <span slot="trigger" class="trigger"><i
                                                             class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
@@ -445,14 +445,14 @@ export default {
                                                                                 :prop_uid="contract.i"
                                                                                 :prop_links="links[contract.i]"
                                                                                 :prop_insert="postBodyAdder[contract.i]"
-                                                                                @tosign="toSign=$event" />
+                                                                                @tosign="sendIt($event)" />
                                                                             </div>
                                                                         </div>
                                                                     </div>
 
                                                                     <!-- upload -->
                                                                     <div v-if="contract.c == 1" class="mx-1">
-                                                                        <upload-vue :user="saccountapi" :propcontract="contract" @tosign="toSign=$event" @done="done()" />
+                                                                        <upload-vue :user="saccountapi" :propcontract="contract" @tosign="sendIt($event)" @done="done()" />
                                                                     </div>
 
 
@@ -480,7 +480,7 @@ export default {
                                                                                             <extension-vue :node-view="nodeview"
                                                                                             :contract="contract" :sstats="sstats"
                                                                                             :account="account" :saccountapi="saccountapi" :spkapi="spkapi"
-                                                                                            @tosign="toSign=$event"></extension-vue> 
+                                                                                            @tosign="sendIt($event)"></extension-vue> 
                                                                                 </div>
 
                                                                                 <!-- save button -->
@@ -571,7 +571,7 @@ export default {
                                                                                                 <div class="mb-1">
                                                                                                     <label class="mb-1">Thumbnail</label>
                                                                                                     <div class="position-relative has-validation">
-                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][cid].thumb" @change="getImgData(contract.i, cid)" placeholder="https://your-thumbnail-image.png" pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+" class="form-control">
+                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][cid].thumb" @change="getImgData(contract.i, cid)" placeholder="https://your-thumbnail-image.png" pattern="(https:\/\/[a-z0-9.-\/]+)|(Qm[a-zA-Z0-9]+)" class="form-control">
                                                                                                     </div>
                                                                                                 </div>
 
