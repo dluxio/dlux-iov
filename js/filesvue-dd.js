@@ -232,7 +232,7 @@ export default {
                     <div class="d-flex align-items-center justify-content-center" style="height: 70px; width: 100%;">
                         <i class="fa-solid fa-folder fa-3x" style="color: #ffd166;"></i>
                     </div>
-                    <div class="text-truncate mt-2" style="max-width: 110px; font-size: 0.9rem;">{{ folder.name }}</div>
+                    <div class="text-truncate pb-1" style="max-width: 110px; font-size: 0.9rem;">{{ folder.name }}</div>
                 </div>
                 <div v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" 
                      class="file-grid m-2 p-2 rounded text-center" 
@@ -261,7 +261,7 @@ export default {
                             </g>
                         </svg>
                 </div>
-                    <div class="text-truncate mt-2" style="max-width: 110px; font-size: 0.9rem;">{{ newMeta[file.i][file.f].name || file.f }}</div>
+                    <div class="text-truncate pb-1" style="max-width: 110px; font-size: 0.9rem;">{{ newMeta[file.i][file.f].name || file.f }}</div>
                     <div v-if="flagsDecode(newMeta[file.i][file.f].flags, 1).length" class="position-absolute bottom-0 end-0 bg-dark rounded-circle p-1" style="margin: 2px;">
                         <i class="fa-solid fa-lock fa-sm"></i>
                     </div>
