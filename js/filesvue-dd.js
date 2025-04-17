@@ -3485,6 +3485,117 @@ export default {
             this.showDetailsViewer = false;
             this.fileToViewDetails = null;
         },
+
+        // Added/Modified: Method to move a file to the Trash folder
+        deleteFile(file) {
+            if (!this.isEditable(file)) {
+                alert("You can only move your own files to trash.");
+                return;
+            }
+
+            const contractId = file.i;
+            const fileId = file.f;
+            const newPath = "Trash"; // The target folder is always "Trash"
+
+            console.log(`Moving file ${fileId} (contract ${contractId}) to Trash.`);
+
+            // Update the canonical file object in this.files
+            if (this.files[fileId]) {
+                this.files[fileId].folderPath = newPath;
+            }
+
+            // Update newMeta
+            if (this.newMeta[contractId] && this.newMeta[contractId][fileId]) {
+                this.newMeta[contractId][fileId].folderPath = newPath;
+            }
+
+            // Update pendingChanges
+            this.pendingChanges[contractId] = this.pendingChanges[contractId] || {};
+            this.pendingChanges[contractId][fileId] = {
+                ...(this.pendingChanges[contractId][fileId] || {}), // Preserve other pending changes like name, labels etc.
+                folderPath: newPath, // Set/overwrite the folder path
+                name: this.newMeta[contractId]?.[fileId]?.name || fileId, // Ensure name is preserved
+            };
+
+            console.log('Updated pendingChanges for move to trash:', JSON.parse(JSON.stringify(this.pendingChanges[contractId][fileId])));
+
+            // Rebuild folder trees and re-render the view
+            this.buildFolderTrees();
+            this.render(); // Ensure the UI updates to reflect the move
+        },
+
+        // Added: Method to move a folder and its contents to the Trash folder
+        deleteFolder(folder) {
+            if (!this.isEditableFolder(folder)) {
+                alert("You can only move your own folders to trash.");
+                return;
+            }
+
+            if (folder.isPreset && folder.name === "Trash") {
+                 alert("You cannot move the Trash folder itself.");
+                 return;
+            }
+            // Also prevent moving other preset folders if desired
+            if (folder.isPreset) {
+                 alert(`Preset folder "${folder.name}" cannot be moved to Trash.`);
+                 return;
+            }
+
+            const folderPath = folder.path;
+            const targetPath = "Trash";
+            let filesMoved = 0;
+
+            console.log(`Moving folder "${folderPath}" contents to Trash.`);
+
+            // Find all files within this folder and its subfolders
+            const filesToMove = Object.values(this.files).filter(file => 
+                (file.folderPath === folderPath || file.folderPath.startsWith(folderPath + '/'))
+            );
+
+            // Move each editable file to the Trash folder
+            filesToMove.forEach(file => {
+                if (this.isEditable(file)) {
+                    const contractId = file.i;
+                    const fileId = file.f;
+
+                    // Update the canonical file object
+                    if (this.files[fileId]) {
+                        this.files[fileId].folderPath = targetPath;
+                    }
+
+                    // Update newMeta
+                    if (this.newMeta[contractId] && this.newMeta[contractId][fileId]) {
+                        this.newMeta[contractId][fileId].folderPath = targetPath;
+                    }
+
+                    // Stage the change in pendingChanges
+                    this.pendingChanges[contractId] = this.pendingChanges[contractId] || {};
+                    this.pendingChanges[contractId][fileId] = {
+                        ...(this.pendingChanges[contractId][fileId] || {}), // Preserve other changes
+                        folderPath: targetPath,
+                        name: this.newMeta[contractId]?.[fileId]?.name || fileId, // Ensure name is preserved
+                    };
+                    filesMoved++;
+                }
+            });
+
+            // If the folder being moved was newly created (only in pendingChanges), remove it
+            for (const contractId in this.pendingChanges) {
+                 if (this.pendingChanges[contractId]?.__newFolders__) {
+                      const index = this.pendingChanges[contractId].__newFolders__.indexOf(folderPath);
+                      if (index > -1) {
+                           this.pendingChanges[contractId].__newFolders__.splice(index, 1);
+                           console.log(`Removed pending new folder "${folderPath}" as it was moved to trash.`);
+                      }
+                 }
+            }
+
+            console.log(`Moved ${filesMoved} files from "${folderPath}" to Trash.`);
+
+            // Update UI
+            this.buildFolderTrees();
+            this.render();
+        },
     },
     computed: {
         hasFiles() {
