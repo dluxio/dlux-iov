@@ -202,6 +202,11 @@ export default {
                 </div>
             </div>
         </div>
+        <!-- Added: Warning Box for Trash Folder -->
+        <div v-if="currentFolderPath === 'Trash'" class="alert alert-warning my-2 mx-1" role="alert">
+            <i class="fa-solid fa-triangle-exclamation fa-fw me-1"></i>
+            Files in Trash will be permanently deleted after their deletion date.
+        </div>
         <div class="files" @contextmenu.prevent="showContextMenu($event, 'background', null)" 
              @dragover="dragOverBackground($event)" 
              @drop="dropOnBackground($event)"
@@ -287,7 +292,7 @@ export default {
                             <th>Filename</th>
                             <th>Owner</th>
                             <th>Size</th>
-                            <th>Labels & Tags</th>
+                            <th>{{ currentFolderPath === 'Trash' ? 'Deletion Date' : 'Labels & Tags' }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -342,7 +347,7 @@ export default {
                             <td>@{{ file.o }}</td>
                             <td>{{ fancyBytes(file.s) }}</td>
                             <td>
-                                <div class="d-flex flex-wrap align-items-center justify-content-center">
+                                <div v-if="currentFolderPath !== 'Trash'" class="d-flex flex-wrap align-items-center justify-content-center">
                                     <!-- colors -->
                                     <div v-if="file.lc" class="d-flex me-1 align-items-center" style="margin-left: 15px">
                                             <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :style="'margin-left: ' + -15 +'px !important;'"></i>
@@ -370,6 +375,9 @@ export default {
                                         </pop-vue>
                                     </div>
                                 </div>
+                                <div v-else>
+                                    <p class="text-muted">This file will be deleted on {{ blockToTime(file.e) }}</p>
+                                </div>
                             </td>
                         </tr>
                         <!-- Empty state row for table view -->
@@ -385,13 +393,7 @@ export default {
                 </table>
             </div>
             
-            <!-- Empty state indicator for both views when folder is empty -->
-            <div v-if="getSubfolders(selectedUser, currentFolderPath).length === 0 && getFiles(selectedUser, currentFolderPath).length === 0 && viewOpts.fileView !== 'grid'" 
-                 class="w-100 text-center p-5 d-flex flex-column align-items-center justify-content-center" 
-                 style="min-height: 150px;">
-                <i class="fa-solid fa-folder-open fa-3x mb-3"></i>
-                <p class="text-muted">This folder is empty. Drag and drop files here or create a new folder.</p>
-            </div>
+            
         </div>
     </div>
 <!-- Context menu -->
@@ -636,12 +638,6 @@ export default {
     </span>
   </button>
   <button class="btn btn-secondary" @click="revertPendingChanges">Revert Pending Changes</button>
-</div>
-
-<!-- Added: Warning Box for Trash Folder -->
-<div v-if="currentFolderPath === 'Trash'" class="alert alert-warning my-2 mx-1" role="alert">
-    <i class="fa-solid fa-triangle-exclamation fa-fw me-1"></i>
-    Files in Trash will be permanently deleted after their review/expiration date.
 </div>
 
 </div>
