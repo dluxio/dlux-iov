@@ -553,7 +553,8 @@ export default {
                         <li><strong>Type:</strong> {{ detailsData.file.type }}</li>
                         <li><strong>Encrypted:</strong> {{ detailsData.file.encrypted ? 'Yes' : 'No' }}</li>
                         <li><strong>Created:</strong> {{ detailsData.file.creationTime }} (Block: {{ detailsData.file.creationBlock }})</li>
-                        <li><strong>Expires:</strong> Block {{ detailsData.file.expirationBlock }}</li>
+                        <li><strong>Review/Expire:</strong>{{ detailsData.file.expirationTime }} (Block {{ detailsData.file.expirationBlock }})</li>
+                        <li><span class="text-muted">...Empties Trash</span></li>
                         <li v-if="detailsData.file.thumbCid"><strong>Thumbnail CID:</strong> <code class="text-break">{{ detailsData.file.thumbCid }}</code> <i class="fa-regular fa-copy fa-fw ms-1" role="button" @click="copyText(detailsData.file.thumbCid)"></i></li>
                         <li v-if="detailsData.file.thumbData" class="mt-2">
                             <strong>Thumbnail:</strong><br>
@@ -586,15 +587,13 @@ export default {
                      <ul class="list-unstyled small">
                         <li><strong>Contract ID:</strong> <code class="text-break">{{ detailsData.contract.id }}</code> <i class="fa-regular fa-copy fa-fw ms-1" role="button" @click="copyText(detailsData.contract.id)"></i></li>
                         <li><strong>Contract Owner:</strong> @{{ detailsData.contract.owner }}</li>
-                        <li><strong>Storage Node:</strong> {{ detailsData.contract.node }}</li>
-                        <li><strong>Price/Block:</strong> {{ detailsData.contract.pricePerBlock }}</li>
-                        <li><strong>Extension:</strong> {{ detailsData.contract.extensionBlocks }} Blocks</li>
+                        <li><strong>Storage Nodes:</strong> <div v-for="node in detailsData.contract.nodes" :key="node">@{{ node }}</div></li>
+                        <li><strong>Incentivized Nodes:</strong> {{ detailsData.contract.prominence }} </li>
+                        <li><strong>Pay Scale:</strong> {{ detailsData.contract.payScale }} </li>
+                        <li><strong>Price/Month:</strong> {{ detailsData.contract.cost }} BROCA </li>
                         <li><strong>Total Size Stored:</strong> {{ detailsData.contract.totalSizeStored }}</li>
                         <li><strong>Auto-Renew:</strong> {{ detailsData.contract.autoRenew ? 'Yes' : 'No' }}</li>
                         <li><strong>Contract Encrypted:</strong> {{ detailsData.contract.encrypted ? 'Yes' : 'No' }}</li>
-                        <li v-if="detailsData.contract.encrypted">
-                            <strong>Encryption Key Available:</strong> {{ detailsData.contract.encryptionKeyAvailable ? 'Yes (Decrypted)' : 'No' }}
-                        </li>
                         <li v-if="detailsData.contract.encryptionAccounts.length > 0">
                              <strong>Encrypted For:</strong>
                              <ul>
@@ -3560,18 +3559,19 @@ export default {
                     creationBlock: file.c,
                     creationTime: blockToTime(file.c),
                     expirationBlock: file.e,
-                    // expirationTime: blockToTime(file.e), // If needed
+                    expirationTime: blockToTime(file.e), // If needed
                 },
                 contract: {
                     id: file.i,
                     owner: contract.t,
-                    node: contract.u,
-                    pricePerBlock: contract.p,
-                    extensionBlocks: contract.extend,
-                    totalSizeStored: fancyBytes(contract.s || 0), // Assuming contract.s exists
-                    autoRenew: meta.contract?.autoRenew,
-                    encrypted: meta.contract?.encrypted,
-                    encryptionKeyAvailable: contract.encryption?.key ? true : false,
+                    nodes: contract.n,
+                    payScale: parseFloat(1 / (Object.keys(contract.n).length / contract.p)).toFixed(2),
+                    prominence: contract.p, // number of incentivized nodes to decentralize the file
+                    cost: contract.r, // cost per month
+                    reviewBlock: contract.e.split(':')[0], // trash empty date
+                    totalSizeStored: fancyBytes(contract.u || 0), 
+                    autoRenew: Number(contract.m.substring(0, 1)) & 1,
+                    encrypted: contract.m.substring(1, 1) === '#' ? true : false,
                     encryptionAccounts: contract.encryption?.accounts ? Object.keys(contract.encryption.accounts) : [],
                 }
             };
