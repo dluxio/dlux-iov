@@ -172,67 +172,34 @@ export default {
 
             </div>
         </div>
-
-<!-- change view list / grid -->
-        <div class="d-flex align-items-center my-1 mx-1">
-            <h5 v-if="viewOpts.view === 'grid' || viewOpts.view === 'list'" class="mb-0">{{filesArray.length}} File{{filesArray.length > 1 ? 's' : ''}}</h5>
-            <h5 v-else class="mb-0">{{ getSubfolderCount }} Folder{{ getSubfolderCount === 1 ? '' : 's' }} & {{ currentFileCount }} File{{ currentFileCount === 1 ? '' : 's' }}</h5>
-            <button 
-                class="btn btn-success btn-sm ms-2" 
-                @click="saveChanges" 
-                v-if="Object.keys(pendingChanges).length > 0"
-                :disabled="updatesPayloadTooLarge"
-                :title="updatesPayloadTooLarge ? 'Payload size exceeds the maximum allowed size (7500 bytes)' : ''"
-            >
-                <i class="fa-solid fa-save me-1"></i>Save
-                <span v-if="updatesPayloadTooLarge" class="text-warning ms-1">
-                    <i class="fa-solid fa-exclamation-triangle"></i>
-                </span>
-            </button>
-            <button class="btn btn-danger btn-sm ms-2" @click="revertPendingChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-undo me-1"></i>Revert</button>
-            <div class="ms-auto">
-                <div class="ms-auto">
-                    <div class="btn-group">
-                        <input type="radio" class="btn-check" :name="bid + 'smView'" :id="bid + 'setGrid'"
-                            autocomplete="off" @click="setView('grid')" :checked="viewOpts.view === 'grid'" />
-                        <label class="btn btn-outline-light" :for="bid + 'setGrid'"><i
-                                class="fa-solid fa-table-cells-large fa-fw"></i></label>
-                        <input type="radio" class="btn-check" :name="bid + 'smView'" :id="bid + 'setList'"
-                            autocomplete="off" @click="setView('list')" :checked="viewOpts.view === 'list'" />
-                        <label class="btn btn-outline-light" :for="bid + 'setList'"><i
-                                class="fa-solid fa-table-list fa-fw"></i></label>
-                        <input type="radio" class="btn-check" :name="bid + 'smView'" :id="bid + 'setFolder'"
-                            autocomplete="off" @click="setView('folder')" :checked="viewOpts.view === 'folder'" />
-                        <label class="btn btn-outline-light" :for="bid + 'setFolder'"><i
-                                class="fa-solid fa-folder-tree fa-fw"></i></label>
-                        <input type="radio" class="btn-check" :name="bid + 'smView'" :id="bid + 'setIcon'"
-                            autocomplete="off" @click="setView('icon')" :checked="viewOpts.view === 'icon'" />
-                        <label class="btn btn-outline-light" :for="bid + 'setIcon'"><i
-                                class="fa-solid fa-icons fa-fw"></i></label>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
        
-<!-- Icon View -->
-    <div class="d-flex flex-wrap">
-        <h3>@{{ selectedUser }}</h3>
-        <div class="breadcrumb d-flex align-items-center">
-            <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;"><i class="fa-solid fa-hard-drive"></i></span>
+<!-- Filesystem View -->
+    <div class="d-flex flex-column flex-wrap">
+        <h3 class="d-none">@{{ selectedUser }}</h3>
+        <div class="breadcrumb d-flex align-items-center w-100 rounded bg-darkg mt-2">
+            
+            <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; border-radius: 4px;"><i class="fa-fw fa-solid fa-hard-drive"></i></span>
             <template v-for="(part, index) in currentFolderPath.split('/').filter(Boolean)" :key="index">
-                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'), $event)" @dragenter="handleDragEnterBreadcrumb($event, currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; background-color: #333; border-radius: 4px;">{{ part }}</span>
+                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'), $event)" @dragenter="handleDragEnterBreadcrumb($event, currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; border-radius: 4px;">{{ part }}</span>
                 <span class="mx-1">/</span>
             </template>
         </div>
-        <div class="d-flex justify-content-end w-100 my-2">
-            <button class="btn btn-secondary btn-sm" @click="createNewFolder"><i class="fa-solid fa-folder-plus me-1"></i>New Folder</button>
-            <button class="btn btn-success btn-sm ms-2" @click="saveChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-save me-1"></i>Save</button>
-            <button class="btn btn-danger btn-sm ms-2" @click="revertPendingChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-undo me-1"></i>Revert</button>
-            <div class="btn-group ms-2">
-                <button class="btn btn-sm" :class="viewOpts.fileView === 'grid' ? 'btn-primary' : 'btn-secondary'" @click="viewOpts.fileView = 'grid'"><i class="fa-solid fa-th-large"></i></button>
-                <button class="btn btn-sm" :class="viewOpts.fileView === 'list' ? 'btn-primary' : 'btn-secondary'" @click="viewOpts.fileView = 'list'"><i class="fa-solid fa-list"></i></button>
+        <div class="d-flex flex-wrap justify-content-end w-100 my-2">
+            <!-- count folders files -->
+            <div class="d-flex align-items-center my-1 mx-1">
+                <h5 v-if="viewOpts.view === 'grid' || viewOpts.view === 'list'" class="mb-0">{{filesArray.length}} File{{filesArray.length > 1 ? 's' : ''}}</h5>
+                <h5 v-else class="mb-0">{{ getSubfolderCount }} Folder{{ getSubfolderCount === 1 ? '' : 's' }} & {{ currentFileCount }} File{{ currentFileCount === 1 ? '' : 's' }}</h5>
+            </div>
+            <div class="d-flex flex-wrap ms-auto">
+                <button class="btn btn-secondary btn-sm" @click="createNewFolder"><i class="fa-solid fa-folder-plus me-1"></i>New Folder</button>
+                <button class="btn btn-success btn-sm ms-2" @click="saveChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-save me-1"></i>Save</button>
+                <button class="btn btn-danger btn-sm ms-2" @click="revertPendingChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-undo me-1"></i>Revert</button>
+                <div class="btn-group ms-2">
+                    <button class="btn btn-sm" :class="viewOpts.fileView === 'grid' ? 'btn-primary' : 'btn-secondary'" @click="viewOpts.fileView = 'grid'"><i class="fa-solid fa-th-large"></i></button>
+                    <button class="btn btn-sm" :class="viewOpts.fileView === 'list' ? 'btn-primary' : 'btn-secondary'" @click="viewOpts.fileView = 'list'"><i class="fa-solid fa-list"></i></button>
+                </div>
             </div>
         </div>
         <div class="files" @contextmenu.prevent="showContextMenu($event, 'background', null)" 
