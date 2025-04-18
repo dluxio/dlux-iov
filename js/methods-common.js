@@ -480,7 +480,7 @@ export default {
     return bytes.toString(CryptoJS.enc.Utf8);
   },
   toBase58(num) {
-    const glyphs = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    const glyphs = "0123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     let result = "";
     while (num > 0) {
       result = glyphs[num % 58] + result;
@@ -489,7 +489,7 @@ export default {
     return result || "1"; // Return "1" for 0 or invalid input
   },
   numberToBase58(num) {
-    const base58Chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    const base58Chars = "0123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     if (num === 0) return base58Chars[0];
     let result = "";
     while (num > 0) {
@@ -499,7 +499,7 @@ export default {
     return result;
   },
   base58ToNumber(b58) {
-    const base58Chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    const base58Chars = "0123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     let num = 0;
     for (let i = 0; i < b58.length; i++) {
       num = num * 58 + base58Chars.indexOf(b58[i]);

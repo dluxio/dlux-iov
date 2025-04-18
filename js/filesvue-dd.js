@@ -421,7 +421,7 @@ export default {
         v-if="contextMenu.type === 'background' && selectedUser === account"
         class="p-1"
         style="cursor: pointer;"
-        @click="createNewFolder; hideContextMenu();"
+        @click="createNewFolder(); hideContextMenu();"
       >
         New Folder
       </li>
@@ -891,31 +891,26 @@ export default {
                     alert(`Folder "${folderName}" already exists at this level.`);
                     return;
                 }
-                // Also check pending changes (more complex, maybe skip for now or add later)
 
-                // --- Stage in Pending Changes ---
-                const userContractId = Object.keys(this.contract).find(id => this.contract[id].t === this.selectedUser);
-
-                if (userContractId) {
-                    this.pendingChanges[userContractId] = this.pendingChanges[userContractId] || {};
-                    this.pendingChanges[userContractId]['__newFolders__'] = this.pendingChanges[userContractId]['__newFolders__'] || [];
-                    if (!this.pendingChanges[userContractId]['__newFolders__'].includes(newPath)) {
-                        this.pendingChanges[userContractId]['__newFolders__'].push(newPath);
-                        console.log("Pending Changes after staging new folder:", JSON.parse(JSON.stringify(this.pendingChanges)));
-
-                        // --- Trigger UI update by rebuilding tree ---
-                        // No direct UI manipulation needed now, buildFolderTrees will handle it
-                        this.buildFolderTrees();
-                        // Optional: Force update if reactivity is sometimes slow, but ideally not needed
-                        // this.$forceUpdate();
-                    } else {
-                        alert(`Folder "${folderName}" is already pending creation.`);
-                    }
-                } else {
-                    console.error("Cannot add new folder to pending changes: No contract found for user", this.selectedUser);
-                    alert("Could not stage folder creation for saving. No contract found.");
+                // --- Create Virtual Folder ---
+                // Instead of attaching to a random contract, we'll store it separately
+                if (!this.pendingChanges['__virtualFolders__']) {
+                    this.pendingChanges['__virtualFolders__'] = {};
                 }
-
+                if (!this.pendingChanges['__virtualFolders__'][this.selectedUser]) {
+                    this.pendingChanges['__virtualFolders__'][this.selectedUser] = [];
+                }
+                
+                // Add to virtual folders if not already there
+                if (!this.pendingChanges['__virtualFolders__'][this.selectedUser].includes(newPath)) {
+                    this.pendingChanges['__virtualFolders__'][this.selectedUser].push(newPath);
+                    console.log("Added virtual folder:", newPath);
+                    
+                    // --- Trigger UI update by rebuilding tree ---
+                    this.buildFolderTrees();
+                } else {
+                    alert(`Folder "${folderName}" is already pending creation.`);
+                }
             } else if (folderName && this.selectedUser !== this.account) {
                 alert("Cannot create folders for other users.");
             }
@@ -1449,6 +1444,37 @@ export default {
                                 folderPath: newPath,
                                 name: this.newMeta[currentContractId]?.[fileId]?.name || fileId,
                             };
+                            
+                            // Check if target folder is a virtual folder
+                            // If so, move it from virtual to the contract so it's saved properly
+                            if (this.pendingChanges['__virtualFolders__']?.[this.selectedUser]) {
+                                const virtualFolders = this.pendingChanges['__virtualFolders__'][this.selectedUser];
+                                const pathParts = newPath.split('/');
+                                
+                                // Build paths for all parent folders
+                                let parentPath = '';
+                                for (let i = 0; i < pathParts.length; i++) {
+                                    const part = pathParts[i];
+                                    parentPath = parentPath ? `${parentPath}/${part}` : part;
+                                    
+                                    // Check if this path is in virtual folders
+                                    const virtualIndex = virtualFolders.indexOf(parentPath);
+                                    if (virtualIndex !== -1) {
+                                        // Ensure contract has newFolders array
+                                        this.pendingChanges[currentContractId]['__newFolders__'] = 
+                                            this.pendingChanges[currentContractId]['__newFolders__'] || [];
+                                        
+                                        // Add to contract's newFolders if not already there
+                                        if (!this.pendingChanges[currentContractId]['__newFolders__'].includes(parentPath)) {
+                                            this.pendingChanges[currentContractId]['__newFolders__'].push(parentPath);
+                                            console.log(`Converted virtual folder '${parentPath}' to real folder in contract ${currentContractId}`);
+                                        }
+                                        
+                                        // Remove from virtual folders since it's now a real folder
+                                        virtualFolders.splice(virtualIndex, 1);
+                                    }
+                                }
+                            }
                         });
                     }
                 } else {
@@ -2471,6 +2497,7 @@ export default {
                 indexToPath[index] = fullPath;
                 currentIndex++;
             }
+            console.log(indexToPath)
             return indexToPath;
         },
         buildFolderTree(files) {
@@ -2562,6 +2589,13 @@ export default {
 
                 // 2. Get pending new folders for this user
                 let pendingFolderPaths = [];
+                
+                // First check for the new virtual folders system
+                if (this.pendingChanges['__virtualFolders__']?.[user]) {
+                    pendingFolderPaths = [...this.pendingChanges['__virtualFolders__'][user]];
+                }
+                
+                // Also check the old system for backward compatibility
                 const userContractIds = Object.keys(this.contract).filter(id => this.contract[id]?.t === user);
                 for (const contractId of userContractIds) {
                     if (this.pendingChanges[contractId]?.__newFolders__) {
@@ -3372,6 +3406,37 @@ export default {
                                 folderPath: newPath,
                                 name: this.newMeta[currentContractId]?.[fileId]?.name || fileId,
                             };
+                            
+                            // Check if target folder is a virtual folder
+                            // If so, move it from virtual to the contract so it's saved properly
+                            if (this.pendingChanges['__virtualFolders__']?.[this.selectedUser]) {
+                                const virtualFolders = this.pendingChanges['__virtualFolders__'][this.selectedUser];
+                                const pathParts = newPath.split('/');
+                                
+                                // Build paths for all parent folders
+                                let parentPath = '';
+                                for (let i = 0; i < pathParts.length; i++) {
+                                    const part = pathParts[i];
+                                    parentPath = parentPath ? `${parentPath}/${part}` : part;
+                                    
+                                    // Check if this path is in virtual folders
+                                    const virtualIndex = virtualFolders.indexOf(parentPath);
+                                    if (virtualIndex !== -1) {
+                                        // Ensure contract has newFolders array
+                                        this.pendingChanges[currentContractId]['__newFolders__'] = 
+                                            this.pendingChanges[currentContractId]['__newFolders__'] || [];
+                                        
+                                        // Add to contract's newFolders if not already there
+                                        if (!this.pendingChanges[currentContractId]['__newFolders__'].includes(parentPath)) {
+                                            this.pendingChanges[currentContractId]['__newFolders__'].push(parentPath);
+                                            console.log(`Converted virtual folder '${parentPath}' to real folder in contract ${currentContractId}`);
+                                        }
+                                        
+                                        // Remove from virtual folders since it's now a real folder
+                                        virtualFolders.splice(virtualIndex, 1);
+                                    }
+                                }
+                            }
                         });
                     }
                 } else {
@@ -3875,74 +3940,67 @@ export default {
         // Added: Method to move a folder and its contents to the Trash folder
         deleteFolder(folder) {
             if (!this.isEditableFolder(folder)) {
-                alert("You can only move your own folders to trash.");
-                return;
-            }
-
-            if (folder.isPreset && folder.name === "Trash") {
-                alert("You cannot move the Trash folder itself.");
-                return;
-            }
-            // Also prevent moving other preset folders if desired
-            if (folder.isPreset) {
-                alert(`Preset folder "${folder.name}" cannot be moved to Trash.`);
+                alert("You don't have permission to delete this folder.");
                 return;
             }
 
             const folderPath = folder.path;
-            const targetPath = "Trash";
-            let filesMoved = 0;
-
-            console.log(`Moving folder "${folderPath}" contents to Trash.`);
-
-            // Find all files within this folder and its subfolders
-            const filesToMove = Object.values(this.files).filter(file =>
-                (file.folderPath === folderPath || file.folderPath.startsWith(folderPath + '/'))
+            
+            // Check if any files exist in this folder or its subfolders
+            const hasFiles = Object.values(this.files).some(file => 
+                file.folderPath === folderPath || file.folderPath.startsWith(folderPath + '/')
             );
 
-            // Move each editable file to the Trash folder
-            filesToMove.forEach(file => {
-                if (this.isEditable(file)) {
-                    const contractId = file.i;
-                    const fileId = file.f;
-
-                    // Update the canonical file object
-                    if (this.files[fileId]) {
-                        this.files[fileId].folderPath = targetPath;
-                    }
-
-                    // Update newMeta
-                    if (this.newMeta[contractId] && this.newMeta[contractId][fileId]) {
-                        this.newMeta[contractId][fileId].folderPath = targetPath;
-                    }
-
-                    // Stage the change in pendingChanges
-                    this.pendingChanges[contractId] = this.pendingChanges[contractId] || {};
-                    this.pendingChanges[contractId][fileId] = {
-                        ...(this.pendingChanges[contractId][fileId] || {}), // Preserve other changes
-                        folderPath: targetPath,
-                        name: this.newMeta[contractId]?.[fileId]?.name || fileId, // Ensure name is preserved
-                    };
-                    filesMoved++;
+            if (hasFiles) {
+                // If the folder has files, we need confirmation and we'll move files to Trash
+                const confirmation = confirm(`Delete folder "${folder.name}" and move all its files to Trash?`);
+                if (!confirmation) {
+                    return;
                 }
-            });
 
-            // If the folder being moved was newly created (only in pendingChanges), remove it
-            for (const contractId in this.pendingChanges) {
-                if (this.pendingChanges[contractId]?.__newFolders__) {
-                    const index = this.pendingChanges[contractId].__newFolders__.indexOf(folderPath);
-                    if (index > -1) {
-                        this.pendingChanges[contractId].__newFolders__.splice(index, 1);
-                        console.log(`Removed pending new folder "${folderPath}" as it was moved to trash.`);
+                // Move all files to Trash
+                Object.values(this.files).forEach(file => {
+                    if ((file.folderPath === folderPath || file.folderPath.startsWith(folderPath + '/')) && this.isEditable(file)) {
+                        this.deleteFile(file); // This will move the file to Trash
+                    }
+                });
+            } else {
+                // For empty folders, simple confirmation
+                const confirmation = confirm(`Delete empty folder "${folder.name}"?`);
+                if (!confirmation) {
+                    return;
+                }
+                
+                // Check if it's a virtual folder and remove it if found
+                if (this.pendingChanges['__virtualFolders__']?.[this.selectedUser]) {
+                    const virtualFolders = this.pendingChanges['__virtualFolders__'][this.selectedUser];
+                    const virtualIndex = virtualFolders.indexOf(folderPath);
+                    
+                    if (virtualIndex !== -1) {
+                        // Remove from virtual folders
+                        virtualFolders.splice(virtualIndex, 1);
+                        console.log(`Deleted virtual folder: ${folderPath}`);
+                        this.buildFolderTrees();
+                        return;
+                    }
+                }
+                
+                // For regular pending folders, we need to remove from contracts
+                for (const contractId in this.pendingChanges) {
+                    if (contractId === '__virtualFolders__') continue;
+                    
+                    if (this.pendingChanges[contractId].__newFolders__) {
+                        const folderIndex = this.pendingChanges[contractId].__newFolders__.indexOf(folderPath);
+                        if (folderIndex !== -1) {
+                            this.pendingChanges[contractId].__newFolders__.splice(folderIndex, 1);
+                            console.log(`Removed pending new folder "${folderPath}" as it was deleted.`);
+                        }
                     }
                 }
             }
 
-            console.log(`Moved ${filesMoved} files from "${folderPath}" to Trash.`);
-
-            // Update UI
+            // Rebuild folder trees to reflect changes
             this.buildFolderTrees();
-            this.render();
         },
 
         // Added: Method to restore a file from the Trash folder
