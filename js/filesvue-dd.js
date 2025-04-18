@@ -4001,13 +4001,13 @@ export default {
                 const namePattern = /^[^,]{1,32}$/u
                 // Files should not start/end with spaces or periods
                 if (!namePattern.test(name)) {
-                    return { valid: false, message: "File name contains invalid characters." };
+                    return { valid: false, message: "File name contains a comma or is too long. " };
                 }
             } else if (type === "folder") {
                 const namePattern = /^[0-9a-zA-Z+_.\- ]{2,16}$/
                 // Folders should not start/end with spaces and can't be named "." or ".."
                 if (!namePattern.test(name)) {
-                    return { valid: false, message: "Folder name cannot start or end with spaces." };
+                    return { valid: false, message: "Valid Folder Names are 2-16 characters long, alphanumeric, and can include +, _, -, and spaces." };
                 }
                 if (name.length > 16) {
                     return { valid: false, message: "Folder name is too long (max 16 characters)." };
