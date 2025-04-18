@@ -268,7 +268,7 @@ export default {
                 
                 <!-- has files -->
                 <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
-                        <files-vue :assets="assets" @addassets="addAssets($event)" :account="saccountapi.name" :current="saccountapi.head_block" :cc="true"
+                        <files-vue :assets="assets" @addassets="addAssets($event)" :account="saccountapi.name" :current="saccountapi.head_block" :cc="true" :page_account="saccountapi.name"
                             :contracts="contracts" :nodeview="nodeview" :bid="title" @tosign="sendIt($event)"></files-vue>
                    
                 </div>
@@ -311,7 +311,7 @@ export default {
                 
                 <!-- has files -->
                 <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center">
-                        <files-vue :assets="assets" @addassets="addAssets($event)" :account="saccountapi.name" :current="saccountapi.head_block" @tosign="sendIt($event)"
+                        <files-vue :assets="assets" @addassets="addAssets($event)" :account="account" :current="saccountapi.head_block" @tosign="sendIt($event)" :page_account="saccountapi.name"
                             :contracts="contracts" :nodeview="nodeview" :bid="title + 2"></files-vue>
                 </div>
             </div>

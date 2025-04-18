@@ -180,16 +180,27 @@ export default {
         <h3 class="d-none">@{{ selectedUser }}</h3>
         <div class="breadcrumb d-flex align-items-center w-100 rounded bg-darkg mt-2">
             
-            <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; border-radius: 4px;"><i class="fa-fw fa-solid fa-hard-drive"></i></span>
+            <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; border-radius: 4px;"><i class="fa-fw fa-solid fa-hard-drive"></i>
+                <!-- Added: Search result count for root -->
+                <span v-if="breadcrumbCounts && breadcrumbCounts[''] > 0" class="badge bg-info ms-1">{{ breadcrumbCounts[''] }}</span>
+            </span>
             <template v-for="(part, index) in currentFolderPath.split('/').filter(Boolean)" :key="index">
-                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'), $event)" @dragenter="handleDragEnterBreadcrumb($event, currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; border-radius: 4px;">{{ part }}</span>
+                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'), $event)" @dragenter="handleDragEnterBreadcrumb($event, currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; border-radius: 4px;">{{ part }}
+                    <!-- Added: Search result count for this folder level -->
+                    <span v-if="breadcrumbCounts && breadcrumbCounts[currentFolderPath.split('/').slice(0, index + 1).join('/')] > 0" class="badge bg-info ms-1">{{ breadcrumbCounts[currentFolderPath.split('/').slice(0, index + 1).join('/')] }}</span>
+                </span>
                 <span class="mx-1">/</span>
             </template>
         </div>
         <div class="d-flex flex-wrap justify-content-end w-100 my-2">
             <!-- count folders files -->
             <div class="d-flex align-items-center my-1 mx-1">
-                <h5 v-if="viewOpts.view === 'grid' || viewOpts.view === 'list'" class="mb-0">{{filesArray.length}} File{{filesArray.length > 1 ? 's' : ''}}</h5>
+                <!-- Added: Search results explanation -->
+                <h5 v-if="filesSelect.search || filterLabels || filterFlags > 0" class="mb-0">
+                    <span class="text-info">Search results:</span> {{filesArray.length}} File{{filesArray.length > 1 ? 's' : ''}}
+                    <span v-if="currentFolderPath" class="text-muted small"> in "{{ currentFolderPath }}" and subfolders</span>
+                </h5>
+                <h5 v-else-if="viewOpts.view === 'grid' || viewOpts.view === 'list'" class="mb-0">{{filesArray.length}} File{{filesArray.length > 1 ? 's' : ''}}</h5>
                 <h5 v-else class="mb-0">{{ getSubfolderCount }} Folder{{ getSubfolderCount === 1 ? '' : 's' }} & {{ currentFileCount }} File{{ currentFileCount === 1 ? '' : 's' }}</h5>
             </div>
             <div class="d-flex flex-wrap ms-auto">
@@ -673,6 +684,10 @@ export default {
             type: String,
             default: "",
         },
+        page_account: {
+            type: String,
+            default: "",
+        },
         current: {
             type: Number,
             default: 85000000,
@@ -789,6 +804,7 @@ export default {
             ],
             showDetailsViewer: false, // Added: Control visibility of details viewer
             fileToViewDetails: null,  // Added: Store the file for the details viewer
+            breadcrumbCounts: {}
         };
     },
     emits: ["tosign", "addassets"], // Ensure 'tosign' is included here
@@ -799,18 +815,18 @@ export default {
             if (Object.keys(this.pendingChanges).length === 0) {
                 return; // Nothing to revert
             }
-            
+
             // Confirm with user before discarding changes
             if (confirm("Are you sure you want to discard all pending changes? This cannot be undone.")) {
                 // Clear pending changes
                 this.pendingChanges = {};
-                
+
                 // Clear from localStorage
                 if (this.localStorageKey) {
                     localStorage.removeItem(this.localStorageKey);
                     console.log("Cleared pending changes from localStorage");
                 }
-                
+
                 // Rebuild from original contract data
                 this.init();
                 console.log("Reverted all pending changes");
@@ -844,29 +860,38 @@ export default {
         },
         createNewFolder() {
             const folderName = prompt("Enter new folder name:", "New Folder");
+            // Validate folder name
+            if (folderName) {
+                const validation = this.validateItemName(folderName, "folder");
+                if (!validation.valid) {
+                    alert(validation.message);
+                    return;
+                }
+            }
+            
             // Ensure user is the current logged-in account and folderName is valid
             if (folderName && this.selectedUser === this.account) {
                 const newPath = this.currentFolderPath ? `${this.currentFolderPath}/${folderName}` : folderName;
 
                 // --- Prevent creating folder if it already exists (check pending and current) ---
-                 const userTree = this.userFolderTrees[this.selectedUser] || [];
-                 const findFolder = (nodes, pathParts) => {
-                     if (!pathParts.length) return null; // Should target a folder name
-                     let currentLevel = nodes;
-                     let node = null;
-                     for(const part of pathParts) {
-                         node = currentLevel.find(n => n.name === part);
-                         if (!node) return null; // Path segment not found
-                         currentLevel = node.subfolders;
-                     }
-                     return node; // Return the found node
-                 };
-                 const parts = newPath.split('/').filter(Boolean);
-                 if (findFolder(userTree, parts)) {
-                     alert(`Folder "${folderName}" already exists at this level.`);
-                     return;
-                 }
-                 // Also check pending changes (more complex, maybe skip for now or add later)
+                const userTree = this.userFolderTrees[this.selectedUser] || [];
+                const findFolder = (nodes, pathParts) => {
+                    if (!pathParts.length) return null; // Should target a folder name
+                    let currentLevel = nodes;
+                    let node = null;
+                    for (const part of pathParts) {
+                        node = currentLevel.find(n => n.name === part);
+                        if (!node) return null; // Path segment not found
+                        currentLevel = node.subfolders;
+                    }
+                    return node; // Return the found node
+                };
+                const parts = newPath.split('/').filter(Boolean);
+                if (findFolder(userTree, parts)) {
+                    alert(`Folder "${folderName}" already exists at this level.`);
+                    return;
+                }
+                // Also check pending changes (more complex, maybe skip for now or add later)
 
                 // --- Stage in Pending Changes ---
                 const userContractId = Object.keys(this.contract).find(id => this.contract[id].t === this.selectedUser);
@@ -875,16 +900,16 @@ export default {
                     this.pendingChanges[userContractId] = this.pendingChanges[userContractId] || {};
                     this.pendingChanges[userContractId]['__newFolders__'] = this.pendingChanges[userContractId]['__newFolders__'] || [];
                     if (!this.pendingChanges[userContractId]['__newFolders__'].includes(newPath)) {
-                         this.pendingChanges[userContractId]['__newFolders__'].push(newPath);
-                         console.log("Pending Changes after staging new folder:", JSON.parse(JSON.stringify(this.pendingChanges)));
+                        this.pendingChanges[userContractId]['__newFolders__'].push(newPath);
+                        console.log("Pending Changes after staging new folder:", JSON.parse(JSON.stringify(this.pendingChanges)));
 
-                         // --- Trigger UI update by rebuilding tree ---
-                         // No direct UI manipulation needed now, buildFolderTrees will handle it
-                         this.buildFolderTrees();
-                         // Optional: Force update if reactivity is sometimes slow, but ideally not needed
-                         // this.$forceUpdate();
-                } else {
-                         alert(`Folder "${folderName}" is already pending creation.`);
+                        // --- Trigger UI update by rebuilding tree ---
+                        // No direct UI manipulation needed now, buildFolderTrees will handle it
+                        this.buildFolderTrees();
+                        // Optional: Force update if reactivity is sometimes slow, but ideally not needed
+                        // this.$forceUpdate();
+                    } else {
+                        alert(`Folder "${folderName}" is already pending creation.`);
                     }
                 } else {
                     console.error("Cannot add new folder to pending changes: No contract found for user", this.selectedUser);
@@ -892,7 +917,7 @@ export default {
                 }
 
             } else if (folderName && this.selectedUser !== this.account) {
-                 alert("Cannot create folders for other users.");
+                alert("Cannot create folders for other users.");
             }
         },
         appendUserFiles() {
@@ -1016,31 +1041,44 @@ export default {
                 });
         },
         handleLabel(m) {
+            console.log('handleLabel:', m); // Debug log
+            let currentLabels = this.filterLabels ? this.filterLabels.split('') : [];
             if (m.action == 'added') {
-                var string = this.filterLabels
-                if (!string) string = '2'
-                this.filterLabels += m.item
-            } else {
-                var string = this.filterLabels
-                var arr = string.split('')
-                for (var j = 0; j < arr.length; j++) {
-                    if (arr[j] == m.item) arr.splice(j, 1)
+                if (!currentLabels.includes(m.item)) {
+                    currentLabels.push(m.item);
                 }
-                this.filterLabels = arr.join('')
+            } else if (m.action == 'removed') {
+                currentLabels = currentLabels.filter(label => label !== m.item);
             }
-            this.render()
+            this.filterLabels = currentLabels.sort().join('');
+            console.log('Updated filterLabels:', this.filterLabels); // Debug log
+            this.render();
         },
         handleTag(m) {
-            var num = this.Base64toNumber(this.filterFlags) || 0
-            if (m.action == 'added') {
-                if (num & m.item) { }
-                else num += m.item
-                this.filterFlags = num
+            console.log('handleTag:', m); // Debug log
+            // Flags seem to be a bitmask, passed directly as prop_selections?
+            // Let's assume the @data event for tags/flags gives us the *new complete bitmask*
+            // If it gives individual add/remove like labels, we need to adjust
+            if (m.action === 'update') { // Assuming choices-vue emits an 'update' with the full value
+                this.filterFlags = m.value || 0;
             } else {
-                if (num & m.item) num -= m.item
-                this.filterFlags = num
+                // Fallback logic if it sends add/remove like labels (adjust as needed)
+                let num = this.filterFlags || 0;
+                const itemValue = parseInt(m.item); // Ensure item is treated as number
+                if (m.action == 'added') {
+                    if (!(num & itemValue)) { // Add flag if not present
+                        num |= itemValue;
+                    }
+                } else if (m.action == 'removed') {
+                    if (num & itemValue) { // Remove flag if present
+                        num &= ~itemValue;
+                    }
+                }
+                this.filterFlags = num;
             }
-            this.render()
+
+            console.log('Updated filterFlags:', this.filterFlags); // Debug log
+            this.render();
         },
         download(fileInfo, data = false, MIME_TYPE = "image/png") {
             if (data) {
@@ -1071,8 +1109,8 @@ export default {
                 })
                 .then((blob) => {
                     const id = file.i;
-                    const name = (this.newMeta[id] && this.newMeta[id][cid]) 
-                        ? `${this.newMeta[id][cid].name}.${this.newMeta[id][cid].type}` 
+                    const name = (this.newMeta[id] && this.newMeta[id][cid])
+                        ? `${this.newMeta[id][cid].name}.${this.newMeta[id][cid].type}`
                         : 'file';
                     // Check if the file is encrypted
                     if (this.contract[id].encryption && this.contract[id].encryption.key) {
@@ -1085,16 +1123,16 @@ export default {
                             ia[i] = byteString.charCodeAt(i);
                         }
                         blob = new Blob([ab], { type: mimeString });
-                                // Ensure decryptedData is in the correct format
-                                // const byteString = atob(decryptedData.split(',')[1]); // Assuming decryptedData is a base64 string
-                                // const mimeString = decryptedData.split(',')[0].split(':')[1].split(';')[0];
-                                // const ab = new ArrayBuffer(byteString.length);
-                                // const ia = new Uint8Array(ab);
-                                // for (let i = 0; i < byteString.length; i++) {
-                                //     ia[i] = byteString.charCodeAt(i);
-                                // }
-                                // const decryptedBlob = new Blob([ab], { type: mimeString });
-                                this.triggerDownload(blob, name);
+                        // Ensure decryptedData is in the correct format
+                        // const byteString = atob(decryptedData.split(',')[1]); // Assuming decryptedData is a base64 string
+                        // const mimeString = decryptedData.split(',')[0].split(':')[1].split(';')[0];
+                        // const ab = new ArrayBuffer(byteString.length);
+                        // const ia = new Uint8Array(ab);
+                        // for (let i = 0; i < byteString.length; i++) {
+                        //     ia[i] = byteString.charCodeAt(i);
+                        // }
+                        // const decryptedBlob = new Blob([ab], { type: mimeString });
+                        this.triggerDownload(blob, name);
                     } else {
                         // Directly trigger download for plain files
                         this.triggerDownload(blob, name);
@@ -1121,7 +1159,7 @@ export default {
             }
             // Ensure selectedUser is set for folder/icon views
             if ((mode === "folder" || mode === "icon") && !this.selectedUser && this.owners.length > 0) {
-                this.selectedUser = this.account || this.owners[0];
+                this.selectedUser = this.page_account || this.owners[0];
             }
         },
         navigateTo(path) {
@@ -1142,21 +1180,21 @@ export default {
         getFiles(user, path) {
             // Normalize empty paths
             const normalizedPath = path === undefined ? '' : path;
-            
+
             // Get all files for this user that match the path
             return Object.values(this.files).filter(file => {
                 // Check if owner matches
                 const ownerMatch = file.o === user;
-                
+
                 // Normalize file path
                 const filePathNormalized = file.folderPath === undefined ? '' : file.folderPath;
-                
+
                 // Check if path matches
                 const pathMatch = filePathNormalized === normalizedPath;
-                
+
                 // Skip thumbnails
                 const notThumb = !file.is_thumb;
-                
+
                 return ownerMatch && pathMatch && notThumb;
             });
         },
@@ -1182,7 +1220,7 @@ export default {
             if (folder.isPreset) {
                 return false;
             }
-            
+
             // Check if *any* loaded file belongs to the current user
             // This might need refinement if folder ownership becomes a thing
             // For now, assume if the user owns *any* files, they can manage folders
@@ -1191,7 +1229,15 @@ export default {
         renameItem(item, type) {
             const oldName = type === "file" ? (this.newMeta[item.i][item.f].name || item.f) : item.name;
             const newName = prompt(`Rename ${type} from "${oldName}" to:`, oldName);
+            
             if (newName && newName !== oldName) {
+                // Validate the new name
+                const validation = this.validateItemName(newName, type);
+                if (!validation.valid) {
+                    alert(validation.message);
+                    return;
+                }
+                
                 if (type === "file") {
                     this.pendingChanges[item.i] = this.pendingChanges[item.i] || {};
                     this.pendingChanges[item.i][item.f] = {
@@ -1222,7 +1268,7 @@ export default {
         },
         dragStartFile(event, file) {
             console.log('Drag start file:', file);
-            
+
             // If dragging a selected file and there are multiple files selected
             if (this.isFileSelected(file) && this.selectedFiles.length > 1) {
                 // Include all selected files in the drag data
@@ -1231,20 +1277,20 @@ export default {
             } else {
                 // Single file drag (traditional behavior)
                 this.selectedFiles = [file.f]; // Select only this file
-            event.dataTransfer.setData("fileid", file.f);
+                event.dataTransfer.setData("fileid", file.f);
             }
-            
+
             event.dataTransfer.setData("contractid", file.i);
-            
+
             // Use text/plain as a fallback
             event.dataTransfer.setData("text/plain", file.f);
-            
+
             // Set drag image
             const dragIcon = document.createElement('div');
             dragIcon.style.position = 'absolute';
             dragIcon.style.top = '-1000px'; // Position off-screen initially
             dragIcon.style.maxWidth = '200px'; // Limit width
-            
+
             if (this.selectedFiles.length > 1) {
                 // Show count for multiple files
                 dragIcon.innerHTML = `<div style="padding: 10px; background: rgba(0,0,0,0.7); color: white; border-radius: 4px; display: flex; align-items: center; max-width: 200px; white-space: nowrap;">
@@ -1255,16 +1301,16 @@ export default {
                 // Show single file icon
                 const fileName = this.newMeta[file.i][file.f].name || file.f;
                 const truncatedName = fileName.length > 15 ? fileName.substring(0, 15) + '...' : fileName;
-                
+
                 dragIcon.innerHTML = `<div style="padding: 10px; background: rgba(0,0,0,0.7); color: white; border-radius: 4px; display: flex; align-items: center; max-width: 200px; white-space: nowrap;">
                     <i class="fa-solid ${this.smartIcon(file.a)} fa-lg me-2"></i> 
                     <span>${truncatedName}</span>
                 </div>`;
             }
-            
+
             document.body.appendChild(dragIcon);
             event.dataTransfer.setDragImage(dragIcon, 0, 0);
-            
+
             // Clean up the drag image element after drag starts
             setTimeout(() => {
                 document.body.removeChild(dragIcon);
@@ -1275,63 +1321,63 @@ export default {
         },
         dropOnFolder(event, folder) {
             event.preventDefault();
-            event.stopPropagation(); 
+            event.stopPropagation();
             let itemIds = [];
-            
+
             // Check for multiple items being dragged
-            const itemIdsStr = event.dataTransfer.getData("itemids"); 
+            const itemIdsStr = event.dataTransfer.getData("itemids");
             if (itemIdsStr) {
                 try {
                     itemIds = JSON.parse(itemIdsStr);
                 } catch (e) {
                     // Fallback to text/plain if parsing fails
                     const textData = event.dataTransfer.getData("text/plain");
-                    if(textData) itemIds = textData.split('\n');
+                    if (textData) itemIds = textData.split('\n');
                 }
             } else {
-                 // Fallback to text/plain if itemids is missing
-                 const textData = event.dataTransfer.getData("text/plain");
-                 if(textData) itemIds = textData.split('\n');
+                // Fallback to text/plain if itemids is missing
+                const textData = event.dataTransfer.getData("text/plain");
+                if (textData) itemIds = textData.split('\n');
             }
-            
+
             // Get contract ID if available (may not be for folder-only drags)
-            const contractId = event.dataTransfer.getData("contractid"); 
-            
+            const contractId = event.dataTransfer.getData("contractid");
+
             if (!itemIds.length) {
                 return;
             }
-            
+
             const targetPath = folder.path;
-            
+
             // Process each item
             itemIds.forEach(itemId => {
                 if (itemId.startsWith('folder-')) {
                     // --- Handle Folder Drop ---
                     const folderPathToMove = itemId.substring('folder-'.length);
-                    
+
                     // Skip if moving to itself
                     if (folderPathToMove === targetPath) {
                         return;
                     }
-                    
+
                     // Check if this is a preset folder - don't allow moving preset folders
                     if (this.isPresetFolder(folderPathToMove)) {
                         console.warn("Cannot move preset folders");
                         return;
                     }
-                    
+
                     // Check if we're dropping into a subfolder of the folder being moved
                     // This would create a recursive loop and is not allowed
                     if (targetPath.startsWith(folderPathToMove + '/')) {
                         console.warn('Cannot move a folder into its own subfolder');
                         return;
                     }
-                    
+
                     // Find all files that are in the folder being moved or its subfolders
-                    const filesInFolder = Object.values(this.files).filter(file => 
+                    const filesInFolder = Object.values(this.files).filter(file =>
                         file.folderPath === folderPathToMove || file.folderPath.startsWith(folderPathToMove + '/')
                     );
-                    
+
                     if (filesInFolder.length === 0) {
                         // This is an empty folder, perhaps a newly created one
                         // We'll need to update any pending folder creation
@@ -1342,7 +1388,7 @@ export default {
                                 if (index !== -1) {
                                     // Remove the old path
                                     this.pendingChanges[cid].__newFolders__.splice(index, 1);
-                                    
+
                                     // Add the new path
                                     const newPath = targetPath + '/' + folderPathToMove.split('/').pop();
                                     this.pendingChanges[cid].__newFolders__.push(newPath);
@@ -1356,7 +1402,7 @@ export default {
                             if (!this.isEditable(file)) {
                                 return;
                             }
-                            
+
                             // Calculate new path
                             // If the file is directly in the moved folder:
                             //    folderPathToMove = "docs"
@@ -1370,7 +1416,7 @@ export default {
                             //    targetPath = "personal"
                             //    => newPath = "personal/reports"
                             let newPath;
-                            
+
                             if (file.folderPath === folderPathToMove) {
                                 // File is directly in the folder being moved
                                 newPath = targetPath;
@@ -1379,76 +1425,76 @@ export default {
                                 const relativePath = file.folderPath.substring(folderPathToMove.length + 1);
                                 newPath = `${targetPath}/${relativePath}`;
                             }
-                            
+
                             const fileId = file.f;
                             const currentContractId = file.i;
-                            
+
                             // Skip if the file is already at the target path
                             if (file.folderPath === newPath) {
                                 return;
                             }
-                            
+
                             // Update the file's folder path
                             file.folderPath = newPath;
-                            
+
                             // Update metadata
                             if (this.newMeta[currentContractId] && this.newMeta[currentContractId][fileId]) {
                                 this.newMeta[currentContractId][fileId].folderPath = newPath;
                             }
-                            
+
                             // Update pending changes
                             this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
                             this.pendingChanges[currentContractId][fileId] = {
-                                ...(this.pendingChanges[currentContractId][fileId] || {}), 
+                                ...(this.pendingChanges[currentContractId][fileId] || {}),
                                 folderPath: newPath,
-                                name: this.newMeta[currentContractId]?.[fileId]?.name || fileId, 
+                                name: this.newMeta[currentContractId]?.[fileId]?.name || fileId,
                             };
                         });
                     }
                 } else {
                     // --- Handle File Drop ---
                     const fileId = itemId;
-                const file = this.files[fileId];
+                    const file = this.files[fileId];
                     if (!file) {
                         return;
                     }
-                    
+
                     // Use the contractId obtained earlier if available, otherwise try to get from file
                     const currentContractId = contractId || file.i;
                     if (!currentContractId) {
-                        return; 
+                        return;
                     }
-                    
+
                     if (!this.isEditable(file)) {
                         return;
                     }
-                    
+
                     const originalPath = file.folderPath || '';
                     const newPath = folder.path;
-                    
+
                     if (originalPath === newPath) {
                         return;
                     }
-                    
+
                     // Update the file's folder path
                     file.folderPath = newPath;
-                    
+
                     // Update metadata in newMeta
                     if (this.newMeta[currentContractId] && this.newMeta[currentContractId][fileId]) {
                         this.newMeta[currentContractId][fileId].folderPath = newPath;
                     }
-                    
+
                     // Update pending changes
                     this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
                     this.pendingChanges[currentContractId][fileId] = {
-                        ...(this.pendingChanges[currentContractId][fileId] || {}), 
+                        ...(this.pendingChanges[currentContractId][fileId] || {}),
                         folderPath: newPath,
-                        name: this.newMeta[currentContractId]?.[fileId]?.name || fileId, 
+                        name: this.newMeta[currentContractId]?.[fileId]?.name || fileId,
                     };
                 }
             });
-            
-                this.buildFolderTrees();
+
+            this.buildFolderTrees();
             this.$nextTick(() => {
                 this.render();
             });
@@ -1457,165 +1503,165 @@ export default {
             event.preventDefault();
         },
         dropOnBreadcrumb(path, event) {
-                event.preventDefault();
+            event.preventDefault();
             let itemIds = [];
-            
+
             // Check for multiple items
             const itemIdsStr = event.dataTransfer.getData("itemids");
-             if (itemIdsStr) {
-                 try {
-                     itemIds = JSON.parse(itemIdsStr);
-                 } catch (e) {
-                     const textData = event.dataTransfer.getData("text/plain");
-                     if(textData) itemIds = textData.split('\n');
-                 }
-             } else {
-                  const textData = event.dataTransfer.getData("text/plain");
-                  if(textData) itemIds = textData.split('\n');
-             }
-            
-            const contractId = event.dataTransfer.getData("contractid"); 
-            const targetPath = path == null ? '' : path; 
-            
+            if (itemIdsStr) {
+                try {
+                    itemIds = JSON.parse(itemIdsStr);
+                } catch (e) {
+                    const textData = event.dataTransfer.getData("text/plain");
+                    if (textData) itemIds = textData.split('\n');
+                }
+            } else {
+                const textData = event.dataTransfer.getData("text/plain");
+                if (textData) itemIds = textData.split('\n');
+            }
+
+            const contractId = event.dataTransfer.getData("contractid");
+            const targetPath = path == null ? '' : path;
+
             if (!itemIds.length) {
                 return;
             }
-            
+
             // Process each item
             itemIds.forEach(itemId => {
-                 if (itemId.startsWith('folder-')) {
-                      // --- Handle Folder Drop ---
-                     const folderPathToMove = itemId.substring('folder-'.length);
-                     
-                     // Skip if moving to itself
-                     if (folderPathToMove === targetPath) {
-                         return;
-                     }
-                     
-                     // Check if this is a preset folder - don't allow moving preset folders
-                     if (this.isPresetFolder(folderPathToMove)) {
-                         console.warn("Cannot move preset folders");
-                         return;
-                     }
-                     
-                     // Check if we're dropping into a subfolder of the folder being moved
-                     if (targetPath.startsWith(folderPathToMove + '/')) {
-                         console.warn('Cannot move a folder into its own subfolder');
-                         return;
-                     }
-                     
-                     // Find all files that are in the folder being moved or its subfolders
-                     const filesInFolder = Object.values(this.files).filter(file => 
-                         file.folderPath === folderPathToMove || file.folderPath.startsWith(folderPathToMove + '/')
-                     );
-                     
-                     if (filesInFolder.length === 0) {
-                         // This is an empty folder, perhaps a newly created one
-                         // We'll need to update any pending folder creation
-                         for (const cid in this.pendingChanges) {
-                             if (this.pendingChanges[cid].__newFolders__) {
-                                 // Find the index of the folder in the pending folders array
-                                 const index = this.pendingChanges[cid].__newFolders__.indexOf(folderPathToMove);
-                                 if (index !== -1) {
-                                     // Remove the old path
-                                     this.pendingChanges[cid].__newFolders__.splice(index, 1);
-                                     
-                                     // Add the new path, keeping the folder name but changing the parent location
-                                     const folderName = folderPathToMove.split('/').pop();
-                                     const newPath = targetPath ? `${targetPath}/${folderName}` : folderName;
-                                     this.pendingChanges[cid].__newFolders__.push(newPath);
-                                 }
-                             }
-                         }
-                     } else {
-                         // Move all files to the new location, preserving subfolder structure
-                         filesInFolder.forEach(file => {
-                             // Only process files we can edit
-                             if (!this.isEditable(file)) {
-                                 return;
-                             }
-                             
-                             // Calculate new path
-                             let newPath;
-                             
-                             if (file.folderPath === folderPathToMove) {
-                                 // File is directly in the folder being moved
-                                 newPath = targetPath;
-                             } else {
-                                 // File is in a subfolder of the folder being moved
-                                 const relativePath = file.folderPath.substring(folderPathToMove.length + 1);
-                                 newPath = targetPath ? `${targetPath}/${relativePath}` : relativePath;
-                             }
-                             
-                             const fileId = file.f;
-                             const currentContractId = file.i;
-                             
-                             // Skip if the file is already at the target path
-                             if (file.folderPath === newPath) {
-                                 return;
-                             }
-                             
-                             // Update the file's folder path
-                             file.folderPath = newPath;
-                             
-                             // Update metadata
-                             if (this.newMeta[currentContractId] && this.newMeta[currentContractId][fileId]) {
-                                 this.newMeta[currentContractId][fileId].folderPath = newPath;
-                             }
-                             
-                             // Update pending changes
-                             this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
-                             this.pendingChanges[currentContractId][fileId] = {
-                                 ...(this.pendingChanges[currentContractId][fileId] || {}), 
-                                 folderPath: newPath,
-                                 name: this.newMeta[currentContractId]?.[fileId]?.name || fileId, 
-                             };
-                         });
-                     }
-                 } else {
-                      // --- Handle File Drop ---
-                      const fileId = itemId;
-                const file = this.files[fileId];
-                      if (!file) {
-                           return;
-                      }
-                      
-                      const currentContractId = contractId || file.i;
-                      if (!currentContractId) {
-                           return;
-                      }
-                      
-                      if (!this.isEditable(file)) {
-                           return;
-                      }
-                      
-                      const originalPath = file.folderPath || '';
-                      
-                      if (originalPath === targetPath) {
-                           return;
-                      }
-                      
-                      // Update the canonical file object
-                      file.folderPath = targetPath;
-                      
-                      // Update newMeta (if it exists)
-                      if (this.newMeta[currentContractId]?.[fileId]) {
-                           this.newMeta[currentContractId][fileId].folderPath = targetPath;
-                      }
-                      
-                      // Update pending changes
-                      this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
-                      this.pendingChanges[currentContractId][fileId] = {
-                           ...(this.pendingChanges[currentContractId][fileId] || {}),
-                           folderPath: targetPath,
-                           name: this.pendingChanges[currentContractId]?.[fileId]?.name || this.newMeta[currentContractId]?.[fileId]?.name || fileId,
-                      };
-                 }
+                if (itemId.startsWith('folder-')) {
+                    // --- Handle Folder Drop ---
+                    const folderPathToMove = itemId.substring('folder-'.length);
+
+                    // Skip if moving to itself
+                    if (folderPathToMove === targetPath) {
+                        return;
+                    }
+
+                    // Check if this is a preset folder - don't allow moving preset folders
+                    if (this.isPresetFolder(folderPathToMove)) {
+                        console.warn("Cannot move preset folders");
+                        return;
+                    }
+
+                    // Check if we're dropping into a subfolder of the folder being moved
+                    if (targetPath.startsWith(folderPathToMove + '/')) {
+                        console.warn('Cannot move a folder into its own subfolder');
+                        return;
+                    }
+
+                    // Find all files that are in the folder being moved or its subfolders
+                    const filesInFolder = Object.values(this.files).filter(file =>
+                        file.folderPath === folderPathToMove || file.folderPath.startsWith(folderPathToMove + '/')
+                    );
+
+                    if (filesInFolder.length === 0) {
+                        // This is an empty folder, perhaps a newly created one
+                        // We'll need to update any pending folder creation
+                        for (const cid in this.pendingChanges) {
+                            if (this.pendingChanges[cid].__newFolders__) {
+                                // Find the index of the folder in the pending folders array
+                                const index = this.pendingChanges[cid].__newFolders__.indexOf(folderPathToMove);
+                                if (index !== -1) {
+                                    // Remove the old path
+                                    this.pendingChanges[cid].__newFolders__.splice(index, 1);
+
+                                    // Add the new path, keeping the folder name but changing the parent location
+                                    const folderName = folderPathToMove.split('/').pop();
+                                    const newPath = targetPath ? `${targetPath}/${folderName}` : folderName;
+                                    this.pendingChanges[cid].__newFolders__.push(newPath);
+                                }
+                            }
+                        }
+                    } else {
+                        // Move all files to the new location, preserving subfolder structure
+                        filesInFolder.forEach(file => {
+                            // Only process files we can edit
+                            if (!this.isEditable(file)) {
+                                return;
+                            }
+
+                            // Calculate new path
+                            let newPath;
+
+                            if (file.folderPath === folderPathToMove) {
+                                // File is directly in the folder being moved
+                                newPath = targetPath;
+                            } else {
+                                // File is in a subfolder of the folder being moved
+                                const relativePath = file.folderPath.substring(folderPathToMove.length + 1);
+                                newPath = targetPath ? `${targetPath}/${relativePath}` : relativePath;
+                            }
+
+                            const fileId = file.f;
+                            const currentContractId = file.i;
+
+                            // Skip if the file is already at the target path
+                            if (file.folderPath === newPath) {
+                                return;
+                            }
+
+                            // Update the file's folder path
+                            file.folderPath = newPath;
+
+                            // Update metadata
+                            if (this.newMeta[currentContractId] && this.newMeta[currentContractId][fileId]) {
+                                this.newMeta[currentContractId][fileId].folderPath = newPath;
+                            }
+
+                            // Update pending changes
+                            this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
+                            this.pendingChanges[currentContractId][fileId] = {
+                                ...(this.pendingChanges[currentContractId][fileId] || {}),
+                                folderPath: newPath,
+                                name: this.newMeta[currentContractId]?.[fileId]?.name || fileId,
+                            };
+                        });
+                    }
+                } else {
+                    // --- Handle File Drop ---
+                    const fileId = itemId;
+                    const file = this.files[fileId];
+                    if (!file) {
+                        return;
+                    }
+
+                    const currentContractId = contractId || file.i;
+                    if (!currentContractId) {
+                        return;
+                    }
+
+                    if (!this.isEditable(file)) {
+                        return;
+                    }
+
+                    const originalPath = file.folderPath || '';
+
+                    if (originalPath === targetPath) {
+                        return;
+                    }
+
+                    // Update the canonical file object
+                    file.folderPath = targetPath;
+
+                    // Update newMeta (if it exists)
+                    if (this.newMeta[currentContractId]?.[fileId]) {
+                        this.newMeta[currentContractId][fileId].folderPath = targetPath;
+                    }
+
+                    // Update pending changes
+                    this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
+                    this.pendingChanges[currentContractId][fileId] = {
+                        ...(this.pendingChanges[currentContractId][fileId] || {}),
+                        folderPath: targetPath,
+                        name: this.pendingChanges[currentContractId]?.[fileId]?.name || this.newMeta[currentContractId]?.[fileId]?.name || fileId,
+                    };
+                }
             });
-            
-                    this.buildFolderTrees();
+
+            this.buildFolderTrees();
             this.$nextTick(() => {
-                    this.render();
+                this.render();
             });
         },
         saveChanges() {
@@ -1631,14 +1677,14 @@ export default {
             }
 
             const transactionPayloads = []; // Collect payloads first
-            
+
             // --- Logic to calculate payloads (as before) ---
             for (const contractId in this.pendingChanges) {
                 if (!this.contract[contractId]) {
                     // console.warn(`Contract ${contractId} not found in this.contract. Skipping.`);
                     continue;
                 }
-                
+
                 const contractChanges = this.pendingChanges[contractId];
                 const originalContract = this.contract[contractId];
                 const originalMeta = this.newMeta[contractId];
@@ -1755,7 +1801,7 @@ export default {
                         console.error(`Error: Parent path '${parentPath}' for folder '${path}' not found in pathToIndex. Skipping.`);
                         return;
                     }
-                    if(nextCustomIndex == 1) nextCustomIndex = 9;
+                    if (nextCustomIndex == 1) nextCustomIndex = 9;
                     let assignedIndex;
                     if (parts.length === 1 && presetFoldersMap[folderName]) {
                         assignedIndex = presetFoldersMap[folderName];
@@ -1775,8 +1821,8 @@ export default {
                         const insertIndex = topLevelFolders.indexOf(name);
                         let mainListInsertIndex = 1;
                         let topLevelCount = 0;
-                        while(mainListInsertIndex < folderListEntries.length && topLevelCount < insertIndex) {
-                            if(folderListEntries[mainListInsertIndex] && !folderListEntries[mainListInsertIndex].includes('/')) {
+                        while (mainListInsertIndex < folderListEntries.length && topLevelCount < insertIndex) {
+                            if (folderListEntries[mainListInsertIndex] && !folderListEntries[mainListInsertIndex].includes('/')) {
                                 topLevelCount++;
                             }
                             mainListInsertIndex++;
@@ -1793,7 +1839,7 @@ export default {
                     // Ensure folderIndex is correctly retrieved or defaulted
                     let folderIndex = folderPath ? pathToIndex[folderPath] : pathToIndex['']; // Use root index if path is empty
                     if (folderIndex === undefined) {
-                         folderIndex = "1";
+                        folderIndex = "1";
                     }
 
                     const flagsNum = fileState.flags || 0;
@@ -1820,24 +1866,24 @@ export default {
                     alert(`Metadata size for contract ${contractId} exceeds 8000 bytes (${newMetaString.length}). Please save fewer changes at a time.`);
                     continue;
                 }
-                
+
                 // Add payload to the list for later emission
                 const originalMetadata = this.contract[contractId].m || '';
                 const newMetadata = newMetaString;
-                
+
                 // Create a diff using jsdiff
                 const metadataDiff = Diff.createPatch('metadata', originalMetadata, newMetadata);
-                
+
                 // Determine if using diff is more efficient (smaller)
                 const useDiff = metadataDiff.length < newMetadata.length;
-                
+
                 transactionPayloads.push({
                     contractId: contractId,
                     metadata: useDiff ? undefined : newMetadata,
                     diff: useDiff ? metadataDiff : undefined
                 });
             }
-            
+
             // Check if there are any payloads to send
             if (transactionPayloads.length === 0) {
                 alert("No valid changes to save.");
@@ -1846,7 +1892,7 @@ export default {
 
             // --- Prepare single update object for multiple contracts --- 
             const updates = {};
-            
+
             transactionPayloads.forEach(payload => {
                 // Add either metadata or diff to the updates object, keyed by contractId
                 if (payload.metadata) {
@@ -1863,45 +1909,224 @@ export default {
                     updates[payload.contractId].diff = payload.diff;
                 }
             });
-            
+
             // Check the size of the updates object
             const updatesPayload = { updates: updates };
             const payloadSize = JSON.stringify(updatesPayload).length;
             const MAX_SIZE = 7500; // Maximum size in bytes
-            
+
             if (payloadSize > MAX_SIZE) {
                 alert(`Updates payload size (${payloadSize} bytes) exceeds the maximum allowed size (${MAX_SIZE} bytes). Please save fewer changes at a time.`);
                 return;
             }
-            
+
             // Emit a single transaction with all updates bundled
             const opData = {
                 type: 'cj', // Custom JSON
                 cj: updatesPayload, // All updates in one object
-                id: 'spkcc_update_metadata', // The required_posting_auths id for the custom_json
+                id: 'spkccT_update_metadata', // The required_posting_auths id for the custom_json
                 msg: `Updating metadata for ${Object.keys(updates).length} contracts`,
                 ops: ['clear_file_changes', ...Object.keys(updates)], // Custom ops array to trigger cleanup for all contracts
                 txid: `saveMeta_batch_${Date.now()}`, // Unique ID for tracking
                 key: 'Posting' // Specify Posting key
             };
-            
+
             console.log("Emitting tosign for batch update:", opData);
             this.$emit('tosign', opData);
-            
+
             // **DO NOT** clear pending changes or re-init here.
             alert(`Preparing update for ${Object.keys(updates).length} contract(s) for signing to save changes.`);
+        },
+        isValidMetadata(metadataString) {
+            // build arrays to validate each portion of the metadata
+            let metaData = metadataString.split(',')
+
+            console.log(`Validating metadata with ${metaData.length} parts`);
+
+            // Isolate the first portion of the metadata, this is the contract data
+            const contractData = metaData[0]
+            // Isolate the rest of the metadata, this is the file metadata
+            const metadata = metaData.splice(1)
+
+            if (metadata.length % 4 !== 0) {
+                console.log(`Metadata validation failed: File metadata length (${metadata.length}) is not a multiple of 4`);
+                return false;
+            }
+
+            // Validate the first character of the contract data containing 6 bitwise flags, we will assume the first character is a 1 if none are present
+            // its valid as a base64 character
+            let firstChar = contractData.split('')[0]
+            // if the first character is a # or |, we will set the first character is a 1
+            if (firstChar == '#') {
+                firstChar = "1"
+            }
+            if (firstChar == '|') {
+                firstChar = "1"
+            }
+            // test to see it's a valid character
+            let simpleTest = this.Base64toNumber(firstChar) + 1
+            if (typeof simpleTest !== 'number') {
+                console.log(`Metadata validation failed: First character '${firstChar}' is not a valid Base64 character`);
+                return false
+            }
+
+            // Verify encryption keys if present
+            let encryptionData = contractData.split('#')
+            encryptionData[encryptionData.length - 1] = encryptionData[encryptionData.length - 1].split('|')[0]
+            encryptionData = encryptionData.splice(1)
+            for (let i = 0; i < encryptionData.length; i++) {
+                let key = encryptionData[i];
+                if (key.endsWith(';')) {
+                    key = key.substring(0, key.length - 1);
+                }
+                let atIndex = key.indexOf('@');
+                if (atIndex === -1) {
+                    console.log(`Metadata validation failed: Missing @ in encryption key ${key}`);
+                    return false;
+                }
+                let cipher = key.substring(0, atIndex);
+                if (!/^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/.test(cipher)) {
+                    console.log(`Metadata validation failed: Invalid cipher format in encryption key: '${cipher}'`);
+                    return false;
+                }
+                let account = key.substring(atIndex + 1);
+                if (!/^[a-z0-9-.]{1,16}$/.test(account)) {
+                    console.log(`Metadata validation failed: Invalid account format in encryption key: '${account}'`);
+                    return false;
+                }
+            }
+
+            // Verify folder data
+            let folderData = contractData.split('|')
+            folderData = folderData.splice(1)
+            if (folderData.length > 48) {
+                console.log(`Metadata validation failed: Too many folders (${folderData.length}), maximum is 48`);
+                return false;
+            }
+
+            let folderIndexMap = new Map(); // Track folder indices by path
+            folderIndexMap.set('', 0); // Root folder
+            let k = 0
+            for (let i = 0; i < folderData.length; i++) {
+                let folderPath = folderData[i];
+                let pathParts = folderPath.split('/');
+                for (let j = 0; j < pathParts.length; j++) {
+                    let part = pathParts[j];
+                    if (j < pathParts.length - 1) {
+                        // Parent indices
+                        if (!part.match(/^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/)) {
+                            console.log(`Metadata validation failed: Invalid parent folder index format: '${part}'`);
+                            return false;
+                        }
+                        let parentIndex = this.base58ToNumber(part);
+                        if (!folderIndexMap.has(parentIndex)) {
+                            console.log(`Metadata validation failed: Parent folder index not found: ${parentIndex}`);
+                            return false;
+                        }
+                    } else {
+                        // Folder name
+                        if (!part.match(/^[0-9a-zA-Z+_.\- ]{2,16}$/)) {
+                            console.log(`Metadata validation failed: Invalid folder name format: '${part}'`);
+                            return false;
+                        }
+                        folderIndexMap.set(k + 1, folderPath); // Assign index to path
+                        if (k == 0) {
+                            for (var l = 2; l < 10; l++) {
+                                folderIndexMap.set(l, l)
+                            }
+                            k = 9
+                        }
+                        k++
+                    }
+                }
+            }
+
+            // if folderIndexMap is < 9, fill with dummy values
+            for (let i = folderIndexMap.size; i < 9; i++) {
+                folderIndexMap.set(i, i)
+            }
+
+            if (!validateFileMetadata(metadata, folderIndexMap)) {
+                // Validation error is logged in validateFileMetadata
+                return false;
+            }
+
+            console.log('Metadata validation passed');
+            return true;
+
+            function validateFileMetadata(metadataStr, folderIndexMap) {
+                // Split the metadata string into file entries (each entry has 4 fields)
+                const fileEntries = [];
+                for (let i = 0; i < metadataStr.length; i += 4) {
+                    if (i + 4 <= metadataStr.length) {
+                        fileEntries.push(metadataStr.slice(i, i + 4));
+                    } else {
+                        console.log(`Metadata validation failed: Incomplete file entry at position ${i}`);
+                        return false;
+                    }
+                }
+
+                // Regex patterns for validation
+                const namePattern = /^[^,]{1,32}$/u; // Up to 32 chars, no commas, Unicode support
+                const typePattern = /^[a-z0-9]{1,4}(?:\.[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+)?$/; // Up to 4 lowercase chars/numbers, optional .folderIndex
+                const ipfsPattern = /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/; // Simplified IPFS CID pattern
+                const urlPattern = /^(https?:\/\/[^\s$.?#].[^\s]*)$/; // Valid full URL
+                const flagsPattern = /^([0-9a-zA-Z+/=]?)-([0-9a-zA-Z+/=]?)-([0-9a-zA-Z+/=]*)$/;// Two base64 chars with hyphens, then several base64 chars
+
+                // Validate each file entry
+                for (let i = 0; i < fileEntries.length; i++) {
+                    const entry = fileEntries[i];
+                    if (entry.length !== 4) {
+                        console.log(`Metadata validation failed: File entry ${i} has ${entry.length} fields, expected 4`);
+                        return false;
+                    }
+
+                    const [name, type, thumb, flagsCombined] = entry;
+
+                    // Validate name
+                    if (!namePattern.test(name)) {
+                        console.log(`Metadata validation failed: Invalid file name format: '${name}'`);
+                        return false;
+                    }
+
+                    // Validate type
+                    if (!typePattern.test(type)) {
+                        console.log(`Metadata validation failed: Invalid file type format: '${type}'`);
+                        return false;
+                    }
+                    const typeParts = type.split('.');
+                    if (typeParts.length > 1 && !folderIndexMap.has(typeParts[1])) {
+                        console.log(`Metadata validation failed: Invalid folder index in type: '${type}', folder index '${typeParts[1]}' not found`);
+                        return false;
+                    }
+
+                    // Validate thumb (IPFS CID or URL)
+                    if (thumb && !ipfsPattern.test(thumb) && !urlPattern.test(thumb)) {
+                        console.log(`Metadata validation failed: Invalid thumbnail format: '${thumb}'`);
+                        return false;
+                    }
+
+                    // Validate flagsCombined
+                    if (flagsCombined && !flagsPattern.test(flagsCombined)) {
+                        console.log(`Metadata validation failed: Invalid flags format: '${flagsCombined}'`);
+                        return false;
+                    }
+                }
+
+                return true; // All entries are valid
+            }
         },
         handleChangesConfirmed(contractId) {
             console.log(`Handling confirmed changes for contract: ${contractId}`);
             if (this.pendingChanges[contractId]) {
                 // Remove the specific contract's changes from pendingChanges
                 delete this.pendingChanges[contractId];
-                
+
                 // Use Vue.delete for reactivity if pendingChanges is reactive
                 // this.$delete(this.pendingChanges, contractId);
 
                 // Create a new object to ensure reactivity if the above doesn't work
-                this.pendingChanges = { ...this.pendingChanges }; 
+                this.pendingChanges = { ...this.pendingChanges };
 
                 // Persist the updated pendingChanges to localStorage
                 if (this.localStorageKey) {
@@ -2035,66 +2260,177 @@ export default {
             })
         },
         render() {
-            this.filesArray = []
-            for (var i in this.files) {
-                if (!this.files[i].is_thumb)
-                    this.filesArray.push(this.files[i])
-            }
-            // filterFlags: "=",
-            // filterLabels: "",
-            // filesSelect: {
-            //     sort: "time",
-            //     dir: "dec",
-            //     search: "",
-            // },
-            this.filesArray = this.filesArray.filter((file) => {
-                if (this.filterFlags && !(this.filterFlags & file.lf)) return false
-                if (this.filterLabels) {
-                    const arr = this.filterLabels.split('')
-                    for (var j = 0; j < arr.length; j++) {
-                        if (file.l.indexOf(arr[j]) == -1) return false
+            console.log('Rendering with filters:',
+                {
+                    search: this.filesSelect.search,
+                    flags: this.filterFlags,
+                    labels: this.filterLabels,
+                    owners: JSON.parse(JSON.stringify(this.filesSelect.addusers)),
+                    cc_only: this.filesSelect.cc_only,
+                    currentFolderPath: this.currentFolderPath
+                }
+            );
 
+            // Start with all non-thumbnail files
+            let filteredFiles = Object.values(this.files).filter(file => !file.is_thumb);
+
+            // Apply owner/view filters
+            filteredFiles = filteredFiles.filter(file => {
+                const ownerViewSetting = this.filesSelect.addusers[file.o];
+                switch (ownerViewSetting) {
+                    case false:
+                        return false; // Explicitly hidden
+                    case 'lock':
+                        // Show only if encrypted OR user has decryption key (check contract)
+                        const isEncrypted = (file.lf & 1);
+                        const canDecrypt = this.contract[file.i]?.encryption?.accounts?.[this.account] || this.contract[file.i]?.encryption?.key;
+                        return isEncrypted && canDecrypt;
+                    case 'cc':
+                        // Show only if CC licensed
+                        return !!file.lic && file.lic !== '0'; // Check if license exists and is not '0'
+                    case true:
+                        return true; // Explicitly shown
+                    default:
+                        // If user is not in addusers, default based on whether it's the page owner
+                        return file.o === this.page_account;
+                }
+            });
+
+            // Keep track of all files that match the search/tag/label criteria
+            // but may not be in the current folder - we'll use this for breadcrumb counts
+            let allMatchingFiles = [...filteredFiles];
+
+            // Apply search filter (case-insensitive)
+            if (this.filesSelect.search) {
+                const searchTerm = this.filesSelect.search.toLowerCase();
+                allMatchingFiles = allMatchingFiles.filter(file =>
+                    (file.n || file.f).toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Apply label filter (must contain ALL selected labels)
+            if (this.filterLabels) {
+                const requiredLabels = this.filterLabels.split('');
+                allMatchingFiles = allMatchingFiles.filter(file => {
+                    const fileLabels = (file.l || '').split('');
+                    return requiredLabels.every(reqLabel => fileLabels.includes(reqLabel));
+                });
+            }
+
+            // Apply flag filter (must contain ALL selected flags - bitwise AND)
+            if (this.filterFlags > 0) {
+                allMatchingFiles = allMatchingFiles.filter(file =>
+                    (file.lf & this.filterFlags) === this.filterFlags
+                );
+            }
+
+            // Apply CC-only filter (if enabled, only show own files or CC licensed files)
+            if (this.filesSelect.cc_only) {
+                allMatchingFiles = allMatchingFiles.filter(file =>
+                    file.o === this.account || (!!file.lic && file.lic !== '0')
+                );
+            }
+
+            // Now filter by current folder path only if search or other filters are active
+            let isSearchActive = this.filesSelect.search || this.filterLabels || this.filterFlags > 0;
+
+            if (this.currentFolderPath) {
+                // When in a folder, show files from that folder and its subfolders if searching
+                filteredFiles = allMatchingFiles.filter(file => {
+                    if (isSearchActive) {
+                        // If searching, include files in this folder and all subfolders
+                        return file.folderPath === this.currentFolderPath ||
+                            file.folderPath.startsWith(this.currentFolderPath + '/');
+                    } else {
+                        // If not searching, show only files directly in this folder
+                        return file.folderPath === this.currentFolderPath;
+                    }
+                });
+            } else {
+                // When at root, show only root files if not searching
+                filteredFiles = allMatchingFiles.filter(file => {
+                    if (isSearchActive) {
+                        // If searching, include all matching files
+                        return true;
+                    } else {
+                        // If not searching, show only files directly in root
+                        return !file.folderPath || file.folderPath === '';
+                    }
+                });
+            }
+
+            // Compute breadcrumb search counts if search is active
+            if (isSearchActive) {
+                this.breadcrumbCounts = this.computeBreadcrumbCounts(allMatchingFiles);
+            } else {
+                this.breadcrumbCounts = {};
+            }
+
+            // Apply sorting
+            filteredFiles.sort((a, b) => {
+                let comparison = 0;
+                const dirMultiplier = this.filesSelect.dir === 'asc' ? 1 : -1;
+
+                switch (this.filesSelect.sort) {
+                    case 'time':
+                        comparison = a.c - b.c;
+                        break;
+                    case 'size':
+                        comparison = a.s - b.s;
+                        break;
+                    case 'name':
+                        comparison = (a.n || a.f).localeCompare(b.n || b.f);
+                        break;
+                    case 'type':
+                        // Ensure type comparison is consistent
+                        const typeA = a.y || '';
+                        const typeB = b.y || '';
+                        comparison = typeA.localeCompare(typeB);
+                        break;
+                    case 'exp':
+                        comparison = a.e - b.e;
+                        break;
+                }
+                return comparison * dirMultiplier;
+            });
+
+            // Update the reactive array used by the template
+            this.filesArray = filteredFiles;
+            console.log('Render complete. Files matching filters:', this.filesArray.length, 'Total matching anywhere:', allMatchingFiles.length); // Debug log
+        },
+
+        // Helper method to compute the number of matching files at each breadcrumb level
+        computeBreadcrumbCounts(matchingFiles) {
+            const counts = {};
+
+            // Count files at root level
+            counts[''] = matchingFiles.filter(file => !file.folderPath || file.folderPath === '').length;
+
+            // Count files at each folder level
+            matchingFiles.forEach(file => {
+                if (!file.folderPath) return;
+
+                // Count files for each folder level in the path
+                const pathParts = file.folderPath.split('/').filter(Boolean);
+                let currentPath = '';
+
+                for (let i = 0; i < pathParts.length; i++) {
+                    currentPath = currentPath ? `${currentPath}/${pathParts[i]}` : pathParts[i];
+
+                    if (!counts[currentPath]) {
+                        counts[currentPath] = 0;
+                    }
+
+                    // If this file is directly in this folder (not a subfolder)
+                    if (file.folderPath === currentPath) {
+                        counts[currentPath]++;
                     }
                 }
-                switch (this.filesSelect.addusers[file.o]) {
-                    case false:
-                        return false
-                    case 'lock':
-                        if (!(file.lf & 1) && !this.contract[file.i].encryption.accounts[this.account]) return false
-                        break
-                    case 'cc':
-                        if (!file.lic) return false
-                    case true:
-                        break
-                    default:
-                        return false
-                }
-                if (this.filesSelect.cc_only && (!file.lic && file.o != this.account)) return false
-                if (this.filesSelect.search && file.n.toLowerCase().indexOf(this.filesSelect.search.toLowerCase()) == -1) return false
-                return true
-            })
-            this.filesArray.sort((a, b) => {
-                if (this.filesSelect.sort == 'time') {
-                    if (this.filesSelect.dir == 'dec') return a.c - b.c
-                    else return b.c - a.c
-                } else if (this.filesSelect.sort == 'size') {
-                    if (this.filesSelect.dir == 'dec') return a.s - b.s
-                    else return b.s - a.s
-                } else if (this.filesSelect.sort == 'name') {
-                    if (this.filesSelect.dir == 'dec') return a.n.localeCompare(b.n)
-                    else return b.n.localeCompare(a.n)
-                } else if (this.filesSelect.sort == 'type') {
-                    if (this.filesSelect.dir == 'dec') return a.y - b.y
-                    else return b.s - a.s
-                } else if (this.filesSelect.sort == 'exp') {
-                    if (this.filesSelect.dir == 'dec') return a.e - b.e
-                    else return b.e - a.e
-                } else {
-                    return 0
-                }
-            })
+            });
 
+            return counts;
         },
+
         getImgData(id, cid) {
             var string = this.smartThumb(id, cid)
             if (string.includes("https://")) fetch(string).then(response => response.text()).then(data => {
@@ -2170,8 +2506,8 @@ export default {
 
             // Recursive function to convert the temp structure (objects) to the final array structure
             const convertNode = (node) => {
-                 // Sort files?
-                 node.files.sort((a,b) => (a.n || a.f).localeCompare(b.n || b.f));
+                // Sort files?
+                node.files.sort((a, b) => (a.n || a.f).localeCompare(b.n || b.f));
 
                 const subfoldersArray = Object.values(node.subfolders)
                     .map(convertNode) // Convert children first
@@ -2209,101 +2545,101 @@ export default {
             const newUserFolderTrees = {};
             const relevantUsers = new Set(Object.keys(filesByUser));
 
-             // Add users who have pending folder changes even if they have no files currently loaded
-             for (const contractId in this.pendingChanges) {
-                  if (this.pendingChanges[contractId]?.__newFolders__ && this.contract[contractId]?.t) {
-                      relevantUsers.add(this.contract[contractId].t);
-                  }
-             }
-             relevantUsers.delete(undefined);
+            // Add users who have pending folder changes even if they have no files currently loaded
+            for (const contractId in this.pendingChanges) {
+                if (this.pendingChanges[contractId]?.__newFolders__ && this.contract[contractId]?.t) {
+                    relevantUsers.add(this.contract[contractId].t);
+                }
+            }
+            relevantUsers.delete(undefined);
 
-             for (const user of relevantUsers) {
-                 if(!user) continue;
+            for (const user of relevantUsers) {
+                if (!user) continue;
 
-                 // 1. Build tree based on files for this user
-                 const userFiles = filesByUser[user] || [];
-                 const fileBasedTreeArray = this.buildFolderTree(userFiles); // Returns array of top-level folders
+                // 1. Build tree based on files for this user
+                const userFiles = filesByUser[user] || [];
+                const fileBasedTreeArray = this.buildFolderTree(userFiles); // Returns array of top-level folders
 
-                 // 2. Get pending new folders for this user
-                 let pendingFolderPaths = [];
-                 const userContractIds = Object.keys(this.contract).filter(id => this.contract[id]?.t === user);
-                 for(const contractId of userContractIds) {
-                      if (this.pendingChanges[contractId]?.__newFolders__) {
-                          pendingFolderPaths = [...pendingFolderPaths, ...this.pendingChanges[contractId]['__newFolders__']];
-                      }
-                 }
-                 pendingFolderPaths = [...new Set(pendingFolderPaths)]; // Unique paths
+                // 2. Get pending new folders for this user
+                let pendingFolderPaths = [];
+                const userContractIds = Object.keys(this.contract).filter(id => this.contract[id]?.t === user);
+                for (const contractId of userContractIds) {
+                    if (this.pendingChanges[contractId]?.__newFolders__) {
+                        pendingFolderPaths = [...pendingFolderPaths, ...this.pendingChanges[contractId]['__newFolders__']];
+                    }
+                }
+                pendingFolderPaths = [...new Set(pendingFolderPaths)]; // Unique paths
 
-                 // 3. Merge pending new folders into the file-based tree array
-                 const mergeFoldersIntoTree = (treeArray, paths) => {
-                      for (const fullPath of paths) {
-                           const parts = fullPath.split('/').filter(Boolean);
-                           let currentLevelArray = treeArray; // Start with the top-level array
-                           let currentPath = '';
+                // 3. Merge pending new folders into the file-based tree array
+                const mergeFoldersIntoTree = (treeArray, paths) => {
+                    for (const fullPath of paths) {
+                        const parts = fullPath.split('/').filter(Boolean);
+                        let currentLevelArray = treeArray; // Start with the top-level array
+                        let currentPath = '';
 
-                           for (let i = 0; i < parts.length; i++) {
-                                const part = parts[i];
-                                currentPath = currentPath ? `${currentPath}/${part}` : part;
-                                let folderNode = currentLevelArray.find(node => node.name === part /* && node.path === currentPath */ ); // Find existing node
+                        for (let i = 0; i < parts.length; i++) {
+                            const part = parts[i];
+                            currentPath = currentPath ? `${currentPath}/${part}` : part;
+                            let folderNode = currentLevelArray.find(node => node.name === part /* && node.path === currentPath */); // Find existing node
 
-                                if (!folderNode) {
-                                     folderNode = { name: part, path: currentPath, files: [], subfolders: [] };
-                                     currentLevelArray.push(folderNode);
-                                     // Sort siblings after adding
-                                     currentLevelArray.sort((a, b) => a.name.localeCompare(b.name));
-                                }
+                            if (!folderNode) {
+                                folderNode = { name: part, path: currentPath, files: [], subfolders: [] };
+                                currentLevelArray.push(folderNode);
+                                // Sort siblings after adding
+                                currentLevelArray.sort((a, b) => a.name.localeCompare(b.name));
+                            }
 
-                                // Descend to the subfolder array of the found/created node
-                                currentLevelArray = folderNode.subfolders;
-                           }
-                      }
-                      return treeArray; // Return the potentially modified tree array
-                 };
+                            // Descend to the subfolder array of the found/created node
+                            currentLevelArray = folderNode.subfolders;
+                        }
+                    }
+                    return treeArray; // Return the potentially modified tree array
+                };
 
-                 // 4. Add the preset folders to ensure they're always present
-                 const presetFolders = [
-                     "Documents",
-                     "Images",
-                     "Videos",
-                     "Music",
-                     "Archives",
-                     "Code",
-                     "Trash",
-                     "Misc"
-                 ];
-                 
-                 // Add preset folders if they don't exist
-                 const treeWithPresets = [...fileBasedTreeArray]; // Start with existing folders
-                 
-                 for (const presetName of presetFolders) {
-                     if (!treeWithPresets.some(folder => folder.name === presetName)) {
-                         treeWithPresets.push({
-                             name: presetName,
-                             path: presetName,
-                             files: [],
-                             subfolders: [],
-                             isPreset: true // Mark as preset to prevent moving/renaming
-                         });
-                     } else {
-                         // Mark existing preset folder
-                         const existingPreset = treeWithPresets.find(folder => folder.name === presetName);
-                         if (existingPreset) {
-                             existingPreset.isPreset = true;
-                         }
-                     }
-                 }
-                 
-                 // Sort alphabetically, but make 'Documents' first
-                 treeWithPresets.sort((a, b) => {
-                     if (a.name === "Documents") return -1;
-                     if (b.name === "Documents") return 1;
-                     return a.name.localeCompare(b.name);
-                 });
-                 
-                 // Merge any pending folders that aren't presets
-                 const finalTree = mergeFoldersIntoTree(treeWithPresets, pendingFolderPaths);
-                 newUserFolderTrees[user] = finalTree;
-             }
+                // 4. Add the preset folders to ensure they're always present
+                const presetFolders = [
+                    "Documents",
+                    "Images",
+                    "Videos",
+                    "Music",
+                    "Archives",
+                    "Code",
+                    "Trash",
+                    "Misc"
+                ];
+
+                // Add preset folders if they don't exist
+                const treeWithPresets = [...fileBasedTreeArray]; // Start with existing folders
+
+                for (const presetName of presetFolders) {
+                    if (!treeWithPresets.some(folder => folder.name === presetName)) {
+                        treeWithPresets.push({
+                            name: presetName,
+                            path: presetName,
+                            files: [],
+                            subfolders: [],
+                            isPreset: true // Mark as preset to prevent moving/renaming
+                        });
+                    } else {
+                        // Mark existing preset folder
+                        const existingPreset = treeWithPresets.find(folder => folder.name === presetName);
+                        if (existingPreset) {
+                            existingPreset.isPreset = true;
+                        }
+                    }
+                }
+
+                // Sort alphabetically, but make 'Documents' first
+                treeWithPresets.sort((a, b) => {
+                    if (a.name === "Documents") return -1;
+                    if (b.name === "Documents") return 1;
+                    return a.name.localeCompare(b.name);
+                });
+
+                // Merge any pending folders that aren't presets
+                const finalTree = mergeFoldersIntoTree(treeWithPresets, pendingFolderPaths);
+                newUserFolderTrees[user] = finalTree;
+            }
 
             // Update the main userFolderTrees object
             this.userFolderTrees = newUserFolderTrees;
@@ -2437,11 +2773,11 @@ export default {
                             f.folderPath = pendingPath; // Update the file object
                             this.newMeta[id][filesNames[j]].folderPath = pendingPath; // Update the metadata object
                         }
-                        
+
                         // Also apply pending name changes if they exist
                         if (this.pendingChanges[id] && this.pendingChanges[id][filesNames[j]] && this.pendingChanges[id][filesNames[j]].hasOwnProperty('name')) {
                             const pendingName = this.pendingChanges[id][filesNames[j]].name;
-                             f.n = pendingName; // Update the file object
+                            f.n = pendingName; // Update the file object
                             this.newMeta[id][filesNames[j]].name = pendingName; // Update the metadata object
                         }
 
@@ -2482,50 +2818,50 @@ export default {
             event.preventDefault();
             const fileId = event.dataTransfer.getData("fileid");
             console.log('Background drop - fileId:', fileId);
-            
+
             // Find the file by ID
             const file = this.files[fileId];
             console.log('Background drop - Found file:', file);
-            
+
             if (!file) {
                 console.error('Background drop - File not found with ID:', fileId);
                 return;
             }
-            
+
             if (!this.isEditable(file)) {
                 console.warn('Background drop - File not editable:', file);
                 return;
             }
-            
+
             // Skip if folder path is the same
             if (file.folderPath === this.currentFolderPath) {
                 console.log('Background drop - File already in this folder');
                 return;
             }
-            
+
             // Store original path for debugging
             const originalPath = file.folderPath;
             console.log('Background drop - Original path:', originalPath, 'New path:', this.currentFolderPath);
-            
+
             // Update file folder path
-                this.pendingChanges[file.i] = this.pendingChanges[file.i] || {};
-                this.pendingChanges[file.i][file.f] = {
-                    folderPath: this.currentFolderPath,
-                    name: this.newMeta[file.i][file.f].name || file.f,
-                };
-            
+            this.pendingChanges[file.i] = this.pendingChanges[file.i] || {};
+            this.pendingChanges[file.i][file.f] = {
+                folderPath: this.currentFolderPath,
+                name: this.newMeta[file.i][file.f].name || file.f,
+            };
+
             // Important: Actually update the file object's folderPath
-                file.folderPath = this.currentFolderPath;
+            file.folderPath = this.currentFolderPath;
             console.log('Background drop - Updated file:', file);
-            
+
             // Force folder path into metadata if needed
             if (this.newMeta[file.i] && this.newMeta[file.i][file.f]) {
                 this.newMeta[file.i][file.f].folderPath = this.currentFolderPath;
             }
-            
+
             // Rebuild and render
-                this.buildFolderTrees();
-                this.render();
+            this.buildFolderTrees();
+            this.render();
         },
         handleDragEnterFolder(event, folder) {
             clearTimeout(this.dragHoverTimeout);
@@ -2542,7 +2878,7 @@ export default {
         handleDragEnterBreadcrumb(event, path) {
             clearTimeout(this.dragHoverTimeout);
             this.dragHoverTargetPath = path;
-             console.log('Entering breadcrumb:', path);
+            console.log('Entering breadcrumb:', path);
             this.dragHoverTimeout = setTimeout(() => {
                 if (this.dragHoverTargetPath === path) {
                     console.log('Navigating due to hover on breadcrumb:', path);
@@ -2556,7 +2892,7 @@ export default {
             // Check if the related target (what we're moving to) is a child of the current target (what we're leaving)
             const currentTarget = event.currentTarget;
             const relatedTarget = event.relatedTarget;
-            
+
             // If relatedTarget is null or not a descendant of currentTarget, we're truly leaving
             if (!relatedTarget || !currentTarget.contains(relatedTarget)) {
                 clearTimeout(this.dragHoverTimeout);
@@ -2584,32 +2920,32 @@ export default {
                 this.selectedFiles = [file.f];
             }
         },
-        
+
         // Add a method to check if a folder is selected
         isFolderSelected(folder) {
             // Simple check if the folder's ID is in the selection
             const id = `folder-${folder.path}`;
             return this.selectedFiles.includes(id);
         },
-        
+
         // Add a helper method for folder click
         handleFolderClick(event, folder) {
             // Prevent selection of preset folders
             if (folder.isPreset) {
                 // If it wasn't an Alt/Ctrl click, still allow navigation
                 if (!event.altKey && !event.ctrlKey) {
-                     this.navigateTo(folder.path);
+                    this.navigateTo(folder.path);
                 }
                 return; // Stop further selection processing
             }
-            
+
             // If Alt/Ctrl is pressed, select folder instead of navigating
             if (event.altKey || event.ctrlKey) {
                 event.preventDefault();
                 event.stopPropagation();
-                
+
                 const folderId = `folder-${folder.path}`;
-                
+
                 if (this.selectedFiles.includes(folderId)) {
                     // Deselect if already selected
                     this.selectedFiles = this.selectedFiles.filter(id => id !== folderId);
@@ -2617,14 +2953,14 @@ export default {
                     // Add to selection
                     this.selectedFiles.push(folderId);
                 }
-                
+
                 return false; // Prevent navigation
             }
-            
+
             // Otherwise allow normal navigation
             this.navigateTo(folder.path);
         },
-        
+
         startSelectionBox(event) {
             // Only start selection box on left click on background (not on files/folders)
             if (event.button !== 0 || event.target.closest('.file-grid') || event.target.closest('tr')) {
@@ -2632,7 +2968,7 @@ export default {
             }
 
             // Stop propagation and prevent default text selection
-            event.stopPropagation(); 
+            event.stopPropagation();
             event.preventDefault();
 
             // Store viewport coordinates
@@ -2643,7 +2979,7 @@ export default {
                 endX: event.clientX,
                 endY: event.clientY
             };
-            
+
             // Store initial selection state if Alt/Ctrl is pressed
             this.initialSelection = (event.altKey || event.ctrlKey) ? [...this.selectedFiles] : [];
 
@@ -2704,14 +3040,14 @@ export default {
 
             this.$nextTick(() => {
                 // Get the files container
-                const filesContainer = this.$refs.container.querySelector('.files'); 
+                const filesContainer = this.$refs.container.querySelector('.files');
                 if (!filesContainer) {
                     return;
                 }
-                
+
                 // Get all selectable elements with their type clearly marked
                 const allElements = [];
-                
+
                 // Get files and folders in grid view
                 if (this.viewOpts.fileView === 'grid') {
                     // Get all .file-grid elements with data-type
@@ -2722,35 +3058,35 @@ export default {
                     const listItems = Array.from(filesContainer.querySelectorAll('tbody tr[data-type]'));
                     allElements.push(...listItems);
                 }
-                
+
                 // Count files and folders for debug
                 const fileCount = allElements.filter(el => el.dataset.type === 'file').length;
                 const folderCount = allElements.filter(el => el.dataset.type === 'folder').length;
-                
+
                 // Process all elements
                 const selectedItems = [];
                 allElements.forEach(element => {
                     // Get element's viewport position
                     const rect = element.getBoundingClientRect();
-                    
+
                     // Get element data attributes for type and key
                     const elementType = element.dataset.type; // 'file' or 'folder'
                     const elementKey = element.dataset.key;
-                    
+
                     // Intersection test using viewport coordinates
                     const overlapHoriz = !(rect.right < selLeft || rect.left > selRight);
                     const overlapVert = !(rect.bottom < selTop || rect.top > selBottom);
                     const intersects = overlapHoriz && overlapVert;
-                    
+
                     // Alternative test - check if center point is inside selection (viewport)
                     const centerX = rect.left + rect.width / 2;
                     const centerY = rect.top + rect.height / 2;
-                    const centerInSelection = 
-                        centerX >= selLeft && 
-                        centerX <= selRight && 
-                        centerY >= selTop && 
+                    const centerInSelection =
+                        centerX >= selLeft &&
+                        centerX <= selRight &&
+                        centerY >= selTop &&
                         centerY <= selBottom;
-                        
+
                     // If we have a valid element that intersects with the selection
                     // AND it's not a preset folder
                     if ((intersects || centerInSelection) && elementKey && element.dataset.isPreset !== 'true') {
@@ -2760,30 +3096,30 @@ export default {
                         } else { // file
                             itemId = elementKey; // Files use CID directly
                         }
-                        
+
                         if (itemId) {
                             selectedItems.push(itemId);
                         }
                     }
                 });
-                
+
                 // Final selection combining initial selection if Alt/Ctrl was held
                 const combinedSelection = new Set([...this.initialSelection, ...selectedItems]);
                 this.selectedFiles = Array.from(combinedSelection);
-                
+
                 // Force re-render to update visual highlighting
                 this.$forceUpdate();
             });
         },
-        
+
         endSelectionBox() {
             if (!this.selectionBox.active) {
                 return; // Don't do anything if not active
             }
-            
+
             this.selectionBox.active = false;
             this.initialSelection = []; // Clear initial selection state
-            
+
             // Remove the selection overlay
             const selectionOverlay = document.getElementById('selection-box-overlay');
             if (selectionOverlay) {
@@ -2797,16 +3133,16 @@ export default {
                     delete el.dataset.originalPointerEvents;
                 }
             });
-            
+
             // ANTI-FREEZE: Remove document-level mouseup listener if it was added externally
             document.removeEventListener('mouseup', this.endSelectionBox);
-            
+
             // Force re-render to ensure visual state reflects the selection
             this.$forceUpdate();
         },
         dragStartItem(event, item, type) {
             console.log(`Drag start ${type}:`, item);
-            
+
             let dragDataIds = [];
             let isDraggingSelected = false;
 
@@ -2820,7 +3156,7 @@ export default {
                     event.stopPropagation();
                     return;
                 }
-                
+
                 isDraggingSelected = this.isFolderSelected(item);
             }
 
@@ -2837,7 +3173,7 @@ export default {
                 if (type === 'file') {
                     singleId = item.f;
                 } else { // folder
-                    singleId = `folder-${item.path}`; 
+                    singleId = `folder-${item.path}`;
                 }
                 this.selectedFiles = [singleId];
                 dragDataIds = [singleId];
@@ -2846,26 +3182,26 @@ export default {
             }
 
             // Set fallback text data (might be useful for external drops)
-            event.dataTransfer.setData("text/plain", dragDataIds.join('\n')); 
+            event.dataTransfer.setData("text/plain", dragDataIds.join('\n'));
 
             // **Important**: Need contract ID(s) if files are involved
             // For simplicity now, just use the contract ID of the first file found in selection
             let representativeContractId = null;
             const firstFileId = dragDataIds.find(id => !id.startsWith('folder-'));
-            if(firstFileId && this.files[firstFileId]){
-                 representativeContractId = this.files[firstFileId].i;
-                 event.dataTransfer.setData("contractid", representativeContractId);
-                 console.log("Using contractId:", representativeContractId);
+            if (firstFileId && this.files[firstFileId]) {
+                representativeContractId = this.files[firstFileId].i;
+                event.dataTransfer.setData("contractid", representativeContractId);
+                console.log("Using contractId:", representativeContractId);
             } else {
                 console.warn("No file found in selection to determine contractId.");
                 // Optionally set a placeholder or handle folder-only drags differently later
             }
-           
+
             // Set drag image
             const dragIcon = document.createElement('div');
             dragIcon.style.position = 'absolute';
-            dragIcon.style.top = '-1000px'; 
-            dragIcon.style.maxWidth = '200px'; 
+            dragIcon.style.top = '-1000px';
+            dragIcon.style.maxWidth = '200px';
 
             if (dragDataIds.length > 1) {
                 // Show count for multiple items
@@ -2884,18 +3220,18 @@ export default {
                     itemName = item.name;
                     itemIconClass = 'fa-solid fa-folder'; // Folder icon
                 }
-                
+
                 const truncatedName = itemName.length > 15 ? itemName.substring(0, 15) + '...' : itemName;
-                
+
                 dragIcon.innerHTML = `<div style="padding: 10px; background: rgba(0,0,0,0.7); color: white; border-radius: 4px; display: flex; align-items: center; max-width: 200px; white-space: nowrap;">
                     <i class="${itemIconClass} fa-lg me-2"></i> 
                     <span>${truncatedName}</span>
                 </div>`;
             }
-            
+
             document.body.appendChild(dragIcon);
             event.dataTransfer.setDragImage(dragIcon, 0, 0);
-            
+
             // Clean up the drag image element
             setTimeout(() => {
                 if (document.body.contains(dragIcon)) {
@@ -2908,63 +3244,63 @@ export default {
         },
         dropOnFolder(event, folder) {
             event.preventDefault();
-            event.stopPropagation(); 
+            event.stopPropagation();
             let itemIds = [];
-            
+
             // Check for multiple items being dragged
-            const itemIdsStr = event.dataTransfer.getData("itemids"); 
+            const itemIdsStr = event.dataTransfer.getData("itemids");
             if (itemIdsStr) {
                 try {
                     itemIds = JSON.parse(itemIdsStr);
                 } catch (e) {
                     // Fallback to text/plain if parsing fails
                     const textData = event.dataTransfer.getData("text/plain");
-                    if(textData) itemIds = textData.split('\n');
+                    if (textData) itemIds = textData.split('\n');
                 }
             } else {
-                 // Fallback to text/plain if itemids is missing
-                 const textData = event.dataTransfer.getData("text/plain");
-                 if(textData) itemIds = textData.split('\n');
+                // Fallback to text/plain if itemids is missing
+                const textData = event.dataTransfer.getData("text/plain");
+                if (textData) itemIds = textData.split('\n');
             }
-            
+
             // Get contract ID if available (may not be for folder-only drags)
-            const contractId = event.dataTransfer.getData("contractid"); 
-            
+            const contractId = event.dataTransfer.getData("contractid");
+
             if (!itemIds.length) {
                 return;
             }
-            
+
             const targetPath = folder.path;
-            
+
             // Process each item
             itemIds.forEach(itemId => {
                 if (itemId.startsWith('folder-')) {
                     // --- Handle Folder Drop ---
                     const folderPathToMove = itemId.substring('folder-'.length);
-                    
+
                     // Skip if moving to itself
                     if (folderPathToMove === targetPath) {
                         return;
                     }
-                    
+
                     // Check if this is a preset folder - don't allow moving preset folders
                     if (this.isPresetFolder(folderPathToMove)) {
                         console.warn("Cannot move preset folders");
                         return;
                     }
-                    
+
                     // Check if we're dropping into a subfolder of the folder being moved
                     // This would create a recursive loop and is not allowed
                     if (targetPath.startsWith(folderPathToMove + '/')) {
                         console.warn('Cannot move a folder into its own subfolder');
                         return;
                     }
-                    
+
                     // Find all files that are in the folder being moved or its subfolders
-                    const filesInFolder = Object.values(this.files).filter(file => 
+                    const filesInFolder = Object.values(this.files).filter(file =>
                         file.folderPath === folderPathToMove || file.folderPath.startsWith(folderPathToMove + '/')
                     );
-                    
+
                     if (filesInFolder.length === 0) {
                         // This is an empty folder, perhaps a newly created one
                         // We'll need to update any pending folder creation
@@ -2975,7 +3311,7 @@ export default {
                                 if (index !== -1) {
                                     // Remove the old path
                                     this.pendingChanges[cid].__newFolders__.splice(index, 1);
-                                    
+
                                     // Add the new path
                                     const newPath = targetPath + '/' + folderPathToMove.split('/').pop();
                                     this.pendingChanges[cid].__newFolders__.push(newPath);
@@ -2989,7 +3325,7 @@ export default {
                             if (!this.isEditable(file)) {
                                 return;
                             }
-                            
+
                             // Calculate new path
                             // If the file is directly in the moved folder:
                             //    folderPathToMove = "docs"
@@ -3003,7 +3339,7 @@ export default {
                             //    targetPath = "personal"
                             //    => newPath = "personal/reports"
                             let newPath;
-                            
+
                             if (file.folderPath === folderPathToMove) {
                                 // File is directly in the folder being moved
                                 newPath = targetPath;
@@ -3012,29 +3348,29 @@ export default {
                                 const relativePath = file.folderPath.substring(folderPathToMove.length + 1);
                                 newPath = `${targetPath}/${relativePath}`;
                             }
-                            
+
                             const fileId = file.f;
                             const currentContractId = file.i;
-                            
+
                             // Skip if the file is already at the target path
                             if (file.folderPath === newPath) {
                                 return;
                             }
-                            
+
                             // Update the file's folder path
                             file.folderPath = newPath;
-                            
+
                             // Update metadata
                             if (this.newMeta[currentContractId] && this.newMeta[currentContractId][fileId]) {
                                 this.newMeta[currentContractId][fileId].folderPath = newPath;
                             }
-                            
+
                             // Update pending changes
                             this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
                             this.pendingChanges[currentContractId][fileId] = {
-                                ...(this.pendingChanges[currentContractId][fileId] || {}), 
+                                ...(this.pendingChanges[currentContractId][fileId] || {}),
                                 folderPath: newPath,
-                                name: this.newMeta[currentContractId]?.[fileId]?.name || fileId, 
+                                name: this.newMeta[currentContractId]?.[fileId]?.name || fileId,
                             };
                         });
                     }
@@ -3045,42 +3381,42 @@ export default {
                     if (!file) {
                         return;
                     }
-                    
+
                     // Use the contractId obtained earlier if available, otherwise try to get from file
                     const currentContractId = contractId || file.i;
                     if (!currentContractId) {
-                        return; 
+                        return;
                     }
-                    
+
                     if (!this.isEditable(file)) {
                         return;
                     }
-                    
+
                     const originalPath = file.folderPath || '';
                     const newPath = folder.path;
-                    
+
                     if (originalPath === newPath) {
                         return;
                     }
-                    
+
                     // Update the file's folder path
                     file.folderPath = newPath;
-                    
+
                     // Update metadata in newMeta
                     if (this.newMeta[currentContractId] && this.newMeta[currentContractId][fileId]) {
                         this.newMeta[currentContractId][fileId].folderPath = newPath;
                     }
-                    
+
                     // Update pending changes
                     this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
                     this.pendingChanges[currentContractId][fileId] = {
-                        ...(this.pendingChanges[currentContractId][fileId] || {}), 
+                        ...(this.pendingChanges[currentContractId][fileId] || {}),
                         folderPath: newPath,
-                        name: this.newMeta[currentContractId]?.[fileId]?.name || fileId, 
+                        name: this.newMeta[currentContractId]?.[fileId]?.name || fileId,
                     };
                 }
             });
-            
+
             this.buildFolderTrees();
             this.$nextTick(() => {
                 this.render();
@@ -3092,160 +3428,160 @@ export default {
         dropOnBreadcrumb(path, event) {
             event.preventDefault();
             let itemIds = [];
-            
+
             // Check for multiple items
             const itemIdsStr = event.dataTransfer.getData("itemids");
-             if (itemIdsStr) {
-                 try {
-                     itemIds = JSON.parse(itemIdsStr);
-                 } catch (e) {
-                     const textData = event.dataTransfer.getData("text/plain");
-                     if(textData) itemIds = textData.split('\n');
-                 }
-             } else {
-                  const textData = event.dataTransfer.getData("text/plain");
-                  if(textData) itemIds = textData.split('\n');
-             }
-            
-            const contractId = event.dataTransfer.getData("contractid"); 
-            const targetPath = path == null ? '' : path; 
-            
+            if (itemIdsStr) {
+                try {
+                    itemIds = JSON.parse(itemIdsStr);
+                } catch (e) {
+                    const textData = event.dataTransfer.getData("text/plain");
+                    if (textData) itemIds = textData.split('\n');
+                }
+            } else {
+                const textData = event.dataTransfer.getData("text/plain");
+                if (textData) itemIds = textData.split('\n');
+            }
+
+            const contractId = event.dataTransfer.getData("contractid");
+            const targetPath = path == null ? '' : path;
+
             if (!itemIds.length) {
                 return;
             }
-            
+
             // Process each item
             itemIds.forEach(itemId => {
-                 if (itemId.startsWith('folder-')) {
-                      // --- Handle Folder Drop ---
-                     const folderPathToMove = itemId.substring('folder-'.length);
-                     
-                     // Skip if moving to itself
-                     if (folderPathToMove === targetPath) {
-                         return;
-                     }
-                     
-                     // Check if this is a preset folder - don't allow moving preset folders
-                     if (this.isPresetFolder(folderPathToMove)) {
-                         console.warn("Cannot move preset folders");
-                         return;
-                     }
-                     
-                     // Check if we're dropping into a subfolder of the folder being moved
-                     if (targetPath.startsWith(folderPathToMove + '/')) {
-                         console.warn('Cannot move a folder into its own subfolder');
-                         return;
-                     }
-                     
-                     // Find all files that are in the folder being moved or its subfolders
-                     const filesInFolder = Object.values(this.files).filter(file => 
-                         file.folderPath === folderPathToMove || file.folderPath.startsWith(folderPathToMove + '/')
-                     );
-                     
-                     if (filesInFolder.length === 0) {
-                         // This is an empty folder, perhaps a newly created one
-                         // We'll need to update any pending folder creation
-                         for (const cid in this.pendingChanges) {
-                             if (this.pendingChanges[cid].__newFolders__) {
-                                 // Find the index of the folder in the pending folders array
-                                 const index = this.pendingChanges[cid].__newFolders__.indexOf(folderPathToMove);
-                                 if (index !== -1) {
-                                     // Remove the old path
-                                     this.pendingChanges[cid].__newFolders__.splice(index, 1);
-                                     
-                                     // Add the new path, keeping the folder name but changing the parent location
-                                     const folderName = folderPathToMove.split('/').pop();
-                                     const newPath = targetPath ? `${targetPath}/${folderName}` : folderName;
-                                     this.pendingChanges[cid].__newFolders__.push(newPath);
-                                 }
-                             }
-                         }
-                     } else {
-                         // Move all files to the new location, preserving subfolder structure
-                         filesInFolder.forEach(file => {
-                             // Only process files we can edit
-                             if (!this.isEditable(file)) {
-                                 return;
-                             }
-                             
-                             // Calculate new path
-                             let newPath;
-                             
-                             if (file.folderPath === folderPathToMove) {
-                                 // File is directly in the folder being moved
-                                 newPath = targetPath;
-                             } else {
-                                 // File is in a subfolder of the folder being moved
-                                 const relativePath = file.folderPath.substring(folderPathToMove.length + 1);
-                                 newPath = targetPath ? `${targetPath}/${relativePath}` : relativePath;
-                             }
-                             
-                             const fileId = file.f;
-                             const currentContractId = file.i;
-                             
-                             // Skip if the file is already at the target path
-                             if (file.folderPath === newPath) {
-                                 return;
-                             }
-                             
-                             // Update the file's folder path
-                             file.folderPath = newPath;
-                             
-                             // Update metadata
-                             if (this.newMeta[currentContractId] && this.newMeta[currentContractId][fileId]) {
-                                 this.newMeta[currentContractId][fileId].folderPath = newPath;
-                             }
-                             
-                             // Update pending changes
-                             this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
-                             this.pendingChanges[currentContractId][fileId] = {
-                                 ...(this.pendingChanges[currentContractId][fileId] || {}), 
-                                 folderPath: newPath,
-                                 name: this.newMeta[currentContractId]?.[fileId]?.name || fileId, 
-                             };
-                         });
-                     }
-                 } else {
-                      // --- Handle File Drop ---
-                      const fileId = itemId;
-                      const file = this.files[fileId];
-                      if (!file) {
-                           return;
-                      }
-                      
-                      const currentContractId = contractId || file.i;
-                      if (!currentContractId) {
-                           return;
-                      }
-                      
-                      if (!this.isEditable(file)) {
-                           return;
-                      }
-                      
-                      const originalPath = file.folderPath || '';
-                      
-                      if (originalPath === targetPath) {
-                           return;
-                      }
-                      
-                      // Update the canonical file object
-                      file.folderPath = targetPath;
-                      
-                      // Update newMeta (if it exists)
-                      if (this.newMeta[currentContractId]?.[fileId]) {
-                           this.newMeta[currentContractId][fileId].folderPath = targetPath;
-                      }
-                      
-                      // Update pending changes
-                      this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
-                      this.pendingChanges[currentContractId][fileId] = {
-                           ...(this.pendingChanges[currentContractId][fileId] || {}),
-                           folderPath: targetPath,
-                           name: this.pendingChanges[currentContractId]?.[fileId]?.name || this.newMeta[currentContractId]?.[fileId]?.name || fileId,
-                      };
-                 }
+                if (itemId.startsWith('folder-')) {
+                    // --- Handle Folder Drop ---
+                    const folderPathToMove = itemId.substring('folder-'.length);
+
+                    // Skip if moving to itself
+                    if (folderPathToMove === targetPath) {
+                        return;
+                    }
+
+                    // Check if this is a preset folder - don't allow moving preset folders
+                    if (this.isPresetFolder(folderPathToMove)) {
+                        console.warn("Cannot move preset folders");
+                        return;
+                    }
+
+                    // Check if we're dropping into a subfolder of the folder being moved
+                    if (targetPath.startsWith(folderPathToMove + '/')) {
+                        console.warn('Cannot move a folder into its own subfolder');
+                        return;
+                    }
+
+                    // Find all files that are in the folder being moved or its subfolders
+                    const filesInFolder = Object.values(this.files).filter(file =>
+                        file.folderPath === folderPathToMove || file.folderPath.startsWith(folderPathToMove + '/')
+                    );
+
+                    if (filesInFolder.length === 0) {
+                        // This is an empty folder, perhaps a newly created one
+                        // We'll need to update any pending folder creation
+                        for (const cid in this.pendingChanges) {
+                            if (this.pendingChanges[cid].__newFolders__) {
+                                // Find the index of the folder in the pending folders array
+                                const index = this.pendingChanges[cid].__newFolders__.indexOf(folderPathToMove);
+                                if (index !== -1) {
+                                    // Remove the old path
+                                    this.pendingChanges[cid].__newFolders__.splice(index, 1);
+
+                                    // Add the new path, keeping the folder name but changing the parent location
+                                    const folderName = folderPathToMove.split('/').pop();
+                                    const newPath = targetPath ? `${targetPath}/${folderName}` : folderName;
+                                    this.pendingChanges[cid].__newFolders__.push(newPath);
+                                }
+                            }
+                        }
+                    } else {
+                        // Move all files to the new location, preserving subfolder structure
+                        filesInFolder.forEach(file => {
+                            // Only process files we can edit
+                            if (!this.isEditable(file)) {
+                                return;
+                            }
+
+                            // Calculate new path
+                            let newPath;
+
+                            if (file.folderPath === folderPathToMove) {
+                                // File is directly in the folder being moved
+                                newPath = targetPath;
+                            } else {
+                                // File is in a subfolder of the folder being moved
+                                const relativePath = file.folderPath.substring(folderPathToMove.length + 1);
+                                newPath = targetPath ? `${targetPath}/${relativePath}` : relativePath;
+                            }
+
+                            const fileId = file.f;
+                            const currentContractId = file.i;
+
+                            // Skip if the file is already at the target path
+                            if (file.folderPath === newPath) {
+                                return;
+                            }
+
+                            // Update the file's folder path
+                            file.folderPath = newPath;
+
+                            // Update metadata
+                            if (this.newMeta[currentContractId] && this.newMeta[currentContractId][fileId]) {
+                                this.newMeta[currentContractId][fileId].folderPath = newPath;
+                            }
+
+                            // Update pending changes
+                            this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
+                            this.pendingChanges[currentContractId][fileId] = {
+                                ...(this.pendingChanges[currentContractId][fileId] || {}),
+                                folderPath: newPath,
+                                name: this.newMeta[currentContractId]?.[fileId]?.name || fileId,
+                            };
+                        });
+                    }
+                } else {
+                    // --- Handle File Drop ---
+                    const fileId = itemId;
+                    const file = this.files[fileId];
+                    if (!file) {
+                        return;
+                    }
+
+                    const currentContractId = contractId || file.i;
+                    if (!currentContractId) {
+                        return;
+                    }
+
+                    if (!this.isEditable(file)) {
+                        return;
+                    }
+
+                    const originalPath = file.folderPath || '';
+
+                    if (originalPath === targetPath) {
+                        return;
+                    }
+
+                    // Update the canonical file object
+                    file.folderPath = targetPath;
+
+                    // Update newMeta (if it exists)
+                    if (this.newMeta[currentContractId]?.[fileId]) {
+                        this.newMeta[currentContractId][fileId].folderPath = targetPath;
+                    }
+
+                    // Update pending changes
+                    this.pendingChanges[currentContractId] = this.pendingChanges[currentContractId] || {};
+                    this.pendingChanges[currentContractId][fileId] = {
+                        ...(this.pendingChanges[currentContractId][fileId] || {}),
+                        folderPath: targetPath,
+                        name: this.pendingChanges[currentContractId]?.[fileId]?.name || this.newMeta[currentContractId]?.[fileId]?.name || fileId,
+                    };
+                }
             });
-            
+
             this.buildFolderTrees();
             this.$nextTick(() => {
                 this.render();
@@ -3256,7 +3592,7 @@ export default {
             if (folder.isPreset) {
                 return false;
             }
-            
+
             // Check if *any* loaded file belongs to the current user
             // This might need refinement if folder ownership becomes a thing
             // For now, assume if the user owns *any* files, they can manage folders
@@ -3290,29 +3626,29 @@ export default {
                                 if (this.newMeta[contractId] && this.newMeta[contractId][fileId]) {
                                     // Merge pending changes into newMeta for the specific file
                                     // Ensure all relevant fields (name, folderPath, labels, license, flags) are updated
-                                    if(change.hasOwnProperty('name')) {
+                                    if (change.hasOwnProperty('name')) {
                                         this.newMeta[contractId][fileId].name = change.name;
                                     }
-                                    if(change.hasOwnProperty('folderPath')) {
+                                    if (change.hasOwnProperty('folderPath')) {
                                         this.newMeta[contractId][fileId].folderPath = change.folderPath;
                                     }
-                                    if(change.hasOwnProperty('labels')) {
+                                    if (change.hasOwnProperty('labels')) {
                                         this.newMeta[contractId][fileId].labels = change.labels;
                                     }
-                                    if(change.hasOwnProperty('license')) {
+                                    if (change.hasOwnProperty('license')) {
                                         this.newMeta[contractId][fileId].license = change.license;
                                     }
-                                    if(change.hasOwnProperty('flags')) {
+                                    if (change.hasOwnProperty('flags')) {
                                         this.newMeta[contractId][fileId].flags = change.flags;
                                     }
 
                                     // Also update the main file object if it exists (for UI binding)
-                                    if(this.files[fileId]) {
-                                        if(change.hasOwnProperty('name')) this.files[fileId].n = change.name;
-                                        if(change.hasOwnProperty('folderPath')) this.files[fileId].folderPath = change.folderPath;
-                                        if(change.hasOwnProperty('labels')) this.files[fileId].l = change.labels;
-                                        if(change.hasOwnProperty('license')) this.files[fileId].lic = change.license;
-                                        if(change.hasOwnProperty('flags')) this.files[fileId].lf = change.flags;
+                                    if (this.files[fileId]) {
+                                        if (change.hasOwnProperty('name')) this.files[fileId].n = change.name;
+                                        if (change.hasOwnProperty('folderPath')) this.files[fileId].folderPath = change.folderPath;
+                                        if (change.hasOwnProperty('labels')) this.files[fileId].l = change.labels;
+                                        if (change.hasOwnProperty('license')) this.files[fileId].lic = change.license;
+                                        if (change.hasOwnProperty('flags')) this.files[fileId].lf = change.flags;
                                     }
                                 }
                             }
@@ -3341,7 +3677,7 @@ export default {
             this.hideContextMenu(); // Ensure context menu is closed
             this.fileToEditMetadata = file;
             const meta = this.newMeta[file.i][file.f];
-            
+
             // Initialize tempMetadata based on the *current* state in newMeta
             // This ensures pending changes loaded earlier are reflected
             const currentFlags = meta.flags || 0; // Use the potentially updated meta.flags
@@ -3350,9 +3686,9 @@ export default {
                 license: meta.license ? [meta.license] : [], // String '7' -> ['7'] or []
                 flags: this.availableFlags.filter(flag => (currentFlags & flag.value) !== 0).map(flag => flag.value)
             };
-            
+
             this.showMetadataEditor = true;
-            
+
             // The choices-vue components should reactively update based on the
             // :prop_selections binding when tempMetadata changes.
             // Explicit method calls are not needed (and were causing errors).
@@ -3360,20 +3696,20 @@ export default {
 
         saveMetadataChanges() {
             if (!this.fileToEditMetadata) return;
-            
+
             console.log('Saving metadata, current tempMetadata:', JSON.parse(JSON.stringify(this.tempMetadata)));
-            
+
             const file = this.fileToEditMetadata;
             const contractId = file.i;
             const fileId = file.f;
-            
+
             // --- Calculate final values --- 
             // Labels: Join array back to string, ensure sorted
-            const finalLabels = this.tempMetadata.labels.sort().join(''); 
-            
+            const finalLabels = this.tempMetadata.labels.sort().join('');
+
             // License: Get the single value from array or empty string
-            const finalLicense = this.tempMetadata.license[0] || ''; 
-            
+            const finalLicense = this.tempMetadata.license[0] || '';
+
             // Flags: Combine selected flag values back into a number
             // Start with existing non-editable flags (like encryption bit 1)
             let finalFlagsNum = (this.newMeta[contractId][fileId].flags || 0) & 1; // Preserve encryption flag
@@ -3392,7 +3728,7 @@ export default {
             file.l = finalLabels;
             file.lic = finalLicense;
             file.lf = finalFlagsNum;
-            
+
             // --- Update pendingChanges --- 
             this.pendingChanges[contractId] = this.pendingChanges[contractId] || {};
             this.pendingChanges[contractId][fileId] = {
@@ -3402,16 +3738,16 @@ export default {
                 labels: finalLabels,
                 license: finalLicense,
                 flags: finalFlagsNum,
-                 // Ensure name and path are preserved from newMeta/pendingChanges
+                // Ensure name and path are preserved from newMeta/pendingChanges
                 name: this.newMeta[contractId][fileId].name || fileId,
-                folderPath: this.newMeta[contractId][fileId].folderPath || '', 
+                folderPath: this.newMeta[contractId][fileId].folderPath || '',
             };
 
             console.log('Updated pendingChanges for', contractId, fileId, ':', JSON.parse(JSON.stringify(this.pendingChanges[contractId][fileId])));
 
             // --- Close editor --- 
             this.closeMetadataEditor();
-            
+
             // Optional: Force update if UI doesn't refresh automatically
             // this.$forceUpdate(); 
         },
@@ -3421,7 +3757,7 @@ export default {
             this.fileToEditMetadata = null;
             this.tempMetadata = { labels: [], license: [], flags: [] }; // Reset temp data
         },
-        
+
         // Handlers for the choices-vue components in the editor
         handleTempLabel(data) {
             console.log('handleTempLabel received data:', data);
@@ -3438,7 +3774,7 @@ export default {
             }
             // Force reactivity by creating a new object with the updated array
             this.tempMetadata = {
-                ...this.tempMetadata, 
+                ...this.tempMetadata,
                 labels: currentLabels.sort() // Keep it sorted
             };
             console.log('tempMetadata after label update:', JSON.parse(JSON.stringify(this.tempMetadata)));
@@ -3460,28 +3796,28 @@ export default {
         },
         handleTempFlag(data) {
             console.log('handleTempFlag received data:', data);
-            
+
             // Initialize current flags as a bitwise number
             let currentFlagsNum = this.tempMetadata.flags.reduce((acc, flag) => acc | flag, 0);
-            
+
             if (data.action === 'added') {
                 currentFlagsNum |= data.item; // Add the flag using bitwise OR
             } else if (data.action === 'removed') {
                 currentFlagsNum &= ~data.item; // Remove the flag using bitwise AND with negation
             }
-            
+
             // Convert back to an array of flags for tempMetadata
             const newFlagsArray = [];
             if (currentFlagsNum & 4) newFlagsArray.push(4); // NSFW
             if (currentFlagsNum & 8) newFlagsArray.push(8); // Executable
             // Add other flags as needed
-        
+
             // Force reactivity
             this.tempMetadata = {
                 ...this.tempMetadata,
                 flags: newFlagsArray.sort((a, b) => a - b) // Sort numerically
             };
-            
+
             console.log('tempMetadata after flag update:', JSON.parse(JSON.stringify(this.tempMetadata)));
         },
         // Added: Method to open the details viewer
@@ -3544,13 +3880,13 @@ export default {
             }
 
             if (folder.isPreset && folder.name === "Trash") {
-                 alert("You cannot move the Trash folder itself.");
-                 return;
+                alert("You cannot move the Trash folder itself.");
+                return;
             }
             // Also prevent moving other preset folders if desired
             if (folder.isPreset) {
-                 alert(`Preset folder "${folder.name}" cannot be moved to Trash.`);
-                 return;
+                alert(`Preset folder "${folder.name}" cannot be moved to Trash.`);
+                return;
             }
 
             const folderPath = folder.path;
@@ -3560,7 +3896,7 @@ export default {
             console.log(`Moving folder "${folderPath}" contents to Trash.`);
 
             // Find all files within this folder and its subfolders
-            const filesToMove = Object.values(this.files).filter(file => 
+            const filesToMove = Object.values(this.files).filter(file =>
                 (file.folderPath === folderPath || file.folderPath.startsWith(folderPath + '/'))
             );
 
@@ -3593,13 +3929,13 @@ export default {
 
             // If the folder being moved was newly created (only in pendingChanges), remove it
             for (const contractId in this.pendingChanges) {
-                 if (this.pendingChanges[contractId]?.__newFolders__) {
-                      const index = this.pendingChanges[contractId].__newFolders__.indexOf(folderPath);
-                      if (index > -1) {
-                           this.pendingChanges[contractId].__newFolders__.splice(index, 1);
-                           console.log(`Removed pending new folder "${folderPath}" as it was moved to trash.`);
-                      }
-                 }
+                if (this.pendingChanges[contractId]?.__newFolders__) {
+                    const index = this.pendingChanges[contractId].__newFolders__.indexOf(folderPath);
+                    if (index > -1) {
+                        this.pendingChanges[contractId].__newFolders__.splice(index, 1);
+                        console.log(`Removed pending new folder "${folderPath}" as it was moved to trash.`);
+                    }
+                }
             }
 
             console.log(`Moved ${filesMoved} files from "${folderPath}" to Trash.`);
@@ -3652,8 +3988,41 @@ export default {
             this.buildFolderTrees();
             this.render(); // Ensure the UI updates to reflect the move
         },
-    },
-    computed: {
+        
+        /**
+         * Validates file or folder names against allowed patterns
+         * @param {string} name - The name to validate
+         * @param {string} type - Either "file" or "folder"
+         * @returns {object} - { valid: boolean, message: string }
+         */
+        validateItemName(name, type) {
+            // Specific validations
+            if (type === "file") {
+                const namePattern = /^[^,]{1,32}$/u
+                // Files should not start/end with spaces or periods
+                if (!namePattern.test(name)) {
+                    return { valid: false, message: "File name contains invalid characters." };
+                }
+            } else if (type === "folder") {
+                const namePattern = /^[0-9a-zA-Z+_.\- ]{2,16}$/
+                // Folders should not start/end with spaces and can't be named "." or ".."
+                if (!namePattern.test(name)) {
+                    return { valid: false, message: "Folder name cannot start or end with spaces." };
+                }
+                if (name.length > 16) {
+                    return { valid: false, message: "Folder name is too long (max 16 characters)." };
+                }
+                if (name.length < 2) {
+                    return { valid: false, message: "Folder name must be at least 2 characters long." };
+                }
+                if (name === "." || name === "..") {
+                    return { valid: false, message: "Folder name cannot be '.' or '..'." };
+                }
+            }
+            
+            return { valid: true, message: "" };
+        },
+        
         hasFiles() {
             return Object.keys(this.files).length > 0;
         },
@@ -3668,14 +4037,14 @@ export default {
             if (!this.pendingChanges || Object.keys(this.pendingChanges).length === 0) {
                 return 0;
             }
-            
+
             // Create a test updates object similar to what would be sent
             const testUpdates = {};
-            
+
             for (const contractId in this.pendingChanges) {
                 if (this.contract && this.contract[contractId] && this.contract[contractId].m) {
                     const originalMetadata = this.contract[contractId].m || '';
-                    
+
                     // This is approximate - we're using the original metadata length as an estimate
                     // The actual size would be calculated during saveChanges
                     if (!testUpdates[contractId]) {
@@ -3683,7 +4052,7 @@ export default {
                     }
                 }
             }
-            
+
             // Estimate the size of the stringified updates
             const payloadObj = { updates: testUpdates };
             return JSON.stringify(payloadObj).length;
@@ -3736,7 +4105,7 @@ export default {
                     prominence: contract.p, // number of incentivized nodes to decentralize the file
                     cost: contract.r, // cost per month
                     reviewBlock: contract.e.split(':')[0], // trash empty date
-                    totalSizeStored: fancyBytes(contract.u || 0), 
+                    totalSizeStored: fancyBytes(contract.u || 0),
                     autoRenew: Number(contract.m.substring(0, 1)) & 1,
                     encrypted: contract.m.substring(1, 1) === '#' ? true : false,
                     encryptionAccounts: contract.encryption?.accounts ? Object.keys(contract.encryption.accounts) : [],
@@ -3800,12 +4169,12 @@ export default {
         this.localStorageKey = this.account ? `fileVuePendingChanges_${this.account}` : '';
         // Load any pending changes from previous sessions
         this.loadPendingChanges();
-        
+
         // Existing mounted code
-        if (this.account) this.filesSelect.addusers[this.account] = true;
+        if (this.page_account) this.filesSelect.addusers[this.page_account] = true;
         if (!this.nodeview) this.filesSelect.cc_only = false;
-        if (this.owners.length > 0) {
-            this.selectedUser = this.account || this.owners[0];
+        if (this.owners.length > 0) {  //when page_account is not set
+            this.selectedUser = this.page_account
         }
         this.init()
 
