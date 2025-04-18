@@ -2472,6 +2472,7 @@ export default {
         parseFolderList(folderListStr) {
             var folderEntries = folderListStr.split("|").filter(Boolean);
             const indexToPath = {
+                "0": "",
                 "1": folderEntries[0],
                 "2": "Documents",
                 "3": "Images",
