@@ -4022,7 +4022,8 @@ export default {
             
             return { valid: true, message: "" };
         },
-        
+    },
+    computed: {
         hasFiles() {
             return Object.keys(this.files).length > 0;
         },
