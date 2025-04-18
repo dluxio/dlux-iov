@@ -1956,7 +1956,7 @@ export default {
                 cj: updatesPayload, // All updates in one object
                 id: 'spkccT_update_metadata', // The required_posting_auths id for the custom_json
                 msg: `Updating metadata for ${Object.keys(updates).length} contracts`,
-                ops: [{op: 'propogate_changes', args: [`revertPendingChanges`]}], // Custom ops array to trigger cleanup for all contracts
+                ops: ['getSPKUser', {op: 'propogate_changes', args: [`revertPendingChanges`]}], // Custom ops array to trigger cleanup for all contracts
                 txid: `saveMeta_batch_${Date.now()}`, // Unique ID for tracking
                 key: 'Posting' // Specify Posting key
             };

@@ -1,4 +1,4 @@
-this.version = "2025.04.18.7";
+this.version = "2025.04.18.8";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -215,6 +215,7 @@ var urlsToCache = [
   `/js/vue.esm-browser.js`,
   `/js/vueme.js`,
   `/js/vueqr.js`,
+  `/js/watchers-common.js`,
   `/lang/en.js`,
   `/mint/index.html`,
   `/naf-playground/aframe/aframe-inspector.min.js`,
