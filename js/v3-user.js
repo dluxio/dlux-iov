@@ -1675,7 +1675,14 @@ PORT=3000
         },
         method: 'POST'
       })
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            // If response is not OK, throw an error with status text
+            // This prevents trying to parse non-JSON error pages
+            throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+          }
+          return response.json(); // Only parse if response is OK
+        })
         .then(data => {
           if (data.error) {
             console.error(`Error in ${method}:`, data.error);
