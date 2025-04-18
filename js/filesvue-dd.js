@@ -1827,17 +1827,19 @@ export default {
                         console.error(`Error: Parent path '${parentPath}' for folder '${path}' not found in pathToIndex. Skipping.`);
                         return;
                     }
-                    if (nextCustomIndex == 1) nextCustomIndex = 9;
+                    
                     let assignedIndex;
                     if (parts.length === 1 && presetFoldersMap[folderName]) {
                         assignedIndex = presetFoldersMap[folderName];
                     } else {
-                        assignedIndex = this.numberToBase58(nextCustomIndex++);
+                        assignedIndex = this.numberToBase58(nextCustomIndex);
                     }
                     indexToPath[assignedIndex] = path;
                     pathToIndex[path] = assignedIndex;
                     const entry = (parentIndex === "0") ? folderName : `${parentIndex}/${folderName}`;
                     folderListEntries.push(entry);
+                    nextCustomIndex++
+                    if (nextCustomIndex == 1) nextCustomIndex = 9;
                 });
                 Object.entries(presetFoldersMap).forEach(([name, index]) => {
                     if (allPaths.has(name) && !folderListEntries.some(entry => entry === name)) {
@@ -1901,7 +1903,7 @@ export default {
                 const metadataDiff = Diff.createPatch('metadata', originalMetadata, newMetadata);
 
                 // Determine if using diff is more efficient (smaller)
-                const useDiff = metadataDiff.length < newMetadata.length;
+                const useDiff = false //metadataDiff.length < newMetadata.length;
 
                 transactionPayloads.push({
                     contractId: contractId,
@@ -2481,7 +2483,7 @@ export default {
                 "9": "Misc",
             };
             folderEntries = folderEntries.splice(1)
-            let currentIndex = 10;
+            let currentIndex = 9;
 
             for (const entry of folderEntries) {
                 let fullPath;
