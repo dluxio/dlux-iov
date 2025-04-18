@@ -84,6 +84,7 @@ createApp({
   data() {
     return {
       rcAccount: null,
+      signedtx: [],
       hpDelegationsOut: [],
       hpDelegationsIn: [],
       rcDelegationsOut: [],
@@ -3205,12 +3206,6 @@ function buyNFT(setname, uid, price, type, callback){
             reject(err);
           });
       });
-    },
-    run(op) {
-      console.log('Refreshing:', op)
-      if (typeof this[op] == "function" && this.account != "GUEST") {
-        this[op](this.account);
-      }
     },
     accountRelations(name) {
       fetch(this.hapi, {

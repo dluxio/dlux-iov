@@ -687,8 +687,16 @@ createApp({
       });
     },
     run(op) {
+      console.log('Refreshing:', op)
       if (typeof this[op] == "function" && this.account != "GUEST") {
         this[op](this.account);
+      } else if (typeof op == "object" ) {
+        try {
+          this[op.op](...op.args)
+        } catch (error) {
+          console.error('Error signing operation:', error);
+          throw error;
+        }
       }
     },
     checkAccount(name, key) {

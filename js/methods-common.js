@@ -498,6 +498,24 @@ export default {
     }
     return result;
   },
+  run(op) {
+    console.log('Refreshing:', op)
+      if (typeof this[op] == "function" && this.account != "GUEST") {
+        this[op](this.account);
+      } else if (typeof op == "object" ) {
+        try {
+          this[op.op](...op.args)
+        } catch (error) {
+          console.error('Error signing operation:', error);
+          throw error;
+        }
+      }
+  },
+  propogate_changes(...args) {
+    if(typeof this.signedtx == "object") {
+      this.signedtx.push(['propogate_changes', ...args])
+    }
+  },
   base58ToNumber(b58) {
     const base58Chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     let num = 0;

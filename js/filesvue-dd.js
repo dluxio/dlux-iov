@@ -2,7 +2,7 @@ import ChoicesVue from '/js/choices-vue.js';
 import Pop from "/js/pop.js";
 import common from './methods-common.js';
 import spk from './methods-spk.js';
-
+import watchers from './watchers-common.js';
 
 export default {
     components: {
@@ -207,6 +207,7 @@ export default {
                 <button class="btn btn-secondary btn-sm" @click="createNewFolder"><i class="fa-solid fa-folder-plus me-1"></i>New Folder</button>
                 <button class="btn btn-success btn-sm ms-2" @click="saveChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-save me-1"></i>Save</button>
                 <button class="btn btn-danger btn-sm ms-2" @click="revertPendingChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-undo me-1"></i>Revert</button>
+                <button class="btn btn-danger btn-sm ms-2" @click="clearPendingChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-trash me-1"></i>Clear</button>
                 <div class="btn-group ms-2">
                     <button class="btn btn-sm" :class="viewOpts.fileView === 'grid' ? 'btn-primary' : 'btn-secondary'" @click="viewOpts.fileView = 'grid'"><i class="fa-solid fa-th-large"></i></button>
                     <button class="btn btn-sm" :class="viewOpts.fileView === 'list' ? 'btn-primary' : 'btn-secondary'" @click="viewOpts.fileView = 'list'"><i class="fa-solid fa-list"></i></button>
@@ -654,6 +655,7 @@ export default {
 </div>
    `,
     props: {
+        signedtx: Array,
         assets: {
             type: Boolean,
             default: false,
@@ -1954,7 +1956,7 @@ export default {
                 cj: updatesPayload, // All updates in one object
                 id: 'spkccT_update_metadata', // The required_posting_auths id for the custom_json
                 msg: `Updating metadata for ${Object.keys(updates).length} contracts`,
-                ops: ['clear_file_changes', ...Object.keys(updates)], // Custom ops array to trigger cleanup for all contracts
+                ops: [{op: 'propogate_changes', args: [`revertPendingChanges`]}], // Custom ops array to trigger cleanup for all contracts
                 txid: `saveMeta_batch_${Date.now()}`, // Unique ID for tracking
                 key: 'Posting' // Specify Posting key
             };
@@ -4176,6 +4178,7 @@ export default {
         }
     },
     watch: {
+        ...watchers,
         'contracts': {
 
             handler(newValue, oldValue) {
@@ -4224,7 +4227,7 @@ export default {
                 }
             },
             deep: true
-        }
+        },
     },
     mounted() {
         // Set up localStorage key based on current account
