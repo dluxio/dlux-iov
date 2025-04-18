@@ -4184,8 +4184,16 @@ export default {
             handler(newValue, oldValue) {
                 //find the difference in this object
                 var diff = false
+                //check if the contract is in the new value 
                 for (var i = 0; i < newValue.length; i++) {
                     if (!this.newMeta[newValue[i].i]) {
+                        diff = true
+                        break
+                    }
+                }
+                //if the contract is in the new value check each .m string for a change
+                if(!diff)for (var i = 0; i < newValue.length; i++) {
+                    if (newValue[i].m != oldValue[i].m) {
                         diff = true
                         break
                     }
