@@ -3,6 +3,7 @@ import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
 import Vote from "/js/vote.js";
 import Pop from "/js/pop.js";
+import Mcommon from "/js/methods-common.js";
 
 export default {
     components: {
@@ -305,6 +306,7 @@ export default {
     },
     emits: ['vote', 'reply', 'modalselect', 'tosign'],
     methods: {
+        ...Mcommon,
         modalSelect(url) {
             this.$emit('modalselect', url);
         },
@@ -530,6 +532,7 @@ export default {
         }
     },
     mounted() {
+        this.post.rep = this.readRep(this.post.author_reputation)
         this.hideLowRep()
         this.getContracts()
     },

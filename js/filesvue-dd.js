@@ -176,6 +176,96 @@ export default {
                 </div>
             </div>
         </div>
+        <div v-if="filesArray.length" class="table-responsive">
+            <table class="table table-dark table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Preview</th>
+                        <th>Filename</th>
+                        <th>Owner</th>
+                        <th>Size</th>
+                        <th>{{ currentFolderPath === 'Trash' ? 'Deletion Date' : 'Labels & Tags' }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="file in filesArray" :key="file.f" 
+                        :class="{ 'table-primary': isFileSelected(file) }"
+                        draggable="true" 
+                        @dragstart="dragStartItem($event, file, 'file')" 
+                        @click="handleFileClick($event, file)"
+                        @contextmenu.prevent.stop="showContextMenu($event, 'file', file)">
+                        <td>
+                            <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="50" />
+                            <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" width="50">
+                                <g>
+                                    <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10S555.5,210,550,210z" />
+                                    <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10 s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
+                                C660,305.2,655.5,309.7,650,309.7z" />
+                                    <path class="st0"
+                                        d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
+                                c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
+                                    <path class="st0"
+                                        d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
+                                    <path class="st0"
+                                        d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
+                                    <path class="st0"
+                                        d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
+                                c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
+                                c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
+                                    <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2"
+                                        style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
+                                </g>
+                            </svg>
+                        </td>
+                        <td>{{ newMeta[file.i][file.f].name || file.f }}</td>
+                        <td>@{{ file.o }}</td>
+                        <td>{{ fancyBytes(file.s) }}</td>
+                        <td>
+                            <div v-if="currentFolderPath !== 'Trash'" class="d-flex flex-wrap align-items-center justify-content-center">
+                                <!-- colors -->
+                                <div v-if="file.lc" class="d-flex me-1 align-items-center" style="margin-left: 15px">
+                                        <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :style="'margin-left: ' + -15 +'px !important;'"></i>
+                                </div>
+                                <!-- labels -->
+                                <div class="me-1" v-for="label in labelsDecode(file.l)">
+                                    <span class="d-flex align-items-center">
+                                        <pop-vue :id="'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')" :title="label.l" trigger="hover">
+                                            <i :class="label.fa"></i>
+                                        </pop-vue>
+                                    </span>
+                                </div>
+                                <!-- flags -->
+                                <div class="d-flex align-items-center">
+                                <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)" >
+                                        <!-- title="Labels"  -->
+                                        <pop-vue :id="'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')" :title="flag.l" trigger="hover">
+                                            <i :class="flag.fa"></i>
+                                        </pop-vue>
+                                    </div>
+                                </div>
+                                <div>
+                                    <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id="'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
+                                        <i :class="lic.fa"></i>
+                                    </pop-vue>
+                                </div>
+                            </div>
+                            <div v-else>
+                                <p class="text-muted">This file will be deleted on {{ blockToTime(file.e) }}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Empty state row for table view -->
+                    <tr v-if="getSubfolders(selectedUser, currentFolderPath).length === 0 && getFiles(selectedUser, currentFolderPath).length === 0">
+                        <td colspan="5" class="text-center p-5">
+                            <div class="text-muted">
+                                <i class="fa-solid fa-folder-open fa-2x mb-3"></i>
+                                <p>This folder is empty. Drag and drop files here or create a new folder.</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
         <!-- Upload Everywhere Controller -->
         <div id="UEController"></div>
         <!-- Warning Box for Trash Folder -->
@@ -183,193 +273,193 @@ export default {
             <i class="fa-solid fa-triangle-exclamation fa-fw me-1"></i>
             Files in Trash will be permanently deleted after their deletion date.
         </div>
-        <div class="files" @contextmenu.prevent="showContextMenu($event, 'background', null)" 
-             @dragover="dragOverBackground($event)" 
-             @drop="dropOnBackground($event)"
-             @mousedown="startSelectionBox($event)"
-             @mousemove="updateSelectionBox($event)"
-             @mouseup="endSelectionBox"
-             style="position: relative; min-height: 200px;">
-            <!-- Remove the template-based selection box overlay -->
-            
-            <div v-if="viewOpts.fileView === 'grid'" class="d-flex flex-wrap" style="background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px;">
-                <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="folder.path" 
-                     class="file-grid m-2 p-2 rounded text-center" 
-                     :class="{ 'bg-dark': !isFolderSelected(folder), 'bg-primary': isFolderSelected(folder) }"
-                     :data-key="folder.path"  
-                     :data-is-preset="folder.isPreset ? 'true' : null" 
-                     :data-type="'folder'"
-                     draggable="true"
-                     @dragstart="dragStartItem($event, folder, 'folder')"
-                     @dblclick="navigateTo(folder.path)" 
-                     @click="handleFolderClick($event, folder)"
-                     @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)" 
-                     @dragover="dragOverFolder($event)" 
-                     @drop="dropOnFolder($event, folder)" 
-                     @dragenter="handleDragEnterFolder($event, folder)" 
-                     @dragleave="handleDragLeave"
-                     style="width: 120px; height: 120px; position: relative; border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: pointer;"
-                     @mouseenter="$event.currentTarget.style.transform = 'translateY(-3px)'; $event.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)'; $event.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'"
-                     @mouseleave="$event.currentTarget.style.transform = ''; $event.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)'; $event.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'">
-                    <div class="d-flex align-items-center justify-content-center" style="height: 70px; width: 100%;">
-                        <i class="fa-solid fa-folder fa-3x" style="color: #ffd166;"></i>
-                    </div>
-                    <div class="text-truncate pb-1" style="max-width: 110px; font-size: 0.9rem;">{{ folder.name }}</div>
-                </div>
-                <div v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" 
-                     class="file-grid m-2 p-2 rounded text-center" 
-                     :class="{ 'bg-primary': isFileSelected(file) }"
-                     :data-key="file.f"  
-                     :data-type="'file'"
-                     :data-file-id="file.f"
-                     draggable="true" 
-                     @dragstart="dragStartItem($event, file, 'file')" 
-                     @click="handleFileClick($event, file)"
-                     @contextmenu.prevent.stop="showContextMenu($event, 'file', file)"
-                     style="width: 120px; height: 120px; position: relative; border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: pointer;"
-                     @mouseenter="$event.currentTarget.style.transform = 'translateY(-3px)'; $event.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)'; $event.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'"
-                     @mouseleave="$event.currentTarget.style.transform = ''; $event.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)'; $event.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'">
-                    <div class="file-icon-container d-flex align-items-center justify-content-center" style="height: 70px; width: 100%;">
-                        <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" style="max-height: 70px; max-width: 100%; object-fit: contain;" />
-                        <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" width="70">
-                            <g>
-                                <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10 S655.5,210,650,210z" />
-                                <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10 s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7 C660,305.2,655.5,309.7,650,309.7z" />
-                                <path class="st0" d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400 c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
-                                <path class="st0" d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
-                                <path class="st0" d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
-                                <path class="st0" d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3 c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500 c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
-                                <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
-                            </g>
-                        </svg>
-                </div>
-                    <div class="text-truncate pb-1" style="max-width: 110px; font-size: 0.9rem;">{{ newMeta[file.i][file.f].name || file.f }}</div>
-                    <div v-if="flagsDecode(newMeta[file.i][file.f].flags, 1).length" class="position-absolute bottom-0 end-0 bg-dark rounded-circle p-1" style="margin: 2px;">
-                        <i class="fa-solid fa-lock fa-sm"></i>
-                    </div>
-                </div>
+        <div v-if="!filesArray.length">
+            <div class="files" @contextmenu.prevent="showContextMenu($event, 'background', null)" 
+                @dragover="dragOverBackground($event)" 
+                @drop="dropOnBackground($event)"
+                @mousedown="startSelectionBox($event)"
+                @mousemove="updateSelectionBox($event)"
+                @mouseup="endSelectionBox"
+                style="position: relative; min-height: 200px;">
+                <!-- Remove the template-based selection box overlay -->
                 
-                <!-- Empty state for grid view -->
-                <div v-if="getSubfolders(selectedUser, currentFolderPath).length === 0 && getFiles(selectedUser, currentFolderPath).length === 0" 
-                     class="w-100 text-center p-5 d-flex flex-column align-items-center justify-content-center" 
-                     style="min-height: 180px; background-color: rgba(255,255,255,0.05); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.2); margin: 10px;">
-                    <i class="fa-solid fa-folder-open fa-3x mb-3" style="color: #adb5bd;"></i>
-                    <p class="text-muted">This folder is empty. Drag and drop files here or create a new folder.</p>
-                    <button class="btn btn-outline-secondary btn-sm mt-2" @click="createNewFolder">
-                        <i class="fa-solid fa-folder-plus me-1"></i>New Folder
-                    </button>
+                <div v-if="viewOpts.fileView === 'grid'" class="d-flex flex-wrap" style="background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px;">
+                    <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="folder.path" 
+                        class="file-grid m-2 p-2 rounded text-center" 
+                        :class="{ 'bg-dark': !isFolderSelected(folder), 'bg-primary': isFolderSelected(folder) }"
+                        :data-key="folder.path"  
+                        :data-is-preset="folder.isPreset ? 'true' : null" 
+                        :data-type="'folder'"
+                        draggable="true"
+                        @dragstart="dragStartItem($event, folder, 'folder')"
+                        @dblclick="navigateTo(folder.path)" 
+                        @click="handleFolderClick($event, folder)"
+                        @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)" 
+                        @dragover="dragOverFolder($event)" 
+                        @drop="dropOnFolder($event, folder)" 
+                        @dragenter="handleDragEnterFolder($event, folder)" 
+                        @dragleave="handleDragLeave"
+                        style="width: 120px; height: 120px; position: relative; border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: pointer;"
+                        @mouseenter="$event.currentTarget.style.transform = 'translateY(-3px)'; $event.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)'; $event.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'"
+                        @mouseleave="$event.currentTarget.style.transform = ''; $event.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)'; $event.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'">
+                        <div class="d-flex align-items-center justify-content-center" style="height: 70px; width: 100%;">
+                            <i class="fa-solid fa-folder fa-3x" style="color: #ffd166;"></i>
+                        </div>
+                        <div class="text-truncate pb-1" style="max-width: 110px; font-size: 0.9rem;">{{ folder.name }}</div>
+                    </div>
+                    <div v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" 
+                        class="file-grid m-2 p-2 rounded text-center" 
+                        :class="{ 'bg-primary': isFileSelected(file) }"
+                        :data-key="file.f"  
+                        :data-type="'file'"
+                        :data-file-id="file.f"
+                        draggable="true" 
+                        @dragstart="dragStartItem($event, file, 'file')" 
+                        @click="handleFileClick($event, file)"
+                        @contextmenu.prevent.stop="showContextMenu($event, 'file', file)"
+                        style="width: 120px; height: 120px; position: relative; border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: pointer;"
+                        @mouseenter="$event.currentTarget.style.transform = 'translateY(-3px)'; $event.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)'; $event.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'"
+                        @mouseleave="$event.currentTarget.style.transform = ''; $event.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)'; $event.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'">
+                        <div class="file-icon-container d-flex align-items-center justify-content-center" style="height: 70px; width: 100%;">
+                            <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" style="max-height: 70px; max-width: 100%; object-fit: contain;" />
+                            <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" width="70">
+                                <g>
+                                    <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10 S655.5,210,650,210z" />
+                                    <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10 s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7 C660,305.2,655.5,309.7,650,309.7z" />
+                                    <path class="st0" d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400 c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
+                                    <path class="st0" d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
+                                    <path class="st0" d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
+                                    <path class="st0" d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3 c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500 c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
+                                    <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
+                                </g>
+                            </svg>
+                    </div>
+                        <div class="text-truncate pb-1" style="max-width: 110px; font-size: 0.9rem;">{{ newMeta[file.i][file.f].name || file.f }}</div>
+                        <div v-if="flagsDecode(newMeta[file.i][file.f].flags, 1).length" class="position-absolute bottom-0 end-0 bg-dark rounded-circle p-1" style="margin: 2px;">
+                            <i class="fa-solid fa-lock fa-sm"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Empty state for grid view -->
+                    <div v-if="getSubfolders(selectedUser, currentFolderPath).length === 0 && getFiles(selectedUser, currentFolderPath).length === 0" 
+                        class="w-100 text-center p-5 d-flex flex-column align-items-center justify-content-center" 
+                        style="min-height: 180px; background-color: rgba(255,255,255,0.05); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.2); margin: 10px;">
+                        <i class="fa-solid fa-folder-open fa-3x mb-3" style="color: #adb5bd;"></i>
+                        <p class="text-muted">This folder is empty. Drag and drop files here or create a new folder.</p>
+                        <button class="btn btn-outline-secondary btn-sm mt-2" @click="createNewFolder">
+                            <i class="fa-solid fa-folder-plus me-1"></i>New Folder
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <div v-else class="table-responsive">
-                <table class="table table-dark table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>Preview</th>
-                            <th>Filename</th>
-                            <th>Owner</th>
-                            <th>Size</th>
-                            <th>{{ currentFolderPath === 'Trash' ? 'Deletion Date' : 'Labels & Tags' }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" 
-                             class="folder-row" 
-                            :data-key="folder.path" 
-                            :data-type="'folder'" 
-                            :data-is-preset="folder.isPreset ? 'true' : null"
-                            @dblclick="navigateTo(folder.path)" 
-                            @click="handleFolderClick($event, folder)" 
-                            @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)" 
-                            @dragover="dragOverFolder($event)" 
-                            @drop="dropOnFolder($event, folder)" 
-                            @dragenter="handleDragEnterFolder($event, folder)" 
-                            @dragleave="handleDragLeave">
-                            <td><i class="fa-solid fa-folder"></i></td>
-                            <td>{{ folder.name }}</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        <tr v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" 
-                            :class="{ 'table-primary': isFileSelected(file) }"
-                            draggable="true" 
-                            @dragstart="dragStartItem($event, file, 'file')" 
-                            @click="handleFileClick($event, file)"
-                            @contextmenu.prevent.stop="showContextMenu($event, 'file', file)">
-                            <td>
-                                <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="50" />
-                                <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" width="50">
-                                    <g>
-                                        <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10S555.5,210,550,210z" />
-                                        <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10 s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
-                                    C660,305.2,655.5,309.7,650,309.7z" />
-                                        <path class="st0"
-                                            d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
-                                    c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
-                                        <path class="st0"
-                                            d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
-                                        <path class="st0"
-                                            d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
-                                        <path class="st0"
-                                            d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
-                                    c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
-                                    c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
-                                        <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2"
-                                            style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
-                                    </g>
-                                </svg>
-                            </td>
-                            <td>{{ newMeta[file.i][file.f].name || file.f }}</td>
-                            <td>@{{ file.o }}</td>
-                            <td>{{ fancyBytes(file.s) }}</td>
-                            <td>
-                                <div v-if="currentFolderPath !== 'Trash'" class="d-flex flex-wrap align-items-center justify-content-center">
-                                    <!-- colors -->
-                                    <div v-if="file.lc" class="d-flex me-1 align-items-center" style="margin-left: 15px">
-                                            <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :style="'margin-left: ' + -15 +'px !important;'"></i>
-                                    </div>
-                                    <!-- labels -->
-                                    <div class="me-1" v-for="label in labelsDecode(file.l)">
-                                        <span class="d-flex align-items-center">
-                                            <pop-vue :id="'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')" :title="label.l" trigger="hover">
-                                                <i :class="label.fa"></i>
-                                            </pop-vue>
-                                        </span>
-                                    </div>
-                                    <!-- flags -->
-                                    <div class="d-flex align-items-center">
-                                    <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)" >
-                                            <!-- title="Labels"  -->
-                                            <pop-vue :id="'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')" :title="flag.l" trigger="hover">
-                                                <i :class="flag.fa"></i>
+                <div v-else class="table-responsive">
+                    <table class="table table-dark table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Preview</th>
+                                <th>Filename</th>
+                                <th>Owner</th>
+                                <th>Size</th>
+                                <th>{{ currentFolderPath === 'Trash' ? 'Deletion Date' : 'Labels & Tags' }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" 
+                                class="folder-row" 
+                                :data-key="folder.path" 
+                                :data-type="'folder'" 
+                                :data-is-preset="folder.isPreset ? 'true' : null"
+                                @dblclick="navigateTo(folder.path)" 
+                                @click="handleFolderClick($event, folder)" 
+                                @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)" 
+                                @dragover="dragOverFolder($event)" 
+                                @drop="dropOnFolder($event, folder)" 
+                                @dragenter="handleDragEnterFolder($event, folder)" 
+                                @dragleave="handleDragLeave">
+                                <td><i class="fa-solid fa-folder"></i></td>
+                                <td>{{ folder.name }}</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" 
+                                :class="{ 'table-primary': isFileSelected(file) }"
+                                draggable="true" 
+                                @dragstart="dragStartItem($event, file, 'file')" 
+                                @click="handleFileClick($event, file)"
+                                @contextmenu.prevent.stop="showContextMenu($event, 'file', file)">
+                                <td>
+                                    <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="50" />
+                                    <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" width="50">
+                                        <g>
+                                            <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10S555.5,210,550,210z" />
+                                            <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10 s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
+                                        C660,305.2,655.5,309.7,650,309.7z" />
+                                            <path class="st0"
+                                                d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
+                                        c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
+                                            <path class="st0"
+                                                d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
+                                            <path class="st0"
+                                                d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
+                                            <path class="st0"
+                                                d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
+                                        c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
+                                        c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
+                                            <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2"
+                                                style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
+                                        </g>
+                                    </svg>
+                                </td>
+                                <td>{{ newMeta[file.i][file.f].name || file.f }}</td>
+                                <td>@{{ file.o }}</td>
+                                <td>{{ fancyBytes(file.s) }}</td>
+                                <td>
+                                    <div v-if="currentFolderPath !== 'Trash'" class="d-flex flex-wrap align-items-center justify-content-center">
+                                        <!-- colors -->
+                                        <div v-if="file.lc" class="d-flex me-1 align-items-center" style="margin-left: 15px">
+                                                <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :style="'margin-left: ' + -15 +'px !important;'"></i>
+                                        </div>
+                                        <!-- labels -->
+                                        <div class="me-1" v-for="label in labelsDecode(file.l)">
+                                            <span class="d-flex align-items-center">
+                                                <pop-vue :id="'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')" :title="label.l" trigger="hover">
+                                                    <i :class="label.fa"></i>
+                                                </pop-vue>
+                                            </span>
+                                        </div>
+                                        <!-- flags -->
+                                        <div class="d-flex align-items-center">
+                                        <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)" >
+                                                <!-- title="Labels"  -->
+                                                <pop-vue :id="'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')" :title="flag.l" trigger="hover">
+                                                    <i :class="flag.fa"></i>
+                                                </pop-vue>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id="'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
+                                                <i :class="lic.fa"></i>
                                             </pop-vue>
                                         </div>
                                     </div>
-                                    <div>
-                                        <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id="'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
-                                            <i :class="lic.fa"></i>
-                                        </pop-vue>
+                                    <div v-else>
+                                        <p class="text-muted">This file will be deleted on {{ blockToTime(file.e) }}</p>
                                     </div>
-                                </div>
-                                <div v-else>
-                                    <p class="text-muted">This file will be deleted on {{ blockToTime(file.e) }}</p>
-                                </div>
-                            </td>
-                        </tr>
-                        <!-- Empty state row for table view -->
-                        <tr v-if="getSubfolders(selectedUser, currentFolderPath).length === 0 && getFiles(selectedUser, currentFolderPath).length === 0">
-                            <td colspan="5" class="text-center p-5">
-                                <div class="text-muted">
-                                    <i class="fa-solid fa-folder-open fa-2x mb-3"></i>
-                                    <p>This folder is empty. Drag and drop files here or create a new folder.</p>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                </td>
+                            </tr>
+                            <!-- Empty state row for table view -->
+                            <tr v-if="getSubfolders(selectedUser, currentFolderPath).length === 0 && getFiles(selectedUser, currentFolderPath).length === 0">
+                                <td colspan="5" class="text-center p-5">
+                                    <div class="text-muted">
+                                        <i class="fa-solid fa-folder-open fa-2x mb-3"></i>
+                                        <p>This folder is empty. Drag and drop files here or create a new folder.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            
-            
         </div>
     </div>
 <!-- Context menu -->

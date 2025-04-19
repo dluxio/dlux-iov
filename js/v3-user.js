@@ -1623,6 +1623,23 @@ PORT=3000
             }
           }
           console.log(this.spkapi.pubKey, {contractOpen})
+          
+          // Check if Hive posting key and SPK key are different and SPK key isn't 'NA'
+          if (this.accountinfo && this.spkapi.pubKey !== 'NA' && 
+              this.accountinfo.posting.key_auths && 
+              this.accountinfo.posting.key_auths[0] && 
+              this.accountinfo.posting.key_auths[0][0] !== this.spkapi.pubKey) {
+            
+            // Create a confirmation dialog with Continue and Cancel buttons
+            if (confirm("Your Hive posting public key is different from your SPK public key. Would you like to update your SPK key to match your Hive posting key?")) {
+              // User clicked Continue - update the key
+              this.updatePubkey();
+            } else {
+              // User clicked Cancel - do nothing or handle as needed
+              console.log("User opted not to update SPK public key");
+            }
+          }
+          
           if (!contractOpen && this.spkapi.pubKey != 'NA'){
             fetch("https://ipfs.dlux.io/upload-promo-contract?user=" + this.account)
               .then((response) => response.json())
@@ -3864,27 +3881,6 @@ function buyNFT(setname, uid, price, type, callback){
         }
       }
       return 0;
-    },
-    readRep(rep2) {
-      function log10(str) {
-        const leadingDigits = parseInt(str.substring(0, 4));
-        const log = Math.log(leadingDigits) / Math.LN10 + 0.00000001;
-        const n = str.length - 1;
-        return n + (log - parseInt(log));
-      }
-      if (rep2 == null) return rep2;
-      let rep = String(rep2);
-      const neg = rep.charAt(0) === "-";
-      rep = neg ? rep.substring(1) : rep;
-
-      let out = log10(rep);
-      if (isNaN(out)) out = 0;
-      out = Math.max(out - 9, 0); // @ -9, $0.50 earned is approx magnitude 1
-      out = (neg ? -1 : 1) * out;
-      out = out * 9 + 25; // 9 points per magnitude. center at 25
-      // base-line 0 to darken and < 0 to auto hide (grep rephide)
-      out = parseInt(out);
-      return out;
     },
     getQuotes() {
       fetch(
