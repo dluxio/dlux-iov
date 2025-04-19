@@ -43,6 +43,20 @@ export default {
                 </button>
             </div>
 
+            <!-- Combined progress bar (always visible during upload) -->
+            <div v-if="isUploading" class="mt-3 mb-2">
+                <div class="d-flex align-items-center mb-1">
+                    <span class="me-2">Overall Upload Progress:</span>
+                    <span class="ms-auto">{{Math.round(combinedProgress)}}%</span>
+                </div>
+                <div class="progress" role="progressbar" aria-label="Combined upload progress">
+                    <div class="progress-bar" :style="'width: ' + combinedProgress + '%'"></div>
+                </div>
+                <div class="text-center mt-1 small text-muted">
+                    {{uploadedCount}}/{{totalUploadCount}} files complete
+                </div>
+            </div>
+
             <!-- Collapsible file details section -->
             <div v-show="showFileDetails" class="mt-2 border-top pt-2">
                 <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key, index) in Object.values(FileInfo).filter(file => !file.is_thumb)"
@@ -60,7 +74,7 @@ export default {
                                     aria-valuemin="0" aria-valuemax="100">
                                     <div class="progress-bar"
                                         :style="'width: ' + File[FileInfo[file.name].index].progress + '%'">
-                                        {{File[FileInfo[file.name].index].progress}}%
+                                        {{Math.round(File[FileInfo[file.name].index].progress)}}%
                                     </div>
                                 </div>
                             </div>
@@ -460,6 +474,9 @@ export default {
       ready: false,
       deletable: true,
       showFileDetails: false,
+      uploadInProgress: false,
+      fileProgress: {}, // Tracks progress for each file by CID
+      completedFiles: 0,
     };
   },
   emits: ["tosign", "done"],
@@ -1179,6 +1196,11 @@ export default {
           return; 
       }
 
+      // Reset upload tracking
+      this.uploadInProgress = false
+      this.fileProgress = {}
+      this.completedFiles = 0
+
       if (!this.encryption.encrypted) for (var i = 0; i < names.length; i++) {
         if ((this.FileInfo[names[i]].is_thumb && this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
           meta[this.FileInfo[names[i]].hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},${this.FileInfo[names[i]].meta.thumb},${this.FileInfo[names[i]].is_thumb ? '2' : this.FileInfo[names[i]].meta.flag}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
@@ -1354,7 +1376,7 @@ export default {
       
       // Add file metadata entries to the string
       if (fileMetaEntries.length > 0) {
-        metaString += (metaString.endsWith('|') ? '' : '|') + fileMetaEntries.join('|');
+        metaString += (metaString.endsWith(',') ? '' : ',') + fileMetaEntries.join(',');
       }
       
       console.log({metaString});
@@ -1377,6 +1399,9 @@ export default {
           this.File = []
           this.FileInfo = {}
           this.fileRequests = {}
+          this.uploadInProgress = false
+          this.fileProgress = {}
+          this.completedFiles = 0
         },
         onProgress: (e, f) => {
           console.log('options.onProgress', e, f, this.FileInfo, this.File, this.File[this.FileInfo[f.name].index])
@@ -1385,6 +1410,17 @@ export default {
           this.File[this.FileInfo[f.name].index].actions.cancel = true
           this.File[this.FileInfo[f.name].index].progress = e.loaded / e.total * 100
           this.FileInfo[f.name].status = this.File[this.FileInfo[f.name].index].progress < 100 ? `uploading(${this.File[this.FileInfo[f.name].index].progress}%)` : 'done'
+          
+          // Update combined progress tracking
+          this.uploadInProgress = true
+          if (f.cid) {
+            this.fileProgress[f.cid] = {
+              loaded: e.loaded,
+              total: e.total,
+              percentage: e.loaded / e.total * 100,
+              size: f.size
+            }
+          }
         },
         onError: (e, f) => {
           console.log('options.onError', e, f)
@@ -1403,6 +1439,18 @@ export default {
           this.FileInfo[f.name].progress = 100
           this.File[this.FileInfo[f.name].index].progress = 100
           this.FileInfo[f.name].status = 'done'
+          
+          // Update combined progress tracking
+          if (f.cid) {
+            this.fileProgress[f.cid] = {
+              loaded: f.size,
+              total: f.size,
+              percentage: 100,
+              size: f.size
+            }
+            this.completedFiles++
+          }
+          
           var done = true
           for (var file in this.FileInfo) {
             if (this.FileInfo[file].status != 'done') {
@@ -1412,6 +1460,7 @@ export default {
           }
           if (done) {
             setTimeout(() => {
+              this.uploadInProgress = false
               this.$emit('done', this.contract)
             }, 5000)
           }
@@ -1569,7 +1618,11 @@ export default {
         .forEach(file => {
           let options = defaultOptions
           options.cid = file.cid
-          uploadFile(file, options, file.cid)
+          if (file.cid) {
+            // Set the CID as a property on the file object so onProgress and onComplete can access it
+            file.cid = file.cid
+            uploadFile(file, options, file.cid)
+          }
         });
     },
   },
@@ -1632,7 +1685,28 @@ export default {
         }
       }
       return size
-    }
+    },
+    isUploading() {
+      return this.uploadInProgress;
+    },
+    combinedProgress() {
+      let total = 0;
+      let completed = 0;
+      for (const progress in this.fileProgress) {
+        total += this.fileProgress[progress].total;
+        completed += this.fileProgress[progress].loaded;
+      }
+      return total > 0 ? (completed / total) * 100 : 0;
+    },
+    uploadedCount() {
+      return this.completedFiles;
+    },
+    totalUploadCount() {
+      // Count only non-thumbnail files that will be uploaded
+      return Object.values(this.FileInfo).filter(file => 
+        !file.is_thumb || (file.is_thumb && file.use_thumb)
+      ).length;
+    },
   },
   mounted() {
     this.contract = this.propcontract;
