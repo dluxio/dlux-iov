@@ -1601,9 +1601,10 @@ PORT=3000
             this.contracts.push(data.file_contracts[node]);
             this.contractIDs[data.file_contracts[node].i].index = this.contracts.length - 1;
           }
-          var videoUploadContract = false
+          var videoUploadContract = false, contractOpen = false
           for (var user in data.channels) {
             for (var node in data.channels[user]) {
+              contractOpen = true
               if (this.services[user]) {
                 this.services[user].channel = 1
                 this.services[user].memo = "Contract Open"
@@ -1620,6 +1621,17 @@ PORT=3000
                 this.contractIDs[data.channels[user][node].i].index = this.contracts.length - 1;
               }
             }
+          }
+          console.log(this.spkapi.pubKey, {contractOpen})
+          if (!contractOpen && this.spkapi.pubKey != 'NA'){
+            fetch("https://ipfs.dlux.io/upload-promo-contract?user=" + this.account)
+              .then((response) => response.json())
+              .then((data) => {
+                console.log(data)
+                if(data.message == "Contract Sent")setTimeout(() => {
+                  this.getSPKUser()
+                }, 10000)
+              })
           }
         });
     },
@@ -3006,17 +3018,27 @@ function buyNFT(setname, uid, price, type, callback){
       return parseFloat(num).toFixed(dig);
     },
     handleScroll() {
+      //console.log("Scroll event detected"); // Log: Check if handler fires
       if (this.activeTab == 'blog' || this.activeTab == 'inventory') {
         const now = Date.now();
-        if (now - this.lastScroll > 2000) {
+        if (now - this.lastScroll > 500) { 
           this.lastScroll = now;
-          if (
-            document.documentElement.clientHeight + window.scrollY >
-            document.documentElement.scrollHeight -
-            document.documentElement.clientHeight * 2
-          ) {
-            if (this.activeTab == 'blog') this.getPosts();
-            else if (this.activeTab == 'inventory') this.getNFTs()
+          // Use document.body properties for scroll calculation
+          const scrollPosition = window.innerHeight + document.body.scrollTop; 
+          const scrollHeight = document.body.scrollHeight;
+          //const threshold = document.documentElement.scrollHeight - 500;
+          //console.log(`Scroll Position: ${scrollPosition}, Threshold: ${threshold}`); // Log: Check values
+          
+          // Trigger when one viewport height away from the bottom of the body
+          if ( scrollPosition >= scrollHeight - window.innerHeight ) { 
+            //console.log("Threshold reached, loading more content..."); // Log: Check if condition met
+            if (this.activeTab == 'blog') {
+              //console.log("Calling getPosts()"); // Log: Check function call
+              this.getPosts();
+            } else if (this.activeTab == 'inventory') {
+              //console.log("Calling getNFTs()"); // Log: Check function call
+              this.getNFTs()
+            }
           }
         }
       }
@@ -4103,6 +4125,8 @@ function buyNFT(setname, uid, price, type, callback){
         }, 250);
     },
     trades(i) {
+      this.FTtrades = []; // Clear existing FT trades
+      this.NFTtrades = []; // Clear existing NFT trades
       fetch(this.providers[i].api + "/api/trades/fts/" + this.account)
         .then((r) => r.json())
         .then((json) => {
@@ -4990,7 +5014,16 @@ function buyNFT(setname, uid, price, type, callback){
       }
     }
     this.pendingTokens = JSON.parse(localStorage.getItem(`pendingTokens`)) || []
-    //window.addEventListener('scroll', this.handleScroll);
+    this.boundScrollHandler = this.handleScroll.bind(this); // Create a bound reference
+    //window.addEventListener('scroll', this.boundScrollHandler); - Changed target below
+    
+    // Simplified scroll listener for testing - Attached to BODY - REMOVED
+    //this.simpleScrollLogger = () => { console.log(\"*** BODY SCROLL EVENT FIRED ***\"); };
+    //document.body.addEventListener('scroll', this.simpleScrollLogger);
+
+    // Attach the actual handler to the body element
+    document.body.addEventListener('scroll', this.boundScrollHandler);
+
     //check hash
     if (location.hash) {
       if (location.hash == "#blog") {
@@ -5029,7 +5062,11 @@ function buyNFT(setname, uid, price, type, callback){
     this.observer.disconnect();
   },
   unmounted() {
-    //window.removeEventListener('scroll', this.handleScroll);
+    //window.removeEventListener('scroll', this.boundScrollHandler); // Use the same bound reference - Temporarily disabled
+    //document.body.removeEventListener('scroll', this.simpleScrollLogger); // Remove simplified listener from BODY - REMOVED
+
+    // Remove the actual handler from the body element
+    document.body.removeEventListener('scroll', this.boundScrollHandler);
   },
   watch: {
     postSelect(a, b) {

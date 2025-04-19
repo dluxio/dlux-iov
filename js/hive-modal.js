@@ -496,7 +496,16 @@ export default {
             if (opid === 'delegate_rc') {
                 const op = {
                     type: "raw",
-                    op: ["rc", ["delegate_rc", opParams]],
+                    op: [[
+                      "delegate_rc",
+                      {
+                        "from": this.account,
+                        "delegatees": [
+                            opParams.to
+                        ],
+                        "max_rc": opParams.amount
+                      }
+                    ]],
                     key: this.feat.key,
                     id: `${opid} ${this.account}`,
                     msg: this.feat.string,

@@ -88,13 +88,16 @@ export default {
   fallBackIMG(event, string) {
     event.target.src = 'https://images.hive.blog/u/' + string + '/avatar'
   },
-  fancyBytes(bytes, decimals = 0) {
-    var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
-    while (bytes > 1024) {
-      bytes = bytes / 1024
-      counter++
+  fancyBytes(bytes) {
+    if (bytes === 0) return '0 B';
+    let counter = 0;
+    const units = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'];
+    while (bytes >= 1024 && counter < units.length - 1) {
+      bytes /= 1024;
+      counter++;
     }
-    return `${this.toFixed(bytes, decimals)} ${p[counter]}B`
+    // Use toFixed(1) for non-bytes units, toFixed(0) for bytes
+    return `${bytes.toFixed(counter > 0 ? 1 : 0)} ${units[counter]}B`;
   },
   fancyRounding(bytes) {
     var counter = 0, p = ['', 'K', 'M', 'B', 'T', 'Q', 'KQ', 'S', 'KS']
@@ -500,19 +503,19 @@ export default {
   },
   run(op) {
     console.log('Refreshing:', op)
-      if (typeof this[op] == "function" && this.account != "GUEST") {
-        this[op](this.account);
-      } else if (typeof op == "object" ) {
-        try {
-          this[op.op](...op.args)
-        } catch (error) {
-          console.error('Error signing operation:', error);
-          throw error;
-        }
+    if (typeof this[op] == "function" && this.account != "GUEST") {
+      this[op](this.account);
+    } else if (typeof op == "object") {
+      try {
+        this[op.op](...op.args)
+      } catch (error) {
+        console.error('Error signing operation:', error);
+        throw error;
       }
+    }
   },
   propogate_changes(...args) {
-    if(typeof this.signedtx == "object") {
+    if (typeof this.signedtx == "object") {
       this.signedtx.push(['propogate_changes', ...args])
     }
   },

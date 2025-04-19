@@ -9,6 +9,8 @@ export default {
  <!--file uploader-->
     <Transition>
        <div v-if="contract.i" class="">
+        <!-- Hide the file input/drag-drop area as files are passed via props -->
+        <!-- 
         <div>
             <form onsubmit="return false;">
                 <div class="d-flex justify-content-between align-items-center">
@@ -27,178 +29,186 @@ export default {
                 </div>
             </form>
         </div>
+        -->
 
 
 
-        <div v-if="File.length" class="rounded" style="background-color:rgba(0,0,0,0.3)">
-
-            <div class="d-flex mx-1">
-                <div class="mx-auto mt-2 lead fs-2">{{ fileCount }} | {{fancyBytes(totalSize)}}</div>
+        <div v-if="File.length" class="rounded p-2" style="background-color:rgba(0,0,0,0.1)"> 
+            <!-- Always visible summary -->
+            <div class="d-flex mx-1 align-items-center">
+                <div class="lead fs-5">{{ fileCount }} | {{fancyBytes(totalSize)}}</div>
+                <button class="btn btn-sm btn-outline-secondary ms-auto" @click="showFileDetails = !showFileDetails">
+                    {{ showFileDetails ? 'Hide Details' : 'Show Details' }}
+                    <i :class="['fa-solid', showFileDetails ? 'fa-chevron-up' : 'fa-chevron-down']" class="fa-fw"></i>
+                </button>
             </div>
 
-            <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key, index) in Object.values(FileInfo).filter(file => !file.is_thumb)"
-                class="rounded">
-                <div class="card mt-3">
-                    <div class="d-flex flex-wrap align-items-center px-2 py-1">
-                        <div>
-                            <div class="fs-4 fw-light m-0 text-break"><span
-                                    class="px-2 py-1 me-2 border border-light text-white rounded-pill"><i
-                                        class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</div>
-                        </div>
-                        <div class="flex-grow-1 mx-5" >
-                         <!--v-if="File[FileInfo[file.name].index].actions.cancel"-->
-                            <div class="progress" role="progressbar" aria-label="Upload progress" aria-valuenow="25"
-                                aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar"
-                                    :style="'width: ' + File[FileInfo[file.name].index].progress + '%'">
-                                    {{File[FileInfo[file.name].index].progress}}%
+            <!-- Collapsible file details section -->
+            <div v-show="showFileDetails" class="mt-2 border-top pt-2">
+                <div id="listOfImgs" v-if="!encryption.encrypted" v-for="(file, key, index) in Object.values(FileInfo).filter(file => !file.is_thumb)"
+                    class="rounded">
+                    <div class="card mt-3">
+                        <div class="d-flex flex-wrap align-items-center px-2 py-1">
+                            <div>
+                                <div class="fs-4 fw-light m-0 text-break"><span
+                                        class="px-2 py-1 me-2 border border-light text-white rounded-pill"><i
+                                            class="fa-solid fa-lock-open fa-fw"></i></span>{{file.name}}</div>
+                            </div>
+                            <div class="flex-grow-1 mx-5" >
+                             <!--v-if="File[FileInfo[file.name].index].actions.cancel"-->
+                                <div class="progress" role="progressbar" aria-label="Upload progress" aria-valuenow="25"
+                                    aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar"
+                                        :style="'width: ' + File[FileInfo[file.name].index].progress + '%'">
+                                        {{File[FileInfo[file.name].index].progress}}%
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="flex-shrink" v-if="File.length">
-                            <button type="button" class="me-2 btn btn-secondary"
-                                v-if="File[FileInfo[file.name].index].actions.pause"
-                                @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Pause</button>
-                            <button type="button" class="me-2 btn btn-secondary"
-                                v-if="File[FileInfo[file.name].index].actions.resume"
-                                @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Resume</button>
-                            <button type="button" class="me-2 btn btn-secondary"
-                                v-if="File[FileInfo[file.name].index].actions.cancel"
-                                @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Cancel</button>
-                        </div>
-                        <div class="ms-auto my-1">
-                            <button class="btn btn-danger" @click="deleteImg(FileInfo[file.name].index, file.name)"
-                                data-toggle="tooltip" data-placement="top" title="Delete Asset"><i
-                                    class="fas fa-fw fa-trash-alt"></i></button>
-                        </div>
-                    </div>
-
-                    <div class="d-flex flex-wrap align-items-center px-2 py-2 mb-1 rounded-bottom">
-                        <div class="flex-grow-1">
-
-                            <div class="d-flex flex-wrap justify-content-around">
-
-                                <div class="d-flex flex-column justify-content-center py-2 rounded" style="background-color:rgba(0,0,0,0.3); min-width:350px;">
-
-                                    <div class="d-flex align-items-center px-2 py-1" v-if="FileInfo['thumb' + file.name]" >
-                                        <div class="me-auto fs-5 text-wrap">
-                                          Automatic Thumbnail
-                                          <span class="small d-none">({{fancyBytes(FileInfo['thumb' + file.name].size)}})</span>
-                                        </div>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input fs-4" @click="resetThumb(file.name)" type="checkbox"
-                                                role="switch" :id="'includeThumb' + file.name" :checked="FileInfo['thumb' + file.name].use_thumb">
-                                            <label class="form-check-label" :for="'includeThumb' + file.name"></label>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mx-auto my-auto"
-                                        v-if="FileInfo['thumb' + file.name] && FileInfo['thumb' + file.name].use_thumb">
-                                        <img :src="FileInfo['thumb' + file.name].fileContent"
-                                            class="img-thumbnail"></img>
-                                    </div>
-                                    <div class="img-thumbnail mx-auto my-auto"
-                                        v-if="!FileInfo['thumb' + file.name] || !FileInfo['thumb' + file.name].use_thumb">
-                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                            xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-                                            viewBox="0 0 800 800"
-                                            style="enable-background:new 0 0 800 800; background-color: #fff; width: 128px; border-radius: .25em;"
-                                            xml:space="preserve">
-
-                                            <g>
-                                                <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
-                                                  S655.5,210,650,210z" />
-                                                <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
-                                                  s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
-                                                  C660,305.2,655.5,309.7,650,309.7z" />
-                                                <path class="st0"
-                                                    d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
-                                                  c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
-                                                <path class="st0"
-                                                    d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
-                                                <path class="st0"
-                                                    d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
-                                                <path class="st0"
-                                                    d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
-                                                  c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
-                                                  c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
-                                                <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2"
-                                                    style="text-transform: uppercase; font-size: 149px;">{{FileInfo[file.name].meta.ext}}</text>
-                                            </g>
-                                        </svg>
-                                    </div>
-
-                                   
-                                    <span class="fs-4 mx-auto"> {{ FileInfo['thumb' + file.name] && FileInfo['thumb' + file.name].use_thumb ? fancyBytes(FileInfo['thumb' + file.name].size + FileInfo[file.name].size) : fancyBytes(FileInfo[file.name].size)}} </span>
-
-                                    <!-- link -->
-                                    <div class="mx-2">
-                                        <a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
-                                            target="_blank" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"><span
-                                                class="d-flex align-items-center">URL<i
-                                                    class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex flex-column">
-
-                                    <div class="mb-1">
-                                        <label class="mb-1">File Name</label>
-                                        <div class="input-group">
-                                            <input autocapitalize="off" placeholder="File Name"
-                                                pattern="[a-zA-Z0-9]{3,25}" class="form-control bg-dark border-0 text-info"
-                                                v-model="FileInfo[file.name].meta.name">
-                                            <span class="input-group-text">.</span>
-                                            <input autocapitalize="off" placeholder="File Type"
-                                                pattern="[a-zA-Z0-9]{1,4}" class="form-control bg-dark border-0 text-info"
-                                                v-model="FileInfo[file.name].meta.ext">
-                                        </div>
-                                    </div>
-                                    <div class="mb-1">
-                                        <label class="mb-1">Thumbnail</label>
-                                        <div v-if="FileInfo['thumb' + file.name]"
-                                            class="position-relative has-validation">
-                                            <input autocapitalize="off"
-                                                :disabled="FileInfo['thumb' + file.name].use_thumb"
-                                                placeholder="https://your-thumbnail-image.png"
-                                                pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+"
-                                                class="form-control disabled bg-dark border-0" v-model="FileInfo[file.name].meta.thumb">
-                                        </div>
-                                        <div v-if="!FileInfo['thumb' + file.name]"
-                                            class="position-relative has-validation">
-                                            <input autocapitalize="off" placeholder="https://your-thumbnail-image.png"
-                                                pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+"
-                                                class="form-control disabled" v-model="FileInfo[file.name].meta.thumb">
-                                        </div>
-                                    </div>
-
-                                    <!-- choices-js-->
-                                    <div class="mb-1">
-                                        <label class="mb-1">Tags</label>
-                                        <choices-vue :ref="file.name +'select-tag'" prop_type="tags"
-                                            :reference="file.name +'select-tag'"
-                                            @data="handleTag(file.name, $event)"></choices-vue>
-                                    </div>
-                                    <div class="mb-1">
-                                        <label class="mb-1">License <a
-                                                href="https://creativecommons.org/share-your-work/cclicenses/"
-                                                target="_blank"><i class="fa-solid fa-section"></i></a></label>
-                                        <choices-vue :ref="file.name +'license-tag'" prop_type="license"
-                                            :reference="file.name +'license-tag'"
-                                            @data="handleLic(file.name, $event)"></choices-vue>
-                                    </div>
-                                    <div class="mb-1">
-                                        <label class="mb-1">Labels</label>
-                                        <choices-vue :ref="file.name +'select-label'" prop_type="labels"
-                                            :reference="file.name +'select-label'"
-                                            @data="handleLabel(file.name, $event)"></choices-vue>
-                                    </div>
-
-                                </div>
-
+                            <div class="flex-shrink" v-if="File.length">
+                                <button type="button" class="me-2 btn btn-secondary"
+                                    v-if="File[FileInfo[file.name].index].actions.pause"
+                                    @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Pause</button>
+                                <button type="button" class="me-2 btn btn-secondary"
+                                    v-if="File[FileInfo[file.name].index].actions.resume"
+                                    @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Resume</button>
+                                <button type="button" class="me-2 btn btn-secondary"
+                                    v-if="File[FileInfo[file.name].index].actions.cancel"
+                                    @click="fileRequest[FileInfo[file.name].index].resumeFileUpload()">Cancel</button>
+                            </div>
+                            <div class="ms-auto my-1">
+                                <button class="btn btn-danger" @click="deleteImg(FileInfo[file.name].index, file.name)"
+                                    data-toggle="tooltip" data-placement="top" title="Delete Asset"><i
+                                        class="fas fa-fw fa-trash-alt"></i></button>
                             </div>
                         </div>
 
+                        <div class="d-flex flex-wrap align-items-center px-2 py-2 mb-1 rounded-bottom">
+                            <div class="flex-grow-1">
+
+                                <div class="d-flex flex-wrap justify-content-around">
+
+                                    <div class="d-flex flex-column justify-content-center py-2 rounded" style="background-color:rgba(0,0,0,0.3); min-width:350px;">
+
+                                        <div class="d-flex align-items-center px-2 py-1" v-if="FileInfo['thumb' + file.name]" >
+                                            <div class="me-auto fs-5 text-wrap">
+                                              Automatic Thumbnail
+                                              <span class="small d-none">({{fancyBytes(FileInfo['thumb' + file.name].size)}})</span>
+                                            </div>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input fs-4" @click="resetThumb(file.name)" type="checkbox"
+                                                    role="switch" :id="'includeThumb' + file.name" :checked="FileInfo['thumb' + file.name].use_thumb">
+                                                <label class="form-check-label" :for="'includeThumb' + file.name"></label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mx-auto my-auto"
+                                            v-if="FileInfo['thumb' + file.name] && FileInfo['thumb' + file.name].use_thumb">
+                                            <img :src="FileInfo['thumb' + file.name].fileContent"
+                                                class="img-thumbnail"></img>
+                                        </div>
+                                        <div class="img-thumbnail mx-auto my-auto"
+                                            v-if="!FileInfo['thumb' + file.name] || !FileInfo['thumb' + file.name].use_thumb">
+                                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
+                                                xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                                                viewBox="0 0 800 800"
+                                                style="enable-background:new 0 0 800 800; background-color: #fff; width: 128px; border-radius: .25em;"
+                                                xml:space="preserve">
+
+                                                    <g>
+                                                        <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10
+                                                          S655.5,210,650,210z" />
+                                                        <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10
+                                                          s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
+                                                          C660,305.2,655.5,309.7,650,309.7z" />
+                                                        <path class="st0"
+                                                            d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
+                                                          c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
+                                                        <path class="st0"
+                                                            d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
+                                                        <path class="st0"
+                                                            d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
+                                                        <path class="st0"
+                                                            d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
+                                                          c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
+                                                          c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
+                                                        <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2"
+                                                            style="text-transform: uppercase; font-size: 149px;">{{FileInfo[file.name].meta.ext}}</text>
+                                                    </g>
+                                                </svg>
+                                        </div>
+
+                                       
+                                        <span class="fs-4 mx-auto"> {{ FileInfo['thumb' + file.name] && FileInfo['thumb' + file.name].use_thumb ? fancyBytes(FileInfo['thumb' + file.name].size + FileInfo[file.name].size) : fancyBytes(FileInfo[file.name].size)}} </span>
+
+                                        <!-- link -->
+                                        <div class="mx-2">
+                                            <a :href="'https://ipfs.dlux.io/ipfs/' + FileInfo[file.name].hash"
+                                                target="_blank" class="w-100 btn btn-sm btn-primary mb-1 mx-auto"><span
+                                                    class="d-flex align-items-center">URL<i
+                                                        class="ms-auto fa-solid fa-fw fa-up-right-from-square"></i></span></a>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex flex-column">
+
+                                        <div class="mb-1">
+                                            <label class="mb-1">File Name</label>
+                                            <div class="input-group">
+                                                <input autocapitalize="off" placeholder="File Name"
+                                                    pattern="[a-zA-Z0-9]{3,25}" class="form-control bg-dark border-0 text-info"
+                                                    v-model="FileInfo[file.name].meta.name">
+                                                <span class="input-group-text">.</span>
+                                                <input autocapitalize="off" placeholder="File Type"
+                                                    pattern="[a-zA-Z0-9]{1,4}" class="form-control bg-dark border-0 text-info"
+                                                    v-model="FileInfo[file.name].meta.ext">
+                                            </div>
+                                        </div>
+                                        <div class="mb-1">
+                                            <label class="mb-1">Thumbnail</label>
+                                            <div v-if="FileInfo['thumb' + file.name]"
+                                                class="position-relative has-validation">
+                                                <input autocapitalize="off"
+                                                    :disabled="FileInfo['thumb' + file.name].use_thumb"
+                                                    placeholder="https://your-thumbnail-image.png"
+                                                    pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+"
+                                                    class="form-control disabled bg-dark border-0" v-model="FileInfo[file.name].meta.thumb">
+                                            </div>
+                                            <div v-if="!FileInfo['thumb' + file.name]"
+                                                class="position-relative has-validation">
+                                                <input autocapitalize="off" placeholder="https://your-thumbnail-image.png"
+                                                    pattern="https:\/\/[a-z0-9.-\/]+|Qm[a-zA-Z0-9]+"
+                                                    class="form-control disabled" v-model="FileInfo[file.name].meta.thumb">
+                                            </div>
+                                        </div>
+
+                                        <!-- choices-js-->
+                                        <div class="mb-1">
+                                            <label class="mb-1">Tags</label>
+                                            <choices-vue :ref="file.name +'select-tag'" prop_type="tags"
+                                                :reference="file.name +'select-tag'"
+                                                @data="handleTag(file.name, $event)"></choices-vue>
+                                        </div>
+                                        <div class="mb-1">
+                                            <label class="mb-1">License <a
+                                                    href="https://creativecommons.org/share-your-work/cclicenses/"
+                                                    target="_blank"><i class="fa-solid fa-section"></i></a></label>
+                                            <choices-vue :ref="file.name +'license-tag'" prop_type="license"
+                                                :reference="file.name +'license-tag'"
+                                                @data="handleLic(file.name, $event)"></choices-vue>
+                                        </div>
+                                        <div class="mb-1">
+                                            <label class="mb-1">Labels</label>
+                                            <choices-vue :ref="file.name +'select-label'" prop_type="labels"
+                                                :reference="file.name +'select-label'"
+                                                @data="handleLabel(file.name, $event)"></choices-vue>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
                     <div class="d-flex flex-column text-end d-none" v-if="FileInfo['thumb' + file.name]">
                         <div class="small text-muted">File: {{FileInfo[file.name].hash}}</div>
@@ -371,7 +381,10 @@ export default {
         }
       }
     },
-    propStructuredFiles: Object,
+    propStructuredFiles: {
+      type: Array,
+      default: () => []
+    },
     dataurls: {
       type: Object,
       default: function () {
@@ -387,16 +400,42 @@ export default {
     },
     propStructuredFiles: {
       immediate: true,
-      handler(newDrop) {
-        if (newDrop?.files && Array.isArray(newDrop.files)) {
-            console.log('propStructuredFiles handler received:', newDrop);
-            newDrop.files.forEach(item => {
-                this.processSingleFile(item.file, item.fullAppPath);
-            });
-            this.ready = true;
-        } else if (newDrop?.target) { 
-          console.log('propStructuredFiles handler (legacy mode):', newDrop);
-          this.uploadFile(newDrop); 
+      deep: true,
+      async handler(newFilesArray) {
+        if (Array.isArray(newFilesArray) && newFilesArray.length > 0) {
+          console.log('propStructuredFiles watcher received:', newFilesArray);
+          
+          const filesToAdd = newFilesArray.filter(newItem => 
+              !this.File.some(existingFile => 
+                  existingFile.name === newItem.file.name && existingFile.size === newItem.file.size
+              )
+          );
+
+          if (filesToAdd.length > 0) {
+              console.log('Adding new files:', filesToAdd);
+              const processingPromises = [];
+              filesToAdd.forEach(item => {
+                  // Log exactly what we're passing to processSingleFile
+                  console.log(`Adding file ${item.file.name} with path: ${item.fullAppPath || item.targetPath}`);
+                  processingPromises.push(this.processSingleFile(item.file, item.fullAppPath || item.targetPath)); 
+              });
+              
+              try {
+                await Promise.all(processingPromises);
+                console.log('All files processed from prop update.');
+                this.ready = true;
+              } catch (error) {
+                console.error("Error processing files from props:", error);
+                this.ready = false;
+              }
+          } else {
+              console.log('No new files to add from prop update.');
+              if(this.File.length > 0 && !this.ready) {
+                if (Object.keys(this.FileInfo).length > 0) this.ready = true;
+              }
+          }
+        } else {
+            console.log('propStructuredFiles updated to empty or non-array:', newFilesArray);
         }
       }
     }
@@ -420,6 +459,7 @@ export default {
       File: [],
       ready: false,
       deletable: true,
+      showFileDetails: false,
     };
   },
   emits: ["tosign", "done"],
@@ -427,76 +467,107 @@ export default {
     ...MCommon,
     ...Mspk,
     processSingleFile(file, fullAppPath = null) {
-        if (this.File.some(existingFile => existingFile.name === file.name && existingFile.size === file.size)) {
-            console.log(`Skipping duplicate file: ${file.name}`);
-            return; 
-        }
-
-        file.progress = 0;
-        file.actions = { cancel: false, pause: false, resume: false };
-        const fileIndex = this.File.length;
-        this.File.push(file);
-
-        var reader = new FileReader();
-        reader.File = file;
-        reader.fullAppPath = fullAppPath || file.name;
-
-        reader.onload = (event) => {
-            const target = event.currentTarget || event.target;
-            const fileContent = target.result;
-            const currentFile = target.File;
-            const pathForFile = target.fullAppPath;
-            const indexForFile = this.File.findIndex(f => f === currentFile);
-
-            if (indexForFile === -1) {
-                 console.error("Could not find file in array after reader load:", currentFile.name);
-                 return;
+        return new Promise((resolveProcess, rejectProcess) => { 
+            // Skip duplicate files
+            if (this.File.some(existingFile => existingFile.name === file.name && existingFile.size === file.size)) {
+                console.log(`Skipping duplicate file: ${file.name}`);
+                resolveProcess();
+                return; 
             }
             
-            this.hashOf(buffer.Buffer(fileContent), { index: indexForFile, path: pathForFile, originalFile: currentFile }).then((ret) => {
-                const dict = { 
-                    hash: ret.hash, 
-                    index: ret.opts.index, 
-                    size: ret.opts.originalFile.size, 
-                    name: ret.opts.originalFile.name, 
-                    fullAppPath: ret.opts.path,
-                    progress: 0, 
-                    status: 'Pending Signature' 
-                };
+            // Security check: skip hidden files (starting with .)
+            if (file.name.startsWith('.')) {
+                console.log(`Skipping hidden file for security: ${file.name}`);
+                resolveProcess();
+                return;
+            }
+
+            file.progress = 0;
+            file.actions = { cancel: false, pause: false, resume: false };
+            const fileIndex = this.File.length;
+            this.File.push(file);
+
+            var reader = new FileReader();
+            reader.File = file;
+            // Make sure we use the full path, not just the filename
+            const actualPath = fullAppPath || file.name;
+            reader.fullAppPath = actualPath;
+            console.log(`Processing file: ${file.name} with fullAppPath: ${actualPath} (original input: ${fullAppPath})`);
+
+            reader.onload = (event) => {
+                const target = event.currentTarget || event.target;
+                const fileContent = target.result;
+                const currentFile = target.File;
+                const pathForFile = target.fullAppPath;
+                const indexForFile = this.File.findIndex(f => f === currentFile);
+
+                if (indexForFile === -1) {
+                    console.error("Could not find file in array after reader load:", currentFile.name);
+                    rejectProcess("File not found after load");
+                    return;
+                }
                 
-                fetch(`https://spktest.dlux.io/api/file/${ret.hash}`).then(r => r.json()).then(res => {
-                    if (res.result == "Not found") {
-                        this.FileInfo[dict.name] = dict;
-                        const names = dict.name.replaceAll(',', '-').split('.');
-                        const ext = names.length > 1 ? names.pop() : '';
-                        const name = names.join('.'); 
-                        
-                        this.FileInfo[dict.name].meta = {
-                            name,
-                            ext,
-                            flag: "",
-                            labels: "",
-                            thumb: "",
-                            license: "",
-                            fullAppPath: dict.fullAppPath
-                        };
+                console.log(`File ${currentFile.name} loaded with path: ${pathForFile}`);
+                this.hashOf(buffer.Buffer(fileContent), { index: indexForFile, path: pathForFile, originalFile: currentFile })
+                .then((ret) => {
+                    const dict = { 
+                        hash: ret.hash, 
+                        index: ret.opts.index, 
+                        size: ret.opts.originalFile.size, 
+                        name: ret.opts.originalFile.name, 
+                        fullAppPath: ret.opts.path,
+                        progress: 0, 
+                        status: 'Pending Signature' 
+                    };
+                    
+                    fetch(`https://spktest.dlux.io/api/file/${ret.hash}`).then(r => r.json()).then(res => {
+                        if (res.result == "Not found") {
+                            this.FileInfo[dict.name] = dict;
+                            const names = dict.name.replaceAll(',', '-').split('.');
+                            const ext = names.length > 1 ? names.pop() : '';
+                            const name = names.join('.'); 
+                            
+                            this.FileInfo[dict.name].meta = {
+                                name,
+                                ext,
+                                flag: "",
+                                labels: "",
+                                thumb: "",
+                                license: "",
+                                fullAppPath: dict.fullAppPath
+                            };
+                            console.log(`FileInfo entry created for ${dict.name} with path: ${dict.fullAppPath}`);
 
-                        const currentIndex = this.File.findIndex(f => f === ret.opts.originalFile);
-                        if(currentIndex !== -1) dict.index = currentIndex;
-                        else console.warn("File index mismatch after hash check");
+                            const currentIndex = this.File.findIndex(f => f === ret.opts.originalFile);
+                            if(currentIndex !== -1) dict.index = currentIndex;
+                            else console.warn("File index mismatch after hash check");
 
-                        this.encryptFileAndPlace(dict);
-                        this.generateThumbnail(ret.opts.originalFile, dict.name);
+                            this.encryptFileAndPlace(dict);
+                            this.generateThumbnail(ret.opts.originalFile, dict.name);
+                            
+                            resolveProcess();
 
-                    } else {
-                        alert(`${target.File.name} already uploaded`);
-                        const existingIndex = this.File.findIndex(f => f === ret.opts.originalFile);
-                        if(existingIndex !== -1) this.File.splice(existingIndex, 1); 
-                    }
+                        } else {
+                            alert(`${target.File.name} already uploaded`);
+                            const existingIndex = this.File.findIndex(f => f === ret.opts.originalFile);
+                            if(existingIndex !== -1) this.File.splice(existingIndex, 1); 
+                            resolveProcess();
+                        }
+                    }).catch(fetchError => {
+                        console.error("Fetch error in processSingleFile:", fetchError);
+                        rejectProcess(fetchError);
+                    });
+                }).catch(hashError => {
+                     console.error("Hashing error in processSingleFile:", hashError);
+                     rejectProcess(hashError);
                 });
-            });
-        };
-        reader.readAsArrayBuffer(file);
+            };
+            reader.onerror = (error) => {
+                console.error("FileReader error:", error);
+                rejectProcess(error); 
+            };
+            reader.readAsArrayBuffer(file);
+        });
     },
     addUser() {
       if (this.encryption.input) {
@@ -731,20 +802,134 @@ export default {
       }
       Reader.readAsArrayBuffer(newFile);
   },
-    uploadFile(e) {
+    async uploadFile(e) {
       const filesToProcess = e.target?.files || [];
+      if (filesToProcess.length === 0) return;
+
+      const processingPromises = [];
       for (let i = 0; i < filesToProcess.length; i++) {
-          this.processSingleFile(filesToProcess[i]);
+          processingPromises.push(this.processSingleFile(filesToProcess[i]));
       }
-      this.ready = true;
+      
+      try {
+        await Promise.all(processingPromises);
+        console.log('All files processed from upload.');
+        this.ready = true;
+      } catch (error) {
+        console.error("Error processing files from upload:", error);
+        this.ready = false;
+      }
     },
-    dragFile(e) {
+    async dragFile(e) {
       e.preventDefault();
       const filesToProcess = e.dataTransfer?.files || [];
-      for (var i = 0; i < filesToProcess.length; i++) {
-         this.processSingleFile(filesToProcess[i]);
+       if (filesToProcess.length === 0) return;
+
+      // Check if we have DataTransferItemList with directories
+      if (e.dataTransfer.items) {
+        const items = e.dataTransfer.items;
+        const entries = [];
+        
+        // Collect all entries first
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (item.kind === 'file') {
+            const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+            if (entry) {
+              entries.push(entry);
+            }
+          }
+        }
+        
+        // Process directories recursively
+        if (entries.some(entry => entry && entry.isDirectory)) {
+          console.log("Processing dropped folders...");
+          const allFiles = [];
+          
+          const processEntries = async (entries) => {
+            const promises = entries.map(async (entry) => {
+              if (entry.isDirectory) {
+                // Skip hidden directories for security
+                if (entry.name.startsWith('.')) {
+                  console.log(`Skipping hidden directory for security: ${entry.name}`);
+                  return [];
+                }
+                
+                // Process directory contents
+                const directoryReader = entry.createReader();
+                return new Promise((resolve) => {
+                  const readEntries = () => {
+                    directoryReader.readEntries(async (entries) => {
+                      if (entries.length > 0) {
+                        const subFiles = await processEntries(entries);
+                        readEntries(); // Continue reading if more entries
+                        resolve(subFiles);
+                      } else {
+                        resolve([]); // No more entries
+                      }
+                    });
+                  };
+                  readEntries();
+                });
+              } else if (entry.isFile) {
+                // Skip hidden files for security
+                if (entry.name.startsWith('.')) {
+                  console.log(`Skipping hidden file for security: ${entry.name}`);
+                  return [];
+                }
+                
+                // Get file with full path
+                return new Promise((resolve) => {
+                  entry.file((file) => {
+                    // Set fullPath property to preserve directory structure
+                    file.fullPath = entry.fullPath.substring(1); // Remove leading slash
+                    allFiles.push(file);
+                    resolve([file]);
+                  });
+                });
+              }
+              return [];
+            });
+            
+            const results = await Promise.all(promises);
+            return results.flat();
+          };
+          
+          await processEntries(entries);
+          
+          // Process all collected files with their paths
+          const processingPromises = [];
+          for (const file of allFiles) {
+            processingPromises.push(this.processSingleFile(file, file.fullPath));
+          }
+          
+          try {
+            await Promise.all(processingPromises);
+            console.log('All files processed from folder drop.');
+            this.ready = true;
+          } catch (error) {
+            console.error("Error processing files from folder drop:", error);
+            this.ready = false;
+          }
+          
+          return; // Skip regular file processing
+        }
       }
-      this.ready = true
+      
+      // Regular file processing for non-directory drops
+      const processingPromises = [];
+      for (var i = 0; i < filesToProcess.length; i++) {
+         processingPromises.push(this.processSingleFile(filesToProcess[i]));
+      }
+      
+      try {
+        await Promise.all(processingPromises);
+        console.log('All files processed from drag.');
+        this.ready = true;
+      } catch (error) {
+        console.error("Error processing files from drag:", error);
+        this.ready = false;
+      }
     },
     generateThumbnail(originalFile, fileInfoKey) {
         if (!originalFile.type.startsWith('image/')) {
@@ -774,7 +959,7 @@ export default {
                             hash: ret.hash,
                             index: newIndex,
                             size: buf.byteLength,
-                            name: 'thumb_' + originalFile.name,
+                            name: ('thumb_' + originalFile.name).substring(0, 32),
                             progress: 0,
                             status: 'Pending Signature',
                             is_thumb: true,
@@ -853,13 +1038,27 @@ export default {
       const allPaths = new Set(['']);
       const fileInfosToProcess = Object.values(this.FileInfo).filter(f => !f.is_thumb);
 
+      // Debug fullAppPath access
+      console.log("Files for path processing:", fileInfosToProcess.map(f => ({
+          name: f.name,
+          fullAppPath: f.meta?.fullAppPath,
+          metaExists: !!f.meta
+      })));
+
       fileInfosToProcess.forEach(file => {
-          const path = file.fullAppPath || '';
+          // Get path from meta object
+          const path = file.meta?.fullAppPath || '';
+          console.log(`Processing path: ${path} for file ${file.name}`);
+          
+          if (!path) return; // Skip if no path
+          
           const lastSlash = path.lastIndexOf('/');
-          const folderPath = lastSlash > -1 ? path.substring(0, lastSlash) : ''; 
+          const folderPath = lastSlash > -1 ? path.substring(0, lastSlash) : '';
 
-          allPaths.add(folderPath);
+          // Add the folder path
+          if (folderPath) allPaths.add(folderPath);
 
+          // Add all parent paths
           const parts = folderPath.split('/').filter(Boolean);
           let current = '';
           for (let i = 0; i < parts.length; i++) {
@@ -868,52 +1067,91 @@ export default {
           }
       });
 
+      // Sort paths by depth first, then alphabetically within same depth
       const sortedPaths = Array.from(allPaths).sort((a, b) => {
-          if (a === '') return -1;
-          if (b === '') return 1;
           const depthA = a.split('/').length;
           const depthB = b.split('/').length;
           if (depthA !== depthB) return depthA - depthB;
           return a.localeCompare(b);
       });
 
+      console.log("Sorted paths:", sortedPaths);
+
       const indexToPath = {};
       const pathToIndex = {};
-      let nextCustomIndex = 0;
-      const folderListEntries = [];
-
-      indexToPath["1"] = '';
-      pathToIndex[''] = "1";
       
-      sortedPaths.forEach(path => {
-          if (path === '') return;
+      // Add preset folders map from filesvue-dd.js
+      const presetFoldersMap = {
+          "Documents": "2", "Images": "3", "Videos": "4", "Music": "5",
+          "Archives": "6", "Code": "7", "Trash": "8", "Misc": "9"
+      };
+      
+      // For custom paths, use letters (A-Z) as indices
+      let nextCustomIndex = 0;
+      const customIndexChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      
+      // Folder list format: folderName|parentIndex/folderName|...
+      let folderListEntries = [];
 
+      // Set root index to "0"
+      indexToPath["0"] = '';
+      pathToIndex[''] = "0";
+      
+      // First pass: Assign indices to all paths
+      sortedPaths.forEach(path => {
+          if (path === '') return; // Skip root
+          
           const parts = path.split('/');
           const folderName = parts[parts.length - 1];
-          const parentPath = parts.slice(0, -1).join('/'); 
-
-          const parentIndex = pathToIndex[parentPath];
-          if (parentIndex === undefined) {
-              console.error(`Error: Parent path '${parentPath}' for folder '${path}' not found in pathToIndex during makePaths. Assigning to root.`);
-               return;
+          
+          // If it's a top-level folder, check for preset index
+          if (parts.length === 1) {
+              if (presetFoldersMap[folderName]) {
+                  const index = presetFoldersMap[folderName];
+                  indexToPath[index] = path;
+                  pathToIndex[path] = index;
+              } else {
+                  // Use A, B, C, etc. for custom folders
+                  const index = customIndexChars[nextCustomIndex++ % customIndexChars.length];
+                  indexToPath[index] = path;
+                  pathToIndex[path] = index;
+              }
+          } else {
+              // For deeper paths, use A, B, C, etc.
+              const index = customIndexChars[nextCustomIndex++ % customIndexChars.length];
+              indexToPath[index] = path;
+              pathToIndex[path] = index;
           }
-
-          const assignedIndex = this.numberToBase58(nextCustomIndex); 
-
-          indexToPath[assignedIndex] = path;
-          pathToIndex[path] = assignedIndex;
-
-          const entry = (parentIndex === "1") ? folderName : `${parentIndex}/${folderName}`;
-          folderListEntries.push(entry);
-
-          nextCustomIndex++; 
       });
-
-      const newFolderListStr = folderListEntries.join("|");
-      console.log("Generated Folder String:", newFolderListStr);
-      console.log("Generated PathToIndex Map:", pathToIndex);
       
-      return { folderListString: newFolderListStr, pathToIndexMap: pathToIndex };
+      // Second pass: Build the folder list entries
+      sortedPaths.forEach(path => {
+          if (path === '') return; // Skip root
+          
+          const parts = path.split('/');
+          
+          if (parts.length === 1) {
+              // Top level folders just use the name
+              folderListEntries.push(path);
+          } else {
+              // Find the parent path and use its index
+              const parentPath = path.split('/').slice(0, -1).join('/');
+              const parentIndex = pathToIndex[parentPath] || '0';
+              const folderName = path.split('/').pop();
+              
+              folderListEntries.push(`${parentIndex}/${folderName}`);
+          }
+      });
+      // filter out preset folders
+      folderListEntries = folderListEntries.filter(entry => !presetFoldersMap[entry]);
+      
+      // Format: folderName|parentIndex/folderName|...
+      const folderListString = folderListEntries.join('|');
+      
+      console.log("Generated Folder String:", folderListString);
+      console.log("Generated PathToIndex Map:", pathToIndex);
+
+      return { folderListString, pathToIndexMap: pathToIndex };
     },
     deleteImg(index, name) {
       for (var item in this.FileInfo) {
@@ -934,6 +1172,13 @@ export default {
       var meta = {}
       const { folderListString, pathToIndexMap } = this.makePaths();
 
+      // Ensure makePaths actually returned the map
+      if (!pathToIndexMap) {
+          console.error("pathToIndexMap is undefined after call to makePaths. Aborting upload.");
+          // Handle this error appropriately - maybe show a user message
+          return; 
+      }
+
       if (!this.encryption.encrypted) for (var i = 0; i < names.length; i++) {
         if ((this.FileInfo[names[i]].is_thumb && this.FileInfo[names[i]].use_thumb) || !this.FileInfo[names[i]].is_thumb) {
           meta[this.FileInfo[names[i]].hash] = `,${this.FileInfo[names[i]].meta.name},${this.FileInfo[names[i]].meta.ext},${this.FileInfo[names[i]].meta.thumb},${this.FileInfo[names[i]].is_thumb ? '2' : this.FileInfo[names[i]].meta.flag}-${this.FileInfo[names[i]].meta.license}-${this.FileInfo[names[i]].meta.labels}`
@@ -949,12 +1194,39 @@ export default {
         }
       }
       this.contract.files = body
+      
       this.signText(header + body).then(res => {
         this.meta = meta
         this.contract.fosig = res.split(":")[3]
-        this.upload(cids, this.contract, folderListString)
+        this.upload(cids, this.contract, folderListString, pathToIndexMap)
         this.ready = false
       })
+    },
+    appendFile(file, id) {
+      if (this.files[file]) delete this.files[file]
+      else this.files[file] = id
+    },
+    uploadAndTrack(name, contract) {
+      this.signText().then((headers) => {
+        let uploader = null;
+        const setFileElement = (file) => {
+          // create file element here
+        }
+        const onProgress = (e, file) => { };
+        const onError = (e, file) => { };
+        const onAbort = (e, file) => { };
+        const onComplete = (e, file) => { };
+        return (uploadedFiles) => {
+          [...uploadedFiles].forEach(setFileElement);
+
+          uploader = uploadFiles(uploadedFiles, {
+            onProgress,
+            onError,
+            onAbort,
+            onComplete
+          });
+        }
+      });
     },
     signText(challenge) {
       return new Promise((res, rej) => {
@@ -1005,30 +1277,89 @@ export default {
       if (num & 8) out.executable = true
       return out
     },
-    upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract, folderListString = '') {
+    upload(cids = ['QmYJ2QP58rXFLGDUnBzfPSybDy3BnKNsDXh6swQyH7qim3'], contract, folderListString = '', pathToIndexMap = { '': '0' }) {
       cids = cids.sort(function (a, b) {
         if (a < b) { return -1; }
         if (a > b) { return 1; }
         return 0;
       })
-      var metaString = `1${this.stringOfKeys()}${folderListString ? '|' + folderListString : ''}`;
+      
+      // Format: "1|folderList|file1,ext.pathIndex,thumb,flags|file2,ext.pathIndex,thumb,flags|..."
+      var metaString = `1${this.stringOfKeys()}`;
+      if (folderListString) {
+        metaString += '|' + folderListString;
+      }
+      
       const fileMetaEntries = [];
 
+      console.log("Path to index map in upload:", pathToIndexMap);
+
       for (var name in this.FileInfo) {
+        const fileInfo = this.FileInfo[name];
+
+        // --- Start Sanitization and Path Index ---
+        let sanitizedFileName = fileInfo.meta.name.replaceAll(',', '-'); // Replace commas
+        sanitizedFileName = sanitizedFileName.substring(0, 32); // Cap length
+        if (!sanitizedFileName) sanitizedFileName = '__'; // Ensure min length 2
+        if (sanitizedFileName.length < 2) sanitizedFileName = sanitizedFileName + '_'
+        
+        let sanitizedExt = fileInfo.meta.ext
+        // max 4 chars, all lowercase, alphanumeric only
+        sanitizedExt = sanitizedExt.substring(0, 4).toLowerCase().replace(/[^a-z0-9]/g, '');
+        
+        let sanitizedThumb = fileInfo.meta.thumb
+        // valid IPFS CID and full https urls are allowed
+        const ipfsPattern = /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/; // Simplified IPFS CID pattern
+        const urlPattern = /^(https?:\/\/[^\s$.?#].[^\s]*)$/; 
+        if (!ipfsPattern.test(sanitizedThumb) && !urlPattern.test(sanitizedThumb)) {
+          sanitizedThumb = ""
+        }
+        
+        let sanitizedFlag = `${fileInfo.meta.flag}-${fileInfo.meta.license}-${fileInfo.meta.labels}`
+        const flagsPattern = /^([0-9a-zA-Z+/=]?)-([0-9a-zA-Z+/=]?)-([0-9a-zA-Z+/=]*)$/
+        if (!flagsPattern.test(sanitizedFlag)) {
+          sanitizedFlag = `--`
+        }
+        
+        // Get appropriate path for the file
+        const fullAppPath = fileInfo.meta?.fullAppPath || '';
+        const lastSlash = fullAppPath.lastIndexOf('/');
+        const folderPath = lastSlash > -1 ? fullAppPath.substring(0, lastSlash) : '';
+        
+        // Look up the folder index in pathToIndexMap
+        const pathIndex = pathToIndexMap[folderPath] || '0';
+        
+        // Format extension with path suffix: ext.pathIndex
+        // But only add the pathIndex if it's not the root (0)
+        const extWithPath = sanitizedExt + (pathIndex !== '0' ? '.' + pathIndex : '');
+        
+        console.log(`File: ${fileInfo.name}, Path: ${folderPath}, Index: ${pathIndex}, Formatted extension: ${extWithPath}`);
+        
+        // --- End Sanitization and Path Index ---
+
         for (var i = 0; i < cids.length; i++) {
-          if (this.FileInfo[name].hash == cids[i]) {
-            this.File[this.FileInfo[name].index].cid = cids[i]
-            fileMetaEntries.push(this.FileInfo[name].meta.name + ',' + this.FileInfo[name].meta.ext + ',' + this.FileInfo[name].meta.thumb + ',' + this.FileInfo[name].meta.flag + '-' + this.FileInfo[name].meta.license + '-' + this.FileInfo[name].meta.labels);
+          if (fileInfo.hash == cids[i]) {
+            this.File[fileInfo.index].cid = cids[i];
+            // Format: name,ext.pathIndex,thumb,flags
+            fileMetaEntries.push(`${sanitizedFileName},${extWithPath},${sanitizedThumb},${sanitizedFlag}`);
             break;
-          } else if (this.FileInfo[name].enc_hash == cids[i]) {
-            this.File[this.FileInfo[name].enc_index].cid = cids[i]
-            fileMetaEntries.push(this.FileInfo[name].meta.name + ',' + this.FileInfo[name].meta.ext + ',' + this.FileInfo[name].meta.flag + '-' + this.FileInfo[name].meta.labels);
+          } else if (fileInfo.enc_hash == cids[i]) {
+            this.File[fileInfo.enc_index].cid = cids[i];
+            // Same format for encrypted files
+            fileMetaEntries.push(`${sanitizedFileName},${extWithPath},${sanitizedThumb},${sanitizedFlag}`);
             break;
           }
         }
       }
-      metaString += fileMetaEntries.join('');
-
+      
+      // Add file metadata entries to the string
+      if (fileMetaEntries.length > 0) {
+        metaString += (metaString.endsWith('|') ? '' : '|') + fileMetaEntries.join('|');
+      }
+      
+      console.log({metaString});
+      // return // for testing without actual upload
+      
       const ENDPOINTS = {
         UPLOAD: `${this.contract.api}/upload`,
         UPLOAD_STATUS: `${this.contract.api}/upload-check`,
@@ -1240,32 +1571,6 @@ export default {
           options.cid = file.cid
           uploadFile(file, options, file.cid)
         });
-    },
-    appendFile(file, id) {
-      if (this.files[file]) delete this.files[file]
-      else this.files[file] = id
-    },
-    uploadAndTrack(name, contract) {
-      this.signText().then((headers) => {
-        let uploader = null;
-        const setFileElement = (file) => {
-          // create file element here
-        }
-        const onProgress = (e, file) => { };
-        const onError = (e, file) => { };
-        const onAbort = (e, file) => { };
-        const onComplete = (e, file) => { };
-        return (uploadedFiles) => {
-          [...uploadedFiles].forEach(setFileElement);
-
-          uploader = uploadFiles(uploadedFiles, {
-            onProgress,
-            onError,
-            onAbort,
-            onComplete
-          });
-        }
-      });
     },
   },
   computed: {

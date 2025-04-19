@@ -1,5 +1,7 @@
 import ModalVue from '/js/modal-manager.js';
-import UploadVue from '/js/uploadvue.js';
+import UploadVue from '/js/uploadvue-dd.js';
+import MCommon from '/js/methods-common.js';
+import Watchers from '/js/watchers-common.js';
 
 export default {
     name: 'UploadEverywhere',
@@ -9,61 +11,96 @@ export default {
     },
     template: `
   <div class="d-flex flex-column">
-    <!-- Drag and Drop Area -->
+    <!-- Drag and Drop Area / Click Trigger -->
     <div
       @drop="handleDrop"
       @dragover.prevent
-      class="drop-area text-center py-5 lead rounded"
-      style="border-width: 2px; border-style: dashed; background-color: rgba(0,0,0,0.3);"
+      @click="triggerFileInput"
+      class="drop-area text-center py-0 lead rounded"
+      style="border-width: 2px; border-style: dashed; background-color: rgba(0,0,0,0.3); cursor: pointer;"
     >
-      Drop files here to start the upload process
+      <i class="fa-solid fa-cloud-arrow-up fa-2x"></i>
     </div>
+    <input type="file" multiple ref="fileInput" @change="handleFileSelect" style="display: none;">
 
-    <!-- File List (Optional Preview Before Contract Creation) -->
-    <div v-if="droppedFiles.length > 0 && !contractBuilt" class="mt-3">
-      <h5>Dropped Files: {{ droppedFiles.length }} (Total Size: {{ fancyBytes(totalSize) }})</h5>
-      <ul class="list-group">
-        <li v-for="(file, index) in droppedFiles" :key="index" class="list-group-item d-flex justify-content-between align-items-center">
-          {{ file.name }} ({{ fancyBytes(file.size) }})
-          <button class="btn btn-sm btn-danger" @click="removeFile(index)">Remove</button>
-        </li>
-      </ul>
-    </div>
+    <!-- Teleported UI Elements -->
+    <teleport :to="teleportref" :disabled="!teleportref">
+      <!-- File List -->
+      <div v-if="droppedFiles.length > 0" class="mt-3">
+        <h5>Ready to Upload: {{ droppedFiles.length }} (Total Size: {{ fancyBytes(totalSize) }})</h5>
+        <ul class="list-group">
+          <li v-for="(file, index) in droppedFiles" :key="index" class="list-group-item d-flex justify-content-between align-items-center">
+            {{ file.name }} ({{ fancyBytes(file.size) }})
+            <button class="btn btn-sm btn-danger" @click="removeFile(index)">Remove</button>
+          </li>
+        </ul>
+      </div>
 
-    <!-- Contract Modal Trigger -->
-    <modal-vue
-      v-if="(showContractButton && ! contractSize) ||  (showContractButton && requiredBroca <= contractSize)"
-      type="contract"
-      :to_account="{'amount':requiredBroca,'broker':'dlux-io'}"
-      :account="account"
-      :api="sapi"
-      :mypfp="mypfp"
-      :tokenuser="saccountapi"
-      :tokenstats="stats"
-      :tokenprotocol="protocol"
-      @tosign="sendIt($event, 'contractBuilt')"
-      v-slot:trigger
-    >
-      <button class="btn btn-primary mt-3 trigger">
-        Build Contract for {{ requiredBroca.toFixed(0) }} BROCA
+      <!-- Contract Progress Bar -->
+      <div v-if="contractSize > 0 && droppedFiles.length > 0" class="mt-2">
+        <label class="form-label small mb-0">Contract Usage: {{ fancyBytes(totalSize) }} / {{ fancyBytes(contractSize) }}</label>
+        <progress class="progress w-100" :value="totalSize" :max="contractSize" style="height: 5px;"></progress>
+      </div>
+
+
+      <!-- Contract Modal Trigger -->
+      <modal-vue
+        v-if="showContractButton"
+        type="contract"
+        :to_account="{'amount':displayRequiredBroca,'broker':'dlux-io'}"
+        :account="account"
+        :api="sapi"
+        :mypfp="mypfp"
+        :tokenuser="saccountapi"
+        :tokenstats="stats"
+        :tokenprotocol="protocol"
+        @tosign="sendIt($event, 'contractBuilt')"
+        v-slot:trigger
+      >
+         <!-- Button to Build/Upgrade Contract -->
+         <button
+            v-if="!contractSize || requiredBroca > contractSize"
+            :class="['btn', 'mt-3', 'trigger', !contractSize ? 'btn-primary' : 'btn-secondary']">
+           {{ !contractSize ? 'Build Contract' : 'Upgrade Contract' }} for {{ displayRequiredBroca.toFixed(0) }} BROCA
+         </button>
+      </modal-vue>
+
+      <!-- Continue Button -->
+      <button v-if="contractBuilt && requiredBroca <= contractSize && droppedFiles.length > 0" @click="startUpload" class="btn btn-primary mt-3">
+        Continue Upload
       </button>
-    </modal-vue>
 
-    <!-- Upload Interface -->
-    <div v-if="droppedFiles.length && contractBuilt && totalSize && requiredBroca <= contractSize" class="mt-3">
-      <upload-vue
-        :user="saccountapi"
-        :propcontract="selectedContract"
-        :propfiles="{'target':{id, 'files': droppedFiles}}"
-        @tosign="sendIt($event)"
-        @done="handleUploadDone"
-      />
-    </div>
+      <!-- Loading State (for contract build) -->
+      <div v-if="loading" class="text-center mt-3">
+        <p>Building contract... Please wait.</p>
+      </div>
+    </teleport>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="text-center mt-3">
-      <p>Loading contract details... Please wait.</p>
-    </div>
+    <!-- Upload Modal (Teleported to body using div overlay pattern) -->
+    <teleport to="body">
+      <div v-if="showUploadModal"
+           class="details-viewer-overlay d-flex justify-content-center align-items-center"
+           @click.self="closeUploadModal" 
+           style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.8); z-index: 1055; overflow-y: auto; padding: 20px;">
+        
+        <!-- Inner Content Box -->
+        <div class="bg-dark text-white p-4 rounded shadow-lg" style="min-width: 500px; max-width: 800px; max-height: 90vh; overflow-y: auto;"> 
+          <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+              <h5 class="mb-0">Upload Files</h5>
+              <button type="button" class="btn-close btn-close-white" aria-label="Close" @click="closeUploadModal"></button>
+          </div>
+          
+          <upload-vue
+            :user="saccountapi"
+            :propcontract="selectedContract"
+            :prop-structured-files="structuredFilesForUpload"
+            @tosign="sendIt($event)"
+            @done="handleUploadDone"
+          />
+        </div>
+      </div>
+    </teleport>
+
   </div>
   `,
     props: {
@@ -72,6 +109,7 @@ export default {
             default: '',
             required: true,
         },
+        signedtx: Array,
         sapi: {
             type: String,
             default: 'https://spktest.dlux.io',
@@ -103,7 +141,16 @@ export default {
                 granted: { t: 0 },
                 granting: { t: 0 },
                 head_block: 0,
+                channels: {} // Ensure channels is initialized
             }),
+        },
+        teleportref: {
+            type: String,
+            default: null // Default to null, teleport is disabled if null
+        },
+        externalDrop: { // Added: New prop for external file drops with path
+            type: Object,
+            default: () => ({ files: [], targetPath: null })
         },
         nodeview: {
             type: Boolean,
@@ -121,66 +168,192 @@ export default {
             requiredBroca: 0,
             contractSize: 0,
             showContractButton: false,
-            contractBuilt: false,
+            contractBuilt: false, // True if *any* contract is selected from channels
             selectedContract: null,
-            loading: false,
-            id: ""
+            loading: false, // Specifically for contract building transaction
+            structuredFilesForUpload: [],
+            showUploadModal: false, // Controls the upload modal visibility
         };
     },
-    watch: {
-        saccountapi: {
-            immediate: true,
-            handler(thenew) {
-                this.pickContract('watcher')
-            }
+    computed: {
+        displayRequiredBroca() {
+            // Calculate the BROCA needed, with a minimum of 100 for the button display/contract build amount
+            return Math.max(100, this.requiredBroca);
         }
     },
-    methods: {
-        handleDrop(event) {
-            event.preventDefault();
-            const files = Array.from(event.dataTransfer.files);
-            this.id = event.target.id
-            this.droppedFiles = [...this.droppedFiles, ...files];
-            this.calculateFileSizes();
-            this.showContractButton = true;
-        },
-        pickContract(info) {
-            console.log(this.saccountapi)
-            const bestFit = this.requiredBroca < 100 ? 100 : this.requiredBroca
-            for (var node in this.saccountapi.channels) {
-                for (var type in this.saccountapi.channels[node]) {
-                    if (this.saccountapi.channels[node][type].r >= bestFit) {
-                        this.selectedContract = this.saccountapi.channels[node][type]
-                        this.contractSize = this.saccountapi.channels[node][type].r
-                        this.contractBuilt = true
-                    }
+    watch: {
+        ...Watchers,
+        saccountapi: {
+            immediate: true,
+            deep: true, // Watch nested properties like channels
+            handler(thenew) {
+                if (thenew && thenew.channels) { // Ensure channels exist
+                    this.pickContract('watcher')
                 }
             }
         },
+        externalDrop: { // Added: Watcher for the new externalDrop prop
+            handler(newDrop) {
+                if (newDrop && newDrop.files && newDrop.files.length > 0) {
+                    console.log('externalDrop watcher triggered, accumulating files:', newDrop);
+                     // Extract just the File objects for addFiles UI update
+                    const fileObjects = newDrop.files.map(item => item.file); 
+                    this.addFiles(fileObjects); // Add the plain File objects to the UI list
+
+                    // Append the new structured files to the existing list for upload
+                    this.structuredFilesForUpload = [...this.structuredFilesForUpload, ...newDrop.files]; 
+                    console.log('Accumulated structuredFilesForUpload:', this.structuredFilesForUpload);
+
+                    // Clear the prop in the parent immediately after processing
+                    this.$emit('update:externalDrop', { files: [], targetPath: null });
+                }
+            },
+            deep: true
+        }
+    },
+    methods: {
+        ...MCommon,
+        addFiles(files) {
+            // Filter out potential duplicates if necessary, based on name and size
+            const newFilesToAdd = files.filter(newFile =>
+                !this.droppedFiles.some(existingFile =>
+                    existingFile.name === newFile.name && existingFile.size === newFile.size
+                )
+            );
+            if (newFilesToAdd.length > 0) {
+                this.droppedFiles = [...this.droppedFiles, ...newFilesToAdd];
+                this.calculateFileSizes();
+                this.showContractButton = true; // Show button whenever files are added
+                this.pickContract('addFiles'); // Re-evaluate contract after adding files
+            }
+        },
+        handleDrop(event) {
+            event.preventDefault();
+            const files = Array.from(event.dataTransfer.files);
+            this.addFiles(files);
+        },
+        triggerFileInput() {
+            this.$refs.fileInput.click();
+        },
+        handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            this.addFiles(files);
+            // Reset file input value to allow selecting the same file again
+            event.target.value = null;
+        },
+        pickContract(info) {
+            // Reset contract state before picking
+            this.selectedContract = null;
+            this.contractSize = 0;
+            this.contractBuilt = false; // Reset contract built status
+
+            if (!this.saccountapi || !this.saccountapi.channels || this.requiredBroca <= 0) {
+                console.log(`pickContract(${info}): Skipping, no channels or no required Broca (${this.requiredBroca})`);
+                this.loading = false; // Ensure loading is off if we skip early
+                return;
+            }
+            console.log(`pickContract(${info}): Looking for contract >= ${this.requiredBroca} BROCA`);
+
+            // We use requiredBroca (actual need) for finding the contract,
+            // displayRequiredBroca (min 100) is for the build button amount.
+            const actualNeed = this.requiredBroca;
+            let foundContract = null;
+            let foundContractSize = 0;
+
+            // Find the smallest contract that fits the requirement
+            for (const node in this.saccountapi.channels) {
+                for (const type in this.saccountapi.channels[node]) {
+                    const channel = this.saccountapi.channels[node][type];
+                    if (channel.r >= actualNeed) {
+                        if (!foundContract || channel.r < foundContractSize) {
+                            foundContract = channel;
+                            foundContractSize = channel.a;
+                        }
+                    }
+                }
+            }
+
+            if (foundContract) {
+                console.log(`pickContract(${info}): Found suitable contract`, foundContract);
+                this.selectedContract = foundContract;
+                this.contractSize = foundContractSize;
+                // Set contractBuilt to true meaning a contract is *selected*,
+                // the Continue button logic checks if it's sufficient (requiredBroca <= contractSize)
+                this.contractBuilt = true;
+                this.loading = false; // Contract found (or determined no suitable one exists), stop loading
+            } else {
+                console.log(`pickContract(${info}): No suitable contract found.`);
+                 this.contractBuilt = false; // Explicitly ensure it's false if no contract found
+                 this.loading = false; // Stop loading
+            }
+        },
         removeFile(index) {
+            // ... (keep existing logic for removing from droppedFiles and structuredFilesForUpload) ...
+            const fileToRemove = this.droppedFiles[index];
+            if (!fileToRemove) return;
+
             this.droppedFiles.splice(index, 1);
-            this.calculateFileSizes();
+
+            const structuredIndex = this.structuredFilesForUpload.findIndex(
+                sf => sf.file.name === fileToRemove.name && sf.file.size === fileToRemove.size
+            );
+            if (structuredIndex > -1) {
+                this.structuredFilesForUpload.splice(structuredIndex, 1);
+                console.log('Removed corresponding structured file:', fileToRemove.name);
+            } else {
+                 console.warn('Could not find corresponding structured file to remove:', fileToRemove.name);
+            }
+
             if (this.droppedFiles.length === 0) {
-                this.showContractButton = false;
+                this.resetComponent(); // Reset everything if no files left
+            } else {
+                this.calculateFileSizes(); // Recalculate sizes first
+                this.pickContract('removeFile'); // Then re-evaluate contract
             }
         },
         calculateFileSizes() {
             this.totalSize = this.droppedFiles.reduce((acc, file) => acc + file.size, 0);
-            // Assuming spkStats.channel_bytes is available via stats prop
-            const channelBytes = this.stats.channel_bytes || 1024; // Fallback to 1024 if not provided
-            this.requiredBroca = parseInt((this.totalSize / channelBytes) * 1.5);
-        },
-        handleModalSign(op) {
-            this.loading = true;
-            this.$emit('tosign', op);
+            const channelBytes = this.stats.channel_bytes || 1024;
+            // Calculate actual required Broca (minimum 0)
+            this.requiredBroca = Math.max(0, parseInt((this.totalSize / channelBytes) * 1.5));
+
+            // Show button if files exist, contract logic is handled by v-if and pickContract
+            this.showContractButton = this.droppedFiles.length > 0;
+
+            // Reset contract status as requirements changed, let pickContract determine the new status
+            this.contractBuilt = false;
+            this.selectedContract = null;
+            this.contractSize = 0;
+            this.showUploadModal = false; // Hide upload modal if file list changes
+
+            // If files exist, attempt to pick a contract immediately after calculation
+            if(this.droppedFiles.length > 0) {
+                this.pickContract('calculateFileSizes');
+            }
         },
         sendIt(event) {
-            this.$emit('tosign', event)
+            // Check if the event signifies starting the contract build process
+            if (event?.op === 'custom_json' && event?.id === this.protocol?.prefix + 'channel_open') {
+                 this.loading = true; // Show loading specifically when initiating contract build
+                 // contractBuilt status will be updated by the watcher when the channel appears
+            }
+            this.$emit('tosign', event);
+        },
+        startUpload() {
+            console.log('startUpload called. Current showUploadModal:', this.showUploadModal);
+            this.showUploadModal = true;
+            this.$nextTick(() => {
+              console.log('startUpload finished. New showUploadModal:', this.showUploadModal, 'DOM updated.');
+            });
+        },
+        closeUploadModal() {
+            console.log('closeUploadModal called.');
+            this.showUploadModal = false;
         },
         handleUploadDone() {
-
-            this.$emit('done');
-            this.resetComponent();
+            this.$emit('done'); 
+            this.closeUploadModal(); // Use the new close method
+            this.resetComponent(); 
         },
         resetComponent() {
             this.droppedFiles = [];
@@ -189,20 +362,22 @@ export default {
             this.showContractButton = false;
             this.contractBuilt = false;
             this.selectedContract = null;
+            this.contractSize = 0; 
             this.loading = false;
-        },
-        fancyBytes(bytes) {
-            let counter = 0;
-            const units = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'];
-            while (bytes > 1024) {
-                bytes /= 1024;
-                counter++;
+            this.structuredFilesForUpload = []; 
+            this.showUploadModal = false; // Ensure upload modal is hidden on reset
+            if (this.$refs.fileInput) {
+                this.$refs.fileInput.value = null;
             }
-            return `${bytes.toFixed(2)} ${units[counter]}B`;
         },
     },
     mounted(){
-        this.pickContract()
+        // Initial check for contracts based on potentially pre-existing state or props
+        if (this.droppedFiles.length > 0) {
+            this.calculateFileSizes(); // This now also calls pickContract if files exist
+        } else {
+            this.pickContract('mounted'); // Check for existing contracts even if no files initially
+        }
     },
-    emits: ['tosign', 'done'],
+    emits: ['tosign', 'done', 'update:externalDrop'], // Removed targetPath from done payload
 };

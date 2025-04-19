@@ -1,5 +1,6 @@
 import ChoicesVue from '/js/choices-vue.js';
 import Pop from "/js/pop.js";
+import Upload from '/js/upload-everywhere.js';
 import common from './methods-common.js';
 import spk from './methods-spk.js';
 import watchers from './watchers-common.js';
@@ -7,59 +8,12 @@ import watchers from './watchers-common.js';
 export default {
     components: {
         "pop-vue": Pop,
-        "choices-vue": ChoicesVue
+        "choices-vue": ChoicesVue,
+        "upload-everywhere": Upload
     },
     template: `
 <div ref="container" class="d-flex flex-grow-1 flex-column rounded" @contextmenu.prevent="showContextMenu($event, 'background', null)">
     <div class="pt-1">
-<!-- USER INPUT -->
-        <div v-if="cc" class="d-flex flex-column flex-grow-1 mb-1 mx-1">
-            <label class="fs-5 fw-light mb-1">View other users' files, use <i
-                    class="fa-brands fa-creative-commons fa-fw"></i> and <i
-                    class="fa-brands fa-creative-commons-zero fa-fw"></i> licensed files, and decrypt files that have
-                been shared with you</label>
-            <div class="d-flex">
-                <div class="position-relative flex-grow-1">
-                    <span class="position-absolute top-50 translate-middle-y ps-2"><i
-                            class="fa-solid fa-at fa-fw"></i></span>
-                    <input class="ps-4 mb-1 form-control border-white" type="search" placeholder="username"
-                        @blur="appendUserFiles()" v-model="newUser">
-                </div>
-                <div class="ms-1">
-                    <div class="btn btn-lg btn-light" @click="appendUserFiles()"><i class="fa-solid fa-fw fa-plus"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="d-flex flex-wrap d-xl-flex mb-1" v-if="owners.length > 1">
-<!-- Active Filters -->
-                <div v-for="owner in owners" class="btn-group btn-group me-1 mb-1" style="height:50px">
-                    <a :href="'/@' + owner" target="_blank" class="btn btn-light rounded-start align-content-center">
-                        <span>{{owner}}</span>
-                    </a>
-                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled>
-                    </button>
-                    <button type="button" @click="cycleView(owner)" class="btn btn-light px-2">
-                        <i class="fa-solid fa-fw"
-                            :class="{'fa-eye': filesSelect.addusers[owner] === true, 'fa-eye-slash': filesSelect.addusers[owner] === false, 'fa-lock': filesSelect.addusers[owner] == 'lock', 'fa-brands fa-creative-commons': filesSelect.addusers[owner] == 'cc'}"></i>
-                        <i class="fa-solid fa-eye-slash fa-fw d-none"></i>
-                    </button>
-                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled>
-                    </button>
-                    <button @click="purge(owner)" type="button" class="btn btn-light px-2">
-                        <i class="fa-solid fa-xmark fa-fw"></i>
-                    </button>
-                </div>
-
-                <button @click="clearFilters()" type="button" class="btn btn-secondary mb-1 d-none">
-                    Clear All
-                </button>
-
-            </div>
-        </div>
-
-
-
 <!-- ACTION BAR -->
         <div class="d-flex border-bottom border-white-50">
             <div class="d-flex flex-wrap align-items-center justify-content-center mx-1 flex-grow-1">
@@ -204,6 +158,14 @@ export default {
                 <h5 v-else class="mb-0">{{ getSubfolderCount }} Folder{{ getSubfolderCount === 1 ? '' : 's' }} & {{ currentFileCount }} File{{ currentFileCount === 1 ? '' : 's' }}</h5>
             </div>
             <div class="d-flex flex-wrap ms-auto">
+                <upload-everywhere v-if="selectedUser == account" 
+                                   :account="account" 
+                                   :saccountapi="saccountapi"
+                                   :external-drop="droppedExternalFiles" 
+                                   @update:externalDrop="droppedExternalFiles = $event" 
+                                   @tosign="sendIt($event)" 
+                                   @done="handleUploadDone($event)" 
+                                   teleportref="#UEController"/>
                 <button class="btn btn-secondary btn-sm" @click="createNewFolder"><i class="fa-solid fa-folder-plus me-1"></i>New Folder</button>
                 <button class="btn btn-success btn-sm ms-2" @click="saveChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-save me-1"></i>Save</button>
                 <button class="btn btn-danger btn-sm ms-2" @click="revertPendingChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-undo me-1"></i>Revert</button>
@@ -214,7 +176,9 @@ export default {
                 </div>
             </div>
         </div>
-        <!-- Added: Warning Box for Trash Folder -->
+        <!-- Upload Everywhere Controller -->
+        <div id="UEController"></div>
+        <!-- Warning Box for Trash Folder -->
         <div v-if="currentFolderPath === 'Trash'" class="alert alert-warning my-2 mx-1" role="alert">
             <i class="fa-solid fa-triangle-exclamation fa-fw me-1"></i>
             Files in Trash will be permanently deleted after their deletion date.
@@ -660,53 +624,45 @@ export default {
             type: Boolean,
             default: false,
         },
+        saccountapi: {
+            type: Object,
+            default: function () {
+                return {
+                    channels: {},
+                    name: "",
+                };
+            },
+        },
         bid: {
             type: String,
             default: "",
-        },
-        contracts: {
-            type: Object,
-            default: function () {
-                return [{
-                    n: {},
-                    p: 3,
-                    df: {},
-                    nt: "0",
-                    i: "a:1:1",
-                    id: "a-1-1",
-                    m: "",
-                    u: 1,
-                    t: "",
-                    extend: 7,
-
-                }];
-            }
         },
         account: {
             type: String,
             default: "",
         },
-        page_account: {
-            type: String,
-            default: "",
-        },
-        current: {
-            type: Number,
-            default: 85000000,
-        },
         cc: {
             default: false,
         },
-        nodeview: {
-            type: Boolean,
-            default: false,
-        }
     },
     data() {
         return {
             files: {},
             userFolderTrees: {},
             owners: [],
+            contracts: [{
+                n: {},
+                p: 3,
+                df: {},
+                nt: "0",
+                i: "a:1:1",
+                id: "a-1-1",
+                m: "",
+                u: 1,
+                t: "",
+                extend: 7,
+
+            }],
             contractIDs: {},
             newUser: '',
             filesArray: [],
@@ -751,6 +707,7 @@ export default {
                 endY: 0
             }, // For rubber-band selection
             initialSelection: [], // Added: To store selection state at drag start
+            droppedExternalFiles: { files: [], targetPath: null }, // Added: For external file drops
             labels: {
                 "0": { fa: "fa-solid fa-sink fa-fw", l: "Miscellaneous", c: 0 },
                 "1": { fa: "fa-solid fa-exclamation fa-fw", l: "Important", c: 0 },
@@ -809,10 +766,85 @@ export default {
             breadcrumbCounts: {}
         };
     },
-    emits: ["tosign", "addassets"], // Ensure 'tosign' is included here
+    emits: ["tosign", "addassets", 'update:externalDrop'], // Ensure 'tosign' and 'update:externalDrop' are included here
     methods: {
         ...common,
         ...spk,
+        /**
+         * Helper function to recursively scan dropped directory entries.
+         * @param {FileSystemDirectoryEntry} directoryEntry - The directory entry to scan.
+         * @returns {Promise<Array<{ file: File, relativePath: string }>>} - Promise resolving to an array of file objects with relative paths.
+         */
+        async scanDirectory(directoryEntry) {
+            const reader = directoryEntry.createReader();
+            let entries = [];
+            let readEntries = await new Promise((resolve, reject) => {
+                reader.readEntries(resolve, reject);
+            });
+            while (readEntries.length > 0) {
+                entries = entries.concat(readEntries);
+                readEntries = await new Promise((resolve, reject) => {
+                    reader.readEntries(resolve, reject);
+                });
+            }
+
+            let files = [];
+            for (const entry of entries) {
+                if (entry.isFile) {
+                    const file = await new Promise((resolve, reject) => entry.file(resolve, reject));
+                    // Ensure relativePath uses forward slashes and removes leading slash if present
+                    const relativePath = entry.fullPath.startsWith('/') ? entry.fullPath.substring(1) : entry.fullPath;
+                    files.push({ file: file, relativePath: relativePath });
+                } else if (entry.isDirectory) {
+                    // Recursively scan subdirectories
+                    const subFiles = await this.scanDirectory(entry);
+                    files = files.concat(subFiles);
+                }
+            }
+            return files;
+        },
+
+        /**
+         * Process dropped items (files or folders) from an external source.
+         * @param {DataTransferItemList} items - The items from the drop event.
+         * @returns {Promise<Array<{ file: File, relativePath: string }>>} - Promise resolving to a flat array of file objects with relative paths.
+         */
+        async processDroppedItems(items) {
+            let allFiles = [];
+            const promises = [];
+
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                if (item.kind === 'file') {
+                    const entry = item.webkitGetAsEntry();
+                    if (entry) {
+                        if (entry.isFile) {
+                             promises.push(
+                                new Promise((resolve, reject) => entry.file(resolve, reject))
+                                .then(file => ({ file: file, relativePath: file.name })) // Single file has its name as path
+                            );
+                        } else if (entry.isDirectory) {
+                            // Start scanning the directory
+                            promises.push(this.scanDirectory(entry));
+                        }
+                    }
+                }
+            }
+            
+            // Wait for all scanning/file reading promises to complete
+            const results = await Promise.all(promises);
+            // Flatten the results (scanDirectory returns arrays)
+            results.forEach(result => {
+                if (Array.isArray(result)) {
+                    allFiles = allFiles.concat(result);
+                } else if (result) { // Handle single file case
+                    allFiles.push(result);
+                }
+            });
+
+            return allFiles;
+        },
+
         revertPendingChanges() {
             if (Object.keys(this.pendingChanges).length === 0) {
                 return; // Nothing to revert
@@ -1156,7 +1188,7 @@ export default {
             }
             // Ensure selectedUser is set for folder/icon views
             if ((mode === "folder" || mode === "icon") && !this.selectedUser && this.owners.length > 0) {
-                this.selectedUser = this.page_account || this.owners[0];
+                this.selectedUser = this.saccountapi.name || this.owners[0];
             }
         },
         navigateTo(path) {
@@ -1319,23 +1351,45 @@ export default {
         dropOnFolder(event, folder) {
             event.preventDefault();
             event.stopPropagation();
-            let itemIds = [];
+            const targetPath = folder.path;
 
-            // Check for multiple items being dragged
-            const itemIdsStr = event.dataTransfer.getData("itemids");
-            if (itemIdsStr) {
-                try {
-                    itemIds = JSON.parse(itemIdsStr);
-                } catch (e) {
-                    // Fallback to text/plain if parsing fails
-                    const textData = event.dataTransfer.getData("text/plain");
-                    if (textData) itemIds = textData.split('\n');
-                }
-            } else {
-                // Fallback to text/plain if itemids is missing
-                const textData = event.dataTransfer.getData("text/plain");
-                if (textData) itemIds = textData.split('\n');
+            // Check for external files first
+            if (event.dataTransfer.items && event.dataTransfer.items.length > 0) {
+                this.processDroppedItems(event.dataTransfer.items).then(processedFiles => {
+                    if (processedFiles.length > 0) {
+                        // Combine targetPath with relativePath here
+                        const filesWithFullPath = processedFiles.map(item => {
+                            let fullAppPath;
+                            // Combine targetPath (app folder) and relativePath (from dropped item)
+                            if (targetPath && item.relativePath) {
+                                // Avoid double slashes if relativePath already starts with one (unlikely but safe)
+                                fullAppPath = `${targetPath}/${item.relativePath.replace(/^\/+/, '')}`;
+                            } else if (targetPath) {
+                                fullAppPath = targetPath; // e.g., dropping an empty folder?
+                            } else { // targetPath is empty (root drop)
+                                fullAppPath = item.relativePath;
+                            }
+                            // Clean up potential double slashes from concatenation
+                            fullAppPath = fullAppPath.replace(/\/+/g, '/');
+                            return { file: item.file, fullAppPath: fullAppPath };
+                        });
+
+                        console.log(`External items processed (dropped on folder "${targetPath}"):`, filesWithFullPath);
+                        // Update the state passed to upload-everywhere - targetPath is implicitly included now
+                        this.droppedExternalFiles = { files: filesWithFullPath };
+                        // Prevent internal D&D logic from running for external files
+                        return;
+                    }
+                }).catch(error => {
+                    console.error("Error processing dropped items:", error);
+                    alert("Error processing dropped folder/files.");
+                });
+                return; // Prevent internal D&D logic
             }
+
+            // --- Existing internal D&D logic ---
+            let itemIds = [];
+            // ... (rest of existing internal drop logic) ...
 
             // Get contract ID if available (may not be for folder-only drags)
             const contractId = event.dataTransfer.getData("contractid");
@@ -1343,8 +1397,6 @@ export default {
             if (!itemIds.length) {
                 return;
             }
-
-            const targetPath = folder.path;
 
             // Process each item
             itemIds.forEach(itemId => {
@@ -2205,7 +2257,7 @@ export default {
         },
         blockToTime(block) {
             const now = new Date().getTime()
-            const then = new Date(now - ((this.current - block) * 3000))
+            const then = new Date(now - ((this.saccountapi.head_block) * 3000))
             // simple ago or until format
 
             return then.toLocaleDateString()
@@ -2322,7 +2374,7 @@ export default {
                         return true; // Explicitly shown
                     default:
                         // If user is not in addusers, default based on whether it's the page owner
-                        return file.o === this.page_account;
+                        return file.o === this.saccountapi.name;
                 }
             });
 
@@ -2685,6 +2737,9 @@ export default {
         },
         init() {
             var contracts = [];
+            if (this.saccountapi.file_contracts) {
+                this.contracts = this.saccountapi.file_contracts;
+            }
             // Handle contracts as an array or object
             if (Array.isArray(this.contracts)) {
                 contracts = this.contracts.slice();
@@ -2692,11 +2747,6 @@ export default {
                 for (var id in this.contracts) {
                     contracts.push(this.contracts[id]);
                 }
-            }
-            if (this.nodeview) {
-                contracts.forEach(contract => {
-                    this.filesSelect.addusers[contract.t] = true;
-                });
             }
             for (var user in this.filesSelect.addusers) {
                 for (var id in this.contractIDs[user]) {
@@ -2855,6 +2905,42 @@ export default {
         },
         dropOnBackground(event) {
             event.preventDefault();
+            const targetPath = this.currentFolderPath; // Target is the current folder when dropping on background
+
+              // Check for external files first
+            if (event.dataTransfer.items && event.dataTransfer.items.length > 0) {
+                console.log('Dropped on background - event.dataTransfer.items:', event.dataTransfer.items);
+                this.processDroppedItems(event.dataTransfer.items).then(processedFiles => {
+                    if (processedFiles.length > 0) {
+                        // Combine targetPath with relativePath here
+                        const filesWithFullPath = processedFiles.map(item => {
+                            let fullAppPath;
+                            // Combine targetPath (app folder) and relativePath (from dropped item)
+                            if (targetPath && item.relativePath) {
+                                // Avoid double slashes if relativePath already starts with one (unlikely but safe)
+                                fullAppPath = `${targetPath}/${item.relativePath.replace(/^\/+/, '')}`;
+                            } else if (targetPath) {
+                                fullAppPath = targetPath; // e.g., dropping an empty folder?
+                            } else { // targetPath is empty (root drop)
+                                fullAppPath = item.relativePath;
+                            }
+                             // Clean up potential double slashes from concatenation
+                            fullAppPath = fullAppPath.replace(/\/+/g, '/');
+                            return { file: item.file, fullAppPath: fullAppPath };
+                        });
+
+                        console.log(`External items processed (dropped on background, target: "${targetPath}"):`, filesWithFullPath);
+                        // Update the state passed to upload-everywhere - targetPath is implicitly included now
+                         this.droppedExternalFiles = { files: filesWithFullPath };
+                     }
+                 }).catch(error => {
+                    console.error("Error processing dropped items:", error);
+                    alert("Error processing dropped folder/files.");
+                });
+                return; // Prevent internal D&D logic
+            }
+
+            // --- Existing internal D&D logic ---
             const fileId = event.dataTransfer.getData("fileid");
             console.log('Background drop - fileId:', fileId);
 
@@ -4085,6 +4171,11 @@ export default {
             
             return { valid: true, message: "" };
         },
+        handleUploadDone(payload) {
+            console.log('Upload done event received in filesvue-dd. Payload:', payload);
+            // Clear the dropped files state after upload is handled by child
+            this.droppedExternalFiles = { files: [] }; // Clear files, no targetPath needed now
+         },
     },
     computed: {
         hasFiles() {
@@ -4218,6 +4309,16 @@ export default {
             },
             deep: false
         },
+        'saccountapi': {
+            handler(newValue) {
+                if (this.saccountapi.name) this.filesSelect.addusers[this.saccountapi.name] = true;
+                if (this.owners.length > 0) {  //when saccountapi.name is not set
+                    this.selectedUser = this.saccountapi.name
+                }
+                this.init();
+            },
+            deep: true
+        },
         'pendingChanges': {
             handler(newValue) {
                 if (this.localStorageKey) {
@@ -4244,11 +4345,6 @@ export default {
         this.loadPendingChanges();
 
         // Existing mounted code
-        if (this.page_account) this.filesSelect.addusers[this.page_account] = true;
-        if (!this.nodeview) this.filesSelect.cc_only = false;
-        if (this.owners.length > 0) {  //when page_account is not set
-            this.selectedUser = this.page_account
-        }
         this.init()
 
         // Add window mouseup handler for selection box (emergency escape)

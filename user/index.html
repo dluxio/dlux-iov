@@ -163,7 +163,7 @@
                                             <modal-vue v-if="protocol?.dlux?.head_block && accountapi.head_block"
                                                 func="send" :mypfp="mypfp" token="balance" :tokenuser="accountapi"
                                                 :account="account" :tokenprotocol="protocol?.dlux"
-                                                @tosign="sendIt($event)" v-slot:trigger>
+                                                @tosign="toSign = $event" v-slot:trigger>
                                                 <a slot="trigger" class="dropdown-item trigger" type="button">Send
                                                     DLUX</a>
                                             </modal-vue>
@@ -213,7 +213,7 @@
                                             :broca_refill="sstats.broca_refill" :broca="spkapi.broca"
                                             :spk_power="spkapi.spk_power"
                                             :has_ipfs="spkapi.storage?.length ? true : false" :contracts="contracts"
-                                            :extendcost="extendcost" @tosign="sendIt($event)"
+                                            :extendcost="extendcost" @tosign="toSign = $event"
                                             @modalselect="modalSelect($event)" @vote="vote($event)"></card-vue>
                                     </div>
                                 </div>
@@ -367,7 +367,7 @@
                                                                     func="send" :mypfp="mypfp" token="balance"
                                                                     :tokenuser="accountapi" :account="account"
                                                                     :tokenprotocol="protocol?.dlux"
-                                                                    @tosign="sendIt($event)" v-slot:trigger>
+                                                                    @tosign="toSign = $event" v-slot:trigger>
 
                                                                     <span slot="trigger"
                                                                         class="p-2 trigger text-nowrap"><i
@@ -389,7 +389,7 @@
                                                                         func="powup" :mypfp="mypfp" token="balance"
                                                                         :tokenuser="accountapi" :account="account"
                                                                         :tokenprotocol="protocol?.dlux"
-                                                                        @tosign="sendIt($event)" v-slot:trigger
+                                                                        @tosign="toSign = $event" v-slot:trigger
                                                                         class="dropdown-menu-item">
                                                                         <a class="dropdown-item trigger" slot="trigger"
                                                                             role="button">
@@ -402,7 +402,7 @@
                                                                         func="govup" :mypfp="mypfp" token="balance"
                                                                         :tokenuser="accountapi" :account="account"
                                                                         :tokenprotocol="protocol?.dlux"
-                                                                        @tosign="sendIt($event)" v-slot:trigger
+                                                                        @tosign="toSign = $event" v-slot:trigger
                                                                         class="dropdown-menu-item">
                                                                         <a class="dropdown-item trigger" slot="trigger"
                                                                             role="button"><i
@@ -478,7 +478,7 @@
                                                                     func="powdel" :mypfp="mypfp" token="poweredUp"
                                                                     :tokenuser="accountapi" :account="account"
                                                                     :tokenprotocol="protocol?.dlux"
-                                                                    @tosign="sendIt($event)" v-slot:trigger>
+                                                                    @tosign="toSign = $event" v-slot:trigger>
                                                                     <span class="p-2 trigger text-nowrap"
                                                                         slot="trigger"><span><i
                                                                                 class="fas fa-user-friends fa-fw me-2"></i>Delegate</span>
@@ -499,7 +499,7 @@
                                                                         func="powdn" :mypfp="mypfp" token="poweredUp"
                                                                         :tokenuser="accountapi" :account="account"
                                                                         :tokenprotocol="protocol?.dlux"
-                                                                        @tosign="sendIt($event)" v-slot:trigger>
+                                                                        @tosign="toSign = $event" v-slot:trigger>
                                                                         <button class="dropdown-item trigger"
                                                                             slot="trigger" type="button">
                                                                             <i
@@ -533,7 +533,7 @@
                                                                 func="powdn" token="poweredUp" :tokenuser="accountapi"
                                                                 :to_account="{'amount':(accountapi?.power_downs[Object.keys(accountapi?.power_downs)[0]].amount * 4)/1000}"
                                                                 :account="account" :tokenprotocol="protocol?.dlux"
-                                                                :mypfp="mypfp" @tosign="sendIt($event)"
+                                                                :mypfp="mypfp" @tosign="toSign = $event"
                                                                 v-slot:trigger>
                                                                 <button
                                                                     class="btn btn-sm rounded-pill btn-outline-light trigger"
@@ -668,7 +668,7 @@
                                                                             :to_account="{'amount':a/1000,'to':b}"
                                                                             :account="account"
                                                                             :tokenprotocol="protocol?.dlux"
-                                                                            @tosign="sendIt($event)" v-slot:trigger>
+                                                                            @tosign="toSign = $event" v-slot:trigger>
                                                                             <button
                                                                                 class="btn btn-secondary btn-sm trigger">
                                                                                 <i class="fas fa-fw fa-user-edit"></i>
@@ -788,7 +788,7 @@
                                                                         func="govdn" :mypfp="mypfp" token="gov"
                                                                         :tokenuser="accountapi" :account="account"
                                                                         :tokenprotocol="protocol?.dlux"
-                                                                        @tosign="sendIt($event)" v-slot:trigger>
+                                                                        @tosign="toSign = $event" v-slot:trigger>
                                                                         <button class="dropdown-item trigger"
                                                                             slot="trigger" type="button"><i
                                                                                 class="fas fa-lock-open fa-fw me-2"></i>Unlock
@@ -821,7 +821,7 @@
                                                                 :account="account"
                                                                 :to_account="{'amount':(accountapi?.gov_downs[Object.keys(accountapi?.gov_downs)[0]].amount * 4)/1000}"
                                                                 :tokenprotocol="protocol?.dlux" :mypfp="mypfp"
-                                                                @tosign="sendIt($event)" v-slot:trigger>
+                                                                @tosign="toSign = $event" v-slot:trigger>
                                                                 <button
                                                                     class="btn btn-sm rounded-pill btn-outline-light trigger"
                                                                     type="button">
@@ -1111,7 +1111,7 @@
                                                                             func="send" :mypfp="mypfp" token="spk"
                                                                             :tokenuser="saccountapi" :account="account"
                                                                             :tokenprotocol="protocol?.spk"
-                                                                            @tosign="sendIt($event)" v-slot:trigger>
+                                                                            @tosign="toSign = $event" v-slot:trigger>
                                                                             <span slot="trigger"
                                                                                 class="text-nowrap p-2 trigger"><i
                                                                                     class="fas fa-paper-plane me-2"></i>Send</span>
@@ -1183,7 +1183,7 @@
                                                                             func="send" :mypfp="mypfp" token="balance"
                                                                             :tokenuser="saccountapi" :account="account"
                                                                             :tokenprotocol="protocol?.larynx"
-                                                                            @tosign="sendIt($event)" v-slot:trigger>
+                                                                            @tosign="toSign = $event" v-slot:trigger>
                                                                             <span slot="trigger"
                                                                                 class="text-nowrap p-2 trigger"><i
                                                                                     class="fas fa-paper-plane me-2"></i>Send</span>
@@ -1206,7 +1206,7 @@
                                                                                 token="balance" :tokenuser="saccountapi"
                                                                                 :account="account"
                                                                                 :tokenprotocol="protocol?.larynx"
-                                                                                @tosign="sendIt($event)"
+                                                                                @tosign="toSign = $event"
                                                                                 v-slot:trigger>
                                                                                 <button class="dropdown-item trigger"
                                                                                     slot="trigger" type="button"><i
@@ -1220,7 +1220,7 @@
                                                                                 token="balance" :tokenuser="saccountapi"
                                                                                 :account="account"
                                                                                 :tokenprotocol="protocol?.larynx"
-                                                                                @tosign="sendIt($event)"
+                                                                                @tosign="toSign = $event"
                                                                                 v-slot:trigger>
                                                                                 <button class="dropdown-item trigger"
                                                                                     :disabled="!isNode" slot="trigger"
@@ -1300,7 +1300,7 @@
                                                                             token="poweredUp" :tokenuser="saccountapi"
                                                                             :account="account"
                                                                             :tokenprotocol="protocol?.larynx"
-                                                                            @tosign="sendIt($event)" v-slot:trigger>
+                                                                            @tosign="toSign = $event" v-slot:trigger>
                                                                             <span slot="trigger"
                                                                                 class="p-2 trigger"><span>
                                                                                     <i
@@ -1326,7 +1326,7 @@
                                                                                 :tokenuser="saccountapi"
                                                                                 :account="account"
                                                                                 :tokenprotocol="protocol?.larynx"
-                                                                                @tosign="sendIt($event)"
+                                                                                @tosign="toSign = $event"
                                                                                 v-slot:trigger>
                                                                                 <button
                                                                                     :disabled="!saccountapi.poweredUp"
@@ -1359,7 +1359,7 @@
                                                                         func="powdn" token="poweredUp"
                                                                         :tokenuser="saccountapi" :account="account"
                                                                         :tokenprotocol="protocol?.dlux" :mypfp="mypfp"
-                                                                        @tosign="sendIt($event)" v-slot:trigger>
+                                                                        @tosign="toSign = $event" v-slot:trigger>
                                                                         <button
                                                                             class="btn btn-sm rounded-pill btn-outline-light trigger"
                                                                             type="button">
@@ -1493,7 +1493,7 @@
                                                                                     :to_account="{'amount':a/1000,'to':b}"
                                                                                     :account="account"
                                                                                     :tokenprotocol="protocol?.larynx"
-                                                                                    @tosign="sendIt($event)"
+                                                                                    @tosign="toSign = $event"
                                                                                     v-slot:trigger>
                                                                                     <button
                                                                                         class="btn btn-secondary btn-sm trigger"
@@ -1617,7 +1617,7 @@
                                                                                 :tokenuser="saccountapi"
                                                                                 :account="account"
                                                                                 :tokenprotocol="protocol?.larynx"
-                                                                                @tosign="sendIt($event)"
+                                                                                @tosign="toSign = $event"
                                                                                 v-slot:trigger>
                                                                                 <button class="dropdown-item trigger"
                                                                                     slot="trigger" disabled
@@ -1740,7 +1740,7 @@
                                                                 v-if="focus.id && hivestats.content_reward_percent"
                                                                 func="transfer" :mypfp="mypfp" token="HIVE"
                                                                 :tokenuser="focus" :account="account"
-                                                                :tokenstats="hivestats" @tosign="sendIt($event)"
+                                                                :tokenstats="hivestats" @tosign="toSign = $event"
                                                                 :type="{}" v-slot:trigger>
                                                                 <span class="text-nowrap trigger p-2" slot="trigger"><i
                                                                         class="fas fa-paper-plane me-2 "></i>Send</span>
@@ -1758,7 +1758,7 @@
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="transfer_to_vesting" :mypfp="mypfp"
                                                                     token="HIVE" :tokenuser="focus" :account="account"
-                                                                    :tokenstats="hivestats" @tosign="sendIt($event)"
+                                                                    :tokenstats="hivestats" @tosign="toSign = $event"
                                                                     :type="{}" v-slot:trigger
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
@@ -1771,7 +1771,7 @@
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="collateralized_convert" :mypfp="mypfp"
                                                                     token="HIVE" :tokenuser="focus" :account="account"
-                                                                    :tokenstats="hivestats" @tosign="sendIt($event)"
+                                                                    :tokenstats="hivestats" @tosign="toSign = $event"
                                                                     :type="{}" v-slot:trigger
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
@@ -1784,7 +1784,7 @@
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="transfer_to_savings" :mypfp="mypfp"
                                                                     token="HIVE" :tokenuser="focus" :account="account"
-                                                                    :tokenstats="hivestats" @tosign="sendIt($event)"
+                                                                    :tokenstats="hivestats" @tosign="toSign = $event"
                                                                     :type="{}" v-slot:trigger
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
@@ -1842,7 +1842,7 @@
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="recurrent_transfer" :mypfp="mypfp"
                                                                     token="HIVE" :tokenuser="focus" :account="account"
-                                                                    :tokenstats="hivestats" @tosign="sendIt($event)"
+                                                                    :tokenstats="hivestats" @tosign="toSign = $event"
                                                                     :type="xfr" v-slot:trigger>
                                                                     <button
                                                                         class="btn btn-sm rounded-pill btn-outline-light trigger"
@@ -1933,7 +1933,7 @@
                                                                 v-if="focus.id && hivestats.content_reward_percent"
                                                                 func="delegate_vesting_shares" :mypfp="mypfp" token="HP"
                                                                 :tokenuser="focus" :account="account" :type="{}"
-                                                                :tokenstats="hivestats" @tosign="sendIt($event)"
+                                                                :tokenstats="hivestats" @tosign="toSign = $event"
                                                                 v-slot:trigger class="">
                                                                 <span class="text-nowrap trigger p-2" slot="trigger"
                                                                     :disabled="!parseF(focus.vesting_shares)">
@@ -1956,7 +1956,7 @@
                                                                     func="delegate_rc" :mypfp="mypfp" token="RC"
                                                                     :tokenuser="focus" :account="account"
                                                                     :tokenstats="hivestats" :rc-info="rcAccount"
-                                                                    @tosign="sendIt($event)" :type="{}"
+                                                                    @tosign="toSign = $event" :type="{}"
                                                                     v-slot:trigger class="dropdown-menu-item">
                                                                     <button class="text-nowrap dropdown-item trigger">
                                                                         <i class="fas fa-microchip fa-fw me-2"></i>
@@ -1967,7 +1967,7 @@
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="withdraw_vesting" :mypfp="mypfp" token="HP"
                                                                     :tokenuser="focus" :type="{}" :account="account"
-                                                                    :tokenstats="hivestats" @tosign="sendIt($event)"
+                                                                    :tokenstats="hivestats" @tosign="toSign = $event"
                                                                     v-slot:trigger class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
                                                                         slot="trigger"
@@ -1983,7 +1983,7 @@
                                                                     func="set_withdraw_vesting_route" :mypfp="mypfp"
                                                                     token="HP" :tokenuser="focus" :type="{}"
                                                                     :account="account" :tokenstats="hivestats"
-                                                                    @tosign="sendIt($event)" v-slot:trigger
+                                                                    @tosign="toSign = $event" v-slot:trigger
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap dropdown-item trigger"
                                                                         slot="trigger"
@@ -1995,7 +1995,7 @@
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="claim_account" :mypfp="mypfp" token="HP"
                                                                     :tokenuser="focus" :account="account"
-                                                                    :tokenstats="hivestats" @tosign="sendIt($event)"
+                                                                    :tokenstats="hivestats" @tosign="toSign = $event"
                                                                     :type="{}" v-slot:trigger
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap dropdown-item trigger"
@@ -2026,7 +2026,7 @@
                                                         <modal-vue v-if="focus.id && hivestats.content_reward_percent"
                                                             func="withdraw_vesting" :mypfp="mypfp" token="HP"
                                                             :tokenuser="focus" :type="{}" :account="account"
-                                                            :tokenstats="hivestats" @tosign="sendIt($event)"
+                                                            :tokenstats="hivestats" @tosign="toSign = $event"
                                                             v-slot:trigger>
                                                             <button
                                                                 class="btn btn-sm rounded-pill btn-outline-light trigger"
@@ -2240,7 +2240,7 @@
                                                                                         :account="account" type="hive"
                                                                                         :to_account="delegation.delegatee"
                                                                                         :tokenstats="hivestats"
-                                                                                        @tosign="sendIt($event)"
+                                                                                        @tosign="toSign = $event"
                                                                                         v-slot:trigger>
                                                                                         <span class="p-1 trigger"><i
                                                                                                 class="fas fa-fw fa-user-edit"></i></span></modal-vue>
@@ -2393,7 +2393,7 @@
                                                                                     :tokenstats="hivestats" type="hive"
                                                                                     :to_account="delegation.to"
                                                                                     :rc-info="rcAccount"
-                                                                                    @tosign="sendIt($event)"
+                                                                                    @tosign="toSign = $event"
                                                                                     v-slot:trigger>
                                                                                     <span class="p-1 trigger">
                                                                                         <i
@@ -2467,7 +2467,7 @@
                                                         <modal-vue v-if="focus.id && hivestats.content_reward_percent"
                                                             func="transfer_from_savings" :mypfp="mypfp" token="HIVE"
                                                             :tokenuser="focus" :account="account"
-                                                            :tokenstats="hivestats" @tosign="sendIt($event)"
+                                                            :tokenstats="hivestats" @tosign="toSign = $event"
                                                             :type="{}" v-slot:trigger class="d-flex">
                                                             <span class="text-nowrap btn-padding trigger"
                                                                 slot="trigger">
@@ -2561,7 +2561,7 @@
                                                                 v-if="focus.id && hivestats.content_reward_percent"
                                                                 func="transfer" :mypfp="mypfp" token="HBD"
                                                                 :tokenuser="focus" :account="account"
-                                                                :tokenstats="hivestats" @tosign="sendIt($event)"
+                                                                :tokenstats="hivestats" @tosign="toSign = $event"
                                                                 :type="{}" v-slot:trigger>
                                                                 <span class="text-nowrap trigger p-2">
                                                                     <i class="fas fa-paper-plane me-2 trigger"></i>
@@ -2582,7 +2582,7 @@
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="convert" :mypfp="mypfp" token="HBD"
                                                                     :tokenuser="focus" :account="account"
-                                                                    :tokenstats="hivestats" @tosign="sendIt($event)"
+                                                                    :tokenstats="hivestats" @tosign="toSign = $event"
                                                                     :type="{}" v-slot:trigger
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
@@ -2596,7 +2596,7 @@
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="transfer_to_savings" :mypfp="mypfp"
                                                                     token="HBD" :tokenuser="focus" :account="account"
-                                                                    :tokenstats="hivestats" @tosign="sendIt($event)"
+                                                                    :tokenstats="hivestats" @tosign="toSign = $event"
                                                                     :type="{}" v-slot:trigger
                                                                     class="dropdown-menu-item">
                                                                     <button class="text-nowrap trigger dropdown-item"
@@ -2654,7 +2654,7 @@
                                                                     v-if="focus.id && hivestats.content_reward_percent"
                                                                     func="recurrent_transfer" :mypfp="mypfp" token="HBD"
                                                                     :tokenuser="focus" :account="account"
-                                                                    :tokenstats="hivestats" @tosign="sendIt($event)"
+                                                                    :tokenstats="hivestats" @tosign="toSign = $event"
                                                                     :type="xfr" v-slot:trigger><button
                                                                         class="btn btn-sm rounded-pill btn-outline-light trigger"
                                                                         type="button">
@@ -2726,7 +2726,7 @@
                                                                 v-if="focus.id && hivestats.content_reward_percent"
                                                                 func="transfer_from_savings" :mypfp="mypfp" token="HBD"
                                                                 :tokenuser="focus" :account="account"
-                                                                :tokenstats="hivestats" @tosign="sendIt($event)"
+                                                                :tokenstats="hivestats" @tosign="toSign = $event"
                                                                 :type="{}" v-slot:trigger class="d-flex">
                                                                 <span class="text-nowrap btn-padding trigger"
                                                                     slot="trigger">
@@ -2884,14 +2884,14 @@
                                             :multisig="chains[rnft.token].multisig"
                                             @focusitem="activeIndex = named;numitems=FTtrades.length;focusItem = $event;"
                                             :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)"
-                                            @tosign="sendIt($event)" :ocolors="getSetDetailsColors(rnft.script)"
+                                            @tosign="toSign = $event" :ocolors="getSetDetailsColors(rnft.script)"
                                             @detail="itemModal.hidden = false" />
                                     </div>
                                     <!-- NFT TRADES -->
                                     <div v-for="(item, named) in NFTtrades" class="col my-2" id="trade-nft-cards">
                                         <nftcard :item="item" trade="true" :account="account"
                                             :multisig="chains[item.token].multisig" :uid="Base64toNumber(item.uid)"
-                                            :oicon="getIcon(item.script)" @tosign="sendIt($event)"
+                                            :oicon="getIcon(item.script)" @tosign="toSign = $event"
                                             :ocolors="getSetDetailsColors(item.script)"
                                             @focusitem="activeIndex = named;numitems=NFTtrades.length;focusItem = $event;"
                                             @detail="modalIndex('itemModal', $event, 'NFTtrades');itemModal.hidden = false" />
@@ -2907,7 +2907,7 @@
                                         <nftcard :item="rnft" :inventory="true" :mint="true"
                                             :multisig="chains[rnft.token].multisig"
                                             :wrapped="getAttr(rnft.script, 'wrapped')" :oicon="getIcon(rnft.script)"
-                                            @tosign="sendIt($event)"
+                                            @tosign="toSign = $event"
                                             @focusitem="numitems=accountRNFTs.length;activeIndex = name;focusItem = $event;"
                                             :ocolors="getSetDetailsColors(rnft.script)"
                                             @modal="modalIndex('transferModal', $event);transferModal.hidden = false" />
@@ -2989,7 +2989,7 @@
                                     <div class="col my-2" v-for="(item, name, index) in displayNFTs">
                                         <nftcard :item="item" :uid="Base64toNumber(item.uid)"
                                             :multisig="chains[item.token].multisig" :index="index" :inventory="true"
-                                            @focusitem="focusItem = $event" @tosign="sendIt($event)"
+                                            @focusitem="focusItem = $event" @tosign="toSign = $event"
                                             @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                                     </div>
                                 </div>
@@ -3058,7 +3058,7 @@
             <!--NFT item detail modal-->
             <div>
                 <nftdetail :account="account" :itemmodal="itemModal" :pfp="pfp" :chains="chains" :denoms="denoms"
-                    :inventory="true" @setpfp="setPFP($event)" @tosign="sendIt($event)"
+                    :inventory="true" @setpfp="setPFP($event)" @tosign="toSign = $event"
                     @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
             </div>
 
@@ -3117,7 +3117,7 @@
                 <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect"
                     :voteval="voteVal" :head_block="sstats.head_block" :broca_refill="sstats.broca_refill"
                     :broca="spkapi.broca" :spk_power="spkapi.spk_power" :contracts="contracts" :extendcost="extendcost"
-                    @tosign="sendIt($event)" @modalselect="modalSelect($event)" @reply="reply($event)"
+                    @tosign="toSign = $event" @modalselect="modalSelect($event)" @reply="reply($event)"
                     @vote="vote($event)"></detail-vue>
             </div>
             <!-- mint transfer modal -->
@@ -3126,7 +3126,7 @@
                     :numitems="numitems" :activeindex="activeIndex" :mint="transferMint" @modal="injectIndex($event)"
                     :icon="getIcon(focusItem.script)" :setdetail="chains[focusItem.token].sets[focusItem.set]"
                     :api="chains[focusItem.token].api" :wrapped="getAttr(focusItem.script, 'wrapped')"
-                    :colors="getSetDetailsColors(focusItem.script)" @tosign="sendIt($event)"
+                    :colors="getSetDetailsColors(focusItem.script)" @tosign="toSign = $event"
                     :info="getSetDetailsInfo(focusItem.script)" />
             </div>
 
@@ -3150,7 +3150,7 @@
             </div>
 
             <mfi-vue api="https://spktest.dlux.io/spk" :accountinfo="accountinfo" bsid="buyTokenModal"
-                @tosign="sendIt($event)" :hiveprice="hiveprice.hive.usd"></mfi-vue>
+                @tosign="toSign = $event" :hiveprice="hiveprice.hive.usd"></mfi-vue>
 
 
         </main>
