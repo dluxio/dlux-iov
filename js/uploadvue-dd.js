@@ -321,7 +321,7 @@ export default {
                     <div v-if="!encryption.encrypted" class="mb-2">Files uploaded to this contract will not be
                         encrypted, <b>they will be publicly available on SPK Network</b></div>
                     <div v-if="encryption.encrypted" class="mb-2">Files uploaded to this contract will be encrypted,
-                        <b>only the accounts you add will have access.</b>
+                        <b>only the accounts you add will have access. File and Folder names are public!</b>
                     </div>
 
 
