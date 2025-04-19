@@ -14,7 +14,7 @@ export default {
         "vote": Vote,
         "pop-vue": Pop
       },
-  template: `<div>
+  template: `<div :id="'comment-' + post.permlink">
 <a role="button" v-if="warn" @click="warn = false">Hidden due to low reputation.</a>
 <div class="d-flex align-items-start">
 <a :href="'/@' + post.author" class="no-decoration">

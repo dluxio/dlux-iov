@@ -205,7 +205,7 @@ export default {
             class="text-white-50">{{post.upVotes}}</span>
          </a>
          <a href="#detailModal" class="ms-2 no-decoration text-white-50" data-bs-toggle="modal"
-            @click="modalSelect(post.url)"><i
+            @click="modalSelect(post.url, post.first_replier_permlink)"><i
             class="fas fa-comment fa-fw me-1"></i><span
             class="text-white-50">{{post.children}}</span>
          </a>
@@ -307,8 +307,15 @@ export default {
     emits: ['vote', 'reply', 'modalselect', 'tosign'],
     methods: {
         ...Mcommon,
-        modalSelect(url) {
+        modalSelect(url, firstReplyPermlink) {
             this.$emit('modalselect', url);
+            if (firstReplyPermlink) {
+                // Wait for modal to be shown before scrolling
+                setTimeout(() => {
+                    const commentElement = document.getElementById('comment-' + firstReplyPermlink);
+                    if (commentElement) commentElement.scrollIntoView();
+                }, 500);
+            }
         },
         isStored(contract){
             var found = false
@@ -533,6 +540,7 @@ export default {
     },
     mounted() {
         this.post.rep = this.readRep(this.post.author_reputation)
+        if(this.post?.replies?.length > 0)this.post.first_replier_permlink = this.post.replies[0].permlink
         this.hideLowRep()
         this.getContracts()
     },
