@@ -3,6 +3,7 @@ import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
 import Vote from "/js/vote.js";
 import Pop from "/js/pop.js";
+import MCommon from "/js/methods-common.js";
 
 export default {
     name: "replies",
@@ -74,6 +75,7 @@ export default {
     },
     emits: ['vote', 'reply'],
     methods:{
+        ...MCommon,
         pending(event){
             this.mde = event
         },
@@ -163,6 +165,7 @@ export default {
           }
     },
   mounted() {
+    this.post.rep = this.readRep(this.post.author_reputation)
     this.hideLowRep()
   },
 };
