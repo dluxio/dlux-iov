@@ -45,17 +45,9 @@ if (
 let user = localStorage.getItem("user") || "GUEST";
 let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
 
-// Vue.directive("scroll", {
-//   inserted: function (el, binding) {
-//     const onScrollCallback = binding.value;
-//     window.addEventListener("scroll", () => onScrollCallback());
-//   },
-// });
 
-createApp({ // vue 3
-  //var app = new Vue({
-  // vue 2
-  //el: "#app", // vue 2
+
+createApp({ 
   directives: {
     scroll
   },
@@ -1354,9 +1346,11 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       if (this.setPage &&
         Date.now() - this.lastLoad > 2000) {
         this.lastLoad = Date.now();
-        if (document.documentElement.clientHeight + window.scrollY >
-          document.documentElement.scrollHeight -
-          document.documentElement.clientHeight * 2) {
+        const scrollPosition = window.innerHeight + document.body.scrollTop;
+        const scrollHeight = document.body.scrollHeight;
+        if (
+          scrollPosition >= scrollHeight - window.innerHeight
+        ) {
           this.NFTselect.amount += 30;
           this.wantedNum += 30;
           this.selectNFTs();
@@ -2765,10 +2759,10 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     //this.getNodes();
     if (user != "GUEST") this.getTokenUser();
     if (user != "GUEST") this.getHiveUser();
-    window.addEventListener('scroll', this.handleScroll);
+    document.body.addEventListener('scroll', this.handleScroll);
   },
   unmounted() {
-    window.removeEventListener('scroll', this.handleScroll);
+    document.body.removeEventListener('scroll', this.handleScroll);
   },
   watch: {
     testnum: {

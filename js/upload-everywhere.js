@@ -24,7 +24,7 @@ export default {
     <input type="file" multiple ref="fileInput" @change="handleFileSelect" style="display: none;">
 
     <!-- Teleported UI Elements -->
-    <teleport :to="teleportref" :disabled="!teleportref">
+    <teleport :to="teleportref" v-if="droppedFiles.length > 0">
         <div class="d-flex flex-column rounded px-2 py-1 border border-white-50 bg-blur-darkg mb-3">
             <!-- File List -->
             <div v-if="droppedFiles.length > 0" class="mb-3">
