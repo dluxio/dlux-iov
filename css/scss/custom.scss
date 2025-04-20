@@ -24,9 +24,7 @@ body {
   text-decoration: none;
 }
 
-.border-dashed {
-  border-style: dashed !important;
-}
+
 
 .card-bg {
   border: none;
@@ -2570,4 +2568,8 @@ body[data-touch="false"] .dropdown-extra:hover {
 
 .btn-padding {
   padding: 12px 24px;
+}
+
+.border-dashed {
+  border-style: dashed !important;
 }

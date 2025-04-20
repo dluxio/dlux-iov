@@ -12515,10 +12515,6 @@ body {
   text-decoration: none;
 }
 
-.border-dashed {
-  border-style: dashed !important;
-}
-
 .card-bg {
   border: none;
   box-shadow: inset 1px 1px rgba(255, 255, 255, 0.2), inset -1px -1px rgba(255, 255, 255, 0.1), 1px 3px 24px -1px rgba(0, 0, 0, 0.15);
@@ -14905,4 +14901,8 @@ body[data-touch=false] .dropdown-extra:hover {
 
 .btn-padding {
   padding: 12px 24px;
+}
+
+.border-dashed {
+  border-style: dashed !important;
 }/*# sourceMappingURL=custom.css.map */

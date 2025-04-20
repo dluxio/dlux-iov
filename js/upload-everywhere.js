@@ -17,6 +17,7 @@ export default {
       @dragover.prevent
       @click="triggerFileInput"
       class="drop-area btn btn-sm btn-dark me-2 border border-light border-2 border-dashed"
+      style="border-style: dashed !important;"
     >
       <i class="fa-solid fa-cloud-arrow-up fa-fw me-1"></i>Upload Files
     </div>
