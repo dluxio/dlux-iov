@@ -16,49 +16,35 @@ import UploadVue from "/js/uploadvue.js";
 import PostVue from "/js/postvue.js";
 import DetailVue from "/js/detailvue.js";
 
+const HIVE_API = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+const LARYNX_API = "https://spkinstant.hivehoneycomb.com";
+const DUAT_API = "https://duat.hivehoneycomb.com";
+const DLUX_TOKEN_API = "https://token.dlux.io";
+const SPK_TEST_API = "https://spktest.dlux.io"; // Assuming this is the intended test API
+const DLUX_DATA_API = "https://data.dlux.io"; // For post fetching
+const COINGECKO_API = "https://api.coingecko.com/api/v3/simple/price";
+
 let url = location.href.replace(/\/$/, "");
 let lapi = "";
-// if (location.search) {
-//     const string = location.search.replace("?", "");
-//     let params = string.split("&");
-//     for (let i = 0; i < params.length; i++) {
-//         let param = params[i].split("=");
-//         if (param[0] == "api") {
-//             lapi = param[1];
-//         }
-//     }
-//     //window.history.replaceState(null, null, "dex?api=" + lapi);
-// }
-// if (location.hash && !lapi) {
-//     const hash = url.split("#");
-//     if (hash[1].includes("dlux")) {
-//         lapi = "https://token.dlux.io";
-//     } else if (hash[1].includes("larynx")) {
-//         lapi = "https://spkinstant.hivehoneycomb.com";
-//     } else if (hash[1].includes("duat")) {
-//         lapi = "https://duat.hivehoneycomb.com";
-//     }
-// }
-// if (!lapi) {
-    lapi = "https://token.dlux.io";
-// }
+lapi = DLUX_TOKEN_API; // Use constant
 if (
-    lapi == "https://token.dlux.io" ||
-    lapi == "https://spkinstant.hivehoneycomb.com" ||
-    lapi == "https://duat.hivehoneycomb.com"
+  lapi == DLUX_TOKEN_API ||
+  lapi == LARYNX_API ||
+  lapi == DUAT_API
 ) {
-    console.log("using defaults");
-    //window.history.replaceState(null, null, "dex");
+  console.log("using defaults");
+  //window.history.replaceState(null, null, "dex");
 }
 let user = localStorage.getItem("user") || "GUEST";
-let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+// let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io"; // Use constant HIVE_API
 
 createApp({
-  directives:{
+  directives: {
     scroll
   },
   data() {
     return {
+      lastScroll: 0,
       toSign: {},
       account: user,
       spkapi: {},
@@ -87,7 +73,7 @@ createApp({
       hiveFormValid: false,
       hbdFormValid: false,
       lapi: lapi,
-      hapi: hapi,
+      hapi: HIVE_API, // Use constant
       accountapi: {},
       hiveprice: {
         hive: {
@@ -406,6 +392,7 @@ createApp({
         items: [],
       },
       authors: {},
+      boundScrollHandler: null, // Initialize scroll handler reference
     };
   },
   components: {
@@ -426,11 +413,11 @@ createApp({
     "detail-vue": DetailVue,
   },
   methods: {
-    reply(deets){
+    reply(deets) {
       console.log('getReply:', deets)
-      if(!deets.json_metadata)deets.json_metadata = JSON.stringify({})
+      if (!deets.json_metadata) deets.json_metadata = JSON.stringify({})
       var operations = []
-      if(deets.bens){
+      if (deets.bens) {
         operations.push(["comment_options",
           {
             "author": this.account,
@@ -446,7 +433,7 @@ createApp({
                     deets.bens
                 }]]
           }])
-          delete deets.bens
+        delete deets.bens
       }
       operations.unshift(["comment", deets])
       this.toSign = {
@@ -460,7 +447,7 @@ createApp({
     },
     vote(url) {
       var key, slider, flag
-      if(typeof url == 'object'){
+      if (typeof url == 'object') {
         slider = url.slider
         flag = url.flag
         url = url.url
@@ -482,18 +469,18 @@ createApp({
         txid: "vote",
       };
     },
-    setRating(url, rating){
+    setRating(url, rating) {
       this.posturls[url].rating = rating;
     },
-    pending(url, text){
+    pending(url, text) {
       this.posturls[url].comment = text;
       this.comment(url)
     },
-    comment(url){
+    comment(url) {
       var meta = this.posturls[url].edit ? this.posturls[url].json_metadata : {
-            tags: this.posturls[url].json_metadata.tags,
-          }
-      if(this.posturls[url].rating)meta.review = {rating:this.posturls[url].rating }
+        tags: this.posturls[url].json_metadata.tags,
+      }
+      if (this.posturls[url].rating) meta.review = { rating: this.posturls[url].rating }
       this.toSign = {
         type: "comment",
         cj: {
@@ -502,7 +489,7 @@ createApp({
           body: this.posturls[url].comment,
           parent_author: this.posturls[url].edit ? this.posturls[url].parent_author : this.posturls[url].author,
           parent_permlink: this.posturls[url].edit ? this.posturls[url].parent_permlink : this.posturls[url].permlink,
-          permlink: this.posturls[url].edit ? this.posturls[url].permlink : 
+          permlink: this.posturls[url].edit ? this.posturls[url].permlink :
             "re-" + this.posturls[url].permlink + this.posturls[url].children,
           json_metadata: JSON.stringify(meta),
         },
@@ -511,23 +498,28 @@ createApp({
         txid: "comment",
       };
     },
-    hasVoted(url){
+    hasVoted(url) {
       const vote = this.posturls[url].active_votes.filter(vote => vote.voter === this.account)
       return vote.length ? vote[0].percent : 0
     },
     precision(num, precision) {
       return parseFloat(num / Math.pow(10, precision)).toFixed(precision);
     },
-    toFixed(num, dig){
+    toFixed(num, dig) {
       return parseFloat(num).toFixed(dig);
     },
     handleScroll() {
-      if (
-        document.documentElement.clientHeight + window.scrollY >
-        document.documentElement.scrollHeight -
-          document.documentElement.clientHeight * 2
-      ) {
-        this.getPosts();
+      const now = Date.now();
+      if (now - this.lastScroll > 500) {
+        this.lastScroll = now;
+        // Use document.body properties for scroll calculation
+        const scrollPosition = window.innerHeight + document.body.scrollTop;
+        const scrollHeight = document.body.scrollHeight;
+        if (
+          scrollPosition >= scrollHeight - window.innerHeight
+        ) {
+          this.getPosts();
+        }
       }
     },
     modalNext(modal) {
@@ -551,7 +543,7 @@ createApp({
         this[modal].item = this[modal].items[this[modal].index];
       }
     },
-    color_code(name){
+    color_code(name) {
       return parseInt(this.contracts[name] ? this.contracts[name].e.split(':')[0] : 0) - this.spkapi.head_block
     },
     Base64toNumber(chars) {
@@ -571,41 +563,41 @@ createApp({
       if (total > (this.spkapi.spk_power * 1000)) total = (this.spkapi.spk_power * 1000)
       return total
     },
-    extend(contract, amount, up = false){
-      if(amount > this.broca_calc(this.spkapi.broca))return
+    extend(contract, amount, up = false) {
+      if (amount > this.broca_calc(this.spkapi.broca)) return
       this.toSign = {
-          type: "cja",
-          cj: {
-            broca: amount,
-            id: contract.i,
-            file_owner: contract.t,
-            power: this.up ? 1 : 0,
-          },
-          id: `spkccT_extend`,
-          msg: `Extending ${contract}...`,
-          ops: ["getTokenUser"],
-          api: "https://spktest.dlux.io",
-          txid: "extend",
-        }
+        type: "cja",
+        cj: {
+          broca: amount,
+          id: contract.i,
+          file_owner: contract.t,
+          power: this.up ? 1 : 0,
+        },
+        id: `spkccT_extend`,
+        msg: `Extending ${contract}...`,
+        ops: ["getTokenUser"],
+        api: SPK_TEST_API, // Use constant
+        txid: "extend",
+      }
     },
     modalPrev(modal) {
       if (this[modal].index) this[modal].index--;
       else this[modal].index = this[modal].items.length - 1;
       this[modal].item = this[modal].items[this[modal].index];
     },
-    goBack(){
+    goBack() {
       window.history.back();
     },
     modalSelect(key) {
-      if(key.indexOf('/@') > 0)
+      if (key.indexOf('/@') > 0)
         key = '/@' + key.split('/@')[1];
       this.displayPost.index = key;
       this.displayPost.item = this.posturls[key];
       window.history.pushState("Blog Modal", this.displayPost.item.title, "/blog/@" + key.split('/@')[1]);
-      if (this.displayPost.item.children && !this.displayPost.item.replies.length){
+      if (this.displayPost.item.children && !this.displayPost.item.replies.length) {
         var recompile = false
         console.log(this.displayPost.item)
-        if(!this.displayPost.item.ratings){
+        if (!this.displayPost.item.ratings) {
           this.displayPost.item.ratings = 0
           this.displayPost.item.rating = 0
           recompile = true
@@ -617,7 +609,7 @@ createApp({
         )
       }
     },
-    getRewardFund(){
+    getRewardFund() {
       fetch(this.hapi, {
         body: `{"jsonrpc":"2.0", "method":"condenser_api.get_reward_fund", "params":["post"], "id":1}`,
         headers: {
@@ -625,12 +617,13 @@ createApp({
         },
         method: "POST"
       })
-      .then(r=>r.json())
-      .then(r=>{
-        this.rewardFund = r.result;
-      })
+        .then(r => r.json())
+        .then(r => {
+          this.rewardFund = r.result;
+        })
+        .catch(error => console.error('Error fetching reward fund:', error)); // Add catch
     },
-    getFeedPrice(){
+    getFeedPrice() {
       fetch(this.hapi, {
         body: `{"jsonrpc":"2.0", "method":"condenser_api.get_current_median_history_price", "params":[], "id":1}`,
         headers: {
@@ -641,7 +634,8 @@ createApp({
         .then((r) => r.json())
         .then((r) => {
           this.feedPrice = r.result;
-        });
+        })
+        .catch(error => console.error('Error fetching feed price:', error)); // Add catch
     },
     modalIndex(modal, index) {
       var i = 0;
@@ -655,44 +649,44 @@ createApp({
     },
     sigFig(num, sig) {
       // return a number in K or M or B format
-      if(num){
-      var post = typeof num.split == "function" ? num.split(" ")[1] : "";
-      num = parseFloat(num);
-      var out;
-      if (num < 1) {
-        out = (num * 1000).toFixed(sig);
-        post = "m" + post;
-      } else if (num < 1000) {
-        out = num.toFixed(sig);
-      } else if (num < 1000000) {
-        out = (num / 1000).toFixed(sig);
-        post = "K" + post;
-      } else if (num < 1000000000) {
-        out = (num / 1000000).toFixed(sig);
-        post = "M" + post;
-      } else if (num < 1000000000000) {
-        out = (num / 1000000000).toFixed(sig);
-        post = "B" + post;
-      } else if (num < 1000000000000000) {
-        out = (num / 1000000000000).toFixed(sig);
-        post = "T" + post;
-      } else if (num < 1000000000000000000) {
-        out = (num / 1000000000000000).toFixed(sig);
-        post = "Q" + post;
+      if (num) {
+        var post = typeof num.split == "function" ? num.split(" ")[1] : "";
+        num = parseFloat(num);
+        var out;
+        if (num < 1) {
+          out = (num * 1000).toFixed(sig);
+          post = "m" + post;
+        } else if (num < 1000) {
+          out = num.toFixed(sig);
+        } else if (num < 1000000) {
+          out = (num / 1000).toFixed(sig);
+          post = "K" + post;
+        } else if (num < 1000000000) {
+          out = (num / 1000000).toFixed(sig);
+          post = "M" + post;
+        } else if (num < 1000000000000) {
+          out = (num / 1000000000).toFixed(sig);
+          post = "B" + post;
+        } else if (num < 1000000000000000) {
+          out = (num / 1000000000000).toFixed(sig);
+          post = "T" + post;
+        } else if (num < 1000000000000000000) {
+          out = (num / 1000000000000000).toFixed(sig);
+          post = "Q" + post;
+        }
+        //remove trailing zeros
+        out = out.replace(/\.?0+$/, "");
+        return out + post;
       }
-      //remove trailing zeros
-      out = out.replace(/\.?0+$/, "");
-      return out + post;
-    }
     },
     removeOp(txid) {
       if (this.toSign.txid == txid) {
         this.toSign = {};
       }
     },
-    getReplies(a,p,c){
+    getReplies(a, p, c) {
       return new Promise((resolve, reject) => {
-        fetch('https://hive-api.dlux.io', {
+        fetch(this.hapi, { // Use constant HIVE_API
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content_replies", "params":["${a}","${p}"], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -701,44 +695,46 @@ createApp({
         })
           .then((res) => res.json())
           .then((r) => {
-          const key = `/@${a}/${p}`
-          var authors = []
-          for (let i = 0; i < r.result.length; i++) {
-            authors.push(r.result[i].author)
-            r.result[i].edit = false;
-            if(r.result[i].children)this.getReplies(r.result[i].author, r.result[i].permlink)
-            if (r.result[i].json_metadata) {
-              try {
-                r.result[i].json_metadata = JSON.parse(
-                  r.result[i].json_metadata
-                );
-              } catch (e) {}
-            }
-            const repKey =`/@${r.result[i].author}/${r.result[i].permlink}`
-            if(c){
-              const rating = r.result[i].json_metadata?.review?.rating || 0
-              if(rating > 0){
-                this.posturls[key].ratings += 1
-                this.posturls[key].rating = parseFloat(( (rating + this.posturls[key].rating) / this.posturls[key].ratings)).toFixed(2)
+            const key = `/@${a}/${p}`
+            var authors = []
+            for (let i = 0; i < r.result.length; i++) {
+              authors.push(r.result[i].author)
+              r.result[i].edit = false;
+              if (r.result[i].children) this.getReplies(r.result[i].author, r.result[i].permlink)
+              if (r.result[i].json_metadata) {
+                try {
+                  r.result[i].json_metadata = JSON.parse(
+                    r.result[i].json_metadata
+                  );
+                } catch (e) { }
               }
-            }
-            this.posturls[repKey] =
-              r.result[i];
-            if (r.result[i].slider < 0) {
-              r.result[i].flag = true;
-              r.result[i].slider =
-                r.result[i].slider * -1;
+              const repKey = `/@${r.result[i].author}/${r.result[i].permlink}`
+              if (c) {
+                const rating = r.result[i].json_metadata?.review?.rating || 0
+                if (rating > 0) {
+                  this.posturls[key].ratings += 1
+                  this.posturls[key].rating = parseFloat(((rating + this.posturls[key].rating) / this.posturls[key].ratings)).toFixed(2)
+                }
+              }
+              this.posturls[repKey] =
+                r.result[i];
+              if (r.result[i].slider < 0) {
+                r.result[i].flag = true;
+                r.result[i].slider =
+                  r.result[i].slider * -1;
 
+              }
+              this.posturls[repKey].rep = "...";
+              // console.log(this.posturls[repKey].json_metadata)
+              this.posturls[repKey].rating = this.posturls[repKey].json_metadata?.review?.rating || 0
+              this.rep(repKey)
             }
-            this.posturls[repKey].rep = "...";
-            // console.log(this.posturls[repKey].json_metadata)
-            this.posturls[repKey].rating = this.posturls[repKey].json_metadata?.review?.rating || 0
-            this.rep(repKey)
-          }
-          this.posturls[key].replies = r.result;
-          this.getHiveAuthors(authors)
+            this.posturls[key].replies = r.result;
+            this.getHiveAuthors(authors)
+            resolve(r.result) // Resolve promise
           })
           .catch((err) => {
+            console.error('Error fetching replies:', err); // Add console error
             reject(err);
           });
       });
@@ -749,7 +745,7 @@ createApp({
       }
     },
     checkAccount(name, key) {
-      fetch("https://hive-api.dlux.io", {
+      fetch(this.hapi, { // Use constant HIVE_API
         body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -762,7 +758,8 @@ createApp({
         .then((re) => {
           if (re.result.length) this[key] = true;
           else this[key] = false;
-        });
+        })
+        .catch(error => console.error(`Error checking account ${this[name]}:`, error)); // Add catch
     },
     tokenSend() {
       if (!this.sendFormValid) return;
@@ -825,19 +822,19 @@ createApp({
     toUpperCase(value) {
       return value.toUpperCase();
     },
-    gt(a,b){
-      return parseFloat(a)>parseFloat(b);
+    gt(a, b) {
+      return parseFloat(a) > parseFloat(b);
     },
     formatNumber(t, n, r, e) {
       if (typeof t != "number") {
         const parts = t.split(" ");
         var maybe = 0
         for (i = 0; i < parts.length; i++) {
-          if (parseFloat(parts[i])>0){
+          if (parseFloat(parts[i]) > 0) {
             maybe += parseFloat(parts[i])
           }
         }
-        if (maybe>parseFloat(t)){
+        if (maybe > parseFloat(t)) {
           t = maybe
         } else {
           t = parseFloat(t)
@@ -852,7 +849,7 @@ createApp({
         i = a[0],
         o = 1 < a.length ? r + a[1] : "";
       if (e)
-        for (var c = /(\d+)(\d{3})/; c.test(i); )
+        for (var c = /(\d+)(\d{3})/; c.test(i);)
           i = i.replace(c, "$1" + e + "$2");
       return (u ? "-" : "") + i + o;
     },
@@ -863,7 +860,7 @@ createApp({
       }
       let api =
         url ||
-        prompt("Please enter your API", "https://spkinstant.hivehoneycomb.com");
+        prompt("Please enter your API", LARYNX_API); // Use constant
       if (url.indexOf("https://") == -1) {
         alert("https is required");
         return;
@@ -894,31 +891,33 @@ createApp({
         if (!this[key]) this[key] = value;
       }
     },
-    fancyBytes(bytes){
+    fancyBytes(bytes) {
       var counter = 0, p = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y']
-      while (bytes > 1024){
+      while (bytes > 1024) {
         bytes = bytes / 1024
-        counter ++
+        counter++
       }
       return `${this.toFixed(bytes, 2)} ${p[counter]}B`
     },
-    getStats(){
-      fetch('https://token.dlux.io/')
-      .then(r => r.json())
-      .then(r => {
-        r.result.head_block = r.head_block
-        this.stats = r.result
-      })
+    getStats() {
+      fetch(DLUX_TOKEN_API + '/') // Use constant
+        .then(r => r.json())
+        .then(r => {
+          r.result.head_block = r.head_block
+          this.stats = r.result
+        })
+        .catch(error => console.error('Error fetching DLUX stats:', error)); // Add catch
     },
-    getSPKStats(){
-      fetch('https://spktest.dlux.io/')
-      .then(r => r.json())
-      .then(r => {
-        r.result.head_block = r.head_block
-        this.sstats = r.result
-      })
+    getSPKStats() {
+      fetch(SPK_TEST_API + '/') // Use constant
+        .then(r => r.json())
+        .then(r => {
+          r.result.head_block = r.head_block
+          this.sstats = r.result
+        })
+        .catch(error => console.error('Error fetching SPK stats:', error)); // Add catch
     },
-    expIn(con){
+    expIn(con) {
       return `Expires in ${parseInt((parseInt(con.e.split(':')[0]) - this.spkapi.head_block) / 20 / 60) < 24 ? parseInt((parseInt(con.e.split(':')[0]) - this.spkapi.head_block) / 20 / 60) + ' hours' : parseInt((parseInt(con.e.split(':')[0]) - this.spkapi.head_block) / 20 / 60 / 24) + ' days'}`
     },
     setMem(key, value, reload) {
@@ -971,12 +970,10 @@ createApp({
       ) {
         this.postSelect[this.postSelect.entry].p = true;
         var APIQ = this.postSelect.searchTerm
-          ? `https://data.dlux.io/search/${this.postSelect.searchTerm.toLowerCase()}?a=${
-              this.postSelect[this.postSelect.entry].a
-            }&o=${this.postSelect[this.postSelect.entry].o}&b=${bitMask}`
-          : `https://data.dlux.io/${this.postSelect.entry}?a=${
-              this.postSelect[this.postSelect.entry].a
-            }&o=${this.postSelect[this.postSelect.entry].o}&b=${bitMask}`;
+          ? `${DLUX_DATA_API}/search/${this.postSelect.searchTerm.toLowerCase()}?a=${this.postSelect[this.postSelect.entry].a
+          }&o=${this.postSelect[this.postSelect.entry].o}&b=${bitMask}`
+          : `${DLUX_DATA_API}/${this.postSelect.entry}?a=${this.postSelect[this.postSelect.entry].a
+          }&o=${this.postSelect[this.postSelect.entry].o}&b=${bitMask}`;
         fetch(APIQ)
           .then((r) => r.json())
           .then((res) => {
@@ -1007,13 +1004,17 @@ createApp({
             if (!called) this.selectPosts();
             authors = [...new Set(authors)];
             this.getHiveAuthors(authors);
+          })
+          .catch(error => { // Add catch
+            console.error('Error fetching posts:', error);
+            this.postSelect[this.postSelect.entry].p = false; // Reset pending flag on error
           });
       }
     },
     selectPosts(modal) {
       var arr = [];
       for (var i = 0; i < this[this.postSelect.entry].length; i++) {
-        if(this.posturls[this[this.postSelect.entry][i]])arr.push(this.posturls[this[this.postSelect.entry][i]]);
+        if (this.posturls[this[this.postSelect.entry][i]]) arr.push(this.posturls[this[this.postSelect.entry][i]]);
       }
       this.displayPosts = arr
       if (modal) {
@@ -1024,7 +1025,7 @@ createApp({
     },
     getContent(a, p, modal) {
       if (a && p) {
-        fetch('https://hive-api.dlux.io', {
+        fetch(this.hapi, { // Use constant HIVE_API
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":["${a}", "${p}"], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -1055,7 +1056,7 @@ createApp({
                 if (this.posturls[key].active_votes[i].percent > 0)
                   this.posturls[key].upVotes++;
                 else this.posturls[key].downVotes++;
-                if(this.posturls[key].active_votes[i].voter == this.account){
+                if (this.posturls[key].active_votes[i].voter == this.account) {
                   this.posturls[key].slider = this.posturls[key].active_votes[i].percent
                   this.posturls[key].hasVoted = true
                 }
@@ -1072,45 +1073,45 @@ createApp({
               }
               var contracts = false
               var type = "Blog";
-              if(this.posturls[key].json_metadata.assets){
-                for(var i = 0; i < this.posturls[key].json_metadata.assets.length; i++){
-                  if(this.posturls[key].json_metadata.assets[i].contract){
+              if (this.posturls[key].json_metadata.assets) {
+                for (var i = 0; i < this.posturls[key].json_metadata.assets.length; i++) {
+                  if (this.posturls[key].json_metadata.assets[i].contract) {
                     this.posturls[key].contract[this.posturls[key].json_metadata.assets[i].contract] = {}
                     contracts = true
                   }
                 }
               }
               try {
-              if (
-                "QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k" ==
-                this.posturls[key].json_metadata.vrHash ||
-                "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
-                this.posturls[key].json_metadata.vrHash ||
-                "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV" ==
-                this.posturls[key].json_metadata.vrHash || 
-                "Qma4dk3mWP325HrHYBDz3UdL9h1A6q8CSvZdc8JhqfgiMp" == this.posturls[key].json_metadata.vrHash
-              )
-                type = "360";
-              else if (this.posturls[key].json_metadata.vrHash)
-                type = "VR";
-              else if (this.posturls[key].json_metadata.arHash)
-                type = "AR";
-              else if (this.posturls[key].json_metadata.appHash)
-                type = "APP";
-              else if (this.posturls[key].json_metadata.audHash)
-                type = "Audio";
-              else if (this.posturls[key].json_metadata.vidHash)
-                type = "Video";
-            } catch (e) {
-              console.log(key, e, "no JSON?");
-            }
-            this.posturls[key].type = type;
-              if(contracts){
+                if (
+                  "QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k" ==
+                  this.posturls[key].json_metadata.vrHash ||
+                  "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
+                  this.posturls[key].json_metadata.vrHash ||
+                  "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV" ==
+                  this.posturls[key].json_metadata.vrHash ||
+                  "Qma4dk3mWP325HrHYBDz3UdL9h1A6q8CSvZdc8JhqfgiMp" == this.posturls[key].json_metadata.vrHash
+                )
+                  type = "360";
+                else if (this.posturls[key].json_metadata.vrHash)
+                  type = "VR";
+                else if (this.posturls[key].json_metadata.arHash)
+                  type = "AR";
+                else if (this.posturls[key].json_metadata.appHash)
+                  type = "APP";
+                else if (this.posturls[key].json_metadata.audHash)
+                  type = "Audio";
+                else if (this.posturls[key].json_metadata.vidHash)
+                  type = "Video";
+              } catch (e) {
+                console.log(key, e, "no JSON?");
+              }
+              this.posturls[key].type = type;
+              if (contracts) {
                 this.getContracts(key)
               }
               this.posturls[key].rep = "...";
               this.rep(key);
-              if (this.posturls[key].slider < 0){
+              if (this.posturls[key].slider < 0) {
                 this.posturls[key].slider =
                   this.posturls[key].slider * -1;
                 this.posturls[key].flag = true
@@ -1122,21 +1123,21 @@ createApp({
                 this.posturls[key].created
               );
               this.selectPosts();
-              if(modal)this.modalSelect(key)
+              if (modal) this.modalSelect(key)
             }
-          });
+          })
+          .catch(error => console.error(`Error fetching content @${a}/${p}:`, error)); // Add catch
       } else {
         console.log("no author or permlink", a, p);
       }
     },
-    updateCost(id){
+    updateCost(id) {
       this.extendcost[id] = parseInt(this.contracts[id].extend / 30 * this.contracts[id].r)
-      this.$forceUpdate()
     },
-    getContracts(url){
+    getContracts(url) {
       var contracts = [],
         getContract = (u, id) => {
-          fetch('https://spktest.dlux.io/api/fileContract/' + id)
+          fetch(SPK_TEST_API + '/api/fileContract/' + id) // Use constant
             .then((r) => r.json())
             .then((res) => {
               res.result.extend = "7"
@@ -1144,13 +1145,14 @@ createApp({
                 this.contracts[id] = res.result
                 this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
               }
-            });
+            })
+            .catch(error => console.error(`Error fetching contract ${id}:`, error)); // Add catch
         }
-      for(var contract in this.posturls[url].contract){
+      for (var contract in this.posturls[url].contract) {
         contracts.push(contract)
       }
       contracts = [...new Set(contracts)]
-      for(var i = 0; i < contracts.length; i++){
+      for (var i = 0; i < contracts.length; i++) {
         getContract(url, contracts[i])
       }
     },
@@ -1237,7 +1239,7 @@ createApp({
       var arr;
       try {
         arr = json.image[0];
-      } catch (e) {}
+      } catch (e) { }
       if (typeof json.image == "string") {
         return json.image;
       } else if (typeof arr == "string") {
@@ -1278,20 +1280,22 @@ createApp({
       return out;
     },
     getQuotes() {
-      fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=hive&amp;vs_currencies=usd"
+      fetch( // Use constant COINGECKO_API
+        `${COINGECKO_API}?ids=hive&amp;vs_currencies=usd`
       )
         .then((response) => response.json())
         .then((data) => {
           this.hiveprice = data;
-        });
-      fetch(
-        "https://api.coingecko.com/api/v3/simple/price?ids=hive_dollar&amp;vs_currencies=usd"
+        })
+        .catch(error => console.error('Error fetching Hive price:', error)); // Add catch
+      fetch( // Use constant COINGECKO_API
+        `${COINGECKO_API}?ids=hive_dollar&amp;vs_currencies=usd`
       )
         .then((response) => response.json())
         .then((data) => {
           this.hbdprice = data;
-        });
+        })
+        .catch(error => console.error('Error fetching HBD price:', error)); // Add catch
     },
     getNodes() {
       fetch(this.lapi + "/runners")
@@ -1300,13 +1304,15 @@ createApp({
           this.runners = data.result.sort((a, b) => {
             return b.g - a.g;
           });
-        });
+        })
+        .catch(error => console.error('Error fetching runners:', error)); // Add catch
       fetch(this.lapi + "/markets")
         .then((response) => response.json())
         .then((data) => {
           this.nodes = data.markets.node;
           this.stats = data.stats;
-        });
+        })
+        .catch(error => console.error('Error fetching markets:', error)); // Add catch
     },
     getProtocol() {
       fetch(this.lapi + "/api/protocol")
@@ -1321,7 +1327,8 @@ createApp({
           this.features = data.features ? data.features : this.features;
           this.behind = data.behind;
           this.behindTitle = data.behind + " Blocks Behind Hive";
-        });
+        })
+        .catch(error => console.error('Error fetching protocol:', error)); // Add catch
     },
     removeUser() {
       this.balance = 0;
@@ -1343,7 +1350,8 @@ createApp({
             if (json.result == "No Profile Picture Set or Owned") return;
             this.pfp.set = json.result[0].pfp.split(":")[0];
             this.pfp.uid = json.result[0].pfp.split(":")[1];
-          });
+          })
+          .catch(error => console.error('Error fetching PFP:', error)); // Add catch
       }
     },
     pm(a, b) {
@@ -1383,30 +1391,31 @@ createApp({
             this.accountapi = data;
             if (
               new Date().getMonth() + 1 !=
-                parseInt(data.drop?.last_claim, 16) &&
+              parseInt(data.drop?.last_claim, 16) &&
               data.drop?.availible.amount > 0
             ) {
               this.hasDrop = true;
               this.dropnai = `${parseFloat(
                 data.drop.availible.amount /
-                  Math.pow(10, data.drop.availible.precision)
-              ).toFixed(data.drop.availible.precision)} ${
-                data.drop.availible.token
-              }`;
+                Math.pow(10, data.drop.availible.precision)
+              ).toFixed(data.drop.availible.precision)} ${data.drop.availible.token
+                }`;
             }
-          });
+          })
+          .catch(error => console.error(`Error fetching token user @${user}:`, error)); // Add catch
     },
     getSPKUser(user) {
       if (user)
-        fetch("https://spktest.dlux.io/@" + user)
+        fetch(SPK_TEST_API + "/@" + user) // Use constant
           .then((response) => response.json())
           .then((data) => {
             this.spkapi = data
-          });
+          })
+          .catch(error => console.error(`Error fetching SPK user @${user}:`, error)); // Add catch
     },
     getHiveUser(user) {
       if (user)
-        fetch(hapi, {
+        fetch(HIVE_API, { // Use constant HIVE_API
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${user}"]], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -1425,10 +1434,11 @@ createApp({
             const final_vest = total_vests * 1000000;
             const power = ((parseInt(this.accountinfo.voting_power) * 10000) / 10000) / 50;
             this.accountinfo.rshares = (power * final_vest) / 10000;
-          });
+          })
+          .catch(error => console.error(`Error fetching Hive user @${user}:`, error)); // Add catch
     },
-    brocaCost(t,c){
-      return parseInt((t/30)*c)
+    brocaCost(t, c) {
+      return parseInt((t / 30) * c)
     },
     getHiveAuthors(users) {
       var q = "";
@@ -1437,7 +1447,7 @@ createApp({
       }
       if (q.length > 0) {
         q = q.substring(0, q.length - 1);
-        fetch(hapi, {
+        fetch(HIVE_API, { // Use constant HIVE_API
           body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[[${q}]], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
@@ -1449,7 +1459,8 @@ createApp({
             for (var i = 0; i < data.result.length; i++) {
               this.authors[data.result[i].name] = data.result[i];
             }
-          });
+          })
+          .catch(error => console.error('Error fetching Hive authors:', error)); // Add catch
       }
     },
   },
@@ -1465,25 +1476,27 @@ createApp({
       this.me = true;
     }
     if (this.pageAccount == this.account) this.me = true;
-    if(this.pagePermlink){
+    if (this.pagePermlink) {
       this.getContent(this.pageAccount, this.pagePermlink, true)
     } else {
       this.getPosts();
-      window.addEventListener('scroll', this.handleScroll);
+      this.boundScrollHandler = this.handleScroll.bind(this); // Create bound handler
+      document.body.addEventListener('scroll', this.boundScrollHandler); // Use bound handler
     }
     this.getStats()
     this.getSPKStats()
-    this.getPosts();
     this.getProtocol();
     this.getRewardFund();
     this.getFeedPrice();
   },
-  unmounted () {
-    window.removeEventListener('scroll', this.handleScroll);
+  unmounted() {
+    if (this.boundScrollHandler) { // Check if handler exists before removing
+      document.body.removeEventListener('scroll', this.boundScrollHandler); // Use bound handler
+    }
   },
   watch: {
-    postSelect(a, b){
-      if(a.searchTerm != b.searchTerm || a.bitMask != b.bitMask){
+    postSelect(a, b) {
+      if (a.searchTerm != b.searchTerm || a.bitMask != b.bitMask) {
         console.log('Watched')
         this.displayPosts = []
         this[this.postSelect.entry] = []
@@ -1498,7 +1511,7 @@ createApp({
         return location;
       },
     },
-    voteVal(){
+    voteVal() {
       return ((this.accountinfo.rshares / parseInt(this.rewardFund.recent_claims)) *
         parseFloat(this.rewardFund.reward_balance) *
         (parseFloat(this.feedPrice.base)))

@@ -537,7 +537,9 @@ export default {
             handler() {
                 this.post.rep = this.readRep(this.post.author_reputation)
                 this.hideLowRep()
-                if(this.post?.replies?.length != 0)this.first_replier_permlink = this.post.replies[0].permlink
+                try{
+                    if(this.post?.replies?.length != 0)this.first_replier_permlink = this.post.replies[0].permlink
+                } catch (e) {}
             },
             deep: true
         }
