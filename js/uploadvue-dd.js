@@ -1353,7 +1353,7 @@ export default {
         
         // Format extension with path suffix: ext.pathIndex
         // But only add the pathIndex if it's not the root (0)
-        const extWithPath = sanitizedExt + (pathIndex !== '0' ? '.' + pathIndex : '');
+        const extWithPath = sanitizedExt + (pathIndex !== '1' ? '.' + pathIndex : '');
         
         console.log(`File: ${fileInfo.name}, Path: ${folderPath}, Index: ${pathIndex}, Formatted extension: ${extWithPath}`);
         
