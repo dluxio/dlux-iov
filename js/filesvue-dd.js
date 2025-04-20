@@ -2003,6 +2003,7 @@ export default {
                     }
                 });
                 const newFolderListStr = folderListEntries.join("|");
+                console.log({newFolderListStr})
                 const newFilesMetadata = [];
                 const sortedFileCIDs = Object.keys(originalContract.df || {}).sort();
                 sortedFileCIDs.forEach(cid => {
@@ -2027,7 +2028,7 @@ export default {
                 const newFilesMetadataStr = newFilesMetadata.join(',');
                 let finalMetaString;
                 if (encData) {
-                    const folderPart = newFolderListStr.startsWith('|') ? newFolderListStr : `|${newFolderListStr}`;
+                    const folderPart = ( !newFolderListStr.length || newFolderListStr.startsWith('|')) ? newFolderListStr : `|${newFolderListStr}`;
                     finalMetaString = `${encData}${folderPart},${newFilesMetadataStr}`;
                 } else {
                     finalMetaString = `1${newFolderListStr},${newFilesMetadataStr}`;
