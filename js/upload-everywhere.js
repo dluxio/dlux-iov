@@ -67,7 +67,7 @@ export default {
             </modal-vue>
 
             <!-- Continue Button -->
-            <button v-if="contractBuilt && requiredBroca <= contractSize && droppedFiles.length > 0" @click="startUpload" class="ms-auto btn btn-primary>
+            <button v-if="contractBuilt && requiredBroca <= contractSize && droppedFiles.length > 0" @click="startUpload" class="ms-auto btn btn-primary">
                 Continue<i class="fa-solid fa-angles-right ms-2 fa-fw"></i>
             </button>
 
