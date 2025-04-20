@@ -294,7 +294,7 @@ export default {
 
         <!-- encryption banner -->
         <div v-if="type != 'video'" class="card card-body d-flex align-items-center my-3">
-            <div class="d-flex flex-column w-100 flex-grow-1 mx-1 px-md-2 px-lg-5">
+            <div class="d-flex flex-column w-100 flex-grow-1">
 
                 <!-- bubble preview -->
                 <div class="d-flex justify-content-center flex-wrap fs-3 fw-lighter mb-3">

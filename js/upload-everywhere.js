@@ -16,64 +16,65 @@ export default {
       @drop="handleDrop"
       @dragover.prevent
       @click="triggerFileInput"
-      class="drop-area text-center py-0 lead rounded"
-      style="border-width: 2px; border-style: dashed; background-color: rgba(0,0,0,0.3); cursor: pointer;"
+      class="drop-area btn btn-sm btn-dark me-2 border border-light border-2 border-dashed"
     >
-      <i class="fa-solid fa-cloud-arrow-up fa-2x"></i>
+      <i class="fa-solid fa-cloud-arrow-up fa-fw me-1"></i>Upload Files
     </div>
     <input type="file" multiple ref="fileInput" @change="handleFileSelect" style="display: none;">
 
     <!-- Teleported UI Elements -->
     <teleport :to="teleportref" :disabled="!teleportref">
-      <!-- File List -->
-      <div v-if="droppedFiles.length > 0" class="mt-3">
-        <h5>Ready to Upload: {{ droppedFiles.length }} (Total Size: {{ fancyBytes(totalSize) }})</h5>
-        <ul class="list-group">
-          <li v-for="(file, index) in droppedFiles" :key="index" class="list-group-item d-flex justify-content-between align-items-center">
-            {{ file.name }} ({{ fancyBytes(file.size) }})
-            <button class="btn btn-sm btn-danger" @click="removeFile(index)">Remove</button>
-          </li>
-        </ul>
-      </div>
+        <div class="d-flex flex-column rounded px-2 py-1 border border-white-50 bg-blur-darkg mb-3">
+            <!-- File List -->
+            <div v-if="droppedFiles.length > 0" class="mb-3">
+                <h5>Ready to Upload: {{ droppedFiles.length }} (Total Size: {{ fancyBytes(totalSize) }})</h5>
+                <ul class="list-group">
+                <li v-for="(file, index) in droppedFiles" :key="index" class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ file.name }} ({{ fancyBytes(file.size) }})
+                    <button class="btn btn-sm btn-danger" @click="removeFile(index)">Remove</button>
+                </li>
+                </ul>
+            </div>
 
-      <!-- Contract Progress Bar -->
-      <div v-if="contractSize > 0 && droppedFiles.length > 0" class="mt-2">
-        <label class="form-label small mb-0">Contract Usage: {{ fancyBytes(totalSize) }} / {{ fancyBytes(contractSize) }}</label>
-        <progress class="progress w-100" :value="totalSize" :max="contractSize" style="height: 5px;"></progress>
-      </div>
+            <!-- Contract Progress Bar -->
+            <div v-if="contractSize > 0 && droppedFiles.length > 0" class="mb-3">
+                <label class="form-label small mb-0">Contract Usage: {{ fancyBytes(totalSize) }} / {{ fancyBytes(contractSize) }}</label>
+                <progress class="progress w-100" :value="totalSize" :max="contractSize" style="height: 5px;"></progress>
+            </div>
 
 
-      <!-- Contract Modal Trigger -->
-      <modal-vue
-        v-if="showContractButton"
-        type="contract"
-        :to_account="{'amount':displayRequiredBroca,'broker':'dlux-io'}"
-        :account="account"
-        :api="sapi"
-        :mypfp="mypfp"
-        :tokenuser="saccountapi"
-        :tokenstats="stats"
-        :tokenprotocol="protocol"
-        @tosign="sendIt($event, 'contractBuilt')"
-        v-slot:trigger
-      >
-         <!-- Button to Build/Upgrade Contract -->
-         <button
-            v-if="!contractSize || requiredBroca > contractSize"
-            :class="['btn', 'mt-3', 'trigger', !contractSize ? 'btn-primary' : 'btn-secondary']">
-           {{ !contractSize ? 'Build Contract' : 'Upgrade Contract' }} for {{ displayRequiredBroca.toFixed(0) }} BROCA
-         </button>
-      </modal-vue>
+            <!-- Contract Modal Trigger -->
+            <modal-vue
+                v-if="showContractButton"
+                type="contract"
+                :to_account="{'amount':displayRequiredBroca,'broker':'dlux-io'}"
+                :account="account"
+                :api="sapi"
+                :mypfp="mypfp"
+                :tokenuser="saccountapi"
+                :tokenstats="stats"
+                :tokenprotocol="protocol"
+                @tosign="sendIt($event, 'contractBuilt')"
+                v-slot:trigger
+            >
+                <!-- Button to Build/Upgrade Contract -->
+                <button
+                    v-if="!contractSize || requiredBroca > contractSize"
+                    :class="['btn', 'mb-3', 'trigger', !contractSize ? 'btn-primary' : 'btn-secondary']">
+                {{ !contractSize ? 'Build Contract' : 'Upgrade Contract' }} for {{ displayRequiredBroca.toFixed(0) }} BROCA
+                </button>
+            </modal-vue>
 
-      <!-- Continue Button -->
-      <button v-if="contractBuilt && requiredBroca <= contractSize && droppedFiles.length > 0" @click="startUpload" class="btn btn-primary mt-3">
-        Continue Upload
-      </button>
+            <!-- Continue Button -->
+            <button v-if="contractBuilt && requiredBroca <= contractSize && droppedFiles.length > 0" @click="startUpload" class="ms-auto btn btn-primary>
+                Continue<i class="fa-solid fa-angles-right ms-2 fa-fw"></i>
+            </button>
 
-      <!-- Loading State (for contract build) -->
-      <div v-if="loading" class="text-center mt-3">
-        <p>Building contract... Please wait.</p>
-      </div>
+            <!-- Loading State (for contract build) -->
+            <div v-if="loading" class="text-center mt-3">
+                <p>Building contract... Please wait.</p>
+            </div>
+        </div>
     </teleport>
 
     <!-- Upload Modal (Teleported to body using div overlay pattern) -->
@@ -84,10 +85,10 @@ export default {
            style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.8); z-index: 1055; overflow-y: auto; padding: 20px;">
         
         <!-- Inner Content Box -->
-        <div class="bg-dark text-white p-4 rounded shadow-lg" style="min-width: 500px; max-width: 800px; max-height: 90vh; overflow-y: auto;"> 
+        <div class="bg-blur-darkg text-white p-4 rounded shadow-lg" style="min-width: 500px; max-width: 800px; max-height: 90vh; overflow-y: auto;"> 
           <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
               <h5 class="mb-0">Upload Files</h5>
-              <button type="button" class="btn-close btn-close-white" aria-label="Close" @click="closeUploadModal"></button>
+              <button type="button" class="btn-close btn-close" aria-label="Close" @click="closeUploadModal"></button>
           </div>
           
           <upload-vue
