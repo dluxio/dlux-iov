@@ -169,14 +169,13 @@ export default {
                 <button class="btn btn-secondary btn-sm" @click="createNewFolder"><i class="fa-solid fa-folder-plus me-1"></i>New Folder</button>
                 <button class="btn btn-success btn-sm ms-2" @click="saveChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-save me-1"></i>Save</button>
                 <button class="btn btn-danger btn-sm ms-2" @click="revertPendingChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-undo me-1"></i>Revert</button>
-                <button class="btn btn-danger btn-sm ms-2" @click="clearPendingChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-trash me-1"></i>Clear</button>
                 <div class="btn-group ms-2">
                     <button class="btn btn-sm" :class="viewOpts.fileView === 'grid' ? 'btn-primary' : 'btn-secondary'" @click="viewOpts.fileView = 'grid'"><i class="fa-solid fa-th-large"></i></button>
                     <button class="btn btn-sm" :class="viewOpts.fileView === 'list' ? 'btn-primary' : 'btn-secondary'" @click="viewOpts.fileView = 'list'"><i class="fa-solid fa-list"></i></button>
                 </div>
             </div>
         </div>
-        <div v-if="filesArray.length" class="table-responsive">
+        <div v-if="filesSelect.search" class="table-responsive">
             <table class="table table-dark table-striped table-hover">
                 <thead>
                     <tr>
@@ -273,7 +272,7 @@ export default {
             <i class="fa-solid fa-triangle-exclamation fa-fw me-1"></i>
             Files in Trash will be permanently deleted after their deletion date.
         </div>
-        <div v-if="!filesArray.length">
+        <div v-if="!filesSelect.search">
             <div class="files" @contextmenu.prevent="showContextMenu($event, 'background', null)" 
                 @dragover="dragOverBackground($event)" 
                 @drop="dropOnBackground($event)"
@@ -329,7 +328,8 @@ export default {
                                     <path class="st0" d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400 c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
                                     <path class="st0" d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
                                     <path class="st0" d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
-                                    <path class="st0" d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3 c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500 c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
+                                    <path class="st0" d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3 c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
+                                c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
                                     <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
                                 </g>
                             </svg>
@@ -909,9 +909,9 @@ export default {
                     const entry = item.webkitGetAsEntry();
                     if (entry) {
                         if (entry.isFile) {
-                             promises.push(
+                            promises.push(
                                 new Promise((resolve, reject) => entry.file(resolve, reject))
-                                .then(file => ({ file: file, relativePath: file.name })) // Single file has its name as path
+                                    .then(file => ({ file: file, relativePath: file.name })) // Single file has its name as path
                             );
                         } else if (entry.isDirectory) {
                             // Start scanning the directory
@@ -920,7 +920,7 @@ export default {
                     }
                 }
             }
-            
+
             // Wait for all scanning/file reading promises to complete
             const results = await Promise.all(promises);
             // Flatten the results (scanDirectory returns arrays)
@@ -992,7 +992,7 @@ export default {
                     return;
                 }
             }
-            
+
             // Ensure user is the current logged-in account and folderName is valid
             if (folderName && this.selectedUser === this.account) {
                 const newPath = this.currentFolderPath ? `${this.currentFolderPath}/${folderName}` : folderName;
@@ -1024,12 +1024,12 @@ export default {
                 if (!this.pendingChanges['__virtualFolders__'][this.selectedUser]) {
                     this.pendingChanges['__virtualFolders__'][this.selectedUser] = [];
                 }
-                
+
                 // Add to virtual folders if not already there
                 if (!this.pendingChanges['__virtualFolders__'][this.selectedUser].includes(newPath)) {
                     this.pendingChanges['__virtualFolders__'][this.selectedUser].push(newPath);
                     console.log("Added virtual folder:", newPath);
-                    
+
                     // --- Trigger UI update by rebuilding tree ---
                     this.buildFolderTrees();
                 } else {
@@ -1348,7 +1348,7 @@ export default {
         renameItem(item, type) {
             const oldName = type === "file" ? (this.newMeta[item.i][item.f].name || item.f) : item.name;
             const newName = prompt(`Rename ${type} from "${oldName}" to:`, oldName);
-            
+
             if (newName && newName !== oldName) {
                 // Validate the new name
                 const validation = this.validateItemName(newName, type);
@@ -1356,7 +1356,7 @@ export default {
                     alert(validation.message);
                     return;
                 }
-                
+
                 if (type === "file") {
                     this.pendingChanges[item.i] = this.pendingChanges[item.i] || {};
                     this.pendingChanges[item.i][item.f] = {
@@ -1588,32 +1588,32 @@ export default {
                                 folderPath: newPath,
                                 name: this.newMeta[currentContractId]?.[fileId]?.name || fileId,
                             };
-                            
+
                             // Check if target folder is a virtual folder
                             // If so, move it from virtual to the contract so it's saved properly
                             if (this.pendingChanges['__virtualFolders__']?.[this.selectedUser]) {
                                 const virtualFolders = this.pendingChanges['__virtualFolders__'][this.selectedUser];
                                 const pathParts = newPath.split('/');
-                                
+
                                 // Build paths for all parent folders
                                 let parentPath = '';
                                 for (let i = 0; i < pathParts.length; i++) {
                                     const part = pathParts[i];
                                     parentPath = parentPath ? `${parentPath}/${part}` : part;
-                                    
+
                                     // Check if this path is in virtual folders
                                     const virtualIndex = virtualFolders.indexOf(parentPath);
                                     if (virtualIndex !== -1) {
                                         // Ensure contract has newFolders array
-                                        this.pendingChanges[currentContractId]['__newFolders__'] = 
+                                        this.pendingChanges[currentContractId]['__newFolders__'] =
                                             this.pendingChanges[currentContractId]['__newFolders__'] || [];
-                                        
+
                                         // Add to contract's newFolders if not already there
                                         if (!this.pendingChanges[currentContractId]['__newFolders__'].includes(parentPath)) {
                                             this.pendingChanges[currentContractId]['__newFolders__'].push(parentPath);
                                             console.log(`Converted virtual folder '${parentPath}' to real folder in contract ${currentContractId}`);
                                         }
-                                        
+
                                         // Remove from virtual folders since it's now a real folder
                                         virtualFolders.splice(virtualIndex, 1);
                                     }
@@ -1971,7 +1971,7 @@ export default {
                         console.error(`Error: Parent path '${parentPath}' for folder '${path}' not found in pathToIndex. Skipping.`);
                         return;
                     }
-                    
+
                     let assignedIndex;
                     if (parts.length === 1 && presetFoldersMap[folderName]) {
                         assignedIndex = presetFoldersMap[folderName];
@@ -2003,7 +2003,7 @@ export default {
                     }
                 });
                 const newFolderListStr = folderListEntries.join("|");
-                console.log({newFolderListStr})
+                console.log({ newFolderListStr })
                 const newFilesMetadata = [];
                 const sortedFileCIDs = Object.keys(originalContract.df || {}).sort();
                 sortedFileCIDs.forEach(cid => {
@@ -2028,7 +2028,7 @@ export default {
                 const newFilesMetadataStr = newFilesMetadata.join(',');
                 let finalMetaString;
                 if (encData) {
-                    const folderPart = ( !newFolderListStr.length || newFolderListStr.startsWith('|')) ? newFolderListStr : `|${newFolderListStr}`;
+                    const folderPart = (!newFolderListStr.length || newFolderListStr.startsWith('|')) ? newFolderListStr : `|${newFolderListStr}`;
                     finalMetaString = `${encData}${folderPart},${newFilesMetadataStr}`;
                 } else {
                     finalMetaString = `1${newFolderListStr},${newFilesMetadataStr}`;
@@ -2099,7 +2099,7 @@ export default {
                 cj: updatesPayload, // All updates in one object
                 id: 'spkccT_update_metadata', // The required_posting_auths id for the custom_json
                 msg: `Updating metadata for ${Object.keys(updates).length} contracts`,
-                ops: ['getSPKUser', {op: 'propogate_changes', args: [`revertPendingChanges`]}], // Custom ops array to trigger cleanup for all contracts
+                ops: ['getSPKUser', { op: 'propogate_changes', args: [`revertPendingChanges`] }], // Custom ops array to trigger cleanup for all contracts
                 txid: `saveMeta_batch_${Date.now()}`, // Unique ID for tracking
                 key: 'Posting' // Specify Posting key
             };
@@ -2390,13 +2390,20 @@ export default {
         },
         labelsDecode(flags = "", only = -1) {
             var arr = []
-            if (flags.length == 0) return arr
-            const len = only >= 0 ? 1 : flags.length
+            if (!flags || typeof flags !== 'string' || flags.length === 0) return arr; // Added check for non-string/empty flags
+            const len = only >= 0 ? 1 : flags.length;
             for (var i = (only >= 0 ? only : 0); i < len; i++) {
-                arr.push(this.labels[flags[i]])
+                const labelKey = flags[i];
+                const labelData = this.labels[labelKey]; // Get label data
+                if (labelData) { // Check if labelData is found
+                    arr.push(labelData);
+                } else {
+                    // Optional: Log a warning if an invalid key is found
+                    console.warn(`Invalid label key "${labelKey}" found in file data. Skipping.`);
+                }
             }
-            arr = new Set(arr)
-            return new Array(...arr)
+            arr = new Set(arr); // Remove potential duplicates
+            return new Array(...arr); // Return array of valid label objects
         },
         Base64toNumber(chars = "0") {
             if (typeof chars != 'string') {
@@ -2605,13 +2612,16 @@ export default {
         },
 
         getImgData(id, cid) {
-            var string = this.smartThumb(id, cid)
-            if (string.includes("https://")) fetch(string).then(response => response.text()).then(data => {
-                if (data.indexOf('data:image/') >= 0) this.newMeta[id][cid].thumb_data = data
-                else this.newMeta[id][cid].thumb_data = string
-            }).catch(e => {
-                console.log("caught", e)
-                this.newMeta[id][cid].thumb_data = string
+            return new Promise((resolve, reject) => {
+                var string = this.smartThumb(id, cid)
+                if (string.includes("https://")) fetch(string).then(response => response.text()).then(data => {
+                    if (data.indexOf('data:image/') >= 0) this.newMeta[id][cid].thumb_data = data
+                    else this.newMeta[id][cid].thumb_data = string
+                    resolve(this.newMeta[id][cid].thumb_data)
+                }).catch(e => {
+                    this.newMeta[id][cid].thumb_data = string
+                    resolve(this.newMeta[id][cid].thumb_data)
+                })
             })
         },
         parseFolderList(folderListStr) {
@@ -2737,12 +2747,12 @@ export default {
 
                 // 2. Get pending new folders for this user
                 let pendingFolderPaths = [];
-                
+
                 // First check for the new virtual folders system
                 if (this.pendingChanges['__virtualFolders__']?.[user]) {
                     pendingFolderPaths = [...this.pendingChanges['__virtualFolders__'][user]];
                 }
-                
+
                 // Also check the old system for backward compatibility
                 const userContractIds = Object.keys(this.contract).filter(id => this.contract[id]?.t === user);
                 for (const contractId of userContractIds) {
@@ -2879,13 +2889,17 @@ export default {
                 if (!fileMetadata && !folderListStr) {
                     // Fallback: Add files with minimal metadata
                     for (var j = 0; j < filesNames.length; j++) {
+                        const typeIndex = slots[j * 4 + 2] || "";
+                        const [type, folderIndex] = typeIndex.split(".");
+                        console.log({ typeIndex, type, folderIndex })
+                        const folderPath = folderIndex ? indexToPath[folderIndex] : indexToPath["1"];
                         this.newMeta[id][filesNames[j]] = {
                             name: filesNames[j],
-                            type: "",
+                            type,
                             thumb: "",
                             is_thumb: false,
                             flags: 0,
-                            folderPath: "",
+                            folderPath,
                         };
                         const f = {
                             i: id,
@@ -2895,7 +2909,7 @@ export default {
                             n: filesNames[j],
                             y: "",
                             o: this.contract[id].t,
-                            folderPath: indexToPath["1"],
+                            folderPath,
                             s: this.contract[id].df[filesNames[j]],
                             lf: 0,
                             lic: "",
@@ -2913,8 +2927,7 @@ export default {
                         const [type, folderIndex] = typeIndex.split(".");
                         const thumb = slots[j * 4 + 3] || "";
                         const flags = slots[j * 4 + 4] || "0";
-                        const folderPath = indexToPath[folderIndex] || indexToPath["1"];
-
+                        const folderPath = folderIndex ? indexToPath[folderIndex] : indexToPath["0"];
                         this.newMeta[id][filesNames[j]] = {
                             name,
                             type,
@@ -2926,7 +2939,7 @@ export default {
                             license: flags.includes("-") ? flags.split("-")[1] : "",
                             labels: flags.includes("-") ? flags.split("-")[2] : flags.slice(1),
                         };
-
+                        console.log('thumb', thumb)
                         if (thumb) this.getImgData(id, filesNames[j]);
                         if (this.newMeta[id][filesNames[j]].flags & 1) this.newMeta[id][filesNames[j]].encrypted = true;
                         if (this.newMeta[id][filesNames[j]].flags & 2) this.newMeta[id][filesNames[j]].is_thumb = true
@@ -2998,7 +3011,7 @@ export default {
             event.preventDefault();
             const targetPath = this.currentFolderPath; // Target is the current folder when dropping on background
 
-              // Check for external files first
+            // Check for external files first
             if (event.dataTransfer.items && event.dataTransfer.items.length > 0) {
                 console.log('Dropped on background - event.dataTransfer.items:', event.dataTransfer.items);
                 this.processDroppedItems(event.dataTransfer.items).then(processedFiles => {
@@ -3015,16 +3028,16 @@ export default {
                             } else { // targetPath is empty (root drop)
                                 fullAppPath = item.relativePath;
                             }
-                             // Clean up potential double slashes from concatenation
+                            // Clean up potential double slashes from concatenation
                             fullAppPath = fullAppPath.replace(/\/+/g, '/');
                             return { file: item.file, fullAppPath: fullAppPath };
                         });
 
                         console.log(`External items processed (dropped on background, target: "${targetPath}"):`, filesWithFullPath);
                         // Update the state passed to upload-everywhere - targetPath is implicitly included now
-                         this.droppedExternalFiles = { files: filesWithFullPath };
-                     }
-                 }).catch(error => {
+                        this.droppedExternalFiles = { files: filesWithFullPath };
+                    }
+                }).catch(error => {
                     console.error("Error processing dropped items:", error);
                     alert("Error processing dropped folder/files.");
                 });
@@ -3588,32 +3601,32 @@ export default {
                                 folderPath: newPath,
                                 name: this.newMeta[currentContractId]?.[fileId]?.name || fileId,
                             };
-                            
+
                             // Check if target folder is a virtual folder
                             // If so, move it from virtual to the contract so it's saved properly
                             if (this.pendingChanges['__virtualFolders__']?.[this.selectedUser]) {
                                 const virtualFolders = this.pendingChanges['__virtualFolders__'][this.selectedUser];
                                 const pathParts = newPath.split('/');
-                                
+
                                 // Build paths for all parent folders
                                 let parentPath = '';
                                 for (let i = 0; i < pathParts.length; i++) {
                                     const part = pathParts[i];
                                     parentPath = parentPath ? `${parentPath}/${part}` : part;
-                                    
+
                                     // Check if this path is in virtual folders
                                     const virtualIndex = virtualFolders.indexOf(parentPath);
                                     if (virtualIndex !== -1) {
                                         // Ensure contract has newFolders array
-                                        this.pendingChanges[currentContractId]['__newFolders__'] = 
+                                        this.pendingChanges[currentContractId]['__newFolders__'] =
                                             this.pendingChanges[currentContractId]['__newFolders__'] || [];
-                                        
+
                                         // Add to contract's newFolders if not already there
                                         if (!this.pendingChanges[currentContractId]['__newFolders__'].includes(parentPath)) {
                                             this.pendingChanges[currentContractId]['__newFolders__'].push(parentPath);
                                             console.log(`Converted virtual folder '${parentPath}' to real folder in contract ${currentContractId}`);
                                         }
-                                        
+
                                         // Remove from virtual folders since it's now a real folder
                                         virtualFolders.splice(virtualIndex, 1);
                                     }
@@ -4127,9 +4140,9 @@ export default {
             }
 
             const folderPath = folder.path;
-            
+
             // Check if any files exist in this folder or its subfolders
-            const hasFiles = Object.values(this.files).some(file => 
+            const hasFiles = Object.values(this.files).some(file =>
                 file.folderPath === folderPath || file.folderPath.startsWith(folderPath + '/')
             );
 
@@ -4152,12 +4165,12 @@ export default {
                 if (!confirmation) {
                     return;
                 }
-                
+
                 // Check if it's a virtual folder and remove it if found
                 if (this.pendingChanges['__virtualFolders__']?.[this.selectedUser]) {
                     const virtualFolders = this.pendingChanges['__virtualFolders__'][this.selectedUser];
                     const virtualIndex = virtualFolders.indexOf(folderPath);
-                    
+
                     if (virtualIndex !== -1) {
                         // Remove from virtual folders
                         virtualFolders.splice(virtualIndex, 1);
@@ -4166,11 +4179,11 @@ export default {
                         return;
                     }
                 }
-                
+
                 // For regular pending folders, we need to remove from contracts
                 for (const contractId in this.pendingChanges) {
                     if (contractId === '__virtualFolders__') continue;
-                    
+
                     if (this.pendingChanges[contractId].__newFolders__) {
                         const folderIndex = this.pendingChanges[contractId].__newFolders__.indexOf(folderPath);
                         if (folderIndex !== -1) {
@@ -4228,7 +4241,7 @@ export default {
             this.buildFolderTrees();
             this.render(); // Ensure the UI updates to reflect the move
         },
-        
+
         /**
          * Validates file or folder names against allowed patterns
          * @param {string} name - The name to validate
@@ -4259,14 +4272,14 @@ export default {
                     return { valid: false, message: "Folder name cannot be '.' or '..'." };
                 }
             }
-            
+
             return { valid: true, message: "" };
         },
         handleUploadDone(payload) {
             console.log('Upload done event received in filesvue-dd. Payload:', payload);
             // Clear the dropped files state after upload is handled by child
             this.droppedExternalFiles = { files: [] }; // Clear files, no targetPath needed now
-         },
+        },
     },
     computed: {
         hasFiles() {
@@ -4374,7 +4387,7 @@ export default {
                     }
                 }
                 //if the contract is in the new value check each .m string for a change
-                if(!diff)for (var i = 0; i < newValue.length; i++) {
+                if (!diff) for (var i = 0; i < newValue.length; i++) {
                     if (newValue[i].m != oldValue[i].m) {
                         diff = true
                         break
