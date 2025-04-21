@@ -2927,7 +2927,7 @@ export default {
                         const [type, folderIndex] = typeIndex.split(".");
                         const thumb = slots[j * 4 + 3] || "";
                         const flags = slots[j * 4 + 4] || "0";
-                        const folderPath = folderIndex ? indexToPath[folderIndex] : indexToPath["0"];
+                        const folderPath = folderIndex ? indexToPath[folderIndex] : indexToPath["1"];
                         this.newMeta[id][filesNames[j]] = {
                             name,
                             type,
