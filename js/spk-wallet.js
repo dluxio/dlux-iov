@@ -100,6 +100,244 @@ export default {
                 </div>
             </div>
         </div>
+        <!-- broca banner -->
+        <div class="d-flex justify-content-center align-items-center bg-dark my-3 p-2 rounded">
+            <img src="/img/spknetwork/broca_logomark.png" class="img-fluid" alt="BROCA Logomark" style="height: 70px;">
+        </div>
+        <!-- Liquid BROCA -->
+        <div class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
+                <div class="text-center position-relative">
+                    <div class="ratio ratio-1x1 wallet-token-img">
+                        <div
+                            class="rounded-circle border border-light bg-dark d-flex justify-content-center align-items-center">
+                            <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1"
+                                alt="BROCA Token Logo">
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center text-lg-start flex-grow-1">
+                    <h4>BROCA</h4>
+                    <p class="text-white-50 m-0">The storage
+                        token of
+                        SPK Network
+                    </p>
+                </div>
+                <div class="text-center text-lg-end">
+                    <h5 class="d-flex align-items-center justify-content-center justify-content-lg-end">
+                        {{formatNumber((saccountapi.liq_broca)/1000,
+                        3, '.',
+                        ',')}}
+                        <span class="ms-2">BROCA</span><span
+                            class="ms-1 badge badge-type-append bg-light text-dark d-flex align-items-center justify-content-center rounded-circle">
+                            <i class="fa-solid fa-atom"></i>
+                        </span>
+                    </h5>
+                    <div class="btn-group" role="group" aria-label="SPK Actions">
+                        <button type="button" class="btn btn-light p-0">
+                            <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="send"
+                                :mypfp="mypfp" token="liq_broca" :test="test" :tokenuser="saccountapi"
+                                :account="account" :tokenprotocol="protocolbroca" @tosign="sendIt($event)"
+                                v-slot:trigger>
+                                <span class="text-nowrap p-2 trigger">
+                                    <i class="fas fa-paper-plane me-2"></i>Send
+                                </span>
+                            </modal-vue>
+                        </button>
+                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+                        <div class="btn-group" role="group" v-if="me">
+                            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false"></button>
+                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
+                                aria-labelledby="btnGroupDrop1">
+                                <modal-vue class="dropdown-menu-item"
+                                    v-if="protocolspk.head_block && saccountapi.head_block" func="powup"
+                                    token="liq_broca" :test="test" :tokenuser="saccountapi" :account="account"
+                                    :tokenprotocol="protocolbroca" :mypfp="mypfp" @tosign="sendIt($event)"
+                                    v-slot:trigger>
+                                    <button class="dropdown-item trigger" type="button"><i
+                                            class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
+                                </modal-vue>
+                                <div class="dropdown-divider">
+                                </div>
+                                <div class="dropdown-menu-item">
+                                    <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/broca" id="buylink"
+                                        target="_blank"><i class="fas fa-store fa-fw me-2"></i>Market</a>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Broca Power-->
+        <div class=" px-3 py-4 px-lg-1 py-lg-3">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
+                <div class="text-center position-relative">
+                    <div class="ratio ratio-1x1 wallet-token-img">
+                        <div
+                            class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
+                            <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1"
+                                alt="BROCA Token Logo">
+                        </div>
+                    </div>
+                    <div class="position-absolute badge-type-offset top-0 start-0 translate-middle">
+                        <span
+                            class="badge badge-type bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                            <i class="fa-solid fa-bolt-lightning"></i>
+                        </span>
+                    </div>
+                    <div class="position-absolute badge-perk-offset top-100 start-100 translate-middle">
+                        <span
+                            class="badge badge-perk bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                            <i class="fa-solid fa-hard-drive"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="text-center text-lg-start flex-grow-1">
+                    <h4>BROCA Power</h4>
+                    <ul class="text-white-50 text-start">
+                        <li>Regenerative Resource Credits for IPFS Storage</li>
+                        <li>Recharges every
+                            {{formatNumber((spkStats.broca_refill / 28800), 2, '.', ',')}} Days, {{formatNumber((1 -
+                            (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) * (spkStats.broca_refill /
+                            28800), 2, '.', ',')}}
+                            Days until full
+                        </li>
+                        <li>Instant Power Up | 4 Week Power
+                            Down</li>
+                    </ul>
+                </div>
+                <div class="text-center text-lg-end">
+                    <h5 class="d-flex align-items-center justify-content-center justify-content-lg-end">
+                        {{formatNumber((saccountapi.pow_broca)/1000,
+                        3, '.',
+                        ',')}}
+                        <span class="ms-2 text-warning">BROCA</span>
+                        <span
+                            class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                            <i class="fa-solid fa-bolt-lightning"></i>
+                        </span>
+                    </h5>
+                    <div class="btn-group" role="group" aria-label="Power Actions">
+                        <button type="button" class="btn btn-light p-0">
+                            <!-- register -->
+                            <div class="px-2 text-nowrap" v-if="saccountapi.pubKey == 'NA'" @click="updatePubkey">
+                                <i class="fas fa-plus fa-fw me-2"></i>Register Account
+                            </div>
+                            <!-- new contract -->
+                            <div v-if="saccountapi.pubKey != 'NA'">
+                                <modal-vue v-if="protocolbroca.head_block && saccountapi.head_block" type="contract"
+                                    :api="api" :mypfp="mypfp" token="balance" :test="test" :tokenstats="spkStats"
+                                    :tokenprotocol="protocolbroca" :tokenuser="saccountapi" :account="account"
+                                    @tosign="sendIt($event)" v-slot:trigger>
+                                    <span class="text-nowrap p-2 trigger"><i
+                                            class="fa-solid fa-file-contract fa-fw me-2"></i>Storage Contract</span>
+                                </modal-vue>
+                            </div>
+                        </button>
+                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+                        <div class="btn-group" role="group" v-if="me">
+                            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false"></button>
+                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
+                                aria-labelledby="btnGroupDrop1">
+                                <modal-vue class="dropdown-menu-item"
+                                    v-if="protocolspk.head_block && saccountapi.head_block" func="powdn"
+                                    token="pow_broca" :test="test" :tokenuser="saccountapi" :account="account"
+                                    :tokenprotocol="protocolbroca" :mypfp="mypfp" @tosign="sendIt($event)"
+                                    v-slot:trigger>
+                                    <button class="dropdown-item trigger" type="button"><i
+                                            class="fas fa-angle-double-down fa-fw me-2"></i>Power Down</button>
+                                </modal-vue>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Broca Power Down -->
+            <div v-if="when(saccountapi.bpower_downs)"
+                class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
+                role="alert" style="background-color: #ffffff10;">
+                <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
+                <p class="mb-0 lead ">A Power Down of
+                    {{formatNumber(saccountapi?.bpower_downs[Object.keys(saccountapi?.bpower_downs)[0]].amount / 1000,
+                    3, '.', ',')}} BROCA
+                    is scheduled in {{when(saccountapi.bpower_downs)}}
+                    with {{when(saccountapi.bpower_downs, true)}} installment<span
+                        v-if="when(saccountapi.bpower_downs, true) > 1">s</span> remaining</p>
+                <small class="ms-lg-auto">
+                    <div class="d-flex ms-lg-2">
+                        <modal-vue class="dropdown-menu-item" v-if="protocolbroca.head_block && saccountapi.head_block"
+                            func="powdn" token="poweredUp" :test="test" :tokenuser="saccountapi" :account="account"
+                            :to_account="{'amount':(saccountapi?.bpower_downs[Object.keys(saccountapi?.bpower_downs)[0]].amount * 4) / 1000}"
+                            :tokenprotocol="protocolbroca" :mypfp="mypfp" @tosign="sendIt($event)" v-slot:trigger>
+                            <button class="btn btn-sm rounded-pill btn-outline-light trigger" type="button">
+                                CHANGE</button>
+                        </modal-vue>
+                        <button class="btn btn-sm rounded-pill btn-outline-danger ms-2" type="button"
+                            @click="simpleCJ('spkccT_broca_power_down', 'amount:0', {'broadcast':'tosign'})">
+                            STOP</button>
+                    </div>
+                </small>
+            </div>
+        </div>
+        <!-- Broca Features -->
+        <div class="card-group mb-3 mt-2 rounded">
+            <div class="card bg-img-none text-center">
+                <div class="card-header bg-info-50 text-dark">
+                    <h3 class="card-title mb-0">Storage Rate</h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2 justify-content-center">
+                        <h5 class="mb-0 card-title text-info">
+                            {{fancyBytes(1000000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) *
+                            spkStats.channel_bytes)}}</h5>
+                        <h5 class="mb-0 mx-1 card-title text-info">/</h5>
+                        <p class="mb-0 me-1 lead text-warning">1 BROCA</p>
+                        <div class="d-flex align-items-center text-warning">
+                            <span
+                                class="badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                <i class="fa-solid fa-bolt-lightning"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <p class="card-text text-white-50">Current SPK Network IPFS Pinning Service size per one BROCA Power
+                    </p>
+                </div>
+                <div class="card-footer bg-card">
+                    <small class="text-body-secondary">Pinned for 30 Days</small>
+                </div>
+            </div>
+            <div class="card bg-img-none text-center">
+                <div class="card-header bg-info-50 text-dark">
+                    <h3 class="card-title mb-0">Upload Limit</h3>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title text-info">{{fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) *
+                        spkStats.channel_bytes)}}</h5>
+                    <p class="card-text text-white-50">Your available storage based on your current BROCA Power
+                        resources</p>
+                </div>
+                <div class="card-footer bg-card">
+                    <small class="text-body-secondary">Regenerates Every 5 Days</small>
+                </div>
+            </div>
+            <div class="card bg-img-none text-center">
+                <div class="card-header bg-info-50 text-dark">
+                    <h3 class="card-title mb-0">Drive Size</h3>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title text-info">~{{(fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) *
+                        6000))}}</h5>
+                    <p class="card-text text-white-50">Your perpetual storage when files are set to autorenew at current
+                        network rates</p>
+                </div>
+                <div class="card-footer bg-card">
+                    <small class="text-body-secondary">Rolling Storage Over 30 Days</small>
+                </div>
+            </div>
+        </div>
         <!-- spk banner -->
         <div class="d-flex justify-content-center align-items-center bg-dark my-3 p-2 rounded">
             <img src="/img/spknetwork/spk_logomark.png" class="img-fluid" alt="SPK Logomark" style="height: 70px;">
@@ -338,244 +576,6 @@ export default {
                             </div>
                         </form>
                     </div>
-                </div>
-            </div>
-        </div>
-        <!-- broca banner -->
-        <div class="d-flex justify-content-center align-items-center bg-dark my-3 p-2 rounded">
-            <img src="/img/spknetwork/broca_logomark.png" class="img-fluid" alt="BROCA Logomark" style="height: 70px;">
-        </div>
-        <!-- Liquid BROCA -->
-        <div class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
-            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
-                <div class="text-center position-relative">
-                    <div class="ratio ratio-1x1 wallet-token-img">
-                        <div
-                            class="rounded-circle border border-light bg-dark d-flex justify-content-center align-items-center">
-                            <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1"
-                                alt="BROCA Token Logo">
-                        </div>
-                    </div>
-                </div>
-                <div class="text-center text-lg-start flex-grow-1">
-                    <h4>BROCA</h4>
-                    <p class="text-white-50 m-0">The storage
-                        token of
-                        SPK Network
-                    </p>
-                </div>
-                <div class="text-center text-lg-end">
-                    <h5 class="d-flex align-items-center justify-content-center justify-content-lg-end">
-                        {{formatNumber((saccountapi.liq_broca)/1000,
-                        3, '.',
-                        ',')}}
-                        <span class="ms-2">BROCA</span><span
-                            class="ms-1 badge badge-type-append bg-light text-dark d-flex align-items-center justify-content-center rounded-circle">
-                            <i class="fa-solid fa-atom"></i>
-                        </span>
-                    </h5>
-                    <div class="btn-group" role="group" aria-label="SPK Actions">
-                        <button type="button" class="btn btn-light p-0">
-                            <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="send"
-                                :mypfp="mypfp" token="liq_broca" :test="test" :tokenuser="saccountapi"
-                                :account="account" :tokenprotocol="protocolbroca" @tosign="sendIt($event)"
-                                v-slot:trigger>
-                                <span class="text-nowrap p-2 trigger">
-                                    <i class="fas fa-paper-plane me-2"></i>Send
-                                </span>
-                            </modal-vue>
-                        </button>
-                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
-                        <div class="btn-group" role="group" v-if="me">
-                            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"
-                                aria-haspopup="true" aria-expanded="false"></button>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
-                                aria-labelledby="btnGroupDrop1">
-                                <modal-vue class="dropdown-menu-item"
-                                    v-if="protocolspk.head_block && saccountapi.head_block" func="powup"
-                                    token="liq_broca" :test="test" :tokenuser="saccountapi" :account="account"
-                                    :tokenprotocol="protocolbroca" :mypfp="mypfp" @tosign="sendIt($event)"
-                                    v-slot:trigger>
-                                    <button class="dropdown-item trigger" type="button"><i
-                                            class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
-                                </modal-vue>
-                                <div class="dropdown-divider">
-                                </div>
-                                <div class="dropdown-menu-item">
-                                    <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/broca" id="buylink"
-                                        target="_blank"><i class="fas fa-store fa-fw me-2"></i>Market</a>
-                                </div>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Broca Power-->
-        <div class=" px-3 py-4 px-lg-1 py-lg-3">
-            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 gap-lg-4 align-items-center">
-                <div class="text-center position-relative">
-                    <div class="ratio ratio-1x1 wallet-token-img">
-                        <div
-                            class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
-                            <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1"
-                                alt="BROCA Token Logo">
-                        </div>
-                    </div>
-                    <div class="position-absolute badge-type-offset top-0 start-0 translate-middle">
-                        <span
-                            class="badge badge-type bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
-                            <i class="fa-solid fa-bolt-lightning"></i>
-                        </span>
-                    </div>
-                    <div class="position-absolute badge-perk-offset top-100 start-100 translate-middle">
-                        <span
-                            class="badge badge-perk bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
-                            <i class="fa-solid fa-hard-drive"></i>
-                        </span>
-                    </div>
-                </div>
-                <div class="text-center text-lg-start flex-grow-1">
-                    <h4>BROCA Power</h4>
-                    <ul class="text-white-50 text-start">
-                        <li>Regenerative Resource Credits for IPFS Storage</li>
-                        <li>Recharges every
-                            {{formatNumber((spkStats.broca_refill / 28800), 2, '.', ',')}} Days, {{formatNumber((1 -
-                            (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) * (spkStats.broca_refill /
-                            28800), 2, '.', ',')}}
-                            Days until full
-                        </li>
-                        <li>Instant Power Up | 4 Week Power
-                            Down</li>
-                    </ul>
-                </div>
-                <div class="text-center text-lg-end">
-                    <h5 class="d-flex align-items-center justify-content-center justify-content-lg-end">
-                        {{formatNumber((saccountapi.pow_broca)/1000,
-                        3, '.',
-                        ',')}}
-                        <span class="ms-2 text-warning">BROCA</span>
-                        <span
-                            class="ms-1 badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
-                            <i class="fa-solid fa-bolt-lightning"></i>
-                        </span>
-                    </h5>
-                    <div class="btn-group" role="group" aria-label="Power Actions">
-                        <button type="button" class="btn btn-light p-0">
-                            <!-- register -->
-                            <div class="px-2 text-nowrap" v-if="saccountapi.pubKey == 'NA'" @click="updatePubkey">
-                                <i class="fas fa-plus fa-fw me-2"></i>Register Account
-                            </div>
-                            <!-- new contract -->
-                            <div v-if="saccountapi.pubKey != 'NA'">
-                                <modal-vue v-if="protocolbroca.head_block && saccountapi.head_block" type="contract"
-                                    :api="api" :mypfp="mypfp" token="balance" :test="test" :tokenstats="spkStats"
-                                    :tokenprotocol="protocolbroca" :tokenuser="saccountapi" :account="account"
-                                    @tosign="sendIt($event)" v-slot:trigger>
-                                    <span class="text-nowrap p-2 trigger"><i
-                                            class="fa-solid fa-file-contract fa-fw me-2"></i>Storage Contract</span>
-                                </modal-vue>
-                            </div>
-                        </button>
-                        <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
-                        <div class="btn-group" role="group" v-if="me">
-                            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"
-                                aria-haspopup="true" aria-expanded="false"></button>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
-                                aria-labelledby="btnGroupDrop1">
-                                <modal-vue class="dropdown-menu-item"
-                                    v-if="protocolspk.head_block && saccountapi.head_block" func="powdn"
-                                    token="pow_broca" :test="test" :tokenuser="saccountapi" :account="account"
-                                    :tokenprotocol="protocolbroca" :mypfp="mypfp" @tosign="sendIt($event)"
-                                    v-slot:trigger>
-                                    <button class="dropdown-item trigger" type="button"><i
-                                            class="fas fa-angle-double-down fa-fw me-2"></i>Power Down</button>
-                                </modal-vue>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Broca Power Down -->
-            <div v-if="when(saccountapi.bpower_downs)"
-                class="alert alert-danger d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mt-4 mt-lg-3"
-                role="alert" style="background-color: #ffffff10;">
-                <i class="fa-solid fa-triangle-exclamation text-danger fs-1"></i>
-                <p class="mb-0 lead ">A Power Down of
-                    {{formatNumber(saccountapi?.bpower_downs[Object.keys(saccountapi?.bpower_downs)[0]].amount / 1000,
-                    3, '.', ',')}} BROCA
-                    is scheduled in {{when(saccountapi.bpower_downs)}}
-                    with {{when(saccountapi.bpower_downs, true)}} installment<span
-                        v-if="when(saccountapi.bpower_downs, true) > 1">s</span> remaining</p>
-                <small class="ms-lg-auto">
-                    <div class="d-flex ms-lg-2">
-                        <modal-vue class="dropdown-menu-item" v-if="protocolbroca.head_block && saccountapi.head_block"
-                            func="powdn" token="poweredUp" :test="test" :tokenuser="saccountapi" :account="account"
-                            :to_account="{'amount':(saccountapi?.bpower_downs[Object.keys(saccountapi?.bpower_downs)[0]].amount * 4) / 1000}"
-                            :tokenprotocol="protocolbroca" :mypfp="mypfp" @tosign="sendIt($event)" v-slot:trigger>
-                            <button class="btn btn-sm rounded-pill btn-outline-light trigger" type="button">
-                                CHANGE</button>
-                        </modal-vue>
-                        <button class="btn btn-sm rounded-pill btn-outline-danger ms-2" type="button"
-                            @click="simpleCJ('spkccT_broca_power_down', 'amount:0', {'broadcast':'tosign'})">
-                            STOP</button>
-                    </div>
-                </small>
-            </div>
-        </div>
-        <!-- Broca Features -->
-        <div class="card-group mb-3 mt-2 rounded">
-            <div class="card bg-img-none text-center">
-                <div class="card-header bg-info-50 text-dark">
-                    <h3 class="card-title mb-0">Storage Rate</h3>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-2 justify-content-center">
-                        <h5 class="mb-0 card-title text-info">
-                            {{fancyBytes(1000000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) *
-                            spkStats.channel_bytes)}}</h5>
-                        <h5 class="mb-0 mx-1 card-title text-info">/</h5>
-                        <p class="mb-0 me-1 lead text-warning">1 BROCA</p>
-                        <div class="d-flex align-items-center text-warning">
-                            <span
-                                class="badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
-                                <i class="fa-solid fa-bolt-lightning"></i>
-                            </span>
-                        </div>
-                    </div>
-                    <p class="card-text text-white-50">Current SPK Network IPFS Pinning Service size per one BROCA Power
-                    </p>
-                </div>
-                <div class="card-footer bg-card">
-                    <small class="text-body-secondary">Pinned for 30 Days</small>
-                </div>
-            </div>
-            <div class="card bg-img-none text-center">
-                <div class="card-header bg-info-50 text-dark">
-                    <h3 class="card-title mb-0">Upload Limit</h3>
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title text-info">{{fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) *
-                        spkStats.channel_bytes)}}</h5>
-                    <p class="card-text text-white-50">Your available storage based on your current BROCA Power
-                        resources</p>
-                </div>
-                <div class="card-footer bg-card">
-                    <small class="text-body-secondary">Regenerates Every 5 Days</small>
-                </div>
-            </div>
-            <div class="card bg-img-none text-center">
-                <div class="card-header bg-info-50 text-dark">
-                    <h3 class="card-title mb-0">Drive Size</h3>
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title text-info">~{{(fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) *
-                        6000))}}</h5>
-                    <p class="card-text text-white-50">Your perpetual storage when files are set to autorenew at current
-                        network rates</p>
-                </div>
-                <div class="card-footer bg-card">
-                    <small class="text-body-secondary">Rolling Storage Over 30 Days</small>
                 </div>
             </div>
         </div>

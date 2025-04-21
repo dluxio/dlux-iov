@@ -25,15 +25,15 @@ export default {
 
     <!-- Teleported UI Elements -->
     <teleport :to="teleportref" v-if="droppedFiles.length > 0">
-        <div class="d-flex flex-column rounded px-2 py-1 border border-white-50 bg-blur-darkg mb-3">
+        <div class="d-flex flex-column rounded p-2 border border-primary bg-blur-darkg mb-3">
             <!-- File List -->
             <div v-if="droppedFiles.length > 0" class="mb-3">
                 <h5>Ready to Upload: {{ droppedFiles.length }} (Total Size: {{ fancyBytes(totalSize) }})</h5>
-                <ul class="list-group">
-                <li v-for="(file, index) in droppedFiles" :key="index" class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ file.name }} ({{ fancyBytes(file.size) }})
-                    <button class="btn btn-sm btn-danger" @click="removeFile(index)">Remove</button>
-                </li>
+                <ul class="m-0">
+                    <li v-for="(file, index) in droppedFiles" :key="index" class="my-1 p-1 bg-card rounded d-flex justify-content-between align-items-center">
+                        {{ file.name }} ({{ fancyBytes(file.size) }})
+                        <button class="btn btn-sm btn-danger" @click="removeFile(index)">Remove</button>
+                    </li>
                 </ul>
             </div>
 
@@ -67,8 +67,8 @@ export default {
             </modal-vue>
 
             <!-- Continue Button -->
-            <button v-if="contractBuilt && requiredBroca <= contractSize && droppedFiles.length > 0" @click="startUpload" class="ms-auto btn btn-primary">
-                Continue<i class="fa-solid fa-angles-right ms-2 fa-fw"></i>
+            <button v-if="contractBuilt && requiredBroca <= contractSize && droppedFiles.length > 0" @click="startUpload" class="ms-auto btn btn-sm btn-primary">
+                Continue<i class="fa-solid fa-angles-right ms-1 fa-fw"></i>
             </button>
 
             <!-- Loading State (for contract build) -->
