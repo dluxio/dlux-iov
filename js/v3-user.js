@@ -12,7 +12,7 @@ import ChoicesVue from '/js/choices-vue.js';
 import Replies from "/js/replies.js";
 import CardVue from "/js/cardvue.js";
 import Tagify from "/js/tagifyvue.js";
-import ContractVue from "/js/contractvue.js";
+import ContractVue from "/js/spkdrive.js";
 import FilesVue from "/js/filesvue.js";
 import ExtensionVue from "/js/extensionvue.js";
 import UploadVue from "/js/uploadvue.js";
