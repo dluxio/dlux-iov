@@ -1,4 +1,4 @@
-this.version = "2025.04.21.1";
+this.version = "2025.04.21.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -136,8 +136,8 @@ var urlsToCache = [
   `/js/codemirror-xml.min.js`,
   `/js/codemirror.min.js`,
   `/js/contract-modal.js`,
+  `/js/contracts-vue.js`,
   `/js/contractvue-old.js`,
-  `/js/contractvue.js`,
   `/js/cryptojs.min.js`,
   `/js/cycler.js`,
   `/js/dd.js`,
@@ -190,6 +190,7 @@ var urlsToCache = [
   `/js/showdown.js`,
   `/js/spk-js.js`,
   `/js/spk-wallet.js`,
+  `/js/spkdrive.js`,
   `/js/spkvue.js`,
   `/js/standard-modal.js`,
   `/js/stwidget.js`,

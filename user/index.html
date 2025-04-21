@@ -224,17 +224,29 @@
                             <div class="container card bg-img-none py-3 px-1 px-md-3"
                                 style="background-color: rgba(61, 61, 61, 0.708);">
                                 <div class="mb-3">
-                                    <ul id="wallettabs" class="nav nav-pills justify-content-center" role="tablist">
-                                        <li class="nav-item"> <a class="nav-link active" href="#dlux" id="dluxtab"
+                                    <ul id="wallettabs" class="nav nav-tabs justify-content-center" role="tablist">
+                                        <li class="nav-item"> <a class="nav-link active d-flex flex-column justify-content-center text-center" href="#dlux" id="dluxtab"
                                                 role="tab" @click="activeTab = 'wallet'" data-bs-toggle="tab"
-                                                aria-controls="dlux" aria-expanded="true">DLUX</a></li>
-                                        <li class="nav-item"> <a class="nav-link d-flex align-items-center" href="#spk"
+                                                aria-controls="dlux" aria-expanded="true">
+                                                <div class="d-flex justify-content-center align-items-center rounded-circle p-1 bg-dark border border-light" style="height: 70px; width: 70px;">
+                                                    <img src="/img/dlux-logo.png" class="img-fluid" alt="DLUX ICON">
+                                                </div>
+                                                    DLUX</a></li>
+                                        <li class="nav-item"> <a class="nav-link d-flex flex-column justify-content-center text-center" href="#spk"
                                                 @click="activeTab = 'wallet'" id="spktab" role="tab"
-                                                data-bs-toggle="tab" aria-controls="spk" aria-expanded="true">SPK</a>
+                                                data-bs-toggle="tab" aria-controls="spk" aria-expanded="true">
+                                                <div class="d-flex justify-content-center align-items-center rounded-circle p-1 bg-dark border border-light" style="height: 70px; width: 70px;">
+                                                    <img src="/img/spknetwork/spk_icon.png" class="img-fluid" alt="SPK ICON">
+                                                </div>
+                                                SPK</a>
                                         </li>
-                                        <li class="nav-item"> <a class="nav-link" href="#hive" id="hivetab" role="tab"
+                                        <li class="nav-item"> <a class="nav-link d-flex flex-column justify-content-center text-center" href="#hive" id="hivetab" role="tab"
                                                 @click="activeTab = 'wallet'" data-bs-toggle="tab" aria-controls="hive"
-                                                aria-expanded="true">HIVE</a>
+                                                aria-expanded="true">
+                                                <div class="d-flex justify-content-center align-items-center rounded-circle p-1 bg-dark border border-light" style="height: 70px; width: 70px;">
+                                                    <img src="/img/hextacular.svg" class="img-fluid" alt="HIVE ICON" >
+                                                </div>
+                                                HIVE</a>
                                         </li>
                                     </ul>
                                 </div>
