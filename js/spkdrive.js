@@ -25,305 +25,302 @@ export default {
         "contracts-vue": ContractsModal,
     },
     template: `
-    <div class="d-flex flex-column">     
-        <!-- register account -->
-        <div v-if="saccountapi.pubKey == 'NA'">
-            <div class="mx-xl-5">
-                <div class="card p-1 p-md-3 mx-lg-5">
-                    <div class="card-body text-center">
-                        <div class="fs-4 lead mb-3">
-                            Register your account on SPK Network for free<br>to start pinning your files on IPFS
-                        </div>
-                        <button type="button" class="btn btn-primary my-3" @click="updatePubkey()">
-                            <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
+    <div class="d-flex flex-column">
+    <!-- register account -->
+    <div v-if="saccountapi.pubKey == 'NA'">
+        <div class="mx-xl-5">
+            <div class="card p-1 p-md-3 mx-lg-5">
+                <div class="card-body text-center">
+                    <div class="fs-4 lead mb-3">
+                        Register your account on SPK Network for free<br>to start pinning your files on IPFS
+                    </div>
+                    <button type="button" class="btn btn-primary my-3" @click="updatePubkey()">
+                        <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
                     </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- tabs nav -->
-        <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column square rounded-bottom p-0">
-            <!-- top menu -->
-            <div class="pb-1">
-                <div class="d-flex flex-wrap align-items-center">
-                    <!--fake invisible button -->
-                    <div class="btn-group m-2 d-none d-lg-block invisible" role="group" aria-label="Storage Actions" v-if="title == 'new'">
-                        <button @click="storeAll()" role="button" class="btn btn-primary"><i class="fa-solid fa-download fa-fw me-2"></i>Store Selected</button>
-                            <button type="button"
-                                class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                disabled></button>
-                        <div class="btn-group" role="group">
-                            <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fa-solid fa-filter fa-fw"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-dark">
-                                <div class="p-2" style="max-width: 200px">
-                                    <div class="d-flex flex-column">
-                                        <div class="text-center mb-3">
-                                            <label for="fileSize" class="lead form-label">File Size</label>
-                                            <input required="required" type="range" @change="filterSize()" class="form-range" :min="filter.min" :max="filter.max" :step="filter.step" v-model="filter.size" id="fileSize">
-                                            <span>{{fancyBytes(filter.size)}}</span>
-                                        </div>
-                                        <div class="form-check form-switch d-none">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
-                                            <label class="form-check-label" for="flexSwitchCheckChecked">NSFW</label>
-                                        </div>
-                                        <div class="form-check form-switch d-none">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
-                                            <label class="form-check-label" for="flexSwitchCheckChecked">Encrypted</label>
-                                        </div>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" @change="filterSlots()" type="checkbox" role="switch" id="flexSwitchCheckChecked" :checked="filter.slots" v-model="filter.slots">
-                                            <label class="form-check-label" for="flexSwitchCheckChecked">Open Slots</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="btn-group m-2" role="group" aria-label="Storage Actions" v-if="title == 'new'">
-                    <!-- real visible button -->
-                        <button @click="storeAll()" role="button" class="btn btn-danger" :disabled="!contracts.length" :class="{'disabled': !contracts.length}"><i class="fa-solid fa-download fa-fw me-2"></i>Store Selected</button>
-                        <button type="button"
-                                class="btn btn-dark ms-0 me-0 ps-0 pe-0"
-                                disabled></button>
-                        <div class="btn-group" role="group">
-                            <button class="btn btn-danger dropdown-toggle" type="button" :disabled="!contracts.length" :class="{'disabled': !contracts.length}" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-filter fa-fw"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-dark">
-                                <div class="p-2" style="max-width: 200px">
-                                    <div class="d-flex flex-column">
-                                        <div class="text-center mb-3">
-                                            <label for="fileSize" class="lead form-label">File Size</label>
-                                            <input required="required" type="range" @change="filterSize()" class="form-range" :min="filter.min" :max="filter.max" :step="filter.step" v-model="filter.size" id="fileSize">
-                                            <span>{{fancyBytes(filter.size)}}</span>
-                                        </div>
-                                        <div class="form-check form-switch d-none">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
-                                            <label class="form-check-label" for="flexSwitchCheckChecked">NSFW</label>
-                                        </div>
-                                        <div class="form-check form-switch d-none">
-                                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
-                                            <label class="form-check-label" for="flexSwitchCheckChecked">Encrypted</label>
-                                        </div>
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" @change="filterSlots()" type="checkbox" role="switch" id="flexSwitchCheckChecked" :checked="filter.slots" v-model="filter.slots">
-                                            <label class="form-check-label" for="flexSwitchCheckChecked">Open Slots</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- cc node view -->
-            <div v-if="cc" role="tabpanel show active" class="tab-pane" id="ccTab" aria-labelledby="cctab">
-                <div class="hero-subtitle d-flex align-items-top mb-3 me-auto">IPFS Drive<span class="ms-2 fs-5">(SPK Network)</span></div>
-                <!-- no files -->
-                <div v-if="hasFiles" class="ms-auto me-auto text-center">
-                    <div class="ms-auto me-auto card px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
-                        <h2 class="fw-light mt-1">No files found</h2>
-                        <p class="lead mb-1" v-if="!nodeview">
-                            Click <a class="btn btn-sm btn-primary no-decoration small" style="font-size: 0.6em;"
-                                role="button" data-bs-toggle="tab" href="#contractsTab"><i
-                                    class="fa-solid fa-list fa-fw me-1"></i>Contracts Tab
-                            </a> to upload files
-                        </p>
-                    </div>
-                </div>
-                <!-- has files -->
-                <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
-                <contracts-vue
-                            :contracts="contracts"
-                            :account="account"
-                            :saccountapi="saccountapi"
-                            :protocol="protocol"
-                            :stats="stats"
-                            :nodeview="nodeview"
-                            :title="title"
-                            :test="test"
-                            :new-meta="newMeta"
-                            :links="links"
-                            :post-body-adder="postBodyAdder"
-                            :postpage="postpage"
-                            :spkapi="spkapi"
-                            :sstats="sstats"
-                            :mypfp="mypfp"
-                            @tosign="sendIt($event)"
-                            @update-pubkey="updatePubkey"
-                            @store="store($event.contracts, $event.remove)"
-                            @download-file="downloadFile($event.cid, $event.id)"
-                            @decrypt-key="decryptKey($event)"
-                            @add-user="addUser($event)"
-                            @del-user="delUser($event.id, $event.user)"
-                            @check-hive="checkHive($event)"
-                            @update-meta="update_meta($event)"
-                            @handle-tag="handleTag($event.id, $event.cid, $event.m)"
-                            @handle-license="handleLicense($event.id, $event.cid, $event.m)"
-                            @handle-label="handleLabel($event.id, $event.cid, $event.m)"
-                            @get-img-data="getImgData($event.id, $event.cid)"
-                            />
-                </div>
-            </div>
-            <!-- file system view -->
-            <div v-if="!cc">
-                <div class="d-flex flex-column">
-                    <div class="d-flex flex-wrap align-items-center mb-3">
-                        <div class="hero-subtitle d-flex align-items-top me-auto">SPK Network IPFS Drive</div>
-                        <!-- storage widget -->
-                        <a class="no-decoration" data-bs-toggle="collapse" href="#brocaRates" role="button" aria-expanded="false" aria-controls="brocaRates">
-                            <div class="spk-widg">
-                                <div class="d-flex flex-column card-body px-2 py-1">
-                                    <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;" v-if="saccountapi">{{fancyBytes(usedBytes)}} of {{fancyBytes(availableBytes)}} used</div>
-                                    <div class="progress mb-1" role="progressbar" aria-label="Basic example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                                        <div class="progress-bar" :style="'width:' + (usedBytes && availableBytes ? (usedBytes/availableBytes)*100 : 0) + '%;'">{{formatNumber((usedBytes && availableBytes ? (usedBytes/availableBytes)*100 : 0),'2','.',',')}}%</div>
-                                    </div>
-                                </div>
-                            </div>
-                         </a>
-                        <button class="ms-auto btn btn-outline-light rounded-pill" data-bs-toggle="modal" data-bs-target="#contractsModal">
-                            <i class="fa-solid fa-magnifying-glass fa-fw me-2"></i>{{contracts.length}} Contract{{contracts.length !== 1 ? 's' : ''}}
-                        </button>
-                    </div>
-                    <div class="collapse" id="brocaRates">
-                        <div class="">
-                            <!-- Broca Features -->
-                            <div class="card-group mb-3 mt-2 rounded">
-                                <div class="card bg-img-none text-center">
-                                    <div class="card-header bg-info-50 text-dark">
-                                        <h3 class="card-title mb-0">Storage Rate</h3>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center mb-2 justify-content-center">
-                                            <h5 class="mb-0 card-title text-info">
-                                                <!-- {{fancyBytes(1000000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}} -->
-                                            </h5>
-                                            <h5 class="mb-0 mx-1 card-title text-info">/</h5>
-                                            <p class="mb-0 me-1 lead text-warning">1 BROCA</p>
-                                            <div class="d-flex align-items-center text-warning">
-                                                <span
-                                                    class="badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
-                                                    <i class="fa-solid fa-bolt-lightning"></i>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <p class="card-text text-white-50">Current SPK Network IPFS Pinning Service size per one BROCA Power
-                                        </p>
-                                    </div>
-                                    <div class="card-footer bg-card">
-                                        <small class="text-body-secondary">Pinned for 30 Days</small>
-                                    </div>
-                                </div>
-                                <div class="card bg-img-none text-center">
-                                    <div class="card-header bg-info-50 text-dark">
-                                        <h3 class="card-title mb-0">Upload Limit</h3>
-                                    </div>
-                                    <div class="card-body">
-                                        <h5 class="card-title text-info">
-                                            <!-- {{fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * spkStats.channel_bytes)}} -->
-                                        </h5>
-                                        <p class="card-text text-white-50">Your available storage based on your current BROCA Power
-                                            resources</p>
-                                    </div>
-                                    <div class="card-footer bg-card">
-                                        <small class="text-body-secondary">Regenerates Every 5 Days</small>
-                                    </div>
-                                </div>
-                                <div class="card bg-img-none text-center">
-                                    <div class="card-header bg-info-50 text-dark">
-                                        <h3 class="card-title mb-0">Drive Size</h3>
-                                    </div>
-                                    <div class="card-body">
-                                        <h5 class="card-title text-info">
-                                            <!-- ~{{(fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * 6000))}} -->
-                                        </h5>
-                                        <p class="card-text text-white-50">Your perpetual storage when files are set to autorenew at current
-                                            network rates</p>
-                                    </div>
-                                    <div class="card-footer bg-card">
-                                        <small class="text-body-secondary">Rolling Storage Over 30 Days</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- no files -->
-                <div v-show="!contracts.length"> 
-                    <div class="ms-auto me-auto d-flex justify-content-center">
-                        <div class="card mx-1 px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
-                            <h2 class="fw-light mt-1">No files found</h2>
-                            <p class="lead mb-1" v-if="nodeview && title == 'stored'">The TROLE API service can take up to 10 minutes to update data</p>
-                            <p class="lead mb-1" v-if="!nodeview || title == 'new'" v-show="saccountapi.spk_power">
-                            Click 
-                                <a class="btn btn-sm btn-dark border-info text-info no-decoration small" style="font-size: 0.6em; width: 72px;" role="button" data-bs-toggle="modal" data-bs-target="#contractModal">
-                                    <modal-vue v-if="protocol?.head_block && saccountapi?.head_block" type="contract"
-                                    :api="sapi" :mypfp="mypfp" token="balance" :test="test" :tokenstats="stats"
-                                    :tokenprotocol="protocol" :tokenuser="saccountapi" :account="account"
-                                    @tosign="sendIt($event)" v-slot:trigger>
-                                        <span slot="trigger" class="trigger"><i
-                                                class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
-                                    </modal-vue>
-                                </a>
-                                    to create a contract using SPK Power
-                            </p>
-                            <p class="lead mb-1" v-if="!nodeview">
-                                Click <a class="btn btn-sm btn-dark border-success text-success no-decoration small" style="font-size: 0.6em; width:72px;"
-                                    role="button" data-bs-toggle="modal" data-bs-target="#sponsoredModal"><i
-                                        class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE</a>
-                                to select a sponsored contract</p>
-                        </div>
-                    </div>
-                </div>
-                <!-- has files -->
-                <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center">
-                        <files-vue :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" @tosign="sendIt($event)" :signedtx="signedtx"></files-vue>
                 </div>
             </div>
         </div>
     </div>
-    <teleport to="body">
-        <div class="modal fade" id="contractsModal" tabindex="-1" role="dialog" aria-labelledby="contractsModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
-            <div class="modal-content bg-darker text-white">
-                <div class="modal-header">
-                <h5 class="modal-title" id="contractsModalLabel">Contracts</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- tabs nav -->
+    <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column square rounded-bottom p-0">
+        <!-- top menu -->
+        <div class="pb-1">
+            <div class="d-flex flex-wrap align-items-center">
+                <!--fake invisible button -->
+                <div class="btn-group m-2 d-none d-lg-block invisible" role="group" aria-label="Storage Actions"
+                    v-if="title == 'new'">
+                    <button @click="storeAll()" role="button" class="btn btn-primary"><i
+                            class="fa-solid fa-download fa-fw me-2"></i>Store Selected</button>
+                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            <i class="fa-solid fa-filter fa-fw"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark bg-dark">
+                            <div class="p-2" style="max-width: 200px">
+                                <div class="d-flex flex-column">
+                                    <div class="text-center mb-3">
+                                        <label for="fileSize" class="lead form-label">File Size</label>
+                                        <input required="required" type="range" @change="filterSize()"
+                                            class="form-range" :min="filter.min" :max="filter.max" :step="filter.step"
+                                            v-model="filter.size" id="fileSize">
+                                        <span>{{fancyBytes(filter.size)}}</span>
+                                    </div>
+                                    <div class="form-check form-switch d-none">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                            id="flexSwitchCheckChecked" checked>
+                                        <label class="form-check-label" for="flexSwitchCheckChecked">NSFW</label>
+                                    </div>
+                                    <div class="form-check form-switch d-none">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                            id="flexSwitchCheckChecked" checked>
+                                        <label class="form-check-label" for="flexSwitchCheckChecked">Encrypted</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" @change="filterSlots()" type="checkbox"
+                                            role="switch" id="flexSwitchCheckChecked" :checked="filter.slots"
+                                            v-model="filter.slots">
+                                        <label class="form-check-label" for="flexSwitchCheckChecked">Open Slots</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </ul>
+                    </div>
                 </div>
-                <div class="modal-body p-0">
-                    <contracts-vue
-                    :contracts="contracts"
-                    :account="account"
-                    :saccountapi="saccountapi"
-                    :protocol="protocol"
-                    :stats="stats"
-                    :nodeview="nodeview"
-                    :title="title"
-                    :test="test"
-                    :new-meta="newMeta"
-                    :links="links"
-                    :post-body-adder="postBodyAdder"
-                    :postpage="postpage"
-                    :spkapi="spkapi"
-                    :sstats="sstats"
-                    :mypfp="mypfp"
-                    @tosign="sendIt($event)"
-                    @update-pubkey="updatePubkey"
-                    @store="store($event.contracts, $event.remove)"
-                    @download-file="downloadFile($event.cid, $event.id)"
-                    @decrypt-key="decryptKey($event)"
-                    @add-user="addUser($event)"
-                    @del-user="delUser($event.id, $event.user)"
-                    @check-hive="checkHive($event)"
-                    @update-meta="update_meta($event)"
-                    @handle-tag="handleTag($event.id, $event.cid, $event.m)"
+                <div class="btn-group m-2" role="group" aria-label="Storage Actions" v-if="title == 'new'">
+                    <!-- real visible button -->
+                    <button @click="storeAll()" role="button" class="btn btn-danger" :disabled="!contracts.length"
+                        :class="{'disabled': !contracts.length}"><i class="fa-solid fa-download fa-fw me-2"></i>Store
+                        Selected</button>
+                    <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-danger dropdown-toggle" type="button" :disabled="!contracts.length"
+                            :class="{'disabled': !contracts.length}" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-filter fa-fw"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-dark bg-dark">
+                            <div class="p-2" style="max-width: 200px">
+                                <div class="d-flex flex-column">
+                                    <div class="text-center mb-3">
+                                        <label for="fileSize" class="lead form-label">File Size</label>
+                                        <input required="required" type="range" @change="filterSize()"
+                                            class="form-range" :min="filter.min" :max="filter.max" :step="filter.step"
+                                            v-model="filter.size" id="fileSize">
+                                        <span>{{fancyBytes(filter.size)}}</span>
+                                    </div>
+                                    <div class="form-check form-switch d-none">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                            id="flexSwitchCheckChecked" checked>
+                                        <label class="form-check-label" for="flexSwitchCheckChecked">NSFW</label>
+                                    </div>
+                                    <div class="form-check form-switch d-none">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                            id="flexSwitchCheckChecked" checked>
+                                        <label class="form-check-label" for="flexSwitchCheckChecked">Encrypted</label>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" @change="filterSlots()" type="checkbox"
+                                            role="switch" id="flexSwitchCheckChecked" :checked="filter.slots"
+                                            v-model="filter.slots">
+                                        <label class="form-check-label" for="flexSwitchCheckChecked">Open Slots</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- cc node view -->
+        <div v-if="cc" role="tabpanel show active" class="tab-pane" id="ccTab" aria-labelledby="cctab">
+            <div class="hero-subtitle d-flex align-items-top mb-3 me-auto">IPFS Drive<span class="ms-2 fs-5">(SPK
+                    Network)</span></div>
+            <!-- no files -->
+            <div v-if="hasFiles" class="ms-auto me-auto text-center">
+                <div class="ms-auto me-auto card px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
+                    <h2 class="fw-light mt-1">No files found</h2>
+                    <p class="lead mb-1" v-if="!nodeview">
+                        Click <a class="btn btn-sm btn-primary no-decoration small" style="font-size: 0.6em;"
+                            role="button" data-bs-toggle="tab" href="#contractsTab"><i
+                                class="fa-solid fa-list fa-fw me-1"></i>Contracts Tab
+                        </a> to upload files
+                    </p>
+                </div>
+            </div>
+            <!-- has files -->
+            <div v-if="!hasFiles" class="d-flex flex-wrap justify-content-center">
+                <contracts-vue :contracts="contracts" :account="account" :saccountapi="saccountapi" :protocol="protocol"
+                    :stats="stats" :nodeview="nodeview" :title="title" :test="test" :new-meta="newMeta" :links="links"
+                    :post-body-adder="postBodyAdder" :postpage="postpage" :spkapi="spkapi" :sstats="sstats"
+                    :mypfp="mypfp" @tosign="sendIt($event)" @update-pubkey="updatePubkey"
+                    @store="store($event.contracts, $event.remove)" @download-file="downloadFile($event.cid, $event.id)"
+                    @decrypt-key="decryptKey($event)" @add-user="addUser($event)"
+                    @del-user="delUser($event.id, $event.user)" @check-hive="checkHive($event)"
+                    @update-meta="update_meta($event)" @handle-tag="handleTag($event.id, $event.cid, $event.m)"
                     @handle-license="handleLicense($event.id, $event.cid, $event.m)"
                     @handle-label="handleLabel($event.id, $event.cid, $event.m)"
-                    @get-img-data="getImgData($event.id, $event.cid)"
-                    />
+                    @get-img-data="getImgData($event.id, $event.cid)" />
+            </div>
+        </div>
+        <!-- file system view -->
+        <div v-if="!cc">
+            <div class="d-flex flex-column">
+                <div class="d-flex flex-wrap align-items-center mb-3">
+                    <div class="hero-subtitle d-flex align-items-top me-auto">SPK Network IPFS Drive</div>
+                    <!-- storage widget -->
+                    <a class="no-decoration" data-bs-toggle="collapse" href="#brocaRates" role="button"
+                        aria-expanded="false" aria-controls="brocaRates">
+                        <div class="spk-widg">
+                            <div class="d-flex flex-column card-body px-2 py-1">
+                                <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;"
+                                    v-if="saccountapi">{{fancyBytes(usedBytes)}} of {{fancyBytes(availableBytes)}} used
+                                </div>
+                                <div class="progress mb-1" role="progressbar" aria-label="Basic example"
+                                    aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar"
+                                        :style="'width:' + (usedBytes && availableBytes ? (usedBytes/availableBytes)*100 : 0) + '%;'">
+                                        {{formatNumber((usedBytes && availableBytes ? (usedBytes/availableBytes)*100 :
+                                        0),'2','.',',')}}%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    <button class="ms-auto btn btn-outline-light rounded-pill" data-bs-toggle="modal"
+                        data-bs-target="#contractsModal">
+                        <i class="fa-solid fa-magnifying-glass fa-fw me-2"></i>{{contracts.length}}
+                        Contract{{contracts.length !== 1 ? 's' : ''}}
+                    </button>
+                </div>
+                <div class="collapse" id="brocaRates">
+                    <div class="">
+                        <!-- Broca Features -->
+                        <div class="card-group mb-3 mt-2 rounded">
+                            <div class="card bg-img-none text-center">
+                                <div class="card-header bg-info-50 text-dark">
+                                    <h3 class="card-title mb-0">Storage Rate</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2 justify-content-center">
+                                        <h5 class="mb-0 card-title text-info">
+                                            <!-- {{fancyBytes(1000000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}} -->
+                                        </h5>
+                                        <h5 class="mb-0 mx-1 card-title text-info">/</h5>
+                                        <p class="mb-0 me-1 lead text-warning">1 BROCA</p>
+                                        <div class="d-flex align-items-center text-warning">
+                                            <span
+                                                class="badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                <i class="fa-solid fa-bolt-lightning"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p class="card-text text-white-50">Current SPK Network IPFS Pinning Service size per
+                                        one BROCA Power
+                                    </p>
+                                </div>
+                                <div class="card-footer bg-card">
+                                    <small class="text-body-secondary">Pinned for 30 Days</small>
+                                </div>
+                            </div>
+                            <div class="card bg-img-none text-center">
+                                <div class="card-header bg-info-50 text-dark">
+                                    <h3 class="card-title mb-0">Upload Limit</h3>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title text-info">
+                                        <!-- {{fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * spkStats.channel_bytes)}} -->
+                                    </h5>
+                                    <p class="card-text text-white-50">Your available storage based on your current
+                                        BROCA Power
+                                        resources</p>
+                                </div>
+                                <div class="card-footer bg-card">
+                                    <small class="text-body-secondary">Regenerates Every 5 Days</small>
+                                </div>
+                            </div>
+                            <div class="card bg-img-none text-center">
+                                <div class="card-header bg-info-50 text-dark">
+                                    <h3 class="card-title mb-0">Drive Size</h3>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title text-info">
+                                        <!-- ~{{(fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * 6000))}} -->
+                                    </h5>
+                                    <p class="card-text text-white-50">Your perpetual storage when files are set to
+                                        autorenew at current
+                                        network rates</p>
+                                </div>
+                                <div class="card-footer bg-card">
+                                    <small class="text-body-secondary">Rolling Storage Over 30 Days</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- no files -->
+            <div v-show="!contracts.length">
+                <div class="ms-auto me-auto d-flex justify-content-center">
+                    <div class="card mx-1 px-3 py-2 mt-3 mb-4 bg-darker" style="max-width: 600px">
+                        <h2 class="fw-light mt-1">No files found</h2>
+                        <p class="lead mb-1" v-if="nodeview && title == 'stored'">The TROLE API service can take up to
+                            10 minutes to update data</p>
+                        <p class="lead mb-1" v-if="!nodeview || title == 'new'" v-show="saccountapi.spk_power">
+                            Click
+                            <a class="btn btn-sm btn-dark border-info text-info no-decoration small"
+                                style="font-size: 0.6em; width: 72px;" role="button" data-bs-toggle="modal"
+                                data-bs-target="#contractModal">
+                                <modal-vue v-if="protocol?.head_block && saccountapi?.head_block" type="contract"
+                                    :api="sapi" :mypfp="mypfp" token="balance" :test="test" :tokenstats="stats"
+                                    :tokenprotocol="protocol" :tokenuser="saccountapi" :account="account"
+                                    @tosign="sendIt($event)" v-slot:trigger>
+                                    <span slot="trigger" class="trigger"><i
+                                            class="fa-solid fa-file-contract fa-fw me-1"></i>NEW</span>
+                                </modal-vue>
+                            </a>
+                            to create a contract using SPK Power
+                        </p>
+                        <p class="lead mb-1" v-if="!nodeview">
+                            Click <a class="btn btn-sm btn-dark border-success text-success no-decoration small"
+                                style="font-size: 0.6em; width:72px;" role="button" data-bs-toggle="modal"
+                                data-bs-target="#sponsoredModal"><i
+                                    class="fa-solid fa-wand-magic-sparkles fa-fw me-1"></i>FREE</a>
+                            to select a sponsored contract</p>
+                    </div>
+                </div>
+            </div>
+            <!-- has files -->
+            <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center">
+                <files-vue :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi"
+                    @tosign="sendIt($event)" :signedtx="signedtx"></files-vue>
+            </div>
+        </div>
+    </div>
+    <!-- contracts modal -->
+    <teleport to="body">
+        <div class="modal fade" id="contractsModal" tabindex="-1" role="dialog" aria-labelledby="contractsModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content bg-darker text-white">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="contractsModalLabel">Contracts</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <contracts-vue :contracts="contracts" :account="account" :saccountapi="saccountapi"
+                            :protocol="protocol" :stats="stats" :nodeview="nodeview" :title="title" :test="test"
+                            :new-meta="newMeta" :links="links" :post-body-adder="postBodyAdder" :postpage="postpage"
+                            :spkapi="spkapi" :sstats="sstats" :mypfp="mypfp" @tosign="sendIt($event)"
+                            @update-pubkey="updatePubkey" @store="store($event.contracts, $event.remove)"
+                            @download-file="downloadFile($event.cid, $event.id)" @decrypt-key="decryptKey($event)"
+                            @add-user="addUser($event)" @del-user="delUser($event.id, $event.user)"
+                            @check-hive="checkHive($event)" @update-meta="update_meta($event)"
+                            @handle-tag="handleTag($event.id, $event.cid, $event.m)"
+                            @handle-license="handleLicense($event.id, $event.cid, $event.m)"
+                            @handle-label="handleLabel($event.id, $event.cid, $event.m)"
+                            @get-img-data="getImgData($event.id, $event.cid)" />
+                    </div>
                 </div>
             </div>
         </div>
