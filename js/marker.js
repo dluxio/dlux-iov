@@ -66,7 +66,9 @@ export default {
           const language = hljs.getLanguage(lang) ? lang : 'plaintext'; // Check if language is supported
           try {
             // Return highlighted code HTML
-            return hljs.highlight(code, { language, ignoreIllegals: true }).value;
+            const value = hljs.highlight(code, { language, ignoreIllegals: true }).value;
+            console.log({value})
+            return value
           } catch (e) {
             console.error(`Highlight.js error for lang '${lang}':`, e);
             // Fallback to plain code block
