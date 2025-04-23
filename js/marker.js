@@ -48,40 +48,13 @@ export default {
   },
   computed: {
     compiledMarkdown: function () {
-      console.log('DEBUG: compiledMarkdown is running', marked);
-      console.log('DEBUG: hljs object:', typeof hljs !== 'undefined' ? hljs : 'Not loaded');
-      // Ensure hljs is available
-      if (typeof hljs === 'undefined') {
-        console.error('Highlight.js not loaded.');
-        // Return unhighlighted markdown or handle error appropriately
-      }
-
+      
       const markdownToParse = this.md
         ? this.md.replace(
             `[View in VR @ dlux.io](https://dlux.io/dlux/@${this.author}/${this.permlink})`,
             ""
           )
         : this.text;
-
-      console.log('DEBUG: Input to marked.parse:', markdownToParse);
-      
-      // Try using marked.use() instead of setOptions
-      const renderer = new marked.Renderer();
-      marked.use({
-        renderer,
-        highlight: function (code, lang) {
-          console.log('DEBUG: highlight function called with:', { code, lang });
-          const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-          try {
-            const value = hljs.highlight(code, { language, ignoreIllegals: true }).value;
-            console.log({value});
-            return value;
-          } catch (e) {
-            console.error(`Highlight.js error:`, e);
-            return `<pre><code class="hljs">${code}</code></pre>`;
-          }
-        }
-      });
       
       const rawHtml = marked.parse(markdownToParse);
 
