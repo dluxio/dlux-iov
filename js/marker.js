@@ -80,7 +80,7 @@ export default {
       };
 
       console.log('DEBUG: Input to marked.parse:', markdownToParse);
-      const rawHtml = marked.parse(markdownToParse, markedOptions);
+      const rawHtml = marked(markdownToParse, markedOptions);
 
       // Sanitize the final HTML which now includes hljs classes
       return DOMPurify.sanitize(rawHtml, { 
