@@ -64,6 +64,11 @@ export default {
 
       const markedOptions = {
         highlight: function (code, lang) {
+          // --- TEMPORARY TEST ---
+          console.log(`--- MARKED HIGHLIGHT CALLED (lang: ${lang}) ---`);
+          return code; // Just return the original code for now
+          // --- END TEMPORARY TEST ---
+          /* Original code commented out for testing:
           console.log('DEBUG: highlight function called with:', { code, lang });
           const language = hljs.getLanguage(lang) ? lang : 'plaintext'; // Check if language is supported
           try {
@@ -76,6 +81,7 @@ export default {
             // Fallback to plain code block
             return `<pre><code class="hljs">${code}</code></pre>`; 
           }
+          */
         },
         // You might want to add other marked options here if needed, e.g., gfm: true
       };
