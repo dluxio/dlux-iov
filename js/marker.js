@@ -63,7 +63,8 @@ export default {
           )
         : this.text;
 
-      const markedOptions = {
+      // Set up marked options BEFORE parsing
+      marked.setOptions({
         highlight: function (code, lang) {
           console.log('DEBUG: highlight function called with:', { code, lang });
           const language = hljs.getLanguage(lang) ? lang : 'plaintext'; // Check if language is supported
@@ -78,10 +79,11 @@ export default {
             return `<pre><code class="hljs">${code}</code></pre>`;
           }
         }
-      };
+      });
 
       console.log('DEBUG: Input to marked.parse:', markdownToParse);
-      const rawHtml = marked.parse(markdownToParse, markedOptions);
+      // After setting options, just pass the markdown string without options
+      const rawHtml = marked.parse(markdownToParse);
 
       // Sanitize the final HTML which now includes hljs classes
       return DOMPurify.sanitize(rawHtml, { 
