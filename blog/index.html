@@ -124,17 +124,18 @@
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
     <script>
+        const { Marked } = globalThis.marked;
         const { markedHighlight } = globalThis.markedHighlight
-      const marked = new Marked(
-        markedHighlight({
-          emptyLangClass: 'hljs',
-          langPrefix: 'hljs language-',
-          highlight(code, lang, info) {
-            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-            return hljs.highlight(code, { language }).value;
-          }
-        })
-      )
+        const marked = new Marked(
+            markedHighlight({
+                emptyLangClass: 'hljs',
+                langPrefix: 'hljs language-',
+                highlight(code, lang, info) {
+                    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                    return hljs.highlight(code, { language }).value;
+                }
+            })
+        )
     </script>
 </body>
 
