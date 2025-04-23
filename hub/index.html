@@ -26,34 +26,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="/js/cryptojs.min.js"></script>
     <script src="/js/diff.js"></script>
-    <script>
-        marked.use(markedLinkifyIt({
-            '@': {
-                validate: function (text, pos, self) {
-                    var tail = text.slice(pos);
-
-                    if (!self.re.hive) {
-                        self.re.hive = new RegExp(
-                            '^([a-z0-9\.\-]){1,16}(?!_)(?=$|' + self.re.src_ZPCc + ')'
-                        );
-                    }
-                    if (self.re.hive.test(tail)) {
-                        if (pos >= 2 && tail[pos - 2] === '@') {
-                            return false;
-                        }
-                        return tail.match(self.re.hive)[0].length;
-                    }
-                    return 0;
-                },
-                normalize: function (match) {
-                    if (match.url.endsWith('.')) {
-                        match.url = match.url.substring(0, match.url.length - 1);
-                    }
-                    match.url = '/@' + match.url.replace(/^@/, '');
-                }
-            }
-        }, {}));
-    </script>
     <script src="/js/purify.min.js"></script>
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
     <script type="module" src="/js/v3-hub.js"></script>
@@ -272,6 +244,46 @@
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
+    <script>
+        const { Marked } = globalThis.marked;
+        const { markedHighlight } = globalThis.markedHighlight
+        const marked = new Marked(
+            markedHighlight({
+                emptyLangClass: 'hljs',
+                langPrefix: 'hljs language-',
+                highlight(code, lang, info) {
+                    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                    return hljs.highlight(code, { language }).value;
+                }
+            })
+        )
+        marked.use(markedLinkifyIt({
+            '@': {
+                validate: function (text, pos, self) {
+                    var tail = text.slice(pos);
+
+                    if (!self.re.hive) {
+                        self.re.hive = new RegExp(
+                            '^([a-z0-9\.\-]){1,16}(?!_)(?=$|' + self.re.src_ZPCc + ')'
+                        );
+                    }
+                    if (self.re.hive.test(tail)) {
+                        if (pos >= 2 && tail[pos - 2] === '@') {
+                            return false;
+                        }
+                        return tail.match(self.re.hive)[0].length;
+                    }
+                    return 0;
+                },
+                normalize: function (match) {
+                    if (match.url.endsWith('.')) {
+                        match.url = match.url.substring(0, match.url.length - 1);
+                    }
+                    match.url = '/@' + match.url.replace(/^@/, '');
+                }
+            }
+        }, {}));
+    </script>
 </body>
 
 </html>

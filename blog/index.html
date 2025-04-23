@@ -34,34 +34,6 @@
     <script type="module" src="/js/v3-app.js"></script>
     <link href="/css/smde-comment.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
-    <script>
-        marked.use(markedLinkifyIt({
-            '@': {
-                validate: function (text, pos, self) {
-                    var tail = text.slice(pos);
-
-                    if (!self.re.hive) {
-                        self.re.hive = new RegExp(
-                            '^([a-z0-9\.\-]){1,16}(?!_)(?=$|' + self.re.src_ZPCc + ')'
-                        );
-                    }
-                    if (self.re.hive.test(tail)) {
-                        if (pos >= 2 && tail[pos - 2] === '@') {
-                            return false;
-                        }
-                        return tail.match(self.re.hive)[0].length;
-                    }
-                    return 0;
-                },
-                normalize: function (match) {
-                    if (match.url.endsWith('.')) {
-                        match.url = match.url.substring(0, match.url.length - 1);
-                    }
-                    match.url = '/@' + match.url.replace(/^@/, '');
-                }
-            }
-        }, {}));
-    </script>
     <script src="/reg-sw.js"></script>
 
 </head>
@@ -136,6 +108,32 @@
                 }
             })
         )
+        marked.use(markedLinkifyIt({
+            '@': {
+                validate: function (text, pos, self) {
+                    var tail = text.slice(pos);
+
+                    if (!self.re.hive) {
+                        self.re.hive = new RegExp(
+                            '^([a-z0-9\.\-]){1,16}(?!_)(?=$|' + self.re.src_ZPCc + ')'
+                        );
+                    }
+                    if (self.re.hive.test(tail)) {
+                        if (pos >= 2 && tail[pos - 2] === '@') {
+                            return false;
+                        }
+                        return tail.match(self.re.hive)[0].length;
+                    }
+                    return 0;
+                },
+                normalize: function (match) {
+                    if (match.url.endsWith('.')) {
+                        match.url = match.url.substring(0, match.url.length - 1);
+                    }
+                    match.url = '/@' + match.url.replace(/^@/, '');
+                }
+            }
+        }, {}));
     </script>
 </body>
 
