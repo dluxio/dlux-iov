@@ -48,7 +48,8 @@ export default {
   },
   computed: {
     compiledMarkdown: function () {
-      console.log('DEBUG: compiledMarkdown is running');
+      console.log('DEBUG: compiledMarkdown is running', marked);
+      console.log('DEBUG: hljs object:', typeof hljs !== 'undefined' ? hljs : 'Not loaded');
       // Ensure hljs is available
       if (typeof hljs === 'undefined') {
         console.error('Highlight.js not loaded.');
@@ -80,7 +81,7 @@ export default {
       };
 
       console.log('DEBUG: Input to marked.parse:', markdownToParse);
-      const rawHtml = marked(markdownToParse, markedOptions);
+      const rawHtml = marked.parse(markdownToParse, markedOptions);
 
       // Sanitize the final HTML which now includes hljs classes
       return DOMPurify.sanitize(rawHtml, { 
