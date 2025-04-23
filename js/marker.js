@@ -63,26 +63,26 @@ export default {
           )
         : this.text;
 
-      // Set up marked options BEFORE parsing
-      marked.setOptions({
+      console.log('DEBUG: Input to marked.parse:', markdownToParse);
+      
+      // Try using marked.use() instead of setOptions
+      const renderer = new marked.Renderer();
+      marked.use({
+        renderer,
         highlight: function (code, lang) {
           console.log('DEBUG: highlight function called with:', { code, lang });
-          const language = hljs.getLanguage(lang) ? lang : 'plaintext'; // Check if language is supported
+          const language = hljs.getLanguage(lang) ? lang : 'plaintext';
           try {
-            // Return highlighted code HTML
             const value = hljs.highlight(code, { language, ignoreIllegals: true }).value;
-            console.log({value})
-            return value
+            console.log({value});
+            return value;
           } catch (e) {
-            console.error(`Highlight.js error for lang '${lang}':`, e);
-            // Fallback to plain code block
+            console.error(`Highlight.js error:`, e);
             return `<pre><code class="hljs">${code}</code></pre>`;
           }
         }
       });
-
-      console.log('DEBUG: Input to marked.parse:', markdownToParse);
-      // After setting options, just pass the markdown string without options
+      
       const rawHtml = marked.parse(markdownToParse);
 
       // Sanitize the final HTML which now includes hljs classes
