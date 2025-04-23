@@ -80,6 +80,7 @@ export default {
         // You might want to add other marked options here if needed, e.g., gfm: true
       };
 
+      console.log('DEBUG: Input to marked.parse:', markdownToParse);
       const rawHtml = marked.parse(markdownToParse, markedOptions);
 
       // Sanitize the final HTML which now includes hljs classes
