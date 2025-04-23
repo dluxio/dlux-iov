@@ -48,6 +48,7 @@ export default {
   },
   computed: {
     compiledMarkdown: function () {
+      console.log('DEBUG: compiledMarkdown is running');
       // Ensure hljs is available
       if (typeof hljs === 'undefined') {
         console.error('Highlight.js not loaded.');
@@ -63,6 +64,7 @@ export default {
 
       const markedOptions = {
         highlight: function (code, lang) {
+          console.log('DEBUG: highlight function called with:', { code, lang });
           const language = hljs.getLanguage(lang) ? lang : 'plaintext'; // Check if language is supported
           try {
             // Return highlighted code HTML
