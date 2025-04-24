@@ -6,14 +6,14 @@ import Pop from "/js/pop.js";
 import MCommon from "/js/methods-common.js";
 
 export default {
-    name: "replies",
-    components: {
-        "vue-markdown": Marker,
-        "vue-ratings": Ratings,
-        "mde": MDE,
-        "vote": Vote,
-        "pop-vue": Pop
-      },
+  name: "replies",
+  components: {
+    "vue-markdown": Marker,
+    "vue-ratings": Ratings,
+    "mde": MDE,
+    "vote": Vote,
+    "pop-vue": Pop
+  },
   template: `<div :id="'comment-' + post.permlink">
 <a role="button" v-if="warn" @click="warn = false">Hidden due to low reputation.</a>
 <div class="d-flex align-items-start">
@@ -47,123 +47,135 @@ export default {
 </div>                 
 </div>
 </div>`,
-    props: {
-        post: {
-        required: true,
-        default: function () {
-            return {
-            
-            };
-        },
-        },
-        account: {
-            default: ''
-        },
-        voteval: 0,
+  props: {
+    post: {
+      required: true,
+      default: function () {
+        return {
+
+        };
+      },
     },
-    data() {
+    account: {
+      default: ''
+    },
+    voteval: 0,
+  },
+  data() {
     return {
-        collapse: false,
-        edit: false,
-        view: true,
-        mde: '',
-        postCustom_json: {},
-        makeReply: false,
-        makeVote: false,
-        warn: false,
+      collapse: false,
+      edit: false,
+      view: true,
+      mde: '',
+      postCustom_json: {},
+      makeReply: false,
+      makeVote: false,
+      warn: false,
     };
+  },
+  emits: ['vote', 'reply'],
+  methods: {
+    ...MCommon,
+    pending(event) {
+      this.mde = event
     },
-    emits: ['vote', 'reply'],
-    methods:{
-        ...MCommon,
-        pending(event){
-            this.mde = event
-        },
-        vote(event){
-            this.$emit('vote', event);
-        },
-        timeSince(date) {
-            var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);
-            var interval = Math.floor(seconds / 86400);
-            if (interval > 7) {
-              return new Date(date).toLocaleDateString();
-            }
-            if (interval >= 1) {
-              return interval + ` day${interval > 1 ? "s" : ""} ago`;
-            }
-            interval = Math.floor(seconds / 3600);
-            if (interval >= 1) {
-              return interval + ` hour${interval > 1 ? "s" : ""} ago`;
-            }
-            interval = Math.floor(seconds / 60);
-            if (interval >= 1) {
-              return `${interval} minute${interval > 1 ? "s" : ""} ago`;
-            }
-            return Math.floor(seconds) + " seconds ago";
-          },
-        setReply(event){
-            this.mde = event
-        },
-        reply(deets){
-          var json_metadata = JSON.stringify(this.postCustom_json)
-          console.log(json_metadata)
-          if(!json_metadata)json_metadata = JSON.stringify({})
-            if(!deets)deets = {
-                "parent_author": this.post.author,
-                "parent_permlink": this.post.permlink,
-                "author": this.account,
-                "permlink": 're-' + this.post.permlink,
-                "title": '',
-                "body": this.mde,
-                json_metadata
-            }
-            this.$emit('reply', deets)
-        },
-        formatNumber(t, n, r, e) { // number, decimals, decimal separator, thousands separator
-            if (typeof t != "number") {
-              const parts = t ? t.split(" ") : []
-              var maybe = 0
-              for (i = 0; i < parts.length; i++) {
-                if (parseFloat(parts[i])>0){
-                  maybe += parseFloat(parts[i])
-                }
-              }
-              if (maybe>parseFloat(t)){
-                t = maybe
-              } else {
-                t = parseFloat(t)
-              }
-            }
-            if (isNaN(t)) return "Invalid Number";
-            if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
-            (r = r || "."), (e = e || "");
-            var u = t < 0;
-            t = Math.abs(t);
-            var a = (null != n && 0 <= n ? t.toFixed(n) : t.toString()).split("."),
-              i = a[0],
-              o = 1 < a.length ? r + a[1] : "";
-            if (e)
-              for (var c = /(\d+)(\d{3})/; c.test(i); )
-                i = i.replace(c, "$1" + e + "$2");
-            return (u ? "-" : "") + i + o;
-          },
-          gt(a,b){
-          return parseFloat(a)>parseFloat(b);
-        },
-        hideLowRep(){
-            if(this.post.rep != '...'){
-                if(parseFloat(this.post.rep) < 25){
-                    this.view = false;
-                    this.warn = true;
-                }
-            } else {
-                setTimeout(this.hideLowRep, 1000)
-            }
-        },
-        setRating(rating){
-            this.post.rating = rating;
+    vote(event) {
+      this.$emit('vote', event);
+    },
+    timeSince(date) {
+      var seconds = Math.floor((new Date() - new Date(date + ".000Z")) / 1000);
+      var interval = Math.floor(seconds / 86400);
+      if (interval > 7) {
+        return new Date(date).toLocaleDateString();
+      }
+      if (interval >= 1) {
+        return interval + ` day${interval > 1 ? "s" : ""} ago`;
+      }
+      interval = Math.floor(seconds / 3600);
+      if (interval >= 1) {
+        return interval + ` hour${interval > 1 ? "s" : ""} ago`;
+      }
+      interval = Math.floor(seconds / 60);
+      if (interval >= 1) {
+        return `${interval} minute${interval > 1 ? "s" : ""} ago`;
+      }
+      return Math.floor(seconds) + " seconds ago";
+    },
+    setReply(event) {
+      this.mde = event
+    },
+    reply(deets) {
+      var json_metadata = JSON.stringify(this.postCustom_json)
+      console.log(json_metadata)
+      if (!json_metadata) json_metadata = JSON.stringify({})
+      if (!deets) deets = {
+        "parent_author": this.post.author,
+        "parent_permlink": this.post.permlink,
+        "author": this.account,
+        "permlink": 're-' + this.post.permlink,
+        "title": '',
+        "body": this.mde,
+        json_metadata
+      }
+      this.$emit('reply', deets)
+    },
+    formatNumber(t, n, r, e) { // number, decimals, decimal separator, thousands separator
+      if (typeof t != "number") {
+        const parts = t ? t.split(" ") : []
+        var maybe = 0
+        for (i = 0; i < parts.length; i++) {
+          if (parseFloat(parts[i]) > 0) {
+            maybe += parseFloat(parts[i])
           }
+        }
+        if (maybe > parseFloat(t)) {
+          t = maybe
+        } else {
+          t = parseFloat(t)
+        }
+      }
+      if (isNaN(t)) return "Invalid Number";
+      if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
+      (r = r || "."), (e = e || "");
+      var u = t < 0;
+      t = Math.abs(t);
+      var a = (null != n && 0 <= n ? t.toFixed(n) : t.toString()).split("."),
+        i = a[0],
+        o = 1 < a.length ? r + a[1] : "";
+      if (e)
+        for (var c = /(\d+)(\d{3})/; c.test(i);)
+          i = i.replace(c, "$1" + e + "$2");
+      return (u ? "-" : "") + i + o;
     },
+    gt(a, b) {
+      return parseFloat(a) > parseFloat(b);
+    },
+    hideLowRep() {
+      if (this.post.rep != '...') {
+        if (parseFloat(this.post.rep) < 25) {
+          this.view = false;
+          this.warn = true;
+        }
+      } else {
+        setTimeout(this.hideLowRep, 1000)
+      }
+    },
+    setRating(rating) {
+      this.post.rating = rating;
+    }
+  },
+  watch: {
+    post: {
+      handler() {
+        this.post.rep = this.readRep(this.post.author_reputation)
+        this.hideLowRep()
+        try {
+          if (this.post?.replies?.length != 0) this.first_replier_permlink = this.post.replies[0].permlink
+        } catch (e) { }
+      },
+      deep: true
+    }
+  },
   mounted() {
     this.post.rep = this.readRep(this.post.author_reputation)
     this.hideLowRep()
