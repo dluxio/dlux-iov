@@ -650,6 +650,18 @@ methods: {
         return `Expires in ${parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60) < 24 ? parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60) + ' hours' : parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60 / 24) + ' days'}`
     }
 },
+watch: {
+    post: {
+        handler() {
+            this.post.rep = this.readRep(this.post.author_reputation)
+            this.hideLowRep()
+            try{
+                if(this.post?.replies?.length != 0)this.first_replier_permlink = this.post.replies[0].permlink
+            } catch (e) {}
+        },
+        deep: true
+    }
+},
 mounted() {
     this.post.rep = this.readRep(this.post.author_reputation)
     this.hideLowRep()
