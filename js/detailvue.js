@@ -5,6 +5,7 @@ import Vote from "/js/vote.js";
 import Pop from "/js/pop.js";
 import Replies from "/js/replies.js";
 import Bennies from "/js/bennies.js";
+import Mcommon from "/js/methods-common.js";
 
 export default {
     components: {
@@ -299,6 +300,7 @@ data() {
 },
 emits: ['vote', 'reply', 'modalselect', 'tosign'],
 methods: {
+    ...Mcommon,
     orderBy(type){
         this.orderby = type;
         if(this.post?.replies?.length)switch(type){
