@@ -649,6 +649,7 @@ methods: {
     }
 },
 mounted() {
+    this.post.rep = this.readRep(this.post.author_reputation)
     this.hideLowRep()
     this.getContracts()
 },

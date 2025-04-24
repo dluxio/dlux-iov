@@ -1,4 +1,4 @@
-this.version = "2025.04.23.14";
+this.version = "2025.04.24.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
