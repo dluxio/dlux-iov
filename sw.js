@@ -1,4 +1,4 @@
-this.version = "2025.05.02.3";
+this.version = "2025.05.02.4";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -451,39 +451,57 @@ self.addEventListener("install", function (event) {
 
 self.addEventListener('fetch', function(event) {    
     const url = new URL(event.request.url);
-
-    if (url.endsWith('.m4v') || url.startsWith('https://api.coingecko.com/')) {
-        event.respondWith(fetch(event.request));
-    } else if (url.origin != self.location.origin) {
-        return
-    } else {
-        event.respondWith(
-            caches.match(event.request)
-                .then(cachedResponse => {
-                    const fetchPromise = fetch(event.request)
-                        .then(networkResponse => {
-                            if (!networkResponse || !networkResponse.ok) {
-                                console.error('Failed to fetch:', event.request.url);
-                                return cachedResponse || networkResponse; // Fallback to cache if available
-                            }
-                            if (networkResponse.status === 200 && networkResponse.type === 'basic') { // Ensure cacheable
-                                const responseToCache = networkResponse.clone();
-                                caches.open(CACHE_NAME)
-                                    .then(cache => {
-                                        cache.put(event.request, responseToCache)
-                                            .catch(error => console.error('Cache put failed:', event.request.url, error));
-                                    });
-                            }
-                            return networkResponse;
-                        })
-                        .catch(error => {
-                            console.error('Network error for:', event.request.url, error);
-                            return cachedResponse; // Fallback to cache on network failure
-                        });
-                    return cachedResponse || fetchPromise; // Serve cache first, then update
-                })
-        );
+    
+    // For external requests (CDNs, APIs, etc.), let the browser handle them
+    if (url.origin !== self.location.origin) {
+        // For specific external resources we want to handle
+        if (url.pathname.endsWith('.m4v') || url.hostname === 'api.coingecko.com') {
+            event.respondWith(
+                fetch(event.request)
+                    .catch(error => {
+                        console.error('Network error for external resource:', event.request.url, error);
+                        return new Response(null, { status: 503 }); // Service Unavailable
+                    })
+            );
+        }
+        return; // Let browser handle all other external requests
     }
+
+    // For same-origin requests, use cache-first strategy
+    event.respondWith(
+        caches.match(event.request)
+            .then(cachedResponse => {
+                // Return cached response if available
+                if (cachedResponse) {
+                    return cachedResponse;
+                }
+
+                // Otherwise fetch from network
+                return fetch(event.request)
+                    .then(networkResponse => {
+                        // Check if we got a valid response
+                        if (!networkResponse || networkResponse.status !== 200) {
+                            return networkResponse;
+                        }
+
+                        // Clone the response for caching
+                        const responseToCache = networkResponse.clone();
+
+                        // Cache the new response
+                        caches.open(CACHE_NAME)
+                            .then(cache => {
+                                cache.put(event.request, responseToCache)
+                                    .catch(error => console.error('Cache put failed:', event.request.url, error));
+                            });
+
+                        return networkResponse;
+                    })
+                    .catch(error => {
+                        console.error('Network error for:', event.request.url, error);
+                        return new Response(null, { status: 503 }); // Service Unavailable
+                    });
+            })
+    );
 });
 
 self.addEventListener('message', (event) => {
