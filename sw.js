@@ -1,8 +1,7 @@
-this.version = "2025.05.02.2";
+this.version = "2025.05.02.3";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
-// Files to cache (same as your original list, omitted for brevity)
 var urlsToCache = [
   `/about/index.html`,
   `/aframe-builder/aframe.min.js`,
@@ -450,9 +449,13 @@ self.addEventListener("install", function (event) {
     );
 });
 
-self.addEventListener('fetch', function(event) {
-    if (event.request.url.endsWith('.m4v') || event.request.url.startsWith('https://api.coingecko.com/')) {
+self.addEventListener('fetch', function(event) {    
+    const url = new URL(event.request.url);
+
+    if (url.endsWith('.m4v') || url.startsWith('https://api.coingecko.com/')) {
         event.respondWith(fetch(event.request));
+    } else if (url.origin != self.location.origin) {
+        return
     } else {
         event.respondWith(
             caches.match(event.request)
