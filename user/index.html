@@ -3321,8 +3321,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
     <script>
         const { Marked } = globalThis.marked;
-        const { markedHighlight } = globalThis.markedHighlight
-        const marked = new Marked(
+        const { markedHighlight } = globalThis.markedHighlight ? globalThis.markedHighlight : null
+        const marked = markedHighlight ? new Marked(
             markedHighlight({
                 emptyLangClass: 'hljs',
                 langPrefix: 'hljs language-',
@@ -3331,7 +3331,7 @@
                     return hljs.highlight(code, { language }).value;
                 }
             })
-        )
+        ) : new Marked();
         marked.use(markedLinkifyIt({
             '@': {
                 validate: function (text, pos, self) {
