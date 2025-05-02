@@ -1,9 +1,18 @@
 <!DOCTYPE html>
+<!-- 
+    Collaborative A-Frame Scene Builder
+    
+    URL Parameters:
+    - scene: Path to a scene JSON file to load (e.g., ?scene=scenes/minimalist-scene.json)
+-->
 <html>
 <head>
     <meta charset="utf-8">
     <title>Collaborative A-Frame Scene Builder</title>
     <meta name="description" content="A collaborative 3D scene builder using A-Frame and Networked A-Frame">
+    <!-- Add base tag to ensure correct worker paths -->
+    <base href="/">
+    <!-- Scripts -->
     <script src="aframe/aframe.min.js"></script>
     <script src="aframe/networked-aframe.min.js"></script>
     <script type="module" src="js/state.js"></script>
@@ -11,13 +20,34 @@
     <script type="module" src="js/ui.js"></script>
     <script type="module" src="js/debug.js"></script>
     <script type="module" src="js/main.js"></script>
-    <!-- Move Monaco loader to the end of body for better initialization -->
+    <!-- Monaco Editor Configuration -->
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/window-system.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Monaco Editor Setup -->
+    <script>
+        // Force Monaco to work without web workers
+        window.MonacoEnvironment = { getWorkerUrl: null };
+    </script>
     <script src="monaco-editor/vs/loader.js"></script>
     <script>
-        require.config({ paths: { 'vs': 'monaco-editor/vs' }});
+        // Configure AMD loader for Monaco
+        require.config({ 
+            paths: { 'vs': './monaco-editor/vs' }
+        });
+        
+        // Manually disable worker-dependent features
+        window.MonacoEnvironment = {
+            getWorkerUrl: function() { 
+                return 'data:text/javascript;charset=utf-8,';
+            }
+        };
+        
+        // Pre-load Monaco editor
+        require(['vs/editor/editor.main'], function() {
+            console.log('Monaco editor modules loaded successfully (without workers)');
+            window.dispatchEvent(new Event('monaco-ready'));
+        });
     </script>
     <style>
         body {
@@ -69,6 +99,151 @@
             cursor: pointer;
         }
         /* Remove all window-related styles as they are now in window-system.css */
+        
+        /* Engine Configuration Panel */
+        .engine-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--theme-border-color);
+            margin-bottom: 10px;
+        }
+        
+        .tab-btn {
+            padding: 8px 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            border-bottom: 2px solid var(--theme-primary-color);
+            color: var(--theme-primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 10px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .config-section {
+            margin-bottom: 15px;
+        }
+        
+        .config-section h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--theme-primary-color);
+        }
+        
+        .config-item {
+            display: flex;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        
+        .config-item label {
+            flex: 0 0 30%;
+            margin-right: 10px;
+        }
+        
+        .config-item input[type="text"],
+        .config-item input[type="number"],
+        .config-item textarea {
+            flex: 1;
+            padding: 6px;
+            border: 1px solid var(--theme-border-color);
+            border-radius: 4px;
+        }
+        
+        .engine-actions {
+            margin-top: 15px;
+            text-align: right;
+        }
+        
+        .engine-btn {
+            padding: 8px 12px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--theme-primary-color);
+            color: white;
+            cursor: pointer;
+        }
+        
+        .engine-btn:hover {
+            opacity: 0.9;
+        }
+        
+        /* Toggle Switch */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            margin-left: 15px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 22px;
+            margin-right: 8px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--theme-primary-color);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(18px);
+        }
+        
+        .toggle-label {
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .editor-controls {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid var(--theme-border-color);
+        }
     </style>
 </head>
 <body>
@@ -228,6 +403,185 @@
             <div class="resize-handle bottom"></div>
             <div class="resize-handle corner"></div>
         </div>
+
+        <!-- Asset Manager Panel -->
+        <div id="asset-manager-panel" class="window">
+            <div class="window-header">
+                <span class="window-title">Asset Manager</span>
+                <div class="window-controls">
+                    <button class="window-btn maximize-btn" title="Maximize"></button>
+                    <button class="window-btn minimize-btn" title="Minimize"></button>
+                    <button class="window-btn close-btn" title="Close"></button>
+                </div>
+            </div>
+            <div class="window-content">
+                <div class="asset-manager">
+                    <div class="add-asset-container">
+                        <button id="add-asset-btn" class="add-asset-btn">Add New Asset</button>
+                    </div>
+                    <div id="asset-list" class="asset-list">
+                        <div class="no-assets">No assets found. Add an asset to get started.</div>
+                    </div>
+                </div>
+                <div id="asset-modal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 id="asset-modal-title">Add New Asset</h2>
+                            <span class="close-modal">&times;</span>
+                        </div>
+                        <div class="asset-form">
+                            <div class="form-field">
+                                <label for="asset-name">Asset Name</label>
+                                <input type="text" id="asset-name" placeholder="Enter a name for this asset">
+                            </div>
+                            <div class="form-field">
+                                <label for="asset-type">Asset Type</label>
+                                <select id="asset-type">
+                                    <option value="image">Image</option>
+                                    <option value="video">Video</option>
+                                    <option value="audio">Audio</option>
+                                    <option value="model">3D Model</option>
+                                    <option value="material">Material</option>
+                                    <option value="texture">Texture</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <label for="asset-src">Asset Source URL</label>
+                                <input type="text" id="asset-src" placeholder="Enter the URL or data URI">
+                            </div>
+                            <div class="form-field">
+                                <label for="asset-tags">Tags (comma separated)</label>
+                                <input type="text" id="asset-tags" placeholder="skybox, environment, character, etc.">
+                            </div>
+                            <button id="submit-asset" class="submit-asset">Add Asset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="resize-handle right"></div>
+            <div class="resize-handle bottom"></div>
+            <div class="resize-handle corner"></div>
+        </div>
+
+        <!-- Engine Config Panel -->
+        <div id="engine-panel" class="window">
+            <div class="window-header">
+                <span class="window-title">Engine Configuration</span>
+                <div class="window-controls">
+                    <button class="window-btn maximize-btn" title="Maximize"></button>
+                    <button class="window-btn minimize-btn" title="Minimize"></button>
+                    <button class="window-btn close-btn" title="Close"></button>
+                </div>
+            </div>
+            <div class="window-content">
+                <div class="engine-tabs">
+                    <button class="tab-btn active" data-tab="avatar">Avatar</button>
+                    <button class="tab-btn" data-tab="camera">Camera</button>
+                    <button class="tab-btn" data-tab="network">Network</button>
+                    <button class="tab-btn" data-tab="physics">Physics</button>
+                    <button class="tab-btn" data-tab="system">System</button>
+                </div>
+                <div class="tab-content active" id="avatar-tab">
+                    <div class="config-section">
+                        <h3>Avatar Configuration</h3>
+                        <div class="config-item">
+                            <label for="avatar-enabled">Enabled</label>
+                            <input type="checkbox" id="avatar-enabled" checked>
+                        </div>
+                        <div class="config-item">
+                            <label for="avatar-spawn-x">Spawn Position X</label>
+                            <input type="number" id="avatar-spawn-x" value="0" step="0.1">
+                        </div>
+                        <div class="config-item">
+                            <label for="avatar-spawn-y">Spawn Position Y</label>
+                            <input type="number" id="avatar-spawn-y" value="0" step="0.1">
+                        </div>
+                        <div class="config-item">
+                            <label for="avatar-spawn-z">Spawn Position Z</label>
+                            <input type="number" id="avatar-spawn-z" value="3" step="0.1">
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-content" id="camera-tab">
+                    <div class="config-section">
+                        <h3>Camera Configuration</h3>
+                        <div class="config-item">
+                            <label for="camera-fov">Field of View</label>
+                            <input type="number" id="camera-fov" value="80" min="30" max="120">
+                        </div>
+                        <div class="config-item">
+                            <label for="camera-near">Near Clipping</label>
+                            <input type="number" id="camera-near" value="0.1" step="0.01" min="0.01">
+                        </div>
+                        <div class="config-item">
+                            <label for="camera-far">Far Clipping</label>
+                            <input type="number" id="camera-far" value="1000" step="10" min="10">
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-content" id="network-tab">
+                    <div class="config-section">
+                        <h3>Network Configuration</h3>
+                        <div class="config-item">
+                            <label for="network-enabled">Enabled</label>
+                            <input type="checkbox" id="network-enabled" checked>
+                        </div>
+                        <div class="config-item">
+                            <label for="network-room">Room</label>
+                            <input type="text" id="network-room" value="naf-playground">
+                        </div>
+                        <div class="config-item">
+                            <label for="network-connect-on-load">Connect on Load</label>
+                            <input type="checkbox" id="network-connect-on-load">
+                        </div>
+                        <div class="config-item">
+                            <label for="network-debug">Debug Mode</label>
+                            <input type="checkbox" id="network-debug" checked>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-content" id="physics-tab">
+                    <div class="config-section">
+                        <h3>Physics Configuration</h3>
+                        <div class="config-item">
+                            <label for="physics-enabled">Enabled</label>
+                            <input type="checkbox" id="physics-enabled">
+                        </div>
+                        <div class="config-item">
+                            <label for="physics-gravity-y">Gravity Y</label>
+                            <input type="number" id="physics-gravity-y" value="-9.8" step="0.1">
+                        </div>
+                        <div class="config-item">
+                            <label for="physics-debug">Debug Mode</label>
+                            <input type="checkbox" id="physics-debug">
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-content" id="system-tab">
+                    <div class="config-section">
+                        <h3>System Configuration</h3>
+                        <div class="config-item">
+                            <label for="system-entity-ids">System Entity IDs</label>
+                            <textarea id="system-entity-ids" rows="3">local-avatar
+naf-template</textarea>
+                        </div>
+                        <div class="config-item">
+                            <label for="system-components">System Components</label>
+                            <textarea id="system-components" rows="3">raycaster
+cursor
+look-controls</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="engine-actions">
+                    <button id="save-engine-config" class="engine-btn">Save Engine Configuration</button>
+                    <button id="reload-engine-config" class="engine-btn">Reload Configuration</button>
+                </div>
+            </div>
+            <div class="resize-handle right"></div>
+            <div class="resize-handle bottom"></div>
+            <div class="resize-handle corner"></div>
+        </div>
     </div>
 
     <!-- Window Dock -->
@@ -257,6 +611,11 @@
                 <path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
             </svg>
         </div>
+        <div class="dock-icon" data-window="engine-panel" data-tooltip="Engine Configuration">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+                <path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+            </svg>
+        </div>
         <div class="dock-icon windows-manager" id="windows-manager" data-tooltip="Window Manager">
             <svg viewBox="0 0 24 24" width="16" height="16">
                 <path fill="currentColor" d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm0 2v10h16V7H4zm2 2h12v2H6V9zm0 4h12v2H6v-2z"/>
@@ -273,13 +632,57 @@
     <!-- Scripts -->
     <script type="module">
         import { initializeApp } from './js/initialization-manager.js';
+        import engineManager from './js/engine-manager.js';
+        
+        // Make engineManager available globally
+        window.engineManager = engineManager;
         
         // Start initialization when the DOM is ready
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeApp);
+            document.addEventListener('DOMContentLoaded', () => {
+                // Initialize the app
+                initializeApp().then(() => {
+                    // Initialize the engine after app initialization
+                    const scene = document.querySelector('a-scene');
+                    if (scene) {
+                        console.log('Initializing engine manager...');
+                        engineManager.init(scene).then(() => {
+                            console.log('Engine manager initialized');
+                        }).catch(err => {
+                            console.error('Error initializing engine manager:', err);
+                        });
+                    } else {
+                        console.error('No scene found for engine manager initialization');
+                    }
+                });
+            });
         } else {
-            initializeApp();
+            // Initialize the app
+            initializeApp().then(() => {
+                // Initialize the engine after app initialization
+                const scene = document.querySelector('a-scene');
+                if (scene) {
+                    console.log('Initializing engine manager...');
+                    engineManager.init(scene).then(() => {
+                        console.log('Engine manager initialized');
+                    }).catch(err => {
+                        console.error('Error initializing engine manager:', err);
+                    });
+                } else {
+                    console.error('No scene found for engine manager initialization');
+                }
+            });
         }
+    </script>
+
+    <!-- Monaco Editor Initialization -->
+    <script>
+        // Initialize Monaco editor
+        require(['vs/editor/editor.main'], function() {
+            console.log('Monaco editor loaded successfully');
+            // The editor is now loaded and ready to use
+            // It will be properly configured by monaco.js when needed
+        });
     </script>
 </body>
 </html>

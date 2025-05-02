@@ -1,0 +1,121 @@
+{
+  "metadata": {
+    "title": "Advanced Scene",
+    "description": "An advanced scene with multiple entities and complex lighting",
+    "created": "2023-10-15T13:30:00Z",
+    "modified": "2023-10-15T13:30:00Z"
+  },
+  "sky": {
+    "type": "color",
+    "data": {
+      "color": "#112233"
+    }
+  },
+  "environment": {
+    "preset": "forest",
+    "lighting": true,
+    "ground": true
+  },
+  "entities": [
+    {
+      "type": "box",
+      "id": "box-1",
+      "position": { "x": -2, "y": 1, "z": -3 },
+      "rotation": { "x": 0, "y": 30, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "color": "#4CC3D9",
+      "material": "shader: standard; metalness: 0.2; roughness: 0.3",
+      "shadow": true
+    },
+    {
+      "type": "sphere",
+      "id": "sphere-1",
+      "position": { "x": 0, "y": 1.25, "z": -5 },
+      "radius": 1.25,
+      "color": "#EF2D5E",
+      "material": "shader: standard; metalness: 0.8; roughness: 0.2",
+      "shadow": true
+    },
+    {
+      "type": "torus",
+      "id": "torus-1",
+      "position": { "x": 2, "y": 1.5, "z": -4 },
+      "rotation": { "x": 90, "y": 0, "z": 0 },
+      "geometry": {
+        "primitive": "torus",
+        "radius": 1,
+        "radiusTubular": 0.1,
+        "segmentsRadial": 36,
+        "segmentsTubular": 32
+      },
+      "material": "shader: standard; color: #FF9500; metalness: 0.5; roughness: 0.3",
+      "shadow": true
+    },
+    {
+      "type": "plane",
+      "id": "reflection-plane",
+      "position": { "x": 0, "y": 0.01, "z": -4 },
+      "rotation": { "x": -90, "y": 0, "z": 0 },
+      "width": 15,
+      "height": 15,
+      "color": "#7BC8A4",
+      "material": "shader: standard; roughness: 0.1; metalness: 0.3",
+      "shadow": "receive: true"
+    },
+    {
+      "type": "light",
+      "id": "spot-light-1",
+      "light": {
+        "type": "spot",
+        "color": "#FFAAAA",
+        "intensity": 1.5,
+        "angle": 45,
+        "penumbra": 0.3,
+        "castShadow": true
+      },
+      "position": { "x": -3, "y": 5, "z": -2 },
+      "rotation": { "x": -45, "y": 0, "z": 0 }
+    },
+    {
+      "type": "light",
+      "id": "spot-light-2",
+      "light": {
+        "type": "spot",
+        "color": "#AAFFAA",
+        "intensity": 1.5,
+        "angle": 45,
+        "penumbra": 0.3,
+        "castShadow": true
+      },
+      "position": { "x": 3, "y": 5, "z": -2 },
+      "rotation": { "x": -45, "y": 0, "z": 0 }
+    },
+    {
+      "type": "dodecahedron",
+      "id": "dodecahedron-1",
+      "position": { "x": -4, "y": 1.5, "z": -6 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "geometry": {
+        "primitive": "dodecahedron",
+        "radius": 1
+      },
+      "material": "shader: standard; color: #AAFF00; metalness: 0.2; roughness: 0.8",
+      "animation": "property: rotation; to: 0 360 0; dur: 10000; easing: linear; loop: true"
+    },
+    {
+      "type": "torusKnot",
+      "id": "torusKnot-1",
+      "position": { "x": 4, "y": 1.5, "z": -6 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "geometry": {
+        "primitive": "torusKnot",
+        "radius": 0.8,
+        "radiusTubular": 0.1,
+        "p": 3,
+        "q": 7
+      },
+      "material": "shader: standard; color: #00AAFF; metalness: 0.5; roughness: 0.2",
+      "animation": "property: rotation; to: 360 360 0; dur: 15000; easing: linear; loop: true"
+    }
+  ]
+} 

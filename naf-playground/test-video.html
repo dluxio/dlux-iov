@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Video Test</title>
+  <style>
+    body { background: #333; color: white; font-family: Arial, sans-serif; margin: 20px; }
+    .video-container { max-width: 800px; margin: 0 auto; }
+    video { width: 100%; border: 1px solid #666; }
+    h1 { text-align: center; }
+    .status { margin-top: 20px; padding: 10px; background: #222; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>Video Playability Test</h1>
+  
+  <div class="video-container">
+    <h2>Testing: assets/videos/sky/clouds.mp4</h2>
+    <video id="testVideo" controls autoplay loop muted playsinline crossorigin="anonymous">
+      <source src="assets/videos/sky/clouds.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    
+    <div class="status" id="videoStatus">Status: Loading...</div>
+  </div>
+
+  <script>
+    const video = document.getElementById('testVideo');
+    const statusDiv = document.getElementById('videoStatus');
+    
+    // Log all video events
+    const events = [
+      'loadstart', 'durationchange', 'loadedmetadata', 'loadeddata', 
+      'progress', 'canplay', 'canplaythrough', 'playing', 'error'
+    ];
+    
+    events.forEach(event => {
+      video.addEventListener(event, () => {
+        const time = new Date().toLocaleTimeString();
+        console.log(`${time}: Video ${event} event fired`);
+        statusDiv.innerHTML += `<br>${time}: ${event}`;
+        
+        if (event === 'error') {
+          statusDiv.innerHTML += ` - Error code: ${video.error.code}`;
+          console.error('Video error:', video.error);
+        }
+      });
+    });
+
+    // Check network state
+    setInterval(() => {
+      const networkState = ['NETWORK_EMPTY', 'NETWORK_IDLE', 'NETWORK_LOADING', 'NETWORK_NO_SOURCE'][video.networkState];
+      const readyState = ['HAVE_NOTHING', 'HAVE_METADATA', 'HAVE_CURRENT_DATA', 'HAVE_FUTURE_DATA', 'HAVE_ENOUGH_DATA'][video.readyState];
+      
+      console.log(`Network state: ${networkState}, Ready state: ${readyState}`);
+      
+      // Update the first line of status
+      const statusLines = statusDiv.innerHTML.split('<br>');
+      statusLines[0] = `Status: Network=${networkState}, Ready=${readyState}`;
+      statusDiv.innerHTML = statusLines.join('<br>');
+    }, 1000);
+  </script>
+</body>
+</html> 

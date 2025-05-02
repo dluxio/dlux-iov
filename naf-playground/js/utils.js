@@ -449,4 +449,24 @@ export class EventManager {
     }
     this.boundHandlers.clear();
   }
+  
+  /**
+   * Emit a custom event
+   * @param {string} eventName - Name of the event to emit
+   * @param {Object} [detail={}] - Event detail data
+   * @param {boolean} [bubbles=true] - Whether the event bubbles
+   * @param {boolean} [cancelable=true] - Whether the event is cancelable
+   * @returns {boolean} - Whether the event was not canceled
+   */
+  emit(eventName, detail = {}, bubbles = true, cancelable = true) {
+    console.log(`[EventManager] Emitting event: ${eventName}`, detail);
+    
+    const event = new CustomEvent(eventName, {
+      detail,
+      bubbles,
+      cancelable
+    });
+    
+    return document.dispatchEvent(event);
+  }
 } 

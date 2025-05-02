@@ -1,0 +1,75 @@
+{
+  "metadata": {
+    "title": "Engine Configuration",
+    "description": "Configuration for the NAF Playground engine",
+    "version": "1.0.0"
+  },
+  "avatar": {
+    "enabled": true,
+    "template": {
+      "id": "avatar-template",
+      "components": [
+        {
+          "id": "avatar-rig",
+          "position": { "x": 0, "y": 0, "z": 0 },
+          "children": [
+            {
+              "id": "avatar-camera",
+              "camera": {
+                "active": true
+              },
+              "position": { "x": 0, "y": 1.6, "z": 0 },
+              "components": [
+                "look-controls",
+                "wasd-controls"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "networked": {
+      "template": "#avatar-template",
+      "attachTemplateToLocal": true
+    },
+    "spawn": {
+      "position": { "x": 0, "y": 0, "z": 3 }
+    }
+  },
+  "camera": {
+    "default": "avatar-camera",
+    "options": {
+      "fov": 60,
+      "near": 0.1,
+      "far": 1000
+    }
+  },
+  "network": {
+    "enabled": true,
+    "room": "naf-playground",
+    "connectOnLoad": false,
+    "debug": true,
+    "debugLevel": "warn"
+  },
+  "physics": {
+    "enabled": false,
+    "gravity": { "x": 0, "y": -9.8, "z": 0 },
+    "debug": false
+  },
+  "system": {
+    "entityIds": [
+      "local-avatar",
+      "naf-template"
+    ],
+    "components": [
+      "raycaster",
+      "cursor",
+      "look-controls"
+    ],
+    "dataAttributes": [
+      "data-networked",
+      "data-system-entity",
+      "data-camera-rig"
+    ]
+  }
+} 

@@ -12,10 +12,13 @@ import { setupEventListeners } from './event-handlers.js';
 import { setupGlobalErrorHandler } from './error-handlers.js';
 import { showInitializationError } from './error-handlers.js';
 import { logAction } from './debug.js';
+import { loadScene } from './scene-loader.js';
+import { STARTUP_SCENE_PATH, INITIALIZATION_CONFIG } from './config.js';
 
 class InitializationManager {
     constructor() {
         this.initialized = false;
+        this.sceneLoaded = false;
         this.initializationState = {
             aframe: false,
             scene: false,
@@ -29,21 +32,23 @@ class InitializationManager {
             entityAPI: false,
             monaco: false,
             watcher: false,
-            draggable: false
+            draggable: false,
+            sceneLoader: false
         };
         this.dependencies = {
             aframe: [],
             scene: ['aframe'],
             sceneWatcher: ['scene'],
             state: ['scene', 'sceneWatcher'],
+            sceneLoader: ['state'],
             network: ['scene', 'state'],
+            entities: ['state', 'sceneWatcher', 'sceneLoader'],
+            watcher: ['state', 'sceneWatcher', 'entities'],
             ui: ['state', 'watcher'],
+            monaco: ['aframe', 'sceneLoader'],
             editor: ['state', 'ui', 'monaco'],
             debug: ['state'],
-            watcher: ['state', 'sceneWatcher', 'entities'],
-            entities: ['state', 'sceneWatcher'],
             entityAPI: ['state', 'entities', 'watcher'],
-            monaco: ['aframe'],
             draggable: ['ui']
         };
     }
@@ -53,89 +58,146 @@ class InitializationManager {
      */
     async initialize() {
         if (this.initialized) {
-            console.warn('Application already initialized');
+            console.log('Initialization already complete');
             return;
         }
 
-        try {
-            // Set up global error handler first
-            setupGlobalErrorHandler();
+        console.log('Starting initialization process...');
 
-            // 1. Wait for A-Frame
+        try {
+            // Track initialization start time
+            this.startTime = Date.now();
+
+            // Wait for A-Frame to be available
+            console.log('Waiting for A-Frame...');
+            this.initializationState.aframe = false;
             await this.waitForAFrame();
             this.initializationState.aframe = true;
-            console.log('A-Frame initialized');
+            console.log('A-Frame initialization complete');
 
-            // 2. Initialize scene
+            // Initialize scene first
+            console.log('Initializing scene...');
+            this.initializationState.scene = false;
             await this.initializeScene();
             this.initializationState.scene = true;
-            console.log('Scene initialized');
-
-            // 3. Initialize scene watcher
-            await this.initializeSceneWatcher();
-            this.initializationState.sceneWatcher = true;
-            console.log('Scene watcher initialized');
-
-            // 4. Initialize state
-            await this.initializeState();
-            this.initializationState.state = true;
-            console.log('State initialized');
-
-            // 5. Initialize network
-            await this.initializeNetwork();
-            this.initializationState.network = true;
-            console.log('Network initialized');
-
-            // 6. Initialize Monaco
-            await this.initializeMonaco();
-            this.initializationState.monaco = true;
-            console.log('Monaco initialized');
-
-            // 7. Initialize entities
-            await this.initializeEntities();
-            this.initializationState.entities = true;
-            console.log('Entities initialized');
-
-            // 8. Initialize watcher
+            console.log('Scene initialization complete');
+            
+            // Initialize watcher early to ensure it's available during scene loading
+            console.log('Initializing watcher...');
+            this.initializationState.watcher = false;
             await this.initializeWatcher();
             this.initializationState.watcher = true;
-            console.log('Watcher initialized');
+            console.log('Watcher initialization complete');
 
-            // 9. Initialize UI
-            await this.initializeUI();
-            this.initializationState.ui = true;
-            console.log('UI initialized');
+            // Initialize state after scene
+            console.log('Initializing state...');
+            this.initializationState.state = false;
+            await this.initializeState();
+            this.initializationState.state = true;
+            console.log('State initialization complete');
 
-            // 10. Initialize draggable
-            await this.initializeDraggable();
-            this.initializationState.draggable = true;
-            console.log('Draggable initialized');
+            // Initialize network for multi-user experiences
+            console.log('Initializing network...');
+            this.initializationState.network = false;
+            await this.initializeNetwork();
+            this.initializationState.network = true;
+            await this.waitForNAF();
+            console.log('Network initialization complete');
 
-            // 11. Initialize entity API
+            // Initialize entity systems
+            console.log('Initializing entities API...');
+            this.initializationState.entityAPI = false;
             await this.initializeEntityAPI();
             this.initializationState.entityAPI = true;
-            console.log('Entity API initialized');
+            console.log('Entity API initialization complete');
 
-            // 12. Initialize editor
+            // Initialize entity tracker
+            console.log('Initializing entities...');
+            this.initializationState.entities = false;
+            await this.initializeEntities();
+            this.initializationState.entities = true;
+            console.log('Entity initialization complete');
+
+            // Initialize Monaco editor
+            console.log('Initializing Monaco...');
+            this.initializationState.monaco = false;
+            await this.initializeMonaco();
+            this.initializationState.monaco = true;
+            console.log('Monaco initialization complete');
+
+            // Initialize UI components
+            console.log('Initializing UI...');
+            this.initializationState.ui = false;
+            await this.initializeUI();
+            this.initializationState.ui = true;
+            console.log('UI initialization complete');
+
+            // Initialize scene editor
+            console.log('Initializing editor...');
+            this.initializationState.editor = false;
             await this.initializeEditor();
             this.initializationState.editor = true;
-            console.log('Editor initialized');
+            console.log('Editor initialization complete');
 
-            // 13. Initialize debug
+            // Initialize draggable UI elements
+            console.log('Initializing draggable UI...');
+            this.initializationState.draggable = false;
+            await this.initializeDraggable();
+            this.initializationState.draggable = true;
+            console.log('Draggable UI initialization complete');
+
+            // Initialize debugging tools
+            console.log('Initializing debug tools...');
+            this.initializationState.debug = false;
             await this.initializeDebug();
             this.initializationState.debug = true;
-            console.log('Debug initialized');
+            console.log('Debug tools initialization complete');
 
-            // 14. Set up event listeners
+            // Setup event listeners
+            console.log('Setting up event listeners...');
+            this.initializationState.events = false;
             await this.setupEventListeners();
-            console.log('Event listeners initialized');
+            this.initializationState.events = true;
+            console.log('Event listeners setup complete');
 
+            // Initialize scene watcher (for entity changes)
+            console.log('Initializing scene watcher...');
+            this.initializationState.sceneWatcher = false;
+            await this.initializeSceneWatcher();
+            this.initializationState.sceneWatcher = true;
+            console.log('Scene watcher initialization complete');
+
+            // Initialization complete
             this.initialized = true;
-            console.log('Application initialized successfully');
-            logAction('Application initialized');
+            const duration = Date.now() - this.startTime;
+            console.log(`Initialization complete in ${duration}ms`);
+
+            // Initialize watcher a second time to ensure it's properly connected to all entities
+            console.log('Reinitializing watcher after scene load...');
+            await this.initializeWatcher();
+            console.log('Watcher reinitialization complete');
+
+            // Dispatch event for any listeners
+            document.dispatchEvent(new CustomEvent('initialization-complete', {
+                detail: { duration, initializationState: this.initializationState }
+            }));
+
+            // Load initial scene after everything is fully initialized
+            console.log('Loading initial scene...');
+            this.initializationState.scene_loaded = false;
+            await this.loadInitialScene();
+            this.initializationState.scene_loaded = true;
+            console.log('Initial scene loaded');
+
+            return true;
         } catch (error) {
-            console.error('Initialization failed:', error);
+            console.error('Initialization process failed:', error);
             this.handleInitializationError(error);
+            
+            // Try to recover from errors
+            this.attemptRecovery();
+            
+            return false;
         }
     }
 
@@ -249,200 +311,315 @@ class InitializationManager {
         // Log error
         console.error('Initialization failed:', error);
         
-        // Show error UI
+        // Show error message to user
         showInitializationError(error);
         
-        // Reset initialization state
-        this.initialized = false;
-        Object.keys(this.initializationState).forEach(key => {
-            this.initializationState[key] = false;
-        });
+        // Try to recover critical components if possible
+        this.attemptRecovery();
     }
 
     /**
-     * Check if all dependencies are initialized
+     * Check if component dependencies are met
+     * @param {string} component - Component name
+     * @returns {boolean} - Whether all dependencies are met
      */
     checkDependencies(component) {
-        return this.dependencies[component].every(dep => this.initializationState[dep]);
+        const deps = this.dependencies[component] || [];
+        return deps.every(dep => this.initializationState[dep]);
     }
 
     /**
      * Get initialization state
+     * @returns {Object} - Current initialization state
      */
     getInitializationState() {
-        return {
-            initialized: this.initialized,
-            state: { ...this.initializationState }
-        };
+        return { ...this.initializationState };
     }
 
     /**
-     * Initialize Monaco
+     * Initialize Monaco editor
      */
     async initializeMonaco() {
         return new Promise((resolve, reject) => {
-            // Set up Monaco environment
-            window.MonacoEnvironment = {
-                getWorkerUrl: function(moduleId, label) {
-                    console.log('Monaco requesting worker for:', moduleId, label);
-                    return 'monaco-editor/vs/base/worker/workerMain.js';
+            try {
+                // Check if monaco is already configured
+                if (typeof monaco !== 'undefined' && monaco.editor) {
+                    console.log('Monaco already initialized');
+                    resolve();
+                    return;
                 }
-            };
-
-            // Configure Monaco loader
-            if (typeof require === 'undefined') {
-                reject(new Error('Monaco require function not available'));
-                return;
-            }
-
-            require.config({ 
-                paths: { 'vs': 'monaco-editor/vs' },
-                waitSeconds: 30
-            });
-
-            // Load Monaco
-            if (typeof monaco === 'undefined') {
+                
+                // Check if we have the loader
+                if (typeof require === 'undefined') {
+                    console.warn('Monaco require not found, will try alternate initialization');
+                    // Set a fallback resolve after a timeout
+                    setTimeout(resolve, 1000);
+                    return;
+                }
+                
+                // Configure loader
+                require.config({ paths: { 'vs': 'monaco-editor/vs' }});
+                
+                // Load monaco
                 require(['vs/editor/editor.main'], () => {
-                    console.log('Monaco modules loaded successfully');
+                    console.log('Monaco loaded via require');
                     resolve();
                 });
-            } else {
+                
+                // Set a timeout just in case
+                setTimeout(() => {
+                    if (typeof monaco === 'undefined' || !monaco.editor) {
+                        console.warn('Monaco failed to load in time, continuing anyway');
+                    }
+                    resolve();
+                }, 5000);
+            } catch (error) {
+                console.error('Monaco initialization error:', error);
+                // Don't reject, continue initializing
                 resolve();
             }
         });
     }
 
     /**
-     * Initialize watcher
+     * Initialize watcher for entity changes
      */
     async initializeWatcher() {
-        try {
-            console.log('Initializing watcher...');
-            
-            // Import watcher module
-            const { startWatcher } = await import('./watcher.js');
-            
-            // Start the watcher and get the instance
-            const watcher = startWatcher();
-            
-            // Initialize draggable functionality for the watcher panel
-            const watcherPanel = document.getElementById('watcher-panel');
-            if (watcherPanel) {
-                // Import and initialize draggable
-                const { initDraggable } = await import('./draggable.js');
-                initDraggable(watcherPanel);
+        return new Promise(async (resolve) => {
+            try {
+                // Import watcher module
+                const { initWatcher } = await import('./watcher.js');
                 
-                // Add to dock
-                const dock = document.getElementById('window-dock');
-                if (dock) {
-                    const watcherIcon = dock.querySelector('[data-window="watcher-panel"]');
-                    if (watcherIcon) {
-                        watcherIcon.classList.add('active');
+                // Initialize watcher if not already done
+                if (!window.watcher) {
+                    console.log('Creating new watcher instance');
+                    
+                    // Initialize the watcher module
+                    await initWatcher();
+                    
+                    // Ensure we have fallback methods even if initialization fails
+                    if (!window.watcher) {
+                        console.log('Creating dummy watcher after initialization');
+                        window.watcher = {
+                            save: () => console.log('[Watcher] Using dummy save method'),
+                            saveEntitiesToState: () => console.log('[Watcher] Using dummy saveEntitiesToState method'),
+                            startWatching: () => console.log('[Watcher] Using dummy startWatching method')
+                        };
+                    } else if (!window.watcher.saveEntitiesToState) {
+                        window.watcher.saveEntitiesToState = () => console.log('[Watcher] Using dummy saveEntitiesToState method');
                     }
+                } else {
+                    console.log('Watcher already initialized');
                 }
+                
+                resolve();
+            } catch (error) {
+                console.error('Error in watcher initialization:', error);
+                
+                // Create a dummy watcher to prevent errors
+                if (!window.watcher) {
+                    console.log('Creating dummy watcher after error');
+                    window.watcher = {
+                        save: () => console.log('[Watcher] Using dummy save method'),
+                        saveEntitiesToState: () => console.log('[Watcher] Using dummy saveEntitiesToState method'),
+                        startWatching: () => console.log('[Watcher] Using dummy startWatching method')
+                    };
+                }
+                
+                resolve();
             }
-            
-            return watcher;
-        } catch (error) {
-            console.error('Failed to initialize watcher:', error);
-            throw error;
-        }
+        });
     }
 
     /**
      * Initialize scene watcher
      */
     async initializeSceneWatcher() {
-        try {
-            // Import scene watcher module
-            const { watchScene } = await import('./watcher.js');
-            
-            // Get the scene element
-            const scene = document.querySelector('a-scene');
-            if (!scene) {
-                throw new Error('Scene element not found');
+        return new Promise((resolve) => {
+            try {
+                const scene = document.querySelector('a-scene');
+                if (!scene) {
+                    console.warn('Scene not found for watcher initialization');
+                    resolve();
+                    return;
+                }
+                
+                // Set up scene load handler
+                const handleSceneLoaded = () => {
+                    console.log('Scene loaded event detected');
+                    
+                    // Only initialize if scene is actually loaded
+                    if (scene.hasLoaded) {
+                        scene.removeEventListener('loaded', handleSceneLoaded);
+                        resolve();
+                    }
+                };
+                
+                // If scene is already loaded, resolve immediately
+                if (scene.hasLoaded) {
+                    console.log('Scene already loaded');
+                    resolve();
+                } else {
+                    // Otherwise wait for loaded event
+                    console.log('Waiting for scene to load...');
+                    scene.addEventListener('loaded', handleSceneLoaded);
+                    
+                    // Set timeout in case scene load event never fires
+                    setTimeout(() => {
+                        scene.removeEventListener('loaded', handleSceneLoaded);
+                        console.warn('Scene load timeout, continuing anyway');
+                        resolve();
+                    }, 5000);
+                }
+            } catch (error) {
+                console.error('Error in scene watcher initialization:', error);
+                resolve();
             }
-            
-            // Wait for scene to be fully loaded
-            if (!scene.hasLoaded) {
-                await new Promise(resolve => scene.addEventListener('loaded', resolve));
-            }
-            
-            // Add a small delay to ensure all entities are properly initialized
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            // Start watching the scene
-            return watchScene(scene);
-        } catch (error) {
-            console.error('Failed to initialize scene watcher:', error);
-            throw error;
-        }
+        });
     }
 
     /**
-     * Initialize draggable
+     * Initialize draggable UI
      */
     async initializeDraggable() {
-        try {
-            // Import draggable module
-            const { initDraggable, initDock } = await import('./draggable.js');
-            
-            // Initialize draggable functionality for UI container
-            const uiContainer = document.getElementById('ui-container');
-            if (uiContainer) {
-                initDraggable(uiContainer);
-                console.log('UI container draggable initialized');
-            }
-            
-            // Initialize draggable functionality for editor window
-            const editorWindow = document.getElementById('editor-window');
-            if (editorWindow) {
-                initDraggable(editorWindow);
-                console.log('Editor window draggable initialized');
-            }
-            
-            // Initialize draggable functionality for state debug panel
-            const debugPanel = document.getElementById('state-debug-panel');
-            if (debugPanel) {
-                initDraggable(debugPanel);
-                console.log('State debug panel draggable initialized');
-            } else {
-                console.error('State debug panel element not found');
-            }
-
-            // Initialize dock functionality
-            initDock();
-            console.log('Window dock initialized');
-
-            // Mark all window icons as active in the dock
-            const dock = document.getElementById('window-dock');
-            if (dock) {
-                const windowIds = ['ui-container', 'editor-window', 'state-debug-panel', 'watcher-panel'];
-                windowIds.forEach(windowId => {
-                    const icon = dock.querySelector(`[data-window="${windowId}"]`);
-                    if (icon) {
-                        icon.classList.add('active');
+        return new Promise((resolve) => {
+            try {
+                if (!this.checkDependencies('draggable')) {
+                    console.warn('Draggable dependencies not met, delaying initialization');
+                    setTimeout(() => {
+                        resolve();
+                    }, 500);
+                    return;
+                }
+                
+                // Import and initialize draggable module
+                import('./draggable.js').then(module => {
+                    if (typeof module.initializeDraggableWindows === 'function') {
+                        module.initializeDraggableWindows();
+                        console.log('Draggable windows initialized');
+                    } else {
+                        console.warn('initializeDraggableWindows function not found');
                     }
+                    resolve();
+                }).catch(error => {
+                    console.error('Failed to load draggable module:', error);
+                    resolve();
                 });
+            } catch (error) {
+                console.error('Error in draggable initialization:', error);
+                resolve();
+            }
+        });
+    }
+
+    /**
+     * Load the initial scene either from URL parameters or from the default startup scene
+     */
+    async loadInitialScene() {
+        return new Promise(async (resolve) => {
+            try {
+                console.log('Loading initial scene...');
+                
+                // First check URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const sceneParam = urlParams.get('scene');
+                
+                if (sceneParam) {
+                    console.log(`Loading scene from URL parameter: ${sceneParam}`);
+                    try {
+                        await loadScene(sceneParam);
+                        this.sceneLoaded = true;
+                        resolve();
+                        return;
+                    } catch (error) {
+                        console.error('Error loading scene from URL parameter:', error);
+                        // Continue to load default scene if URL param fails
+                    }
+                }
+                
+                // If no URL param or it failed, load the startup scene
+                console.log(`Loading default startup scene: ${STARTUP_SCENE_PATH}`);
+                try {
+                    await loadScene(STARTUP_SCENE_PATH);
+                    this.sceneLoaded = true;
+                } catch (error) {
+                    console.error('Error loading default startup scene:', error);
+                }
+                
+                resolve();
+            } catch (error) {
+                console.error('Error in loadInitialScene:', error);
+                resolve();
+            }
+        });
+    }
+    
+    /**
+     * Load scene from external file (no longer needed as initial startup, but kept for API compatibility)
+     */
+    async loadExternalScene() {
+        return new Promise((resolve) => {
+            // If a scene has already been loaded during initialization, skip this step
+            if (this.sceneLoaded) {
+                console.log('Scene already loaded during initialization, skipping');
+                resolve();
+                return;
             }
             
-            return true;
-        } catch (error) {
-            console.error('Failed to initialize draggable:', error);
-            throw error;
+            // Otherwise, load the scene as before
+            this.loadInitialScene().then(resolve).catch(() => resolve());
+        });
+    }
+
+    /**
+     * Attempt to recover from initialization errors
+     */
+    attemptRecovery() {
+        console.log('Attempting to recover from initialization errors...');
+        
+        // Try to initialize critical components
+        if (!this.initializationState.state) {
+            console.log('Attempting to recover state...');
+            this.initializeState().catch(e => console.error('State recovery failed:', e));
+        }
+        
+        if (!this.initializationState.ui && this.initializationState.state) {
+            console.log('Attempting to recover UI...');
+            this.initializeUI().catch(e => console.error('UI recovery failed:', e));
         }
     }
 }
 
-// Create singleton instance
-const initializationManager = new InitializationManager();
-
-// Export initialization function
+/**
+ * Initialize application with environment
+ */
 export async function initializeApp() {
-    return initializationManager.initialize();
+    // Create initialization manager
+    const initManager = new InitializationManager();
+
+    try {
+        // Start initialization process
+        await initManager.initialize();
+        
+        // Initialize the engine UI
+        try {
+            const engineUI = await import('./engine-ui.js');
+            engineUI.initEngineUI();
+        } catch (engineUIError) {
+            console.error('Error initializing engine UI:', engineUIError);
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Initialization failed:', error);
+        return false;
+    }
 }
 
-// Export state getter
+/**
+ * Get the current initialization state
+ * @returns {Object} - Current initialization state
+ */
 export function getInitializationState() {
-    return initializationManager.getInitializationState();
+    return new InitializationManager().getInitializationState();
 } 

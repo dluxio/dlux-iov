@@ -1,5 +1,6 @@
 import { RIG_CONFIG, vectorToString } from './config.js';
 import { getState, setState } from './state.js';
+import engineManager from './engine-manager.js';
 
 /**
  * Avatar System - Handles networked avatars and camera synchronization
@@ -49,8 +50,7 @@ class AvatarSystem {
         // Initialize avatar once everything is ready
         waitForInitialization().then(() => {
             console.log('Scene and network initialized, setting up avatar...');
-            console.log('RIG_CONFIG:', JSON.stringify(RIG_CONFIG, null, 2));
-
+            
             // Get the avatar rig entity (this will be created after the template is attached)
             const avatarRig = this.scene.querySelector('#avatar-rig');
             if (avatarRig) {
@@ -59,6 +59,53 @@ class AvatarSystem {
 
                 // Store reference to local avatar
                 this.localAvatar = avatarRig;
+                
+                // Get position from engine config if available, fall back to RIG_CONFIG
+                let rigPosition;
+                if (engineManager.initialized && engineManager.config?.avatar?.spawn?.position) {
+                    rigPosition = engineManager.config.avatar.spawn.position;
+                    console.log('Using engine config for avatar position:', rigPosition);
+                } else {
+                    rigPosition = RIG_CONFIG.spawn || { x: 0, y: 0, z: 3 };
+                    console.log('Using default RIG_CONFIG for avatar position:', rigPosition);
+                }
+                
+                // Set avatar position based on config
+                avatarRig.setAttribute('position', vectorToString(rigPosition));
+                
+                // Get camera and ensure it's at the correct height
+                const camera = avatarRig.querySelector('#avatar-camera');
+                if (camera) {
+                    // Determine camera height from config
+                    let cameraHeight;
+                    if (engineManager.initialized && engineManager.config?.avatar?.template?.children) {
+                        // Try to find camera height in engine config
+                        const cameraConfig = engineManager.config.avatar.template.children.find(
+                            child => child.id === 'avatar-camera'
+                        );
+                        if (cameraConfig && cameraConfig.position && cameraConfig.position.y !== undefined) {
+                            cameraHeight = cameraConfig.position.y;
+                            console.log('Using engine config for camera height:', cameraHeight);
+                        } else {
+                            cameraHeight = RIG_CONFIG.height || 1.6;
+                            console.log('Falling back to RIG_CONFIG for camera height:', cameraHeight);
+                        }
+                    } else {
+                        cameraHeight = RIG_CONFIG.height || 1.6;
+                        console.log('Using default height for camera:', cameraHeight);
+                    }
+                    
+                    const cameraPosition = { x: 0, y: cameraHeight, z: 0 };
+                    console.log(`Setting camera position to height ${cameraHeight}`, cameraPosition);
+                    camera.setAttribute('position', vectorToString(cameraPosition));
+                    
+                    // Ensure camera controls are active
+                    camera.setAttribute('camera', 'active', true);
+                    camera.setAttribute('look-controls', 'enabled', true);
+                    camera.setAttribute('wasd-controls', 'enabled', true);
+                } else {
+                    console.warn('Camera not found in avatar rig');
+                }
 
                 // Setup camera sync
                 this.setupCameraSync(avatarRig);
@@ -72,6 +119,54 @@ class AvatarSystem {
                         console.log('Current avatar-rig position:', retryAvatarRig.getAttribute('position'));
                         
                         this.localAvatar = retryAvatarRig;
+                        
+                        // Get position from engine config if available, fall back to RIG_CONFIG
+                        let rigPosition;
+                        if (engineManager.initialized && engineManager.config?.avatar?.spawn?.position) {
+                            rigPosition = engineManager.config.avatar.spawn.position;
+                            console.log('Using engine config for avatar position on retry:', rigPosition);
+                        } else {
+                            rigPosition = RIG_CONFIG.spawn || { x: 0, y: 0, z: 3 };
+                            console.log('Using default RIG_CONFIG for avatar position on retry:', rigPosition);
+                        }
+                        
+                        // Set avatar position based on config
+                        retryAvatarRig.setAttribute('position', vectorToString(rigPosition));
+                        
+                        // Get camera and ensure it's at the correct height
+                        const camera = retryAvatarRig.querySelector('#avatar-camera');
+                        if (camera) {
+                            // Determine camera height from config
+                            let cameraHeight;
+                            if (engineManager.initialized && engineManager.config?.avatar?.template?.children) {
+                                // Try to find camera height in engine config
+                                const cameraConfig = engineManager.config.avatar.template.children.find(
+                                    child => child.id === 'avatar-camera'
+                                );
+                                if (cameraConfig && cameraConfig.position && cameraConfig.position.y !== undefined) {
+                                    cameraHeight = cameraConfig.position.y;
+                                    console.log('Using engine config for camera height on retry:', cameraHeight);
+                                } else {
+                                    cameraHeight = RIG_CONFIG.height || 1.6;
+                                    console.log('Falling back to RIG_CONFIG for camera height on retry:', cameraHeight);
+                                }
+                            } else {
+                                cameraHeight = RIG_CONFIG.height || 1.6;
+                                console.log('Using default height for camera on retry:', cameraHeight);
+                            }
+                            
+                            const cameraPosition = { x: 0, y: cameraHeight, z: 0 };
+                            console.log(`Setting camera position to height ${cameraHeight} on retry`, cameraPosition);
+                            camera.setAttribute('position', vectorToString(cameraPosition));
+                            
+                            // Ensure camera controls are active
+                            camera.setAttribute('camera', 'active', true);
+                            camera.setAttribute('look-controls', 'enabled', true);
+                            camera.setAttribute('wasd-controls', 'enabled', true);
+                        } else {
+                            console.warn('Camera not found in avatar rig on retry');
+                        }
+                        
                         this.setupCameraSync(retryAvatarRig);
                     } else {
                         console.error('Avatar rig still not found after retry');
@@ -92,8 +187,14 @@ class AvatarSystem {
             return;
         }
 
-        // Set initial position
-        avatarRig.setAttribute('position', vectorToString(RIG_CONFIG.spawn));
+        // Set initial position from engine config
+        let rigPosition;
+        if (engineManager.initialized && engineManager.config?.avatar?.spawn?.position) {
+            rigPosition = engineManager.config.avatar.spawn.position;
+        } else {
+            rigPosition = RIG_CONFIG.spawn;
+        }
+        avatarRig.setAttribute('position', vectorToString(rigPosition));
 
         // Add event listeners for camera movement
         camera.addEventListener('componentchanged', (event) => {

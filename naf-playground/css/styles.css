@@ -460,4 +460,391 @@ input:focus, select:focus, textarea:focus {
     font-size: 16px;
 }
 
-/* Remove all window-related styles as they are now in window-system.css */ 
+/* Remove all window-related styles as they are now in window-system.css */
+
+/* Scene Management */
+.scene-section {
+    margin-top: 20px;
+    margin-bottom: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--theme-border-color);
+}
+
+.scene-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.scene-select-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.scene-select-container label {
+    font-size: 0.9em;
+    color: var(--theme-secondary-color);
+}
+
+.scene-selector {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--theme-border-color);
+    border-radius: 4px;
+    background-color: var(--theme-panel-background);
+    color: var(--theme-text-color);
+}
+
+.scene-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.scene-btn {
+    flex: 1 0 calc(50% - 8px);
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--theme-primary-color);
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-align: center;
+}
+
+.scene-btn:hover {
+    background-color: var(--theme-primary-color);
+    opacity: 0.9;
+}
+
+.scene-btn:active {
+    transform: translateY(1px);
+}
+
+/* Scene Selector */
+.scene-selector {
+    background-color: #2a2a2a;
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.scene-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0 0;
+}
+
+.scene-list li {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    background-color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.scene-list li:hover {
+    background-color: #444;
+}
+
+.scene-list li:active {
+    background-color: #555;
+} 
+/* Scene Management Section */
+.scene-section {
+    margin-bottom: 1.5rem;
+}
+
+.scene-section h2 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: #efefef;
+}
+
+.scene-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.scene-select-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.scene-select-container label {
+    font-size: 0.8rem;
+    color: #cccccc;
+}
+
+.scene-selector {
+    background-color: #2a2a2a;
+    color: #ffffff;
+    padding: 6px 10px;
+    border: 1px solid #444444;
+    border-radius: 4px;
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+.scene-selector:hover {
+    border-color: #666666;
+}
+
+.scene-selector:focus {
+    outline: none;
+    border-color: #7f7fff;
+}
+
+.scene-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.scene-btn {
+    flex: 1;
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #444444;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.scene-btn:hover {
+    background-color: #3a3a3a;
+    border-color: #666666;
+}
+
+.scene-btn:active {
+    background-color: #444444;
+}
+
+/* Asset Manager Styles */
+.asset-manager {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #444;
+  padding-bottom: 15px;
+}
+
+.add-asset-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.asset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.asset-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background: #333;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.asset-item:hover {
+  background: #3a3a3a;
+}
+
+.asset-preview {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #222;
+  border-radius: 4px;
+  margin-right: 10px;
+  overflow: hidden;
+}
+
+
+
+.asset-preview i {
+  font-size: 20px;
+  color: #aaa;
+  width: 40px !important;
+}
+
+.asset-preview-image {
+    width: 40px !important;
+    height: 40px !important;
+    max-width: 40px !important;
+    max-height: 40px !important;
+    object-fit: contain !important;
+    display: block !important;
+  }
+
+.asset-info {
+  flex: 1;
+}
+
+.asset-name {
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.asset-type {
+  font-size: 12px;
+  color: #aaa;
+  text-transform: uppercase;
+}
+
+.asset-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.asset-edit-btn,
+.asset-delete-btn {
+  background: transparent;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+
+.asset-edit-btn:hover {
+  color: #fff;
+  background: #2a6496;
+}
+
+.asset-delete-btn:hover {
+  color: #fff;
+  background: #d9534f;
+}
+
+.add-asset-btn {
+  padding: 5px 10px;
+  background: #2a6496;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s;
+}
+
+.add-asset-btn:hover {
+  background: #3579b5;
+}
+
+.no-assets {
+  padding: 15px;
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  background: #333;
+  border-radius: 4px;
+}
+
+/* Asset Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #222;
+  border-radius: 5px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #444;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.close-modal {
+  font-size: 24px;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close-modal:hover {
+  color: white;
+}
+
+.asset-form {
+  padding: 20px;
+}
+
+.form-field {
+  margin-bottom: 15px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-field input,
+.form-field select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #333;
+  color: white;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: #2a6496;
+}
+
+.submit-asset {
+  padding: 8px 15px;
+  background: #2a6496;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.submit-asset:hover {
+  background: #3579b5;
+} 

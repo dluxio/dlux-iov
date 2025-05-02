@@ -74,49 +74,48 @@ class EnvironmentManager {
     }
 
     /**
-     * Initialize the environment
+     * Initialize the environment manager
+     * Modified to be purely reactive - will not create any entities automatically
      */
     init() {
         if (this.initialized) return;
 
-        // Get current state
-        const state = getState();
+        console.log('[EnvironmentManager] Initializing in reactive mode - will only respond to state changes');
         
-        // Initialize environment if not exists
-        if (!state.environment) {
-            this.setEnvironmentPreset('default');
-        } else {
-            // Ensure environment exists in scene
-            this.ensureEnvironmentExists();
-        }
+        // Set up state change listener
+        document.addEventListener('state-changed', (event) => {
+            const { changes, newState } = event.detail;
+            // Only proceed if we have a valid state and environment changes
+            if (newState && changes && changes.environment) {
+                console.log('[EnvironmentManager] Environment state changed, updating environment...');
+                this.ensureEnvironmentExists();
+            }
+        });
 
         this.initialized = true;
     }
 
     /**
      * Set the current environment preset
+     * This is a main entry point for updating the environment state and should be used
+     * when changing the overall environment. This method delegates to updateEnvironment
+     * which will update the state and trigger DOM updates.
      * @param {string} preset - The preset name to apply
      */
     setEnvironmentPreset(preset) {
-        const state = getState();
         const presetConfig = ENVIRONMENT_PRESETS[preset];
         
         if (!presetConfig) {
-            console.error(`Invalid environment preset: ${preset}`);
+            console.error(`[EnvironmentManager] Invalid environment preset: ${preset}`);
             return;
         }
         
-        // Create environment entity if it doesn't exist
-        let environment = document.querySelector('#environment');
-        if (!environment) {
-            environment = document.createElement('a-entity');
-            environment.id = 'environment';
-            environment.setAttribute('data-entity-uuid', generateEntityId('environment'));
-            document.querySelector('a-scene').appendChild(environment);
-        }
+        console.log(`[EnvironmentManager] Setting environment preset: ${preset}`);
         
-        // Update environment entity with preset configuration
-        const environmentUuid = environment.getAttribute('data-entity-uuid');
+        // Generate a UUID for the environment if needed
+        const environmentUuid = generateEntityId('environment');
+        
+        // Prepare the environment state
         const environmentState = {
             type: 'environment',
             preset,
@@ -124,96 +123,180 @@ class EnvironmentManager {
             ...presetConfig
         };
         
-        // Update state
-        setState({
-            entities: {
-                ...state.entities,
-                [environmentUuid]: environmentState
-            }
-        });
-        
-        // Update DOM
-        this.updateEnvironmentDOM(environment, presetConfig);
+        // Use the updateEnvironment method to update the state
+        this.updateEnvironment(environmentState);
     }
 
     /**
-     * Update the environment DOM elements
+     * Update the environment DOM elements based on configuration
+     * Updated to only modify DOM without changing state
      * @param {HTMLElement} environment - The environment entity element
      * @param {Object} config - The environment configuration
      */
     updateEnvironmentDOM(environment, config) {
-        // Update sky
-        let sky = environment.querySelector('a-sky');
-        if (!sky) {
-            sky = document.createElement('a-sky');
-            sky.id = 'sky';
-            sky.setAttribute('data-entity-uuid', generateEntityId('sky'));
-            environment.appendChild(sky);
-        }
+        console.log('[EnvironmentManager] Updating environment DOM elements');
         
-        // Update sky attributes
+        // Update sky
         if (config.sky) {
+            console.log('[EnvironmentManager] Updating sky via DOM');
+            let sky = environment.querySelector('a-sky');
+            if (!sky) {
+                sky = document.createElement('a-sky');
+                sky.id = 'sky';
+                sky.setAttribute('data-entity-uuid', generateEntityId('sky'));
+                environment.appendChild(sky);
+            }
+            
+            // Update sky attributes
             Object.entries(config.sky).forEach(([key, value]) => {
-                sky.setAttribute(key, value);
+                if (key === 'data' && value && typeof value === 'object') {
+                    // Handle sky data property, which contains color or other attributes
+                    Object.entries(value).forEach(([dataKey, dataValue]) => {
+                        sky.setAttribute(dataKey, dataValue);
+                    });
+                } else if (key !== 'uuid' && key !== 'type') {
+                    // Skip uuid and type, set other attributes directly
+                    sky.setAttribute(key, value);
+                }
             });
         }
         
         // Update lights
-        const lights = environment.querySelectorAll('[light]');
-        lights.forEach(light => light.remove());
-        
-        if (config.lights) {
+        if (config.lights && Array.isArray(config.lights)) {
+            console.log('[EnvironmentManager] Updating lights via DOM');
+            
+            // Remove existing lights
+            const lights = environment.querySelectorAll('[light]');
+            lights.forEach(light => light.remove());
+            
+            // Create new lights
             config.lights.forEach(lightConfig => {
+                if (!lightConfig || !lightConfig.light) return;
+                
                 const light = document.createElement('a-entity');
-                light.id = lightConfig.id;
-                light.setAttribute('data-entity-uuid', generateEntityId('light'));
-                light.setAttribute('light', Object.entries(lightConfig.light)
-                    .map(([key, value]) => `${key}: ${value}`)
-                    .join('; '));
+                light.id = lightConfig.id || `light-${Date.now()}`;
+                light.setAttribute('data-entity-uuid', lightConfig.uuid || generateEntityId('light'));
+                
+                // Set light attributes
+                if (lightConfig.light) {
+                    // Create the light attribute string
+                    const lightAttrs = Object.entries(lightConfig.light)
+                        // Filter out the position as it should be set separately
+                        .filter(([key]) => key !== 'position')
+                        .map(([key, value]) => {
+                            // If the value is an object with x,y,z, convert to string
+                            if (value && typeof value === 'object' && 'x' in value) {
+                                return `${key}: ${value.x} ${value.y} ${value.z}`;
+                            }
+                            return `${key}: ${value}`;
+                        })
+                        .join('; ');
+                    
+                    light.setAttribute('light', lightAttrs);
+                }
+                
+                // Set position if available
+                // First check if it's directly in the lightConfig
+                if (lightConfig.position) {
+                    const pos = lightConfig.position;
+                    light.setAttribute('position', `${pos.x} ${pos.y} ${pos.z}`);
+                }
+                // Also check if it's in the light property
+                else if (lightConfig.light && lightConfig.light.position) {
+                    const pos = lightConfig.light.position;
+                    light.setAttribute('position', `${pos.x} ${pos.y} ${pos.z}`);
+                }
+                
                 environment.appendChild(light);
+                console.log(`[EnvironmentManager] Created light: ${light.id} with position: ${light.getAttribute('position')}`);
             });
         }
     }
 
     /**
-     * Ensure environment exists in scene
+     * Ensure environment exists in scene based on current state
+     * Updated to be purely reactive - creates/updates DOM elements based on state
      */
     ensureEnvironmentExists() {
         const state = getState();
         const environment = state.environment;
-        if (!environment) return;
+        
+        // If there's no environment in state, don't create anything
+        if (!environment) {
+            console.log('[EnvironmentManager] No environment in state, skipping creation');
+            return;
+        }
+
+        console.log('[EnvironmentManager] Ensuring environment exists in DOM based on state');
 
         // Get or create environment entity
         let envEntity = document.getElementById(this.environmentId);
         if (!envEntity) {
+            console.log('[EnvironmentManager] Creating new environment entity in DOM');
             envEntity = document.createElement('a-entity');
             envEntity.id = this.environmentId;
+            envEntity.setAttribute('data-entity-uuid', environment.uuid || generateEntityId('environment'));
             document.querySelector('a-scene').appendChild(envEntity);
+        } else {
+            console.log('[EnvironmentManager] Updating existing environment entity in DOM');
         }
 
-        // Update sky
-        skyManager.updateSky(environment.sky);
+        // Apply preset if specified
+        if (environment.preset && ENVIRONMENT_PRESETS[environment.preset]) {
+            console.log(`[EnvironmentManager] Applying preset: ${environment.preset}`);
+            this.updateEnvironmentDOM(envEntity, ENVIRONMENT_PRESETS[environment.preset]);
+        }
 
-        // Update lights
-        environment.lights.forEach(light => {
-            let lightEntity = document.getElementById(light.id);
-            if (!lightEntity) {
-                lightEntity = document.createElement('a-entity');
+        // Update sky if specified in environment
+        if (environment.sky) {
+            skyManager.updateSky(environment.sky);
+        }
+
+        // Update lights from state
+        if (environment.lights && Array.isArray(environment.lights)) {
+            // Remove existing lights
+            const existingLights = envEntity.querySelectorAll('[light]');
+            existingLights.forEach(light => light.remove());
+            
+            // Create lights from state
+            environment.lights.forEach(light => {
+                if (!light || !light.id) return;
+                
+                let lightEntity = document.createElement('a-entity');
                 lightEntity.id = light.id;
-                envEntity.appendChild(lightEntity);
-            }
-
-            // Update light attributes
-            Object.entries(light.light).forEach(([key, value]) => {
-                if (typeof value === 'object') {
-                    lightEntity.setAttribute(key, Object.entries(value)
-                        .map(([k, v]) => `${k}: ${v}`)
-                        .join('; '));
-                } else {
-                    lightEntity.setAttribute(key, value);
+                lightEntity.setAttribute('data-entity-uuid', light.uuid || generateEntityId('light'));
+                
+                // Set light attributes
+                if (light.light) {
+                    // Filter out position from light attributes string 
+                    const lightAttrs = Object.entries(light.light)
+                        .filter(([key]) => key !== 'position')
+                        .map(([key, value]) => {
+                            // Handle vector values
+                            if (value && typeof value === 'object' && 'x' in value) {
+                                return `${key}: ${value.x} ${value.y} ${value.z}`;
+                            }
+                            return `${key}: ${value}`;
+                        })
+                        .join('; ');
+                    
+                    lightEntity.setAttribute('light', lightAttrs);
                 }
+                
+                // Set position if available in multiple possible locations
+                if (light.position) {
+                    const pos = light.position;
+                    lightEntity.setAttribute('position', `${pos.x} ${pos.y} ${pos.z}`);
+                }
+                else if (light.light && light.light.position) {
+                    const pos = light.light.position;
+                    lightEntity.setAttribute('position', `${pos.x} ${pos.y} ${pos.z}`);
+                }
+                
+                envEntity.appendChild(lightEntity);
+                console.log(`[EnvironmentManager] Created light from state: ${lightEntity.id} with position: ${lightEntity.getAttribute('position')}`);
             });
-        });
+        }
     }
 
     /**
@@ -234,28 +317,76 @@ class EnvironmentManager {
 
     /**
      * Update a specific light in the environment
+     * This modifies a specific light in the environment and delegates to updateEnvironment
+     * to update the state and trigger DOM updates.
      * @param {string} lightId - ID of the light to update
      * @param {Object} properties - New light properties
      */
     updateLight(lightId, properties) {
+        console.log(`[EnvironmentManager] Updating light: ${lightId}`);
+
         const state = getState();
         const environment = state.environment;
-        if (!environment) return;
+        if (!environment) {
+            console.warn('[EnvironmentManager] Cannot update light - no environment in state');
+            return;
+        }
+
+        if (!environment.lights || !Array.isArray(environment.lights)) {
+            console.warn('[EnvironmentManager] Cannot update light - no lights array in environment');
+            return;
+        }
 
         const lightIndex = environment.lights.findIndex(l => l.id === lightId);
-        if (lightIndex === -1) return;
+        if (lightIndex === -1) {
+            console.warn(`[EnvironmentManager] Light not found in state: ${lightId}`);
+            return;
+        }
 
-        // Update light in state
-        environment.lights[lightIndex] = {
-            ...environment.lights[lightIndex],
+        // Create updated environment with modified light
+        const updatedEnvironment = {
+            ...environment,
+            lights: [...environment.lights]
+        };
+
+        // Update specific light properties
+        updatedEnvironment.lights[lightIndex] = {
+            ...updatedEnvironment.lights[lightIndex],
             light: {
-                ...environment.lights[lightIndex].light,
+                ...updatedEnvironment.lights[lightIndex].light,
                 ...properties
             }
         };
 
-        setState({ environment });
-        this.ensureEnvironmentExists();
+        // Use the updateEnvironment method to update the state
+        this.updateEnvironment(updatedEnvironment);
+    }
+
+    /**
+     * Update environment configuration
+     * This is the main entry point for updating the entire environment and is the primary method
+     * that should update the state. All other methods should just respond to state changes
+     * or delegate to this method.
+     * When this method is called, it updates the state, which triggers the state-changed event,
+     * which calls ensureEnvironmentExists to update the DOM.
+     * @param {Object} config - New environment configuration
+     */
+    updateEnvironment(config) {
+        if (!config) return;
+
+        console.log('[EnvironmentManager] Updating environment configuration via state');
+        
+        // Prepare environment state
+        const environmentState = {
+            ...config,
+            uuid: config.uuid || generateEntityId('environment')
+        };
+        
+        // Update state - this will trigger the state-changed event
+        // which will then call ensureEnvironmentExists() via the event listener
+        setState({ 
+            environment: environmentState 
+        }, 'environment-manager-update');
     }
 }
 

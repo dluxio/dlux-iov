@@ -46,6 +46,14 @@ let isInitializing = false;
 let loadAttempts = 0;
 const MAX_LOAD_ATTEMPTS = EDITOR_CONFIG.MAX_LOAD_ATTEMPTS;
 
+// Add debounce timer variable
+let editorUpdateDebounceTimer = null;
+const EDITOR_UPDATE_DEBOUNCE_TIME = 300; // ms
+
+// Flag to indicate that we only show level file entities in the editor
+// Engine entities are managed separately
+const LEVEL_FILE_ONLY = true;
+
 /**
  * Default scene template
  */
@@ -128,6 +136,21 @@ function initMonacoEditor(callback) {
         isInitializing = false;
         if (callback) callback(true);
         return;
+    }
+    
+    // Configure Monaco environment for web workers before loading
+    // Only if not already set up externally
+    if (!window.MonacoEnvironment) {
+        console.log('Setting up Monaco environment (not externally configured)');
+        // Set up Monaco to work without workers
+        window.MonacoEnvironment = {
+            getWorkerUrl: function() {
+                // Return empty worker - disables worker functionality
+                return 'data:text/javascript;charset=utf-8,';
+            }
+        };
+    } else {
+        console.log('Using externally configured Monaco environment');
     }
     
     // Fast path: If monaco is already defined globally, create the editor immediately
@@ -368,7 +391,16 @@ function createEditor(callback) {
             },
             fixedOverflowWidgets: true,
             height: '100%',
-            width: '100%'
+            width: '100%',
+            // Disable features that rely on workers
+            quickSuggestions: false,
+            formatOnType: false,
+            formatOnPaste: false,
+            parameterHints: { enabled: false },
+            folding: false,
+            suggestOnTriggerCharacters: false,
+            hover: { enabled: false },
+            wordBasedSuggestions: false
         });
         
         // Force a resize after a short delay
@@ -550,6 +582,28 @@ async function applyEditorContent(content) {
 function updateMonacoEditor(stateOrForce) {
     if (!editor) return;
 
+    // Clear any existing debounce timer
+    if (editorUpdateDebounceTimer) {
+        console.log('[EDITOR UPDATE] Clearing previous update timer');
+        clearTimeout(editorUpdateDebounceTimer);
+    }
+
+    // Set a new debounce timer
+    editorUpdateDebounceTimer = setTimeout(() => {
+        console.log('[EDITOR UPDATE] Executing debounced editor update');
+        _performMonacoUpdate(stateOrForce);
+        editorUpdateDebounceTimer = null;
+    }, EDITOR_UPDATE_DEBOUNCE_TIME);
+}
+
+/**
+ * Actually performs the Monaco editor update
+ * @private
+ */
+function _performMonacoUpdate(stateOrForce) {
+    // Check if editor is still available
+    if (!editor) return;
+
     // Handle the case where a boolean is passed to force update
     const forceUpdate = typeof stateOrForce === 'boolean' ? stateOrForce : false;
     const state = typeof stateOrForce === 'object' ? stateOrForce : getState();
@@ -557,11 +611,16 @@ function updateMonacoEditor(stateOrForce) {
     // Get current HTML
     const currentHTML = editor.getValue();
     
-    // Generate new HTML
+    // Generate new HTML (now filtered to only include level file entities)
     const newHTML = generateHTMLFromState(state);
     
     // Only update if HTML has changed or force update is true
     if (currentHTML !== newHTML || forceUpdate) {
+        console.log('[EDITOR UPDATE] Updating editor content');
+        
+        // Set flag to prevent circular updates
+        isUpdating = true;
+        
         // Store cursor position
         const position = editor.getPosition();
         
@@ -574,7 +633,12 @@ function updateMonacoEditor(stateOrForce) {
         }
         
         // Update status
-        updateEditorStatus('synced with scene');
+        updateEditorStatus('synced with level file');
+        
+        // Reset flag after a short delay
+        setTimeout(() => {
+            isUpdating = false;
+        }, 50);
     }
 
     // Update validation markers if there are errors
@@ -623,31 +687,8 @@ function clearValidationMarkers() {
  * @returns {string} Generated HTML
  */
 function generateHTMLFromState(state) {
-    try {
-        // Get state if not provided
-        const currentState = state || getState();
-        
-        // Validate state exists
-        if (!currentState) {
-            console.warn('State is null or undefined, using default scene HTML');
-            return generateDefaultSceneHTML();
-        }
-
-        // Generate scene HTML
-        const sceneHTML = getSceneHTML(currentState);
-        
-        // Validate generated HTML
-        if (!sceneHTML || typeof sceneHTML !== 'string') {
-            console.warn('Invalid HTML generated from state, using default scene HTML');
-            return generateDefaultSceneHTML();
-        }
-
-        return sceneHTML;
-    } catch (error) {
-        console.error('Error generating HTML from state:', error);
-        // Return default scene HTML as fallback
-        return generateDefaultSceneHTML();
-    }
+    // Generate scene HTML focused on level file entities
+    return generateSceneHTML();
 }
 
 /**
@@ -832,24 +873,309 @@ function generateDefaultSceneHTML() {
  * @returns {string} HTML for the scene
  */
 function generateSceneHTML() {
+    // Get current state
     const state = getState();
+    let entitiesHTML = '';
+    let skyHTML = ''; // Separate variable for sky HTML
+    let assetsHTML = ''; // Variable for all assets HTML
+    let assetIds = new Set(); // Track asset IDs to avoid duplicates
     
-    // Generate entities HTML
-    const entitiesHTML = generateEntitiesHTML() || '\n';
+    // Check if we have a level file loaded with entities
+    if (state && state.entities) {
+        // Only include entities that are explicitly in the level file
+        // We can determine this by checking if they're not system entities
+        const validEntities = {};
+        
+        // ONLY use state.sky, not entities[skyUuid]
+        if (state && state.sky) {
+            // Generate sky HTML directly from state.sky
+            const skyConfig = state.sky;
+            const skyProps = {
+                'data-entity-uuid': skyConfig.uuid,
+                'data-sky-type': skyConfig.type,
+                id: 'sky'
+            };
+            
+            // Generate asset HTML for image and video skies
+            if (skyConfig.type === 'image' && skyConfig.data?.image) {
+                // Create an asset ID
+                const assetId = `sky-image-asset`;
+                // Add the asset to the assets HTML
+                assetsHTML += `    <img id="${assetId}" src="${skyConfig.data.image}" crossorigin="anonymous">\n`;
+                // Set the src to reference the asset
+                skyProps.src = `#${assetId}`;
+                // Track this asset ID
+                assetIds.add(assetId);
+            } else if (skyConfig.type === 'video' && skyConfig.data?.video) {
+                // Create an asset ID
+                const assetId = `sky-video-asset`;
+                // Add the asset to the assets HTML
+                assetsHTML += `    <video id="${assetId}" src="${skyConfig.data.video}" crossorigin="anonymous" loop autoplay muted playsinline></video>\n`;
+                // Set the src to reference the asset
+                skyProps.src = `#${assetId}`;
+                // Track this asset ID
+                assetIds.add(assetId);
+            } else if (skyConfig.type === 'color' && skyConfig.data?.color) {
+                skyProps.color = skyConfig.data.color;
+            }
+            
+            // Generate sky HTML with the collected properties
+            skyHTML = generateSkyHTML(skyProps);
+        } else {
+            // If no sky in state, check if there's one in the scene as a fallback
+            const skyElement = document.querySelector('a-sky, a-videosphere');
+            if (skyElement) {
+                // Create a representation of the sky for the editor
+                const skyType = skyElement.getAttribute('data-sky-type') || 'color';
+                const skyColor = skyElement.getAttribute('color') || '#87CEEB';
+                
+                const skyProps = {
+                    type: 'sky',
+                    color: skyColor,
+                    'data-sky-type': skyType,
+                    'data-entity-uuid': skyElement.dataset.entityUuid || generateEntityId('sky')
+                };
+                
+                // Check if sky references an asset via src attribute
+                const src = skyElement.getAttribute('src');
+                if (src && src.startsWith('#')) {
+                    // This references an asset, find the asset in the DOM
+                    const assetId = src.substring(1);
+                    const asset = document.querySelector(`#${assetId}`);
+                    if (asset) {
+                        if (asset.tagName.toLowerCase() === 'img') {
+                            // It's an image asset
+                            assetsHTML += `    <img id="${assetId}" src="${asset.getAttribute('src')}" crossorigin="anonymous">\n`;
+                            skyProps.src = src;
+                            // Track this asset ID
+                            assetIds.add(assetId);
+                        } else if (asset.tagName.toLowerCase() === 'video') {
+                            // It's a video asset
+                            assetsHTML += `    <video id="${assetId}" src="${asset.getAttribute('src')}" crossorigin="anonymous" loop autoplay muted playsinline></video>\n`;
+                            skyProps.src = src;
+                            // Track this asset ID
+                            assetIds.add(assetId);
+                        }
+                    }
+                }
+                
+                // Generate sky HTML directly
+                skyHTML = generateSkyHTML(skyProps);
+            }
+        }
+        
+        // Process all entities and collect any assets they may reference
+        Object.entries(state.entities).forEach(([uuid, entity]) => {
+            // Skip system entities and sky entity (handled separately)
+            if (!isSystemEntity(entity) && !isEngineEntity(entity, uuid) && entity.type !== 'sky') {
+                validEntities[uuid] = entity;
+                
+                // Check for assets in the entity
+                const entityAssets = findEntityAssets(entity);
+                if (entityAssets.length > 0) {
+                    entityAssets.forEach(assetInfo => {
+                        // Only add if we haven't already added this asset
+                        if (!assetIds.has(assetInfo.id)) {
+                            assetsHTML += `    ${assetInfo.html}\n`;
+                            assetIds.add(assetInfo.id);
+                        }
+                    });
+                }
+            }
+        });
+        
+        // Generate HTML only for level file entities (excluding sky)
+        if (Object.keys(validEntities).length > 0) {
+            // Create a temporary state with only level file entities
+            const tempState = {
+                ...state,
+                entities: validEntities
+            };
+            
+            // Store the original state
+            const originalState = getState();
+            
+            // Temporarily set state to our filtered version
+            setState(tempState, false); // false to prevent triggering subscribers
+            
+            try {
+                // Generate HTML from the filtered entities
+                entitiesHTML = generateEntitiesHTML() || '\n';
+            } finally {
+                // Restore original state
+                setState(originalState, false);
+            }
+        }
+    }
     
-    // Create the full scene HTML
+    // Create the full scene HTML - now including all assets
     const sceneHTML = `<a-scene>
   <!-- Assets -->
   <a-assets>
     <!-- System templates are maintained internally but not shown in editor -->
-  </a-assets>
+${assetsHTML}  </a-assets>
 
-  <!-- User Entities -->
-${entitiesHTML}
+  <!-- Level File Entities -->
+${skyHTML}${entitiesHTML}
 
 </a-scene>`;
 
     return sceneHTML;
+}
+
+/**
+ * Generate the assets section HTML
+ * @param {Object} assets - The assets object from state
+ * @returns {string} HTML string for assets
+ */
+function generateAssetsHTML(assets) {
+  if (!assets || Object.keys(assets).length === 0) {
+    return '';
+  }
+
+  const assetElements = [];
+  
+  // Generate HTML for each asset
+  Object.values(assets).forEach(asset => {
+    if (!asset || !asset.id || !asset.src) return;
+    
+    // Create the appropriate asset element based on type
+    switch (asset.type) {
+      case 'image':
+        assetElements.push(`    <img id="${asset.id}" src="${asset.src}" crossorigin="anonymous">`);
+        break;
+      case 'video':
+        assetElements.push(`    <video id="${asset.id}" src="${asset.src}" crossorigin="anonymous" preload="auto" loop="true"></video>`);
+        break;
+      case 'audio':
+        assetElements.push(`    <audio id="${asset.id}" src="${asset.src}" crossorigin="anonymous" preload="auto"></audio>`);
+        break;
+      case 'model':
+        // For 3D models, we need to specify the format
+        const format = asset.format || (asset.src.endsWith('.glb') ? 'glb' : 'gltf');
+        assetElements.push(`    <a-asset-item id="${asset.id}" src="${asset.src}" response-type="${format}"></a-asset-item>`);
+        break;
+      default:
+        console.warn(`Unknown asset type: ${asset.type} for asset ${asset.id}`);
+    }
+  });
+  
+  if (assetElements.length === 0) {
+    return '';
+  }
+  
+  return `  <a-assets>
+${assetElements.join('\n')}
+  </a-assets>`;
+}
+
+/**
+ * Generate sky HTML based on sky configuration
+ * @param {Object} skyConfig - Sky configuration from state
+ * @returns {string} HTML string
+ */
+function generateSkyHTML(skyConfig) {
+  if (!skyConfig) {
+    return '';
+  }
+
+  const { type, data } = skyConfig;
+  
+  switch (type) {
+    case 'color':
+      return `  <a-sky color="${data.color || '#FFFFFF'}" data-sky-type="color"></a-sky>`;
+    case 'image':
+      if (data.assetId) {
+        return `  <a-sky src="#${data.assetId}" data-sky-type="image"></a-sky>`;
+      } else if (data.image) {
+        return `  <a-sky src="${data.image}" data-sky-type="image"></a-sky>`;
+      }
+      return '';
+    case 'video':
+      if (data.assetId) {
+        return `  <a-videosphere src="#${data.assetId}" data-sky-type="video"></a-videosphere>`;
+      } else if (data.video) {
+        return `  <a-videosphere src="${data.video}" data-sky-type="video"></a-videosphere>`;
+      }
+      return '';
+    case 'environment':
+      return `  <a-sky src="${data.environment}" data-sky-type="environment"></a-sky>`;
+    case 'gradient':
+      return `  <a-sky data-sky-type="gradient" material="shader: gradient; topColor: ${data.topColor || '#449bf2'}; bottomColor: ${data.bottomColor || '#8C4B3F'};"></a-sky>`;
+    case 'none':
+      return ''; // No sky
+    default:
+      return ''; // Default is no sky
+  }
+}
+
+/**
+ * Check if an entity is an engine entity (not part of the level file)
+ * @param {Object} entity - Entity data
+ * @param {string} uuid - Entity UUID
+ * @returns {boolean} - True if this is an engine entity
+ */
+function isEngineEntity(entity, uuid) {
+    if (!entity) return false;
+    
+    // Explicitly don't consider sky entities as engine entities
+    if (entity.type === 'sky') {
+        return false;
+    }
+    
+    // Check if this entity has engine-specific components
+    const engineComponents = [
+        'networked',
+        'avatar-rig',
+        'player',
+        'physics-system',
+        'virtual-gamepad-controls',
+        'device-orientation-permission-ui',
+        'renderer-settings',
+        'css-system'
+    ];
+    
+    // Check for engine components
+    for (const component of engineComponents) {
+        if (entity[component] !== undefined) {
+            return true;
+        }
+    }
+    
+    // Check for engine entity types
+    const engineTypes = [
+        'system',
+        'avatar',
+        'camera-rig',
+        'networked-avatar'
+    ];
+    
+    if (engineTypes.includes(entity.type)) {
+        return true;
+    }
+    
+    // Check for engine specific IDs
+    if (entity.id && (
+        entity.id.includes('camera') ||
+        entity.id.includes('avatar') ||
+        entity.id.includes('system') ||
+        entity.id.includes('networked') ||
+        entity.id.includes('physics-system')
+    )) {
+        return true;
+    }
+    
+    // Check UUID patterns associated with engine entities
+    if (uuid && (
+        uuid.includes('camera') ||
+        uuid.includes('avatar') ||
+        uuid.includes('system') ||
+        uuid.includes('networked')
+    )) {
+        return true;
+    }
+    
+    return false;
 }
 
 /**
@@ -858,7 +1184,7 @@ ${entitiesHTML}
  */
 function getSkyUUID() {
     // First try to get it from the DOM
-    const skyElement = document.querySelector('a-sky');
+    const skyElement = document.querySelector('a-sky, a-videosphere');
     if (skyElement && skyElement.dataset.entityUuid) {
         return skyElement.dataset.entityUuid;
     }
@@ -867,10 +1193,16 @@ function getSkyUUID() {
     const state = getState();
     if (state && state.entities) {
         for (const uuid in state.entities) {
-            if (state.entities[uuid].type === 'sky') {
+            const entity = state.entities[uuid];
+            if (entity.type === 'sky' || entity.type === 'videosphere') {
                 return uuid;
             }
         }
+    }
+    
+    // If state.sky exists and has a UUID, use that
+    if (state && state.sky && state.sky.uuid) {
+        return state.sky.uuid;
     }
     
     // As a fallback, generate a new one
@@ -894,6 +1226,8 @@ function parseSceneHTML(html) {
 
         // Parse all entities
         const entities = {};
+        
+        // Get regular entities with data-entity-uuid
         const sceneEntities = scene.querySelectorAll('[data-entity-uuid]');
         
         sceneEntities.forEach(entity => {
@@ -918,6 +1252,56 @@ function parseSceneHTML(html) {
             };
         });
         
+        // Special handling for sky entities (both a-sky and a-videosphere)
+        // This ensures sky entities are always included even if they don't have data-entity-uuid
+        const skyEntities = scene.querySelectorAll('a-sky, a-videosphere');
+        skyEntities.forEach(skyEntity => {
+            // Skip if this entity was already processed (has data-entity-uuid and was included)
+            const existingUuid = skyEntity.dataset.entityUuid;
+            if (existingUuid && entities[existingUuid]) return;
+            
+            // Generate a new UUID if needed
+            const skyUuid = existingUuid || generateEntityId('sky');
+            
+            // Extract the sky type
+            let skyType = 'color'; // Default
+            if (skyEntity.hasAttribute('data-sky-type')) {
+                skyType = skyEntity.getAttribute('data-sky-type');
+            } else if (skyEntity.tagName.toLowerCase() === 'a-videosphere') {
+                skyType = 'video';
+            } else if (skyEntity.hasAttribute('src')) {
+                // Check if it's a texture/image
+                const src = skyEntity.getAttribute('src');
+                if (src && src.startsWith('#')) {
+                    skyType = 'image'; // Assuming it's an image reference if it starts with #
+                }
+            }
+            
+            // Get properties
+            const properties = extractEntityAttributes(skyEntity, skyEntity.tagName.toLowerCase().replace('a-', ''));
+            
+            // Clean properties
+            const cleanedProperties = {};
+            for (const [key, value] of Object.entries(properties)) {
+                if (!EXCLUDED_ATTRIBUTES.includes(key)) {
+                    cleanedProperties[key] = value;
+                }
+            }
+            
+            // Add to entities
+            entities[skyUuid] = {
+                type: skyEntity.tagName.toLowerCase().replace('a-', ''),
+                ...cleanedProperties,
+                uuid: skyUuid,
+                'data-sky-type': skyType
+            };
+            
+            // Add uuid attribute to the element if it doesn't have one
+            if (!existingUuid) {
+                skyEntity.dataset.entityUuid = skyUuid;
+            }
+        });
+        
         return entities;
     } catch (error) {
         console.error('Error parsing scene HTML:', error);
@@ -929,11 +1313,53 @@ function parseSceneHTML(html) {
 function isSystemEntity(entity) {
     if (!entity) return false;
     
-    // Check if it's a sky entity first
-    if (skyManager.isSkyEntity(entity)) return false;
+    // Use engine manager if it's initialized
+    const engineManagerModule = window.engineManager;
+    if (engineManagerModule && engineManagerModule.initialized) {
+        return engineManagerModule.isSystemEntity(entity);
+    }
+    
+    // Legacy fallback behavior if engineManager is not available
+    // This will eventually be removed
+    
+    // Check entity ID for avatar and camera related items
+    const systemIds = ['local-avatar', 'avatar-rig', 'avatar-camera', 'camera'];
+    if (entity.id && systemIds.some(id => entity.id.includes(id))) {
+        console.log(`[Monaco] Found system entity with ID: ${entity.id}`);
+        return true;
+    }
+    
+    // Check if it's a sky entity - we don't consider sky or videosphere as system entities in Monaco
+    // because we want them to be editable in the code panel
+    if (window.skyManager && window.skyManager.isSkyEntity(entity)) return false;
+    
+    // Explicitly check for a-sky or a-videosphere and don't treat them as system entities
+    const entityTagName = entity.tagName ? entity.tagName.toLowerCase() : '';
+    if (entityTagName === 'a-sky' || entityTagName === 'a-videosphere') {
+        return false;
+    }
     
     // Check system entity IDs
     if (SYSTEM_ENTITY_IDS.includes(entity.id)) return true;
+    
+    // Check if entity has camera component
+    if (entity.hasAttribute('camera')) {
+        console.log(`[Monaco] Found system entity with camera component: ${entity.id}`);
+        return true;
+    }
+    
+    // Check for networked entities
+    if (entity.hasAttribute('networked')) {
+        console.log(`[Monaco] Found networked entity: ${entity.id}`);
+        return true;
+    }
+    
+    // Check entity UUID for avatar or camera patterns
+    const uuid = entity.getAttribute('data-entity-uuid');
+    if (uuid && (uuid.includes('avatar') || uuid.includes('camera') || uuid.includes('rig'))) {
+        console.log(`[Monaco] Found system entity with system UUID: ${uuid}`);
+        return true;
+    }
     
     // Check system components
     const hasSystemComponent = SYSTEM_COMPONENTS.some(comp => entity.hasAttribute(comp));
@@ -949,24 +1375,12 @@ function isSystemEntity(entity) {
 /**
  * Ensure scene has default camera and lights
  * Helper function to make sure basic scene elements always exist
+ * NOTE: Modified to be a no-op to prevent automatically adding entities
  * @param {Element} sceneEl - Scene element
  */
 function ensureSceneDefaults(sceneEl) {
-    // Ensure default lighting exists
-    if (!sceneEl.querySelector('#default-light')) {
-        const ambientLight = document.createElement('a-entity');
-        ambientLight.id = 'default-light';
-        ambientLight.setAttribute('light', 'type: ambient; color: #BBB');
-        sceneEl.appendChild(ambientLight);
-    }
-    
-    if (!sceneEl.querySelector('#directional-light')) {
-        const dirLight = document.createElement('a-entity');
-        dirLight.id = 'directional-light';
-        dirLight.setAttribute('light', 'type: directional; color: #FFF; intensity: 0.6');
-        dirLight.setAttribute('position', '-0.5 1 1');
-        sceneEl.appendChild(dirLight);
-    }
+    // No-op - don't add default entities
+    return;
 }
 
 /**
@@ -978,7 +1392,10 @@ function setupEditorEvents() {
     // Add change event listener
     editor.onDidChangeModelContent(handleEditorChange);
     
-    console.log('Editor events configured');
+    // Note: We removed the toggle for engine components since we're
+    // now only showing level file entities in the editor
+    
+    console.log('Editor events initialized');
 }
 
 /**
@@ -1175,6 +1592,68 @@ async function processParsedEntities(parsedEntities, warnings, preservedIds) {
     }
 }
 
+/**
+ * Reset Monaco editor to minimal blank state
+ * @param {boolean} [withDefaults=true] - Whether to include default elements like camera rig
+ */
+export function resetEditorToBlank(withDefaults = true) {
+    console.log('[Monaco] Resetting editor to minimal blank state');
+    
+    // Basic template for a blank scene - no environment, sky, or lights
+    // We also don't include the avatar rig in the editor as it's a system entity 
+    // that should be filtered out from Monaco display
+    const blankContent = `<a-scene>
+  <a-assets>
+    <!-- Assets go here -->
+  </a-assets>
+
+  <!-- Empty scene - create entities as needed -->
+</a-scene>`;
+
+    // Update the editor content
+    if (editor) {
+        // Flag to prevent event handler from updating state
+        isUpdating = true;
+        
+        try {
+            editor.setValue(blankContent);
+            editor.getAction('editor.action.formatDocument')?.run();
+            
+            // Update editor status to show it's been reset
+            updateEditorStatus('ready', 'Blank scene loaded');
+        } catch (err) {
+            console.error('[Monaco] Error resetting editor:', err);
+        } finally {
+            // Remove the flag after a short delay
+            setTimeout(() => {
+                isUpdating = false;
+            }, 100);
+        }
+    } else {
+        console.warn('[Monaco] Cannot reset editor - editor instance not available');
+        
+        // Create editor instance if missing - this prevents repeated warnings
+        createEditor((createdEditor) => {
+            if (createdEditor) {
+                console.log('[Monaco] Created editor instance on demand');
+                editor = createdEditor;
+                
+                // Set content in the newly created editor
+                editor.setValue(blankContent);
+                editor.getAction('editor.action.formatDocument')?.run();
+                updateEditorStatus('ready', 'Editor created and blank scene loaded');
+            } else {
+                console.error('[Monaco] Failed to create editor instance on demand');
+            }
+        });
+    }
+    
+    // Notify listeners that the editor has been reset
+    document.dispatchEvent(new CustomEvent('monaco-reset', {
+        detail: { withDefaults }
+    }));
+}
+
 // Export all necessary functions
 export { 
     updateEditorStatus,
@@ -1197,6 +1676,162 @@ export {
     handleEditorChange,
     setEditorStatus
 }; 
+
+/**
+ * Find any assets referenced by an entity
+ * @param {Object} entity - Entity to check for assets
+ * @returns {Array} Array of asset objects with id and html properties
+ */
+function findEntityAssets(entity) {
+    const assets = [];
+    
+    // Check common attributes that might reference assets
+    const assetAttributes = ['src', 'material.src', 'map', 'environment', 'texture'];
+    
+    assetAttributes.forEach(attrPath => {
+        // Handle nested attributes like material.src
+        const parts = attrPath.split('.');
+        let value = entity;
+        
+        // Navigate to the nested property if needed
+        for (const part of parts) {
+            if (value && typeof value === 'object') {
+                value = value[part];
+            } else {
+                value = null;
+                break;
+            }
+        }
+        
+        // If we have a value and it starts with # (asset reference)
+        if (value && typeof value === 'string' && value.startsWith('#')) {
+            const assetId = value.substring(1);
+            
+            // Try to find the actual asset in the DOM
+            const assetEl = document.querySelector(`#${assetId}`);
+            if (assetEl) {
+                const tagName = assetEl.tagName.toLowerCase();
+                
+                // Generate appropriate HTML based on tag name
+                if (tagName === 'img') {
+                    assets.push({
+                        id: assetId,
+                        html: `<img id="${assetId}" src="${assetEl.getAttribute('src')}" crossorigin="anonymous">`
+                    });
+                } else if (tagName === 'video') {
+                    assets.push({
+                        id: assetId,
+                        html: `<video id="${assetId}" src="${assetEl.getAttribute('src')}" crossorigin="anonymous" loop autoplay muted playsinline></video>`
+                    });
+                } else if (tagName === 'audio') {
+                    assets.push({
+                        id: assetId,
+                        html: `<audio id="${assetId}" src="${assetEl.getAttribute('src')}" crossorigin="anonymous"></audio>`
+                    });
+                } else {
+                    // Generic asset-item for other types
+                    const src = assetEl.getAttribute('src');
+                    if (src) {
+                        assets.push({
+                            id: assetId,
+                            html: `<a-asset-item id="${assetId}" src="${src}"></a-asset-item>`
+                        });
+                    }
+                }
+            }
+        }
+    });
+    
+    return assets;
+}
+
+/**
+ * Find assets referenced by entities in the scene
+ * @param {Object} entities - Entities object from state
+ * @returns {Array} Array of asset IDs referenced by entities
+ */
+function findReferencedAssets(entities) {
+  const referencedAssets = new Set();
+  
+  // Look through all entities for src attributes that reference assets
+  Object.values(entities).forEach(entity => {
+    if (!entity) return;
+    
+    // Check for src attribute with # prefix (asset reference)
+    if (entity.src && typeof entity.src === 'string' && entity.src.startsWith('#')) {
+      const assetId = entity.src.substring(1); // Remove the # prefix
+      referencedAssets.add(assetId);
+    }
+    
+    // Check for material.src that might reference assets
+    if (entity.material && entity.material.src && typeof entity.material.src === 'string' && entity.material.src.startsWith('#')) {
+      const assetId = entity.material.src.substring(1);
+      referencedAssets.add(assetId);
+    }
+    
+    // Check for assetId property that directly references an asset
+    if (entity.assetId) {
+      referencedAssets.add(entity.assetId);
+    }
+  });
+  
+  return Array.from(referencedAssets);
+}
+
+/**
+ * Generate A-Frame HTML from state
+ * @param {Object} state - Application state object
+ * @returns {string} A-Frame HTML
+ */
+export function generateHTML(state) {
+  // Start with document structure
+  const lines = [
+    '<!DOCTYPE html>',
+    '<html>',
+    '<head>',
+    '  <meta charset="utf-8">',
+    '  <title>A-Frame Scene</title>',
+    '  <meta name="description" content="Generated A-Frame Scene">',
+    '  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>',
+    '</head>',
+    '<body>',
+    '  <a-scene>'
+  ];
+  
+  // Add assets section if we have assets
+  const assetsHTML = generateAssetsHTML(state.assets);
+  if (assetsHTML) {
+    lines.push(assetsHTML);
+  }
+
+  // Add sky
+  const skyHTML = generateSkyHTML(state.sky);
+  if (skyHTML) {
+    lines.push(skyHTML);
+  }
+  
+  // Generate environment
+  const environmentHTML = generateEnvironmentHTML(state.environment);
+  if (environmentHTML) {
+    lines.push(environmentHTML);
+  }
+  
+  // Generate each entity
+  Object.values(state.entities).forEach(entity => {
+    const entityHTML = generateEntityHTML(entity);
+    if (entityHTML) {
+      lines.push(`  ${entityHTML}`);
+    }
+  });
+  
+  // Close document
+  lines.push('  </a-scene>',
+    '</body>',
+    '</html>'
+  );
+  
+  return lines.join('\n');
+}
 
 
 

@@ -9,6 +9,7 @@
 
 import { getState, setState, updateEntityState } from './state.js';
 import { logAction } from './debug.js';
+import { generateEntityId } from './utils.js';
 import {
   shouldSkipAttribute,
   parseVector,
@@ -71,14 +72,21 @@ if (typeof window !== 'undefined') {
   window.watcher = window.watcher || {};
 }
 
+let isInitializing = true;
+
 /**
  * Set up watcher methods on the global watcher object
  */
 export function setupWatcherMethods() {
     console.log('[Watcher] Setting up watcher methods');
     
+    // Ensure the watcher object exists
+    if (typeof window !== 'undefined' && !window.watcher) {
+      window.watcher = {};
+    }
+    
     // Set up start method
-    window.watcher.start = function() {
+    window.watcher.startWatching = function() {
         console.log('[Watcher] Starting watcher system...');
         
         // Set up mutation observer for scene changes
@@ -92,20 +100,25 @@ export function setupWatcherMethods() {
         
         console.log('[Watcher] Watcher system started successfully');
         
-        // Initial state capture
-        setTimeout(() => {
-            console.log('[Watcher] Performing initial state capture');
-            saveEntitiesToState('watcher-start');
-        }, 1000);
-        
         return this;
     };
     
-    // Set up other methods
+    // Set up core methods
     window.watcher.saveEntitiesToState = saveEntitiesToState;
+    
+    window.watcher.save = function(source = 'api-call') {
+        return saveEntitiesToState(source);
+    };
+    
+    // Add helper methods
     window.watcher.setupSceneObserver = setupSceneObserver;
     window.watcher.setupAFrameHooks = setupAFrameHooks;
     window.watcher.setupInspectorDetection = setupInspectorDetection;
+    
+    // Register this watcher instance as active
+    window.watcher.active = true;
+    
+    return window.watcher;
 }
 
 // Initialize the A-Frame entity watcher component
@@ -276,54 +289,96 @@ if (window.AFRAME) {
 }
 
 /**
- * Initialize the watcher
+ * Initialize the watcher system
+ * @returns {Promise} Promise that resolves when initialization is complete
  */
-function initWatcher() {
-  console.log('[Watcher] Initializing...');
-  
-  // Create the watcher panel
-  createWatcherPanel();
-  
-  // Add A-Frame event listeners
-  setupAFrameEventListeners();
-  
-  // Capture the initial entity baseline
-  captureEntityBaseline();
-  
-  // Watch for A-Frame inspector state changes
-  const body = document.body;
-  const inspectorObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === 'attributes' && 
-          mutation.attributeName === 'class' &&
-          (body.classList.contains('aframe-inspector-opened') || 
-           body.classList.contains('a-inspector-closed'))) {
-        checkInspectorState();
+export function initWatcher() {
+  return new Promise((resolve) => {
+    console.log('[Watcher] Initializing...');
+    
+    // Ensure the global watcher object exists
+    if (typeof window !== 'undefined' && !window.watcher) {
+      window.watcher = {};
+    }
+    
+    // Setup core watcher methods first
+    setupWatcherMethods();
+    
+    // Create the watcher panel
+    createWatcherPanel();
+    
+    // Add A-Frame event listeners
+    setupAFrameEventListeners();
+    
+    // Setup A-Frame hooks
+    setupAFrameHooks();
+    
+    // Capture the initial entity baseline
+    captureEntityBaseline();
+    
+    // Watch for A-Frame inspector state changes
+    const body = document.body;
+    const inspectorObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && 
+            mutation.attributeName === 'class' &&
+            (body.classList.contains('aframe-inspector-opened') || 
+             body.classList.contains('a-inspector-closed'))) {
+          checkInspectorState();
+        }
+      });
+    });
+    
+    // Start observing inspector changes
+    inspectorObserver.observe(body, { attributes: true });
+    
+    // Check if the inspector is already open
+    if (body.classList.contains('aframe-inspector-opened')) {
+      console.log('[Watcher] Inspector already open, setting up hooks...');
+      setupInspectorHooks();
+    }
+    
+    // Set up scene observer for changes
+    setupSceneObserver();
+    
+    // Make sure all the required methods exist
+    const requiredMethods = [
+      'save', 
+      'saveEntitiesToState',
+      'startWatching'
+    ];
+    
+    requiredMethods.forEach(method => {
+      if (typeof window.watcher[method] !== 'function') {
+        console.warn(`[Watcher] Method "${method}" is missing, adding fallback implementation`);
+        window.watcher[method] = function(source = 'api-call') {
+          console.log(`[Watcher] Called fallback implementation of ${method} from ${source}`);
+          return Promise.resolve();
+        };
       }
     });
+    
+    // Start the watcher if not already started
+    if (typeof window.watcher.startWatching === 'function') {
+      window.watcher.startWatching();
+    }
+    
+    // Dispatch event to signal watcher is initialized
+    document.dispatchEvent(new CustomEvent('watcher-initialized', {
+      detail: { timestamp: Date.now() }
+    }));
+    
+    console.log('[Watcher] Initialized with the following methods:', Object.keys(window.watcher));
+    
+    // Setup complete, resolve the promise
+    resolve(window.watcher);
+    
+    // Perform initial state capture after a short delay
+    setTimeout(() => {
+      console.log('[Watcher] Performing initial state capture');
+      saveEntitiesToState('watcher-start');
+    }, 1000);
   });
-  
-  // Start observing inspector changes
-  inspectorObserver.observe(body, { attributes: true });
-  
-  // Check if the inspector is already open
-  if (body.classList.contains('aframe-inspector-opened')) {
-    console.log('[Watcher] Inspector already open, setting up hooks...');
-    setupInspectorHooks();
-  }
-  
-  // Set up scene observer for changes
-  setupSceneObserver();
-  
-  // Add the save function to the global watcher object
-  if (typeof window !== 'undefined') {
-    window.watcher.saveEntitiesToState = saveEntitiesToState;
-    window.watcher.save = function(source = 'api-call') {
-      return saveEntitiesToState(source);
-    };
-  }
-  
-  console.log('[Watcher] Initialized');
 }
 
 /**
@@ -1123,17 +1178,6 @@ function throttledSaveChanges(source = 'unknown') {
 }
 
 /**
- * Capture all entities and save changes to application state
- * Export this to make it available to other modules
- * @param {string} source - Source of the save operation
- * @returns {Object} - The updated entities state
- */
-export function saveEntitiesToState(source = 'unknown') {
-  console.log(`[Watcher] Saving entities to state from: ${source}`);
-  return captureAndSaveChanges(source);
-}
-
-/**
  * Capture and save changes to state
  * @param {string} [source='unknown'] - Source of the save operation
  */
@@ -1186,6 +1230,72 @@ function captureAndSaveChanges(source) {
         setState({ environment: environmentState });
     }
     
+    // SPECIAL HANDLING FOR SKY ENTITIES
+    // Look for sky entities (a-sky or a-videosphere)
+    const skyEntity = scene.querySelector('a-sky, a-videosphere');
+    if (skyEntity) {
+        const tagName = skyEntity.tagName.toLowerCase();
+        const isVideoSky = tagName === 'a-videosphere';
+        const skyType = isVideoSky ? 'video' : (skyEntity.dataset.skyType || 'color');
+        const uuid = skyEntity.dataset.entityUuid || generateEntityId('sky');
+        
+        // Ensure the entity has a uuid
+        if (!skyEntity.dataset.entityUuid) {
+            skyEntity.dataset.entityUuid = uuid;
+        }
+        
+        // Create sky state object
+        const skyState = {
+            type: skyType,
+            uuid: uuid,
+            domElementCreated: true,
+            data: {}
+        };
+        
+        // Extract appropriate data based on type
+        if (skyType === 'color') {
+            // Color sky
+            skyState.data.color = skyEntity.getAttribute('color') || '#ECECEC';
+        } else if (skyType === 'image' || skyType === 'video') {
+            // Image or video sky
+            const src = skyEntity.getAttribute('src');
+            
+            // Handle asset references
+            if (src && src.startsWith('#')) {
+                const assetId = src.substring(1);
+                const assetEl = document.querySelector(`#${assetId}`);
+                
+                if (assetEl) {
+                    const assetSrc = assetEl.getAttribute('src');
+                    skyState.data[skyType] = assetSrc;
+                    skyState.data.assetId = assetId;
+                } else {
+                    skyState.data[skyType] = src;
+                }
+            } else {
+                skyState.data[skyType] = src;
+            }
+        } else if (skyType === 'gradient') {
+            // Gradient sky
+            const material = skyEntity.getAttribute('material');
+            if (material) {
+                skyState.data.colors = [material.topColor || '#449bf2', material.bottomColor || '#8C4B3F'];
+                skyState.data.direction = material.direction || 'vertical';
+            }
+        } else if (skyType === 'environment') {
+            // Environment sky
+            skyState.data.environment = skyEntity.getAttribute('environment');
+        }
+        
+        // Update state with sky information
+        setState({ sky: skyState }, `${source}-sky-update`);
+        
+        console.log(`[Watcher] Sky entity registered in state.sky: ${skyType}`);
+    } else {
+        // No sky entity found, set sky state to null
+        setState({ sky: null }, `${source}-sky-null`);
+    }
+    
     // Get all user entities
     const entities = {};
     const entityMapping = {};
@@ -1194,9 +1304,37 @@ function captureAndSaveChanges(source) {
         // Skip system entities
         if (isSystemEntity(entity)) return;
         
+        // Handle sky entities - register them in entities collection too
+        // (Removed the skip code that was here before)
         const uuid = entity.dataset.entityUuid;
         if (!uuid) return;
         
+        // Check if this is a sky entity - if so, add it to entities with type 'sky'
+        if (skyManager && skyManager.isSkyEntity && skyManager.isSkyEntity(entity)) {
+            const tagName = entity.tagName.toLowerCase();
+            const isVideoSky = tagName === 'a-videosphere';
+            const skyType = isVideoSky ? 'video' : (entity.dataset.skyType || 'color');
+            
+            // Create condensed sky entity data for entities collection
+            entities[uuid] = {
+                type: 'sky',
+                skyType: skyType,
+                uuid: uuid,
+                DOM: true // Add DOM flag to indicate entity exists in DOM
+            };
+            
+            // Add appropriate properties based on sky type
+            if (skyType === 'color') {
+                entities[uuid].color = entity.getAttribute('color') || '#ECECEC';
+            } else if (skyType === 'image' || skyType === 'video') {
+                entities[uuid].src = entity.getAttribute('src');
+            }
+            
+            entityMapping[uuid] = entity.id || 'sky';
+            return; // Continue to the next entity
+        }
+        
+        // Handle regular entities as before
         const type = entity.tagName.toLowerCase().replace('a-', '');
         const properties = extractEntityAttributes(entity, type);
         
@@ -1210,7 +1348,8 @@ function captureAndSaveChanges(source) {
         
         entities[uuid] = {
             type,
-            ...cleanedProperties
+            ...cleanedProperties,
+            DOM: true // Add DOM flag to indicate entity exists in DOM
         };
         
         entityMapping[uuid] = entity.id;
@@ -1222,11 +1361,40 @@ function captureAndSaveChanges(source) {
         entityMapping
     });
     
+    // Update status UI
+    updateStatus('Changes saved', 'saved');
+    lastSaveTime = Date.now();
+    changesPending = false;
+    
+    // Update last update time
+    if (lastUpdateEl) {
+        lastUpdateEl.textContent = new Date().toLocaleTimeString();
+    }
+    
+    // Update entity count
+    updateEntityCount();
+    
+    // Dispatch event to notify other systems
+    const eventDetail = {
+        source,
+        entityCount: Object.keys(entities).length,
+        hasSky: skyEntity !== null,
+        timestamp: Date.now()
+    };
+    
+    // Dispatch the watcher-changes-saved event for other components to listen for
+    document.dispatchEvent(new CustomEvent('watcher-changes-saved', {
+        detail: eventDetail
+    }));
+    
     // Log the action
     logAction('Scene changes captured', {
         source,
-        entityCount: Object.keys(entities).length
+        entityCount: Object.keys(entities).length,
+        hasSky: skyEntity !== null
     });
+    
+    return entities;
 }
 
 /**
@@ -1670,4 +1838,28 @@ export function watchScene(scene) {
     });
     
     console.log('Scene watcher initialized');
+}
+
+// Set initializing to false after a delay
+setTimeout(() => {
+  console.log('[Watcher] Initialization complete, enabling all updates');
+  isInitializing = false;
+}, 5000); // 5 seconds should be enough for initialization
+
+/**
+ * Capture all entities and save changes to application state
+ * Export this to make it available to other modules
+ * @param {string} source - Source of the save operation
+ * @returns {Object} - The updated entities state
+ */
+export function saveEntitiesToState(source = 'unknown') {
+  console.log(`[Watcher] Saving entities to state from: ${source}`);
+  
+  // Don't process certain sources during initialization
+  if (isInitializing && (source === 'blank-scene-loader' || source === 'recreate-from-state')) {
+    console.log(`[Watcher] Skipping update during initialization from source: ${source}`);
+    return {};
+  }
+  
+  return captureAndSaveChanges(source);
 } 

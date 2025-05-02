@@ -6,8 +6,8 @@
  * single source of truth.
  */
 
-import { getState } from './state.js';
-import { generateEntityId, showNotification } from './utils.js';
+import { getState, setState, updateEntityState } from './state.js';
+import { generateEntityId, showNotification, EventManager } from './utils.js';
 import { logAction } from './debug.js';
 import {
   shouldSkipAttribute,
@@ -18,6 +18,7 @@ import {
   cleanEntityData,
   extractEntityAttributes
 } from './entity-utils.js';
+import { skyManager } from './sky-manager.js';
 
 import {
   STANDARD_PRIMITIVES,
@@ -38,6 +39,9 @@ import {
   UI_CONFIG
 } from './config.js';
 
+// Create an instance of EventManager for event handling
+const eventManager = new EventManager();
+
 // Local references to functions that will be imported dynamically
 // to avoid circular dependencies
 let _entitiesModule = null;
@@ -48,6 +52,32 @@ const customPrimitiveDefaults = {};
 
 // Use standardized system entity IDs
 const systemEntityIds = [...SYSTEM_ENTITY_IDS];
+
+// DOM status tracking
+let domStatus = 'uninitialized'; // possible values: uninitialized, synced, error, updating
+
+/**
+ * Set the DOM synchronization status
+ * @param {string} status - The new status (synced, error, updating, uninitialized)
+ */
+function setDOMStatus(status) {
+    domStatus = status;
+    console.log(`[Entity API] DOM status set to: ${status}`);
+    
+    // Dispatch DOM status change event
+    const event = new CustomEvent('dom-status-changed', {
+        detail: { status, timestamp: Date.now() }
+    });
+    document.dispatchEvent(event);
+}
+
+/**
+ * Get the current DOM synchronization status
+ * @returns {string} The current status
+ */
+export function getDOMStatus() {
+    return domStatus;
+}
 
 /**
  * Initialize the entity API by loading required modules
@@ -64,47 +94,131 @@ export async function initEntityAPI() {
     _entitiesModule = entitiesModule;
     _watcherModule = watcherModule;
     
+    // Initialize DOM status
+    setDOMStatus('synced');
+    
     console.log('Entity API initialized successfully');
     return true;
   } catch (error) {
     console.error('Failed to initialize entity API:', error);
+    setDOMStatus('error');
     return false;
   }
 }
 
 /**
- * Ensures the watcher is available for state updates
+ * Ensure watcher is available, with fallback logic for missing watcher
  * @private
- * @throws {Error} Throws error if watcher is not available
  */
 function _ensureWatcher() {
-    // Check if watcher exists
-    if (!window.watcher) {
-        console.error('[Entity API] Watcher not found, attempting to initialize...');
-        // Try to initialize the watcher system
-        import('./watcher.js').then(watcherModule => {
-            if (watcherModule.startWatcher) {
-                watcherModule.startWatcher();
+    const watcher = window.watcher;
+    
+    if (!watcher) {
+        console.warn('[Entity API] Watcher not available, creating fallback implementation');
+        // Create a minimal watcher with stub methods
+        window.watcher = {
+            save: (source) => {
+                console.log(`[Entity API] Watcher save called (stub) from source: ${source}`);
+                return Promise.resolve({});
+            },
+            getEntities: () => {
+                const state = getState();
+                return state.entities || {};
+            },
+            processEntity: (entity) => entity,
+            findEntityByUUID: (uuid) => {
+                const state = getState();
+                return state.entities?.[uuid] || null;
+            },
+            saveEntitiesToState: (source) => {
+                console.log(`[Entity API] Watcher saveEntitiesToState fallback called from source: ${source}`);
+                // Get all entities with UUIDs from the DOM
+                const entities = {};
+                const scene = document.querySelector('a-scene');
+                if (scene) {
+                    const entityElements = scene.querySelectorAll('[data-entity-uuid]');
+                    entityElements.forEach(el => {
+                        const uuid = el.dataset.entityUuid;
+                        // Skip the sky element - it's already managed separately in state.sky
+                        if (uuid && !skyManager.isSkyEntity(el)) {
+                            const type = el.tagName.toLowerCase().replace('a-', '');
+                            entities[uuid] = {
+                                uuid,
+                                type,
+                                ...extractEntityAttributes(el, type)
+                            };
+                        }
+                    });
+                }
+                // Update state with collected entities
+                setState({entities}, source);
+                return entities;
             }
-        }).catch(err => {
-            console.error('[Entity API] Failed to initialize watcher:', err);
+        };
+        return window.watcher;
+    }
+    
+    // Check if watcher has all the required methods
+    const requiredMethods = ['save', 'getEntities', 'processEntity', 'findEntityByUUID', 'saveEntitiesToState'];
+    const missingMethods = requiredMethods.filter(method => typeof watcher[method] !== 'function');
+    
+    if (missingMethods.length > 0) {
+        console.warn(`[Entity API] Watcher missing required methods: ${missingMethods.join(', ')}, using fallback for these methods`);
+        // Create fallback implementations for missing methods
+        missingMethods.forEach(method => {
+            switch (method) {
+                case 'save':
+                    watcher.save = (source) => {
+                        console.log(`[Entity API] Watcher save fallback called from source: ${source}`);
+                        return Promise.resolve({});
+                    };
+                    break;
+                case 'getEntities':
+                    watcher.getEntities = () => {
+                        const state = getState();
+                        return state.entities || {};
+                    };
+                    break;
+                case 'processEntity':
+                    watcher.processEntity = (entity) => entity;
+                    break;
+                case 'findEntityByUUID':
+                    watcher.findEntityByUUID = (uuid) => {
+                        const state = getState();
+                        return state.entities?.[uuid] || null;
+                    };
+                    break;
+                case 'saveEntitiesToState':
+                    watcher.saveEntitiesToState = (source) => {
+                        console.log(`[Entity API] Watcher saveEntitiesToState fallback called from source: ${source}`);
+                        // Get all entities with UUIDs from the DOM
+                        const entities = {};
+                        const scene = document.querySelector('a-scene');
+                        if (scene) {
+                            const entityElements = scene.querySelectorAll('[data-entity-uuid]');
+                            entityElements.forEach(el => {
+                                const uuid = el.dataset.entityUuid;
+                                // Skip the sky element - it's already managed separately in state.sky
+                                if (uuid && !skyManager.isSkyEntity(el)) {
+                                    const type = el.tagName.toLowerCase().replace('a-', '');
+                                    entities[uuid] = {
+                                        uuid,
+                                        type,
+                                        ...extractEntityAttributes(el, type)
+                                    };
+                                }
+                            });
+                        }
+                        // Update state with collected entities
+                        setState({entities}, source);
+                        return entities;
+                    };
+                    break;
+            }
         });
-        throw new Error('Watcher is not initialized. Please try again in a moment.');
     }
-
-    // Check if watcher has required methods
-    if (typeof window.watcher.saveEntitiesToState !== 'function') {
-        console.error('[Entity API] Watcher missing required methods');
-        throw new Error('Watcher is not properly initialized');
-    }
-
-    // Check if watcher is started
-    if (window.watcher.start && !window.watcher.isStarted) {
-        console.log('[Entity API] Starting inactive watcher');
-        window.watcher.start();
-    }
-
-    return true;
+    
+    return watcher;
 }
 
 /**
@@ -182,11 +296,37 @@ function _getDefaultProperties(entityType, baseProperties = {}) {
         properties.rotation = properties.rotation || { ...VECTOR_DEFAULTS.rotation, x: -90 };
         break;
       case 'light':
-        const lightDefaults = LIGHT_DEFAULTS.point;
-        properties.type = properties.type || 'point';
-        properties.intensity = properties.intensity || lightDefaults.intensity;
-        properties.distance = properties.distance || lightDefaults.distance;
-        properties.color = properties.color || lightDefaults.color;
+        // Create light component if it doesn't exist
+        properties.light = properties.light || {};
+        
+        // Get the right light type - respect existing type if specified
+        const lightType = properties.light.type || 'point';
+        
+        // Get defaults for this specific light type
+        const lightDefaults = LIGHT_DEFAULTS[lightType] || LIGHT_DEFAULTS.point;
+        
+        // Apply defaults while preserving any existing values
+        properties.light.type = lightType; // Preserve the original type
+        properties.light.intensity = properties.light.intensity !== undefined ? properties.light.intensity : lightDefaults.intensity;
+        properties.light.color = properties.light.color || lightDefaults.color;
+        
+        // Only apply distance for point and spot lights
+        if (lightType === 'point' || lightType === 'spot') {
+          properties.light.distance = properties.light.distance !== undefined ? 
+            properties.light.distance : lightDefaults.distance;
+        }
+        
+        // Apply position if it's a directional or spot light and position isn't set
+        if ((lightType === 'directional' || lightType === 'spot') && 
+            LIGHT_DEFAULTS[lightType]?.position && !properties.position) {
+          properties.position = { ...LIGHT_DEFAULTS[lightType].position };
+        }
+        
+        // Remove type as direct property if it was set there instead of in light component
+        if (properties.type === 'directional' || properties.type === 'ambient' || 
+            properties.type === 'point' || properties.type === 'spot') {
+          delete properties.type;
+        }
         break;
     }
   } catch (error) {
@@ -576,104 +716,215 @@ export async function addMultipleEntities(type, count, options = {}) {
 }
 
 /**
- * Recreate all entities from the current state
- * Useful for full scene rebuilds
- * @param {Object} [entitiesState] - Optional specific entities state to use (defaults to current state)
- * @returns {boolean} Success status
+ * Recreate all entities in the scene from the current state
+ * This completely rebuilds the scene based on the state
+ * @returns {Promise<Array>} - Array of recreated entity elements
  */
-export async function recreateAllEntities(entitiesState = null) {
-  console.log('[Entity API] Recreating all entities from state');
-  
-  try {
-    // Get current state if not provided
-    const state = entitiesState || getState().entities;
+export async function recreateAllEntities(entities = null, options = {}) {
+    console.log('[Entity API] recreateAllEntities called with entities:', entities ? Object.keys(entities).length : 'null');
     
-    if (!state) {
-      console.error('[Entity API] No valid state provided for recreating entities');
-      return false;
-    }
-    
-    // Clear existing entities from the scene
+    // Verify we have a scene
     const scene = document.querySelector('a-scene');
     if (!scene) {
-      console.error('[Entity API] No A-Frame scene found');
-      return false;
+        console.error('[Entity API] Cannot recreate entities: No scene found');
+        setDOMStatus('error');
+        return false;
     }
     
-    // Store existing entity IDs to avoid conflicts
-    const existingIds = new Set();
-    const existingEntities = scene.querySelectorAll('[data-entity-uuid]');
-    existingEntities.forEach(entity => {
-      if (entity.id) {
-        existingIds.add(entity.id);
-      }
-      // Only remove non-system entities using standardized filters
-      if (!SYSTEM_ENTITY_IDS.includes(entity.id)) {
-        entity.parentNode.removeChild(entity);
-      }
-    });
+    // Get entities from state if not provided
+    const entitiesToRecreate = entities || getState().entities || {};
     
-    // Recreate each entity from state
-    const entities = state;
-    const creationPromises = [];
+    // Check if we have any entities to recreate
+    if (Object.keys(entitiesToRecreate).length === 0) {
+        console.warn('[Entity API] No entities to recreate');
+        return true;
+    }
     
-    for (const [uuid, entityData] of Object.entries(entities)) {
-      if (!entityData) continue;
-      
-      const entityType = entityData.type || 'entity';
-      
-      // Extract properties, filtering out non-attribute data
-      const properties = { ...entityData };
-      delete properties.type; // Remove type as it's not an attribute
-      
-      // Ensure uuid is preserved
-      properties._preserveUuid = uuid;
-      
-      // Set ID to match UUID for consistency
-      // If the entity data already has an ID, prefer that, but ensure it doesn't conflict
-      const preferredId = properties.id || uuid;
-      
-      // If ID exists in the document or is in our set of IDs to be created,
-      // use the UUID instead which is guaranteed to be unique
-      if (document.getElementById(preferredId) || existingIds.has(preferredId)) {
-        properties.id = uuid;
-      } else {
-        properties.id = preferredId;
-        existingIds.add(preferredId); // Track this ID to prevent future conflicts
-      }
-      
-      // Create the entity with the preserved UUID
-      const createPromise = _createEntityDirectly(entityType, properties)
-        .catch(err => console.error(`[Entity API] Error recreating entity ${uuid}:`, err));
+    try {
+        console.log(`[Entity API] Starting recreation of ${Object.keys(entitiesToRecreate).length} entities`);
         
-      creationPromises.push(createPromise);
-    }
-    
-    // Wait for all entities to be created
-    await Promise.all(creationPromises);
+        // First, clear all existing entities to avoid duplicates
+        // Use clearEntitiesAsync to ensure completion
+        await clearEntitiesAsync();
+        
+        // Counter for tracking created entities
+        let created = 0;
+        let failed = 0;
+        let systemEntities = 0;
 
-    // Flush all entity components to the DOM before saving state
-    const allEntities = scene.querySelectorAll('[data-entity-uuid]');
-    allEntities.forEach(entity => {
-      if (entity.components) {
-        Object.values(entity.components).forEach(component => {
-          if (component.flushToDOM) {
-            component.flushToDOM();
-          }
+        // Wait for a frame to ensure A-Frame is ready
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        // First pass: Create environment entities (lights, sky)
+        const lightEntities = Object.entries(entitiesToRecreate)
+            .filter(([uuid, data]) => data.type === 'entity' && data.light);
+        
+        console.log(`[Entity API] Creating ${lightEntities.length} light entities first`);
+        
+        for (const [uuid, entityData] of lightEntities) {
+            try {
+                // Create the entity - Important: directly use createEntityElement to bypass 
+                // filtering for system entities like lights
+                const element = await createEntityElement(entityData);
+                if (element) {
+                    created++;
+                    console.log(`[Entity API] Created light entity: ${uuid}`);
+                } else {
+                    failed++;
+                    console.warn(`[Entity API] Failed to create light entity: ${uuid}`);
+                }
+            } catch (err) {
+                console.error(`[Entity API] Error creating light entity ${uuid}:`, err);
+                failed++;
+            }
+        }
+        
+        // Wait for lights to be created
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+        // Second pass: Create all other entities
+        const otherEntities = Object.entries(entitiesToRecreate)
+            .filter(([uuid, data]) => !(data.type === 'entity' && data.light));
+        
+        console.log(`[Entity API] Creating ${otherEntities.length} other entities`);
+        
+        for (const [uuid, entityData] of otherEntities) {
+            try {
+                // Check if it's a system entity
+                if (shouldFilterEntity(entityData)) {
+                    systemEntities++;
+                    continue; // Skip system entities
+                }
+                
+                // Create the entity
+                const element = await createEntityElement(entityData);
+                if (element) {
+                    created++;
+                } else {
+                    failed++;
+                    console.warn(`[Entity API] Failed to create entity: ${uuid}`);
+                }
+            } catch (err) {
+                console.error(`[Entity API] Error creating entity ${uuid}:`, err);
+                failed++;
+            }
+        }
+        
+        console.log(`[Entity API] Entity recreation complete: ${created} created, ${failed} failed, ${systemEntities} system entities skipped`);
+        
+        // Force a state update to ensure entity mapping is complete
+        const state = getState();
+        setState({
+            entities: state.entities,
+            entityMapping: state.entityMapping
+        }, 'recreate-entities-complete');
+        
+        // Mark as DOM status synchronized with state
+        setDOMStatus('synced');
+        
+        // Call DOM update complete event
+        eventManager.emit('dom-update-complete', { 
+            created, 
+            failed,
+            systemEntities
         });
-      }
+        
+        return true;
+    } catch (error) {
+        console.error('[Entity API] Error in recreateAllEntities:', error);
+        setDOMStatus('error');
+        return false;
+    }
+}
+
+/**
+ * Clear all non-system entities from the scene with a Promise
+ * @returns {Promise<number>} Number of entities removed
+ */
+export function clearEntitiesAsync() {
+    return new Promise(resolve => {
+        console.log('[Entity API] Clearing non-system entities from scene');
+        
+        try {
+            const scene = document.querySelector('a-scene');
+            if (!scene) {
+                console.error('[Entity API] No scene found for clearing entities');
+                resolve(0);
+                return;
+            }
+            
+            // Get all entities with an id and data-entity-uuid
+            const entities = Array.from(scene.querySelectorAll('[data-entity-uuid]'));
+            let removedCount = 0;
+            
+            // First pass: detach from three.js scene to prevent rendering errors
+            entities.forEach(entity => {
+                // Skip system entities
+                if (SYSTEM_ENTITY_IDS.includes(entity.id)) {
+                    return;
+                }
+                
+                // Check for system components
+                if (SYSTEM_COMPONENTS.some(comp => entity.hasAttribute(comp))) {
+                    return;
+                }
+                
+                // Check for system data attributes
+                if (SYSTEM_DATA_ATTRIBUTES.some(attr => entity.hasAttribute(attr))) {
+                    return;
+                }
+                
+                // Detach from three.js scene first to prevent renderer errors
+                try {
+                    if (entity.object3D) {
+                        // Remove from three.js scene graph safely
+                        if (entity.object3D.parent) {
+                            entity.object3D.parent.remove(entity.object3D);
+                        }
+                        
+                        // Clear any children to prevent dangling references
+                        if (entity.object3D.children && entity.object3D.children.length > 0) {
+                            // Clone the array since it might be modified during iteration
+                            [...entity.object3D.children].forEach(child => {
+                                entity.object3D.remove(child);
+                            });
+                        }
+                    }
+                } catch (detachError) {
+                    console.warn('[Entity API] Error detaching entity from three.js scene:', detachError);
+                }
+            });
+            
+            // Short delay to let three.js finish any pending operations
+            setTimeout(() => {
+                // Second pass: remove entities from DOM
+                entities.forEach(entity => {
+                    // Skip system entities (same checks as above)
+                    if (SYSTEM_ENTITY_IDS.includes(entity.id) || 
+                        SYSTEM_COMPONENTS.some(comp => entity.hasAttribute(comp)) ||
+                        SYSTEM_DATA_ATTRIBUTES.some(attr => entity.hasAttribute(attr))) {
+                        return;
+                    }
+                    
+                    // Remove from DOM safely
+                    try {
+                        if (entity.parentNode) {
+                            entity.parentNode.removeChild(entity);
+                            removedCount++;
+                        }
+                    } catch (removeError) {
+                        console.warn('[Entity API] Error removing entity from DOM:', removeError);
+                    }
+                });
+                
+                console.log(`[Entity API] Removed ${removedCount} entities from scene`);
+                resolve(removedCount);
+            }, 50); // Slightly longer timeout for three.js cleanup
+        } catch (error) {
+            console.error('[Entity API] Error clearing entities:', error);
+            resolve(0);
+        }
     });
-    
-    // Save to state via watcher
-    _ensureWatcher();
-    window.watcher.saveEntitiesToState('entity-api-recreate');
-    
-    logAction('Recreated all entities from state');
-    return true;
-  } catch (error) {
-    console.error('[Entity API] Error recreating entities:', error);
-    return false;
-  }
 }
 
 /**
@@ -940,6 +1191,144 @@ export async function ensureEntityUUIDs() {
 }
 
 /**
+ * Check if an entity should be filtered out
+ * @param {Object} entityData - Entity data from state
+ * @returns {boolean} True if entity should be filtered out
+ */
+function shouldFilterEntity(entityData) {
+  if (!entityData) return true;
+  
+  // Check if entity type is in filtered types
+  if (FILTERED_ENTITY_TYPES.includes(entityData.type)) {
+    return true;
+  }
+  
+  // Check if entity ID is in filtered IDs
+  if (entityData.id && FILTERED_ENTITY_IDS.includes(entityData.id)) {
+    return true;
+  }
+  
+  // Check for filtered components
+  for (const component of FILTERED_COMPONENTS) {
+    if (entityData[component]) {
+      return true;
+    }
+  }
+  
+  // Check for filtered data attributes
+  for (const attr of FILTERED_DATA_ATTRIBUTES) {
+    if (entityData[attr]) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+/**
+ * Create a DOM element for an entity from entity data
+ * @param {Object} entityData - Entity data from state
+ * @returns {Element} Created DOM element
+ */
+async function createEntityElement(entityData) {
+  if (!entityData || !entityData.type) {
+    console.error('[Entity API] Invalid entity data for element creation:', entityData);
+    return null;
+  }
+  
+  try {
+    // Determine proper tag based on type
+    const tagName = STANDARD_PRIMITIVES.includes(entityData.type) 
+      ? `a-${entityData.type}` 
+      : 'a-entity';
+    
+    // Create element
+    const element = document.createElement(tagName);
+    
+    // Set ID and UUID
+    if (entityData.id) {
+      element.id = entityData.id;
+    }
+    element.setAttribute('data-entity-uuid', entityData.uuid);
+    
+    // Set all attributes
+    Object.entries(entityData).forEach(([key, value]) => {
+      // Skip special attributes
+      if (key === 'type' || key === 'uuid' || key === 'id' || key === 'DOM') {
+        return;
+      }
+      
+      // Format vector attributes
+      if (VECTOR_ATTRIBUTES.includes(key)) {
+        element.setAttribute(key, vectorToString(value));
+      } else if (key === 'light' && typeof value === 'object') {
+        // Special handling for light components
+        const lightAttrs = Object.entries(value)
+          .map(([lightKey, lightValue]) => {
+            // If the light value is a vector, convert to string
+            if (lightValue && typeof lightValue === 'object' && 'x' in lightValue) {
+              return `${lightKey}: ${lightValue.x} ${lightValue.y} ${lightValue.z}`;
+            }
+            return `${lightKey}: ${lightValue}`;
+          })
+          .join('; ');
+        
+        element.setAttribute('light', lightAttrs);
+      } else if (typeof value === 'object') {
+        element.setAttribute(key, JSON.stringify(value));
+      } else {
+        element.setAttribute(key, value);
+      }
+    });
+    
+    // Get scene and append the element to it
+    const scene = document.querySelector('a-scene');
+    if (!scene) {
+      console.error('[Entity API] No scene found for adding entity');
+      return null;
+    }
+    
+    // Add entity-watcher component for change tracking
+    element.setAttribute('entity-watcher', '');
+    
+    // Finally add to DOM
+    scene.appendChild(element);
+    console.log(`[Entity API] Added entity to scene: ${entityData.id || entityData.uuid}`);
+    
+    // Update DOM status of the entity in state
+    try {
+      const state = getState();
+      if (state.entities && state.entities[entityData.uuid]) {
+        // Update entity DOM status directly in the state object
+        setState({
+          entities: {
+            ...state.entities,
+            [entityData.uuid]: {
+              ...state.entities[entityData.uuid],
+              DOM: true
+            }
+          }
+        }, 'createEntityElement');
+      }
+      
+      // Add to entity mapping if not present
+      if (entityData.id && state.entityMapping && !state.entityMapping[entityData.id]) {
+        const updatedMapping = { ...state.entityMapping };
+        updatedMapping[entityData.id] = entityData.uuid;
+        setState({ entityMapping: updatedMapping }, 'createEntityElement-mapping');
+      }
+    } catch (stateError) {
+      console.warn('[Entity API] Error updating entity state:', stateError);
+    }
+    
+    return element;
+  } catch (error) {
+    console.error('[Entity API] Error creating entity element:', error);
+    return null;
+  }
+}
+
+/**
  * Check if an entity is a system entity
  * @param {Object} entity - Entity data from state
  * @param {string} uuid - Entity UUID
@@ -948,19 +1337,43 @@ export async function ensureEntityUUIDs() {
 function isSystemEntity(entity, uuid) {
     if (!entity) return false;
     
-    // Check if entity type is in systemEntityIds
+    // Use engine manager if it's initialized
+    if (window.engineManager && window.engineManager.initialized) {
+        return window.engineManager.isSystemEntity(entity, uuid);
+    }
+    
+    // Legacy fallback behavior if engineManager is not available
+    // This will eventually be removed
+    
+    // Check entity ID directly for common system entity IDs
+    const systemIds = ['local-avatar', 'avatar-rig', 'avatar-camera', 'camera', 'sky'];
+    if (entity.id && systemIds.some(id => entity.id.includes(id))) {
+        return true;
+    }
+    
+    // Check if entity type is a system entity type
     if (systemEntityIds.includes(entity.type)) {
+        return true;
+    }
+    
+    // Check for camera component which indicates a system entity
+    if (entity.camera !== undefined) {
         return true;
     }
     
     // Check if entity is the sky entity from state
     const state = getState();
-    if (state.sky && (uuid === state.sky.uuid || entity.type === SYSTEM_ENTITY_TYPES.SKY)) {
+    if (state.sky && (uuid === state.sky.uuid || entity.type === 'sky')) {
         return true;
     }
     
     // Check if entity is a networked or auto-generated entity
-    if (uuid.startsWith('entity-entity-') || entity.networked) {
+    if (uuid && (uuid.startsWith('entity-entity-') || uuid.includes('avatar') || uuid.includes('camera') || uuid.includes('rig'))) {
+        return true;
+    }
+    
+    // Check if entity has networked component
+    if (entity.networked) {
         return true;
     }
     
@@ -1042,4 +1455,92 @@ export function generateEntitiesHTML() {
     });
     
     return html;
+}
+
+/**
+ * Clear all non-system entities from the scene
+ * @returns {number} Number of entities removed
+ */
+export function clearEntities() {
+  console.log('[Entity API] Clearing non-system entities from scene');
+  
+  try {
+    const scene = document.querySelector('a-scene');
+    if (!scene) {
+      console.error('[Entity API] No scene found for clearing entities');
+      return 0;
+    }
+    
+    // Get all entities with an id and data-entity-uuid
+    const entities = Array.from(scene.querySelectorAll('[data-entity-uuid]'));
+    let removedCount = 0;
+    
+    // First pass: detach from three.js scene to prevent rendering errors
+    entities.forEach(entity => {
+      // Skip system entities
+      if (SYSTEM_ENTITY_IDS.includes(entity.id)) {
+        return;
+      }
+      
+      // Check for system components
+      if (SYSTEM_COMPONENTS.some(comp => entity.hasAttribute(comp))) {
+        return;
+      }
+      
+      // Check for system data attributes
+      if (SYSTEM_DATA_ATTRIBUTES.some(attr => entity.hasAttribute(attr))) {
+        return;
+      }
+      
+      // Detach from three.js scene first to prevent renderer errors
+      try {
+        if (entity.object3D) {
+          // Remove from three.js scene graph safely
+          if (entity.object3D.parent) {
+            entity.object3D.parent.remove(entity.object3D);
+          }
+          
+          // Clear any children to prevent dangling references
+          if (entity.object3D.children && entity.object3D.children.length > 0) {
+            // Clone the array since it might be modified during iteration
+            [...entity.object3D.children].forEach(child => {
+              entity.object3D.remove(child);
+            });
+          }
+        }
+      } catch (detachError) {
+        console.warn('[Entity API] Error detaching entity from three.js scene:', detachError);
+      }
+    });
+    
+    // Short delay to let three.js finish any pending operations
+    setTimeout(() => {
+      // Second pass: remove entities from DOM
+      entities.forEach(entity => {
+        // Skip system entities (same checks as above)
+        if (SYSTEM_ENTITY_IDS.includes(entity.id) || 
+            SYSTEM_COMPONENTS.some(comp => entity.hasAttribute(comp)) ||
+            SYSTEM_DATA_ATTRIBUTES.some(attr => entity.hasAttribute(attr))) {
+          return;
+        }
+        
+        // Remove from DOM safely
+        try {
+          if (entity.parentNode) {
+            entity.parentNode.removeChild(entity);
+            removedCount++;
+          }
+        } catch (removeError) {
+          console.warn('[Entity API] Error removing entity from DOM:', removeError);
+        }
+      });
+      
+      console.log(`[Entity API] Removed ${removedCount} entities from scene`);
+    }, 0);
+    
+    return entities.length; // Approximate count since actual removal happens after timeout
+  } catch (error) {
+    console.error('[Entity API] Error clearing entities:', error);
+    return 0;
+  }
 } 

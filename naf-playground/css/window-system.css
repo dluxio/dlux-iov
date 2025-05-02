@@ -241,6 +241,16 @@
     min-height: 40px;
 }
 
+#engine-panel {
+    bottom: 100px; /* Position from bottom, above the dock */
+    left: 50%;
+    transform: translateX(-50%); /* Only center horizontally */
+    width: 420px;
+    height: 370px;
+    min-width: 200px;
+    min-height: 40px;
+}
+
 #editor-window {
     top: 20px;
     left: 340px;
@@ -1044,3 +1054,4 @@ body:not(.aframe-inspector-opened) .toggle-edit {
     height: 16px;
     cursor: se-resize;
 }
+

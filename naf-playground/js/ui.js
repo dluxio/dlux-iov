@@ -12,6 +12,7 @@ import {
     LIGHT_DEFAULTS,
     UI_CONFIG
 } from './config.js';
+import * as sceneLoader from './scene-loader.js';
 
 // DOM elements
 let addBoxBtn;
@@ -52,6 +53,12 @@ export function initUI() {
     
     // Initialize camera selector
     initCameraSelector();
+    
+    // Initialize scene selector
+    setupSceneLoaderUI();
+    
+    // Initialize asset manager UI
+    initAssetManagerUI();
     
     // Logging for debugging
     console.log('UI Elements found:');
@@ -717,4 +724,418 @@ function updateCameraSelector() {
     } else {
         cameraSelector.value = 'avatar-rig';
     }
+}
+
+/**
+ * Set up scene loader buttons
+ */
+function setupSceneLoaderUI() {
+    const uiPanel = document.getElementById('ui-panel');
+    if (!uiPanel) {
+        console.warn('UI panel element not found, cannot set up scene loader UI');
+        return;
+    }
+    
+    // First, remove any existing scene selectors to prevent duplicates
+    const existingSelectors = document.querySelectorAll('.scene-selector, .scene-loader');
+    existingSelectors.forEach(selector => {
+        console.log('Removing existing scene selector', selector);
+        selector.parentNode?.removeChild(selector);
+    });
+    
+    console.log('Setting up scene loader UI');
+    
+    // Create scene selector elements
+    const sceneLoaderContainer = document.createElement('div');
+    sceneLoaderContainer.className = 'tool-item scene-loader';
+    
+    const sceneLoaderLabel = document.createElement('label');
+    sceneLoaderLabel.htmlFor = 'scene-selector';
+    sceneLoaderLabel.textContent = 'Scene:';
+    
+    const sceneSelector = document.createElement('select');
+    sceneSelector.id = 'scene-selector';
+    sceneSelector.className = 'scene-selector';
+    
+    // Import config to get current startup scene
+    import('./config.js').then(config => {
+        const STARTUP_SCENE_PATH = config.STARTUP_SCENE_PATH || 'scenes/blank-scene.json';
+        
+        // Import scene loader
+        import('./scene-loader.js').then(sceneLoaderModule => {
+            const sceneLoader = sceneLoaderModule;
+            
+            // Get available scenes
+            sceneLoader.getAvailableScenes().then(scenes => {
+                // Add options for each scene
+                scenes.forEach(scene => {
+                    const option = document.createElement('option');
+                    option.value = scene.path;
+                    option.textContent = scene.name;
+                    
+                    // Mark the startup scene as selected
+                    if (scene.path === STARTUP_SCENE_PATH) {
+                        option.selected = true;
+                    }
+                    
+                    sceneSelector.appendChild(option);
+                });
+                
+                console.log(`Added ${sceneSelector.options.length} scenes to selector`);
+            });
+            
+            // Assemble the UI
+            sceneLoaderContainer.appendChild(sceneLoaderLabel);
+            sceneLoaderContainer.appendChild(sceneSelector);
+            
+            // Find the right place to insert it (before camera selector)
+            const cameraSelector = uiPanel.querySelector('.camera-selector');
+            if (cameraSelector && cameraSelector.parentNode) {
+                // Insert before the camera selector item (the parent div)
+                uiPanel.insertBefore(sceneLoaderContainer, cameraSelector.parentNode);
+            } else {
+                // Fallback to appending to the tool buttons section
+                const toolButtons = uiPanel.querySelector('.tool-buttons');
+                if (toolButtons) {
+                    toolButtons.appendChild(sceneLoaderContainer);
+                } else {
+                    uiPanel.appendChild(sceneLoaderContainer);
+                }
+            }
+            
+            // Handle scene selection change
+            sceneSelector.addEventListener('change', (e) => {
+                const selectedValue = e.target.value;
+                if (selectedValue) {
+                    loadSelectedScene(selectedValue);
+                }
+            });
+            
+            function loadSelectedScene(selectedValue) {
+                console.log(`Loading scene: ${selectedValue}`);
+                
+                // Load the scene using the scene loader
+                console.log(`Loading scene from file: ${selectedValue}`);
+                
+                sceneLoader.loadScene(selectedValue)
+                    .then(() => {
+                        // Update Monaco editor after scene load
+                        import('./monaco.js').then(monaco => {
+                            if (typeof monaco.updateMonacoEditor === 'function') {
+                                console.log('Updating Monaco editor after scene load');
+                                monaco.updateMonacoEditor(true);
+                            }
+                        }).catch(err => console.error('Error importing monaco:', err));
+                    })
+                    .catch(err => {
+                        console.error('Error loading scene:', err);
+                    });
+            }
+        }).catch(err => {
+            console.error('Error setting up scene loader UI:', err);
+        });
+    }).catch(err => {
+        console.error('Error importing config:', err);
+    });
+}
+
+/**
+ * Initialize the Asset Manager UI
+ * This function sets up the asset manager interface and the modal for adding/editing assets
+ */
+function initAssetManagerUI() {
+    console.log('Initializing Asset Manager UI...');
+    
+    // Import the asset manager
+    import('./asset-manager.js').then(({ assetManager, ASSET_TYPES }) => {
+        // Initialize the asset manager
+        assetManager.init();
+        
+        // Elements
+        const addAssetBtn = document.getElementById('add-asset-btn');
+        const assetList = document.getElementById('asset-list');
+        const assetModal = document.getElementById('asset-modal');
+        const closeModal = document.querySelector('.close-modal');
+        const submitAssetBtn = document.getElementById('submit-asset');
+        const assetNameInput = document.getElementById('asset-name');
+        const assetTypeSelect = document.getElementById('asset-type');
+        const assetSrcInput = document.getElementById('asset-src');
+        const assetTagsInput = document.getElementById('asset-tags');
+        const assetModalTitle = document.getElementById('asset-modal-title');
+        
+        let currentEditAssetId = null;
+        
+        // Add event listeners
+        if (addAssetBtn) {
+            addAssetBtn.addEventListener('click', () => openAssetModal());
+        } else {
+            console.error('Add asset button not found');
+        }
+        
+        if (closeModal) {
+            closeModal.addEventListener('click', () => closeAssetModal());
+        }
+        
+        if (submitAssetBtn) {
+            submitAssetBtn.addEventListener('click', () => {
+                if (currentEditAssetId) {
+                    updateAsset();
+                } else {
+                    addNewAsset();
+                }
+            });
+        }
+        
+        // Initialize the asset list
+        refreshAssetList();
+        
+        // Listen for state changes to refresh the list
+        document.addEventListener('state-changed', (event) => {
+            if (event.detail && event.detail.type === 'update') {
+                refreshAssetList();
+            }
+        });
+        
+        /**
+         * Open the asset modal for adding a new asset or editing an existing one
+         * @param {String} assetId - ID of an asset to edit (optional)
+         */
+        function openAssetModal(assetId = null) {
+            if (assetId) {
+                // Editing existing asset
+                const state = getState();
+                const asset = state.assets[assetId];
+                
+                if (!asset) {
+                    console.error(`Asset not found: ${assetId}`);
+                    return;
+                }
+                
+                currentEditAssetId = assetId;
+                assetModalTitle.textContent = 'Edit Asset';
+                submitAssetBtn.textContent = 'Update Asset';
+                
+                // Fill the form with asset data
+                assetNameInput.value = asset.name || '';
+                assetTypeSelect.value = asset.type || 'image';
+                assetSrcInput.value = asset.src || '';
+                assetTagsInput.value = asset.tags ? asset.tags.join(', ') : '';
+            } else {
+                // Adding new asset
+                currentEditAssetId = null;
+                assetModalTitle.textContent = 'Add New Asset';
+                submitAssetBtn.textContent = 'Add Asset';
+                
+                // Clear the form
+                assetNameInput.value = '';
+                assetTypeSelect.value = 'image';
+                assetSrcInput.value = '';
+                assetTagsInput.value = '';
+            }
+            
+            // Show the modal
+            assetModal.style.display = 'flex';
+        }
+        
+        /**
+         * Close the asset modal
+         */
+        function closeAssetModal() {
+            assetModal.style.display = 'none';
+            currentEditAssetId = null;
+        }
+        
+        /**
+         * Add a new asset
+         */
+        function addNewAsset() {
+            const name = assetNameInput.value.trim();
+            const type = assetTypeSelect.value;
+            const src = assetSrcInput.value.trim();
+            const tags = assetTagsInput.value.split(',').map(tag => tag.trim()).filter(Boolean);
+            
+            if (!src) {
+                console.error('Asset source is required');
+                return;
+            }
+            
+            // Register the asset
+            assetManager.registerAsset(type, src, {
+                name,
+                tags
+            });
+            
+            // Close the modal
+            closeAssetModal();
+            
+            // Refresh the asset list
+            refreshAssetList();
+        }
+        
+        /**
+         * Update an existing asset
+         */
+        function updateAsset() {
+            if (!currentEditAssetId) return;
+            
+            const name = assetNameInput.value.trim();
+            const type = assetTypeSelect.value;
+            const src = assetSrcInput.value.trim();
+            const tags = assetTagsInput.value.split(',').map(tag => tag.trim()).filter(Boolean);
+            
+            if (!src) {
+                console.error('Asset source is required');
+                return;
+            }
+            
+            // Get the current state
+            const state = getState();
+            const currentAsset = state.assets[currentEditAssetId];
+            
+            // Update the asset
+            assetManager._updateAssetState(currentEditAssetId, {
+                name,
+                type,
+                src,
+                tags
+            });
+            
+            // Close the modal
+            closeAssetModal();
+            
+            // Refresh the asset list
+            refreshAssetList();
+        }
+        
+        /**
+         * Delete an asset
+         * @param {String} assetId - ID of the asset to delete
+         */
+        function deleteAsset(assetId) {
+            // Get the current state
+            const state = getState();
+            
+            // Make a copy of the assets without the one we're deleting
+            const newAssets = { ...state.assets };
+            delete newAssets[assetId];
+            
+            // Unload the asset if it's loaded
+            if (assetManager.isAssetLoaded(assetId)) {
+                assetManager.unloadAsset(assetId);
+            }
+            
+            // Update the state
+            setState({ assets: newAssets }, 'asset-delete');
+            
+            // Refresh the list
+            refreshAssetList();
+        }
+        
+        /**
+         * Refresh the asset list display
+         */
+        function refreshAssetList() {
+            // Get all assets from state
+            const state = getState();
+            const assets = state.assets || {};
+            
+            // Clear the current list
+            assetList.innerHTML = '';
+            
+            // If no assets, show the empty message
+            if (Object.keys(assets).length === 0) {
+                assetList.innerHTML = '<div class="no-assets">No assets found. Add an asset to get started.</div>';
+                return;
+            }
+            
+            // Add each asset to the list
+            for (const [id, asset] of Object.entries(assets)) {
+                // Create asset item
+                const assetItem = document.createElement('div');
+                assetItem.className = 'asset-item';
+                
+                // Create preview
+                const preview = document.createElement('div');
+                preview.className = 'asset-preview';
+                
+                // Add preview content based on type
+                if (asset.type === 'image' && asset.src) {
+                    const img = document.createElement('img');
+                    img.src = asset.src;
+                    preview.appendChild(img);
+                } else {
+                    // Add icon based on type
+                    const icon = document.createElement('i');
+                    icon.className = getAssetTypeIcon(asset.type);
+                    preview.appendChild(icon);
+                }
+                
+                // Create info section
+                const info = document.createElement('div');
+                info.className = 'asset-info';
+                
+                const name = document.createElement('div');
+                name.className = 'asset-name';
+                name.textContent = asset.name || id;
+                
+                const type = document.createElement('div');
+                type.className = 'asset-type';
+                type.textContent = asset.type;
+                
+                info.appendChild(name);
+                info.appendChild(type);
+                
+                // Create actions
+                const actions = document.createElement('div');
+                actions.className = 'asset-actions';
+                
+                const editBtn = document.createElement('button');
+                editBtn.className = 'asset-edit-btn';
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                editBtn.title = 'Edit';
+                editBtn.addEventListener('click', () => openAssetModal(id));
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'asset-delete-btn';
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.title = 'Delete';
+                deleteBtn.addEventListener('click', () => {
+                    if (confirm(`Are you sure you want to delete this asset?`)) {
+                        deleteAsset(id);
+                    }
+                });
+                
+                actions.appendChild(editBtn);
+                actions.appendChild(deleteBtn);
+                
+                // Assemble asset item
+                assetItem.appendChild(preview);
+                assetItem.appendChild(info);
+                assetItem.appendChild(actions);
+                
+                // Add to the list
+                assetList.appendChild(assetItem);
+            }
+        }
+        
+        /**
+         * Get an icon class for an asset type
+         * @param {String} assetType - The type of asset
+         * @returns {String} - Icon class
+         */
+        function getAssetTypeIcon(assetType) {
+            const icons = {
+                'image': 'fas fa-image',
+                'video': 'fas fa-video',
+                'audio': 'fas fa-music',
+                'model': 'fas fa-cube',
+                'material': 'fas fa-palette',
+                'texture': 'fas fa-th'
+            };
+            
+            return icons[assetType] || 'fas fa-file';
+        }
+    }).catch(err => {
+        console.error('Error initializing asset manager UI:', err);
+    });
 } 

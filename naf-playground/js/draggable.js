@@ -14,7 +14,8 @@ const WindowManager = {
         'ui-container': 1,
         'editor-window': 2,
         'state-debug-panel': 3,
-        'watcher-panel': 4
+        'watcher-panel': 4,
+        'engine-panel': 5
     },
     
     // Default window positions and sizes
@@ -42,13 +43,20 @@ const WindowManager = {
             left: '20px',
             width: '300px',
             height: '200px'
+        },
+        'engine-panel': {
+            bottom: '100px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '420px',
+            height: '370px'
         }
     },
     
     windows: new Set(),
     closedWindows: new Map(),
     windowStates: new Map(),
-    windowIds: ['ui-container', 'editor-window', 'state-debug-panel', 'watcher-panel'],
+    windowIds: ['ui-container', 'editor-window', 'state-debug-panel', 'watcher-panel', 'engine-panel'],
     activeWindow: null,
     
     /**
@@ -478,6 +486,46 @@ export function initDraggable(target) {
         el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
     }
 
+    return true;
+}
+
+// Initialize all draggable windows in the application
+export function initializeDraggableWindows() {
+    console.log('Initializing all draggable windows...');
+    
+    // Find all windows that should be draggable (using class 'window')
+    const windows = document.querySelectorAll('.window');
+    console.log(`Found ${windows.length} draggable windows`);
+    
+    if (windows.length === 0) {
+        console.warn('No draggable windows found in the DOM');
+    }
+    
+    // Initialize each window
+    windows.forEach(windowElement => {
+        console.log('Initializing draggable window:', windowElement.id || 'unnamed');
+        initDraggable(windowElement);
+    });
+    
+    // Initialize dock as well
+    initDock();
+    
+    // Ensure engine-panel is hidden by default using WindowManager
+    const enginePanel = document.getElementById('engine-panel');
+    if (enginePanel) {
+        console.log('Setting engine-panel to hidden by default');
+        WindowManager.closeWindow(enginePanel);
+    }
+    
+    // Update all dock icons to reflect initial window visibility
+    WindowManager.windowIds.forEach(windowId => {
+        const windowElement = document.getElementById(windowId);
+        if (windowElement) {
+            const isVisible = windowElement.style.display !== 'none';
+            WindowManager.updateDockIcon(windowId, isVisible);
+        }
+    });
+    
     return true;
 }
 

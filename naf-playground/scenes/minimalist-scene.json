@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "title": "Minimalist Scene",
+    "description": "A minimalist scene with only essential elements",
+    "created": "2023-08-11T10:15:00Z",
+    "modified": "2023-08-11T10:15:00Z"
+  },
+  "sky": {
+    "type": "color",
+    "data": {
+      "color": "#1A1A2E"
+    }
+  },
+  "environment": {
+    "preset": "default",
+    "lighting": true,
+    "ground": true
+  },
+  "entities": [
+    {
+      "type": "box",
+      "id": "central-box",
+      "position": { "x": 0, "y": 1, "z": -5 },
+      "color": "#FFFFFF",
+      "material": "shader: standard; emissive: #FFF; emissiveIntensity: 0.2",
+      "shadow": true
+    },
+    {
+      "type": "light",
+      "id": "ambient-light",
+      "light": {
+        "type": "ambient",
+        "color": "#222",
+        "intensity": 0.2
+      }
+    },
+    {
+      "type": "light",
+      "id": "spot-light",
+      "light": {
+        "type": "spot",
+        "color": "#FFFFFF",
+        "intensity": 1.5,
+        "castShadow": true,
+        "angle": 45,
+        "penumbra": 0.8
+      },
+      "position": { "x": 0, "y": 5, "z": 0 },
+      "rotation": { "x": -90, "y": 0, "z": 0 }
+    }
+  ]
+} 

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Scene Loader Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .test-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .test-link {
+            display: block;
+            margin: 10px 0;
+            padding: 10px 15px;
+            background-color: #4a6fd0;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .test-link:hover {
+            background-color: #3a5fc0;
+        }
+        .info {
+            background-color: #e8f5ff;
+            border-left: 4px solid #4a6fd0;
+            padding: 10px 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Scene Loader Test</h1>
+    
+    <div class="info">
+        <p>Use these links to test loading different scene files into the application.</p>
+        <p>The scene files are loaded as external JSON and they update both the 3D scene and the code editor.</p>
+    </div>
+    
+    <div class="test-card">
+        <h2>Test Scenes</h2>
+        <a href="index.html?scene=scenes/default-scene.json" class="test-link">Load Default Scene</a>
+        <a href="index.html?scene=scenes/minimalist-scene.json" class="test-link">Load Minimalist Scene</a>
+        <a href="index.html" class="test-link">Load Application (Default)</a>
+    </div>
+    
+    <div class="test-card">
+        <h2>How It Works</h2>
+        <p>When you click on a test link, the application will:</p>
+        <ol>
+            <li>Load the specified scene file from the server</li>
+            <li>Convert the JSON scene data to application state</li>
+            <li>Update all entities in the 3D scene</li>
+            <li>Update the Monaco code editor to show the scene HTML representation</li>
+        </ol>
+        <p>This demonstrates the complete pipeline from an external scene definition to both visualization and code representation.</p>
+    </div>
+</body>
+</html> 

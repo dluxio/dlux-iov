@@ -7,8 +7,6 @@ import { generateEntityId } from './utils.js';
 
 // Entity Types
 export const SYSTEM_ENTITY_TYPES = {
-  SKY: 'sky',
-  LIGHT: 'light',
   CAMERA: 'camera',
   CURSOR: 'cursor',
   TEMPLATE: 'template'
@@ -16,9 +14,8 @@ export const SYSTEM_ENTITY_TYPES = {
 
 // System Entity IDs that should be filtered out
 export const SYSTEM_ENTITY_IDS = [
-  'default-light',
-  'directional-light',
-  'local-avatar'
+  'local-avatar',
+  'naf-template'
 ];
 
 // Components that indicate a system entity
@@ -42,9 +39,8 @@ export const FILTERED_ENTITY_TYPES = [
 
 // Entity IDs that should be filtered out
 export const FILTERED_ENTITY_IDS = [
-  'default-light',
-  'directional-light',
-  'local-avatar'
+  'local-avatar',
+  'naf-template'
 ];
 
 // Components that should be filtered out
@@ -152,6 +148,7 @@ export const SKY_TYPES = {
   ENVIRONMENT: 'environment',
   IMAGE: 'image',
   VIDEO: 'video',
+  GRADIENT: 'gradient',
   NONE: 'none'
 };
 
@@ -242,7 +239,7 @@ export const LIGHT_DEFAULTS = {
   directional: {
     color: '#FFF',
     intensity: 0.6,
-    position: { ...VECTOR_DEFAULTS.position, x: -0.5, y: 1, z: 1 }
+    position: { x: -0.5, y: 1, z: 1 }
   },
   point: {
     color: '#FFFFFF',
@@ -320,28 +317,15 @@ export const DEFAULT_SCENE = {
 };
 
 /**
- * Generate initial state with default scene
+ * Generate initial state with empty scene
  * @returns {Object} Initial state object
  */
 export function generateInitialState() {
-    const entities = {};
-    const entityMapping = {};
-    
-    // Add environment and its children
-    Object.entries(DEFAULT_SCENE).forEach(([key, config]) => {
-        const uuid = generateEntityId(config.type);
-        entities[uuid] = {
-            ...config,
-            uuid,
-            DOM: false  // Start as false, will be updated when DOM is checked
-        };
-        entityMapping[config.id] = uuid;
-    });
-    
     return {
-        entities,
-        entityMapping,
+        entities: {},
+        entityMapping: {},
         selectedEntity: null,
+        assets: {}, // Initialize empty assets collection
         camera: {
             position: { ...VECTOR_DEFAULTS.position },
             rotation: { ...VECTOR_DEFAULTS.rotation },
@@ -363,4 +347,19 @@ export function generateInitialState() {
             darkMode: true
         }
     };
-} 
+}
+
+// Default scene path
+export const DEFAULT_SCENE_PATH = 'scenes/default-scene.json';
+
+// Default scene to load on startup (used as the initial scene)
+export const STARTUP_SCENE_PATH = 'scenes/default-scene.json';
+
+// Loading and initialization
+export const INITIALIZATION_CONFIG = {
+  READY_TIMEOUT: 5000,
+  WAIT_SECONDS: 30,
+  MAX_LOAD_ATTEMPTS: 5,
+  INITIALIZATION_DELAY: 100,
+  ALWAYS_LOAD_SCENE: true // Always load a scene on startup
+}; 

@@ -27,13 +27,26 @@ import {
 
 export class StateManager {
   constructor() {
-    this.state = generateInitialState();
-    this.history = [];
-    this.isApplyingState = false;
-    this.lastUpdateSource = null;
+    this.state = {
+      entities: {},
+      entityMapping: {},
+      assets: {}, // New dedicated assets collection
+      metadata: {
+        created: Date.now(),
+        modified: Date.now(),
+        version: '1.0'
+      },
+      validation: {
+        errors: [],
+        warnings: []
+      }
+    };
+    
+    this.stateHistory = [];
+    this.historyIndex = -1;
     this.listeners = new Set();
-
-    // Add validation state
+    this.isApplyingState = false;
+    this.lastUpdateSource = 'init';
     this.validationState = {
       errors: [],
       warnings: []
@@ -41,21 +54,22 @@ export class StateManager {
   }
 
   /**
-   * Record a state change in history
+   * Records a change in the state history
    * @private
    */
   recordChange() {
     const change = {
+      state: JSON.parse(JSON.stringify(this.state)),
       timestamp: Date.now(),
-      source: this.lastUpdateSource,
-      state: { ...this.state }
+      source: this.lastUpdateSource
     };
-
-    this.history.push(change);
-
+    
+    this.stateHistory.push(change);
+    this.historyIndex = this.stateHistory.length - 1;
+    
     // Trim history if it gets too long
-    if (this.history.length > 1000) {
-      this.history = this.history.slice(-1000);
+    if (this.stateHistory.length > 1000) {
+      this.stateHistory = this.stateHistory.slice(-1000);
     }
   }
 
@@ -314,19 +328,116 @@ export class StateManager {
 
   /**
    * Reset state to default
+   * This completely resets the state to a clean initial state
    */
   resetState() {
-    this.setState({
-      entities: {},
-      selectedEntity: null,
-      camera: {
-        position: { ...VECTOR_DEFAULTS.position },
-        rotation: { ...VECTOR_DEFAULTS.rotation }
-      },
-      userSettings: {
-        darkMode: true
+    console.log('[StateManager] Performing complete state reset');
+    
+    // Clear entity DOM elements first
+    try {
+      this._clearDOMEntities();
+    } catch (error) {
+      console.error('[StateManager] Error cleaning up DOM elements during reset:', error);
+    }
+    
+    // Import the generateInitialState function if we need it
+    const initialState = generateInitialState();
+    
+    // Create a completely fresh state to avoid any references to old state
+    this.state = JSON.parse(JSON.stringify(initialState));
+    this.lastUpdateSource = 'complete-reset';
+    
+    // Explicitly clear entity mapping to ensure it's completely reset
+    this.state.entities = {};
+    this.state.entityMapping = {};
+    
+    // Update timestamps
+    this.state.metadata.modified = Date.now();
+    this.state.metadata.created = Date.now();
+    
+    // Record change and notify listeners
+    this.recordChange();
+    this.notifyListeners();
+    
+    // Dispatch state change event for complete reset
+    document.dispatchEvent(new CustomEvent('state-changed', {
+      detail: {
+        type: 'reset',
+        data: this.state,
+        source: 'complete-reset'
       }
-    }, 'reset');
+    }));
+    
+    console.log('[StateManager] State reset complete - state completely cleared');
+  }
+  
+  /**
+   * Clear DOM entities (helper method for resetState)
+   * @private
+   */
+  _clearDOMEntities() {
+    const scene = document.querySelector('a-scene');
+    if (!scene) {
+      console.warn('[StateManager] Scene not found when clearing DOM entities');
+      return;
+    }
+    
+    console.log('[StateManager] Cleaning up DOM entities');
+    
+    // Find all entity elements with uuid attribute
+    const entities = scene.querySelectorAll('[data-entity-uuid]');
+    let removedCount = 0;
+    let preservedCount = 0;
+    
+    // System entity types we should keep
+    const systemEntityTypes = ['avatar', 'camera', 'rig'];
+    const systemEntityIds = ['local-avatar', 'avatar-rig', 'avatar-camera'];
+    
+    // Collect all entities to remove first, then remove them
+    // This prevents issues with removing while iterating
+    const entitiesToRemove = [];
+    
+    entities.forEach(entity => {
+      const uuid = entity.getAttribute('data-entity-uuid');
+      const entityId = entity.id || 'unnamed';
+      
+      // Check if this is a system entity we should keep
+      const isSystemEntity = 
+        // Check if it has system entity ID
+        systemEntityIds.includes(entityId) ||
+        // Check UUID for system entity patterns
+        (uuid && systemEntityTypes.some(type => uuid.includes(type)));
+      
+      if (!isSystemEntity) {
+        entitiesToRemove.push(entity);
+        console.log(`[StateManager] Will remove entity from DOM: ${entityId} (${uuid})`);
+      } else {
+        preservedCount++;
+        console.log(`[StateManager] Keeping system entity: ${entityId} (${uuid})`);
+      }
+    });
+    
+    // Now remove all identified entities
+    entitiesToRemove.forEach(entity => {
+      try {
+        if (entity.parentNode) {
+          entity.parentNode.removeChild(entity);
+          removedCount++;
+        }
+      } catch (removeError) {
+        console.warn(`[StateManager] Error removing entity ${entity.id || 'unnamed'}:`, removeError);
+      }
+    });
+    
+    console.log(`[StateManager] Removed ${removedCount} entities from DOM, preserved ${preservedCount} system entities`);
+    
+    // Also check for the local-avatar entity directly, since it might not have a data-entity-uuid
+    const localAvatar = scene.querySelector('#local-avatar');
+    if (!localAvatar) {
+      console.warn('[StateManager] local-avatar entity was not found after clearing DOM entities!');
+    } else {
+      console.log('[StateManager] local-avatar entity is preserved');
+    }
   }
 
   /**
@@ -374,12 +485,15 @@ export class StateManager {
 
     // Initialize sky if it doesn't exist
     const state = window.stateManager.getState();
+    const skyUuid = 'sky-entity-' + Date.now();
+    
     if (!state.sky) {
         window.stateManager.updateState({
             sky: {
                 type: 'color',
                 data: { color: DEFAULT_SKY_COLOR },
-                uuid: 'sky-entity-1'
+                uuid: skyUuid,
+                domElementCreated: true
             }
         }, 'state-init');
     }
@@ -391,20 +505,38 @@ export class StateManager {
                 sky: state.sky || {
                     type: 'color',
                     data: { color: DEFAULT_SKY_COLOR },
-                    uuid: 'sky-entity-1'
+                    uuid: skyUuid
                 }
             }
         }, 'state-init');
     }
 
-    // Ensure sky exists in scene
+    // Ensure sky exists in scene with proper attributes
     let skyEntity = scene.querySelector('a-sky');
     if (!skyEntity) {
         skyEntity = document.createElement('a-sky');
         skyEntity.id = 'sky';
         skyEntity.setAttribute('color', DEFAULT_SKY_COLOR);
+        skyEntity.setAttribute('data-entity-uuid', state.sky?.uuid || skyUuid);
+        skyEntity.setAttribute('data-sky-type', 'color');
         scene.appendChild(skyEntity);
+    } else {
+        // Update existing sky entity with required attributes if missing
+        if (!skyEntity.hasAttribute('data-entity-uuid')) {
+            skyEntity.setAttribute('data-entity-uuid', state.sky?.uuid || skyUuid);
+        }
+        if (!skyEntity.hasAttribute('data-sky-type')) {
+            skyEntity.setAttribute('data-sky-type', 'color');
+        }
     }
+    
+    // Force the watcher to capture the sky entity in state
+    setTimeout(() => {
+        if (window.watcher && typeof window.watcher.saveEntitiesToState === 'function') {
+            console.log('[StateManager] Forcing watcher update to capture sky entity');
+            window.watcher.saveEntitiesToState('sky-init');
+        }
+    }, 500);
 
     return window.stateManager;
   }

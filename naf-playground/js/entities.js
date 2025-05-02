@@ -44,7 +44,9 @@ import {
   GEOMETRY_DEFAULTS,
   DEFAULT_SKY_COLOR,
   LIGHT_DEFAULTS,
-  DEFAULT_ENTITY_COLOR
+  DEFAULT_ENTITY_COLOR,
+  SYSTEM_ENTITY_TYPES,
+  SYSTEM_ENTITY_IDS
 } from './config.js';
 
 // Store default properties for custom primitives
@@ -328,7 +330,7 @@ export function updateEntity(uuid, updates) {
         }
         
         // Update code editor
-        updateMonacoSafely();
+        updateMonacoSafely(0, 2, 'entity-update');
         
         logAction(`Updated entity: ${uuid}`);
         
@@ -452,12 +454,7 @@ export function recreateEntitiesFromState(entitiesState) {
             }
             
             // Skip system entities
-            if (['default-light', 'directional-light', 'sky', 'naf-template'].includes(entity.id)) {
-                return false;
-            }
-            
-            // Skip the sky as we've already handled it
-            if (tagName === 'a-sky') {
+            if (SYSTEM_ENTITY_IDS.includes(entity.id)) {
                 return false;
             }
             
@@ -494,11 +491,6 @@ export function recreateEntitiesFromState(entitiesState) {
                 // Skip if no type (should not happen)
                 if (!type) {
                     console.error(`Entity ${uuid} has no type`, entityData);
-                    return;
-                }
-                
-                // Skip the sky (already handled)
-                if (type === 'sky') {
                     return;
                 }
                 
@@ -627,79 +619,50 @@ function formatAttributeHTML(key, value) {
 }
 
 /**
- * Generate HTML representation of all entities in state
- * @returns {string} HTML string representing all entities in state
+ * Check if an entity is a system entity that should be filtered
+ * @param {Object} entityData - Entity data from state
+ * @param {string} uuid - Entity UUID
+ * @returns {boolean} True if entity is a system entity
  */
-export function generateEntitiesHTML() {
-    const state = getState();
-    const entities = state.entities;
-    let html = '';
+function isSystemEntity(entityData, uuid) {
+    if (!entityData) return false;
     
-    Object.keys(entities).forEach(uuid => {
-        const entityData = entities[uuid];
-        if (!entityData || !entityData.type) return;
-        
-        // Clean and standardize the data
-        const cleanedData = cleanEntityData(entityData);
-        const type = cleanedData.type;
-        
-        // Determine if this is a component-based type
-        const isComponentBased = COMPONENT_BASED_TYPES.includes(type);
-        const hasExplicitGeometry = cleanedData.geometry && Object.keys(cleanedData.geometry).length > 0;
-        
-        // Determine tag name
-        const tagName = (isComponentBased || hasExplicitGeometry) ? 'a-entity' : `a-${type}`;
-        
-        // Start tag
-        html += `  <${tagName}`;
-        
-        // Add ID if we have a mapping
-        if (state.entityMapping) {
-            for (const id in state.entityMapping) {
-                if (state.entityMapping[id] === uuid) {
-                    html += ` id="${id}"`;
-                    break;
-                }
-            }
-        }
-        
-        // Add UUID and DOM attributes
-        html += ` data-entity-uuid="${uuid}"`;
-        html += ` DOM="true"`;
-        
-        // Add all other attributes
-        Object.entries(cleanedData).forEach(([key, value]) => {
-            // Skip special attributes
-            if (key === 'type' || key === 'id' || shouldSkipAttribute(key)) return;
-            
-            // Handle geometry specially for component-based types
-            if (key === 'geometry') {
-                if (isComponentBased || hasExplicitGeometry) {
-                    const geometryData = { ...value };
-                    if (isComponentBased) {
-                        geometryData.primitive = type;
-                    }
-                    html += formatAttributeHTML('geometry', geometryData);
-                }
-                return;
-            }
-            
-            // Format and add other attributes
-            html += formatAttributeHTML(key, value);
-        });
-        
-        // Close tag
-        html += `></${tagName}>\n`;
-    });
+    // Use engine manager if it's initialized
+    if (window.engineManager && window.engineManager.initialized) {
+        return window.engineManager.isSystemEntity(entityData, uuid);
+    }
     
-    return html || '\n';
+    // Legacy fallback behavior below - will eventually be removed
+    
+    // Specific system entity IDs
+    if (SYSTEM_ENTITY_IDS.includes(entityData.id)) {
+        return true;
+    }
+    
+    // System entity types
+    if (Object.values(SYSTEM_ENTITY_TYPES).includes(entityData.type) &&
+        entityData.type !== 'sky' &&
+        entityData.type !== 'light') {
+        return true;
+    }
+    
+    // Skip auto-generated and networked entities
+    if (uuid.startsWith('entity-entity-') || 
+        (entityData.networked === true) || 
+        uuid === 'naf-template' || 
+        uuid === 'naf-avatar' || 
+        uuid === 'naf-camera') {
+        return true;
+    }
+    
+    return false;
 }
 
 /**
  * Update the Monaco editor safely using a retry mechanism
  */
-function updateMonacoSafely(retryCount = 0, maxRetries = 3) {
-    console.log(`Attempting to update Monaco editor (attempt ${retryCount + 1}/${maxRetries + 1})`);
+function updateMonacoSafely(retryCount = 0, maxRetries = 3, source = 'unknown') {
+    console.log(`[EDITOR UPDATE] Attempting to update Monaco editor (source: ${source}, attempt ${retryCount + 1}/${maxRetries + 1})`);
     
     // Dynamic import to avoid circular dependencies
     import('./monaco.js').then(monaco => {
@@ -708,31 +671,31 @@ function updateMonacoSafely(retryCount = 0, maxRetries = 3) {
             const editorInstance = monaco.getEditorInstance ? monaco.getEditorInstance() : null;
             
             if (editorInstance) {
-                console.log('Monaco editor instance found, updating content');
+                console.log(`[EDITOR UPDATE] Monaco editor instance found, updating content (source: ${source})`);
                 monaco.updateMonacoEditor();
             } else if (window._fallbackMonacoEditor && monaco.setEditorInstance) {
-                console.log('Using fallback Monaco editor for update');
+                console.log(`[EDITOR UPDATE] Using fallback Monaco editor for update (source: ${source})`);
                 monaco.setEditorInstance(window._fallbackMonacoEditor);
                 monaco.updateMonacoEditor();
             } else if (retryCount < maxRetries) {
-                console.log('Monaco editor not available, will retry after delay');
-                setTimeout(() => updateMonacoSafely(retryCount + 1, maxRetries), 1000);
+                console.log(`[EDITOR UPDATE] Monaco editor not available, will retry after delay (source: ${source})`);
+                setTimeout(() => updateMonacoSafely(retryCount + 1, maxRetries, source), 1000);
             } else if (window.sceneBuilderDebug && window.sceneBuilderDebug.forceEditorUpdate) {
-                console.log('Using debug function to force editor update as last resort');
+                console.log(`[EDITOR UPDATE] Using debug function to force editor update as last resort (source: ${source})`);
                 window.sceneBuilderDebug.forceEditorUpdate();
             } else {
-                console.error('Failed to update Monaco editor after all retries');
+                console.error(`[EDITOR UPDATE] Failed to update Monaco editor after all retries (source: ${source})`);
             }
         } catch (error) {
-            console.error('Error during Monaco update:', error);
+            console.error(`[EDITOR UPDATE] Error during Monaco update (source: ${source}):`, error);
             if (retryCount < maxRetries) {
-                setTimeout(() => updateMonacoSafely(retryCount + 1, maxRetries), 1000);
+                setTimeout(() => updateMonacoSafely(retryCount + 1, maxRetries, source), 1000);
             }
         }
     }).catch(err => {
-        console.error('Error importing monaco module:', err);
+        console.error(`[EDITOR UPDATE] Error importing monaco module (source: ${source}):`, err);
         if (retryCount < maxRetries) {
-            setTimeout(() => updateMonacoSafely(retryCount + 1, maxRetries), 1000);
+            setTimeout(() => updateMonacoSafely(retryCount + 1, maxRetries, source), 1000);
         }
     });
 }
@@ -830,7 +793,7 @@ export function ensureEntityUUIDs() {
     const entityElements = scene.querySelectorAll('a-entity, a-box, a-sphere, a-cylinder, a-plane, a-sky');
     entityElements.forEach(element => {
         // Skip system entities
-        if (['default-light', 'directional-light', 'sky', 'naf-template'].includes(element.id)) {
+        if (SYSTEM_ENTITY_IDS.includes(element.id)) {
             return;
         }
         
@@ -904,7 +867,7 @@ export function ensureEntityUUIDs() {
         });
         
         // Update Monaco editor to reflect changes
-        updateMonacoSafely();
+        updateMonacoSafely(0, 2, 'ensure-entity-uuids');
     }
     
     return { 
@@ -944,11 +907,34 @@ export function addEntity(primitiveType, properties = {}, updateEditor = true) {
             defaultProps.rotation = { ...VECTOR_DEFAULTS.rotation, x: -90 };
             break;
         case 'light':
-            const lightDefaults = LIGHT_DEFAULTS.point;
-            defaultProps.type = 'point';
-            defaultProps.intensity = lightDefaults.intensity;
-            defaultProps.distance = lightDefaults.distance;
-            defaultProps.color = lightDefaults.color;
+            const lightType = properties.light?.type || 'point';
+            
+            // Get defaults for this light type
+            const lightDefaults = LIGHT_DEFAULTS[lightType] || LIGHT_DEFAULTS.point;
+            
+            // Create a light component if not present
+            defaultProps.light = defaultProps.light || {};
+            
+            // Set light component properties
+            defaultProps.light.type = lightType;
+            defaultProps.light.intensity = lightDefaults.intensity;
+            defaultProps.light.color = lightDefaults.color;
+            
+            // Only add distance for point and spot lights
+            if (lightType === 'point' || lightType === 'spot') {
+                defaultProps.light.distance = lightDefaults.distance;
+            }
+            
+            // Set position for directional and spot lights if applicable
+            if ((lightType === 'directional' || lightType === 'spot') && 
+                LIGHT_DEFAULTS[lightType]?.position && !defaultProps.position) {
+                defaultProps.position = { ...LIGHT_DEFAULTS[lightType].position };
+            }
+            
+            // Remove any direct light properties (to ensure they're in the light component)
+            delete defaultProps.type;
+            delete defaultProps.intensity;
+            delete defaultProps.distance;
             break;
     }
     
@@ -998,11 +984,34 @@ export function addEntity(primitiveType, properties = {}, updateEditor = true) {
             break;
             
         case 'light':
-            const lightDefaults = LIGHT_DEFAULTS.point;
-            defaultProps.type = 'point';
-            defaultProps.intensity = lightDefaults.intensity;
-            defaultProps.distance = lightDefaults.distance;
-            defaultProps.color = lightDefaults.color;
+            const lightType = properties.light?.type || 'point';
+            
+            // Get defaults for this light type
+            const lightDefaults = LIGHT_DEFAULTS[lightType] || LIGHT_DEFAULTS.point;
+            
+            // Create a light component if not present
+            defaultProps.light = defaultProps.light || {};
+            
+            // Set light component properties
+            defaultProps.light.type = lightType;
+            defaultProps.light.intensity = lightDefaults.intensity;
+            defaultProps.light.color = lightDefaults.color;
+            
+            // Only add distance for point and spot lights
+            if (lightType === 'point' || lightType === 'spot') {
+                defaultProps.light.distance = lightDefaults.distance;
+            }
+            
+            // Set position for directional and spot lights if applicable
+            if ((lightType === 'directional' || lightType === 'spot') && 
+                LIGHT_DEFAULTS[lightType]?.position && !defaultProps.position) {
+                defaultProps.position = { ...LIGHT_DEFAULTS[lightType].position };
+            }
+            
+            // Remove any direct light properties (to ensure they're in the light component)
+            delete defaultProps.type;
+            delete defaultProps.intensity;
+            delete defaultProps.distance;
             break;
     }
 
@@ -1046,7 +1055,7 @@ export function addEntity(primitiveType, properties = {}, updateEditor = true) {
     if (updateEditor && element) {
         // Small delay to ensure watcher has processed the entity
         setTimeout(() => {
-            forceEditorUpdate(100, 1);
+            forceEditorUpdate(100, 1, `add-entity-${primitiveType}`);
         }, 50);
     }
     
@@ -1058,11 +1067,11 @@ export function addEntity(primitiveType, properties = {}, updateEditor = true) {
  * @param {number} [delay=100] - Delay in ms before updating
  * @param {number} [retries=2] - Number of retries if update fails
  */
-export function forceEditorUpdate(delay = 100, retries = 2) {
-    console.log(`Scheduling Monaco editor update in ${delay}ms with ${retries} retries if needed`);
+export function forceEditorUpdate(delay = 100, retries = 2, source = 'force-update') {
+    console.log(`[EDITOR UPDATE] Scheduling Monaco editor update in ${delay}ms with ${retries} retries if needed (source: ${source})`);
     
     setTimeout(() => {
-        updateMonacoSafely(0, retries);
+        updateMonacoSafely(0, retries, source);
     }, delay);
 }
 
@@ -1157,4 +1166,118 @@ export function findEntitiesByProperty(property, value) {
         console.error(`Error finding entities with ${property}=${value}:`, error);
         return [];
     }
+}
+
+/**
+ * Generate HTML for all entities in the current state
+ * @returns {string} HTML string of entity markup
+ */
+export function generateEntitiesHTML() {
+    const state = getState();
+    const entities = state.entities;
+    let html = '';
+    
+    if (!entities) {
+        console.warn('No entities in state when generating HTML');
+        return '\n';
+    }
+    
+    // Get the scene source to help with filtering
+    const sceneSource = state.metadata?.sceneSource || 'unknown';
+    const isBlankScene = sceneSource === 'blank-scene' || 
+                         (state.metadata?.title === 'Blank Scene');
+    
+    console.log(`Generating entities HTML (scene source: ${sceneSource}, isBlank: ${isBlankScene})`);
+    
+    Object.keys(entities).forEach(uuid => {
+        const entityData = entities[uuid];
+        if (!entityData || !entityData.type) return;
+        
+        // We no longer filter out system entities
+        // This allows them to be displayed and edited in the Monaco editor
+        
+        // Clean and standardize the data
+        const cleanedData = cleanEntityData(entityData);
+        const type = cleanedData.type;
+        
+        // Determine if this is a component-based type
+        const isComponentBased = COMPONENT_BASED_TYPES.includes(type);
+        const hasExplicitGeometry = cleanedData.geometry && Object.keys(cleanedData.geometry).length > 0;
+        
+        // Determine tag name
+        const tagName = (isComponentBased || hasExplicitGeometry) ? 'a-entity' : `a-${type}`;
+        
+        // Start tag
+        html += `  <${tagName}`;
+        
+        // Process attributes based on type
+        Object.entries(cleanedData).forEach(([key, value]) => {
+            // Skip certain attributes
+            if (shouldSkipAttribute(key)) return;
+            
+            // How to handle this attribute
+            if (key === 'position' || key === 'rotation' || key === 'scale') {
+                if (typeof value === 'object') {
+                    html += ` ${key}="${vectorToString(value)}"`;
+                } else if (typeof value === 'string') {
+                    html += ` ${key}="${value}"`;
+                }
+            } else if (key === 'components') {
+                // Skip components as they are handled separately
+            } else if (key === 'children') {
+                // Skip children as they are handled separately
+            } else if (key === 'type') {
+                // Type is used for the tag name, so skip it as an attribute
+            } else if (key === 'DOM') {
+                // Skip DOM flag
+            } else if (key === 'uuid') {
+                // Skip uuid, already using it to reference the entity
+            } else if (key === 'geometry' && (isComponentBased || hasExplicitGeometry)) {
+                const geometryStr = Object.entries(value)
+                    .map(([gKey, gVal]) => `${gKey}: ${gVal}`)
+                    .join('; ');
+                html += ` geometry="${geometryStr}"`;
+            } else if (typeof value === 'object' && value !== null) {
+                // Handle objects (like materials)
+                const objStr = Object.entries(value)
+                    .map(([objKey, objVal]) => `${objKey}: ${objVal}`)
+                    .join('; ');
+                html += ` ${key}="${objStr}"`;
+            } else {
+                // For simple attributes just add them directly
+                html += ` ${key}="${value}"`;
+            }
+        });
+        
+        // Check for closing tag style
+        const isEmptyTag = false;
+        
+        if (isEmptyTag) {
+            html += ' />\n';
+        } else {
+            html += '>\n';
+            
+            // Add children if this entity has any
+            if (cleanedData.children && Array.isArray(cleanedData.children)) {
+                html += `    <!-- Child entities of ${cleanedData.id || type} -->\n`;
+                cleanedData.children.forEach(child => {
+                    // Recursively process child entity
+                    // This is a placeholder, actual recursive implementation would be more complex
+                    html += `    <a-entity id="${child.id || 'child'}"`;
+                    
+                    // Add basic attributes
+                    if (child.position) {
+                        html += ` position="${vectorToString(child.position)}"`;
+                    }
+                    
+                    html += '>\n    </a-entity>\n';
+                });
+            }
+            
+            // Close tag
+            html += `  </${tagName}>\n`;
+        }
+    });
+    
+    return html;
 } 
