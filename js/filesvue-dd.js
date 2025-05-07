@@ -1277,7 +1277,7 @@ export default {
                 this.viewOpts.fileView = "grid";
             }
             // Ensure selectedUser is set for folder/icon views
-            if ((mode === "folder" || mode === "icon") && !this.selectedUser && this.owners.length > 0) {
+            if ((mode === "folder" || mode === "icon") && !this.selectedUser && this.owners.length >= 0) {
                 this.selectedUser = this.saccountapi.name || this.owners[0];
             }
         },
@@ -2857,7 +2857,7 @@ export default {
 
             this.files = {};
             this.userFolderTrees = {};
-
+            this.owners.push(this.saccountapi.name)
             for (var i in contracts) {
                 if (contracts[i].c == 1) continue;
                 const id = contracts[i].i;
