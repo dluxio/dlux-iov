@@ -3578,6 +3578,10 @@ function buyNFT(setname, uid, price, type, callback){
         })
           .then((r) => r.json())
           .then((res) => {
+            if (!res || !res.result) {
+              console.log('Invalid API response:', res);
+              return;
+            }
             this.postSelect[this.postSelect.entry].p = false;
             var authors = [];
             this.postSelect[this.postSelect.entry].o +=
