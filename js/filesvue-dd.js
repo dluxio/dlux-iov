@@ -1035,7 +1035,7 @@ export default {
                 } else {
                     alert(`Folder "${folderName}" is already pending creation.`);
                 }
-            } else if (folderName && this.selectedUser !== this.account) {
+            } else if (folderName && (this.selectedUser !== this.account)){
                 alert("Cannot create folders for other users.");
             }
         },
