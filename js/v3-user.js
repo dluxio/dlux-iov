@@ -1622,8 +1622,6 @@ PORT=3000
               }
             }
           }
-          console.log(this.spkapi.pubKey, {contractOpen})
-          
           // Check if Hive posting key and SPK key are different and SPK key isn't 'NA'
           if (this.accountinfo && this.spkapi.pubKey !== 'NA' && 
               this.accountinfo.posting.key_auths && 
@@ -4433,7 +4431,6 @@ function buyNFT(setname, uid, price, type, callback){
     getRcAccount(account) {
       this.hiveApiCall('rc_api.find_rc_accounts', { accounts: [account] })
         .then(result => {
-          console.log(result)
           this.rcAccount = result.rc_accounts[0];
         });
     },

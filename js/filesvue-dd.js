@@ -2655,7 +2655,6 @@ export default {
                 indexToPath[index] = fullPath;
                 currentIndex++;
             }
-            console.log(indexToPath)
             return indexToPath;
         },
         buildFolderTree(files) {
@@ -2939,7 +2938,6 @@ export default {
                             license: flags.includes("-") ? flags.split("-")[1] : "",
                             labels: flags.includes("-") ? flags.split("-")[2] : flags.slice(1),
                         };
-                        console.log('thumb', thumb)
                         if (thumb) this.getImgData(id, filesNames[j]);
                         if (this.newMeta[id][filesNames[j]].flags & 1) this.newMeta[id][filesNames[j]].encrypted = true;
                         if (this.newMeta[id][filesNames[j]].flags & 2) this.newMeta[id][filesNames[j]].is_thumb = true
