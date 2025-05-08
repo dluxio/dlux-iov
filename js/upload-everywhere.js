@@ -224,6 +224,16 @@ export default {
             );
             if (newFilesToAdd.length > 0) {
                 this.droppedFiles = [...this.droppedFiles, ...newFilesToAdd];
+                
+                // Structure the files for upload
+                const structuredFiles = newFilesToAdd.map(file => ({
+                    file: file,
+                    targetPath: null // or set a default path if needed
+                }));
+                
+                // Add to structured files array
+                this.structuredFilesForUpload = [...this.structuredFilesForUpload, ...structuredFiles];
+                
                 this.calculateFileSizes();
                 this.showContractButton = true; // Show button whenever files are added
                 this.pickContract('addFiles'); // Re-evaluate contract after adding files
