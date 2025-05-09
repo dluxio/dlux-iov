@@ -1980,19 +1980,11 @@
                                                                         Set Withdrawal Route
                                                                     </button>
                                                                 </modal-vue>
-                                                                <modal-vue
-                                                                    v-if="focus.id && hivestats.content_reward_percent"
-                                                                    func="claim_account" :mypfp="mypfp" token="HP"
-                                                                    :tokenuser="focus" :account="account"
-                                                                    :tokenstats="hivestats" @tosign="toSign = $event"
-                                                                    :type="{}" v-slot:trigger
-                                                                    class="dropdown-menu-item">
-                                                                    <button class="text-nowrap dropdown-item trigger"
-                                                                        slot="trigger"
+                                                                    <button class="dropdown-menu-item text-nowrap dropdown-item trigger"
+                                                                        @click="claimACT()"
                                                                         :disabled="!(parseF(focus.vesting_shares) > 1000000)">Claim
                                                                         Account Creation Token
                                                                     </button>
-                                                                </modal-vue>
                                                             </div>
                                                         </div>
                                                     </div>
