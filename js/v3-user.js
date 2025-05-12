@@ -1623,7 +1623,7 @@ PORT=3000
             }
           }
           // Check if Hive posting key and SPK key are different and SPK key isn't 'NA'
-          if (this.accountinfo && this.spkapi.pubKey !== 'NA' && 
+          if (this.accountinfo.posting && this.spkapi.pubKey !== 'NA' && 
               this.accountinfo.posting.key_auths && 
               this.accountinfo.posting.key_auths[0] && 
               this.accountinfo.posting.key_auths[0][0] !== this.spkapi.pubKey) {
