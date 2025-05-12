@@ -69,7 +69,7 @@
                     <button :title="behindTitle" type="button" class="btn btn-sm mx-2 w-100"
                       :class="[{'btn-outline-success':behind < 30},{'btn-outline-warning':behind >= 30 && behind < 60},{'btn-outline-danger':behind >= 60}]"
                       data-bs-toggle="modal" data-bs-target="#runnerStatusModal">
-                      {{result.length}}<i class="fas fa-user-lock ms-1"></i></span>
+                      {{runners.length}}<i class="fas fa-user-lock ms-1"></i></span>
                     </button>
                   </li>
                   <li class="d-flex mt-2 mb-1" v-if="isnode">
