@@ -1011,23 +1011,98 @@ export default {
         if (a > b) { return 1; }
         return 0;
       })
-      var metaString = `1${this.stringOfKeys()}${folderListString ? '|' + folderListString : ''}`;
+      var metaString = `1${this.stringOfKeys()}`;
+      if (folderListString) {
+        metaString += '|' + folderListString;
+      }
+      
       const fileMetaEntries = [];
 
+      console.log("Path to index map in upload:", pathToIndexMap);
+
       for (var name in this.FileInfo) {
+        const fileInfo = this.FileInfo[name];
+
+        // --- Start Sanitization and Path Index ---
+        let sanitizedFileName = fileInfo.meta.name.replaceAll(',', '-'); // Replace commas
+        sanitizedFileName = sanitizedFileName.substring(0, 32); // Cap length
+        if (!sanitizedFileName) sanitizedFileName = '__'; // Ensure min length 2
+        if (sanitizedFileName.length < 2) sanitizedFileName = sanitizedFileName + '_'
+        
+        let sanitizedExt = fileInfo.meta.ext
+        // max 4 chars, all lowercase, alphanumeric only
+        sanitizedExt = sanitizedExt.substring(0, 4).toLowerCase().replace(/[^a-z0-9]/g, '');
+        
+        let sanitizedThumb = fileInfo.meta.thumb
+        // valid IPFS CID and full https urls are allowed
+        const ipfsPattern = /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/; // Simplified IPFS CID pattern
+        const urlPattern = /^(https?:\/\/[^\s$.?#].[^\s]*)$/; 
+        if (!ipfsPattern.test(sanitizedThumb) && !urlPattern.test(sanitizedThumb)) {
+          sanitizedThumb = ""
+        }
+        
+        let sanitizedFlag = `${fileInfo.meta.flag}-${fileInfo.meta.license}-${fileInfo.meta.labels}`
+        const flagsPattern = /^([0-9a-zA-Z+/=]?)-([0-9a-zA-Z+/=]?)-([0-9a-zA-Z+/=]*)$/
+        if (!flagsPattern.test(sanitizedFlag)) {
+          sanitizedFlag = `--`
+        }
+        
+        // Get appropriate path for the file
+        const fullAppPath = fileInfo.meta?.fullAppPath || '';
+        const lastSlash = fullAppPath.lastIndexOf('/');
+        const folderPath = lastSlash > -1 ? fullAppPath.substring(0, lastSlash) : '';
+        
+        // Look up the folder index in pathToIndexMap
+        const pathIndex = pathToIndexMap[folderPath] || '0';
+        
+        // Format extension with path suffix: ext.pathIndex
+        // But only add the pathIndex if it's not the root (0)
+        const extWithPath = sanitizedExt + (pathIndex !== '1' ? '.' + pathIndex : '');
+        
+        console.log(`File: ${fileInfo.name}, Path: ${folderPath}, Index: ${pathIndex}, Formatted extension: ${extWithPath}`);
+        
+        // --- End Sanitization and Path Index ---
+
         for (var i = 0; i < cids.length; i++) {
-          if (this.FileInfo[name].hash == cids[i]) {
-            this.File[this.FileInfo[name].index].cid = cids[i]
-            fileMetaEntries.push(this.FileInfo[name].meta.name + ',' + this.FileInfo[name].meta.ext + ',' + this.FileInfo[name].meta.thumb + ',' + this.FileInfo[name].meta.flag + '-' + this.FileInfo[name].meta.license + '-' + this.FileInfo[name].meta.labels);
+          if (fileInfo.hash == cids[i]) {
+            this.File[fileInfo.index].cid = cids[i];
+            // Format: name,ext.pathIndex,thumb,flags
+            fileMetaEntries.push(`${sanitizedFileName},${extWithPath},${sanitizedThumb},${sanitizedFlag}`);
             break;
-          } else if (this.FileInfo[name].enc_hash == cids[i]) {
-            this.File[this.FileInfo[name].enc_index].cid = cids[i]
-            fileMetaEntries.push(this.FileInfo[name].meta.name + ',' + this.FileInfo[name].meta.ext + ',' + this.FileInfo[name].meta.flag + '-' + this.FileInfo[name].meta.labels);
+          } else if (fileInfo.enc_hash == cids[i]) {
+            this.File[fileInfo.enc_index].cid = cids[i];
+            // Same format for encrypted files
+            fileMetaEntries.push(`${sanitizedFileName},${extWithPath},${sanitizedThumb},${sanitizedFlag}`);
             break;
           }
         }
       }
-      metaString += fileMetaEntries.join('');
+      
+      // Add file metadata entries to the string
+      if (fileMetaEntries.length > 0) {
+        metaString += (metaString.endsWith(',') ? '' : ',') + fileMetaEntries.join(',');
+      }
+      
+      console.log({metaString});
+      // return // for testing without actual upload
+      
+      // var metaString = `1${this.stringOfKeys()}${folderListString ? '|' + folderListString : ''}`;
+      // const fileMetaEntries = [];
+
+      // for (var name in this.FileInfo) {
+      //   for (var i = 0; i < cids.length; i++) {
+      //     if (this.FileInfo[name].hash == cids[i]) {
+      //       this.File[this.FileInfo[name].index].cid = cids[i]
+      //       fileMetaEntries.push(this.FileInfo[name].meta.name + ',' + this.FileInfo[name].meta.ext + ',' + this.FileInfo[name].meta.thumb + ',' + this.FileInfo[name].meta.flag + '-' + this.FileInfo[name].meta.license + '-' + this.FileInfo[name].meta.labels);
+      //       break;
+      //     } else if (this.FileInfo[name].enc_hash == cids[i]) {
+      //       this.File[this.FileInfo[name].enc_index].cid = cids[i]
+      //       fileMetaEntries.push(this.FileInfo[name].meta.name + ',' + this.FileInfo[name].meta.ext + ',' + this.FileInfo[name].meta.flag + '-' + this.FileInfo[name].meta.labels);
+      //       break;
+      //     }
+      //   }
+      // }
+      // metaString += fileMetaEntries.join('');
 
       const ENDPOINTS = {
         UPLOAD: `${this.contract.api}/upload`,
