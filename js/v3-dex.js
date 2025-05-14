@@ -3,6 +3,7 @@ import Navue from "/js/v3-nav.js";
 import FootVue from "/js/footvue.js";
 import MCommon from "/js/methods-common.js";
 import DataCommon from "/js/dataCommon.js";
+import ModalVue from "/js/modal-manager.js";
 import { Chart, registerables } from 'chart.js';
 import { Line } from "https://cdn.jsdelivr.net/npm/vue-chartjs@5.3.1/dist/index.min.js";
 import {
@@ -229,6 +230,8 @@ createApp({
       sendHBDMemo: "",
       recenthive: {},
       recenthbd: {},
+      dailyhive: [],
+      dailyhbd: [],
       openorders: [],
       orders: {
         filleda: false,
@@ -302,6 +305,7 @@ createApp({
   },
   components: {
     CandlestickChart,
+    "modal-vue": ModalVue,
     "nav-vue": Navue,
     "foot-vue": FootVue,
   },
@@ -797,6 +801,12 @@ createApp({
         }
     },
     getHistorical() {
+      if(!this.stats.lastIBlock){
+        setTimeout(() => {
+          this.getHistorical()
+        }, 1000)
+        return
+      }
       const pair = this.buyhive.checked ? "hive" : "hbd";
       const numbars = this.barcount;
       const period = parseInt(this.barwidth);
@@ -820,7 +830,20 @@ createApp({
           c: 0,
           v: 0,
         };
-      for (var i = 0; i < buckets.length; i++) {
+      var dailypair = []
+      for (var i = buckets.length - 1; i >= 0; i--) {
+        if(dex.markets[pair]?.days[buckets[i]].d){
+          dailypair.push({
+            trade_timestamp: new Date(
+            now - (3000 * (current_block - parseInt(buckets[i])))
+          ).getTime(),
+          open: dex.markets[pair]?.days[buckets[i]].o,
+          high: dex.markets[pair]?.days[buckets[i]].t,
+          low: dex.markets[pair]?.days[buckets[i]].b,
+          close: dex.markets[pair]?.days[buckets[i]].c,
+          volume: dex.markets[pair]?.days[buckets[i]].d,
+          })
+        }
         if (
           new Date(
             now - 3000 * (current_block - parseInt(buckets[i]))
@@ -900,6 +923,7 @@ createApp({
           }
         }
       }
+      this[`daily${pair}`] = dailypair
       let items = recent ? Object.keys(dex.markets[pair.toLowerCase()].his) : []
       for (var i = 0; i < items.length; i++) {
         if (
@@ -1110,6 +1134,7 @@ createApp({
       fetch(this.lapi + "/api/protocol")
         .then((response) => response.json())
         .then((data) => {
+          this.protocol = data
           this.prefix = data.prefix;
           this.multisig = data.multisig;
           this.jsontoken = data.jsontoken;
@@ -1197,6 +1222,18 @@ createApp({
             this.accountinfo = data.result[0];
             this.barhive = this.accountinfo.balance;
             this.barhbd = this.accountinfo.hbd_balance;
+            if (user == this.account) {
+            try {
+              var profilePicUrl = '/img/no-user.png'
+              const metadata = JSON.parse(this.accountinfo.posting_json_metadata || this.accountinfo.json_metadata || '{}');
+              if (metadata.profile && metadata.profile.profile_image) {
+                profilePicUrl = metadata.profile.profile_image;
+              }
+              this.mypfp = profilePicUrl
+            } catch (e) {
+              this.mypfp = '/img/no-user.png'
+            }
+          }
           });
         if (localStorage.getItem(`hhp:${user}`) && 
           localStorage.getItem(`hhp:${user}`) >

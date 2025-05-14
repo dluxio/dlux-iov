@@ -91,333 +91,113 @@
                 </ul>
               </div>
             </div>
-            <!-- Token Menu -->
-            <div v-if="hasDrop || accountapi.claim" class="d-flex me-1 dropdown align-items-center">
-              <a class="btn btn-outline-danger d-flex align-items-center" data-bs-auto-close="outside" role="button"
-                id="claimDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-gift fa-fw force-parent-lh"></i>
-                <span class="d-none d-sm-block ms-1">CLAIM</span></a>
-              <ul class="dropdown-menu dropdown-menu-dark p-2 bg-black text-white-50 text-left"
-                aria-labelledby="claimDropdownBtn" style="width: 300px">
-                <li>
-                  <h6 class="dropdown-header text-center">
-                    CLAIM {{TOKEN}}
-                  </h6>
+            <!-- Dynamic Token Action Menu -->
+            <div v-if="account" class="dropdown ms-auto d-none d-xl-flex align-items-center text-white-50">
+              <a class="dropdown-toggle text-honey no-decoration d-flex align-items-center" href="#" role="button"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="me-2">{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}</span>
+                <i class="fa-solid fa-wallet"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-dark bg-black">
+                <li class="dropdown-header text-center">{{TOKEN}} WALLET</li>
+
+                <!-- Balances Summary -->
+                <li class="p-2">
+                  <div class="d-flex flex-column text-center mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <span class="text-honey">{{TOKEN}}:</span>
+                      <span class="text-honey">{{formatNumber(accountapi.balance/pow10(protocol.precision),3,'.',',')}}</span>
+                    </div>
+                    <div v-if="accountapi.poweredUp"
+                      class="d-flex justify-content-between align-items-center mb-1">
+                      <span class="text-primary">{{TOKEN}}P:</span>
+                      <span class="text-primary">{{formatNumber(accountapi.poweredUp/pow10(protocol.precision),3,'.',',')}}</span>
+                    </div>
+                    <div v-if="accountapi.gov"
+                      class="d-flex justify-content-between align-items-center">
+                      <span class="text-info">{{TOKEN}}G:</span>
+                      <span class="text-info">{{formatNumber(accountapi.gov/pow10(protocol.precision),3,'.',',')}}</span>
+                    </div>
+                  </div>
+                  <hr class="dropdown-divider">
                 </li>
-                <li v-if="hasDrop">
-                  <form>
-                    <div class="row mb-3">
-                      <label class="form-label">Airdrop:</label>
-                      <div class="input-group">
-                        <div id="nodeDrop" class="form-control bg-black border-rb text-white text-center square">
-                          {{dropnai}}
-                        </div>
-                      </div>
+
+                <!-- Claim Rewards -->
+                <li v-for="action in features">
+                  <div class="p-2">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span v-if="action.id == 'rewards' || action.id == 'claim'">{{action.string}}:</span>
+                      <span v-if="action.id == 'rewards' || action.id == 'claim'">{{formatNumber(accountapi[action.addr || 'balance']/pow10(protocol.precision),3,'.',',')}}
+                        {{TOKEN}}</span>
                     </div>
-                    <div class="row mb-3">
-                      <div class="text-center mt-3">
-                        <button id="claimDrop" type="button" class="btn background-rb" @click="dropClaim()">
-                          Claim<i class="fas fa-coins ms-2"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </form>
+
+                    <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="action.id" :mypfp="mypfp" :token="TOKEN" :tokenuser="accountapi" :account="account" :tokenprotocol="protocol"
+                      :tokenstats="stats" @tosign="toSign = $event" v-slot:trigger class="d-flex">
+                      <button type="button" class="btn btn-info w-100 trigger">
+                        {{action.string}}<i :class="action.fa_class"></i>
+                      </button>
+                    </modal-vue>
+                  </div>
+                  <hr class="dropdown-divider">
                 </li>
-                <li v-if="accountapi.claim">
-                  <form>
-                    <div class="row mb-2">
-                      <label class="form-label">Rewards:</label>
-                      <div class="input-group">
-                        <div id="nodeRewards"
-                          class="form-control bg-black border-rb border-2 text-white text-center square">
-                          {{formatNumber(accountapi.claim/1000,3,'.',',')}} {{TOKEN}}
-                        </div>
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <div class="form-check form-switch d-flex justify-content-center"
-                        v-if="isnode && features.rewardSel">
-                        <input type="checkbox" class="form-check-input me-2" v-model="features.reward2Gov"
-                          role="switch" />
-                        <label class="form-check-label">Claim 1/2 to Gov</label>
-                      </div>
-                    </div>
-                    <div class="row mb-2">
-                      <div class="text-center">
-                        <button type="button" class="btn btn-danger" @click="rewardClaim()">
-                          Claim<i class="fas fa-coins ms-2"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                </li>
+
               </ul>
             </div>
-            <!-- token balance wallet button -->
-            <button v-if="account" type="button"
-              class="ms-auto btn d-xl-none btn-outline-success ms-auto d-flex align-items-center" data-bs-toggle="modal"
-              data-bs-target="#dexWallet">
-              <i class="fa-solid fa-paper-plane force-parent-lh"></i>
-              <span class="fs-6 d-none d-sm-block ms-1" v-cloak>{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}</span>
-              <i class="ms-1 fa-fw fa-solid fa-caret-down d-none d-md-block"></i>
-            </button>
-            <!-- xl wallet-->
-            <div class="ms-auto d-none d-xl-flex align-items-center text-white-50">
-              <!-- send token form -->
-              <div v-if="account" id="userSendToken" class="mx-1" v-if="features.send_B">
-                <a class="dropdown-toggle text-honey no-decoration" data-bs-auto-close="outside" role="button"
-                  id="sendDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false" v-cloak>
-                  <span class="me-1" v-cloak>{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}</span></a>
-                <ul class="dropdown-menu dropdown-menu-dark p-2 bg-black text-white-50 text-left" style="width: 300px"
-                  aria-labelledby="sendDropdownBtn">
-                  <li>
-                    <h6 class="dropdown-header text-center">
-                      SEND {{TOKEN}}
-                    </h6>
-                  </li>
-                  <li>
-                    <form id="sendForm" @submit.prevent="validateForm('sendForm', 'sendFormValid');tokenSend()"
-                      class="needs-validation" novalidate>
-                      <div class="row mb-3">
-                        <label class="form-label">To:</label>
-                        <div class="input-group">
-                          <span class="input-group-text k text-white-50">
-                            @</span>
-                          <input class="form-control text-info" v-model="sendTo"
-                            @blur="checkAccount('sendTo', 'sendAllowed')" required id="sendTokenTo" type="text"
-                            placeholder="Recipient" />
-                        </div>
+
+            <!-- HIVE Balance -->
+            <div v-if="account" id="userHive" class="mx-1">
+              <a class="dropdown-toggle text-hive no-decoration" data-bs-auto-close="outside" role="button"
+                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
+                <span class="me-1" v-cloak>{{formatNumber(barhive,3,'.',',')}} HIVE</span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-dark text-white-50 p-2 text-left bg-black" style="width: 300px">
+                <li>
+                  <h6 class="dropdown-header text-center">SEND HIVE</h6>
+                </li>
+                <li>
+                  <form id="hiveForm" @submit.prevent="validateForm('hiveForm', 'hiveFormValid');sendhive()"
+                    class="needs-validation" novalidate>
+                    <div class="row mb-3">
+                      <label class="form-label" for="sendHiveTo">To:</label>
+                      <div class="input-group">
+                        <span class="input-group-text text-white-50">
+                          @
+                        </span>
+                        <input id="sendHiveTo" class="form-control text-info"
+                          @blur="checkAccount('sendHiveTo', 'sendHiveAllowed')" required v-model="sendHiveTo"
+                          type="text" placeholder="Recipient" />
                       </div>
-                      <div class="row mb-3">
-                        <label class="form-label">Amount:</label>
-                        <div class="input-group">
-                          <input class="form-control text-info" v-model="sendAmount" required type="number" step="0.001"
-                            min="0.001" :max="parseF(bartoken)" placeholder="0.000" />
-                          <span class="input-group-text text-white-50">
-                            {{TOKEN}}
-                          </span>
-                        </div>
-                        <div class="small text-center pt-2">
-                          <a role="button" @click="setValue('sendAmount', parseF(bartoken))"
-                            class="text-honey no-decoration">{{formatNumber(bartoken,3,'.',',')}}
-                            {{TOKEN}}</a>
-                          Available
-                        </div>
+                    </div>
+                    <div class="row mb-3">
+                      <label class="form-label">Amount:</label>
+                      <div class="input-group">
+                        <input class="form-control text-info" required v-model="sendHiveAmount" type="number"
+                          step="0.001" min="0.001" :max="parseF(barhive)" placeholder="0.000" />
+                        <span class="input-group-text text-white-50">
+                          HIVE
+                        </span>
                       </div>
-                      <div class="row mb-3">
-                        <label class="form-label">Memo:</label>
-                        <div class="input-group">
-                          <input class="form-control text-info" v-model="sendMemo" type="text"
-                            placeholder="memo (optional)" />
-                        </div>
+                      <div class="small text-center pt-2">
+                        <a type="button" @click="setValue('sendHiveAmount',parseF(barhive))"
+                          class="text-hive no-decoration">{{formatNumber(barhive,3,'.',',')}} HIVE</a>
+                        Available
                       </div>
-                      <div class="text-center mb-2">
-                        <button type="submit" class="btn btn-honey">
-                          Send<i class="fas fa-paper-plane ms-2"></i>
-                        </button>
+                    </div>
+                    <div class="row mb-3">
+                      <label class="form-label">Memo:</label>
+                      <div class="input-group">
+                        <input class="form-control text-info" type="text" v-model="sendHiveMemo"
+                          placeholder="memo (optional)" />
                       </div>
-                    </form>
-                  </li>
-                </ul>
-              </div>
-              <!-- power form -->
-              <div id="userPwr" class="mx-1" v-if="account && (features.powup_B || features.powdn_B)">
-                <a class="dropdown-toggle text-primary no-decoration" data-bs-auto-close="outside" role="button"
-                  data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak><span class="me-1"
-                    v-cloak>{{formatNumber(barpow,3,'.',',')}} {{TOKEN}}P</span></a>
-                <ul class="dropdown-menu dropdown-menu-dark p-2 text-white-50 text-left bg-black" style="width: 300px">
-                  <li>
-                    <h6 class="dropdown-header text-center">
-                      {{TOKEN}} POWER
-                    </h6>
-                  </li>
-                  <li>
-                    <form id="powForm" @submit.prevent="validateForm('powForm', 'powFormValid');power()"
-                      class="needs-validation" novalidate>
-                      <div class="row mb-3 text-center">
-                        <div>
-                          <div class="btn-group text-nowrap">
-                            <input class="btn-check" type="radio" name="pwrPair" id="pwrUp"
-                              :checked="features.powsel_up" @click="setValue('features.powsel_up', true)" />
-                            <label for="pwrUp" class="btn btn-outline-primary">
-                              PWR UP
-                            </label>
-                            <input class="btn-check" type="radio" name="pwrPair" id="pwrDown"
-                              :checked="!features.powsel_up" @click="setValue('features.powsel_up', false)" />
-                            <label for="pwrDown" class="btn btn-outline-primary">PWR DOWN
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <label class="form-label">Amount:</label>
-                        <div class="input-group">
-                          <input class="form-control text-primary" v-if="features.powsel_up" v-model="features.pow_val"
-                            required type="number" step="0.001" min="0.001" :max="parseF(bartoken)"
-                            placeholder="0.000" />
-                          <input class="form-control text-primary" v-if="!features.powsel_up" v-model="features.pow_val"
-                            required type="number" step="0.001" min="0.001" :max="parseF(barpow)" placeholder="0.000" />
-                          <span class="input-group-text text-white-50" v-if="features.powsel_up">
-                            {{TOKEN}}
-                          </span>
-                          <span class="input-group-text text-white-50" v-if="!features.powsel_up">
-                            {{TOKEN}}P
-                          </span>
-                        </div>
-                        <div class="small text-center py-2" v-if="features.powsel_up">
-                          <a type="button" @click="setValue('features.pow_val',balance)"
-                            class="text-primary no-decoration">{{formatNumber(bartoken,3,'.',',')}}
-                            {{TOKEN}}</a>
-                          Available
-                        </div>
-                        <div class="small text-center py-2" v-if="!features.powsel_up">
-                          <a role="button" @click="setValue('features.pow_val',accountapi.poweredUp/1000)"
-                            class="text-primary no-decoration">{{formatNumber(barpow,3,'.',',')}}
-                            {{TOKEN}}P</a>
-                          Available
-                        </div>
-                      </div>
-                      <div class="text-center mb-2">
-                        <button type="submit" class="btn btn-primary" v-if="features.powsel_up">
-                          Power Up<i class="fas fa-arrow-alt-circle-up ms-2"></i>
-                        </button>
-                        <button type="submit" class="btn btn-primary" v-if="!features.powsel_up">
-                          Power Down<i class="fas fa-arrow-alt-circle-down ms-2"></i>
-                        </button>
-                      </div>
-                    </form>
-                  </li>
-                </ul>
-              </div>
-              <!-- gov form -->
-              <div id="userGov" class="mx-1" v-if="isnode && (features.govup_B || features.govdn_B)">
-                <a class="dropdown-toggle text-info no-decoration" role="button" data-bs-auto-close="outside"
-                  role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak><span
-                    class="me-1" v-cloak>{{formatNumber(bargov,3,'.',',')}} {{TOKEN}}G</span></a>
-                <ul class="dropdown-menu dropdown-menu-dark text-white-50 p-2 text-left bg-black" style="width: 300px">
-                  <li>
-                    <h6 class="dropdown-header text-center">
-                      {{TOKEN}} GOVERNANCE
-                    </h6>
-                  </li>
-                  <li class="text-center">
-                    <h4 class="dropdown-header">
-                      Current Threshold:
-                      {{formatNumber(stats.gov_threshhold/1000,3,'.',',')}}
-                    </h4>
-                  </li>
-                  <li>
-                    <form id="govForm" @submit.prevent="validateForm('govForm', 'govFormValid');gov()"
-                      class="needs-validation" novalidate>
-                      <div class="row mb-3 text-center">
-                        <div>
-                          <div class="btn-group">
-                            <input class="btn-check" type="radio" name="govPair" id="govLock"
-                              :checked="features.govsel_up" @click="setValue('features.govsel_up', true)" />
-                            <label for="govLock" class="btn btn-outline-info">
-                              LOCK
-                            </label>
-                            <input class="btn-check" type="radio" name="govPair" id="govUnlock"
-                              :checked="!features.govsel_up" @click="setValue('features.govsel_up', false)" />
-                            <label for="govUnlock" class="btn btn-outline-info">
-                              UNLOCK
-                            </label>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <label class="form-label">Amount:</label>
-                        <div class="input-group">
-                          <input class="form-control text-info" v-if="features.govsel_up" v-model="features.gov_val"
-                            required type="number" step="0.001" min="0.001" :max="parseF(bartoken)"
-                            placeholder="0.000" />
-                          <input class="form-control text-info" v-if="!features.govsel_up" v-model="features.gov_val"
-                            required type="number" step="0.001" min="0.001" :max="parseF(bargov)" placeholder="0.000" />
-                          <span class="input-group-text text-white-50" v-if="features.govsel_up">
-                            {{TOKEN}}
-                          </span>
-                          <span class="input-group-text text-white-50" v-if="!features.govsel_up">
-                            {{TOKEN}}G
-                          </span>
-                        </div>
-                        <div class="small text-center py-2" v-if="features.govsel_up">
-                          <a role="button" @click="setValue('features.gov_val',balance)"
-                            class="text-info no-decoration">{{formatNumber(bartoken,3,'.',',')}}
-                            {{TOKEN}}</a>
-                          Available
-                        </div>
-                        <div class="small text-center py-2" v-if="!features.govsel_up">
-                          <a role="button" @click="setValue('features.gov_val',accountapi.gov/1000)"
-                            class="text-info no-decoration">{{formatNumber(bargov,3,'.',',')}}
-                            {{TOKEN}}G</a>
-                          Locked
-                        </div>
-                      </div>
-                      <div class="text-center mb-2">
-                        <button type="submit" class="btn btn-info" v-if="features.govsel_up">
-                          Lock Gov<i class="fas fa-lock ms-2"></i>
-                        </button>
-                        <button type="submit" class="btn btn-info" v-if="!features.govsel_up">
-                          Unlock Gov<i class="fas fa-lock-open ms-2"></i>
-                        </button>
-                      </div>
-                    </form>
-                  </li>
-                </ul>
-              </div>
-              <!-- send hive form -->
-              <div v-if="account" id="userHive" class="mx-1">
-                <a class="dropdown-toggle text-hive no-decoration" data-bs-auto-close="outside" role="button"
-                  data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
-                  <span class="me-1" v-cloak>{{formatNumber(barhive,3,'.',',')}} HIVE</span></a>
-                <ul class="dropdown-menu dropdown-menu-dark text-white-50 p-2 text-left bg-black" style="width: 300px">
-                  <li>
-                    <h6 class="dropdown-header text-center">SEND HIVE</h6>
-                  </li>
-                  <li>
-                    <form id="hiveForm" @submit.prevent="validateForm('hiveForm', 'hiveFormValid');sendhive()"
-                      class="needs-validation" novalidate>
-                      <div class="row mb-3">
-                        <label class="form-label" for="sendHiveTo">To:</label>
-                        <div class="input-group">
-                          <span class="input-group-text text-white-50">
-                            @
-                          </span>
-                          <input id="" class="form-control text-info"
-                            @blur="checkAccount('sendHiveTo', 'sendHiveAllowed')" required v-model="sendHiveTo"
-                            type="text" placeholder="Recipient" />
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <label class="form-label">Amount:</label>
-                        <div class="input-group">
-                          <input class="form-control text-info" required v-model="sendHiveAmount" type="number"
-                            step="0.001" min="0.001" :max="parseF(barhive)" placeholder="0.000" />
-                          <span class="input-group-text text-white-50">
-                            HIVE
-                          </span>
-                        </div>
-                        <div class="small text-center pt-2">
-                          <a type="button" @click="setValue('sendHiveAmount',parseF(barhive))"
-                            class="text-hive no-decoration">{{formatNumber(barhive,3,'.',',')}} HIVE</a>
-                          Available
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <label class="form-label">Memo:</label>
-                        <div class="input-group">
-                          <input class="form-control text-info" type="text" v-model="sendHiveMemo"
-                            placeholder="memo (optional)" />
-                        </div>
-                      </div>
-                      <div class="text-center mb-2">
-                        <button type="submit" class="btn btn-hive">
-                          Send<i class="fas fa-paper-plane ms-2"></i>
-                        </button>
-                      </div>
-                    </form>
-              </div>
-              </li>
+                    </div>
+                    <div class="text-center mb-2">
+                      <button type="submit" class="btn btn-hive">
+                        Send<i class="fas fa-paper-plane ms-2"></i>
+                      </button>
+                    </div>
+                  </form>
+
+                </li>
               </ul>
             </div>
             <!-- send hbd form -->
@@ -477,7 +257,7 @@
       </div>
 
       <div class="container text-white pt-3">
-        <div v-if="!hidePrompt && !hasHiddenPrompt" class="alert alert-info p-2 mb-3" role="alert">
+        <div v-if="!hidePrompt && !hasHiddenPrompt && account" class="alert alert-info p-2 mb-3" role="alert">
           <div class="d-flex align-items-center justify-content-around flex-wrap">
             <div class="text-center">Help contribute to further development by supporting the <a
                 href="https://peakd.com/proposals/322" target="_blank">HoneyComb Improvement Proposal</a></div>
@@ -617,8 +397,7 @@
               <div class="mt-2 col">
                 <h5>Ask</h5>
                 <i class="fab fa-hive me-1"></i><span v-cloak>{{hivesells[0] ? hivesells[0].rate : 0}}</span><br />
-                <i class="fas fa-dollar-sign mx-1"></i><span v-cloak>{{toFixed((hivesells[0] ? hivesells[0].rate : 0 )
-                  *
+                <i class="fas fa-dollar-sign mx-1"></i><span v-cloak>{{toFixed((hivesells[0] ? hivesells[0].rate : 0 ) *
                   hiveprice.hive.usd, 6)}}</span>
               </div>
               <div class="mt-2 col">
@@ -1289,34 +1068,91 @@
           <div id="hiveTradeHistory" ref="chartContainer">
             <div class="row">
               <div class="mt-3 col-12">
-                <h4>Trade History</h4>
+                <h4>Detailed Trade History</h4>
                 <div class="table-responsive table-blur rounded border">
                   <table role="table" aria-busy="false" aria-colcount="4" class="table table-striped table-hover"
-                    id="hivetradehistorytable">
+                    id="hbdtradehistorytable">
                     <thead role="rowgroup" class="">
                       <tr role="row">
                         <th role="columnheader" scope="col" aria-colindex="1" class="">
-                          PRICE
+                          TIME
                         </th>
                         <th role="columnheader" scope="col" aria-colindex="2" class="">
-                          QTY
+                          PRICE
                         </th>
                         <th role="columnheader" scope="col" aria-colindex="3" class="">
-                          TIME
+                          QTY
                         </th>
                       </tr>
                     </thead>
                     <tbody role="rowgroup" class="tbody-scroll-history">
                       <tr class="" role="row" v-for="item in recenthive">
-                        <td aria-colindex="1" role="cell" class=""
+                        <td aria-colindex="1" role="cell" class="">
+                          {{new Date(item.trade_timestamp).toLocaleTimeString()}}
+                        </td>
+                        <td aria-colindex="2" role="cell" class=""
                           v-bind:class="{'text-danger': (item.type == 'sell'), 'text-success': (item.type == 'buy')}">
                           {{formatNumber(item.price,6,'.',',')}}
                         </td>
-                        <td aria-colindex="2" role="cell" class="">
+                        <td aria-colindex="3" role="cell" class="">
                           {{formatNumber(item.target_volume,3,'.',',')}}
                         </td>
-                        <td aria-colindex="3" role="cell" class="">
-                          {{trade_date(item.trade_timestamp)}}
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <h4>Daily Trade History</h4>
+                <div class="table-responsive table-blur rounded border">
+                  <table role="table" aria-busy="false" aria-colcount="4" class="table table-striped table-hover"
+                    id="hbdtradehistorytable">
+                    <thead role="rowgroup" class="">
+                      <tr role="row">
+                        <th role="columnheader" scope="col" aria-colindex="1" class="">
+                          DATE
+                        </th>
+                        <th role="columnheader" scope="col" aria-colindex="2" class="">
+                          OPEN
+                        </th>
+                        <th role="columnheader" scope="col" aria-colindex="4" class="">
+                          HIGH
+                        </th>
+                        <th role="columnheader" scope="col" aria-colindex="5" class="">
+                          LOW
+                        </th>
+                        <th role="columnheader" scope="col" aria-colindex="6" class="">
+                          CLOSE
+                        </th>
+                        <th role="columnheader" scope="col" aria-colindex="3" class="">
+                          VOLUME
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody role="rowgroup" class="tbody-scroll-history">
+                      <tr class="" role="row" v-for="item in dailyhive">
+                        <td aria-colindex="1" role="cell"
+                          v-bind:class="{'text-danger': (item.open < item.close), 'text-success': (item.open >= item.close)}">
+                          {{new
+                          Date(item.trade_timestamp).toLocaleDateString()}}
+                        </td>
+                        <td aria-colindex="2" role="cell"
+                          v-bind:class="{'text-danger': (item.open < item.close), 'text-success': (item.open >= item.close)}">
+                          {{formatNumber(item.open,6,'.',',')}}
+                        </td>
+                        <td aria-colindex="3" role="cell"
+                          v-bind:class="{'text-danger': (item.open < item.close), 'text-success': (item.open >= item.close)}">
+                          {{formatNumber(item.high,6,'.',',')}}
+                        </td>
+                        <td aria-colindex="4" role="cell"
+                          v-bind:class="{'text-danger': (item.open < item.close), 'text-success': (item.open >= item.close)}">
+                          {{formatNumber(item.low,6,'.',',')}}
+                        </td>
+                        <td aria-colindex="5" role="cell"
+                          v-bind:class="{'text-danger': (item.open < item.close), 'text-success': (item.open >= item.close)}">
+                          {{formatNumber(item.close,6,'.',',')}}
+                        </td>
+                        <td aria-colindex="6" role="cell"
+                          v-bind:class="{'text-danger': (item.open < item.close), 'text-success': (item.open >= item.close)}">
+                          {{formatNumber(item.volume / 1000,3,'.',',')}}
                         </td>
                       </tr>
                     </tbody>
@@ -1417,35 +1253,91 @@
           <div id="hbdTradeHistory">
             <div class="row">
               <div class="mt-3 col-12">
-                <h4>Trade History</h4>
+                <h4>Detailed Trade History</h4>
                 <div class="table-responsive table-blur rounded border">
                   <table role="table" aria-busy="false" aria-colcount="4" class="table table-striped table-hover"
                     id="hbdtradehistorytable">
                     <thead role="rowgroup" class="">
                       <tr role="row">
                         <th role="columnheader" scope="col" aria-colindex="1" class="">
-                          PRICE
+                          TIME
                         </th>
                         <th role="columnheader" scope="col" aria-colindex="2" class="">
-                          QTY
+                          PRICE
                         </th>
                         <th role="columnheader" scope="col" aria-colindex="3" class="">
-                          TIME
+                          QTY
                         </th>
                       </tr>
                     </thead>
                     <tbody role="rowgroup" class="tbody-scroll-history">
                       <tr class="" role="row" v-for="item in recenthbd">
-                        <td aria-colindex="1" role="cell" class=""
+                        <td aria-colindex="1" role="cell" class="">
+                          {{new Date(item.trade_timestamp).toLocaleTimeString()}}
+                        </td>
+                        <td aria-colindex="2" role="cell" class=""
                           v-bind:class="{'text-danger': (item.type == 'sell'), 'text-success': (item.type == 'buy')}">
                           {{formatNumber(item.price,6,'.',',')}}
                         </td>
-                        <td aria-colindex="2" role="cell" class="">
+                        <td aria-colindex="3" role="cell" class="">
                           {{formatNumber(item.target_volume,3,'.',',')}}
                         </td>
-                        <td aria-colindex="3" role="cell" class="">
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <h4>Daily Trade History</h4>
+                <div class="table-responsive table-blur rounded border">
+                  <table role="table" aria-busy="false" aria-colcount="4" class="table table-striped table-hover"
+                    id="hbdtradehistorytable">
+                    <thead role="rowgroup" class="">
+                      <tr role="row">
+                        <th role="columnheader" scope="col" aria-colindex="1" class="">
+                          DATE
+                        </th>
+                        <th role="columnheader" scope="col" aria-colindex="2" class="">
+                          OPEN
+                        </th>
+                        <th role="columnheader" scope="col" aria-colindex="3" class="">
+                          HIGH
+                        </th>
+                        <th role="columnheader" scope="col" aria-colindex="1" class="">
+                          LOW
+                        </th>
+                        <th role="columnheader" scope="col" aria-colindex="2" class="">
+                          CLOSE
+                        </th>
+                        <th role="columnheader" scope="col" aria-colindex="3" class="">
+                          VOLUME
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody role="rowgroup" class="tbody-scroll-history">
+                      <tr class="" role="row" v-for="item in dailyhbd">
+                        <td aria-colindex="3" role="cell"
+                          v-bind:class="{'text-danger': (item.open < item.close), 'text-success': (item.open >= item.close)}">
                           {{new
-                          Date(item.trade_timestamp).toLocaleTimeString()}}
+                          Date(item.trade_timestamp).toLocaleDateString()}}
+                        </td>
+                        <td aria-colindex="1" role="cell"
+                          v-bind:class="{'text-danger': (item.open < item.close), 'text-success': (item.open >= item.close)}">
+                          {{formatNumber(item.open,6,'.',',')}}
+                        </td>
+                        <td aria-colindex="1" role="cell"
+                          v-bind:class="{'text-danger': (item.open < item.close), 'text-success': (item.open >= item.close)}">
+                          {{formatNumber(item.high,6,'.',',')}}
+                        </td>
+                        <td aria-colindex="1" role="cell"
+                          v-bind:class="{'text-danger': (item.open < item.close), 'text-success': (item.open >= item.close)}">
+                          {{formatNumber(item.low,6,'.',',')}}
+                        </td>
+                        <td aria-colindex="1" role="cell"
+                          v-bind:class="{'text-danger': (item.open < item.close), 'text-success': (item.open >= item.close)}">
+                          {{formatNumber(item.close,6,'.',',')}}
+                        </td>
+                        <td aria-colindex="2" role="cell"
+                          v-bind:class="{'text-danger': (item.open < item.close), 'text-success': (item.open >= item.close)}">
+                          {{formatNumber(item.volume / 1000,3,'.',',')}}
                         </td>
                       </tr>
                     </tbody>
@@ -1935,36 +1827,34 @@
                           <div class="input-group">
                             <span class="input-group-text text-white-50">
                               @</span>
-                            <input class="form-control text-info" @blur="checkAccount('sendHBDTo', 'sendHBDAllowed')"
-                              required v-model="sendHBDTo" type="text" placeholder="Recipient" />
                           </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label class="form-label">Amount:</label>
-                          <div class="input-group">
-                            <input class="form-control text-info" required v-model="sendHBDAmount" type="number"
-                              step="0.001" min="0.001" :max="parseF(barhbd)" placeholder="0.000" />
-                            <span class="input-group-text text-white-50">
-                              HBD
-                            </span>
+                          <div class="row mb-3">
+                            <label class="form-label">Amount:</label>
+                            <div class="input-group">
+                              <input class="form-control text-info" required v-model="sendHBDAmount" type="number"
+                                step="0.001" min="0.001" :max="parseF(barhbd)" placeholder="0.000" />
+                              <span class="input-group-text text-white-50">
+                                HBD
+                              </span>
+                            </div>
+                            <div class="small text-center pt-2">
+                              <a role="button" @click="setValue('sendHBDAmount',parseF(barhbd))"
+                                class="text-hbd no-decoration">{{formatNumber(barhbd,3,'.',',')}} HBD</a>
+                              Available
+                            </div>
                           </div>
-                          <div class="small text-center pt-2">
-                            <a role="button" @click="setValue('sendHBDAmount',parseF(barhbd))"
-                              class="text-hbd no-decoration">{{formatNumber(barhbd,3,'.',',')}} HBD</a>
-                            Available
+                          <div class="row mb-3">
+                            <label class="form-label">Memo:</label>
+                            <div class="input-group">
+                              <input class="form-control text-info" v-model="sendHBDMemo" type="text"
+                                placeholder="memo (optional)" />
+                            </div>
                           </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label class="form-label">Memo:</label>
-                          <div class="input-group">
-                            <input class="form-control text-info" v-model="sendHBDMemo" type="text"
-                              placeholder="memo (optional)" />
+                          <div class="text-center mb-2">
+                            <button type="submit" class="btn btn-hbd">
+                              Send<i class="fas fa-paper-plane ms-2"></i>
+                            </button>
                           </div>
-                        </div>
-                        <div class="text-center mb-2">
-                          <button type="submit" class="btn btn-hbd">
-                            Send<i class="fas fa-paper-plane ms-2"></i>
-                          </button>
                         </div>
                       </form>
                     </div>

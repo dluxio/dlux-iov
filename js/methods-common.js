@@ -420,6 +420,9 @@ export default {
     this.$emit('tosign', op)
     this.toSign = op
   },
+  pow10(precision){
+    return Math.pow(10, precision)
+  },
   stopRT(from, to, type = "HIVE") {
     var op = {
       type: "raw",

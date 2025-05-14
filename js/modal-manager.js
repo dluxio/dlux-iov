@@ -28,10 +28,11 @@ export default {
         type: { default: "move" },
         reqid: String,
         mypfp: String,
+        features: Object,
     },
     data() {
         return {
-            modalId: `modal-${Math.random().toString(36).substr(2, 9)}`,
+            modalId: this.reqid || `modal-${Math.random().toString(36).substr(2, 9)}`,
             showModalListener: null,
             modalInstance: null,
             mutablefunc: "",
@@ -84,19 +85,26 @@ export default {
   </div>`,
     methods: {
         sendIt(op) {
-            console.log('mm')
             this.$emit("tosign", op)
         },
         openModal(data){
-            console.log(data, 1234)
             if(data){
                 this.mutablefunc = data
             } else {
                 this.mutablefunc = this.func
             }
-          },
+        },
+        triggerAction(featureId) {
+            const feature = this.features[featureId]
+            if (feature && feature.B) {
+                this.$emit("action", {
+                    id: featureId,
+                    feature: feature
+                })
+            }
+        }
     },
-    emits: ["tosign"],
+    emits: ["tosign", "action"],
     computed: {
         canShowModal() {
             if (this.type === 'move') {
@@ -109,6 +117,14 @@ export default {
                 return !!(this.tokenuser.id && this.tokenstats.content_reward_percent)
             }
         },
+        availableActions() {
+            return Object.entries(this.features || {})
+                .filter(([_, feature]) => feature.B)
+                .map(([id, feature]) => ({
+                    id,
+                    ...feature
+                }));
+        }
     },
     mounted() {
         if (this.$slots.trigger) {
@@ -122,7 +138,6 @@ export default {
                 this.modalInstance = modal
             }
         }
-
     },
     beforeUnmount() {
         if (this.showModalListener && this.modalInstance) {
