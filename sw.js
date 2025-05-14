@@ -1,4 +1,4 @@
-this.version = "2025.05.13.2";
+this.version = "2025.05.14.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -130,8 +130,10 @@ var urlsToCache = [
   `/js/bootstrap.bundle.min.js`,
   `/js/buffer.js`,
   `/js/cardvue.js`,
+  `/js/chartjs-adapter-date-fns.local.js`,
   `/js/chatvue.js`,
   `/js/choices-vue.js`,
+  `/js/chrtjscf.js`,
   `/js/codemirror-xml.min.js`,
   `/js/codemirror.min.js`,
   `/js/contract-modal.js`,
@@ -139,6 +141,7 @@ var urlsToCache = [
   `/js/contractvue-old.js`,
   `/js/cryptojs.min.js`,
   `/js/cycler.js`,
+  `/js/dataCommon.js`,
   `/js/dd.js`,
   `/js/detailvue.js`,
   `/js/dexvue.js`,
