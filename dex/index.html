@@ -131,7 +131,7 @@
                         {{TOKEN}}</span>
                     </div>
 
-                    <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="action.id" :mypfp="mypfp" :token="TOKEN" :tokenuser="accountapi" :account="account" :tokenprotocol="protocol"
+                    <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="action.id" :mypfp="mypfp" :token="TOKEN" :tokenuser="accountapi" :account="account" :tokenprotocol="protocol" :api="lapi"
                       :tokenstats="stats" @tosign="toSign = $event" v-slot:trigger class="d-flex">
                       <button type="button" class="btn btn-info w-100 trigger">
                         {{action.string}}<i :class="action.fa_class"></i>

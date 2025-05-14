@@ -46,8 +46,8 @@ export default {
             <label class="small mb-1 d-flex" :for="key">
               {{ field.string }}
               <span v-if="key === 'amount'" class="ms-auto">
-                Balance: <a role="button" class="text-info" @click="form[key] = tokenuser[token] / pf(tokenprotocol.precision)">
-                  {{ formatNumber(tokenuser[token] / pf(tokenprotocol.precision), tokenprotocol.precision, '.', ',') }}
+                Balance: <a role="button" class="text-info" @click="form[key] = tokenuser[feat.addr || 'balance'] / pf(tokenprotocol.precision)">
+                  {{ formatNumber(tokenuser[feat.addr || 'balance'] / pf(tokenprotocol.precision), tokenprotocol.precision, '.', ',') }}
                 </a> {{ tokenprotocol.token }}
               </span>
             </label>

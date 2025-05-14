@@ -138,7 +138,7 @@
                                                 type="button" @click="unfollow(pageAccount)"
                                                 v-if="relations.follows">Unfollow</a>
                                             <modal-vue v-if="protocol?.dlux?.head_block && accountapi.head_block"
-                                                func="send" :mypfp="mypfp" token="balance" :tokenuser="accountapi"
+                                                func="send" :mypfp="mypfp" token="balance" :tokenuser="accountapi" :api="lapi"
                                                 :account="account" :tokenprotocol="protocol?.dlux"
                                                 @tosign="toSign = $event" v-slot:trigger>
                                                 <a slot="trigger" class="dropdown-item trigger" type="button">Send

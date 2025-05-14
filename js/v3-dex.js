@@ -533,6 +533,38 @@ createApp({
           })
       })
     },
+    sendhive() {
+      if (!this.hiveFormValid) return;
+      if (this.sendHiveAllowed)
+        this.toSign = {
+          type: "xfr",
+          cj: {
+            to: this.sendHiveTo,
+            hive: this.sendHiveAmount * 1000,
+            memo: this.sendHiveMemo,
+          },
+          txid: "sendhive",
+          msg: ``,
+          ops: ["getHiveUser"],
+        };
+      else alert("Account Not Found");
+    },
+    sendhbd() {
+      if (!this.hbdFormValid) return;
+      if (this.sendHBDAllowed)
+        this.toSign = {
+          type: "xfr",
+          cj: {
+            to: this.sendHBDTo,
+            hbd: this.sendHBDAmount * 1000,
+            memo: this.sendHBDMemo,
+          },
+          txid: "sendhbd",
+          msg: ``,
+          ops: ["getHiveUser"],
+        };
+      else alert("Account Not Found");
+    },
     toUpperCase(value) {
       return value.toUpperCase();
     },
