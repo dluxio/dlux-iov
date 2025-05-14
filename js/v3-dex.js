@@ -1,13 +1,79 @@
-import Vue from "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.esm.browser.js";
+import { createApp, toRaw } from '/js/vue.esm-browser.js'
 import Navue from "/js/v3-nav.js";
 import FootVue from "/js/footvue.js";
+import MCommon from "/js/methods-common.js";
+import DataCommon from "/js/dataCommon.js";
+import { Chart, registerables } from 'chart.js';
+import { Line } from "https://cdn.jsdelivr.net/npm/vue-chartjs@5.3.1/dist/index.min.js";
+import {
+  CandlestickController,
+  CandlestickElement,
+  OhlcController,
+  OhlcElement
+} from "/js/chrtjscf.js";
 
-const { TradingVue } = TradingVueJs; //vue 2 only
-// export default {
-//     components: {
-//       Navue
-//     }
-//   }
+Chart.register(...registerables, CandlestickController, CandlestickElement, OhlcController, OhlcElement);
+
+const CandlestickChart = {
+  extends: Line,
+  props: ['data', 'options'],
+  mounted() {
+    this.renderChart();
+  },
+  methods: {
+    renderChart() {
+      if (this.chartInstance) {
+        this.chartInstance.destroy();
+      }
+      const ctx = this.$refs.canvas.getContext('2d');
+      this.chartInstance = new Chart(ctx, {
+        type: 'candlestick',
+        data: {
+          datasets: [{
+            label: this.options.label,
+            data: this.data.map(item => ({
+              t: item[0],
+              o: item[1],
+              h: item[2],
+              l: item[3],
+              c: item[4],
+              v: item[5]
+            }))
+          }]
+        },
+        options: {
+          scales: {
+            x: {
+              type: 'linear',
+              ticks: {
+                callback: function(value, index, ticks) {
+                  const date = new Date(value);
+                  if (ticks.length > 10) {
+                    return `${date.getMonth()+1}/${date.getDate()}`;
+                  } else {
+                    return date.toLocaleDateString();
+                  }
+                }
+              }
+            },
+            y: {
+              type: 'linear'
+            }
+          }
+        }
+      });
+    }
+  },
+  watch: {
+    data() {
+      this.renderChart();
+    },
+    options() {
+      this.renderChart();
+    }
+  },
+  template: '<canvas ref="canvas"></canvas>'
+};
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "";
@@ -50,23 +116,16 @@ console.log({
   lapi,
 });
 
-// createApp({ // vue 3
-var app = new Vue({
-  // vue 2
-  el: "#app", // vue 2
+createApp({ 
   data() {
     return {
-      ohlcv: [],
+      ...DataCommon,
       hidePrompt: true,
-      hasHiddenPrompt: true,
       chart: {
-        id: "honeycomb_tv",
-        width: 600,
-        height: 400,
-        toolbar: true,
-        overlays: false,
-        bg: `none`,
+        responsive: true,
+        label: 'OHLC',
       },
+      chartData: [],
       barcount: 500,
       barwidth: 3600000 * 6,
       nowtime: new Date().getTime(),
@@ -185,82 +244,6 @@ var app = new Vue({
         typea: false,
         typed: false,
       },
-      features: {
-        claim_id: "claim",
-        claim_S: "Airdrop",
-        claim_B: true,
-        claim_json: "drop",
-        rewards_id: "shares_claim",
-        rewards_S: "Rewards",
-        rewards_B: true,
-        rewards_json: "claim",
-        rewardSel: false,
-        reward2Gov: false,
-        send_id: "send",
-        send_S: "Send",
-        send_B: true,
-        send_json: "send",
-        powup_id: "power_up",
-        powup_B: false,
-        pow_val: "",
-        powdn_id: "power_down",
-        powdn_B: false,
-        powsel_up: true,
-        govup_id: "gov_up",
-        govup_B: true,
-        gov_val: "",
-        govsel_up: true,
-        govdn_id: "gov_down",
-        govdn_B: true,
-        node: {
-          id: "node_add",
-          opts: [
-            {
-              S: "Domain",
-              type: "text",
-              info: "https://no-trailing-slash.com",
-              json: "domain",
-              val: "",
-            },
-            {
-              S: "DEX Fee Vote",
-              type: "number",
-              info: "500 = .5%",
-              max: 1000,
-              min: 0,
-              json: "bidRate",
-              val: "",
-            },
-            {
-              S: "DEX Max Vote",
-              type: "number",
-              info: "10000 = 100%",
-              max: 10000,
-              min: 0,
-              json: "dm",
-              val: "",
-            },
-            {
-              S: "DEX Slope Vote",
-              type: "number",
-              info: "10000 = 100%",
-              max: 10000,
-              min: 0,
-              json: "ds",
-              val: "",
-            },
-            {
-              S: "DAO Claim Vote",
-              type: "number",
-              info: "1500 = 15%",
-              max: 10000,
-              min: 0,
-              json: "dv",
-              val: "",
-            },
-          ],
-        },
-      },
       accountinfo: {},
       filterusers: {
         checked: true,
@@ -318,11 +301,12 @@ var app = new Vue({
     window.removeEventListener("resize", this.onResize);
   },
   components: {
-    TradingVue,
+    CandlestickChart,
     "nav-vue": Navue,
     "foot-vue": FootVue,
   },
   methods: {
+    ...MCommon,
     removeOp(txid){
       if(this.toSign.txid == txid){
         this.toSign = {};
@@ -340,155 +324,10 @@ var app = new Vue({
         this.chart.height + 30
       }px;`;
     },
-    saveNodeSettings() {
-      let updates = {};
-      for (var i = 0; i < this.features.node.opts.length; i++) {
-        if (this.features.node.opts[i].val) {
-          updates[this.features.node.opts[i].json] =
-            this.features.node.opts[i].val;
-        }
-      }
-      this.toSign = {
-        type: 'cja',
-        cj: updates,
-        id: `${this.prefix}${this.features.node.id}`,
-        msg: `Updating ${this.TOKEN} Node...`,
-        ops: ["getTokenUser"],
-        txid: 'saveNodeSettings',
-      }
-    },
-    dropClaim() {
-      this.toSign = {
-        type: "cja",
-        cj: {
-          claim: true,
-        },
-        id: `${this.prefix}${this.features.claim_id}`,
-        msg: `Claiming ${this.TOKEN}...`,
-        ops: ["getTokenUser"],
-        txid: "claim",
-      };
-    },
-    rewardClaim() {
-      this.toSign = {
-        type: "cja",
-        cj: {
-          gov: this.features.reward2Gov,
-        },
-        id: `${this.prefix}${this.features.rewards_id}`,
-        msg: `Claiming ${this.TOKEN}...`,
-        ops: ["getTokenUser"],
-        txid: "reward_claim",
-      };
-    },
-    power() {
-      if (this.features.pow_val && this.powFormValid)
-        this.toSign = {
-          type: "cja",
-          cj: {
-            amount: parseInt(this.features.pow_val * 1000),
-          },
-          id: `${this.prefix}${
-            this.features.powsel_up
-              ? this.features.powup_id
-              : this.features.powdn_id
-          }`,
-          msg: `${this.features.powsel_up ? "" : "Down-"}Powering ${
-            this.TOKEN
-          }...`,
-          ops: ["getTokenUser"],
-          txid: `power${this.features.powsel_up ? "" : "Down-"}`,
-        };
-    },
-    gov() {
-      if (this.features.gov_val && this.govFormValid)
-        this.toSign = {
-          type: "cja",
-          cj: {
-            amount: parseInt(this.features.gov_val * 1000),
-          },
-          id: `${this.prefix}${
-            this.features.govsel_up
-              ? this.features.govup_id
-              : this.features.govdn_id
-          }`,
-          msg: `${this.features.govsel_up ? "" : "Un-"}Locking ${
-            this.TOKEN
-          }...`,
-          ops: ["getTokenUser"],
-          txid: `gov${this.features.govsel_up ? "" : "Un-"}`,
-        };
-    },
-    checkAccount(name, key) {
-      fetch("https://hive-api.dlux.io", {
-        body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${this[name]}\"]], \"id\":1}`,
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        method: "POST",
-      })
-        .then((r) => {
-          return r.json();
-        })
-        .then((re) => {
-          if (re.result.length) this[key] = true;
-          else this[key] = false;
-        });
-    },
-    tokenSend() {
-      if (!this.sendFormValid) return;
-      if (this.sendAllowed) {
-        this.toSign = {
-          type: "cja",
-          cj: {
-            to: this.sendTo,
-            amount: parseInt(this.sendAmount * 1000),
-            memo: this.sendMemo,
-          },
-          id: `${this.prefix}send`,
-          msg: `Trying to send ${this.TOKEN}...`,
-          ops: ["getTokenUser"],
-          txid: "send",
-        };
-      } else alert("Username not found");
-    },
-    sendhive() {
-      if (!this.hiveFormValid) return;
-      if (this.sendHiveAllowed)
-        this.toSign = {
-          type: "xfr",
-          cj: {
-            to: this.sendHiveTo,
-            hive: this.sendHiveAmount * 1000,
-            memo: this.sendHiveMemo,
-          },
-          txid: "sendhive",
-          msg: ``,
-          ops: ["getHiveUser"],
-        };
-      else alert("Account Not Found");
-    },
-    sendhbd() {
-      if (!this.hbdFormValid) return;
-      if (this.sendHBDAllowed)
-        this.toSign = {
-          type: "xfr",
-          cj: {
-            to: this.sendHBDTo,
-            hbd: this.sendHBDAmount * 1000,
-            memo: this.sendHBDMemo,
-          },
-          txid: "sendhbd",
-          msg: ``,
-          ops: ["getHiveUser"],
-        };
-      else alert("Account Not Found");
-    },
     bcalc(k, w = false) {
       if(!w)setTimeout(() => this.bcalc(k, true), 1000);
       else switch (k) {
         case "t":
-          //this.buyQuantity = parseFloat(this.buyQuantity);
           if (this.bform.cl) {
             if (this.buyhive.checked)
               this.buyPrice = (this.buyHiveTotal / this.buyQuantity).toFixed(6);
@@ -502,7 +341,6 @@ var app = new Vue({
           }
           break;
         case "p":
-          //this.buyPrice = parseFloat(this.buyPrice);
           if (this.bform.cl) {
             if (this.buyhive.checked)
               this.buyQuantity = (this.buyHiveTotal / this.buyPrice).toFixed(3);
@@ -671,13 +509,8 @@ var app = new Vue({
           break;
       }
     },
-    toFixed(value, decimals) {
-      return Number(value).toFixed(decimals);
-    },
     trade_date(ts){
-      // return a time string if less then 24 hours old
       if (Date.now() - ts < 86400000) return new Date(ts).toLocaleTimeString()
-      //return an actual date if older then 24 hours
       return new Date(ts).toLocaleDateString()
     },
     proveAPI(url){
@@ -696,26 +529,8 @@ var app = new Vue({
           })
       })
     },
-    parseFloat(value) {
-      return parseFloat(value);
-    },
     toUpperCase(value) {
       return value.toUpperCase();
-    },
-    formatNumber(t, n, r, e) {
-      if (typeof t != "number") t = parseFloat(t);
-      if (isNaN(t)) return "Invalid Number";
-      if (!isFinite(t)) return (t < 0 ? "-" : "") + "infinite";
-      (r = r || "."), (e = e || "");
-      var u = t < 0;
-      t = Math.abs(t);
-      var a = (null != n && 0 <= n ? t.toFixed(n) : t.toString()).split("."),
-        i = a[0],
-        o = 1 < a.length ? r + a[1] : "";
-      if (e)
-        for (var c = /(\d+)(\d{3})/; c.test(i); )
-          i = i.replace(c, "$1" + e + "$2");
-      return (u ? "-" : "") + i + o;
     },
     togglecoin(coin) {
       this.buyhive.checked = coin == "hive" ? true : false;
@@ -866,7 +681,6 @@ var app = new Vue({
       var Container = document.getElementById(formKey);
       if (Container.querySelector('input:invalid'))
         this[validKey] = false;
-      //querySelector('input:invalid[name="pwd"]')
       else this[validKey] = true;
     },
     buyDEX() {
@@ -988,11 +802,13 @@ var app = new Vue({
       const period = parseInt(this.barwidth);
       const now = this.nowtime;
       var startdate = new Date(now - period * numbars).getTime();
+      this.chart.label = this.TOKEN
       var currentBucket = startdate;
       const dex = this.dexapi;
-      if (!dex.markets.hive.his) return;
+      let recent = true
+      if (!dex.markets.hive.his)recent = false
       const current_block = this.stats.lastIBlock;
-      const buckets = typeof dex.markets[pair]?.days == "Object" ? Object.keys(dex.markets[pair]?.days) : []
+      const buckets = typeof dex.markets[pair]?.days == "object" ? Object.keys(dex.markets[pair]?.days) : []
       buckets.sort(function (a, b) {
         return parseInt(a) - parseInt(b);
       });
@@ -1018,7 +834,7 @@ var app = new Vue({
               currentBucket + period
             ) {
               bars.push({
-                x: currentBucket,
+                t: currentBucket,
                 o: dex.markets[pair.toLowerCase()].days[buckets[i]].o,
                 h: dex.markets[pair.toLowerCase()].days[buckets[i]].o,
                 l: dex.markets[pair.toLowerCase()].days[buckets[i]].o,
@@ -1035,7 +851,7 @@ var app = new Vue({
               currentBucket + period
             ) {
               bars.push({
-                x: currentBucket,
+                t: currentBucket,
                 o: bars[bars.length - 1].c,
                 h: bars[bars.length - 1].c,
                 l: bars[bars.length - 1].c,
@@ -1059,7 +875,7 @@ var app = new Vue({
               currentBucket + period
           ) {
             bars.push({
-              x: currentBucket,
+              t: currentBucket,
               o: current.o,
               h: current.h,
               l: current.l,
@@ -1074,7 +890,7 @@ var app = new Vue({
             current.v = 0;
           } else if (!buckets[i + 1]) {
             bars.push({
-              x: currentBucket,
+              t: currentBucket,
               o: current.o,
               h: current.h,
               l: current.l,
@@ -1084,7 +900,7 @@ var app = new Vue({
           }
         }
       }
-      let items = Object.keys(dex.markets[pair.toLowerCase()].his);
+      let items = recent ? Object.keys(dex.markets[pair.toLowerCase()].his) : []
       for (var i = 0; i < items.length; i++) {
         if (
           new Date(
@@ -1099,7 +915,7 @@ var app = new Vue({
               currentBucket + period
             ) {
               bars.push({
-                x: currentBucket,
+                t: currentBucket,
                 o: parseFloat(
                   dex.markets[pair.toLowerCase()].his[items[i]].price
                 ),
@@ -1124,7 +940,7 @@ var app = new Vue({
               currentBucket + period
             ) {
               bars.push({
-                x: currentBucket,
+                t: currentBucket,
                 o: bars[bars.length - 1].c,
                 h: bars[bars.length - 1].c,
                 l: bars[bars.length - 1].c,
@@ -1163,7 +979,7 @@ var app = new Vue({
               currentBucket + period
           ) {
             bars.push({
-              x: currentBucket,
+              t: currentBucket,
               o: current.o,
               h: current.h,
               l: current.l,
@@ -1186,7 +1002,7 @@ var app = new Vue({
             current.v = 0;
           } else if (!items[i + 1]) {
             bars.push({
-              x: currentBucket,
+              t: currentBucket,
               o: current.o,
               h: current.h,
               l: current.l,
@@ -1199,7 +1015,7 @@ var app = new Vue({
       var newBars = [];
       for (var i = 0; i < bars.length; i++) {
         newBars.push([
-          bars[i].x,
+          bars[i].t,
           bars[i].o,
           bars[i].h,
           bars[i].l,
@@ -1207,7 +1023,7 @@ var app = new Vue({
           bars[i].v,
         ]);
       }
-      this.ohlcv = newBars;
+      this.chartData = newBars;
     },
     getQuotes() {
       fetch(
@@ -1249,30 +1065,6 @@ var app = new Vue({
           this.nodes = data.markets.node;
           this.stats = data.stats;
         });
-    },
-    voteProposal(num) {
-      this.toSign = {
-        type: "raw",
-        op: [
-          [
-            "update_proposal_votes",
-            {
-              voter: user,
-              proposal_ids: [`${num}`],
-              approve: true,
-            },
-          ],
-        ],
-        msg: `Supporting Proposal${num}`,
-        ops: ["banishPrompt"],
-        txid: `Update Proposal Votes`,
-      };
-      this.hasHiddenPrompt = true;
-    },
-    banishPrompt() {
-      localStorage.setItem(`hhp:${user}`, new Date().getTime());
-      this.hasHiddenPrompt = true
-      console.log('BANISH')
     },
     getRecents(){
       fetch(this.lapi + "/api/recent/HIVE_" + this.TOKEN + "?limit=1000")
@@ -1519,16 +1311,16 @@ var app = new Vue({
     },
   },
   mounted() {
-    this.chart.width = this.$refs.chartContainer.scrollWidth - 15;
-    this.chart.height = this.chart.width / 2.5;
-    this.$refs.dumbo.style = `width: ${this.chart.width}px; height: ${
-      this.chart.height + 30
-    }px;`;
-    window.addEventListener("resize", this.onResize);
+    // this.chart.width = this.$refs.chartContainer.scrollWidth - 15;
+    // this.chart.height = this.chart.width / 2.5;
+    // this.$refs.dumbo.style = `width: ${this.chart.width}px; height: ${
+    //   this.chart.height + 30
+    // }px;`;
+    // window.addEventListener("resize", this.onResize);
     this.getQuotes();
     this.getNodes();
     this.getProtocol();
-    this.popDEX(user);
+    this.popDEX();
     if (user != "GUEST") this.getTokenUser(user);
     if (user != "GUEST") this.getHiveUser(user);
   },
@@ -1607,5 +1399,4 @@ var app = new Vue({
       },
     },
   },
-}); // vue 2
-// }).mount('#app') // vue 3
+}).mount('#app') 

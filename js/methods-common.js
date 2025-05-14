@@ -200,6 +200,74 @@ export default {
     // Fallback (shouldn't occur due to seconds unit)
     return 'unknown';
   },
+  banishPrompt() {
+    localStorage.setItem(`hhp:${user}`, new Date().getTime());
+    this.hasHiddenPrompt = true
+    console.log('BANISH')
+  },
+  voteProposal(num) {
+    this.toSign = {
+      type: "raw",
+      op: [
+        [
+          "update_proposal_votes",
+          {
+            voter: user,
+            proposal_ids: [`${num}`],
+            approve: true,
+          },
+        ],
+      ],
+      msg: `Supporting Proposal${num}`,
+      ops: ["banishPrompt"],
+      txid: `Update Proposal Votes`,
+    };
+    this.hasHiddenPrompt = true;
+  },
+  hiveClaim() {
+    this.toSign = {
+      type: "raw",
+      op: [[
+        "claim_reward_balance",
+        {
+          "account": this.account,
+          "reward_hive": this.accountinfo.reward_hive_balance,
+          "reward_hbd": this.accountinfo.reward_hbd_balance,
+          "reward_vests": this.accountinfo.reward_vesting_balance
+        }
+      ]],
+      key: "posting",
+      id: `Hive Claim ${this.account}`,
+      msg: `Claiming...`,
+      ops: ["getHiveUser"],
+      txid: "reward_claim",
+    };
+
+  },
+  dropClaim(prefix, claim_id) {
+    this.toSign = {
+      type: "cja",
+      cj: {
+        claim: true,
+      },
+      id: `${prefix}_${claim_id}`,
+      msg: `Claiming...`,
+      ops: ["getTokenUser"],
+      txid: "claim",
+    };
+  },
+  rewardClaim(prefix, rewards_id, gov = false) {
+    this.toSign = {
+      type: "cja",
+      cj: {
+        gov,
+      },
+      id: `${prefix}_${rewards_id}`,
+      msg: `Claiming...`,
+      ops: ["getTokenUser"],
+      txid: "reward_claim",
+    };
+  },
   formatNumber(t, n, r, e) {
     if (typeof t != "number") t = parseFloat(t);
     if (isNaN(t)) return "0";
