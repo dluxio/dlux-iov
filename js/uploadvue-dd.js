@@ -483,6 +483,52 @@ export default {
   methods: {
     ...MCommon,
     ...Mspk,
+    pollBundleStatus(contractID, since = 0) {
+      const contractInstanceId = contractID; 
+
+      if (!contractInstanceId) {
+          console.error("Cannot poll bundle status: uploader account name or contract instance ID is missing.", 
+                        { contractInstanceId });
+          // Retry, as these might be set asynchronously or if there's a temporary issue.
+          setTimeout(() => this.pollBundleStatus(), 5000);
+          return;
+      }
+
+      console.log(`Polling for bundle status. Expecting contract pattern::<number>:${contractInstanceId} bundled`);
+      var lastSince = since
+      fetch('https://spktest.dlux.io/feed' + (since ? `/${since}` : ''))
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const feed = data.feed;
+          let foundAndBundled = false;
+          if (feed && typeof feed === 'object') {
+            for (const feedEntryKey in feed) {
+              lastSince = feedEntryKey.split(':')[0];
+              const feedEntryValue = feed[feedEntryKey];
+              if (typeof feedEntryValue === contractID + ' bundled') {
+                foundAndBundled = true;
+              }
+            }
+          }
+
+          if (foundAndBundled) {
+            this.uploadInProgress = false;
+            this.$emit('done', this.contract);
+          } else {
+            console.log(`Bundle not yet complete for contract ${contractInstanceId}. Retrying in 5s...`);
+            setTimeout(() => this.pollBundleStatus(contractID, lastSince), 5000);
+          }
+        })
+        .catch(error => {
+          console.error('Error polling bundle status:', error);
+          setTimeout(() => this.pollBundleStatus(contractID,lastSince), 5000); 
+        });
+    },
     processSingleFile(file, fullAppPath = null) {
         return new Promise((resolveProcess, rejectProcess) => { 
             // Skip duplicate files
@@ -1472,6 +1518,9 @@ export default {
         const chunk = file.slice(options.startingByte);
 
         formData.append('chunk', chunk);
+        // Add cids and meta to the form data instead of headers
+        formData.append('cids', options.cids);
+        formData.append('meta', options.meta);
         console.log(options)
         req.open('POST', options.url, true);
         req.setRequestHeader(
@@ -1481,8 +1530,8 @@ export default {
         req.setRequestHeader('X-Contract', options.contract.i);
         req.setRequestHeader('X-Sig', options.contract.fosig);
         req.setRequestHeader('X-Account', options.contract.t);
-        req.setRequestHeader('X-Files', options.cids);
-        req.setRequestHeader('X-Meta', options.meta);
+        // req.setRequestHeader('X-Files', options.cids); // Removed
+        // req.setRequestHeader('X-Meta', options.meta); // Removed
 
 
         req.onload = (e) => {
@@ -1516,17 +1565,21 @@ export default {
       const uploadFile = (file, options, cid) => {
         console.log('Uploading', cid, options, file)
         return fetch(ENDPOINTS.UPLOAD_REQUEST, {
-          method: 'GET',
+          method: 'POST', // Changed from GET to POST
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json', // Added Content-Type
             'X-Sig': options.contract.fosig,
             'X-Account': options.contract.t,
             'X-Contract': options.contract.i,
             'X-Cid': cid,
-            'X-Files': options.contract.files,
-            'X-Meta': options.meta,
+            // 'X-Files': options.contract.files, // Moved to body
+            // 'X-Meta': options.meta, // Moved to body
             'X-Chain': 'HIVE'
-          }
+          },
+          body: JSON.stringify({ // Added body with cids and meta
+            files: options.contract.files, 
+            meta: options.meta
+          })
         })
           .then(res => res.json())
           .then(res => {
