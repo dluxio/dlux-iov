@@ -898,15 +898,15 @@ createApp({
             currentBucket = new Date(currentBucket + period).getTime();
 
             while (itemTimestamp >= currentBucket + period) {
-                bars.push({
-                    t: currentBucket,
+              bars.push({
+                t: currentBucket,
                     o: current.o,
                     h: current.o,
                     l: current.o,
                     c: current.o,
-                    v: 0,
-                });
-                currentBucket = new Date(currentBucket + period).getTime();
+                v: 0,
+              });
+              currentBucket = new Date(currentBucket + period).getTime();
             }
         }
         
@@ -924,13 +924,13 @@ createApp({
                 current.c = dayC;
                 current.v = dayV;
                 current.firstInBucket = false;
-            } else {
+          } else {
                 current.h = Math.max(current.h, dayH);
                 current.l = Math.min(current.l, dayL);
                 current.c = dayC;
                 current.v += dayV;
             }
-        }
+          }
 
         const nextItemTimestamp = (i < buckets.length - 1 && buckets[i+1]) ? 
             new Date(now - 3000 * (current_block - parseInt(buckets[i+1]))).getTime() 
@@ -938,21 +938,21 @@ createApp({
 
         if ( i === buckets.length - 1 || nextItemTimestamp >= currentBucket + period ) {
             if (!current.firstInBucket) {
-                 bars.push({
-                    t: currentBucket,
-                    o: current.o,
-                    h: current.h,
-                    l: current.l,
-                    c: current.c,
-                    v: current.v,
-                });
+            bars.push({
+              t: currentBucket,
+              o: current.o,
+              h: current.h,
+              l: current.l,
+              c: current.c,
+              v: current.v,
+            });
                 let prevClose = current.c;
                 current = { o: prevClose, h: Number.NEGATIVE_INFINITY, l: Number.POSITIVE_INFINITY, c: prevClose, v: 0, firstInBucket: true};
                  if (nextItemTimestamp >= currentBucket + period && i < buckets.length -1) {
-                    currentBucket = new Date(currentBucket + period).getTime();
+            currentBucket = new Date(currentBucket + period).getTime();
                 }
             } else if (i === buckets.length -1 && bars.length > 0 && bars[bars.length-1].t !== currentBucket){
-            }
+          }
         }
       }
       this[`daily${pair}`] = dailypair.sort((a,b) => b.trade_timestamp - a.trade_timestamp);
@@ -977,8 +977,8 @@ createApp({
 
               while (firstItemTimestamp >= currentBucket + period) {
                   bars.push({ t: currentBucket, o: current.o, h: current.o, l: current.o, c: current.o, v: 0 });
-                  currentBucket = new Date(currentBucket + period).getTime();
-              }
+              currentBucket = new Date(currentBucket + period).getTime();
+            }
           }
       }
 
@@ -1004,9 +1004,9 @@ createApp({
             
             while (itemTimestamp >= currentBucket + period) {
                 bars.push({ t: currentBucket, o: current.o, h: current.o, l: current.o, c: current.o, v: 0 });
-                currentBucket = new Date(currentBucket + period).getTime();
+              currentBucket = new Date(currentBucket + period).getTime();
             }
-        }
+          }
         
         if (itemTimestamp >= currentBucket && itemTimestamp < currentBucket + period) {
             if (current.firstInBucket) {
@@ -1030,22 +1030,22 @@ createApp({
 
         if ( k === items.length - 1 || nextItemTimestamp >= currentBucket + period ) {
             if (!current.firstInBucket) {
-                bars.push({
-                    t: currentBucket,
+            bars.push({
+              t: currentBucket,
                     o: current.o, h: current.h, l: current.l, c: current.c, v: current.v
-                });
+            });
             }
             if (k < items.length - 1 && nextItemTimestamp >= currentBucket + period) {
                  let prevClose = current.c;
                  current = { o: prevClose, h: Number.NEGATIVE_INFINITY, l: Number.POSITIVE_INFINITY, c: prevClose, v: 0, firstInBucket: true};
-                 currentBucket = new Date(currentBucket + period).getTime();
+            currentBucket = new Date(currentBucket + period).getTime();
             }
         }
       }
       
       if (!current.firstInBucket && (bars.length === 0 || bars[bars.length-1].t !== currentBucket) ) {
            bars.push({ t: currentBucket, o: current.o, h: current.h, l: current.l, c: current.c, v: current.v });
-      }
+          }
 
       bars.sort((a,b) => a.t - b.t);
       
@@ -1053,14 +1053,14 @@ createApp({
       var newBars = [];
       for (var j = 0; j < bars.length; j++) {
         if (bars[j].t && bars[j].t >= validStartDate) {
-            newBars.push({
-              t: bars[j].t,
-              o: bars[j].o,
-              h: bars[j].h,
-              l: bars[j].l,
-              c: bars[j].c,
-              v: bars[j].v,
-            });
+        newBars.push([
+              bars[j].t,
+              bars[j].o,
+              bars[j].h,
+              bars[j].l,
+              bars[j].c,
+              bars[j].v,
+      ]);
         }
       }
       this.chartData = newBars;
