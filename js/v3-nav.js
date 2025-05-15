@@ -46,13 +46,11 @@ export default {
       },
       haspich: 50,
       haspic: "/img/hiveauth.svg",
-      decrypted: {
-        pin: false,
-        accounts: {
-        },
-      },
       PIN: "1234",
       PENstatus: "",
+      consentPrivacy: false,
+      consentTerms: false,
+      consentError: false,
     };
   },
   components: {
@@ -814,14 +812,33 @@ export default {
       this.$emit("logout", "");
     },
     setUser(id) {
+      const isAddingNewUser = !id && this.userField;
+
+      if (isAddingNewUser && (!this.consentPrivacy || !this.consentTerms)) {
+        this.consentError = true;
+        return;
+      }
+      
+      this.consentError = false; 
+
       this.HAS_.token = "";
       this.haspic = "/img/hiveauth.svg";
       this.haspich = 50;
-      this.user = id ? id : this.userField;
-      this.userField = "";
+      
+      const userToAdd = id ? id : this.userField;
+      if (!userToAdd) return;
+
+      this.user = userToAdd;
+      
+      if(isAddingNewUser) {
+        this.userField = ""; 
+        this.addRecentUser(this.user); 
+        this.consentPrivacy = false;
+        this.consentTerms = false;
+      }
+      
       localStorage.setItem("user", this.user);
       this.$emit("login", this.user);
-      this.addRecentUser(this.user);
       if (this.HAS) this.HASsetup();
     },
     addRecentUser(user) {
@@ -1355,9 +1372,23 @@ export default {
                     class="fa-solid fa-plus fa-fw"></i></button>
               </span>
             </div>
-            <p v-if="userPinFeedback"></p>
+            <!-- Consent Checkboxes -->
+            <div class="mt-2 mb-1">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" v-model="consentPrivacy" id="privacyCheck" @change="consentError = false">
+                <label class="form-check-label small" :class="{'text-danger': consentError && !consentPrivacy}" for="privacyCheck">
+                  I agree to the <a href="/about#privacy" target="_blank" class="text-info">Privacy Policy</a>
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" v-model="consentTerms" id="termsCheck" @change="consentError = false">
+                <label class="form-check-label small" :class="{'text-danger': consentError && !consentTerms}" for="termsCheck">
+                  I agree to the <a href="/about#terms" target="_blank" class="text-info">Terms of Service</a>
+                </label>
+              </div>
+            </div>
             <div class="small text-muted text-center mt-1 mb-2">
-              Usernames are stored locally. <a class="no-decoration text-info" target="_blank"
+              Usernames are stored locally without verification. You must posses the associated private keys to make transactions. <a class="no-decoration text-info" target="_blank"
                 href="https://signup.hive.io/">Get Account</a>
             </div>
           </div>

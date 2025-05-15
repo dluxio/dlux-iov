@@ -89,7 +89,7 @@
 								</li>
 								<li class="nav-item">
 									<a class="nav-link " id="tosTab" role="tab" data-bs-toggle="tab" aria-controls="tos"
-										aria-expanded="true" href="#tos">Terms Of Service</a>
+										aria-expanded="true" href="#terms">Terms Of Service</a>
 								</li>
 							</ul>
 						</div>
@@ -205,10 +205,10 @@
 											blockchain
 											technology with experiential learning to engage participants in an
 											interactive
-											discovery of Leonardo da Vinci’s ouvre. In the true spirit of this
-											“Renaissance
-											man”, Discover DaVinci explores new ideas and technologies “ahead of their
-											time”.</p>
+											discovery of Leonardo da Vinci's ouvre. In the true spirit of this
+											"Renaissance
+											man", Discover DaVinci explores new ideas and technologies "ahead of their
+											time".</p>
 										<div class="text-center">
 											<a class="btn btn-outline-light rounded-pill m-3"
 												href="https://research.dwi.ufl.edu/page/discover-davinci-a-gamified-blockchain-learning-app/"
@@ -416,16 +416,25 @@
 								<h1 class="display-4 text-center">Privacy Policy</h1>
 								<p class="lead text-center">We believe in data privacy and transparency</p>
 								<hr class="my-4 bg-light">
-								<p>The data you publish and access through DLUX is publicly available permanently on the
-									Hive blockchain. Front ends like DLUX can hide content from users, and assets stored
-									on
-									IPFS can be garbage collected, but the record of the data is immutably saved
-									forever.
+								<p>All data you publish or access through DLUX is recorded permanently on the Hive blockchain, which is publicly available and immutable. While DLUX, as a front end, can filter or hide content for display, and assets stored on IPFS may be garbage-collected, the blockchain record remains accessible forever.
 								</p>
-								<p>DLUX, acting as a front end, stores no user data. Login happens via the Hive Keychain
-									extension, so user keys are never exposed to DLUX. A user session is stored locally,
-									and
-									DLUX does no user data tracking whatsoever.</p>
+								<p>DLUX does not store any user data on its servers. Authentication is handled securely via the Hive Keychain extension or other methods provided in the user login menu, ensuring user keys never leave your device. For user convenience, DLUX stores minimal, non-identifiable data in your browser's localStorage, including:</p>
+								<ul>
+									<li>
+										<b>Chosen account names:</b> Unverified Hive account names you select (e.g., whale_account) to simplify navigation (e.g., home page links) and prefill transaction forms. These are public and do not grant signing authority, which is secured by your wallet software and Hive's RPC.
+									</li>
+									<li>
+										<b>Preferences:</b> Display settings and API choices to enhance your experience across DLUX.
+									</li>
+									<li>
+										<b>Transaction IDs (txids) and pending transactions:</b> Temporary storage of transaction IDs when you initiate a transaction, used to poll Hive or Layer 2 APIs for confirmation and to refresh page data. Pending transactions so your changes aren't lost while navigating.  These are cleared after completion.
+									</li>
+								</ul>
+								<p>This data remains on your device, is not linked to your Hive account for tracking purposes, and is used solely for functionality. DLUX does not track user activity, collect personal data, or use cookies. When polling APIs, DLUX transmits only necessary data (e.g., txids) to public Hive or Layer 2 endpoints, with no additional user identifiers.</p>
+								<p><b>dApp / Subdomain Risks:</b> User defined applications on subdomains (e.g., author1.dlux.io), which you may access in user profiles or dApp listings like the Hub, are controlled by third-party authors, not DLUX. These may contain malicious code or collect data. Exercise caution and verify the trustworthiness of dApps before interacting. Visiting these dApps will transmit the account name you have chosen via URL parameters (e.g., ?account=whale_account) if you are "logged on".
+								</p>
+								<p>We are committed to protecting your privacy and ensuring compliance with regulations like GDPR by minimizing data processing and keeping control in your hands. For more details, see our Privacy Policy.
+								</p>
 								<div class="d-flex flex-column col-md-6 mx-auto pt-5">
 									<p class="lead text-center">Would you like to learn more about how your data is
 										stored
@@ -439,15 +448,39 @@
 						<div role="tabpanel" class="tab-pane fade show" id="tos" aria-labelledby="tosTab">
 							<div class=" container">
 								<h1 class="display-4 text-center">Terms of Service</h1>
-								<p class="lead text-center">What you can expect from us, and what we expect from you</p>
+								<p class="lead text-center">Last Updated: May 15, 2025</p>
 								<hr class="my-4 bg-light">
-								<p>All DLUX software is MIT License Open Source. Report all bugs and issues via Discord.
+								<h3>1. Software and License</h3>
+								<p>DLUX is a front-end interface, not a custodian or financial advisor, and users bear all financial risks. DLUX is open-source software licensed under the MIT License. You are free to use, modify, and distribute the code for your own projects, and we encourage contributions via GitHub or Discord. The software is provided "as is" in public beta, without any warranties, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement. Report bugs or issues via Discord. Use DLUX at your own risk.
 								</p>
-								<p>You are free to use the code for your own projects, and we encourage others to
-									contribute
-									improvements. We offer no warranty or gurantee and consider this software in public
-									beta. Users are welcome to test, debug, provide feedback, and use at their own risk.
+								<h3>2. Cryptocurrency and DEX Trading Risks</h3>
+								<ul>
+									<li><b>Cryptocurrency Risks:</b> Cryptocurrencies, including Hive and related tokens, are highly volatile and can lose significant value quickly. You risk losing funds if private keys are lost, stolen, or compromised through phishing, scams, or user error. Blockchain transactions are irreversible, meaning lost funds cannot be recovered. Cryptocurrencies may face regulatory or tax implications in your jurisdiction. Technical issues, such as network disruptions or software bugs, could impact your assets, though the Hive blockchain is designed for reliability.</li>
+									<li><b>DEX Trading Risks:</b> Trading on a decentralized exchange (DEX) accessible via DLUX involves unique risks. A DEX operates without a central authority, relying on blockchain protocols or smart contracts. You maintain full control of your funds through your private keys (e.g., via Hive Keychain), but you are solely responsible for their security. Trades are irreversible once confirmed on the blockchain, and errors (e.g., incorrect amounts or addresses) cannot be undone. DEXs may have lower liquidity than centralized exchanges, leading to price slippage or delayed trades. User applications on subdomains (e.g., author1.dlux.io) may host trading interfaces controlled by third-party authors, which could introduce risks like malicious code or data collection. Always verify trade details and subdomain trustworthiness before proceeding.</li>
+								</ul>
+								<h3>3. User Responsibilities</h3>
+								<ul>
+									<li>Use DLUX in compliance with applicable local and international laws and regulations.</li>
+									<li>Secure your private keys and authentication methods (e.g., Hive Keychain).</li>
+									<li>Verify the trustworthiness of dApps / third-party subdomains (e.g., author1.dlux.io) before interacting.</li>
+									<li>Not engage in illegal activities, including fraud, money laundering, or distributing malicious code.</li>
+									<li>Not attempt to disrupt DLUX or the Hive blockchain (e.g., through hacking or spamming).</li>
+								</ul>
+								<h3>4. dApps / Third-Party Subdomains</h3>
+								<p>User applications on subdomains (e.g., author1.dlux.io), accessible via user profiles or dApp listings like the Hub, are controlled by third-party authors, not DLUX. These may contain malicious code, collect data, or access URL parameters (e.g., ?account=whale_account). DLUX is not responsible for the content, security, or actions of third-party subdomains. Use them at your own risk.
 								</p>
+								<h3>5. Data Practices</h3>
+								<p>DLUX's use of localStorage for unverified account names (e.g., whale_account), preferences (e.g., viewpoint=dark), transaction IDs, and pending transactions, as well as URL parameters for data passing, is detailed in our Privacy Policy. By using DLUX, you agree to these practices.</p>
+								<h3>6. Limitation of Liability</h3>
+								<p>To the fullest extent permitted by law, DLUX and its contributors shall not be liable for any direct, indirect, incidental, special, or consequential damages arising from your use of DLUX, including but not limited to loss of funds, data, or profits. You assume all risks associated with cryptocurrencies, DEX trading, and third-party subdomains.</p>
+								<h3>7. Termination</h3>
+								<p>We may suspend or terminate your access to DLUX, or other users access to your posted data, at our discretion, with or without notice, if you violate these Terms or engage in activities harmful to DLUX or its users.</p>
+								<h3>8. Governing Law</h3>
+								<p>These Terms are governed by the laws of Paraguay, without regard to conflict of law principles. Any disputes shall be resolved through negotiation or, if necessary, in the courts of Paraguay.</p>
+								<h3>9. Contact Us</h3>
+								<p>For questions, bug reports, or concerns about these Terms, contact us at info@dlux.io or via Discord.</p>
+								<h3>10. Changes to These Terms</h3>
+								<p>We may update these Terms at any time. Changes will be posted on this page, and continued use of DLUX constitutes acceptance of the updated Terms.</p>
 								<div class="d-flex flex-column col-md-6 mx-auto pt-5">
 									<p class="lead text-center">Would you like to audit the code, issue a pull request,
 										clone the repo, or just have a look around?</p>
@@ -587,6 +620,18 @@
 	</div>
 	<!-- Bootstrap -->
 	<script src="/js/bootstrap.bundle.min.js"></script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const hash = window.location.hash;
+			if (hash === '#privacy' || hash === '#terms' || hash === '#tech' || hash === '#faq' || hash === '#about' || hash === '#brand') {
+				const triggerEl = document.querySelector('a.nav-link[data-bs-toggle="tab"][href="' + hash + '"]');
+				if (triggerEl) {
+					const tab = new bootstrap.Tab(triggerEl);
+					tab.show();
+				}
+			}
+		});
+	</script>
 </body>
 
 </html>
