@@ -857,227 +857,211 @@ createApp({
       var bars = [],
         current = {
           o: 0,
-          h: 0,
-          l: 0,
+          h: Number.NEGATIVE_INFINITY,
+          l: Number.POSITIVE_INFINITY,
           c: 0,
           v: 0,
+          firstInBucket: true
         };
       var dailypair = []
-      for (var i = buckets.length - 1; i >= 0; i--) {
-        if(dex.markets[pair]?.days[buckets[i]].d){
+      for (var i = 0; i < buckets.length; i++) {
+        const bucketBlock = buckets[i];
+        if(dex.markets[pair]?.days?.[bucketBlock]?.d !== undefined){
           dailypair.push({
             trade_timestamp: new Date(
-            now - (3000 * (current_block - parseInt(buckets[i])))
+            now - (3000 * (current_block - parseInt(bucketBlock)))
           ).getTime(),
-          open: dex.markets[pair]?.days[buckets[i]].o,
-          high: dex.markets[pair]?.days[buckets[i]].t,
-          low: dex.markets[pair]?.days[buckets[i]].b,
-          close: dex.markets[pair]?.days[buckets[i]].c,
-          volume: dex.markets[pair]?.days[buckets[i]].d,
+          open: dex.markets[pair]?.days[bucketBlock].o,
+          high: dex.markets[pair]?.days[bucketBlock].t,
+          low: dex.markets[pair]?.days[bucketBlock].b,
+          close: dex.markets[pair]?.days[bucketBlock].c,
+          volume: dex.markets[pair]?.days[bucketBlock].d,
           })
         }
-        if (
-          new Date(
-            now - 3000 * (current_block - parseInt(buckets[i]))
-          ).getTime() > currentBucket
-        ) {
-          if (!bars.length) {
-            while (
-              new Date(
-                now - 3000 * (current_block - parseInt(buckets[i]))
-              ).getTime() >
-              currentBucket + period
-            ) {
-              bars.push({
-                t: currentBucket,
-                o: dex.markets[pair.toLowerCase()].days[buckets[i]].o,
-                h: dex.markets[pair.toLowerCase()].days[buckets[i]].o,
-                l: dex.markets[pair.toLowerCase()].days[buckets[i]].o,
-                c: dex.markets[pair.toLowerCase()].days[buckets[i]].o,
-                v: 0,
-              });
-              currentBucket = new Date(currentBucket + period).getTime();
+        
+        const dayOhlcvData = dex.markets[pair.toLowerCase()]?.days?.[bucketBlock];
+        if (!dayOhlcvData || dayOhlcvData.v === undefined) continue;
+
+        const itemTimestamp = new Date(
+            now - 3000 * (current_block - parseInt(bucketBlock))
+          ).getTime();
+
+        if (itemTimestamp >= currentBucket + period) {
+            if (!current.firstInBucket) {
+                bars.push({ t: currentBucket, o: current.o, h: current.h, l: current.l, c: current.c, v: current.v });
             }
-          } else {
-            while (
-              new Date(
-                now - 3000 * (current_block - parseInt(buckets[i]))
-              ).getTime() >
-              currentBucket + period
-            ) {
-              bars.push({
-                t: currentBucket,
-                o: bars[bars.length - 1].c,
-                h: bars[bars.length - 1].c,
-                l: bars[bars.length - 1].c,
-                c: bars[bars.length - 1].c,
-                v: 0,
-              });
-              currentBucket = new Date(currentBucket + period).getTime();
-            }
-          }
-          if (dex.markets[pair.toLowerCase()].days[buckets[i]].t > current.h)
-            current.h = dex.markets[pair.toLowerCase()].days[buckets[i]].t;
-          if (dex.markets[pair.toLowerCase()].days[buckets[i]].b < current.l)
-            current.l = dex.markets[pair.toLowerCase()].days[buckets[i]].b;
-          current.c = dex.markets[pair.toLowerCase()].days[buckets[i]].c;
-          current.v += dex.markets[pair.toLowerCase()].days[buckets[i]].v;
-          if (
-            buckets[i + 1] &&
-            new Date(
-              now - 3000 * (current_block - parseInt(buckets[i + 1]))
-            ).getTime() >
-              currentBucket + period
-          ) {
-            bars.push({
-              t: currentBucket,
-              o: current.o,
-              h: current.h,
-              l: current.l,
-              c: current.c,
-              v: current.v,
-            });
+            let prevCloseForGap = current.c;
+            if (current.firstInBucket && bars.length > 0) prevCloseForGap = bars[bars.length -1].c;
+            else if (current.firstInBucket) prevCloseForGap = dayOhlcvData.o;
+
+            current = { o: prevCloseForGap, h: prevCloseForGap, l: prevCloseForGap, c: prevCloseForGap, v: 0, firstInBucket: true};
             currentBucket = new Date(currentBucket + period).getTime();
-            current.o = current.c;
-            current.h = current.c;
-            current.l = current.c;
-            current.c = current.c;
-            current.v = 0;
-          } else if (!buckets[i + 1]) {
-            bars.push({
-              t: currentBucket,
-              o: current.o,
-              h: current.h,
-              l: current.l,
-              c: current.c,
-              v: current.v,
-            });
-          }
+
+            while (itemTimestamp >= currentBucket + period) {
+                bars.push({
+                    t: currentBucket,
+                    o: current.o,
+                    h: current.o,
+                    l: current.o,
+                    c: current.o,
+                    v: 0,
+                });
+                currentBucket = new Date(currentBucket + period).getTime();
+            }
+        }
+        
+        if (itemTimestamp >= currentBucket && itemTimestamp < currentBucket + period) {
+            const dayO = dayOhlcvData.o;
+            const dayH = dayOhlcvData.t;
+            const dayL = dayOhlcvData.b;
+            const dayC = dayOhlcvData.c;
+            const dayV = dayOhlcvData.v || 0;
+
+            if (current.firstInBucket) {
+                current.o = dayO;
+                current.h = dayH;
+                current.l = dayL;
+                current.c = dayC;
+                current.v = dayV;
+                current.firstInBucket = false;
+            } else {
+                current.h = Math.max(current.h, dayH);
+                current.l = Math.min(current.l, dayL);
+                current.c = dayC;
+                current.v += dayV;
+            }
+        }
+
+        const nextItemTimestamp = (i < buckets.length - 1 && buckets[i+1]) ? 
+            new Date(now - 3000 * (current_block - parseInt(buckets[i+1]))).getTime() 
+            : Number.POSITIVE_INFINITY;
+
+        if ( i === buckets.length - 1 || nextItemTimestamp >= currentBucket + period ) {
+            if (!current.firstInBucket) {
+                 bars.push({
+                    t: currentBucket,
+                    o: current.o,
+                    h: current.h,
+                    l: current.l,
+                    c: current.c,
+                    v: current.v,
+                });
+                let prevClose = current.c;
+                current = { o: prevClose, h: Number.NEGATIVE_INFINITY, l: Number.POSITIVE_INFINITY, c: prevClose, v: 0, firstInBucket: true};
+                 if (nextItemTimestamp >= currentBucket + period && i < buckets.length -1) {
+                    currentBucket = new Date(currentBucket + period).getTime();
+                }
+            } else if (i === buckets.length -1 && bars.length > 0 && bars[bars.length-1].t !== currentBucket){
+            }
         }
       }
-      this[`daily${pair}`] = dailypair
-      let items = recent ? Object.keys(dex.markets[pair.toLowerCase()].his) : []
-      for (var i = 0; i < items.length; i++) {
-        if (
-          new Date(
-            now - 3000 * (current_block - parseInt(items[i].split(":")[0]))
-          ).getTime() > currentBucket
-        ) {
-          if (!bars.length) {
-            while (
-              new Date(
-                now - 3000 * (current_block - parseInt(items[i].split(":")[0]))
-              ).getTime() >
-              currentBucket + period
-            ) {
-              bars.push({
-                t: currentBucket,
-                o: parseFloat(
-                  dex.markets[pair.toLowerCase()].his[items[i]].price
-                ),
-                h: parseFloat(
-                  dex.markets[pair.toLowerCase()].his[items[i]].price
-                ),
-                l: parseFloat(
-                  dex.markets[pair.toLowerCase()].his[items[i]].price
-                ),
-                c: parseFloat(
-                  dex.markets[pair.toLowerCase()].his[items[i]].price
-                ),
-                v: 0,
-              });
+      this[`daily${pair}`] = dailypair.sort((a,b) => b.trade_timestamp - a.trade_timestamp);
+
+      let items = recent && dex.markets[pair.toLowerCase()]?.his ? Object.keys(dex.markets[pair.toLowerCase()].his) : []
+      items.sort((a, b) => parseInt(a.split(':')[0]) - parseInt(b.split(':')[0]));
+
+      if (items.length > 0) {
+          const firstItemBlock = parseInt(items[0].split(":")[0]);
+          const firstItemTimestamp = new Date(now - 3000 * (current_block - firstItemBlock)).getTime();
+          if (firstItemTimestamp >= currentBucket + period) {
+              if (!current.firstInBucket && bars[bars.length -1].t === currentBucket) {
+                   bars.push({ t: currentBucket, o: current.o, h: current.h, l: current.l, c: current.c, v: current.v });
+              }
+              let prevCloseForGap = current.c;
+              if (current.firstInBucket && bars.length > 0) prevCloseForGap = bars[bars.length -1].c;
+              else if (current.firstInBucket && !bars.length) {
+              }
+
+              current = { o: prevCloseForGap, h: Number.NEGATIVE_INFINITY, l: Number.POSITIVE_INFINITY, c: prevCloseForGap, v: 0, firstInBucket: true};
               currentBucket = new Date(currentBucket + period).getTime();
-            }
-          } else {
-            while (
-              new Date(
-                now - 3000 * (current_block - parseInt(items[i].split(":")[0]))
-              ).getTime() >
-              currentBucket + period
-            ) {
-              bars.push({
-                t: currentBucket,
-                o: bars[bars.length - 1].c,
-                h: bars[bars.length - 1].c,
-                l: bars[bars.length - 1].c,
-                c: bars[bars.length - 1].c,
-                v: 0,
-              });
-              currentBucket = new Date(currentBucket + period).getTime();
-            }
+
+              while (firstItemTimestamp >= currentBucket + period) {
+                  bars.push({ t: currentBucket, o: current.o, h: current.o, l: current.o, c: current.o, v: 0 });
+                  currentBucket = new Date(currentBucket + period).getTime();
+              }
           }
-          if (
-            parseFloat(dex.markets[pair.toLowerCase()].his[items[i]].price) >
-            current.h
-          )
-            current.h = parseFloat(
-              dex.markets[pair.toLowerCase()].his[items[i]].price
-            );
-          if (
-            parseFloat(dex.markets[pair.toLowerCase()].his[items[i]].price) <
-            current.l
-          )
-            current.l = parseFloat(
-              dex.markets[pair.toLowerCase()].his[items[i]].price
-            );
-          current.c = parseFloat(
-            dex.markets[pair.toLowerCase()].his[items[i]].price
-          );
-          current.v += parseFloat(
-            dex.markets[pair.toLowerCase()].his[items[i]].target_vol
-          );
-          if (
-            items[i + 1] &&
-            new Date(
-              now -
-                3000 * (current_block - parseInt(items[i + 1].split(":")[0]))
-            ).getTime() >
-              currentBucket + period
-          ) {
-            bars.push({
-              t: currentBucket,
-              o: current.o,
-              h: current.h,
-              l: current.l,
-              c: current.c,
-              v: current.v,
-            });
+      }
+
+      for (var k = 0; k < items.length; k++) {
+        const itemKey = items[k];
+        const tradeData = dex.markets[pair.toLowerCase()].his[itemKey];
+        const itemBlock = parseInt(itemKey.split(":")[0]);
+        const itemTimestamp = new Date(now - 3000 * (current_block - itemBlock)).getTime();
+
+        const price = parseFloat(tradeData.price);
+        const volume = parseFloat(tradeData.target_vol) || 0;
+
+        if (itemTimestamp >= currentBucket + period) {
+            if (!current.firstInBucket) {
+                bars.push({ t: currentBucket, o: current.o, h: current.h, l: current.l, c: current.c, v: current.v });
+            }
+            let prevCloseForGap = current.c;
+            if(current.firstInBucket && bars.length > 0) prevCloseForGap = bars[bars.length-1].c;
+            else if(current.firstInBucket) prevCloseForGap = price;
+
+            current = { o: prevCloseForGap, h: Number.NEGATIVE_INFINITY, l: Number.POSITIVE_INFINITY, c: prevCloseForGap, v: 0, firstInBucket: true};
             currentBucket = new Date(currentBucket + period).getTime();
-            current.o = parseFloat(
-              dex.markets[pair.toLowerCase()].his[items[i]].price
-            );
-            current.h = parseFloat(
-              dex.markets[pair.toLowerCase()].his[items[i]].price
-            );
-            current.l = parseFloat(
-              dex.markets[pair.toLowerCase()].his[items[i]].price
-            );
-            current.c = parseFloat(
-              dex.markets[pair.toLowerCase()].his[items[i]].price
-            );
-            current.v = 0;
-          } else if (!items[i + 1]) {
-            bars.push({
-              t: currentBucket,
-              o: current.o,
-              h: current.h,
-              l: current.l,
-              c: current.c,
-              v: current.v,
-            });
-          }
+            
+            while (itemTimestamp >= currentBucket + period) {
+                bars.push({ t: currentBucket, o: current.o, h: current.o, l: current.o, c: current.o, v: 0 });
+                currentBucket = new Date(currentBucket + period).getTime();
+            }
+        }
+        
+        if (itemTimestamp >= currentBucket && itemTimestamp < currentBucket + period) {
+            if (current.firstInBucket) {
+                current.o = price;
+                current.h = price;
+                current.l = price;
+                current.c = price;
+                current.v = volume;
+                current.firstInBucket = false;
+            } else {
+                current.h = Math.max(current.h, price);
+                current.l = Math.min(current.l, price);
+                current.c = price;
+                current.v += volume;
+            }
+        }
+        
+        const nextItemTimestamp = (k < items.length - 1 && items[k+1]) ?
+            new Date(now - 3000 * (current_block - parseInt(items[k+1].split(":")[0]))).getTime()
+            : Number.POSITIVE_INFINITY;
+
+        if ( k === items.length - 1 || nextItemTimestamp >= currentBucket + period ) {
+            if (!current.firstInBucket) {
+                bars.push({
+                    t: currentBucket,
+                    o: current.o, h: current.h, l: current.l, c: current.c, v: current.v
+                });
+            }
+            if (k < items.length - 1 && nextItemTimestamp >= currentBucket + period) {
+                 let prevClose = current.c;
+                 current = { o: prevClose, h: Number.NEGATIVE_INFINITY, l: Number.POSITIVE_INFINITY, c: prevClose, v: 0, firstInBucket: true};
+                 currentBucket = new Date(currentBucket + period).getTime();
+            }
         }
       }
+      
+      if (!current.firstInBucket && (bars.length === 0 || bars[bars.length-1].t !== currentBucket) ) {
+           bars.push({ t: currentBucket, o: current.o, h: current.h, l: current.l, c: current.c, v: current.v });
+      }
+
+      bars.sort((a,b) => a.t - b.t);
+      
+      const validStartDate = startdate;
       var newBars = [];
-      for (var i = 0; i < bars.length; i++) {
-        newBars.push([
-          bars[i].t,
-          bars[i].o,
-          bars[i].h,
-          bars[i].l,
-          bars[i].c,
-          bars[i].v,
-        ]);
+      for (var j = 0; j < bars.length; j++) {
+        if (bars[j].t && bars[j].t >= validStartDate) {
+            newBars.push({
+              t: bars[j].t,
+              o: bars[j].o,
+              h: bars[j].h,
+              l: bars[j].l,
+              c: bars[j].c,
+              v: bars[j].v,
+            });
+        }
       }
       this.chartData = newBars;
     },
@@ -1380,12 +1364,6 @@ createApp({
     },
   },
   mounted() {
-    // this.chart.width = this.$refs.chartContainer.scrollWidth - 15;
-    // this.chart.height = this.chart.width / 2.5;
-    // this.$refs.dumbo.style = `width: ${this.chart.width}px; height: ${
-    //   this.chart.height + 30
-    // }px;`;
-    // window.addEventListener("resize", this.onResize);
     this.getQuotes();
     this.getNodes();
     this.getProtocol();
@@ -1469,3 +1447,4 @@ createApp({
     },
   },
 }).mount('#app') 
+
