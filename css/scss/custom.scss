@@ -2500,6 +2500,12 @@ body[data-touch="false"] {
     @include activate-dropdown-on-hover-basic;
 
   }
+  .dropdown-start.js-hoverable-dropdown {
+    &:hover > .dropdown-menu {
+      top: 60px;
+      left: 0px;
+    }
+  }
   .dropdown-center.js-hoverable-dropdown {
     &:hover > .dropdown-menu {
       top: 60px;
@@ -2509,7 +2515,7 @@ body[data-touch="false"] {
   }
   .dropdown-end.js-hoverable-dropdown {
     &:hover > .dropdown-menu {
-      top: 60px; // Or adjust if it should drop up or sideways from .nav-more
+      top: 60px;
       right: 0px;
     }
   }

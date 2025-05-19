@@ -45,52 +45,71 @@
         <div class="navbar-subbar-container">
           <div class="navbar-subbar-content">
             <!-- token select -->
-            <div id="userApiSelect" class="me-1">
-              <div v-cloak class="dropdown-center js-hoverable-dropdown">
-                <a class="btn btn-outline-light d-flex align-items-center text-nowrap" role="button"
-                  id="tokenDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fa-solid fa-atom force-parent-lh"></i>
-                  <span class="d-none d-sm-block ms-1">{{TOKEN}}</span>
-                  <i class="d-none d-md-block ms-1 fa-solid fa-caret-down fa-fw"></i>
-                </a>
-                <div class="hover-gap"></div>
-                <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="tokenDropdownBtn">
-                  <li>
-                    <h6 class="dropdown-header">HIVE / HBD</h6>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" role="button" @click="setApi('https://token.dlux.io')"
-                      v-bind:class="{'text-warning': TOKEN == 'DLUX'}">DLUX</a>
-                  </li>
-
-                  <li>
-                    <a class="dropdown-item" role="button" @click="setApi('https://duat.hivehoneycomb.com')"
-                      v-bind:class="{'text-warning': TOKEN == 'DUAT'}">DUAT</a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" role="button" @click="setApi('https://spkinstant.hivehoneycomb.com')"
-                      v-bind:class="{'text-warning': TOKEN == 'LARYNX'}">LARYNX</a>
-                  </li>
-                  <li>
-                    <hr class="dropdown-divider" />
-                  </li>
-                  <li class="d-flex mt-2 mb-1">
-                    <!-- runner status modal button -->
-                    <button :title="behindTitle" type="button" class="btn btn-sm mx-2 w-100"
-                      :class="[{'btn-outline-success':behind < 30},{'btn-outline-warning':behind >= 30 && behind < 60},{'btn-outline-danger':behind >= 60}]"
-                      data-bs-toggle="modal" data-bs-target="#runnerStatusModal">
-                      {{runners.length}}<i class="fas fa-user-lock ms-1"></i></span>
-                    </button>
-                  </li>
-                  <li class="d-flex mt-2 mb-1" v-if="isnode">
-                    <!-- token settings modal button -->
-                    <button type="button" class="btn btn-outline-light btn-sm mx-2 w-100" data-bs-toggle="modal"
-                      data-bs-target="#tokenSettingsModal">
-                      Node<i class="fas fa-cog ms-1"></i>
-                    </button>
-                  </li>
-                </ul>
-              </div>
+            <div id="userApiSelect" v-cloak class="dropdown-start js-hoverable-dropdown me-1">
+              <a class="btn btn-outline-light d-flex align-items-center text-nowrap" role="button" id="tokenDropdownBtn"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-atom force-parent-lh"></i>
+                <span class="d-none d-sm-block ms-1">{{TOKEN}}</span>
+                <i class="d-none d-md-block ms-1 fa-solid fa-caret-down fa-fw"></i>
+              </a>
+              <div class="hover-gap"></div>
+              <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="tokenDropdownBtn"
+                style="min-width: 250px;">
+                <li>
+                  <h6 class="dropdown-header">HIVE / HBD</h6>
+                </li>
+                <li>
+                  <a class="dropdown-item d-flex align-items-center" role="button" @click="setApi('https://token.dlux.io')"
+                    v-bind:class="{'text-warning': TOKEN == 'DLUX'}">
+                    <div
+                      class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
+                      style="height: 40px; width: 40px;">
+                      <img src="/img/dlux-logo.png" class="img-fluid" alt="DLUX ICON">
+                    </div>
+                    <span class="ms-2 hero-subtitle fs-3">DLUX</span>
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item d-flex align-items-center" role="button" @click="setApi('https://duat.hivehoneycomb.com')"
+                    v-bind:class="{'text-warning': TOKEN == 'DUAT'}">
+                  <div
+                      class="d-flex justify-content-center align-items-center rounded-circle bg-dark border border-light"
+                      style="height: 40px; width: 40px; padding: 2px;">
+                      <img src="/img/ragnarok.png" class="img-fluid" alt="DUAT ICON">
+                    </div>
+                    <span class="ms-2 hero-subtitle fs-3">DUAT</span>
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item d-flex align-items-center" role="button" @click="setApi('https://spkinstant.hivehoneycomb.com')"
+                    v-bind:class="{'text-warning': TOKEN == 'LARYNX'}">
+                  <div
+                      class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
+                      style="height: 40px; width: 40px;">
+                      <img src="/img/spknetwork/larynx_icon.png" class="img-fluid" alt="LARYNX ICON">
+                    </div>
+                    <span class="ms-2 hero-subtitle fs-3">LARYNX</span>
+                  </a>
+                </li>
+                <li>
+                  <hr class="dropdown-divider" />
+                </li>
+                <li class="d-flex mt-2 mb-1">
+                  <!-- runner status modal button -->
+                  <button :title="behindTitle" type="button" class="btn btn-sm mx-2 w-100"
+                    :class="[{'btn-outline-success':behind < 30},{'btn-outline-warning':behind >= 30 && behind < 60},{'btn-outline-danger':behind >= 60}]"
+                    data-bs-toggle="modal" data-bs-target="#runnerStatusModal">
+                    {{runners.length}}<i class="fas fa-user-lock ms-1"></i></span>
+                  </button>
+                </li>
+                <li class="d-flex mt-2 mb-1" v-if="isnode">
+                  <!-- token settings modal button -->
+                  <button type="button" class="btn btn-outline-light btn-sm mx-2 w-100" data-bs-toggle="modal"
+                    data-bs-target="#tokenSettingsModal">
+                    Node<i class="fas fa-cog ms-1"></i>
+                  </button>
+                </li>
+              </ul>
             </div>
             <!-- modal button for small screen wallet -->
             <button type="button" data-bs-toggle="modal" data-bs-target="#dexWallet"
