@@ -633,7 +633,7 @@ createApp({
         alert("https is required");
         return;
       }
-      this.proveAPI(url).then((res) => {
+      this.proveAPI(url + '/api/protocol').then((res) => {
         console.log(res)
         location.hash = "";
         localStorage.setItem("lapi", url);
