@@ -117,6 +117,7 @@ createApp({
           api: "https://token.dlux.io",
           sets: {},
           multisig: "dlux-cc",
+          dataAPI: "https://data.dlux.io"
         },
         duat: {
           enabled: false,
@@ -2612,10 +2613,10 @@ PORT=3000
       console.log('trigger', item)
       var pjm = JSON.parse(this.accountinfo.posting_json_metadata);
       if (pjm.profile)
-        pjm.profile.profile_image = `${this.dataAPI}/pfp/${this.account}?${item.setname}-${item.uid}`;
+        pjm.profile.profile_image = `${this.chains[item.token].dataAPI}/pfp/${this.account}?${item.setname}-${item.uid}`;
       else
         pjm.profile = {
-          profile_image: `${this.dataAPI}/pfp/${this.account}?${item.setname}-${item.uid}`,
+          profile_image: `${this.chains[item.token].dataAPI}/pfp/${this.account}?${item.setname}-${item.uid}`,
         };
       var cja = [
         [
