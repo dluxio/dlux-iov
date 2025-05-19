@@ -1278,6 +1278,23 @@ createApp({
                } else this.hidePrompt = false;
             });
     },
+    saveNodeSettings() {
+      let updates = {};
+      for (var i = 0; i < this.features.node.opts.length; i++) {
+        if (this.features.node.opts[i].val) {
+          updates[this.features.node.opts[i].json] =
+            this.features.node.opts[i].val;
+        }
+      }
+      this.toSign = {
+        type: 'cja',
+        cj: updates,
+        id: `${this.prefix}${this.features.node.id}`,
+        msg: `Updating ${this.TOKEN} Node...`,
+        ops: ["getTokenUser"],
+        txid: 'saveNodeSettings',
+      }
+    },
     popDEX() {
       fetch(this.lapi + "/dex")
         .then((response) => response.json())
