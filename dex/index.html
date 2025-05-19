@@ -54,13 +54,13 @@
               </a>
               <div class="hover-gap"></div>
               <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="tokenDropdownBtn"
-                style="min-width: 250px;">
+                style="min-width: 300px;">
                 <li>
                   <h6 class="dropdown-header text-center">HIVE / HBD</h6>
                 </li>
                 <li>
-                  <a class="dropdown-item d-flex align-items-center" role="button" @click="setApi('https://token.dlux.io')"
-                    v-bind:class="{'text-warning': TOKEN == 'DLUX'}">
+                  <a class="dropdown-item d-flex align-items-center" role="button"
+                    @click="setApi('https://token.dlux.io')" v-bind:class="{'text-warning': TOKEN == 'DLUX'}">
                     <div
                       class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
                       style="height: 40px; width: 40px;">
@@ -70,9 +70,9 @@
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item d-flex align-items-center" role="button" @click="setApi('https://duat.hivehoneycomb.com')"
-                    v-bind:class="{'text-warning': TOKEN == 'DUAT'}">
-                  <div
+                  <a class="dropdown-item d-flex align-items-center" role="button"
+                    @click="setApi('https://duat.hivehoneycomb.com')" v-bind:class="{'text-warning': TOKEN == 'DUAT'}">
+                    <div
                       class="d-flex justify-content-center align-items-center rounded-circle bg-dark border border-light"
                       style="height: 40px; width: 40px; padding: 2px;">
                       <img src="/img/ragnarok.png" class="img-fluid" alt="DUAT ICON">
@@ -81,14 +81,61 @@
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item d-flex align-items-center" role="button" @click="setApi('https://spkinstant.hivehoneycomb.com')"
+                  <a class="dropdown-item d-flex align-items-center" role="button"
+                    @click="setApi('https://spkinstant.hivehoneycomb.com')"
                     v-bind:class="{'text-warning': TOKEN == 'LARYNX'}">
-                  <div
+                    <div
                       class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
                       style="height: 40px; width: 40px;">
                       <img src="/img/spknetwork/larynx_icon.png" class="img-fluid" alt="LARYNX ICON">
                     </div>
                     <span class="ms-2 hero-subtitle fs-3">LARYNX</span>
+                  </a>
+                </li>
+                 <li>
+                  <hr class="dropdown-divider" />
+                </li>
+                  <!-- broca test -->
+                <li>
+                  <a class="dropdown-item d-flex align-items-center" role="button"
+                    @click="setApi('https://spkinstant.hivehoneycomb.com')"
+                    v-bind:class="{'text-warning': TOKEN == 'BROCA'}">
+                    <div
+                      class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
+                      style="height: 40px; width: 40px;">
+                      <img src="/img/spknetwork/BROCA_icon.png" class="img-fluid" alt="BROCA ICON">
+                    </div>
+                    <span class="mx-2 hero-subtitle fs-3">BROCA</span>
+                    <span class="badge rounded-pill text-bg-info text-black ms-auto " style="font-size: 1ch;">TEST NET</span>
+                  </a>
+                </li>
+                <!-- spk test -->
+                <li>
+                  <a class="dropdown-item d-flex align-items-center" role="button"
+                    @click="setApi('https://spkinstant.hivehoneycomb.com')"
+                    v-bind:class="{'text-warning': TOKEN == 'SPK'}">
+                    <div
+                      class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
+                      style="height: 40px; width: 40px;">
+                      <img src="/img/spknetwork/spk_icon.png" class="img-fluid" alt="SPK ICON">
+                    </div>
+                    <span class="mx-2 hero-subtitle fs-3">SPK</span>
+                    <span class="badge rounded-pill text-bg-info text-black ms-auto " style="font-size: 1ch;">TEST NET</span>
+                  </a>
+                </li>
+
+                <!-- larynx test -->
+                <li>
+                  <a class="dropdown-item d-flex align-items-center" role="button"
+                    @click="setApi('https://spkinstant.hivehoneycomb.com')"
+                    v-bind:class="{'text-warning': TOKEN == 'LARYNX'}">
+                    <div
+                      class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
+                      style="height: 40px; width: 40px;">
+                      <img src="/img/spknetwork/larynx_icon.png" class="img-fluid" alt="LARYNX ICON">
+                    </div>
+                    <span class="mx-2 hero-subtitle fs-3">LARYNX</span>
+                    <span class="badge rounded-pill text-bg-info text-black ms-auto " style="font-size: 1ch;">TEST NET</span>
                   </a>
                 </li>
                 <li>
