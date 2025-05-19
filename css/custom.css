@@ -14690,7 +14690,6 @@ body[data-touch=false] .js-hoverable-dropdown:hover > .dropdown-menu {
 }
 body[data-touch=false] .dropdown-start.js-hoverable-dropdown:hover > .dropdown-menu {
   top: 60px;
-  left: 0px;
 }
 body[data-touch=false] .dropdown-center.js-hoverable-dropdown:hover > .dropdown-menu {
   top: 60px;

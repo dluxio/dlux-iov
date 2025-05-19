@@ -4,12 +4,14 @@
 @import "../bootswatch/quartz/_bootswatch.scss";
 
 @mixin activate-dropdown-on-hover-basic {
+
   // Applied to the .dropdown or .dropdown-center element
-  &:hover > .dropdown-menu { // Using direct child selector for clarity
+  &:hover>.dropdown-menu {
+    // Using direct child selector for clarity
     display: block;
     position: absolute; // Still needed for it to be out of flow
     z-index: 1021; // Ensure it's above navbar-subbar (z-index 900) and typical navbar (z-index 1000-1030)
-                  // Bootstrap dropdowns are often 1000, modals 1050. Adjust if needed.
+    // Bootstrap dropdowns are often 1000, modals 1050. Adjust if needed.
   }
 }
 
@@ -2151,61 +2153,74 @@ html {
   }
 
 }
+
 /* wallet tokens */
 /* Small screens (< 992px) - Default */
 .wallet-token-img {
   width: 160px;
 }
+
 .badge-type {
   width: 2.5rem;
   height: 2.5rem;
   font-size: 1rem;
 }
+
 .badge-perk {
   width: 3.3rem;
   height: 3.3rem;
   font-size: 1.7rem;
 }
+
 .badge-type-offset {
   margin-left: 18px;
   margin-top: 18px;
 }
+
 .badge-perk-offset {
   margin-left: -15px;
   margin-top: -15px;
 }
+
 .badge-type-append {
   width: 1.25rem !important;
   height: 1.25rem !important;
   font-size: 0.5rem !important;
 }
+
 .badge-blank-append {
   width: 1.25rem !important;
   height: 1.25rem !important;
 }
+
 .alert-dot {
   width: .8rem !important;
   height: .8rem !important;
 }
+
 /* Large screens (≥ 992px) */
 @media (min-width: 992px) {
   .wallet-token-img {
     width: 90px;
   }
+
   .badge-type {
     width: 1.5rem;
     height: 1.5rem;
     font-size: 0.65rem;
   }
+
   .badge-perk {
     width: 2.2rem;
     height: 2.2rem;
     font-size: 1.2rem;
   }
+
   .badge-type-offset {
     margin-left: 12px;
     margin-top: 12px;
   }
+
   .badge-perk-offset {
     margin-left: -10px;
     margin-top: -10px;
@@ -2495,26 +2510,31 @@ html {
 // Nav dropdown hover on non-touch devices
 
 body[data-touch="false"] {
-  .nav-dropdown.dropdown, // For existing nav items
-  .js-hoverable-dropdown { // For new DEX items
+
+  .nav-dropdown.dropdown,
+  // For existing nav items
+  .js-hoverable-dropdown {
+    // For new DEX items
     @include activate-dropdown-on-hover-basic;
 
   }
+
   .dropdown-start.js-hoverable-dropdown {
-    &:hover > .dropdown-menu {
+    &:hover>.dropdown-menu {
       top: 60px;
-      left: 0px;
     }
   }
+
   .dropdown-center.js-hoverable-dropdown {
-    &:hover > .dropdown-menu {
+    &:hover>.dropdown-menu {
       top: 60px;
       left: 50%;
       transform: translateX(-50%);
     }
   }
+
   .dropdown-end.js-hoverable-dropdown {
-    &:hover > .dropdown-menu {
+    &:hover>.dropdown-menu {
       top: 60px;
       right: 0px;
     }
@@ -2522,11 +2542,14 @@ body[data-touch="false"] {
 
   // Specific rule for .nav-more or other right-aligned nav dropdowns (by parent type)
   // This applies if the parent dictates end-alignment for its direct menu child.
-  .nav-more.nav-dropdown, // Targets the existing nav-more in the main navigation
-  .nav-more.js-hoverable-dropdown { // In case .nav-more could also be a .js-hoverable-dropdown
-    &:hover > .dropdown-menu {
+  .nav-more.nav-dropdown,
+  // Targets the existing nav-more in the main navigation
+  .nav-more.js-hoverable-dropdown {
+
+    // In case .nav-more could also be a .js-hoverable-dropdown
+    &:hover>.dropdown-menu {
       top: 100%; // Or adjust if it should drop up or sideways from .nav-more
-      left: auto; 
+      left: auto;
       right: 0;
     }
   }
@@ -2568,8 +2591,9 @@ body[data-touch="false"] {
 }
 
 .draggable {
-  cursor:move;
+  cursor: move;
 }
+
 .draggable:hover {
   background-color: #707070a9;
 }
@@ -2577,26 +2601,28 @@ body[data-touch="false"] {
 .dropdown-divider {
   margin: 0;
 }
+
 .dropdown-menu {
   padding: 0;
 }
+
 .dropdown-item {
   padding-top: 15px;
   padding-bottom: 15px;
 }
 
 /* Target any div, button, or a inside the first dropdown-menu-item */
-.dropdown-menu .dropdown-menu-item:first-child > div,
-.dropdown-menu .dropdown-menu-item:first-child > button,
-.dropdown-menu .dropdown-menu-item:first-child > a {
+.dropdown-menu .dropdown-menu-item:first-child>div,
+.dropdown-menu .dropdown-menu-item:first-child>button,
+.dropdown-menu .dropdown-menu-item:first-child>a {
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
 }
 
 /* Target any div, button, or a inside the last dropdown-menu-item */
-.dropdown-menu .dropdown-menu-item:last-child > div,
-.dropdown-menu .dropdown-menu-item:last-child > button,
-.dropdown-menu .dropdown-menu-item:last-child > a {
+.dropdown-menu .dropdown-menu-item:last-child>div,
+.dropdown-menu .dropdown-menu-item:last-child>button,
+.dropdown-menu .dropdown-menu-item:last-child>a {
   border-bottom-left-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
 }

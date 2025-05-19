@@ -45,7 +45,7 @@
         <div class="navbar-subbar-container">
           <div class="navbar-subbar-content">
             <!-- token select -->
-            <div id="userApiSelect" v-cloak class="dropdown-start js-hoverable-dropdown me-1">
+            <div id="userApiSelect" v-cloak class="d-flex dropdown dropdown-start js-hoverable-dropdown me-auto">
               <a class="btn btn-outline-light d-flex align-items-center text-nowrap" role="button" id="tokenDropdownBtn"
                 data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="fa-solid fa-atom force-parent-lh"></i>
@@ -56,7 +56,7 @@
               <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="tokenDropdownBtn"
                 style="min-width: 250px;">
                 <li>
-                  <h6 class="dropdown-header">HIVE / HBD</h6>
+                  <h6 class="dropdown-header text-center">HIVE / HBD</h6>
                 </li>
                 <li>
                   <a class="dropdown-item d-flex align-items-center" role="button" @click="setApi('https://token.dlux.io')"
@@ -94,7 +94,7 @@
                 <li>
                   <hr class="dropdown-divider" />
                 </li>
-                <li class="d-flex mt-2 mb-1">
+                <li class="d-flex my-2">
                   <!-- runner status modal button -->
                   <button :title="behindTitle" type="button" class="btn btn-sm mx-2 w-100"
                     :class="[{'btn-outline-success':behind < 30},{'btn-outline-warning':behind >= 30 && behind < 60},{'btn-outline-danger':behind >= 60}]"
@@ -102,7 +102,7 @@
                     {{runners.length}}<i class="fas fa-user-lock ms-1"></i></span>
                   </button>
                 </li>
-                <li class="d-flex mt-2 mb-1" v-if="isnode">
+                <li class="d-flex my-2" v-if="isnode">
                   <!-- token settings modal button -->
                   <button type="button" class="btn btn-outline-light btn-sm mx-2 w-100" data-bs-toggle="modal"
                     data-bs-target="#tokenSettingsModal">
@@ -251,7 +251,6 @@
                       </button>
                     </div>
                   </form>
-
                 </li>
               </ul>
             </div>
