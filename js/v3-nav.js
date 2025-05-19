@@ -975,6 +975,7 @@ export default {
     },
   },
   mounted() {
+    console.log('[NavVue] Component mounted. User:', this.user, 'Signer:', localStorage.getItem('signer'));
     const signer = localStorage.getItem("signer");
     const decrypted = sessionStorage.getItem('pen')
     if (decrypted) this.decrypted = JSON.parse(decrypted)
@@ -995,9 +996,11 @@ export default {
     // add sting chat
     this.addStingChat();
     // Nav Behavior
+    console.log('[NavVue] Setting up Nav Behavior in mounted().');
     const navMore = document.querySelector(".nav-more .nav-link");
-    const dropdownMenus = document.querySelectorAll(".nav-dropdown");
+    const dropdownMenus = document.querySelectorAll(".nav-dropdown, .js-hoverable-dropdown");
     const bars = document.querySelectorAll(".nav-bars .bar");
+    console.log('[NavVue] dropdownMenus selected:', dropdownMenus);
 
     let isHoverListenerActive = false;
     let styleTag = null; // Reference to the dynamically added style tag
@@ -1014,6 +1017,7 @@ export default {
     }
 
     function dropdownHoverHandler(event) {
+      console.log('[NavVue] dropdownHoverHandler triggered for:', event.currentTarget);
       dropdownMenus.forEach(otherDropdown => {
         const toggleButton = otherDropdown.querySelector(".dropdown-toggle");
         const dropdownInstance = bootstrap.Dropdown.getInstance(toggleButton);
@@ -1026,17 +1030,22 @@ export default {
     }
 
     function addDropdownHoverListeners() {
+      console.log('[NavVue] Attempting to add hover listeners. Width:', window.innerWidth, 'isHoverListenerActive:', isHoverListenerActive, 'isCoarsePointer:', window.matchMedia("(pointer: coarse)").matches);
       if (window.innerWidth > 768 && !isHoverListenerActive && !window.matchMedia("(pointer: coarse)").matches) {
+        console.log('[NavVue] Conditions MET for adding hover listeners.');
         dropdownMenus.forEach(dropdown => {
           dropdown.addEventListener("mouseover", dropdownHoverHandler);
         });
         isHoverListenerActive = true;
         addDropdownHoverCSS();
+      } else {
+        console.log('[NavVue] Conditions NOT MET for adding hover listeners.');
       }
     }
 
     function removeDropdownHoverListeners() {
-      if (isHoverListenerActive) {
+      if (isHoverListenerActive) { // Only remove if active
+        console.log('[NavVue] Removing hover listeners.');
         dropdownMenus.forEach(dropdown => {
           dropdown.removeEventListener("mouseover", dropdownHoverHandler);
         });
@@ -1046,18 +1055,17 @@ export default {
     }
 
     function addDropdownHoverCSS() {
-      if (!styleTag) {
-        document.body.setAttribute("data-touch", "false");
-      }
+      console.log('[NavVue] Setting data-touch to false');
+      document.body.setAttribute("data-touch", "false");
     }
 
     function removeDropdownHoverCSS() {
-      if (styleTag) {
-        document.body.setAttribute("data-touch", "true");
-      }
+      console.log('[NavVue] Setting data-touch to true');
+      document.body.setAttribute("data-touch", "true");
     }
 
     function handleResize() {
+      console.log('[NavVue] handleResize called. Width:', window.innerWidth, 'isCoarsePointer:', window.matchMedia("(pointer: coarse)").matches);
       if (window.innerWidth > 768 && !window.matchMedia("(pointer: coarse)").matches) {
         addDropdownHoverListeners();
       } else {

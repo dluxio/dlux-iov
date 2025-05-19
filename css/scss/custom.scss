@@ -3,6 +3,16 @@
 @import "../bootstrap/bootstrap.scss";
 @import "../bootswatch/quartz/_bootswatch.scss";
 
+@mixin activate-dropdown-on-hover-basic {
+  // Applied to the .dropdown or .dropdown-center element
+  &:hover > .dropdown-menu { // Using direct child selector for clarity
+    display: block;
+    position: absolute; // Still needed for it to be out of flow
+    z-index: 1021; // Ensure it's above navbar-subbar (z-index 900) and typical navbar (z-index 1000-1030)
+                  // Bootstrap dropdowns are often 1000, modals 1050. Adjust if needed.
+  }
+}
+
 /* CSS Document */
 body {
   background-color: $dark-2;
@@ -2484,43 +2494,71 @@ html {
 
 // Nav dropdown hover on non-touch devices
 
-body[data-touch="false"] .nav-dropdown.dropdown:hover .dropdown-menu {
-  display: block;
-}
+body[data-touch="false"] {
+  .nav-dropdown.dropdown, // For existing nav items
+  .js-hoverable-dropdown { // For new DEX items
+    @include activate-dropdown-on-hover-basic;
 
-body[data-touch="false"] .navbar-nav .nav-item .dropdown-menu li .dropdown-item:hover {
-  color: $light-1 !important;
-  background-color: $dark-1;
-}
+  }
+  .dropdown-center.js-hoverable-dropdown {
+    &:hover > .dropdown-menu {
+      top: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+  .dropdown-end.js-hoverable-dropdown {
+    &:hover > .dropdown-menu {
+      top: 50px; // Or adjust if it should drop up or sideways from .nav-more
+      right: -15px;
+    }
+  }
 
-body[data-touch="false"] .navbar-nav .nav-item .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
-  color: $light-1 !important;
-}
+  // Specific rule for .nav-more or other right-aligned nav dropdowns (by parent type)
+  // This applies if the parent dictates end-alignment for its direct menu child.
+  .nav-more.nav-dropdown, // Targets the existing nav-more in the main navigation
+  .nav-more.js-hoverable-dropdown { // In case .nav-more could also be a .js-hoverable-dropdown
+    &:hover > .dropdown-menu {
+      top: 100%; // Or adjust if it should drop up or sideways from .nav-more
+      left: auto; 
+      right: 0;
+    }
+  }
 
-body[data-touch="false"] .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover {
-  color: $light-1 !important;
-  background-color: $dark-1 !important;
-}
+  .navbar-nav .nav-item .dropdown-menu li .dropdown-item:hover {
+    color: $light-1 !important;
+    background-color: $dark-1;
+  }
 
-body[data-touch="false"] .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
-  color: $light-1 !important;
-}
+  .navbar-nav .nav-item .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
+    color: $light-1 !important;
+  }
 
-body[data-touch="false"] .nav-highlight:hover {
-  background-color: $dark-1;
-  color: $light-1 !important;
-}
+  .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover {
+    color: $light-1 !important;
+    background-color: $dark-1 !important;
+  }
 
-body[data-touch="false"] .nav-highlight:hover .nav-subtitle {
-  color: $light-1 !important;
-}
+  .navbar-nav .nav-more .dropdown-menu li .dropdown-item:hover .subnav-subtitle {
+    color: $light-1 !important;
+  }
 
-body[data-touch="false"] .nav-more .nav-link:hover .bar {
-  background-color: $light-1 !important;
-}
+  .nav-highlight:hover {
+    background-color: $dark-1;
+    color: $light-1 !important;
+  }
 
-body[data-touch="false"] .dropdown-extra:hover {
-  color: $highlight-1 !important;
+  .nav-highlight:hover .nav-subtitle {
+    color: $light-1 !important;
+  }
+
+  .nav-more .nav-link:hover .bar {
+    background-color: $light-1 !important;
+  }
+
+  .dropdown-extra:hover {
+    color: $highlight-1 !important;
+  }
 }
 
 .draggable {

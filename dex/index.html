@@ -46,7 +46,7 @@
           <div class="navbar-subbar-content">
             <!-- token select -->
             <div id="userApiSelect" class="me-1">
-              <div v-cloak class="dropdown">
+              <div v-cloak class="dropdown-center js-hoverable-dropdown">
                 <a class="btn btn-outline-light d-flex align-items-center text-nowrap" role="button"
                   id="tokenDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
                   <i class="fa-solid fa-atom force-parent-lh"></i>
@@ -91,61 +91,93 @@
                 </ul>
               </div>
             </div>
+            <!-- modal button for small screen wallet -->
+            <button type="button" data-bs-toggle="modal" data-bs-target="#dexWallet"
+              class="btn d-md-none btn-outline-success ms-auto d-flex align-items-center"><i aria-hidden="true"
+                class="fa-solid fa-wallet force-parent-lh me-2"></i>
+              <p class="me-1 mb-0 fs-6">{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}
+                <i aria-hidden="true" class="fa-fw fa-solid fa-caret-down"></i>
+              </p>
+            </button>
             <!-- Dynamic Token Action Menu -->
-            <div v-if="account" class="dropdown ms-auto d-none d-xl-flex align-items-center text-white-50">
-              <a class="dropdown-toggle text-honey no-decoration d-flex align-items-center" href="#" role="button"
+            <div v-if="account"
+              class="ms-auto d-none d-md-flex dropdown-center align-items-center text-white-50 js-hoverable-dropdown">
+              <a class="dropdown-toggle text-honey no-decoration d-flex align-items-center mx-1" href="#" role="button"
                 data-bs-toggle="dropdown" aria-expanded="false">
-                <span class="me-2">{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}</span>
-                <i class="fa-solid fa-wallet"></i>
+                <span class="me-1">{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}</span>
+
               </a>
-              <ul class="dropdown-menu dropdown-menu-dark bg-black">
-                <li class="dropdown-header text-center">{{TOKEN}} WALLET</li>
+              <ul class="dropdown-menu dropdown-menu-dark bg-black p-2">
+                <div class="d-flex flex-wrap" style="min-width: 300px;">
+                  <li class="dropdown-header text-center w-100">{{TOKEN}} WALLET</li>
 
-                <!-- Balances Summary -->
-                <li class="p-2">
-                  <div class="d-flex flex-column text-center mb-2">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                      <span class="text-honey">{{TOKEN}}:</span>
-                      <span class="text-honey">{{formatNumber(accountapi.balance/pow10(protocol.precision),3,'.',',')}}</span>
+                  <!-- Balances Summary -->
+                  <div class="w-100 mx-1 mb-2 border-bottom border-white-50">
+                    <div class="d-flex flex-column text-center py-2">
+                      <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-honey">{{TOKEN}}:</span>
+                        <span
+                          class="text-honey">{{formatNumber(accountapi.balance/pow10(protocol.precision),3,'.',',')}}</span>
+                      </div>
+                      <div v-if="accountapi.poweredUp" class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-primary">{{TOKEN}}P:</span>
+                        <span
+                          class="text-primary">{{formatNumber(accountapi.poweredUp/pow10(protocol.precision),3,'.',',')}}</span>
+                      </div>
+                      <div v-if="accountapi.gov" class="d-flex justify-content-between align-items-center">
+                        <span class="text-info">{{TOKEN}}G:</span>
+                        <span
+                          class="text-info">{{formatNumber(accountapi.gov/pow10(protocol.precision),3,'.',',')}}</span>
+                      </div>
                     </div>
-                    <div v-if="accountapi.poweredUp"
-                      class="d-flex justify-content-between align-items-center mb-1">
-                      <span class="text-primary">{{TOKEN}}P:</span>
-                      <span class="text-primary">{{formatNumber(accountapi.poweredUp/pow10(protocol.precision),3,'.',',')}}</span>
+
+                  </div>
+
+                  <!-- Actions -->
+                  <div v-for="action in features" class="d-flex flex-grow-1">
+                    <!-- claim / rewards-->
+                    <div
+                      v-if="action.id == 'rewards' || action.id == 'claim' && accountapi[action.addr || 'balance'] > 0"
+                      class="d-flex flex-column w-100 pt-2 mx-1 mb-2 border-bottom border-white-50">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+
+                        <span v-if="action.id == 'rewards' || action.id == 'claim'">{{action.string}}:</span>
+                        <span
+                          v-if="action.id == 'rewards' || action.id == 'claim'">{{formatNumber(accountapi[action.addr
+                          || 'balance']/pow10(protocol.precision),3,'.',',')}}
+                          {{TOKEN}}</span>
+                      </div>
+                      <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="action.id" :mypfp="mypfp"
+                        :token="TOKEN" :tokenuser="accountapi" :account="account" :tokenprotocol="protocol" :api="lapi"
+                        :tokenstats="stats" @tosign="toSign = $event" v-slot:trigger class="d-flex w-100 pb-3">
+                        <button type="button" class="btn btn-danger w-100 trigger">
+                          Claim<i :class="action.fa_class" class="ms-2"></i>
+                        </button>
+                      </modal-vue>
+
                     </div>
-                    <div v-if="accountapi.gov"
-                      class="d-flex justify-content-between align-items-center">
-                      <span class="text-info">{{TOKEN}}G:</span>
-                      <span class="text-info">{{formatNumber(accountapi.gov/pow10(protocol.precision),3,'.',',')}}</span>
+                    <!-- wallet functions -->
+                    <div v-else class="d-flex" style="width: 150px;">
+                      <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="action.id" :mypfp="mypfp"
+                        :token="TOKEN" :tokenuser="accountapi" :account="account" :tokenprotocol="protocol" :api="lapi"
+                        :tokenstats="stats" @tosign="toSign = $event" v-slot:trigger class="d-flex w-100">
+                        <button type="button"
+                          class="btn btn-dark border border-white-50 m-1 trigger w-100 d-flex align-items-center justify-content-center"
+                          style="font-size: .9em;">
+                          <span class="d-flex flex-column">
+                            <i :class="action.fa_class" class="mb-1"></i>
+                            {{action.string}}
+                          </span>
+                        </button>
+                      </modal-vue>
                     </div>
                   </div>
-                  <hr class="dropdown-divider">
-                </li>
-
-                <!-- Claim Rewards -->
-                <li v-for="action in features">
-                  <div class="p-2">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                      <span v-if="action.id == 'rewards' || action.id == 'claim'">{{action.string}}:</span>
-                      <span v-if="action.id == 'rewards' || action.id == 'claim'">{{formatNumber(accountapi[action.addr || 'balance']/pow10(protocol.precision),3,'.',',')}}
-                        {{TOKEN}}</span>
-                    </div>
-
-                    <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="action.id" :mypfp="mypfp" :token="TOKEN" :tokenuser="accountapi" :account="account" :tokenprotocol="protocol" :api="lapi"
-                      :tokenstats="stats" @tosign="toSign = $event" v-slot:trigger class="d-flex">
-                      <button type="button" class="btn btn-info w-100 trigger">
-                        {{action.string}}<i :class="action.fa_class"></i>
-                      </button>
-                    </modal-vue>
-                  </div>
-                  <hr class="dropdown-divider">
-                </li>
-
+                </div>
               </ul>
             </div>
 
             <!-- HIVE Balance -->
-            <div v-if="account" id="userHive" class="mx-1">
+            <div v-if="account" id="userHive" class="mx-1 d-none d-md-flex dropdown-center js-hoverable-dropdown">
               <a class="dropdown-toggle text-hive no-decoration" data-bs-auto-close="outside" role="button"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
                 <span class="me-1" v-cloak>{{formatNumber(barhive,3,'.',',')}} HIVE</span>
@@ -201,10 +233,11 @@
               </ul>
             </div>
             <!-- send hbd form -->
-            <div v-if="account" id="userHbd" class="mx-1">
+            <div v-if="account" id="userHbd" class="mx-1 d-none d-md-flex dropdown dropdown-end js-hoverable-dropdown">
               <a class="dropdown-toggle text-hbd no-decoration" data-bs-auto-close="outside" role="button"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
                 <span class="me-1" v-cloak>{{formatNumber(barhbd,3,'.',',')}} HBD</span></a>
+              <div class="hover-gap"></div>
               <ul class="dropdown-menu dropdown-menu-dark p-2 text-white-50 text-left bg-black" style="width: 300px">
                 <li>
                   <h6 class="dropdown-header text-center">SEND HBD</h6>
@@ -335,12 +368,12 @@
           <div class="col-6 col-lg-3">
             <div class="d-flex align-items-center justify-content-center">
               <h5 class="m-0">Market</h5>
-              <div class="dropdown show d-flex align-items-center p-0 m-0">
+              <div class="dropdown show d-flex align-items-center p-0 m-0 dropdown-center js-hoverable-dropdown">
                 <a class="text-white" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true"
                   aria-expanded="false">
                   <h5 class="m-0"><i class="fas fa-info-circle ms-2"></i></h5>
                 </a>
-                <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end p-4 text-white-50 text-left bg-black">
+                <div class="dropdown-menu dropdown-menu-dark p-4 text-white-50 text-left bg-black">
                   <h6 class="dropdown-header">{{TOKEN}} STATS</h6>
                   <div class="dropdown-divider bg-light"></div>
                   <p class="mb-0">Supply:</p>
@@ -457,7 +490,7 @@
           </div>
           <div class="mt-2 text-center d-flex justify-content-between">
             <div>
-              <div class="dropdown">
+              <div class="dropdown js-hoverable-dropdown">
                 <a class="btn btn-outline-secondary dropdown-toggle" role="button" id="barwidth"
                   data-bs-toggle="dropdown" aria-expanded="false">
                   {{barwidth == 86400000 ? '1 Day' : barwidth == 21600000 ? '6 Hours' : barwidth == 3600000 ? '1 Hour' :
@@ -1554,206 +1587,90 @@
                   </h2>
                   <div id="collapseWalletOne" class="accordion-collapse collapse " data-bs-parent="#accordionWallet">
                     <div class="accordion-body bg-darkg">
-                      <!-- send token form -->
-                      <div class="mx-1">
-                        <h6 class="dropdown-header text-center">
-                          SEND {{TOKEN}}
-                        </h6>
-                        <form id="sendForm" @submit.prevent="validateForm('sendForm', 'sendFormValid');tokenSend()"
-                          class="needs-validation" novalidate>
-                          <div class="row mb-3">
-                            <label class="form-label">To:</label>
-                            <div class="input-group">
-                              <span class="input-group-text k text-white-50">
-                                @</span>
-                              <input class="form-control text-info" v-model="sendTo"
-                                @blur="checkAccount('sendTo', 'sendAllowed')" required id="sendTokenTo" type="text"
-                                placeholder="Recipient" />
+                    
+                      <!-- Dynamic Token Action Menu -->
+                      <div v-if="account"
+                        class="ms-auto d-none d-md-flex dropdown-center align-items-center text-white-50 js-hoverable-dropdown">
+                        <a class="dropdown-toggle text-honey no-decoration d-flex align-items-center mx-1" href="#"
+                          role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          <span class="me-1">{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}</span>
+
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark bg-black p-2">
+                          <div class="d-flex flex-wrap" style="min-width: 300px;">
+                            <li class="dropdown-header text-center w-100">{{TOKEN}} WALLET</li>
+
+                            <!-- Balances Summary -->
+                            <div class="w-100 mx-1 mb-2 border-bottom border-white-50">
+                              <div class="d-flex flex-column text-center py-2">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                  <span class="text-honey">{{TOKEN}}:</span>
+                                  <span
+                                    class="text-honey">{{formatNumber(accountapi.balance/pow10(protocol.precision),3,'.',',')}}</span>
+                                </div>
+                                <div v-if="accountapi.poweredUp"
+                                  class="d-flex justify-content-between align-items-center mb-1">
+                                  <span class="text-primary">{{TOKEN}}P:</span>
+                                  <span
+                                    class="text-primary">{{formatNumber(accountapi.poweredUp/pow10(protocol.precision),3,'.',',')}}</span>
+                                </div>
+                                <div v-if="accountapi.gov" class="d-flex justify-content-between align-items-center">
+                                  <span class="text-info">{{TOKEN}}G:</span>
+                                  <span
+                                    class="text-info">{{formatNumber(accountapi.gov/pow10(protocol.precision),3,'.',',')}}</span>
+                                </div>
+                              </div>
+
                             </div>
-                          </div>
-                          <div class="row mb-3">
-                            <label class="form-label">Amount:</label>
-                            <div class="input-group">
-                              <input class="form-control text-info" v-model="sendAmount" required type="number"
-                                step="0.001" min="0.001" :max="parseF(bartoken)" placeholder="0.000" />
-                              <span class="input-group-text text-white-50">
-                                {{TOKEN}}
-                              </span>
-                            </div>
-                            <div class="small text-center pt-2">
-                              <a role="button" @click="setValue('sendAmount', parseF(bartoken))"
-                                class="text-honey no-decoration">{{formatNumber(bartoken,3,'.',',')}}
-                                {{TOKEN}}</a>
-                              Available
-                            </div>
-                          </div>
-                          <div class="row mb-3">
-                            <label class="form-label">Memo:</label>
-                            <div class="input-group">
-                              <input class="form-control text-info" v-model="sendMemo" type="text"
-                                placeholder="memo (optional)" />
-                            </div>
-                          </div>
-                          <div class="text-center mb-2">
-                            <button type="submit" class="btn btn-honey">
-                              Send<i class="fas fa-paper-plane ms-2"></i>
-                            </button>
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- token power -->
-                <div class="accordion-item bg-primary" v-if="account && (features.powup_B || features.powdn_B)">
-                  <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                      data-bs-target="#collapseWalletTwo" aria-expanded="false" aria-controls="collapseWalletTwo">
-                      {{TOKEN}}P<span class="ms-auto small">{{formatNumber(barpow,3,'.',',')}}</span>
-                    </button>
-                  </h2>
-                  <div id="collapseWalletTwo" class="accordion-collapse collapse" data-bs-parent="#accordionWallet">
-                    <div class="accordion-body bg-darkg">
-                      <!-- power form -->
-                      <div>
-                        <h6 class="dropdown-header text-center mb-2">
-                          {{TOKEN}} POWER
-                        </h6>
-                        <form id="powForm" @submit.prevent="validateForm('powForm', 'powFormValid');power()"
-                          class="needs-validation" novalidate>
-                          <div class="row mb-3 text-center">
-                            <div>
-                              <div class="btn-group text-nowrap">
-                                <input class="btn-check" type="radio" name="pwrPair" id="pwrUp"
-                                  :checked="features.powsel_up" @click="setValue('features.powsel_up', true)" />
-                                <label for="pwrUp" class="btn btn-outline-primary">
-                                  PWR UP
-                                </label>
-                                <input class="btn-check" type="radio" name="pwrPair" id="pwrDown"
-                                  :checked="!features.powsel_up" @click="setValue('features.powsel_up', false)" />
-                                <label for="pwrDown" class="btn btn-outline-primary">PWR DOWN
-                                </label>
+
+                            <!-- Actions -->
+                            <div v-for="action in features" class="d-flex flex-grow-1">
+                              <!-- claim / rewards-->
+                              <div
+                                v-if="action.id == 'rewards' || action.id == 'claim' && accountapi[action.addr || 'balance'] > 0"
+                                class="d-flex flex-column w-100 pt-2 mx-1 mb-2 border-bottom border-white-50">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                  <span v-if="action.id == 'rewards' || action.id == 'claim'">{{action.string}}:</span>
+                                  <span
+                                    v-if="action.id == 'rewards' || action.id == 'claim'">{{formatNumber(accountapi[action.addr
+                                    || 'balance']/pow10(protocol.precision),3,'.',',')}}
+                                    {{TOKEN}}</span>
+                                </div>
+                                <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="action.id"
+                                  :mypfp="mypfp" :token="TOKEN" :tokenuser="accountapi" :account="account"
+                                  :tokenprotocol="protocol" :api="lapi" :tokenstats="stats" @tosign="toSign = $event"
+                                  v-slot:trigger class="d-flex w-100 pb-3">
+                                  <button type="button" class="btn btn-danger w-100 trigger">
+                                    Claim<i :class="action.fa_class" class="ms-2"></i>
+                                  </button>
+                                </modal-vue>
+
+                              </div>
+                              <!-- wallet functions -->
+                              <div v-else class="d-flex" style="width: 150px;">
+                                <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="action.id"
+                                  :mypfp="mypfp" :token="TOKEN" :tokenuser="accountapi" :account="account"
+                                  :tokenprotocol="protocol" :api="lapi" :tokenstats="stats" @tosign="toSign = $event"
+                                  v-slot:trigger class="d-flex w-100">
+                                  <button type="button"
+                                    class="btn btn-dark border border-white-50 m-1 trigger w-100 d-flex align-items-center justify-content-center"
+                                    style="font-size: .9em;">
+                                    <span class="d-flex flex-column">
+                                      <i :class="action.fa_class" class="mb-1"></i>
+                                      {{action.string}}
+                                    </span>
+                                  </button>
+                                </modal-vue>
                               </div>
                             </div>
                           </div>
-                          <div class="row mb-3">
-                            <label class="form-label">Amount:</label>
-                            <div class="input-group">
-                              <input class="form-control text-primary" v-if="features.powsel_up"
-                                v-model="features.pow_val" required type="number" step="0.001" min="0.001"
-                                :max="parseF(bartoken)" placeholder="0.000" />
-                              <input class="form-control text-primary" v-if="!features.powsel_up"
-                                v-model="features.pow_val" required type="number" step="0.001" min="0.001"
-                                :max="parseF(barpow)" placeholder="0.000" />
-                              <span class="input-group-text text-white-50" v-if="features.powsel_up">
-                                {{TOKEN}}
-                              </span>
-                              <span class="input-group-text text-white-50" v-if="!features.powsel_up">
-                                {{TOKEN}}P
-                              </span>
-                            </div>
-                            <div class="small text-center py-2" v-if="features.powsel_up">
-                              <a type="button" @click="setValue('features.pow_val',balance)"
-                                class="text-primary no-decoration">{{formatNumber(bartoken,3,'.',',')}}
-                                {{TOKEN}}</a>
-                              Available
-                            </div>
-                            <div class="small text-center py-2" v-if="!features.powsel_up">
-                              <a role="button" @click="setValue('features.pow_val',accountapi.poweredUp/1000)"
-                                class="text-primary no-decoration">{{formatNumber(barpow,3,'.',',')}}
-                                {{TOKEN}}P</a>
-                              Available
-                            </div>
-                          </div>
-                          <div class="text-center mb-2">
-                            <button type="submit" class="btn btn-primary" v-if="features.powsel_up">
-                              Power Up<i class="fas fa-arrow-alt-circle-up ms-2"></i>
-                            </button>
-                            <button type="submit" class="btn btn-primary" v-if="!features.powsel_up">
-                              Power Down<i class="fas fa-arrow-alt-circle-down ms-2"></i>
-                            </button>
-                          </div>
-                        </form>
+                        </ul>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="accordion-item bg-info" v-if="isnode && (features.govup_B || features.govdn_B)">
-                  <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                      data-bs-target="#collapseWalletThree" aria-expanded="false" aria-controls="collapseWalletThree">
-                      {{TOKEN}}G<span class="ms-auto small">{{formatNumber(bargov,3,'.',',')}}</span>
-                    </button>
-                  </h2>
-                  <div id="collapseWalletThree" class="accordion-collapse collapse" data-bs-parent="#accordionWallet">
-                    <div class="accordion-body bg-darkg">
-                      <!-- gov form -->
-                      <h6 class="dropdown-header text-center mb-2">
-                        {{TOKEN}} GOVERNANCE
-                      </h6>
-                      <h4 class="dropdown-header text-center mb-1">
-                        Current Threshold:
-                        {{formatNumber(stats.gov_threshhold/1000,3,'.',',')}}
-                      </h4>
-                      <form id="govForm" @submit.prevent="validateForm('govForm', 'govFormValid');gov()"
-                        class="needs-validation" novalidate>
-                        <div class="row mb-3 text-center">
-                          <div>
-                            <div class="btn-group">
-                              <input class="btn-check" type="radio" name="govPair" id="govLock"
-                                :checked="features.govsel_up" @click="setValue('features.govsel_up', true)" />
-                              <label for="govLock" class="btn btn-outline-info">
-                                LOCK
-                              </label>
-                              <input class="btn-check" type="radio" name="govPair" id="govUnlock"
-                                :checked="!features.govsel_up" @click="setValue('features.govsel_up', false)" />
-                              <label for="govUnlock" class="btn btn-outline-info">
-                                UNLOCK
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label class="form-label">Amount:</label>
-                          <div class="input-group">
-                            <input class="form-control text-info" v-if="features.govsel_up" v-model="features.gov_val"
-                              required type="number" step="0.001" min="0.001" :max="parseF(bartoken)"
-                              placeholder="0.000" />
-                            <input class="form-control text-info" v-if="!features.govsel_up" v-model="features.gov_val"
-                              required type="number" step="0.001" min="0.001" :max="parseF(bargov)"
-                              placeholder="0.000" />
-                            <span class="input-group-text text-white-50" v-if="features.govsel_up">
-                              {{TOKEN}}
-                            </span>
-                            <span class="input-group-text text-white-50" v-if="!features.govsel_up">
-                              {{TOKEN}}G
-                            </span>
-                          </div>
-                          <div class="small text-center py-2" v-if="features.govsel_up">
-                            <a role="button" @click="setValue('features.gov_val',balance)"
-                              class="text-info no-decoration">{{formatNumber(bartoken,3,'.',',')}}
-                              {{TOKEN}}</a>
-                            Available
-                          </div>
-                          <div class="small text-center py-2" v-if="!features.govsel_up">
-                            <a role="button" @click="setValue('features.gov_val',accountapi.gov/1000)"
-                              class="text-info no-decoration">{{formatNumber(bargov,3,'.',',')}}
-                              {{TOKEN}}G</a>
-                            Available
-                          </div>
-                        </div>
-                        <div class="text-center mb-2">
-                          <button type="submit" class="btn btn-info" v-if="features.govsel_up">
-                            Lock Gov<i class="fas fa-lock ms-2"></i>
-                          </button>
-                          <button type="submit" class="btn btn-info" v-if="!features.govsel_up">
-                            Unlock Gov<i class="fas fa-lock-open ms-2"></i>
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
+                <!-- HIVE -->
                 <div class="accordion-item bg-hive" v-if="account">
                   <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -1809,6 +1726,7 @@
                     </div>
                   </div>
                 </div>
+                <!-- HBD -->
                 <div class="accordion-item bg-hbd rounded-0" v-if="account">
                   <h2 class="accordion-header rounded-0">
                     <button class="accordion-button collapsed rounded-0 " type="button" data-bs-toggle="collapse"
