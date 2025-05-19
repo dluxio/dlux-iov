@@ -1,4 +1,4 @@
-this.version = "2025.05.18.1";
+this.version = "2025.05.19.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -25,7 +25,6 @@ var urlsToCache = [
   `/css/custom.css`,
   `/css/customaf.css`,
   `/css/drag-sort.css`,
-  `/css/scss/custom.css`,
   `/css/simplemde-bs-dark.css`,
   `/css/smde-comment.css`,
   `/css/smde.css`,
