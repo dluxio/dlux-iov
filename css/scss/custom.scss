@@ -2502,15 +2502,15 @@ body[data-touch="false"] {
   }
   .dropdown-center.js-hoverable-dropdown {
     &:hover > .dropdown-menu {
-      top: 50px;
+      top: 60px;
       left: 50%;
       transform: translateX(-50%);
     }
   }
   .dropdown-end.js-hoverable-dropdown {
     &:hover > .dropdown-menu {
-      top: 50px; // Or adjust if it should drop up or sideways from .nav-more
-      right: -15px;
+      top: 60px; // Or adjust if it should drop up or sideways from .nav-more
+      right: 0px;
     }
   }
 

@@ -14689,13 +14689,13 @@ body[data-touch=false] .js-hoverable-dropdown:hover > .dropdown-menu {
   z-index: 1021;
 }
 body[data-touch=false] .dropdown-center.js-hoverable-dropdown:hover > .dropdown-menu {
-  top: 50px;
+  top: 60px;
   left: 50%;
   transform: translateX(-50%);
 }
 body[data-touch=false] .dropdown-end.js-hoverable-dropdown:hover > .dropdown-menu {
-  top: 50px;
-  right: -15px;
+  top: 60px;
+  right: 0px;
 }
 body[data-touch=false] .nav-more.nav-dropdown:hover > .dropdown-menu,
 body[data-touch=false] .nav-more.js-hoverable-dropdown:hover > .dropdown-menu {

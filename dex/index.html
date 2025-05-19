@@ -53,6 +53,7 @@
                   <span class="d-none d-sm-block ms-1">{{TOKEN}}</span>
                   <i class="d-none d-md-block ms-1 fa-solid fa-caret-down fa-fw"></i>
                 </a>
+                <div class="hover-gap"></div>
                 <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="tokenDropdownBtn">
                   <li>
                     <h6 class="dropdown-header">HIVE / HBD</h6>
@@ -99,14 +100,14 @@
                 <i aria-hidden="true" class="fa-fw fa-solid fa-caret-down"></i>
               </p>
             </button>
-            <!-- Dynamic Token Action Menu -->
+            <!-- TOKEN Balance -->
             <div v-if="account"
               class="ms-auto d-none d-md-flex dropdown-center align-items-center text-white-50 js-hoverable-dropdown">
-              <a class="dropdown-toggle text-honey no-decoration d-flex align-items-center mx-1" href="#" role="button"
+              <a class="dropdown-toggle btn text-honey d-flex align-items-center mx-1" href="#" role="button"
                 data-bs-toggle="dropdown" aria-expanded="false">
                 <span class="me-1">{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}</span>
-
               </a>
+              <div class="hover-gap"></div>
               <ul class="dropdown-menu dropdown-menu-dark bg-black p-2">
                 <div class="d-flex flex-wrap" style="min-width: 300px;">
                   <li class="dropdown-header text-center w-100">{{TOKEN}} WALLET</li>
@@ -178,10 +179,11 @@
 
             <!-- HIVE Balance -->
             <div v-if="account" id="userHive" class="mx-1 d-none d-md-flex dropdown-center js-hoverable-dropdown">
-              <a class="dropdown-toggle text-hive no-decoration" data-bs-auto-close="outside" role="button"
+              <a class="dropdown-toggle btn text-hive" data-bs-auto-close="outside" role="button"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
                 <span class="me-1" v-cloak>{{formatNumber(barhive,3,'.',',')}} HIVE</span>
               </a>
+              <div class="hover-gap"></div>
               <ul class="dropdown-menu dropdown-menu-dark text-white-50 p-2 text-left bg-black" style="width: 300px">
                 <li>
                   <h6 class="dropdown-header text-center">SEND HIVE</h6>
@@ -232,9 +234,9 @@
                 </li>
               </ul>
             </div>
-            <!-- send hbd form -->
-            <div v-if="account" id="userHbd" class="mx-1 d-none d-md-flex dropdown dropdown-end js-hoverable-dropdown">
-              <a class="dropdown-toggle text-hbd no-decoration" data-bs-auto-close="outside" role="button"
+            <!-- HBD Balance -->
+            <div v-if="account" id="userHbd" class="ms-1 d-none d-md-flex dropdown dropdown-end js-hoverable-dropdown">
+              <a class="dropdown-toggle btn text-hbd" data-bs-auto-close="outside" role="button"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
                 <span class="me-1" v-cloak>{{formatNumber(barhbd,3,'.',',')}} HBD</span></a>
               <div class="hover-gap"></div>
