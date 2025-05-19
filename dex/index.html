@@ -113,7 +113,7 @@
             </div>
             <!-- modal button for small screen wallet -->
             <button type="button" data-bs-toggle="modal" data-bs-target="#dexWallet"
-              class="btn d-md-none btn-outline-success ms-auto d-flex align-items-center"><i aria-hidden="true"
+              class="btn d-lg-none btn-outline-success ms-auto d-flex align-items-center"><i aria-hidden="true"
                 class="fa-solid fa-wallet force-parent-lh me-2"></i>
               <p class="me-1 mb-0 fs-6">{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}
                 <i aria-hidden="true" class="fa-fw fa-solid fa-caret-down"></i>
@@ -121,7 +121,7 @@
             </button>
             <!-- TOKEN Balance -->
             <div v-if="account"
-              class="ms-auto d-none d-md-flex dropdown-center align-items-center text-white-50 js-hoverable-dropdown">
+              class="ms-auto d-none d-lg-flex dropdown-center align-items-center text-white-50 js-hoverable-dropdown">
               <a class="dropdown-toggle btn text-honey d-flex align-items-center mx-1" href="#" role="button"
                 data-bs-toggle="dropdown" aria-expanded="false">
                 <span class="me-1">{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}</span>
@@ -199,7 +199,7 @@
             </div>
 
             <!-- HIVE Balance -->
-            <div v-if="account" id="userHive" class="mx-1 d-none d-md-flex dropdown-center js-hoverable-dropdown">
+            <div v-if="account" id="userHive" class="mx-1 d-none d-lg-flex dropdown-center js-hoverable-dropdown">
               <a class="dropdown-toggle btn text-hive" data-bs-auto-close="outside" role="button"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
                 <span class="me-1" v-cloak>{{formatNumber(barhive,3,'.',',')}} HIVE</span>
@@ -255,7 +255,7 @@
               </ul>
             </div>
             <!-- HBD Balance -->
-            <div v-if="account" id="userHbd" class="ms-1 d-none d-md-flex dropdown dropdown-end js-hoverable-dropdown">
+            <div v-if="account" id="userHbd" class="ms-1 d-none d-lg-flex dropdown dropdown-end js-hoverable-dropdown">
               <a class="dropdown-toggle btn text-hbd" data-bs-auto-close="outside" role="button"
                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-cloak>
                 <span class="me-1" v-cloak>{{formatNumber(barhbd,3,'.',',')}} HBD</span></a>

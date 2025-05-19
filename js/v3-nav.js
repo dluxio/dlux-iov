@@ -1017,7 +1017,7 @@ export default {
     }
 
     function dropdownHoverHandler(event) {
-      console.log('[NavVue] dropdownHoverHandler triggered for:', event.currentTarget);
+      //console.log('[NavVue] dropdownHoverHandler triggered for:', event.currentTarget);
       dropdownMenus.forEach(otherDropdown => {
         const toggleButton = otherDropdown.querySelector(".dropdown-toggle");
         const dropdownInstance = bootstrap.Dropdown.getInstance(toggleButton);
