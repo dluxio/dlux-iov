@@ -145,7 +145,7 @@
                 </ul>
               </div>
               <!-- runner status modal button -->
-              <button :title="behindTitle" type="button" class="btn btn-outline-light square rounded-end-pill"
+              <button :title="behindTitle + ' with ' + runners.length + ' node runners in concensus'" type="button" class="btn btn-outline-light square rounded-end-pill"
                 data-bs-toggle="modal" data-bs-target="#runnerStatusModal">
                 <span class="d-none" :class="[{'text-success':behind < 30},{'text-warning':behind >= 30 && behind < 60},{'text-danger':behind >= 60}]">{{runners.length}}</span><i class="fas fa-server"></i></span>
               </button>
