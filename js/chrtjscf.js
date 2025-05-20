@@ -5,12 +5,10 @@ function getPixelForValueManual(value, scale) {
       typeof scale.top !== 'number' || typeof scale.bottom !== 'number') {
     console.error('Manual pixel calculation failed: Scale properties missing or not numeric.', 
                   {min: scale.min, max: scale.max, top: scale.top, bottom: scale.bottom, value: value});
-    // Cannot reliably calculate, return a value that might indicate error or be neutral
     return (scale.top + scale.bottom) / 2; 
   }
 
   if (scale.min === scale.max) {
-    // If data range is zero, map all to the middle of the pixel range.
     return scale.top + (scale.bottom - scale.top) / 2;
   }
 
@@ -22,36 +20,16 @@ function getPixelForValueManual(value, scale) {
   if (scale.options && scale.options.reverse) {
     pixel = scale.top + ratio * pixelRange;
   } else {
-    // Standard y-axis: higher data values are lower pixel values (closer to top of canvas)
-    // However, scale.bottom is often the higher pixel value (further down screen)
-    // And scale.top is the lower pixel value (further up screen)
-    // So, if bottom > top:
-    // pixel = scale.bottom - ratio * pixelRange
-    // If top > bottom (inverted canvas for some reason, less common for y):
-    // pixel = scale.top + ratio * (scale.bottom - scale.top) -> this is actually scale.top - ratio * (top - bottom)
-    // Let's assume standard Chart.js: 0 is at the top, y increases downwards.
-    // A scale's `top` is the pixel for scale.max (if not reversed)
-    // A scale's `bottom` is the pixel for scale.min (if not reversed)
-    // This means pixel = scale.top + ratio * pixelRange if not reversed.
-    // Let's re-verify standard Chart.js behavior or rely on a more direct interpolation:
-    // Pixel = P_min + (value - V_min) * ( (P_max - P_min) / (V_max - V_min) )
-    // If not reversed: P_max is scale.top, P_min is scale.bottom
-    // If reversed: P_max is scale.bottom, P_min is scale.top
-
-    if (scale.options && scale.options.reverse) { // Data max at bottom pixel, data min at top pixel
+    if (scale.options && scale.options.reverse) { 
         pixel = scale.top + ratio * pixelRange;
-    } else { // Data max at top pixel, data min at bottom pixel
+    } else { 
         pixel = scale.bottom - ratio * pixelRange;
     }
   }
-  
-  // console.log(`MANUAL_PIXEL_CALC: val=${value}, scale_min=${scale.min}, scale_max=${scale.max}, scale_top=${scale.top}, scale_bottom=${scale.bottom}, reverse=${scale.options?.reverse}, ratio=${ratio}, PIXEL=${pixel}`);
   return pixel;
 }
 
-/**
- * This class is based off controller.bar.js from the upstream Chart.js library
- */
+
 export class FinancialController extends BarController {
 
   static overrides = {
@@ -103,7 +81,6 @@ export class FinancialController extends BarController {
 
             const ohlc = point; 
             if (ohlc && !isNullOrUndef(ohlc.o) && !isNullOrUndef(ohlc.h) && !isNullOrUndef(ohlc.l) && !isNullOrUndef(ohlc.c)) {
-              // Here, o,h,l,c are data values from parsed point, not pixel values from element
               return `${ctx.dataset.label}: O ${ohlc.o} H ${ohlc.h} L ${ohlc.l} C ${ohlc.c} (${ohlc.s || ''} ${ohlc.v || ''})`;
             }
             return `${ctx.dataset.label || 'Data'}: OHLC data not available`;
@@ -142,25 +119,23 @@ export class FinancialController extends BarController {
     };
   }
 
-  // Helper method to get value scale
   _getValueScale() {
     return this._cachedMeta.vScale;
   }
 
-  // Helper method to create a bar size ruler
   _ruler() {
     const me = this;
     const meta = me._cachedMeta;
     const iScale = meta.iScale;
     const pixels = [];
 
-    if (meta.data && iScale) { // Add checks for meta.data and iScale
+    if (meta.data && iScale) {
       for (let i = 0; i < meta.data.length; i++) {
         const parsedX = me.getParsed(i)?.x;
         if (typeof parsedX !== 'undefined') {
           pixels.push(iScale.getPixelForValue(parsedX));
         } else {
-          pixels.push(null); // Push null if parsed.x is undefined
+          pixels.push(null)
           console.warn(`FinancialCtrl _ruler: parsed.x undefined for index ${i}`);
         }
       }
@@ -175,7 +150,7 @@ export class FinancialController extends BarController {
       stackCount: meta._stacked ? meta._stacked.count : 1,
       scale: iScale,
       getBarWidth() {
-        if (!this.scale) return 10; // Default if scale is missing
+        if (!this.scale) return 10
         const barThickness = this.scale.options?.barThickness;
         if (barThickness !== undefined) {
           return barThickness;
@@ -185,28 +160,22 @@ export class FinancialController extends BarController {
         return Math.min(maxBarWidth, categoryWidth);
       },
       _computeBarWidth() {
-        if (!this.scale || !this.pixels || this.pixels.length === 0) return 10; // Default
-        
+        if (!this.scale || !this.pixels || this.pixels.length === 0) return 10
         const distinctPixels = this.pixels.filter(p => typeof p === 'number' && isFinite(p));
-        if (distinctPixels.length <= 1) return 10; // Default if not enough distinct points
-
-        const minPixelSpacing = 1;
-        // Use the scale width directly from this.scale
+        if (distinctPixels.length <= 1) return 10
+        const minPixelSpacing = 1
         const totalWidth = this.scale.width;
-        if (typeof totalWidth !== 'number' || !isFinite(totalWidth)) return 10;
-
-        // Calculate average spacing between distinct points if possible
-        // This is a simplified approach; real bar charts might do more sophisticated things.
+        if (typeof totalWidth !== 'number' || !isFinite(totalWidth)) return 10
         const first = Math.min(...distinctPixels);
         const last = Math.max(...distinctPixels);
         const span = last - first;
         if (span <= 0) return 10;
 
         const averageSpacing = span / (distinctPixels.length -1);
-        return Math.max(minPixelSpacing, averageSpacing * 0.8); // Use 80% of average spacing
+        return Math.max(minPixelSpacing, averageSpacing * 0.8)
       },
       _calculateMaxBarWidth() {
-        if (!this.scale) return 20; // Default
+        if (!this.scale) return 20
         const iScale = this.scale;
         const fullSize = iScale.isHorizontal() ? iScale.width : iScale.height;
         if (typeof fullSize !== 'number' || !isFinite(fullSize)) return 20;
@@ -222,7 +191,6 @@ export class FinancialController extends BarController {
         if (typeof currentPixel === 'number' && isFinite(currentPixel)) {
           return { x: currentPixel, y: 0 };
         }
-        // Log if currentPixel is not a valid number (it might be null/NaN from iScale.getPixelForValue)
         console.warn(`FinancialCtrl: ruler.getCenterPoint for index ${index} received non-finite pixel: ${currentPixel}.`);
         return { x: null, y: 0 };
       }
@@ -277,7 +245,6 @@ export class FinancialController extends BarController {
     const vscale = me._getValueScale();
     const data = me.chart.data.datasets[me.index].data[index];
 
-    // Explicitly access data fields
     const dataOpen = parseFloat(data.o);
     const dataHigh = parseFloat(data.h);
     const dataLow = parseFloat(data.l);
@@ -285,15 +252,12 @@ export class FinancialController extends BarController {
     if (vscale) {
       
     } else {
-      console.warn(`FinancialCtrl Index ${index}: vscale is undefined.`);
-      // Assign default pixel values if vscale is missing to prevent further errors down the line
+      console.warn(`FinancialCtrl Index ${index}: vscale is undefined.`)
       const openPixel = 0, highPixel = 0, lowPixel = 0, closePixel = 0, base = 0;
       const x_coord = 0, barWidth = 1, height = 1;
       return { base, x: x_coord, y: openPixel, width: barWidth, height, open: openPixel, high: highPixel, low: lowPixel, close: closePixel };
     }
 
-
-    // Calculate pixel values for various price points
     const getPixelValue = (value) => {
       try {
         return vscale.getPixelForValue(value);
@@ -311,21 +275,18 @@ export class FinancialController extends BarController {
     const closePixel = getPixelValue(dataClose);
     const base = vscale.getBasePixel();
 
-    const horizontal = me.isHorizontal(); // Corrected: Use FinancialController's isHorizontal
+    const horizontal = me.isHorizontal()
     let x_coord;
 
     if (horizontal) {
-      // This case is less typical for Candlestick, but for completeness:
-      // Value is on the x-axis, category/time on y-axis
-      x_coord = getPixelValue(dataOpen); // Example: base x on open value
-                                       // y_coord would be iScale.getPixelForValue(parsed.x);
+      x_coord = getPixelValue(dataOpen)
     } else {
-      // Standard case: time on x-axis, value on y-axis
+      
       const centerPoint = ruler.getCenterPoint(index);
-      x_coord = centerPoint.x; // Correctly get the .x property
+      x_coord = centerPoint.x
       if (x_coord === null || typeof x_coord !== 'number' || !isFinite(x_coord)) {
         console.error(`FinancialCtrl Index ${index}: Calculated x_coord is invalid (${x_coord}). Defaulting to 0. This will affect bar placement.`);
-        x_coord = 0; // Fallback if ruler failed
+        x_coord = 0
       }
     }
     
@@ -336,18 +297,15 @@ export class FinancialController extends BarController {
 
 
     const isZeroHeight = Math.abs(openPixel - closePixel) < 0.5;
-    const height = reset ? 0 : (isZeroHeight ? 1 : Math.abs(openPixel - closePixel));
-    
-    // y-coordinate for the bar's visual position (top of the body for non-horizontal)
-    // CandlestickElement.draw will use open/close pixels to determine exact body placement.
+    const height = reset ? 0 : (isZeroHeight ? 1 : Math.abs(openPixel - closePixel))
     const y_pos = Math.min(openPixel, closePixel);
 
 
     const props = {
       base,
       x: x_coord,
-      y: reset ? base : y_pos, // For reset animation, go to base
-      width: Math.max(1, barWidth), // Ensure width is at least 1
+      y: reset ? base : y_pos, 
+      width: Math.max(1, barWidth), 
       height,
       open: openPixel,
       high: highPixel,
@@ -361,11 +319,11 @@ export class FinancialController extends BarController {
     const me = this;
     const chart = me.chart;
     const rects = me._cachedMeta.data;
-    clipArea(chart.ctx, chart.chartArea); // direct import
+    clipArea(chart.ctx, chart.chartArea)
     for (let i = 0; i < rects.length; ++i) {
       rects[i].draw(me._ctx);
     }
-    unclipArea(chart.ctx); // direct import
+    unclipArea(chart.ctx)
   }
 
   updateElements(elements, start, count, mode) {
@@ -375,7 +333,7 @@ export class FinancialController extends BarController {
     const firstOpts = me.resolveDataElementOptions(index, mode);
     const sharedOptions = me.getSharedOptions(firstOpts);
     const includeOptions = me.includeOptions(mode, sharedOptions);
-    const ruler = me._ruler(); // Get the ruler
+    const ruler = me._ruler()
 
     me.updateSharedOptions(sharedOptions, mode, firstOpts);
 
@@ -384,7 +342,7 @@ export class FinancialController extends BarController {
       const baseProperties = me.calculateElementProperties(i, ruler, reset, currentElementOptions);
 
       if (includeOptions) {
-        const parsed = me.getParsed(i); // Get parsed data for color determination
+        const parsed = me.getParsed(i)
         let chosenBackgroundColor = currentElementOptions.backgroundColors?.unchanged || 'rgba(201, 203, 207, 0.5)';
         let chosenBorderColor = currentElementOptions.borderColors?.unchanged || 'rgb(201, 203, 207)';
 
@@ -399,8 +357,8 @@ export class FinancialController extends BarController {
         }
         
         baseProperties.options = {
-          ...currentElementOptions, // Spread original options first
-          borderRadius: { // Provide borderRadius as a fully resolved object
+          ...currentElementOptions,
+          borderRadius: { 
             topLeft: 0,
             topRight: 0,
             bottomLeft: 0,
@@ -415,7 +373,6 @@ export class FinancialController extends BarController {
     }
   }
 
-  // Add missing scale helpers
   _getIndexScale() {
     return this._cachedMeta.iScale;
   }
@@ -424,7 +381,6 @@ export class FinancialController extends BarController {
     return this._cachedMeta.vScale.isHorizontal();
   }
 
-  // Helper to get parsed data at an index
   getParsed(index) {
     const data = this._cachedMeta._parsed;
     if (!data || !data[index]) {
@@ -436,18 +392,15 @@ export class FinancialController extends BarController {
     return data[index];
   }
 
-  // Get labels for the x-axis (for category scales)
   _getLabels() {
     const me = this;
     const labels = me.chart.data.labels || [];
-    
-    // If no explicit labels, try to use parsed x values for time/category
+ 
     if (labels.length === 0 && me._cachedMeta._parsed) {
       return me._cachedMeta._parsed.map((item, index) => {
-        const x = item.x;
-        // Format timestamp appropriately if it's numeric
+        const x = item.x
         if (typeof x === 'number' && !isNaN(x)) {
-          // Simple date formatting for logging purposes
+
           try {
             return new Date(x).toLocaleDateString();
           } catch (e) {
@@ -460,11 +413,9 @@ export class FinancialController extends BarController {
     return labels;
   }
 
-  // Parse the raw data into a format suitable for financial charts
   parse(start, count) {
     const me = this;
     const { _cachedMeta: meta, _data: data } = me;
-    //const { iScale, vScale } = meta;
     const parsed = new Array(count);
 
     for (let i = start, ilen = start + count; i < ilen; ++i) {
@@ -475,11 +426,8 @@ export class FinancialController extends BarController {
         h: undefined, // high
         l: undefined, // low
         c: undefined  // close
-      };
-      
-      // Handle various data formats
+      }
       if (Array.isArray(item)) {
-        // [timestamp, open, high, low, close, volume?]
         if (item.length >= 5) {
           parsedItem = {
             x: +item[0],
@@ -493,8 +441,6 @@ export class FinancialController extends BarController {
           console.warn(`FinancialController: Data item at index ${i} has insufficient elements:`, item);
         }
       } else if (typeof item === 'object' && item !== null) {
-        // {t: timestamp, o: open, h: high, l: low, c: close, v?: volume}
-        // or {x: timestamp, o: open, h: high, l: low, c: close, v?: volume}
         parsedItem = {
           x: +(item.t !== undefined ? item.t : item.x),
           o: +item.o,
@@ -504,8 +450,6 @@ export class FinancialController extends BarController {
           v: item.v !== undefined ? +item.v : undefined
         };
       }
-
-      // Set fallbacks if values are missing or invalid
       if (isNaN(parsedItem.x)) parsedItem.x = i;
       if (isNaN(parsedItem.o)) parsedItem.o = 0;
       if (isNaN(parsedItem.h)) parsedItem.h = parsedItem.o;
@@ -516,7 +460,7 @@ export class FinancialController extends BarController {
     }
 
     meta._parsed = parsed;
-    me._getLabels(); // Update labels from the scale
+    me._getLabels();
   }
 }
 
@@ -542,7 +486,7 @@ function getBarBounds(bar, useFinalPosition) {
     half = width / 2;
     left = x - half;
     right = x + half;
-    top = Math.min(y, base); // use min because 0 pixel at top of screen
+    top = Math.min(y, base)
     bottom = Math.max(y, base);
   }
 
@@ -643,15 +587,12 @@ export class CandlestickElement extends FinancialElement {
       return;
     }
 
-    // Use a safe width value
     const width = Math.max(me.width, 1);
     
     ctx.save();
-    
-    // Set line style
+
     ctx.lineWidth = options.borderWidth || 1;
     
-    // Determine color based on price movement
     let color;
     if (close > open) {
       color = options.borderColors?.up || 'rgb(75, 192, 192)';
@@ -665,31 +606,24 @@ export class CandlestickElement extends FinancialElement {
     }
     
     ctx.strokeStyle = color;
-    
-    // Calculate coordinates safely (force at least 1px height)
     const openY = Number.isFinite(open) ? open : me.base;
     const closeY = Number.isFinite(close) ? close : me.base;
     const highY = Number.isFinite(high) ? high : Math.min(openY, closeY);
     const lowY = Number.isFinite(low) ? low : Math.max(openY, closeY);
-    
-    // Draw the high-low line
+
     ctx.beginPath();
     ctx.moveTo(x, highY);
     ctx.lineTo(x, lowY);
     ctx.stroke();
-    
-    // Draw the body rectangle with at least 1px height
+
     const bodyHeight = Math.max(Math.abs(closeY - openY), 1);
     const bodyY = Math.min(openY, closeY);
-    
-    // Fill and stroke the body
+
     ctx.fillRect(x - width / 2, bodyY, width, bodyHeight);
     ctx.strokeRect(x - width / 2, bodyY, width, bodyHeight);
     
     ctx.restore();
   }
-
-  // Add additional methods needed by the controller
   getRange(axis) {
     const props = this;
     if (axis === 'x') {
@@ -767,13 +701,11 @@ export class CandlestickController extends FinancialController {
     }
   };
 
-  // Override to ensure proper element creation
   constructor(chart, datasetIndex) {
     super(chart, datasetIndex);
     this._elementType = CandlestickElement;
   }
 
-  // Simplified element update method to avoid complexity
   updateElements(elements, start, count, mode) {
     const me = this;
     const reset = mode === 'reset';
@@ -783,7 +715,6 @@ export class CandlestickController extends FinancialController {
       const options = me.resolveDataElementOptions(i, mode);
       const baseProperties = me.calculateElementProperties(i, ruler, reset, options);
       
-      // Always provide options for CandlestickElement
       baseProperties.options = {
         borderWidth: options.borderWidth,
         width: baseProperties.width,
@@ -796,7 +727,6 @@ export class CandlestickController extends FinancialController {
   }
 }
 
-// Accessing Chart.defaults.elements.ohlc directly
 const ohlcElementDefaults = Chart.defaults.elements.ohlc || FinancialElement.defaults;
 
 
@@ -834,7 +764,6 @@ export class OhlcElement extends FinancialElement {
     
     ctx.save();
     
-    // Set line style
     ctx.lineWidth = options.lineWidth || 2;
     
     // Determine color based on price movement
