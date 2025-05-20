@@ -624,12 +624,16 @@ createApp({
         this[key] = value;
       }
     },
-    setApi(url) {
+    setApi(url, attempt = 0) {
       if (url.substr(-1) == "/") {
         url = url.substr(0, url.length - 1);
       }
       url = url || prompt("Please enter your API", "https://spkinstant.hivehoneycomb.com");
       if (url.indexOf("https://") == -1) {
+        if(!attempt && url.indexOf("http://") == -1) {
+          this.setApi('https://' + url, 1);
+          return;
+        }
         alert("https is required");
         return;
       }
