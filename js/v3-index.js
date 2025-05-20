@@ -1023,7 +1023,7 @@ var app = new Vue({
     this.getTickers();
     this.getHiveStats();
     this.getDluxStats();
-    this.makeQr('qrcode', follow);
+    //this.makeQr('qrcode', 'follow');
   },
   computed: {
     reward:{
