@@ -37,22 +37,27 @@
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
-<style>
-    .d-flex.flex-grow-1.flex-column.rounded {
-        position: relative;
-    }
-    .breadcrumb-item:hover {
-        background-color: #555;
-    }
-    .folder-row {
-        cursor: pointer;
-        background-color: #2a2a2a; /* Slightly darker shade for folders */
-    }
-    .folder-row {
-        cursor: pointer;
-        background-color: #2a2a2a; /* Slightly darker shade for folders */
-    }
-</style>
+    <style>
+        .d-flex.flex-grow-1.flex-column.rounded {
+            position: relative;
+        }
+
+        .breadcrumb-item:hover {
+            background-color: #555;
+        }
+
+        .folder-row {
+            cursor: pointer;
+            background-color: #2a2a2a;
+            /* Slightly darker shade for folders */
+        }
+
+        .folder-row {
+            cursor: pointer;
+            background-color: #2a2a2a;
+            /* Slightly darker shade for folders */
+        }
+    </style>
     <script>
         var hash
     </script>
@@ -124,22 +129,31 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-4 text-center m-auto"> <a target="_blank"
-                                            class="d-none btn btn-outline-danger btn-lg m-1" role="button"
-                                            :href="'/vr/@' + pageAccount">VR Page<i
-                                                class="fas fa-vr-cardboard mx-2 fa-lg"></i></a>
+                                    <div class="col-md-4 text-center m-auto">
+                                        <a target="_blank" class="d-none btn btn-outline-danger btn-lg m-1"
+                                            role="button" :href="'/vr/@' + pageAccount">VR Page<i
+                                                class="fas fa-vr-cardboard mx-2 fa-lg"></i>
+                                        </a>
+                                        <div v-if="pageAccount" class="d-flex">
+                                            <a  href="/new/"
+                                                class="btn btn-outline-light d-flex align-items-center ms-auto">NEW
+                                                POST</span><i class="fa-solid fa-plus fa-fw force-parent-lh ms-1"></i>
+                                                <span class="sr-only">New Post</span>
+                                            </a>
+                                        </div>
                                         <button type="button" v-show="!me && account"
                                             class="btn btn-outline-primary btn-lg" data-bs-toggle="dropdown"
                                             aria-haspopup="true" aria-expanded="false"> Actions<i
-                                                class="fas fa-ellipsis-h ms-2"></i></button>
+                                                class="fas fa-ellipsis-h ms-2"></i>
+                                        </button>
                                         <div class="dropdown-menu bg-black dropdown-menu-right"> <a
                                                 class="dropdown-item" type="button" @click="follow(pageAccount)"
                                                 v-if="!relations.follows">Follow</a> <a class="dropdown-item"
                                                 type="button" @click="unfollow(pageAccount)"
                                                 v-if="relations.follows">Unfollow</a>
                                             <modal-vue v-if="protocol?.dlux?.head_block && accountapi.head_block"
-                                                func="send" :mypfp="mypfp" token="balance" :tokenuser="accountapi" :api="lapi"
-                                                :account="account" :tokenprotocol="protocol?.dlux"
+                                                func="send" :mypfp="mypfp" token="balance" :tokenuser="accountapi"
+                                                :api="lapi" :account="account" :tokenprotocol="protocol?.dlux"
                                                 @tosign="toSign = $event" v-slot:trigger>
                                                 <a slot="trigger" class="dropdown-item trigger" type="button">Send
                                                     DLUX</a>
@@ -202,28 +216,38 @@
                                 style="background-color: rgba(61, 61, 61, 0.708);">
                                 <div class="mb-3">
                                     <ul id="wallettabs" class="nav nav-tabs justify-content-center" role="tablist">
-                                        <li class="nav-item"> <a class="nav-link active d-flex flex-column justify-content-center text-center" href="#dlux" id="dluxtab"
-                                                role="tab" @click="activeTab = 'wallet'" data-bs-toggle="tab"
-                                                aria-controls="dlux" aria-expanded="true">
-                                                <div class="d-flex justify-content-center align-items-center rounded-circle p-1 bg-dark border border-light" style="height: 70px; width: 70px;">
+                                        <li class="nav-item"> <a
+                                                class="nav-link active d-flex flex-column justify-content-center text-center"
+                                                href="#dlux" id="dluxtab" role="tab" @click="activeTab = 'wallet'"
+                                                data-bs-toggle="tab" aria-controls="dlux" aria-expanded="true">
+                                                <div class="d-flex justify-content-center align-items-center rounded-circle p-1 bg-dark border border-light"
+                                                    style="height: 70px; width: 70px;">
                                                     <img src="/img/dlux-logo.png" class="img-fluid" alt="DLUX ICON">
                                                 </div>
-                                                    DLUX</a></li>
-                                        <li class="nav-item"> <a class="nav-link d-flex flex-column justify-content-center text-center" href="#spk"
-                                                @click="activeTab = 'wallet'" id="spktab" role="tab"
+                                                DLUX
+                                            </a></li>
+                                        <li class="nav-item"> <a
+                                                class="nav-link d-flex flex-column justify-content-center text-center"
+                                                href="#spk" @click="activeTab = 'wallet'" id="spktab" role="tab"
                                                 data-bs-toggle="tab" aria-controls="spk" aria-expanded="true">
-                                                <div class="d-flex justify-content-center align-items-center rounded-circle p-1 bg-dark border border-light" style="height: 70px; width: 70px;">
-                                                    <img src="/img/spknetwork/spk_icon.png" class="img-fluid" alt="SPK ICON">
+                                                <div class="d-flex justify-content-center align-items-center rounded-circle p-1 bg-dark border border-light"
+                                                    style="height: 70px; width: 70px;">
+                                                    <img src="/img/spknetwork/spk_icon.png" class="img-fluid"
+                                                        alt="SPK ICON">
                                                 </div>
-                                                SPK</a>
+                                                SPK
+                                            </a>
                                         </li>
-                                        <li class="nav-item"> <a class="nav-link d-flex flex-column justify-content-center text-center" href="#hive" id="hivetab" role="tab"
-                                                @click="activeTab = 'wallet'" data-bs-toggle="tab" aria-controls="hive"
-                                                aria-expanded="true">
-                                                <div class="d-flex justify-content-center align-items-center rounded-circle p-1 bg-dark border border-light" style="height: 70px; width: 70px;">
-                                                    <img src="/img/hextacular.svg" class="img-fluid" alt="HIVE ICON" >
+                                        <li class="nav-item"> <a
+                                                class="nav-link d-flex flex-column justify-content-center text-center"
+                                                href="#hive" id="hivetab" role="tab" @click="activeTab = 'wallet'"
+                                                data-bs-toggle="tab" aria-controls="hive" aria-expanded="true">
+                                                <div class="d-flex justify-content-center align-items-center rounded-circle p-1 bg-dark border border-light"
+                                                    style="height: 70px; width: 70px;">
+                                                    <img src="/img/hextacular.svg" class="img-fluid" alt="HIVE ICON">
                                                 </div>
-                                                HIVE</a>
+                                                HIVE
+                                            </a>
                                         </li>
                                     </ul>
                                 </div>
@@ -522,8 +546,7 @@
                                                                 func="powdn" token="poweredUp" :tokenuser="accountapi"
                                                                 :to_account="{'amount':(accountapi?.power_downs[Object.keys(accountapi?.power_downs)[0]].amount * 4)/1000}"
                                                                 :account="account" :tokenprotocol="protocol?.dlux"
-                                                                :mypfp="mypfp" @tosign="toSign = $event"
-                                                                v-slot:trigger>
+                                                                :mypfp="mypfp" @tosign="toSign = $event" v-slot:trigger>
                                                                 <button
                                                                     class="btn btn-sm rounded-pill btn-outline-light trigger"
                                                                     type="button">
@@ -571,7 +594,8 @@
 
                                                         <h4 class="my-2">Delegated DLUX Power</h4>
 
-                                                        <p class="text-white-50">Grant the benefits of DLUX Power, without transferring its ownership
+                                                        <p class="text-white-50">Grant the benefits of DLUX Power,
+                                                            without transferring its ownership
                                                         </p>
                                                     </div>
                                                     <div id="dluxactions" class="text-center text-lg-end">
@@ -1945,8 +1969,8 @@
                                                                     func="delegate_rc" :mypfp="mypfp" token="RC"
                                                                     :tokenuser="focus" :account="account"
                                                                     :tokenstats="hivestats" :rc-info="rcAccount"
-                                                                    @tosign="toSign = $event" :type="{}"
-                                                                    v-slot:trigger class="dropdown-menu-item">
+                                                                    @tosign="toSign = $event" :type="{}" v-slot:trigger
+                                                                    class="dropdown-menu-item">
                                                                     <button class="text-nowrap dropdown-item trigger">
                                                                         <i class="fas fa-microchip fa-fw me-2"></i>
                                                                         Delegate RC
@@ -1980,11 +2004,12 @@
                                                                         Set Withdrawal Route
                                                                     </button>
                                                                 </modal-vue>
-                                                                    <button class="dropdown-menu-item text-nowrap dropdown-item trigger"
-                                                                        @click="claimACT()"
-                                                                        :disabled="!(parseF(focus.vesting_shares) > 1000000)">Claim
-                                                                        Account Creation Token
-                                                                    </button>
+                                                                <button
+                                                                    class="dropdown-menu-item text-nowrap dropdown-item trigger"
+                                                                    @click="claimACT()"
+                                                                    :disabled="!(parseF(focus.vesting_shares) > 1000000)">Claim
+                                                                    Account Creation Token
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -2448,8 +2473,8 @@
                                                         <modal-vue v-if="focus.id && hivestats.content_reward_percent"
                                                             func="transfer_from_savings" :mypfp="mypfp" token="HIVE"
                                                             :tokenuser="focus" :account="account"
-                                                            :tokenstats="hivestats" @tosign="toSign = $event"
-                                                            :type="{}" v-slot:trigger class="d-flex">
+                                                            :tokenstats="hivestats" @tosign="toSign = $event" :type="{}"
+                                                            v-slot:trigger class="d-flex">
                                                             <span class="text-nowrap btn-padding trigger"
                                                                 slot="trigger">
                                                                 <i class="fas fa-money-bill-transfer fa-fw me-2"></i>
@@ -2791,7 +2816,8 @@
                                                         <li v-if="formatNumber(focus.savings_hbd_balance ,3,'.',
                                                         ',') == 0">Add HBD to Savings to start earning</li>
                                                         <li>Claim interest every 30 days</li>
-                                                        <li>Last claim was {{timeUntil(focus.savings_hbd_last_interest_payment)}}</li>
+                                                        <li>Last claim was
+                                                            {{timeUntil(focus.savings_hbd_last_interest_payment)}}</li>
                                                     </ul>
                                                 </div>
                                                 <div id="savingsactions" class="text-center text-lg-end">

@@ -492,8 +492,12 @@
                 </div>
             </div>
             <!-- blog -->
-            <div>
-
+            <div v-if="postCustom_json.vrHash == 'blog'" class="container">
+                <!-- Post Details Widget -->
+                <div class="card-bg rounded p-2">
+                    <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens"
+                        @tosign="sendIt($event)" />
+                </div>
             </div>
 
 
