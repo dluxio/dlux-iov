@@ -95,9 +95,6 @@
                       <span class="ms-2 hero-subtitle fs-3">LARYNX</span>
                     </a>
                   </li>
-                  <li>
-                    <hr class="dropdown-divider" />
-                  </li>
                   <!-- broca test -->
                   <li>
                     <a class="dropdown-item d-flex align-items-center" role="button"
@@ -145,15 +142,18 @@
                 </ul>
               </div>
               <!-- runner status modal button -->
-              <button :title="behindTitle + ' with ' + runners.length + ' node runners in concensus'" type="button" class="btn btn-outline-light square rounded-end-pill"
-                data-bs-toggle="modal" data-bs-target="#runnerStatusModal">
-                <span class="d-none" :class="[{'text-success':behind < 30},{'text-warning':behind >= 30 && behind < 60},{'text-danger':behind >= 60}]">{{runners.length}}</span><i class="fas fa-server"></i></span>
+              <button :title="behindTitle + ' with ' + runners.length + ' node runners in concensus'" type="button"
+                class="btn btn-outline-light square rounded-end-pill" data-bs-toggle="modal"
+                data-bs-target="#runnerStatusModal">
+                <span class="d-none"
+                  :class="[{'text-success':behind < 30},{'text-warning':behind >= 30 && behind < 60},{'text-danger':behind >= 60}]">{{runners.length}}</span><i
+                  class="fas fa-satellite-dish"></i></span>
               </button>
             </div>
             <!-- modal button for small screen wallet -->
             <button type="button" data-bs-toggle="modal" data-bs-target="#dexWallet"
-              class="btn d-lg-none btn-outline-success rounded-pill ms-auto d-flex align-items-center"><i aria-hidden="true"
-                class="fa-solid fa-wallet force-parent-lh me-2"></i>
+              class="btn d-lg-none btn-outline-success rounded-pill ms-auto d-flex align-items-center"><i
+                aria-hidden="true" class="fa-solid fa-wallet force-parent-lh me-2"></i>
               <p class="me-1 mb-0 fs-6">{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}
                 <i aria-hidden="true" class="fa-fw fa-solid fa-caret-down"></i>
               </p>
@@ -229,7 +229,7 @@
                         </button>
                       </modal-vue>
                     </div>
-                  </div>  
+                  </div>
                   <!-- legacy node settings -->
                   <div class="d-flex w-100" v-if="isnode">
                     <!-- token settings modal button -->
@@ -1455,14 +1455,11 @@
           <div class="modal-content bg-blur-darkg bg-img-none">
             <div class="modal-header pb-1 flex-column border-bottom-0">
               <div class="d-flex mb-1 justify-content-between w-100 align-items-center">
-
                 <!-- Title -->
                 <h1 class="modal-title fs-5" id="runnerStatusModalLabel">{{TOKEN}} Nodes</h1>
-
                 <!-- Close -->
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-
               <!-- API Status -->
               <div class="d-flex align-items-center w-100">
                 <span class="small"
@@ -1470,7 +1467,11 @@
                   <i class="fa-solid fa-satellite-dish fa-fw me-1"></i><span class="text-break">{{lapi}}</span>
                   <br>
                   <i class="fa-solid fa-link fa-fw me-1"></i><span>{{behind}} block<span
-                      v-if="behind > 1 || behind == 0">s</span> behind HIVE</span></span>
+                      v-if="behind > 1 || behind == 0">s</span> behind HIVE</span>
+                  <br>
+                  <i class="fa-solid fa-code fa-fw me-1"></i>
+                  version {{dexapi.VERSION}}
+                </span>
               </div>
               <!-- Search -->
               <div class="w-100 mb-1">
@@ -1692,10 +1693,10 @@
                                   || 'balance']/pow10(protocol.precision),3,'.',',')}}
                                   {{TOKEN}}</span>
                               </div>
-                              <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="func"
-                                :mypfp="mypfp" :token="TOKEN" :tokenuser="accountapi" :account="account"
-                                :tokenprotocol="protocol" :api="lapi" :tokenstats="stats" @tosign="toSign = $event"
-                                v-slot:trigger class="d-flex w-100 pb-3">
+                              <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="func" :mypfp="mypfp"
+                                :token="TOKEN" :tokenuser="accountapi" :account="account" :tokenprotocol="protocol"
+                                :api="lapi" :tokenstats="stats" @tosign="toSign = $event" v-slot:trigger
+                                class="d-flex w-100 pb-3">
                                 <button type="button" class="btn btn-danger w-100 trigger">
                                   Claim<i :class="action.fa_class" class="ms-2"></i>
                                 </button>
@@ -1704,10 +1705,10 @@
                           </div>
                           <!-- wallet functions -->
                           <div v-else class="d-flex" style="width: 150px;">
-                            <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="func"
-                              :mypfp="mypfp" :token="TOKEN" :tokenuser="accountapi" :account="account"
-                              :tokenprotocol="protocol" :api="lapi" :tokenstats="stats" @tosign="toSign = $event"
-                              v-slot:trigger class="d-flex w-100">
+                            <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="func" :mypfp="mypfp"
+                              :token="TOKEN" :tokenuser="accountapi" :account="account" :tokenprotocol="protocol"
+                              :api="lapi" :tokenstats="stats" @tosign="toSign = $event" v-slot:trigger
+                              class="d-flex w-100">
                               <button type="button"
                                 class="btn btn-dark border border-white-50 m-1 trigger w-100 d-flex align-items-center justify-content-center"
                                 style="font-size: .9em;">
