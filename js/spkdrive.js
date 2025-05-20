@@ -203,7 +203,8 @@ export default {
                                 <div class="card-body">
                                     <div class="d-flex align-items-center mb-2 justify-content-center">
                                         <h5 class="mb-0 card-title text-info">
-                                            <!-- {{fancyBytes(1000000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) * spkStats.channel_bytes)}} -->
+                                            {{fancyBytes((1000000 *
+                            1024) * (864000/144000))}}
                                         </h5>
                                         <h5 class="mb-0 mx-1 card-title text-info">/</h5>
                                         <p class="mb-0 me-1 lead text-warning">1 BROCA</p>
@@ -228,7 +229,8 @@ export default {
                                 </div>
                                 <div class="card-body">
                                     <h5 class="card-title text-info">
-                                        <!-- {{fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * spkStats.channel_bytes)}} -->
+                                        {{fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) *
+                        1024)}}
                                     </h5>
                                     <p class="card-text text-white-50">Your available storage based on your current
                                         BROCA Power
@@ -244,7 +246,8 @@ export default {
                                 </div>
                                 <div class="card-body">
                                     <h5 class="card-title text-info">
-                                        <!-- ~{{(fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) * 6000))}} -->
+                                        ~{{(fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) *
+                        6000))}}
                                     </h5>
                                     <p class="card-text text-white-50">Your perpetual storage when files are set to
                                         autorenew at current
@@ -1571,14 +1574,6 @@ export default {
                 "json_metadata": JSON.stringify(this.postCustom_json)
             }
             this.$emit('reply', deets)
-        },
-        broca_calc(last = '0,0') {
-            if (!last) last = '0,0'
-            const last_calc = this.Base64toNumber(last.split(',')[1])
-            const accured = parseInt((parseFloat(this.saccountapi.broca_refill || 144000) * (this.saccountapi.head_block - last_calc)) / (this.saccountapi.spk_power * 1000))
-            var total = parseInt(last.split(',')[0]) + accured
-            if (total > (this.saccountapi.spk_power * 1000)) total = (this.saccountapi.spk_power * 1000)
-            return total
         },
         Base64toNumber(chars = "") {
             if (typeof chars != 'string') {

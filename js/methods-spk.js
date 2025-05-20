@@ -4,8 +4,8 @@ const Base64toNumber = common.Base64toNumber;
 const toBase58 = common.toBase58;
 
 export default {
-broca_calc(last = '0,0', broca_refill = 144000, spk_power = 0, head_block = 0) {
-    if (!spk_power) return 0;
+broca_calc(last = '0,0', broca_refill = 144000, spk_power = (this.saccountapi.spk_power * 1000), head_block = this.saccountapi.head_block) {
+    if (!spk_power)return 0
     const last_calc = Base64toNumber(last.split(',')[1]);
     const accured = parseInt(parseFloat(broca_refill) * (head_block - last_calc) / (spk_power * 1000));
     var total = parseInt(last.split(',')[0]) + accured;

@@ -200,7 +200,7 @@ export default {
                         <li>Regenerative Resource Credits for IPFS Storage</li>
                         <li>Recharges every
                             {{formatNumber((spkStats.broca_refill / 28800), 2, '.', ',')}} Days, {{formatNumber((1 -
-                            (broca_calc(saccountapi.broca))/(saccountapi.spk_power * 1000)) * (spkStats.broca_refill /
+                            (broca_calc(saccountapi.broca, spkStats.broca_refill, (saccountapi.spk_power * 1000), spkStats.head_block))/(saccountapi.spk_power * 1000)) * (spkStats.broca_refill /
                             28800), 2, '.', ',')}}
                             Days until full
                         </li>
@@ -291,8 +291,8 @@ export default {
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-2 justify-content-center">
                         <h5 class="mb-0 card-title text-info">
-                            {{fancyBytes(1000000 * ( spkStats.broca_daily_trend ? spkStats.broca_daily_trend : 1000 ) *
-                            spkStats.channel_bytes)}}</h5>
+                            {{fancyBytes((1000000 *
+                            spkStats.channel_bytes) * (864000/spkStats.broca_refill))}}</h5>
                         <h5 class="mb-0 mx-1 card-title text-info">/</h5>
                         <p class="mb-0 me-1 lead text-warning">1 BROCA</p>
                         <div class="d-flex align-items-center text-warning">
@@ -1200,13 +1200,6 @@ export default {
                 return item[0]
                 break;
             } index
-        },
-        broca_calc(last = '0,0') {
-            const last_calc = this.Base64toNumber(last.split(',')[1])
-            const accured = parseInt((parseFloat(this.spkStats.broca_refill) * (this.spkStats.head_block - last_calc)) / (this.saccountapi.spk_power * 1000))
-            var total = parseInt(last.split(',')[0]) + accured
-            if (total > (this.saccountapi.spk_power * 1000)) total = (this.saccountapi.spk_power * 1000)
-            return total
         },
         replace(string, char = ':') {
             return string.replaceAll(char, '_')
