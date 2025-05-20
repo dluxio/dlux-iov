@@ -190,7 +190,7 @@
                     </div>
                   </div>
                   <!-- Actions -->
-                  <div v-for="(action, func) in features" class="d-flex"
+                  <div v-for="(action, func, index) in features" class="d-flex"
                     :class="{'w-100': action.id == 'rewards' || action.id == 'claim' && accountapi[action.addr || 'balance'] > 0}">
                     <!-- claim / rewards-->
                     <div
@@ -216,7 +216,7 @@
                     </div>
                     <!-- wallet functions -->
                     <div v-else class="d-flex" style="width: 150px;">
-                      <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="action.id" :mypfp="mypfp"
+                      <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="func" :mypfp="mypfp"
                         :token="TOKEN" :tokenuser="accountapi" :account="account" :tokenprotocol="protocol" :api="lapi"
                         :tokenstats="stats" @tosign="toSign = $event" v-slot:trigger class="d-flex w-100">
                         <button type="button"
@@ -1678,7 +1678,7 @@
                           </div>
                         </div>
                         <!-- Actions -->
-                        <div v-for="action in features" class="d-flex"
+                        <div v-for="(action, func, index) in features" class="d-flex"
                           :class="{'w-100': action.id == 'rewards' || action.id == 'claim' && accountapi[action.addr || 'balance'] > 0}">
                           <!-- claim / rewards-->
                           <div
@@ -1692,7 +1692,7 @@
                                   || 'balance']/pow10(protocol.precision),3,'.',',')}}
                                   {{TOKEN}}</span>
                               </div>
-                              <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="action.id"
+                              <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="func"
                                 :mypfp="mypfp" :token="TOKEN" :tokenuser="accountapi" :account="account"
                                 :tokenprotocol="protocol" :api="lapi" :tokenstats="stats" @tosign="toSign = $event"
                                 v-slot:trigger class="d-flex w-100 pb-3">
@@ -1704,7 +1704,7 @@
                           </div>
                           <!-- wallet functions -->
                           <div v-else class="d-flex" style="width: 150px;">
-                            <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="action.id"
+                            <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="func"
                               :mypfp="mypfp" :token="TOKEN" :tokenuser="accountapi" :account="account"
                               :tokenprotocol="protocol" :api="lapi" :tokenstats="stats" @tosign="toSign = $event"
                               v-slot:trigger class="d-flex w-100">
