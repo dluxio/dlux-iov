@@ -83,10 +83,11 @@
                       <span class="ms-2 hero-subtitle fs-3">DUAT</span>
                     </a>
                   </li>
+                  <!-- larynx  -->
                   <li>
                     <a class="dropdown-item d-flex align-items-center" role="button"
                       @click="setApi('https://spkinstant.hivehoneycomb.com')"
-                      v-bind:class="{'text-warning': TOKEN == 'LARYNX'}">
+                      v-bind:class="{'text-warning': TOKEN == 'LARYNX'  && lapi != 'https://spktest.dlux.io'}">
                       <div
                         class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
                         style="height: 40px; width: 40px;">
@@ -128,7 +129,7 @@
                   <!-- larynx test -->
                   <li>
                     <a class="dropdown-item d-flex align-items-center" role="button"
-                      @click="setApi('https://spktest.dlux.io')" v-bind:class="{'text-warning': TOKEN == 'LARYNX'}">
+                      @click="setApi('https://spktest.dlux.io')" v-bind:class="{'text-warning': TOKEN == 'LARYNX' && lapi == 'https://spktest.dlux.io'}">
                       <div
                         class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
                         style="height: 40px; width: 40px;">
@@ -1469,8 +1470,7 @@
                   <i class="fa-solid fa-link fa-fw me-1"></i><span>{{behind}} block<span
                       v-if="behind > 1 || behind == 0">s</span> behind HIVE</span>
                   <br>
-                  <i class="fa-solid fa-code fa-fw me-1"></i>
-                  version {{dexapi.VERSION}}
+                  <i class="fa-solid fa-code fa-fw me-1"></i>Honeycomb {{dexapi.VERSION}}
                 </span>
               </div>
               <!-- Search -->
