@@ -1,4 +1,4 @@
-this.version = "2025.05.20.1";
+this.version = "2025.05.20.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -454,10 +454,68 @@ self.addEventListener("install", function (event) {
 self.addEventListener('fetch', function(event) {    
     const url = new URL(event.request.url);
     
-    // For external requests (CDNs, APIs, etc.), let the browser handle them
+    if (url.hostname === 'api.coingecko.com') {
+        event.respondWith(
+            caches.open(CACHE_NAME).then(async cache => {
+                const request = event.request;
+                const CACHE_MAX_AGE_MS = 15 * 60 * 1000; // 15 minutes
+
+                const cachedResponse = await cache.match(request);
+
+                if (cachedResponse) {
+                    const timestampHeader = cachedResponse.headers.get('sw-cache-timestamp');
+                    if (timestampHeader) {
+                        const cachedTime = parseInt(timestampHeader, 10);
+                        if (Date.now() - cachedTime < CACHE_MAX_AGE_MS) {
+                            return cachedResponse;
+                        }
+                    }
+                }
+                try {
+                    const networkResponse = await fetch(request);
+                    if (networkResponse && networkResponse.ok) {
+                        const responseToCache = networkResponse.clone();
+                        const newHeaders = new Headers(responseToCache.headers);
+                        newHeaders.set('sw-cache-timestamp', Date.now().toString());
+                        const body = await responseToCache.arrayBuffer(); 
+                        
+                        const cacheableResponse = new Response(body, {
+                            status: responseToCache.status,
+                            statusText: responseToCache.statusText,
+                            headers: newHeaders
+                        });
+
+                        cache.put(request, cacheableResponse)
+                        return networkResponse
+                    } else {
+                        if (cachedResponse) { 
+                            return cachedResponse;
+                        }
+                        return networkResponse || new Response(JSON.stringify({ error: 'CoinGecko API request failed to fetch and no cache available' }), {
+                            status: 503,
+                            statusText: 'Service Unavailable',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                    }
+                } catch (error) {
+                    console.error(`SW: Fetch error for ${request.url}:`, error);
+                    if (cachedResponse) { 
+                        return cachedResponse;
+                    }
+                    return new Response(JSON.stringify({ error: 'CoinGecko API request failed due to network error and no cache available' }), {
+                        status: 503,
+                        statusText: 'Service Unavailable',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                }
+            })
+        );
+        return
+    }
+
     if (url.origin !== self.location.origin) {
         // For specific external resources we want to handle
-        if (url.pathname.endsWith('.m4v') || url.hostname === 'api.coingecko.com') {
+        if (url.pathname.endsWith('.m4v')) { // MODIFIED: Removed "|| url.hostname === 'api.coingecko.com'"
             event.respondWith(
                 fetch(event.request)
                     .catch(error => {
