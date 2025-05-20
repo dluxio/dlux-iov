@@ -145,15 +145,14 @@
                 </ul>
               </div>
               <!-- runner status modal button -->
-              <button :title="behindTitle" type="button" class="btn square rounded-end-pill"
-                :class="[{'btn-outline-success':behind < 30},{'btn-outline-warning':behind >= 30 && behind < 60},{'btn-outline-danger':behind >= 60}]"
+              <button :title="behindTitle" type="button" class="btn btn-outline-light square rounded-end-pill"
                 data-bs-toggle="modal" data-bs-target="#runnerStatusModal">
-                {{runners.length}}<i class="fas fa-user-lock ms-1"></i></span>
+                <span class="d-none" :class="[{'text-success':behind < 30},{'text-warning':behind >= 30 && behind < 60},{'text-danger':behind >= 60}]">{{runners.length}}</span><i class="fas fa-server"></i></span>
               </button>
             </div>
             <!-- modal button for small screen wallet -->
             <button type="button" data-bs-toggle="modal" data-bs-target="#dexWallet"
-              class="btn d-lg-none btn-outline-success ms-auto d-flex align-items-center"><i aria-hidden="true"
+              class="btn d-lg-none btn-outline-success rounded-pill ms-auto d-flex align-items-center"><i aria-hidden="true"
                 class="fa-solid fa-wallet force-parent-lh me-2"></i>
               <p class="me-1 mb-0 fs-6">{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}
                 <i aria-hidden="true" class="fa-fw fa-solid fa-caret-down"></i>
@@ -170,7 +169,6 @@
               <ul class="dropdown-menu dropdown-menu-dark bg-black p-2">
                 <div class="d-flex flex-wrap" style="min-width: 300px;">
                   <li class="dropdown-header text-center w-100">{{TOKEN}} WALLET</li>
-
                   <!-- Balances Summary -->
                   <div class="w-100 mx-1 mb-2 border-bottom border-white-50">
                     <div class="d-flex flex-column text-center py-2">
@@ -190,9 +188,7 @@
                           class="text-info">{{formatNumber(accountapi.gov/pow10(protocol.precision),3,'.',',')}}</span>
                       </div>
                     </div>
-
                   </div>
-
                   <!-- Actions -->
                   <div v-for="action in features" class="d-flex"
                     :class="{'w-100': action.id == 'rewards' || action.id == 'claim' && accountapi[action.addr || 'balance'] > 0}">
