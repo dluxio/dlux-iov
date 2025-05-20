@@ -127,8 +127,8 @@
                   </li>
 
                   <!-- larynx test -->
-                  <li>
-                    <a class="dropdown-item d-flex align-items-center" role="button"
+                  <li class="dropdown-menu-item">
+                    <a class="dropdown-item  d-flex align-items-center" role="button"
                       @click="setApi('https://spktest.dlux.io')" v-bind:class="{'text-warning': TOKEN == 'LARYNX' && lapi == 'https://spktest.dlux.io'}">
                       <div
                         class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
@@ -234,9 +234,9 @@
                   <!-- legacy node settings -->
                   <div class="d-flex w-100" v-if="isnode">
                     <!-- token settings modal button -->
-                    <button type="button" class="btn btn-outline-light  w-100" data-bs-toggle="modal"
-                      data-bs-target="#tokenSettingsModal">
-                      Legacy Node<i class="fas fa-cog ms-1"></i>
+                    <button type="button" class="btn btn-dark border border-white-50 mx-1 mt-2 w-100" data-bs-toggle="modal"
+                      data-bs-target="#tokenSettingsModal" style="font-size: .9em;">
+                      Node Settings<i class="fas fa-cog ms-1"></i>
                     </button>
                   </div>
                 </div>
