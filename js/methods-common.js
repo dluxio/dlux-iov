@@ -201,7 +201,7 @@ export default {
     return 'unknown';
   },
   banishPrompt() {
-    localStorage.setItem(`hhp:${user}`, new Date().getTime());
+    localStorage.setItem(`hhp:${this.account}`, new Date().getTime());
     this.hasHiddenPrompt = true
     console.log('BANISH')
   },
@@ -212,7 +212,7 @@ export default {
         [
           "update_proposal_votes",
           {
-            voter: user,
+            voter: this.account,
             proposal_ids: [`${num}`],
             approve: true,
           },
