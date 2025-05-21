@@ -397,10 +397,8 @@ export default {
                                             <path class="st0"
                                                 d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
                                         c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
-                                            <path class="st0"
-                                                d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
-                                            <path class="st0"
-                                                d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
+                                            <path class="st0" d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
+                                            <path class="st0" d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
                                             <path class="st0"
                                                 d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
                                         c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
@@ -1214,51 +1212,54 @@ export default {
                         document.body.appendChild(a);
                         a.click();
                         window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a); // Added cleanup
                     });
             }
         },
         downloadFile(file) {
             const cid = file.f;
+            const id = file.i;
+            const name = (this.newMeta[id] && this.newMeta[id][cid])
+                ? `${this.newMeta[id][cid].name}.${this.newMeta[id][cid].type}`
+                : 'file';
+
+            const isEncrypted = this.contract[id]?.encryption?.key;
+
             fetch(`https://ipfs.dlux.io/ipfs/${cid}`)
                 .then((response) => {
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
                     }
-                    return response.text(); // Get the response as a Blob
+                    if (isEncrypted) {
+                        return response.text(); // Encrypted files are expected to be base64 data URLs after decryption
+                    } else {
+                        return response.blob(); // Non-encrypted files are downloaded as blobs directly
+                    }
                 })
-                .then((blob) => {
-                    const id = file.i;
-                    const name = (this.newMeta[id] && this.newMeta[id][cid])
-                        ? `${this.newMeta[id][cid].name}.${this.newMeta[id][cid].type}`
-                        : 'file';
-                    // Check if the file is encrypted
-                    if (this.contract[id].encryption && this.contract[id].encryption.key) {
-                        blob = this.AESDecrypt(blob, this.contract[id].encryption.key);
-                        var byteString = atob(blob.split(',')[1])
-                        var mimeString = blob.split(',')[0].split(':')[1].split(';')[0];
+                .then((data) => { // data will be text for encrypted, blob for non-encrypted
+                    if (isEncrypted) {
+                        const decryptedDataUrl = this.AESDecrypt(data, this.contract[id].encryption.key);
+                        if (!decryptedDataUrl || !decryptedDataUrl.includes(',')) {
+                            throw new Error('Decryption failed or did not produce a valid data URL.');
+                        }
+                        var byteString = atob(decryptedDataUrl.split(',')[1]);
+                        var mimeString = decryptedDataUrl.split(',')[0].split(':')[1].split(';')[0];
                         var ab = new ArrayBuffer(byteString.length);
                         var ia = new Uint8Array(ab);
                         for (var i = 0; i < byteString.length; i++) {
                             ia[i] = byteString.charCodeAt(i);
                         }
-                        blob = new Blob([ab], { type: mimeString });
-                        // Ensure decryptedData is in the correct format
-                        // const byteString = atob(decryptedData.split(',')[1]); // Assuming decryptedData is a base64 string
-                        // const mimeString = decryptedData.split(',')[0].split(':')[1].split(';')[0];
-                        // const ab = new ArrayBuffer(byteString.length);
-                        // const ia = new Uint8Array(ab);
-                        // for (let i = 0; i < byteString.length; i++) {
-                        //     ia[i] = byteString.charCodeAt(i);
-                        // }
-                        // const decryptedBlob = new Blob([ab], { type: mimeString });
+                        const blob = new Blob([ab], { type: mimeString });
                         this.triggerDownload(blob, name);
                     } else {
-                        // Directly trigger download for plain files
-                        this.triggerDownload(blob, name);
+                        // data is already a blob for non-encrypted files
+                        this.triggerDownload(data, name);
                     }
                 })
                 .catch((error) => {
-                    console.error('Download failed:', error);
+                    console.error(`Download failed for ${name} (CID: ${cid}):`, error);
+                    // Optionally, show a user-friendly error message
+                    alert(`Failed to download file: ${name}. ${error.message}`);
                 });
         },
         triggerDownload(blob, name) {
@@ -1269,6 +1270,7 @@ export default {
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
+            document.body.removeChild(a); // Ensure the anchor element is removed
         },
         setView(mode) {
             this.viewOpts.view = mode;
