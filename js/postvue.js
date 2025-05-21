@@ -9,22 +9,23 @@ export default {
     <form onsubmit="return false;">
         <div class="form-group mb-3">
             <label class="mb-1" for="username">Author</label>
-            <div class="input-group">
-                <span
-                    class="input-group-text">@</span>
+            <div class="position-relative text-white-50">
+                <span class="position-absolute top-50 translate-middle-y ps-2">
+                  <i class="fa-solid fa-at fa-fw"></i>
+                </span>
                 <input type="text"
-                    class="form-control text-info"
+                    class="ps-4 form-control bg-dark border-dark text-white-50"
                     readonly v-model="account">
             </div>
         </div>
         <div class="form-group mb-3">
             <label class="mb-1" for="title">Title</label>
             <input type="text"
-                class="form-control"
+                class="form-control bg-dark border-dark text-white"
                 placeholder="Enter an attention grabbing title" v-model="postTitle"
                 @blur="permlink()">
             <small class="form-text text-muted d-flex"><span
-                    class="mr-auto">Permlink:
+                    class="ms-auto">Permlink:
                     https://dlux.io/{{postCustom_json.vrHash ? 'dlux' : postTags.length ? postTags[0] : 'blog'}}/@{{account}}/{{postPermlink}}</span>
                 <!-- <a href="#" class="ml-auto"> Edit Permlink</a> -->
             </small>
@@ -37,19 +38,12 @@ export default {
             <label class="mb-1" for="tags">Tags</label><br>
             <tagify class="rounded p-1 w-100" @data="postTags = $event" style="height: 50px" />
         </div>
-        <bennies :list="postBens" @updatebennies="postBens = $event" />
-        <!--<ul v-if="postBens.length">
-            <h6>Benificiaries: ({{postBens.length}}/8) </h6>
-
-            <li v-for="ben in postBens">@{{ben.account}}: {{formatNumber(ben.weight/ 100,2, '.')}}% <button type="button" class="btn btn-outline-danger btn-sm"
-                @click="delBen(ben.account)">Remove</button></li>
-        </ul>
-        <button class="btn btn-outline-primary" v-if="!isDlux" type="button"
-            @click="addBen('dlux-io', 1000)">Include in
-            DLUX Ecosystem</button>
+        <div class="mb-2">
+          <bennies :list="postBens" @updatebennies="postBens = $event" />
+        </div>
         <button v-for="item in isntBenned" type="button"
             @click="addBen(item.account, item.weight)">Include Contract
-            {{item.contract}}</button>-->
+            {{item.contract}}</button>
         <div class="text-center">
             <button ref="publishButton" type="button" @keyUp="buildTags()"
                 class="btn btn-primary" data-toggle="tooltip" data-placement="top"

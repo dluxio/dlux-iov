@@ -1,6 +1,7 @@
 export default {
     template: `<div>
-<p>Current Beneficiaries: ({{bennies?.length}}/8) {{total/100}}%</p><button v-if="!dlux" class="btn btn-sm btn-warning" @click="addBenny('dlux-io', 1000)">Include in DLUX Ecosystem</button>
+    <p>Beneficiaries ({{bennies?.length}}/8)<p>
+    
 <div class="table-responsive">
 <table class="table align-middle">
 <thead>
@@ -29,7 +30,6 @@ export default {
 <input type="text" placeholder="username" class="ps-4 pe-5 text-info bg-dark border-0 form-control" v-model="addAccount">
 <button class="position-absolute end-0 top-50 translate-middle-y btn btn-outline-secondary border-0 dropdown-toggle square rounded-end" :disabled="!favorites.length" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-star me-1 fa-fw"></i></button>
 <ul class="dropdown-menu bg-black dropdown-menu-dark">
-
 <li v-for="acc in favorites" class="d-flex align-items-center justify-content-between">
 <a class="mx-1 dropdown-item rounded" role="button" @click="addAccount = acc">@{{acc}}</a>
 <a @click="removeFavorite(acc)" class="mx-1 btn btn-sm btn-secondary" role="button">
@@ -51,6 +51,11 @@ export default {
 </tr>
 </tbody>
 </table>
+<div class="d-flex flex-wrap align-items-center justify-content-between">
+<button v-if="!dlux" class="btn btn-outline-warning my-1" @click="addBenny('dlux-io', 1000)">Include in DLUX Ecosystem</button>
+<button v-if="dlux" class="btn btn-secondary my-1" disabled>Included in DLUX Ecosystem</button>
+<p class="lead my-1">Beneficiary Total: {{total/100}}%</p>
+</div>
 </div>
 </div>`,
     data() {

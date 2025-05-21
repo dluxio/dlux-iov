@@ -202,12 +202,12 @@
                                             class="fa-solid fa-shuffle fa-fw me-1"></i>Remix dApp</span>-->
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="postdApp">
-                                <li><a class="dropdown-item"
+                                <li style="cursor: not-allowed;"><a class="dropdown-item disabled"
                                         :class="{active: postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'}"
                                         role="button"
                                         @click="postCustom_json.vrHash = 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k';types='ts,img'"><i
                                             class="fa-solid fa-globe fa-fw me-2"></i>360 Image Gallery</a></li>
-                                <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'video'}"
+                                <li style="cursor: not-allowed;"><a class="dropdown-item disabled" :class="{active: postCustom_json.vrHash == 'video'}"
                                         role="button" @click="postCustom_json.vrHash = 'video';types='img,vid'"><i
                                             class="fa-solid fa-film fa-fw me-2"></i>Video</a></li>
                                 <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'blog'}"
