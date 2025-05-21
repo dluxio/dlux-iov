@@ -221,7 +221,7 @@
                       </div>
                     </div>
                     <!-- wallet functions -->
-                    <div v-else class="d-flex" style="width: 150px;">
+                    <div v-else-if="!(action.id == 'rewards' || action.id == 'claim')" class="d-flex" style="width: 150px;">
                       <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="func" :mypfp="mypfp"
                         :token="TOKEN" :tokenuser="accountapi" :account="account" :tokenprotocol="protocol" :api="lapi"
                         :tokenstats="stats" @tosign="toSign = $event" v-slot:trigger class="d-flex w-100">
