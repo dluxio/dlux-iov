@@ -1226,6 +1226,12 @@ createApp({
             });
             return acc;
           }, []);
+          // if txid doesn't start with this.TOKEN, remove it
+          for (var i = this.openorders.length - 1; i >= 0; i--) {
+            if (!this.openorders[i].txid.startsWith(this.TOKEN)) {  
+              this.openorders.splice(i, 1);
+            }
+          }
         });
     },
     getHiveUser(user) {
