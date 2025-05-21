@@ -50,8 +50,8 @@
               <div id="userApiSelect" v-cloak class="d-flex dropdown dropdown-start js-hoverable-dropdown me-auto">
                 <a class="btn btn-outline-light square rounded-start-pill d-flex align-items-center text-nowrap"
                   role="button" id="tokenDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                  <i class="fa-solid fa-atom force-parent-lh"></i>
-                  <span class="d-none d-sm-block ms-1">{{TOKEN}}</span>
+                  <i class="d-none  fa-solid fa-atom force-parent-lh"></i>
+                  <span class="ms-1">{{TOKEN}}</span>
                   <i class="d-none d-md-block ms-1 fa-solid fa-caret-down fa-fw"></i>
                 </a>
                 <div class="hover-gap"></div>
@@ -149,17 +149,18 @@
               <button :title="behindTitle + ' with ' + runners.length + ' node runners in concensus'" type="button"
                 class="btn btn-outline-light square rounded-end-pill" data-bs-toggle="modal"
                 data-bs-target="#runnerStatusModal">
-                <span class="d-none"
-                  :class="[{'text-success':behind < 30},{'text-warning':behind >= 30 && behind < 60},{'text-danger':behind >= 60}]">{{runners.length}}</span><i
-                  class="fas fa-satellite-dish"></i></span>
+                <span class="d-none" :class="[{'text-success':behind < 30},{'text-warning':behind >= 30 && behind < 60},{'text-danger':behind >= 60}]"> 
+                </span>
+                {{runners.length}}
+                <i class="ms-1 fas fa-satellite-dish"></i>
               </button>
             </div>
             <!-- modal button for small screen wallet -->
             <button type="button" data-bs-toggle="modal" data-bs-target="#dexWallet"
-              class="btn d-lg-none btn-outline-success rounded-pill ms-auto d-flex align-items-center"><i
-                aria-hidden="true" class="fa-solid fa-wallet force-parent-lh me-2"></i>
-              <p class="me-1 mb-0 fs-6">{{formatNumber(bartoken,3,'.',',')}} {{TOKEN}}
-                <i aria-hidden="true" class="fa-fw fa-solid fa-caret-down"></i>
+              class="btn text-success d-lg-none ms-auto d-flex align-items-center">
+              <p class="d-flex align-items-center mb-0 fs-6">
+                <i aria-hidden="true" class="me-1 fa-fw fa-solid fa-wallet"></i>
+                {{formatNumber(bartoken,3,'.',',')}}<span class="ms-1 d-none d-sm-block">{{TOKEN}}</span>
               </p>
             </button>
             <!-- TOKEN Balance -->
