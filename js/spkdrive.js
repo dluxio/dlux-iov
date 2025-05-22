@@ -295,8 +295,8 @@ export default {
             </div>
             <!-- has files -->
             <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center">
-            <!-- @update-contract="update_meta($event)" -->    
-            <files-vue :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" 
+                <!-- @update-contract="update_meta($event)" -->    
+                <files-vue ref="filesVue" :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" 
                     @refresh-contracts="refreshContracts" 
                     @tosign="sendIt($event)" :signedtx="signedtx"></files-vue>
             </div>
@@ -575,6 +575,18 @@ export default {
                                 }
                             });
                         }
+                    }
+                    
+                    // Handle folder navigation from URL hash if it's a drive path with more segments
+                    if (parts[0] === 'drive' && parts.length > 1) {
+                        // Use $nextTick to ensure components are initialized
+                        this.$nextTick(() => {
+                            if (this.$refs.filesVue) {
+                                const folderPath = parts.slice(1).join('/');
+                                console.log("Navigating to folder from hash:", folderPath);
+                                this.$refs.filesVue.navigateTo(folderPath);
+                            }
+                        });
                     }
                 }
             }
@@ -1070,6 +1082,22 @@ export default {
                             }
                         }
                         this.sortContracts()
+                        
+                        // After contracts are loaded, restore the folder path if needed
+                        this.$nextTick(() => {
+                            if (this.pathToRestore && this.$refs.filesVue) {
+                                console.log("Restoring folder path:", this.pathToRestore);
+                                this.$refs.filesVue.navigateTo(this.pathToRestore);
+                                this.pathToRestore = null; // Clear the path after restoring
+                            } else if (location.hash && location.hash.startsWith('#drive/')) {
+                                // If no path to restore but we have a hash path, use that
+                                const folderPath = location.hash.substring('#drive/'.length);
+                                if (folderPath && this.$refs.filesVue) {
+                                    console.log("Navigating to hash path:", folderPath);
+                                    this.$refs.filesVue.navigateTo(folderPath);
+                                }
+                            }
+                        });
                     }
                     this.saccountapi = data;
                     this.saccountapi.spk += this.reward_spk();
@@ -1643,6 +1671,24 @@ export default {
             return found
         },
         refreshContracts() {
+            // Find the filesvue-dd component to get the current folder path
+            const filesVueComponent = this.$refs.filesVue;
+            let currentPath = '';
+            
+            // If we have the files component and it has a current folder path, save it
+            if (filesVueComponent && filesVueComponent.currentFolderPath) {
+                currentPath = filesVueComponent.currentFolderPath;
+                console.log("Saving current folder path:", currentPath);
+            }
+            
+            // Update URL hash to include the folder path
+            if (currentPath) {
+                // Format as #drive/FolderName
+                const newHash = `#drive/${currentPath}`;
+                history.replaceState(null, null, newHash);
+                console.log("Updated URL hash to:", newHash);
+            }
+            
             // Clear current contracts data to prevent duplication
             this.contracts = [];
             this.contractIDs = {};
@@ -1651,6 +1697,9 @@ export default {
             // Refresh contracts from API
             this.getSapi();
             console.log("Refreshing contracts...");
+            
+            // Set a flag to restore path after refresh
+            this.pathToRestore = currentPath;
         },
     },
     watch: {

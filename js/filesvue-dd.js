@@ -1285,6 +1285,10 @@ export default {
         },
         navigateTo(path) {
             this.currentFolderPath = path;
+            
+            // Update URL hash to reflect the current folder path
+            const newHash = path ? `#drive/${path}` : '#drive';
+            history.replaceState(null, null, newHash);
         },
         getSubfolders(user, path) {
             const folders = this.userFolderTrees[user] || [];
