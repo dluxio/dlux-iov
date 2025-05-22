@@ -295,7 +295,8 @@ export default {
             </div>
             <!-- has files -->
             <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center">
-                <files-vue :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" @update-contract="getContract($event)"
+                <files-vue :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" 
+                    @update-contract="update_meta($event)" @refresh-contracts="refreshContracts" 
                     @tosign="sendIt($event)" :signedtx="signedtx"></files-vue>
             </div>
         </div>
@@ -786,104 +787,60 @@ export default {
             }
             if (this.newMeta[contract].contract.m != enc_string) return true
         },
-        // update_meta(contract) {
-        //     return new Promise((resolve, reject) => {
-        //         console.log(this.newMeta[contract], contract)
-        //         var enc_string = ''
-        //         for (var acc in this.contractIDs[contract].encryption.accounts) {
-        //             if (this.contractIDs[contract].encryption.accounts[acc].enc_key) enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`
-        //         }
-        //         //remove last ;
-        //         enc_string = `${this.newMeta[contract].contract.autoRenew ? '1' : '0'}${enc_string.slice(0, -1)}`
-        //         this.newMeta[contract].contract.enc_string = enc_string
-        //         var cids = Object.keys(this.newMeta[contract])
-        //         cids = cids.sort((a, b) => {
-        //             if (a > b) return 1
-        //             else if (a < b) return -1
-        //             else return 0
-        //         })
-        //         for (var i = 0; i < cids.length; i++) {
-        //             if (cids[i] != 'contract') {
-        //                 enc_string += `,${this.newMeta[contract][cids[i]].name},${this.newMeta[contract][cids[i]].type},${this.newMeta[contract][cids[i]].thumb},${this.newMeta[contract][cids[i]].flags}-${this.newMeta[contract][cids[i]].license}-${this.newMeta[contract][cids[i]].labels}`
-        //             }
-        //         }
-        //         var cja = {
-        //             id: contract,
-        //             m: enc_string
-        //         };
-        //         const removeSave = new Promise((res, rej) => {
-        //             this.toSign = {
-        //                 type: "cja",
-        //                 cj: cja,
-        //                 id: `spkccT_update_metadata`,
-        //                 msg: `Updating Metadata for Contract: ${contract}`,
-        //                 ops: [],
-        //                 callbacks: [res, rej],
-        //                 api: this.sapi,
-        //                 txid: `spkccT_update_meta`,
-        //             };
-        //         })
-        //         removeSave.then(() => {
-        //             this.contractIDs[contract].m = cja.m
-        //             console.log(this.contractIDs[contract].m, cja.m)
-        //             resolve('OK')
-        //         }).catch(e => {
-        //             reject(e)
-        //         })
-        //     })
-        // },
-        update_meta(contract) {
+        update_meta(payload) {
             return new Promise((resolve, reject) => {
-                console.log(this.newMeta[contract], contract);
+                const contractId = payload.contractId;
+                console.log(this.newMeta[contractId], contractId);
                 var enc_string = '';
-                for (var acc in this.contractIDs[contract].encryption.accounts) {
-                    if (this.contractIDs[contract].encryption.accounts[acc].enc_key) {
-                        enc_string += `${this.contractIDs[contract].encryption.accounts[acc].enc_key}@${acc};`;
+                if (this.contractIDs && this.contractIDs[contractId] && this.contractIDs[contractId].encryption && this.contractIDs[contractId].encryption.accounts) {
+                    for (var acc in this.contractIDs[contractId].encryption.accounts) {
+                        if (this.contractIDs[contractId].encryption.accounts[acc].enc_key) {
+                            enc_string += `${this.contractIDs[contractId].encryption.accounts[acc].enc_key}@${acc};`;
+                        }
                     }
                 }
-                // Remove last semicolon and prepend autoRenew flag
-                enc_string = `${this.newMeta[contract].contract.autoRenew ? '1' : '0'}${enc_string.slice(0, -1)}`;
-                this.newMeta[contract].contract.enc_string = enc_string;
-                var cids = Object.keys(this.newMeta[contract]);
+                
+                const autoRenew = (this.newMeta && this.newMeta[contractId] && this.newMeta[contractId].contract) ? this.newMeta[contractId].contract.autoRenew : false;
+                enc_string = `${autoRenew ? '1' : '0'}${enc_string ? '#' + enc_string.slice(0, -1) : ''}`;
+
+                if (this.newMeta && this.newMeta[contractId] && this.newMeta[contractId].contract) {
+                    this.newMeta[contractId].contract.enc_string = enc_string;
+                }
+                
+                var cids = (this.newMeta && this.newMeta[contractId]) ? Object.keys(this.newMeta[contractId]) : [];
                 cids = cids.sort((a, b) => {
                     if (a > b) return 1;
                     else if (a < b) return -1;
                     else return 0;
                 });
                 for (var i = 0; i < cids.length; i++) {
-                    if (cids[i] !== 'contract') {
-                        enc_string += `,${this.newMeta[contract][cids[i]].name},${this.newMeta[contract][cids[i]].type},${this.newMeta[contract][cids[i]].thumb},${this.newMeta[contract][cids[i]].flags}-${this.newMeta[contract][cids[i]].license}-${this.newMeta[contract][cids[i]].labels}`;
+                    if (cids[i] !== 'contract' && this.newMeta[contractId][cids[i]]) {
+                        enc_string += `,${this.newMeta[contractId][cids[i]].name || ''},${this.newMeta[contractId][cids[i]].type || ''},${this.newMeta[contractId][cids[i]].thumb || ''},${this.newMeta[contractId][cids[i]].flags || '0'}-${this.newMeta[contractId][cids[i]].license || ''}-${this.newMeta[contractId][cids[i]].labels || ''}`;
                     }
                 }
         
-                // Get existing metadata
-                const existingMeta = this.contractIDs[contract].m || '';
-                // Generate diff
+                const existingMeta = (this.contractIDs && this.contractIDs[contractId]) ? (this.contractIDs[contractId].m || '') : '';
                 const diff = jsdiff.createPatch(
-                    contract, // File name (used in diff header)
-                    existingMeta, // Old metadata
-                    enc_string, // New metadata
-                    'Current Metadata', // Old header
-                    'Updated Metadata' // New header
+                    contractId,
+                    existingMeta,
+                    enc_string,
+                    'Current Metadata',
+                    'Updated Metadata'
                 );
         
-                // Extract unified diff body (remove headers if desired)
                 const diffBody = diff
                     .split('\n')
-                    .slice(4) // Skip headers: ---, +++, @@, etc.
+                    .slice(4)
                     .join('\n')
                     .trim();
         
                 var cja = {
-                    id: contract
+                    id: contractId
                 };
         
-                // Decide whether to send diff or full metadata
                 if (existingMeta && diffBody && diffBody !== enc_string) {
-                    // Send diff if there's existing metadata and a non-trivial diff
                     cja.diff = diffBody;
                 } else {
-                    // Send full metadata if no existing metadata or diff is equivalent to full string
                     cja.m = enc_string;
                 }
         
@@ -892,7 +849,7 @@ export default {
                         type: "cja",
                         cj: cja,
                         id: `spkccT_update_metadata`,
-                        msg: `Updating Metadata for Contract: ${contract}`,
+                        msg: `Updating Metadata for Contract: ${contractId}`,
                         ops: [],
                         callbacks: [res, rej],
                         api: this.sapi,
@@ -901,9 +858,10 @@ export default {
                 });
         
                 removeSave.then(() => {
-                    // Update local metadata
-                    this.contractIDs[contract].m = enc_string;
-                    console.log(this.contractIDs[contract].m, cja.m || cja.diff);
+                    if (this.contractIDs && this.contractIDs[contractId]) {
+                        this.contractIDs[contractId].m = enc_string;
+                        console.log(this.contractIDs[contractId].m, cja.m || cja.diff);
+                    }
                     resolve('OK');
                 }).catch(e => {
                     reject(e);
@@ -1682,6 +1640,16 @@ export default {
                 }
             }
             return found
+        },
+        refreshContracts() {
+            // Clear current contracts data to prevent duplication
+            this.contracts = [];
+            this.contractIDs = {};
+            this.usedBytes = 0;
+            
+            // Refresh contracts from API
+            this.getSapi();
+            console.log("Refreshing contracts...");
         },
     },
     watch: {

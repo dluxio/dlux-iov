@@ -362,8 +362,8 @@ export default {
             console.log('closeUploadModal called.');
             this.showUploadModal = false;
         },
-        handleUploadDone() {
-            this.$emit('done'); 
+        handleUploadDone(payload) {
+            this.$emit('done', payload); // Pass the payload from uploadvue-dd.js to the parent
             this.closeUploadModal(); // Use the new close method
             this.resetComponent(); 
         },

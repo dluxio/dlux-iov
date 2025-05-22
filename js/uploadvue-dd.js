@@ -366,9 +366,19 @@ export default {
                     </div>
                 </div>
                 <div class="d-flex mb-1" v-if="contract.c == 1">
-                    <button class="ms-auto me-auto mt-2 btn btn-lg btn-info" :class="{'disabled': (!reallyReady || !filesReady)}"
-                        :disabled="(!reallyReady || !filesReady)" @click="signNUpload()"><i
-                            class="fa-solid fa-file-signature fa-fw me-2"></i>Sign and Upload</button>
+                    <button class="ms-auto me-auto mt-2 btn btn-lg" 
+                        :class="[
+                            thumbnailsGenerating > 0 ? 'btn-secondary' : 'btn-info',
+                            (!reallyReady || !filesReady || thumbnailsGenerating > 0) ? 'disabled' : ''
+                        ]"
+                        :disabled="(!reallyReady || !filesReady || thumbnailsGenerating > 0)" 
+                        @click="signNUpload()">
+                        <i class="fa-solid" 
+                           :class="[thumbnailsGenerating > 0 ? 'fa-spinner fa-spin' : 'fa-file-signature']"
+                           class="fa-fw me-2"></i>
+                        <span v-if="thumbnailsGenerating > 0">Generating Thumbnails...</span>
+                        <span v-else>Sign and Upload</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -525,6 +535,7 @@ export default {
       uploadInProgress: false,
       fileProgress: {}, // Tracks progress for each file by CID
       completedFiles: 0,
+      thumbnailsGenerating: 0, // Count of thumbnails currently being generated
     };
   },
   emits: ["tosign", "done"],
@@ -1051,6 +1062,10 @@ export default {
         if (!originalFile.type.startsWith('image/')) {
             return;
         }
+        
+        // Increment counter for thumbnail generation
+        this.thumbnailsGenerating++;
+        
         let that = this;
         var thumbReader = new FileReader();
         thumbReader.onload = (ev) => {
@@ -1103,12 +1118,33 @@ export default {
                         } else {
                             console.error(`Main FileInfo entry not found for key ${fileInfoKey} when adding thumbnail.`);
                         }
+                        
+                        // Decrement counter when thumbnail generation is done
+                        that.thumbnailsGenerating--;
+                    }).catch(err => {
+                        console.error("Error hashing thumbnail:", err);
+                        // Make sure to decrement even on error
+                        that.thumbnailsGenerating--;
                     });
                 }
+                thumbFileReader.onerror = (err) => {
+                    console.error("Error reading thumbnail file:", err);
+                    // Make sure to decrement on error
+                    that.thumbnailsGenerating--;
+                };
                 thumbFileReader.readAsArrayBuffer(newThumbFile);
             }
-            originalImage.onerror = () => console.error("Image load error for thumbnail generation.");
+            originalImage.onerror = (err) => {
+                console.error("Image load error for thumbnail generation:", err);
+                // Make sure to decrement on error
+                that.thumbnailsGenerating--;
+            };
         }
+        thumbReader.onerror = (err) => {
+            console.error("Error reading original file for thumbnail:", err);
+            // Make sure to decrement on error
+            that.thumbnailsGenerating--;
+        };
         thumbReader.readAsDataURL(originalFile);
 
         function createThumbnail(image) {
@@ -1201,13 +1237,10 @@ export default {
           "Documents": "2", "Images": "3", "Videos": "4", "Music": "5",
           "Archives": "6", "Code": "7", "Trash": "8", "Misc": "9"
       };
-      if(sortedPaths.length > 1){
-        presetFoldersMap[sortedPaths[1]] = '1';
-      }
       
       // For custom paths, use letters (A-Z) as indices
       let nextCustomIndex = 0;
-      const customIndexChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const customIndexChars = '1ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
       
       // Folder list format: folderName|parentIndex/folderName|...
       let folderListEntries = [];
@@ -1414,7 +1447,7 @@ export default {
         metaString += '|' + folderListString;
       }
       
-      const fileMetaEntries = [];
+      const fileMetaEntries = {};
 
       console.log("Path to index map in upload:", pathToIndexMap);
 
@@ -1460,26 +1493,30 @@ export default {
         console.log(`File: ${fileInfo.name}, Path: ${folderPath}, Index: ${pathIndex}, Formatted extension: ${extWithPath}`);
         
         // --- End Sanitization and Path Index ---
-
         for (var i = 0; i < cids.length; i++) {
           if (fileInfo.hash == cids[i]) {
             this.File[fileInfo.index].cid = cids[i];
             // Format: name,ext.pathIndex,thumb,flags
-            fileMetaEntries.push(`${sanitizedFileName},${extWithPath},${sanitizedThumb},${sanitizedFlag}`);
+            fileMetaEntries[cids[i]] = `${sanitizedFileName},${extWithPath},${sanitizedThumb},${sanitizedFlag}`
             break;
           } else if (fileInfo.enc_hash == cids[i]) {
             this.File[fileInfo.enc_index].cid = cids[i];
             // Same format for encrypted files
-            fileMetaEntries.push(`${sanitizedFileName},${extWithPath},${sanitizedThumb},${sanitizedFlag}`);
+            fileMetaEntries[cids[i]] = `${sanitizedFileName},${extWithPath},${sanitizedThumb},${sanitizedFlag}`
             break;
           }
         }
       }
-      
+    
       // Add file metadata entries to the string
-      if (fileMetaEntries.length > 0) {
-        metaString += (metaString.endsWith(',') ? '' : ',') + fileMetaEntries.join(',');
+      if (cids.length > 0) {
+        
+        cids = cids.sort();
+        for (var i = 0; i < cids.length; i++) {
+          metaString += (metaString.endsWith(',') ? '' : ',') + fileMetaEntries[cids[i]]
+        }
       }
+      this.finalMetadataString = metaString; // Store it on the instance
       
       console.log({metaString});
       // return // for testing without actual upload
@@ -1563,7 +1600,17 @@ export default {
           if (done) {
             setTimeout(() => {
               this.uploadInProgress = false
-              this.$emit('done', this.contract)
+              this.$emit('done', { // Emit 'done' with the necessary payload
+                  contractId: this.contract.i,
+                  metadata: this.finalMetadataString, // Assuming this is available or can be made available
+                  // diff: optional if using diffs
+              });
+              // Clear file arrays after successful upload and emitting 'done'
+              this.File = [];
+              this.FileInfo = {};
+              this.fileInput = []; // also clear the fileInput if it's being used to track original files
+              this.showFileDetails = false; // Optionally hide details view
+              // any other cleanup specific to your component's data
             }, 5000)
           }
         }

@@ -854,7 +854,7 @@ export default {
             breadcrumbCounts: {}
         };
     },
-    emits: ["tosign", "addassets", 'update:externalDrop'], // Ensure 'tosign' and 'update:externalDrop' are included here
+    emits: ["tosign", "addassets", 'update:externalDrop', 'update-contract'], // Ensure 'tosign', 'update:externalDrop', and 'update-contract' are included here
     methods: {
         ...common,
         ...spk,
@@ -4277,6 +4277,7 @@ export default {
         },
         handleUploadDone(payload) {
             this.$emit('update-contract', payload);
+            this.$emit('refresh-contracts'); // Also emit a simple refresh-contracts event
             // Clear the dropped files state after upload is handled by child
             this.droppedExternalFiles = { files: [] }; // Clear files, no targetPath needed now
         },
