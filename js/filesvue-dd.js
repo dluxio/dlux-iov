@@ -368,6 +368,8 @@ export default {
                                 :data-key="folder.path" 
                                 :data-type="'folder'" 
                                 :data-is-preset="folder.isPreset ? 'true' : null"
+                                draggable="true"
+                                @dragstart="dragStartItem($event, folder, 'folder')"
                                 @dblclick="navigateTo(folder.path)" 
                                 @click="handleFolderClick($event, folder)" 
                                 @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)" 
@@ -587,13 +589,13 @@ export default {
         v-if="contextMenu.type === 'file' && account"
         class="p-1"
         style="cursor: pointer;"
-        @click="extend(contextMenu.item, 100); hideContextMenu();"
+        @click="openExtensionDialog(contextMenu.item); hideContextMenu();"
       >
         Extend Contract
       </li>
       <!-- Add Store option for storage node operators who aren't storing this file -->
       <li
-        v-if="contextMenu.type === 'file' && hasStorage() && !isStored(contract[contextMenu.item.i])"
+        v-if="contextMenu.type === 'file' && hasStorage() && contract[contextMenu.item?.i] && !isStored(contract[contextMenu.item.i])"
         class="p-1"
         style="cursor: pointer;"
         @click="store(contextMenu.item, false); hideContextMenu();"
@@ -602,7 +604,7 @@ export default {
       </li>
       <!-- Add Remove option for storage node operators who are storing this file -->
       <li
-        v-if="contextMenu.type === 'file' && hasStorage() && isStored(contract[contextMenu.item.i])"
+        v-if="contextMenu.type === 'file' && hasStorage() && contract[contextMenu.item?.i] && isStored(contract[contextMenu.item.i])"
         class="p-1"
         style="cursor: pointer;"
         @click="store(contextMenu.item, true); hideContextMenu();"
@@ -757,6 +759,42 @@ export default {
   <button class="btn btn-secondary" @click="revertPendingChanges">Revert Pending Changes</button>
 </div>
 
+<!-- Extension Dialog Overlay -->
+<Teleport to="body">
+    <div v-if="showExtensionDialog" 
+         class="extension-dialog-overlay d-flex justify-content-center align-items-center"
+         @click.self="closeExtensionDialog" 
+         style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.7); z-index: 1060;">
+        
+        <div class="bg-dark text-white p-4 rounded shadow-lg" style="min-width: 400px; max-width: 90%;">
+            <h5 class="mb-3">Extend Contract: <code class="text-info">{{ extensionFile?.i }}</code></h5>
+            
+            <div class="mb-3">
+                <label class="form-label">Extension Period (days)</label>
+                <div class="d-flex align-items-center">
+                    <input type="range" class="form-range flex-grow-1 me-2" min="7" max="90" step="7" v-model="extensionDays">
+                    <span class="badge bg-primary">{{ extensionDays }} days</span>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">BROCA Cost</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" v-model="extensionAmount" min="1" :max="brocaBalance">
+                    <span class="input-group-text">BROCA (max: {{ brocaBalance }})</span>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-end mt-4">
+                <button class="btn btn-secondary me-2" @click="closeExtensionDialog">Cancel</button>
+                <button class="btn btn-primary" @click="confirmExtension" :disabled="extensionAmount <= 0 || extensionAmount > brocaBalance">
+                    Extend Contract
+                </button>
+            </div>
+        </div>
+    </div>
+</Teleport>
+
 </div>
    `,
     props: {
@@ -817,7 +855,7 @@ export default {
                 u: 1,
                 t: "",
                 extend: 7,
-
+                r: 100,  // Added data needed for calculations
             }],
             contractIDs: {},
             newUser: '',
@@ -919,7 +957,13 @@ export default {
             ],
             showDetailsViewer: false, // Added: Control visibility of details viewer
             fileToViewDetails: null,  // Added: Store the file for the details viewer
-            breadcrumbCounts: {}
+            breadcrumbCounts: {},
+            showExtensionDialog: false,
+            extensionFile: null,
+            extensionDays: 7,
+            extensionAmount: 100,
+            extensionWithPower: false,
+            brocaBalance: 0,
         };
     },
     emits: ["tosign", "addassets", 'update:externalDrop', 'update-contract'], // Ensure 'tosign', 'update:externalDrop', and 'update-contract' are included here
@@ -4360,19 +4404,26 @@ export default {
             this.droppedExternalFiles = { files: [] }; // Clear files, no targetPath needed now
         },
         hasStorage() {
-            if (typeof this.saccountapi.storage == "string") {
+            console.log("Checking storage node status:", this.saccountapi);
+            if (this.saccountapi && typeof this.saccountapi.storage === "string" && this.saccountapi.storage) {
                 return this.saccountapi.name;
-            } else return false;
+            } else {
+                return false;
+            }
         },
 
         isStored(contract) {
+            console.log("Checking if contract is stored:", contract, "Account:", this.account);
+            if (!contract || !contract.n) return false;
+            
             var found = false;
             for (var i in contract.n) {
-                if (contract.n[i] == this.account) {
+                if (contract.n[i] === this.account) {
                     found = true;
                     break;
                 }
             }
+            console.log("Is stored result:", found);
             return found;
         },
 
@@ -4387,7 +4438,7 @@ export default {
                   broca: amount,
                   id: contract.i,
                   file_owner: contract.t,
-                  power: 0,
+                  power: this.extensionWithPower ? 1 : 0,
                 },
                 id: `spkccT_extend`,
                 msg: `Extending ${contract.i}...`,
@@ -4535,6 +4586,39 @@ export default {
         },
         sendIt(payload) {
             this.$emit('tosign', payload);
+        },
+        confirmExtension() {
+            if (this.extensionFile && this.extensionAmount > 0 && this.extensionAmount <= this.brocaBalance) {
+                this.extend({
+                    i: this.extensionFile.i,
+                    t: this.extensionFile.t
+                }, parseInt(this.extensionAmount));
+                this.closeExtensionDialog();
+            }
+        },
+        closeExtensionDialog() {
+            this.showExtensionDialog = false;
+        },
+        openExtensionDialog(file) {
+            this.extensionFile = file;
+            this.brocaBalance = this.broca_calc(this.saccountapi.broca);
+            
+            // Calculate cost based on contract details
+            const contractDetails = this.contract[file.i];
+            if (contractDetails) {
+                // r is the daily rate, calculate default based on 7 days
+                const defaultCost = Math.min(
+                    parseInt((parseInt(7) / 30) * parseInt(contractDetails.r || 100)), 
+                    this.brocaBalance
+                );
+                this.extensionAmount = Math.max(defaultCost, 1); // Ensure minimum of 1
+                this.extensionDays = 7;
+            } else {
+                this.extensionAmount = 100;
+                this.extensionDays = 7;
+            }
+            
+            this.showExtensionDialog = true;
         },
     },
     computed: {
@@ -4696,6 +4780,18 @@ export default {
                 }
             },
             deep: true
+        },
+        'extensionDays': {
+            handler(newValue) {
+                if (this.extensionFile && this.contract[this.extensionFile.i]) {
+                    const contractDetails = this.contract[this.extensionFile.i];
+                    const cost = Math.min(
+                        parseInt((parseInt(newValue) / 30) * parseInt(contractDetails.r || 100)), 
+                        this.brocaBalance
+                    );
+                    this.extensionAmount = Math.max(cost, 1); // Ensure minimum of 1
+                }
+            }
         },
     },
     mounted() {
