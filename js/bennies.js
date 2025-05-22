@@ -1,6 +1,6 @@
 export default {
     template: `<div>
-    <p>Beneficiaries ({{bennies?.length}}/8)<p>
+    <p>Beneficiaries ({{bennies?.length}}/8)</p>
     
 <div class="table-responsive">
 <table class="table align-middle">

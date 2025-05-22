@@ -295,7 +295,7 @@ export default {
             </div>
             <!-- has files -->
             <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center">
-                <files-vue :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi"
+                <files-vue :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" @update-contract="getContract($event)"
                     @tosign="sendIt($event)" :signedtx="signedtx"></files-vue>
             </div>
         </div>

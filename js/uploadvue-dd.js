@@ -419,19 +419,66 @@ export default {
         if (Array.isArray(newFilesArray) && newFilesArray.length > 0) {
           console.log('propStructuredFiles watcher received:', newFilesArray);
           
-          const filesToAdd = newFilesArray.filter(newItem => 
+          // 1. Consolidate newFilesArray to pick the best fullAppPath for identical files
+          const consolidatedNewFiles = [];
+          const seenFiles = new Map(); // Key: name_size, Value: index in consolidatedNewFiles
+
+          const isNewPathBetter = (newP, oldP) => {
+            if (typeof newP !== 'string' && typeof oldP === 'string') return false; // Old exists as string, new is not: old is better
+            if (typeof newP === 'string' && typeof oldP !== 'string') return true;  // New exists as string, old is not: new is better
+            if (typeof newP !== 'string' && typeof oldP !== 'string') return false; // Neither is a string: no change preference
+
+            // Both newP and oldP are strings
+            const newHasSlash = newP.includes('/');
+            const oldHasSlash = oldP.includes('/');
+
+            if (newHasSlash && !oldHasSlash) return true; // New has dir, old doesn't
+            if (!newHasSlash && oldHasSlash) return false; // Old has dir, new doesn't
+
+            // Both have slashes or neither has slashes
+            return newP.length > oldP.length; // Prefer longer path
+          };
+
+          newFilesArray.forEach(newItem => {
+            if (!newItem || !newItem.file || typeof newItem.file.name !== 'string' || typeof newItem.file.size !== 'number') {
+                console.warn('Skipping malformed item in propStructuredFiles:', newItem);
+                return;
+            }
+            const fileKey = `${newItem.file.name}_${newItem.file.size}`;
+            // Prefer fullAppPath, fallback to targetPath, then to null if neither exists
+            const newItemPath = newItem.fullAppPath || newItem.targetPath || null;
+
+
+            if (seenFiles.has(fileKey)) {
+              const existingItemIndex = seenFiles.get(fileKey);
+              const existingItem = consolidatedNewFiles[existingItemIndex];
+              // Prefer fullAppPath, fallback to targetPath, then to null for existing item path
+              const existingItemPath = existingItem.fullAppPath || existingItem.targetPath || null;
+
+              if (isNewPathBetter(newItemPath, existingItemPath)) {
+                consolidatedNewFiles[existingItemIndex] = { ...newItem, fullAppPath: newItemPath, targetPath: newItem.targetPath }; // Ensure fullAppPath is set
+                console.log(`Consolidated file ${newItem.file.name}: using new path '${newItemPath}' over '${existingItemPath}'`);
+              }
+            } else {
+              seenFiles.set(fileKey, consolidatedNewFiles.length);
+              consolidatedNewFiles.push({ ...newItem, fullAppPath: newItemPath, targetPath: newItem.targetPath }); // Ensure fullAppPath is set
+            }
+          });
+          
+          // 2. Filter consolidated files against existing this.File
+          const filesToAdd = consolidatedNewFiles.filter(newItem => 
               !this.File.some(existingFile => 
                   existingFile.name === newItem.file.name && existingFile.size === newItem.file.size
               )
           );
 
           if (filesToAdd.length > 0) {
-              console.log('Adding new files:', filesToAdd);
+              console.log('Adding new (consolidated) files:', filesToAdd);
               const processingPromises = [];
               filesToAdd.forEach(item => {
-                  // Log exactly what we're passing to processSingleFile
-                  console.log(`Adding file ${item.file.name} with path: ${item.fullAppPath || item.targetPath}`);
-                  processingPromises.push(this.processSingleFile(item.file, item.fullAppPath || item.targetPath)); 
+                  // item.fullAppPath should be the best available path after consolidation
+                  console.log(`Adding file ${item.file.name} with path: ${item.fullAppPath}`); 
+                  processingPromises.push(this.processSingleFile(item.file, item.fullAppPath)); 
               });
               
               try {
@@ -443,7 +490,7 @@ export default {
                 this.ready = false;
               }
           } else {
-              console.log('No new files to add from prop update.');
+              console.log('No new files to add from prop update (after consolidation).');
               if(this.File.length > 0 && !this.ready) {
                 if (Object.keys(this.FileInfo).length > 0) this.ready = true;
               }
@@ -470,6 +517,7 @@ export default {
       },
       fileRequests: {},
       FileInfo: {},
+      FileInfoByCID: {},
       File: [],
       ready: false,
       deletable: true,
@@ -518,7 +566,7 @@ export default {
 
           if (foundAndBundled) {
             this.uploadInProgress = false;
-            this.$emit('done', this.contract);
+            this.$emit('done', contractID);
           } else {
             console.log(`Bundle not yet complete for contract ${contractInstanceId}. Retrying in 5s...`);
             setTimeout(() => this.pollBundleStatus(contractID, lastSince), 5000);
@@ -533,6 +581,11 @@ export default {
         return new Promise((resolveProcess, rejectProcess) => { 
             // Skip duplicate files
             if (this.File.some(existingFile => existingFile.name === file.name && existingFile.size === file.size)) {
+                // skipped file may have correct fullAppPath, must be appended to existing file before skipping
+                const existingIndex = this.File.findIndex(f => f.name === file.name);
+                if (fullAppPath && existingIndex !== -1) {
+                    this.File[existingIndex].fullAppPath = fullAppPath;
+                }
                 console.log(`Skipping duplicate file: ${file.name}`);
                 resolveProcess();
                 return; 
@@ -1144,10 +1197,13 @@ export default {
       const pathToIndex = {};
       
       // Add preset folders map from filesvue-dd.js
-      const presetFoldersMap = {
+      var presetFoldersMap = {
           "Documents": "2", "Images": "3", "Videos": "4", "Music": "5",
           "Archives": "6", "Code": "7", "Trash": "8", "Misc": "9"
       };
+      if(sortedPaths.length > 1){
+        presetFoldersMap[sortedPaths[1]] = '1';
+      }
       
       // For custom paths, use letters (A-Z) as indices
       let nextCustomIndex = 0;

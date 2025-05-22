@@ -1,4 +1,4 @@
-this.version = "2025.05.21.7";
+this.version = "2025.05.22.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -418,13 +418,6 @@ var urlsToCache = [
   `/update/index.html`,
   `/user/detailmodal.html`,
   `/user/index.html`,
-  `/vid/blue_dust.m4v`,
-  `/vid/connected_dots.m4v`,
-  `/vid/data_lake.m4v`,
-  `/vid/floating_abstract.m4v`,
-  `/vid/glowing_hexagon.m4v`,
-  `/vid/gold_wave.m4v`,
-  `/vid/orange_cube.m4v`,
   `/vid/stills/blue_dust.jpg`,
   `/vid/stills/connected_dots.jpg`,
   `/vid/stills/data_lake.jpg`,

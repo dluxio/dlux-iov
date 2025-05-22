@@ -4276,7 +4276,7 @@ export default {
             return { valid: true, message: "" };
         },
         handleUploadDone(payload) {
-            console.log('Upload done event received in filesvue-dd. Payload:', payload);
+            this.$emit('update-contract', payload);
             // Clear the dropped files state after upload is handled by child
             this.droppedExternalFiles = { files: [] }; // Clear files, no targetPath needed now
         },
