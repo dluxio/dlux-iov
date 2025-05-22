@@ -548,13 +548,66 @@ export default {
       >
         Delete Folder
       </li>
+      <!-- Folder operations for contracts - only shown if user has a storage node or broca balance -->
+      <li v-if="contextMenu.type === 'folder' && (hasStorage() || account)" class="dropdown-divider"></li>
+      <li
+        v-if="contextMenu.type === 'folder' && account"
+        class="p-1"
+        style="cursor: pointer;"
+        @click="extendFolderContracts(contextMenu.item); hideContextMenu();"
+      >
+        Extend All Contracts in Folder
+      </li>
+      <li
+        v-if="contextMenu.type === 'folder' && hasStorage()"
+        class="p-1"
+        style="cursor: pointer;"
+        @click="storeFolderContracts(contextMenu.item, false); hideContextMenu();"
+      >
+        Store All Files in Folder
+      </li>
+      <li
+        v-if="contextMenu.type === 'folder' && hasStorage()"
+        class="p-1"
+        style="cursor: pointer;"
+        @click="storeFolderContracts(contextMenu.item, true); hideContextMenu();"
+      >
+        Remove All Files in Folder from Storage
+      </li>
       <li
         v-if="contextMenu.type === 'file'"
         class="p-1"
         style="cursor: pointer;"
         @click="openDetailsViewer(contextMenu.item); hideContextMenu();"
       >
-        View Details <!-- Added: New context menu item -->
+        View Details
+      </li>
+      <!-- Add Extend option for any user with broca balance -->
+      <li
+        v-if="contextMenu.type === 'file' && account"
+        class="p-1"
+        style="cursor: pointer;"
+        @click="extend(contextMenu.item, 100); hideContextMenu();"
+      >
+        Extend Contract
+      </li>
+      <!-- Add Store option for storage node operators who aren't storing this file -->
+      <li
+        v-if="contextMenu.type === 'file' && hasStorage() && !isStored(contract[contextMenu.item.i])"
+        class="p-1"
+        style="cursor: pointer;"
+        @click="store(contextMenu.item, false); hideContextMenu();"
+      >
+        Store File
+      </li>
+      <!-- Add Remove option for storage node operators who are storing this file -->
+      <li
+        v-if="contextMenu.type === 'file' && hasStorage() && isStored(contract[contextMenu.item.i])"
+        class="p-1"
+        style="cursor: pointer;"
+        @click="store(contextMenu.item, true); hideContextMenu();"
+      >
+        Remove File from Storage
       </li>
     </ul>
   </div>
@@ -718,6 +771,7 @@ export default {
                 return {
                     channels: {},
                     name: "",
+                    spk_power: 0,
                 };
             },
         },
@@ -732,7 +786,21 @@ export default {
         cc: {
             default: false,
         },
+        broca: {
+            type: String,
+            default: "0,0",
+        },
+        sstats: {
+            type: Object,
+            default: function() {
+                return {
+                    head_block: 0,
+                    broca_refill: "0",
+                };
+            },
+        },
     },
+    emits: ['tosign'],
     data() {
         return {
             files: {},
@@ -3139,7 +3207,13 @@ export default {
             return this.selectedFiles.includes(file.f);
         },
         handleFileClick(event, file) {
-            // Multi-select with Alt/Ctrl key
+            // Check for double click
+            if (event.detail === 2) {
+                this.handleFileDoubleClick(event, file);
+                return;
+            }
+            
+            // Multi-select with Alt/Ctrl key (existing code)
             if (event.altKey || event.ctrlKey) {
                 if (this.isFileSelected(file)) {
                     // Deselect if already selected
@@ -4284,6 +4358,183 @@ export default {
             this.$emit('refresh-contracts'); // Also emit a simple refresh-contracts event
             // Clear the dropped files state after upload is handled by child
             this.droppedExternalFiles = { files: [] }; // Clear files, no targetPath needed now
+        },
+        hasStorage() {
+            if (typeof this.saccountapi.storage == "string") {
+                return this.saccountapi.name;
+            } else return false;
+        },
+
+        isStored(contract) {
+            var found = false;
+            for (var i in contract.n) {
+                if (contract.n[i] == this.account) {
+                    found = true;
+                    break;
+                }
+            }
+            return found;
+        },
+
+        extend(contract, amount) {
+            // Check broca balance first
+            const brocaBalance = this.broca_calc(this.broca);
+            if (amount > brocaBalance) return;
+            
+            const toSign = {
+                type: "cja",
+                cj: {
+                  broca: amount,
+                  id: contract.i,
+                  file_owner: contract.t,
+                  power: 0,
+                },
+                id: `spkccT_extend`,
+                msg: `Extending ${contract.i}...`,
+                ops: ["getTokenUser"],
+                api: "https://spktest.dlux.io",
+                txid: "extend",
+            };
+            this.$emit('tosign', toSign);
+        },
+
+        store(contract, remove = false) {
+            // Check if user has a storage node
+            if (!this.hasStorage()) return;
+            
+            const toSign = {
+                type: "cja",
+                cj: {
+                  items: [contract.i]
+                },
+                id: `spkccT_${!remove ? 'store' : 'remove'}`,
+                msg: `${!remove ? 'Storing' : 'Removing'} ${contract.i}...`,
+                ops: ["getTokenUser"],
+                api: "https://spktest.dlux.io",
+                txid: `${contract.i}_${!remove ? 'store' : 'remove'}`,
+            };
+            this.$emit('tosign', toSign);
+        },
+        
+        broca_calc(last = '0,0') {
+            const last_calc = this.Base64toNumber(last.split(',')[1]);
+            const accured = parseInt((parseFloat(this.sstats?.broca_refill || 0) * (this.saccountapi.head_block - last_calc)) / (this.saccountapi.spk_power * 1000));
+            var total = parseInt(last.split(',')[0]) + accured;
+            if (total > (this.saccountapi.spk_power * 1000)) total = (this.saccountapi.spk_power * 1000);
+            return total;
+        },
+
+        extendFolderContracts(folder) {
+            // Get all files in the folder
+            const folderPath = folder.path;
+            const filesInFolder = this.filesArray.filter(file => {
+                return this.newMeta[file.i][file.f].folderPath === folderPath;
+            });
+            
+            if (filesInFolder.length === 0) {
+                alert('No files found in this folder.');
+                return;
+            }
+            
+            // Ask for confirmation
+            if (!confirm(`Extend ${filesInFolder.length} contract(s) in folder "${folderPath}"?`)) {
+                return;
+            }
+            
+            // Calculate total broca needed (100 per contract)
+            const brocaPerContract = 100;
+            const totalBrocaNeeded = filesInFolder.length * brocaPerContract;
+            const brocaBalance = this.broca_calc(this.broca);
+            
+            if (totalBrocaNeeded > brocaBalance) {
+                alert(`Not enough broca balance. Need ${totalBrocaNeeded}, have ${brocaBalance}.`);
+                return;
+            }
+            
+            // Process each file
+            const uniqueContracts = new Set();
+            filesInFolder.forEach(file => {
+                if (!uniqueContracts.has(file.i)) {
+                    uniqueContracts.add(file.i);
+                    this.extend({
+                        i: file.i,
+                        t: file.t
+                    }, brocaPerContract);
+                }
+            });
+        },
+        
+        storeFolderContracts(folder, remove = false) {
+            // Get all files in the folder
+            const folderPath = folder.path;
+            const filesInFolder = this.filesArray.filter(file => {
+                return this.newMeta[file.i][file.f].folderPath === folderPath;
+            });
+            
+            if (filesInFolder.length === 0) {
+                alert('No files found in this folder.');
+                return;
+            }
+            
+            // Verify the user has a storage node
+            if (!this.hasStorage()) {
+                alert('You do not have a registered storage node.');
+                return;
+            }
+            
+            // Ask for confirmation
+            if (!confirm(`${remove ? 'Remove' : 'Store'} ${filesInFolder.length} contract(s) in folder "${folderPath}"?`)) {
+                return;
+            }
+            
+            // Process each file, but only store each contract once
+            const uniqueContracts = new Set();
+            filesInFolder.forEach(file => {
+                if (!uniqueContracts.has(file.i)) {
+                    uniqueContracts.add(file.i);
+                    
+                    // Check if we're storing or removing based on current status
+                    const shouldProcess = remove ? 
+                        this.isStored(this.contract[file.i]) : 
+                        !this.isStored(this.contract[file.i]);
+                    
+                    if (shouldProcess) {
+                        this.store({
+                            i: file.i,
+                            t: file.t
+                        }, remove);
+                    }
+                }
+            });
+        },
+
+        handleFileDoubleClick(event, file) {
+            // Prevent default behavior
+            event.preventDefault();
+            
+            // Check if file is encrypted
+            const isEncrypted = this.flagsDecode(this.newMeta[file.i][file.f].flags, 1).length > 0;
+            
+            if (!isEncrypted) {
+                // Show dialog to ask if they want to load the file in browser
+                const cid = file.f;
+                if (confirm(`Do you want to open this file in the browser?\nURL: https://ipfs.dlux.io/ipfs/${cid}`)) {
+                    window.open(`https://ipfs.dlux.io/ipfs/${cid}`, '_blank');
+                }
+            } else if (this.contract[file.i]?.encryption?.key) {
+                // If it's encrypted but we have the key, offer to download decrypted
+                if (confirm('This file is encrypted. Do you want to download the decrypted file?')) {
+                    this.downloadFile(file);
+                }
+            } else {
+                // If it's encrypted and we don't have the key, offer to decrypt
+                if (confirm('This file is encrypted. Do you want to attempt to decrypt it?')) {
+                    this.decode(file.i);
+                }
+            }
+        },
+        sendIt(payload) {
+            this.$emit('tosign', payload);
         },
     },
     computed: {
