@@ -2627,7 +2627,8 @@ body[data-touch="false"] {
 .dropdown-menu {
   padding: 0;
   border-radius: 0.5rem;
-
+  overflow: auto;
+  max-height: calc(100vh - 200px);
 }
 
 .dropdown-item {
