@@ -1,4 +1,4 @@
-this.version = "2025.05.22.1";
+this.version = "2025.05.22.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -152,6 +152,7 @@ var urlsToCache = [
   `/js/extensionvue-old.js`,
   `/js/extensionvue.js`,
   `/js/filesvue-dd.js`,
+  `/js/filesvue-dd.spec.js`,
   `/js/filesvue-old.js`,
   `/js/filesvue.js`,
   `/js/footvue.js`,
