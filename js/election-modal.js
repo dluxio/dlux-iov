@@ -22,15 +22,17 @@ export default {
     func: String,
     smarkets: Object,
   },
-  template: `
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-    <div class="modal-content pt-2">
-   
-    <div class="row m-0">
+  template: `<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Elect Validators</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+    <div class="modal-body row m-0">
       <!-- Available Validators -->
-      <div class="col-lg-6">
+      <div class="col-lg-6 mb-3">
         <div class="mb-2 text-center border-bottom border-light border-2">
-          <h5 class="mb-1">Available Validators</h5>
+          <h5 class="mb-1">Available</h5>
         </div>
         <div v-for="(node, key) in smarkets" :key="key">
           <div v-if="isVal(node) && !isSelected(node.self)">
@@ -57,9 +59,9 @@ export default {
         </div>
       </div>
       <!-- Selected Validators -->
-      <div class="col-lg-6">
+      <div class="col-lg-6 mb-3">
        <div class="mb-2 text-center border-bottom border-light border-2">
-          <h5 class="m-0">Nodes Selected ({{d.valWorkable.length}}/30)</h5>
+          <h5 class="mb-1">Selected ({{d.valWorkable.length}}/30)</h5>
         </div>
           <div
             v-for="(node, index) in d.valWorkable"
@@ -86,8 +88,8 @@ export default {
           <p class="text-center">Add validators from the available list, then drag to rearrange the vote weight.</p>
         </div>
       </div>
-       <div class="lead text-center my-2">Nodes Selected ({{d.valWorkable.length}}/30)</div>
-      <div class="text-center my-2">
+       <div class="lead text-center my-2 d-none">Nodes Selected ({{d.valWorkable.length}}/30)</div>
+      <div class="text-center my-2 d-none">
        <button
           :class="{ 'disabled': !difVote }"
           class="btn btn-success"
@@ -98,7 +100,16 @@ export default {
         </button>
         </div>
       </div>
+
+    <div class="modal-footer">
+      <div class="me-auto btn-group border border-info rounded px-2 py-1" role="group" aria-label="Transact on Test Network Only" v-if="token == 'SPK' || token == 'LARYNX'">
+        <input id="delegatemirror" type="checkbox" v-model="d.test" class="me-2">
+        <label for="delegatemirror">Test Network Only</label>
+      </div>
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button> 
+      <button :disabled="!difVote" type="submit" class="btn btn-primary" @click="valVote()" data-bs-dismiss="modal">Confirm</button> 
     </div>
+        </div>
     </div>
     `,
   data() {
