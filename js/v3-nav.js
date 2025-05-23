@@ -993,6 +993,10 @@ export default {
     }
     if ("WebSocket" in window) this.HAS_.wsa = true;
     else this.HAS_.wsa = false;
+    // add sting script
+    const script = document.createElement("script");
+    script.src = "/js/stwidget.js";
+    document.head.appendChild(script);
     // add sting chat
     this.addStingChat();
     // Nav Behavior

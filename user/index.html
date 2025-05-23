@@ -94,8 +94,8 @@
                 </div>
             </div>
 
-            <div class="container-fluid px-0">
-                <div v-show="pageAccount || account">
+            <div class="container-fluid d-flex flex-grow-1 px-0">
+                <div v-show="pageAccount || account" class="d-flex flex-column flex-grow-1">
                     <!-- Page header area -->
                     <div class="">
                         <div class="container">
@@ -196,7 +196,6 @@
                         <!-- blog tab -->
                         <div role="tabpanel" class="tab-pane fade show active" id="blog" aria-labelledby="blogtab">
                             <!-- blog repeat -->
-                            <!--main view-->
                             <div class="container-fluid">
                                 <div class="row">
                                     <div class="col-sm-6 col-lg-4 col-xl-3 mb-3 card-group" v-for="post in displayPosts"
@@ -3006,9 +3005,9 @@
                         </div>
                         <!-- drive tab -->
                         <div role="tabpanel" ref="driveTab" class="tab-pane fade" id="drive" aria-labelledby="drivetab">
-                            <div class="container card bg-img-none pt-2 px-1 px-md-3 mb-4"
+                            <div class="container card bg-img-none px-1 px-md-3 mb-4"
                                 style="background-color: rgba(61, 61, 61, 0.708);">
-                                <div class="mb-3">
+                                <div class="my-3">
                                     <div>
                                         <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
                                             :mypfp="mypfp" :protocol="protocol.broca" :stats="spkStats"

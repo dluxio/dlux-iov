@@ -31,10 +31,11 @@ export default {
         <div class="mx-xl-5">
             <div class="card p-1 p-md-3 mx-lg-5">
                 <div class="card-body text-center">
-                    <div class="fs-4 lead mb-3">
+                <div class="hero-subtitle mb-2">Activate File Storage</div>
+                    <div class="fs-4 lead mb-2">
                         Register your account on SPK Network for free<br>to start pinning your files on IPFS
                     </div>
-                    <button type="button" class="btn btn-primary my-3" @click="updatePubkey()">
+                    <button type="button" class="btn btn-primary mt-2" @click="updatePubkey()">
                         <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
                     </button>
                 </div>
@@ -44,7 +45,7 @@ export default {
     <!-- tabs nav -->
     <div v-if="saccountapi.pubKey != 'NA'" class="d-flex flex-column square rounded-bottom p-0">
         <!-- top menu -->
-        <div class="pb-1">
+        <div class="">
             <div class="d-flex flex-wrap align-items-center">
                 <!--fake invisible button -->
                 <div class="btn-group m-2 d-none d-lg-block invisible" role="group" aria-label="Storage Actions"
@@ -167,7 +168,7 @@ export default {
         <div v-if="!cc">
             <div class="d-flex flex-column">
                 <div class="d-flex flex-wrap align-items-center mb-3">
-                    <div class="hero-subtitle d-flex align-items-top me-auto">SPK Network IPFS Drive</div>
+                    <div class="hero-subtitle d-none align-items-top me-auto">SPK Network IPFS Drive</div>
                     <!-- storage widget -->
                     <a class="no-decoration" data-bs-toggle="collapse" href="#brocaRates" role="button"
                         aria-expanded="false" aria-controls="brocaRates">
@@ -295,7 +296,6 @@ export default {
             </div>
             <!-- has files -->
             <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center">
-                <!-- @update-contract="update_meta($event)" -->    
                 <files-vue ref="filesVue" :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" 
                     @refresh-contracts="refreshContracts" 
                     @tosign="sendIt($event)" :signedtx="signedtx"></files-vue>

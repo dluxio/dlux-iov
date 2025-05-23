@@ -12,13 +12,13 @@ export default {
         "upload-everywhere": Upload
     },
     template: `
-<div ref="container" class="d-flex flex-grow-1 flex-column rounded" @contextmenu.prevent="showContextMenu($event, 'background', null)">
+<div ref="container" class="d-flex flex-grow-1 flex-column rounded" >
     <div class="pt-1">
-<!-- ACTION BAR -->
+        <!-- ACTION BAR -->
         <div class="d-flex border-bottom border-white-50">
             <div class="d-flex flex-wrap align-items-center justify-content-center mx-1 flex-grow-1">
 
-<!-- Search -->
+                <!-- Search -->
                 <div class="position-relative flex-grow-1 mb-1 me-1">
                     <span class="position-absolute top-50 translate-middle-y ps-2"><i
                             class="fa-solid fa-magnifying-glass fa-fw"></i></span>
@@ -27,7 +27,7 @@ export default {
                         v-model="filesSelect.search">
                 </div>
 
-<!-- choices-js-->
+                <!-- choices-js-->
                 <div class=" mb-1 mx-1" style="min-width: 300px !important;">
 
                     <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_function="search" prop_type="tags"
@@ -39,7 +39,7 @@ export default {
                         prop_type="labels" @data="handleLabel($event)"></choices-vue>
                 </div>
 
-<!-- Sort -->
+                <!-- Sort -->
                 <div class="dropdown ms-1 mb-1">
                     <button class="btn btn-dark w-100"
                         style="padding-top: 11px !important; padding-bottom: 11px !important;" type="button"
@@ -127,25 +127,27 @@ export default {
             </div>
         </div>
     </div>
-
-       
-<!-- Filesystem View -->
-    <div class="d-flex flex-column flex-wrap">
-        <h3 class="d-none">@{{ selectedUser }}</h3>
         <div class="breadcrumb d-flex align-items-center w-100 rounded bg-darkg mt-2">
+            <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; border-radius: 4px;">
+            <i class="fa-fw fa-solid fa-hard-drive me-1"></i>My Drive
             
-            <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; border-radius: 4px;"><i class="fa-fw fa-solid fa-hard-drive"></i>
                 <!-- Added: Search result count for root -->
                 <span v-if="breadcrumbCounts && breadcrumbCounts[''] > 0" class="badge bg-info ms-1">{{ breadcrumbCounts[''] }}</span>
             </span>
+             <span class="mx-1" v-if="currentFolderPath">/</span>
             <template v-for="(part, index) in currentFolderPath.split('/').filter(Boolean)" :key="index">
-                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'), $event)" @dragenter="handleDragEnterBreadcrumb($event, currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; border-radius: 4px;">{{ part }}
+                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'), $event)" @dragenter="handleDragEnterBreadcrumb($event, currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 mx-1" style="cursor: pointer; border-radius: 4px;">{{ part }}
                     <!-- Added: Search result count for this folder level -->
                     <span v-if="breadcrumbCounts && breadcrumbCounts[currentFolderPath.split('/').slice(0, index + 1).join('/')] > 0" class="badge bg-info ms-1">{{ breadcrumbCounts[currentFolderPath.split('/').slice(0, index + 1).join('/')] }}</span>
                 </span>
                 <span class="mx-1">/</span>
             </template>
         </div>
+       
+<!-- Filesystem View -->
+    <div class="d-flex flex-column flex-grow-1 flex-wrap">
+        <h3 class="d-none">@{{ selectedUser }}</h3>
+
         <div class="d-flex flex-wrap justify-content-end w-100 my-2">
             <!-- count folders files -->
             <div class="d-flex align-items-center my-1 mx-1">
@@ -257,7 +259,8 @@ export default {
                     <tr v-if="getSubfolders(selectedUser, currentFolderPath).length === 0 && getFiles(selectedUser, currentFolderPath).length === 0">
                         <td colspan="5" class="text-center p-5">
                             <div class="text-muted">
-                                <i class="fa-solid fa-folder-open fa-2x mb-3"></i>
+                                <i class="fa-solid fa-folder-
+                                 fa-2x mb-3"></i>
                                 <p>This folder is empty. Drag and drop files here or create a new folder.</p>
                             </div>
                         </td>
@@ -272,8 +275,8 @@ export default {
             <i class="fa-solid fa-triangle-exclamation fa-fw me-1"></i>
             Files in Trash will be permanently deleted after their deletion date.
         </div>
-        <div v-if="!filesSelect.search">
-            <div class="files" @contextmenu.prevent="showContextMenu($event, 'background', null)" 
+        <div v-if="!filesSelect.search" class="d-flex flex-grow-1">
+            <div class="d-flex flex-grow-1 files" @contextmenu.prevent="showContextMenu($event, 'background', null)" 
                 @dragover="dragOverBackground($event)" 
                 @drop="dropOnBackground($event)"
                 @mousedown="startSelectionBox($event)"
@@ -282,7 +285,7 @@ export default {
                 style="position: relative; min-height: 200px;">
                 <!-- Remove the template-based selection box overlay -->
                 
-                <div v-if="viewOpts.fileView === 'grid'" class="d-flex flex-wrap" style="background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px;">
+                <div v-if="viewOpts.fileView === 'grid'" class="d-flex flex-grow-1 flex-wrap" style="background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px;">
                     <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="folder.path" 
                         class="file-grid m-2 p-2 rounded text-center" 
                         :class="{ 'bg-dark': !isFolderSelected(folder), 'bg-primary': isFolderSelected(folder) }"
@@ -346,9 +349,19 @@ export default {
                         style="min-height: 180px; background-color: rgba(255,255,255,0.05); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.2); margin: 10px;">
                         <i class="fa-solid fa-folder-open fa-3x mb-3" style="color: #adb5bd;"></i>
                         <p class="text-muted">This folder is empty. Drag and drop files here or create a new folder.</p>
-                        <button class="btn btn-outline-secondary btn-sm mt-2" @click="createNewFolder">
+                        <div class="d-flex flex-wrap align-items-center">
+                        <upload-everywhere class="my-2" v-if="selectedUser == account" 
+                                   :account="account" 
+                                   :saccountapi="saccountapi"
+                                   :external-drop="droppedExternalFiles" 
+                                   @update:externalDrop="droppedExternalFiles = $event" 
+                                   @tosign="sendIt($event)" 
+                                   @done="handleUploadDone($event)" 
+                                   teleportref="#UEController"/>
+                        <button class="btn btn-outline-secondary btn-sm my-2" @click="createNewFolder">
                             <i class="fa-solid fa-folder-plus me-1"></i>New Folder
                         </button>
+                        </div>
                     </div>
                 </div>
                 <div v-else class="table-responsive">
