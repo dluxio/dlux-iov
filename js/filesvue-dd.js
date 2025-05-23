@@ -476,153 +476,102 @@ export default {
         </div>
     </div>
 <!-- Context menu -->
-    <Teleport to="body">
-  <div
-    v-if="contextMenu.show"
+<Teleport to="body">
+  <div v-if="contextMenu.show" @click.stop
     :style="{ position: 'fixed', left: contextMenu.x + 'px', top: contextMenu.y + 'px', zIndex: 1000 }"
-    class="bg-dark text-white p-2 rounded shadow"
-    @click.stop
-  >
-    <ul class="list-unstyled m-0">
+    class="dropdown ">
+    <ul class="dropdown-menu dropdown-menu-dark bg-dark border-dark bg-img-none show">
       <!-- Background Options -->
-      <li
-        v-if="contextMenu.type === 'background' && selectedUser === account"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="createNewFolder(); hideContextMenu();"
-      >
-        New Folder
+      <li v-if="contextMenu.type === 'background' && selectedUser === account">
+        <a class="dropdown-item py-1" href="#" @click="createNewFolder(); hideContextMenu();">
+            New Folder
+        </a>
       </li>
       <!-- File Options -->
-      <li
-        v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="renameItem(contextMenu.item, 'file'); hideContextMenu();"
-      >
-        Rename File
+      <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)">
+        <a class="dropdown-item py-1" href="#" @click="renameItem(contextMenu.item, 'file'); hideContextMenu();">
+            Rename File
+        </a>
       </li>
       <!-- Changed: Conditionally show Move to Trash -->
-      <li
-        v-if="contextMenu.type === 'file' && isEditable(contextMenu.item) && currentFolderPath !== 'Trash'"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="deleteFile(contextMenu.item); hideContextMenu();"
-      >
-        Move to Trash
+      <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item) && currentFolderPath !== 'Trash'">
+        <a class="dropdown-item py-1" href="#" @click="deleteFile(contextMenu.item); hideContextMenu();">
+            Move to Trash
+        </a>
       </li>
       <!-- Added: Restore option for Trash -->
-      <li
-        v-if="contextMenu.type === 'file' && isEditable(contextMenu.item) && currentFolderPath === 'Trash'"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="restoreFile(contextMenu.item); hideContextMenu();"
-      >
-        Restore File
+      <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item) && currentFolderPath === 'Trash'">
+        <a class="dropdown-item py-1" href="#" @click="restoreFile(contextMenu.item); hideContextMenu();">
+            Restore File
+        </a>
       </li>
       <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)" class="dropdown-divider"></li>
-      <li
-        v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="openMetadataEditor(contextMenu.item); hideContextMenu();"
-      >
-        Edit Metadata
+      <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)">
+        <a class="dropdown-item py-1" href="#" @click="openMetadataEditor(contextMenu.item); hideContextMenu();">
+            Edit Metadata
+        </a>
       </li>
       <li v-if="contextMenu.type === 'file'" class="dropdown-divider"></li>
-      <li
-        v-if="contextMenu.type === 'file' && flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length && !contract[contextMenu.item.i].encryption.key"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="decode(contextMenu.item.i); hideContextMenu();"
-      >
-        Decrypt 
+      <li v-if="contextMenu.type === 'file' && flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length && !contract[contextMenu.item.i].encryption.key">
+        <a class="dropdown-item py-1" href="#" @click="decryptFile(contextMenu.item); hideContextMenu();">
+            Decrypt File
+        </a>
       </li>
-      <li
-        v-if="contextMenu.type === 'file' && ( !flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length || (flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length && contract[contextMenu.item.i].encryption.key))"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="downloadFile(contextMenu.item); hideContextMenu();"
-      >
-        Download File
+      <li v-if="contextMenu.type === 'file' && ( !flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length || (flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length && contract[contextMenu.item.i].encryption.key))">
+        <a class="dropdown-item py-1" href="#" @click="downloadFile(contextMenu.item); hideContextMenu();">
+            Download File
+        </a>
       </li>
       <!-- Folder Options -->
-      <li
-        v-if="contextMenu.type === 'folder' && isEditableFolder(contextMenu.item)"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="renameItem(contextMenu.item, 'folder'); hideContextMenu();"
-      >
-        Rename Folder
+      <li v-if="contextMenu.type === 'folder' && isEditableFolder(contextMenu.item)">
+        <a class="dropdown-item py-1" href="#" @click="renameItem(contextMenu.item, 'folder'); hideContextMenu();">
+            Rename Folder
+        </a>
       </li>
-      <li
-        v-if="contextMenu.type === 'folder' && isEditableFolder(contextMenu.item)"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="deleteFolder(contextMenu.item); hideContextMenu();"
-      >
-        Delete Folder
+      <li v-if="contextMenu.type === 'folder' && isEditableFolder(contextMenu.item)">
+        <a class="dropdown-item py-1" href="#" @click="deleteFolder(contextMenu.item); hideContextMenu();">
+            Delete Folder
+        </a>
       </li>
       <!-- Folder operations for contracts - only shown if user has a storage node or broca balance -->
       <li v-if="contextMenu.type === 'folder' && (hasStorage() || account)" class="dropdown-divider"></li>
-      <li
-        v-if="contextMenu.type === 'folder' && account"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="extendFolderContracts(contextMenu.item); hideContextMenu();"
-      >
-        Extend All Contracts in Folder
+      <li v-if="contextMenu.type === 'folder' && account">
+        <a class="dropdown-item py-1" href="#" @click="extendFolderContracts(contextMenu.item); hideContextMenu();">
+            Extend All Contracts in Folder
+        </a>
       </li>
-      <li
-        v-if="contextMenu.type === 'folder' && hasStorage()"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="storeFolderContracts(contextMenu.item, false); hideContextMenu();"
-      >
-        Store All Files in Folder
+      <li v-if="contextMenu.type === 'folder' && hasStorage()">
+        <a class="dropdown-item py-1" href="#" @click="storeFolderContracts(contextMenu.item, false); hideContextMenu();">
+            Store All Files in Folder
+        </a>
       </li>
-      <li
-        v-if="contextMenu.type === 'folder' && hasStorage()"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="storeFolderContracts(contextMenu.item, true); hideContextMenu();"
-      >
-        Remove All Files in Folder from Storage
+      <li v-if="contextMenu.type === 'folder' && hasStorage()">
+        <a class="dropdown-item py-1" href="#" @click="storeFolderContracts(contextMenu.item, true); hideContextMenu();">
+            Remove All Files in Folder from Storage
+        </a>
       </li>
-      <li
-        v-if="contextMenu.type === 'file'"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="openDetailsViewer(contextMenu.item); hideContextMenu();"
-      >
-        View Details
+      <li v-if="contextMenu.type === 'file'">
+        <a class="dropdown-item py-1" href="#" @click="openDetailsViewer(contextMenu.item); hideContextMenu();">
+            View Details
+        </a>
       </li>
       <!-- Add Extend option for any user with broca balance -->
-      <li
-        v-if="contextMenu.type === 'file' && account"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="openExtensionDialog(contextMenu.item); hideContextMenu();"
-      >
-        Extend Contract
+      <li v-if="contextMenu.type === 'file' && account">
+        <a class="dropdown-item py-1" href="#" @click="openExtensionDialog(contextMenu.item); hideContextMenu();">
+            Extend Contract
+        </a>
       </li>
       <!-- Add Store option for storage node operators who aren't storing this file -->
-      <li
-        v-if="contextMenu.type === 'file' && hasStorage() && contract[contextMenu.item?.i] && !isStored(contract[contextMenu.item.i])"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="store(contextMenu.item, false); hideContextMenu();"
-      >
-        Store File
+      <li v-if="contextMenu.type === 'file' && hasStorage() && contract[contextMenu.item?.i] && !isStored(contract[contextMenu.item.i])">
+        <a class="dropdown-item py-1" href="#" @click="store(contextMenu.item, false); hideContextMenu();">
+            Store File
+        </a>
       </li>
       <!-- Add Remove option for storage node operators who are storing this file -->
-      <li
-        v-if="contextMenu.type === 'file' && hasStorage() && contract[contextMenu.item?.i] && isStored(contract[contextMenu.item.i])"
-        class="p-1"
-        style="cursor: pointer;"
-        @click="store(contextMenu.item, true); hideContextMenu();"
-      >
-        Remove File from Storage
+      <li v-if="contextMenu.type === 'file' && hasStorage() && contract[contextMenu.item?.i] && isStored(contract[contextMenu.item.i])">
+        <a class="dropdown-item py-1" href="#" @click="store(contextMenu.item, true); hideContextMenu();">
+            Remove File from Storage
+        </a>
       </li>
     </ul>
   </div>
