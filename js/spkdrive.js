@@ -170,7 +170,7 @@ export default {
                 <div class="d-flex flex-wrap align-items-center mb-3">
                     <div class="hero-subtitle d-none align-items-top me-auto">SPK Network IPFS Drive</div>
                     <!-- storage widget -->
-                    <a class="no-decoration" data-bs-toggle="collapse" href="#brocaRates" role="button"
+                    <a class="d-flex align-items-center no-decoration" data-bs-toggle="collapse" href="#brocaRates" role="button"
                         aria-expanded="false" aria-controls="brocaRates">
                         <div class="spk-widg">
                             <div class="d-flex flex-column card-body px-2 py-1">
@@ -186,7 +186,16 @@ export default {
                                 </div>
                             </div>
                         </div>
+                        <div>
+                        <i class="fa-solid fa-angle-down fa-fw fs-3 ms-1"></i>
+                        </div>
                     </a>
+                    <!-- warning message -->
+                    <div v-if="usedBytes > availableBytes" class="mx-auto d-flex flex-column bg-dark border border-warning rounded p-2 text-center" role="alert" style="max-width: 600px">
+                        <p class="lead">Your files are larger than your drive size!</p>
+                        <p>File pinning contracts may not renew after the initial 30 days expires due to insufficient resource credits. Power Up BROCA to increase your storage.</p>
+                    </div>
+                    <!-- contract modal button -->
                     <button class="ms-auto btn btn-outline-light rounded-pill" data-bs-toggle="modal"
                         data-bs-target="#contractsModal">
                         <i class="fa-solid fa-magnifying-glass fa-fw me-2"></i>{{contracts.length}}
