@@ -212,7 +212,7 @@ export default {
         <div class="modal fade" id="contractsModal" tabindex="-1" role="dialog" aria-labelledby="contractsModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
-                <div class="modal-content text-white bg-dark-80">
+                <div class="modal-content text-white bg-dark-90">
                     <div class="modal-header">
                         <h5 class="modal-title" id="contractsModalLabel">SPK Network</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
