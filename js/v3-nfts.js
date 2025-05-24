@@ -449,7 +449,7 @@ createApp({
         start: 0,
         amount: 30,
         searchTerm: "",
-        searchDefault: "Search UIDs and Owners",
+        searchDefault: "Search UIDs and ",
         searchDeep: false,
         searchDeepKey: "",
         searchDeepK: false,

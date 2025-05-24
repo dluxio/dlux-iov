@@ -335,9 +335,9 @@ export default {
         <!-- Upload Everywhere Controller -->
         <div id="UEController"></div>
         <!-- Warning Box for Trash Folder -->
-        <div v-if="currentFolderPath === 'Trash'" class="alert alert-warning my-2 mx-1" role="alert">
-            <i class="fa-solid fa-triangle-exclamation fa-fw me-1"></i>
-            Files in Trash will be permanently deleted after their deletion date.
+        <div v-if="currentFolderPath === 'Trash'" class="alert alert-warning d-flex align-items-center my-2" role="alert">
+            <i class="fa-solid fa-triangle-exclamation fa-fw me-2 fs-1 text-warning"></i>
+            <p class="mb-0 lead">Files in Trash will be permanently deleted after their deletion date.</p>
         </div>
         <div v-if="!filesSelect.search" class="d-flex flex-grow-1">
             <div class="d-flex flex-grow-1 files" @contextmenu.prevent="showContextMenu($event, 'background', null)" 
@@ -410,21 +410,27 @@ export default {
                     <!-- Empty state for grid view -->
                     <div v-if="getSubfolders(selectedUser, currentFolderPath).length === 0 && getFiles(selectedUser, currentFolderPath).length === 0" 
                         class="w-100 text-center p-5 d-flex flex-column align-items-center justify-content-center" 
-                        style="min-height: 180px; background-color: rgba(255,255,255,0.05); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.2); margin: 10px;">
-                        <i class="fa-solid fa-folder-open fa-3x mb-3" style="color: #adb5bd;"></i>
-                        <p class="text-muted">This folder is empty. Drag and drop files here or create a new folder.</p>
-                        <div class="d-flex flex-wrap align-items-center">
-                        <upload-everywhere class="my-2" v-if="selectedUser == account" 
-                                   :account="account" 
-                                   :saccountapi="saccountapi"
-                                   :external-drop="droppedExternalFiles" 
-                                   @update:externalDrop="droppedExternalFiles = $event" 
-                                   @tosign="sendIt($event)" 
-                                   @done="handleUploadDone($event)" 
-                                   teleportref="#UEController"/>
-                        <button class="btn btn-outline-secondary btn-sm my-2" @click="createNewFolder">
-                            <i class="fa-solid fa-folder-plus me-1"></i>New Folder
-                        </button>
+                        style="min-height: 180px;">
+                        <div v-if="currentFolderPath === 'Trash'">
+                            <i class="fa-solid fa-trash fa-3x mb-3" style="color: #adb5bd;"></i>
+                            <p class="text-muted">The trash is empty.</p>
+                        </div>
+                        <div v-if="currentFolderPath != 'Trash'">
+                            <i class="fa-solid fa-folder-open fa-3x mb-3" style="color: #adb5bd;"></i>
+                            <p class="text-muted">This folder is empty. Drag and drop files here or create a new folder.</p>
+                            <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
+                                <upload-everywhere class="my-2" v-if="selectedUser == account" 
+                                        :account="account" 
+                                        :saccountapi="saccountapi"
+                                        :external-drop="droppedExternalFiles" 
+                                        @update:externalDrop="droppedExternalFiles = $event" 
+                                        @tosign="sendIt($event)" 
+                                        @done="handleUploadDone($event)" 
+                                        teleportref="#UEController"/>
+                                <button class="btn btn-outline-secondary btn-sm my-2" @click="createNewFolder">
+                                    <i class="fa-solid fa-folder-plus me-1"></i>New Folder
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
