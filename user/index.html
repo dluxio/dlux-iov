@@ -143,11 +143,13 @@
                                                 <span class="sr-only">New Post</span>
                                             </a>
                                         </div>
-                                        <button type="button" v-show="!me && account"
-                                            class="btn btn-outline-primary rounded-pill" data-bs-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false"> Actions<i
-                                                class="fas fa-ellipsis-h ms-2"></i>
-                                        </button>
+                                        <div v-if="!me && account" class="d-flex">
+                                            <button type="button"
+                                                class="btn btn-outline-primary ms-auto rounded-pill" data-bs-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false"> Actions<i
+                                                    class="fas fa-ellipsis-h ms-2"></i>
+                                            </button>
+                                        </div>
                                         <div class="dropdown-menu bg-black dropdown-menu-right"> <a
                                                 class="dropdown-item" type="button" @click="follow(pageAccount)"
                                                 v-if="!relations.follows">Follow</a> <a class="dropdown-item"
