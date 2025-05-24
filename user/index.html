@@ -144,24 +144,23 @@
                                             </a>
                                         </div>
                                         <div v-if="!me && account" class="d-flex">
-                                            <button type="button"
-                                                class="btn btn-outline-primary ms-auto rounded-pill" data-bs-toggle="dropdown"
-                                                aria-haspopup="true" aria-expanded="false"> Actions<i
-                                                    class="fas fa-ellipsis-h ms-2"></i>
+                                            <button type="button" class="btn btn-outline-primary ms-auto rounded-pill"
+                                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                Actions<i class="fas fa-ellipsis-h ms-2"></i>
                                             </button>
-                                        </div>
-                                        <div class="dropdown-menu bg-black dropdown-menu-right"> <a
-                                                class="dropdown-item" type="button" @click="follow(pageAccount)"
-                                                v-if="!relations.follows">Follow</a> <a class="dropdown-item"
-                                                type="button" @click="unfollow(pageAccount)"
-                                                v-if="relations.follows">Unfollow</a>
-                                            <modal-vue v-if="protocol?.dlux?.head_block && accountapi.head_block"
-                                                func="send" :mypfp="mypfp" token="balance" :tokenuser="accountapi"
-                                                :api="lapi" :account="account" :tokenprotocol="protocol?.dlux"
-                                                @tosign="toSign = $event" v-slot:trigger>
-                                                <a slot="trigger" class="dropdown-item trigger" type="button">Send
-                                                    DLUX</a>
-                                            </modal-vue>
+                                            <div class="dropdown-menu bg-black dropdown-menu-right"> <a
+                                                    class="dropdown-item" type="button" @click="follow(pageAccount)"
+                                                    v-if="!relations.follows">Follow</a> <a class="dropdown-item"
+                                                    type="button" @click="unfollow(pageAccount)"
+                                                    v-if="relations.follows">Unfollow</a>
+                                                <modal-vue v-if="protocol?.dlux?.head_block && accountapi.head_block"
+                                                    func="send" :mypfp="mypfp" token="balance" :tokenuser="accountapi"
+                                                    :api="lapi" :account="account" :tokenprotocol="protocol?.dlux"
+                                                    @tosign="toSign = $event" v-slot:trigger>
+                                                    <a slot="trigger" class="dropdown-item trigger" type="button">Send
+                                                        DLUX</a>
+                                                </modal-vue>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -2990,8 +2989,8 @@
                                                 :placeholder="NFTselect.searchDefault" />
                                         </div>
                                         <!--sort-->
-                                        <button class="btn btn-dark dropdown-toggle" type="button"
-                                            id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <button class="btn btn-dark dropdown-toggle" type="button" id="sortDropdown"
+                                            data-bs-toggle="dropdown" aria-expanded="false">
                                             <span>Sort on</span>
                                             <span v-if="NFTselect.sort == 'uid' && NFTselect.dir == 'asc'">UID:
                                                 Low
@@ -3047,190 +3046,186 @@
                                                 @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
                                         </div>
                                         <div v-if="!displayNFTs.length"
-                                    class="container-fluid d-flex flex-grow-1 my-3 align-items-center justify-content-center">
-                                    <div class="" style="max-width: 600px;">
-                                        <div class="card-body text-center">
-                                            <div style="font-size: 10em;" class="text-white-50 ">
-                                                <i class="fa-solid fa-magnifying-glass position-relative"></i>
-                                            </div>
-                                            <h1 style="font-size: 1.5em;" class="fw-light">No Results</h1>
-                                            </div>
-                                            <div v-if="me" class="d-flex justify-content-center">
-                                                <a href="/nfts/"
-                                                    class="btn btn-outline-light rounded-pill d-flex align-items-center mt-2">
-                                                    <i class="fa-solid fa-store fa-fw force-parent-lh me-2"></i>
-                                                    <span>Visit Market</span>
-                                                    <span class="sr-only">Visit Market</span>
-                                                </a>
+                                            class="container-fluid d-flex flex-grow-1 my-3 align-items-center justify-content-center">
+                                            <div class="" style="max-width: 600px;">
+                                                <div class="card-body text-center">
+                                                    <div style="font-size: 10em;" class="text-white-50 ">
+                                                        <i class="fa-solid fa-magnifying-glass position-relative"></i>
+                                                    </div>
+                                                    <h1 style="font-size: 1.5em;" class="fw-light">No Results</h1>
+                                                </div>
+                                                <div v-if="me" class="d-flex justify-content-center">
+                                                    <a href="/nfts/"
+                                                        class="btn btn-outline-light rounded-pill d-flex align-items-center mt-2">
+                                                        <i class="fa-solid fa-store fa-fw force-parent-lh me-2"></i>
+                                                        <span>Visit Market</span>
+                                                        <span class="sr-only">Visit Market</span>
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
-                        <!-- drive tab -->
-                        <div role="tabpanel" ref="driveTab" class="tab-pane fade" id="drive" aria-labelledby="drivetab">
-                            <div class="container card bg-img-none px-1 px-md-3 mb-4"
-                                style="background-color: rgba(61, 61, 61, 0.708);">
-                                <div class="my-3">
-                                    <div>
-                                        <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
-                                            :mypfp="mypfp" :protocol="protocol.broca" :stats="spkStats"
-                                            @tosign="toSign = $event" :prop_contracts="contracts"
-                                            :accountinfo="accountinfo" :spkapi="spkapi" @done="getSapi"></contract-vue>
-                                    </div>
+                    </div>
+                    <!-- drive tab -->
+                    <div role="tabpanel" ref="driveTab" class="tab-pane fade" id="drive" aria-labelledby="drivetab">
+                        <div class="container card bg-img-none px-1 px-md-3 mb-4"
+                            style="background-color: rgba(61, 61, 61, 0.708);">
+                            <div class="my-3">
+                                <div>
+                                    <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
+                                        :mypfp="mypfp" :protocol="protocol.broca" :stats="spkStats"
+                                        @tosign="toSign = $event" :prop_contracts="contracts" :accountinfo="accountinfo"
+                                        :spkapi="spkapi" @done="getSapi"></contract-vue>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+    </div>
 
-            <!-- MODALS -->
-            <!-- Create User Modal -->
-            <div class="modal fade" id="signUpModal" tabindex="-1" aria-labelledby="signUpModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="signUpModalLabel">Join HIVE</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- MODALS -->
+    <!-- Create User Modal -->
+    <div class="modal fade" id="signUpModal" tabindex="-1" aria-labelledby="signUpModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="signUpModalLabel">Join HIVE</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <div class="position-relative has-validation">
+                            <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
+                                <i class="fa-solid fa-at fa-fw"></i>
+                            </span>
+                            <input autocapitalize="off" placeholder="username"
+                                class="px-4 form-control bg-dark border-dark text-info">
                         </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label">Username</label>
-                                <div class="position-relative has-validation">
-                                    <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
-                                        <i class="fa-solid fa-at fa-fw"></i>
-                                    </span>
-                                    <input autocapitalize="off" placeholder="username"
-                                        class="px-4 form-control bg-dark border-dark text-info">
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Password</label>
-                                <div class="position-relative has-validation">
-                                    <input class="form-control bg-dark border-dark">
-                                    <span class="position-absolute top-50 end-0 translate-middle-y pe-2 text-white">
-                                        <a class="text-white no-decoration" href=""><i
-                                                class="fa-solid fa-copy fa-fw"></i></a>
-                                    </span>
-                                </div>
-                                <div class="small text-muted text-center mt-1 mb-2">
-                                    You must save your password somewhere, it cannot be recovered.
-                                </div>
-                            </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <div class="position-relative has-validation">
+                            <input class="form-control bg-dark border-dark">
+                            <span class="position-absolute top-50 end-0 translate-middle-y pe-2 text-white">
+                                <a class="text-white no-decoration" href=""><i class="fa-solid fa-copy fa-fw"></i></a>
+                            </span>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary">Join</button>
+                        <div class="small text-muted text-center mt-1 mb-2">
+                            You must save your password somewhere, it cannot be recovered.
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!--NFT item detail modal-->
-            <div>
-                <nftdetail :account="account" :itemmodal="itemModal" :pfp="pfp" :chains="chains" :denoms="denoms"
-                    :inventory="true" @setpfp="setPFP($event)" @tosign="toSign = $event"
-                    @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
-            </div>
-
-
-            <!-- SPK Wallet Modal -->
-            <div class="modal modal-xl fade" id="spkWalletModal" tabindex="-1" aria-labelledby="spkWalletModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content" style="background-color: rgba(0, 0, 0, 0.8);">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="spkWalletModalLabel">SPK Testnet Wallet
-                            </h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body p-0 p-md-1">
-                            <spk-vue v-if="reloaded" node="false" :account="account" :test="true"
-                                @tosign="sendIt($event);log($event)" />
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-                        </div>
-                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary">Join</button>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Sponsored Contract -->
-            <div class="modal fade" id="sponsoredModal" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content bg-darker text-white">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Sponsored Contracts</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
+    <!--NFT item detail modal-->
+    <div>
+        <nftdetail :account="account" :itemmodal="itemModal" :pfp="pfp" :chains="chains" :denoms="denoms"
+            :inventory="true" @setpfp="setPFP($event)" @tosign="toSign = $event"
+            @detail="modalIndex('itemModal', $event);itemModal.hidden = false" />
+    </div>
 
-                        <div class="modal-body text-start">
-                            <div v-for="spon in services" v-if="reloaded">
-                                <button v-if="spon.provider" :disabled="spon.channel"
-                                    @click="petitionForContract(spon.provider)"
-                                    class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span
-                                        class="lead">@{{spon.provider}}</span><span
-                                        class="small text-warning">{{spon.memo}}</span></button>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary d-none"
-                                data-bs-dismiss="modal">Close</button>
 
-                        </div>
-
-                    </div>
+    <!-- SPK Wallet Modal -->
+    <div class="modal modal-xl fade" id="spkWalletModal" tabindex="-1" aria-labelledby="spkWalletModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: rgba(0, 0, 0, 0.8);">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="spkWalletModalLabel">SPK Testnet Wallet
+                    </h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 p-md-1">
+                    <spk-vue v-if="reloaded" node="false" :account="account" :test="true"
+                        @tosign="sendIt($event);log($event)" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!--blog detail view-->
-            <div>
-                <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect"
-                    :voteval="voteVal" :head_block="sstats.head_block" :broca_refill="sstats.broca_refill"
-                    :broca="spkapi.broca" :spk_power="spkapi.spk_power" :contracts="contracts" :extendcost="extendcost"
-                    @tosign="toSign = $event" @modalselect="modalSelect($event)" @reply="reply($event)"
-                    @vote="vote($event)"></detail-vue>
-            </div>
-            <!-- mint transfer modal -->
-            <div>
-                <fttransfer :account="account" :inventory="true" :qty="focusItem.qty" :denoms="denoms" :item="focusItem"
-                    :numitems="numitems" :activeindex="activeIndex" :mint="transferMint" @modal="injectIndex($event)"
-                    :icon="getIcon(focusItem.script)" :setdetail="chains[focusItem.token].sets[focusItem.set]"
-                    :api="chains[focusItem.token].api" :wrapped="getAttr(focusItem.script, 'wrapped')"
-                    :colors="getSetDetailsColors(focusItem.script)" @tosign="toSign = $event"
-                    :info="getSetDetailsInfo(focusItem.script)" />
-            </div>
+    <!-- Sponsored Contract -->
+    <div class="modal fade" id="sponsoredModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content bg-darker text-white">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sponsored Contracts</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
 
-            <!-- file detail modal -->
-            <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            ...
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary">Save changes</button>
-                        </div>
+                <div class="modal-body text-start">
+                    <div v-for="spon in services" v-if="reloaded">
+                        <button v-if="spon.provider" :disabled="spon.channel"
+                            @click="petitionForContract(spon.provider)"
+                            class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span
+                                class="lead">@{{spon.provider}}</span><span
+                                class="small text-warning">{{spon.memo}}</span></button>
                     </div>
                 </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary d-none" data-bs-dismiss="modal">Close</button>
+
+                </div>
+
             </div>
+        </div>
+    </div>
 
-            <mfi-vue api="https://spktest.dlux.io/spk" :accountinfo="accountinfo" bsid="buyTokenModal"
-                @tosign="toSign = $event" :hiveprice="hiveprice.hive.usd"></mfi-vue>
+    <!--blog detail view-->
+    <div>
+        <detail-vue :post="displayPost.item" :account="account" :modal="true" :post_select="postSelect"
+            :voteval="voteVal" :head_block="sstats.head_block" :broca_refill="sstats.broca_refill" :broca="spkapi.broca"
+            :spk_power="spkapi.spk_power" :contracts="contracts" :extendcost="extendcost" @tosign="toSign = $event"
+            @modalselect="modalSelect($event)" @reply="reply($event)" @vote="vote($event)"></detail-vue>
+    </div>
+    <!-- mint transfer modal -->
+    <div>
+        <fttransfer :account="account" :inventory="true" :qty="focusItem.qty" :denoms="denoms" :item="focusItem"
+            :numitems="numitems" :activeindex="activeIndex" :mint="transferMint" @modal="injectIndex($event)"
+            :icon="getIcon(focusItem.script)" :setdetail="chains[focusItem.token].sets[focusItem.set]"
+            :api="chains[focusItem.token].api" :wrapped="getAttr(focusItem.script, 'wrapped')"
+            :colors="getSetDetailsColors(focusItem.script)" @tosign="toSign = $event"
+            :info="getSetDetailsInfo(focusItem.script)" />
+    </div>
+
+    <!-- file detail modal -->
+    <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <mfi-vue api="https://spktest.dlux.io/spk" :accountinfo="accountinfo" bsid="buyTokenModal" @tosign="toSign = $event"
+        :hiveprice="hiveprice.hive.usd"></mfi-vue>
 
 
-        </main>
-        <!-- Footer -->
-        <foot-vue />
+    </main>
+    <!-- Footer -->
+    <foot-vue />
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
