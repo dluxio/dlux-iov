@@ -184,7 +184,7 @@
                     <div class="navbar-subbar-content">
                         <!-- post type dropdown -->
                         <div class="dropdown d-flex me-1">
-                            <a class="ms-auto me-auto btn btn-outline-light dropdown-toggle d-flex align-items-center"
+                            <a class="ms-auto me-auto btn btn-sm btn-secondary rounded-pill px-2 dropdown-toggle d-flex align-items-center"
                                 role="button" id="postdApp" data-bs-toggle="dropdown" aria-expanded="false">
                                 <span class="me-1">TYPE</span>
                                 <span class="mx-1 d-none d-lg-block"
@@ -195,11 +195,10 @@
                                         class="fa-solid fa-film fa-fw me-1"></i>Video</span>
                                 <span class="mx-1 d-none d-lg-block" v-if="postCustom_json.vrHash == 'blog'"><i
                                         class="fa-solid fa-book fa-fw me-1"></i>Blog</span>
-                                <!--
-                                    <span class="mx-1" v-if="postCustom_json.vrHash == 'dapp'"><i
-                                            class="fa-solid fa-mobile-screen-button fa-fw me-1"></i>New dApp</span>
-                                    <span class="mx-1" v-if="postCustom_json.vrHash == 'blog'"><i
-                                            class="fa-solid fa-shuffle fa-fw me-1"></i>Remix dApp</span>-->
+                                <span class="mx-1" v-if="postCustom_json.vrHash == 'dapp'"><i
+                                        class="fa-solid fa-mobile-screen-button fa-fw me-1"></i>New dApp</span>
+                                <span class="mx-1" v-if="postCustom_json.vrHash == 'remix'"><i
+                                        class="fa-solid fa-shuffle fa-fw me-1"></i>Remix dApp</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="postdApp">
                                 <li style="cursor: not-allowed;"><a class="dropdown-item disabled"
@@ -214,53 +213,54 @@
                                 <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'blog'}"
                                         role="button" @click="postCustom_json.vrHash = 'blog';types='img,vid'"><i
                                             class="fa-solid fa-book fa-fw me-2"></i>Blog</a></li>
-                                <!--
-                                    <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'dapp'}"
-                                            role="button"
-                                            @click="postCustom_json.vrHash = 'dapp';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'"><i
-                                                class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>New dApp</a>
-                                    </li>
-                                    <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'remix'}"
-                                            role="button"
-                                            @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'"><i
-                                                class="fa-solid fa-shuffle fa-fw me-2"></i>ReMix dApp</a></li>
-                                    -->
+
+                                <li style="cursor: not-allowed;"><a class="dropdown-item disabled"
+                                        :class="{active: postCustom_json.vrHash == 'dapp'}" role="button"
+                                        @click="postCustom_json.vrHash = 'dapp';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'"><i
+                                            class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>New dApp</a>
+                                </li>
+                                <li style="cursor: not-allowed;"><a class="dropdown-item disabled"
+                                        :class="{active: postCustom_json.vrHash == 'remix'}" role="button"
+                                        @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'"><i
+                                            class="fa-solid fa-shuffle fa-fw me-2"></i>ReMix dApp</a></li>
+
                             </ul>
                         </div>
                         <!-- blog buttons -->
-                        <div class="d-flex justify-content-center ms-auto"
-                            v-if="postCustom_json.vrHash == 'blog'">
-                            
-                           <div class="d-flex flex-wrap align-items-center ms-autojustify-content-center">
+                        <div class="d-flex justify-content-center ms-auto" v-if="postCustom_json.vrHash == 'blog'">
 
-							<div class="dropdown">
-								<button type="button" class="btn btn-outline-secondary dropdown-toggle mx-1"
-									data-bs-toggle="dropdown" aria-expanded="false">
-									<i class="fa-solid fa-fw fa-folder-open me-2"></i>Drafts
-								</button>
-								<ul class="dropdown-menu bg-black dropdown-menu-dark">
-									<li>
-										<h6 class="dropdown-header">LOCAL STORAGE</h6>
-									</li>
-									<li>
-										<hr class="dropdown-divider mt-0 mb-1">
-									</li>
-									<li class="text-center lead mb-2" v-if="!pendingTokens.length">Empty</li>
-									<li class="d-flex align-items-center justify-content-between"
-										v-for="pend of pendingTokens">
-										<a @click="loadNewToken(pend)" class="mx-1 dropdown-item rounded"
-											role="button">{{pend}}</a>
-										<a @click="deleteNewToken(pend)" class="mx-1 btn btn-sm btn-outline-danger"
-											role="button"><i class="fa-solid fa-trash-can fa-fw"></i></a>
-									</li>
-								</ul>
-							</div>
-							<button type="button" class="btn btn-outline-primary mx-1" @click="saveNewToken()"><i
-									class="fa-solid fa-fw fa-floppy-disk me-2" aria-hidden="true"></i>Save</button>
-							<button type="button" class="btn btn-outline-success mx-1"><i
-									class="fa-solid fa-fw fa-flag-checkered me-2"
-									aria-hidden="true"></i>Publish</button>
-						</div>
+                            <div class="d-flex flex-wrap align-items-center ms-autojustify-content-center">
+                                <button type="button" class="btn btn-sm btn-secondary rounded-pill px-2 mx-1"
+                                    @click="saveNewToken()"><i class="fa-solid fa-fw fa-floppy-disk me-2"
+                                        aria-hidden="true"></i>Save</button>
+                                <div class="dropdown">
+                                    <button type="button"
+                                        class="btn btn-sm btn-secondary dropdown-toggle rounded-pill px-2 mx-1"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-fw fa-folder-open me-2"></i>Open
+                                    </button>
+                                    <ul class="dropdown-menu bg-black dropdown-menu-dark">
+                                        <li>
+                                            <h6 class="dropdown-header">LOCAL STORAGE</h6>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider mt-0 mb-1">
+                                        </li>
+                                        <li class="text-center lead mb-2" v-if="!pendingTokens.length">Empty</li>
+                                        <li class="d-flex align-items-center justify-content-between"
+                                            v-for="pend of pendingTokens">
+                                            <a @click="loadNewToken(pend)" class="mx-1 dropdown-item rounded"
+                                                role="button">{{pend}}</a>
+                                            <a @click="deleteNewToken(pend)" class="mx-1 btn btn-sm btn-outline-danger"
+                                                role="button"><i class="fa-solid fa-trash-can fa-fw"></i></a>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <button type="button" class="btn btn-sm btn-secondary rounded-pill px-2 ms-1"
+                                    @click="saveNewToken()"><i class="fa-solid fa-fw fa-flag-checkered me-2"
+                                        aria-hidden="true"></i>Publish</button>
+                            </div>
                         </div>
                         <!-- 360 toggle buttons -->
                         <div class="d-flex justify-content-center ms-auto"
