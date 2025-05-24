@@ -161,8 +161,7 @@ export default {
                                 <div class="dropdown-divider">
                                 </div>
                                 <div class="dropdown-menu-item">
-                                    <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/broca" id="buylink"
-                                        target="_blank"><i class="fas fa-store fa-fw me-2"></i>Market</a>
+                                    <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/broca" id="buylink"><i class="fas fa-store fa-fw me-2"></i>Market</a>
                                 </div>
                             </ul>
                         </div>
@@ -398,8 +397,7 @@ export default {
                                 <div class="dropdown-divider">
                                 </div>
                                 <div class="dropdown-menu-item">
-                                    <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/spk" id="buylink"
-                                        target="_blank"><i class="fas fa-store fa-fw me-2"></i>Market</a>
+                                    <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/spk" id="buylink"><i class="fas fa-store fa-fw me-2"></i>Market</a>
                                 </div>
                             </ul>
                         </div>
@@ -662,8 +660,8 @@ export default {
                                 <div class="dropdown-divider">
                                 </div>
                                 <div class="dropdown-menu-item">
-                                    <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io/larynx"
-                                        id="buylink" target="_blank"><i class="fas fa-store fa-fw me-2"></i>Market</a>
+                                    <a class="dropdown-item" href="/dex/?api=https://spktest.dlux.io"
+                                        id="buylink"><i class="fas fa-store fa-fw me-2"></i>Market</a>
                                 </div>
                             </ul>
                         </div>
