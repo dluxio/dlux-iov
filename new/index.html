@@ -207,8 +207,9 @@
                                         role="button"
                                         @click="postCustom_json.vrHash = 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k';types='ts,img'"><i
                                             class="fa-solid fa-globe fa-fw me-2"></i>360 Image Gallery</a></li>
-                                <li style="cursor: not-allowed;"><a class="dropdown-item disabled" :class="{active: postCustom_json.vrHash == 'video'}"
-                                        role="button" @click="postCustom_json.vrHash = 'video';types='img,vid'"><i
+                                <li style="cursor: not-allowed;"><a class="dropdown-item disabled"
+                                        :class="{active: postCustom_json.vrHash == 'video'}" role="button"
+                                        @click="postCustom_json.vrHash = 'video';types='img,vid'"><i
                                             class="fa-solid fa-film fa-fw me-2"></i>Video</a></li>
                                 <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'blog'}"
                                         role="button" @click="postCustom_json.vrHash = 'blog';types='img,vid'"><i
@@ -494,12 +495,30 @@
             <!-- blog -->
             <div v-if="postCustom_json.vrHash == 'blog'" class="d-flex justify-content-center">
                 <!-- widgets -->
-                <div class=" p-1 d-flex flex-column justify-content-center rounded bg-img-none p-3 mt-3 mb-5" style="background-color: rgba(61, 61, 61, 0.71); max-width: 1200px;">
+                <div class=" p-1 d-flex flex-column justify-content-center rounded bg-img-none p-3 mt-3 mb-5"
+                    style="background-color: rgba(61, 61, 61, 0.71); max-width: 1200px;">
                     <!-- SPK Hosting Widget -->
+                    <div class="accordion  border-white-50 rounded" id="accordionExample">
+                        <div class="accordion-item bg-img-none bg-dark-1">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#ipfsDrive" aria-expanded="true" aria-controls="ipfsDrive">
+                                    <i class="fa-solid fa-hard-drive fa-fw me-2"></i>SPK Network IPFS Drive
+                                </button>
+                            </h2>
+                            <div id="ipfsDrive" class="accordion-collapse collapse show"
+                                data-bs-parent="#accordionExample">
+                                <div class="accordion-body">
+                                    <contract-vue :nodeview="false" :account="pageAccount" :mypfp="mypfp"
+                                        :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
+                                        :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
+                                        @done="getSapi"></contract-vue>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="mb-3">
-                        <contract-vue :nodeview="false" :account="pageAccount" :mypfp="mypfp" :protocol="protocol.broca"
-                            :stats="spkStats" @tosign="toSign = $event" :prop_contracts="contracts"
-                            :accountinfo="accountinfo" :spkapi="spkapi" @done="getSapi"></contract-vue>
+
                     </div>
                     <!-- Post Details Widget -->
                     <div class="">
