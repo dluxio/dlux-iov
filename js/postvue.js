@@ -7,7 +7,7 @@ export default {
     <!-- post builder -->
     <div class="accordion-body">
     <form onsubmit="return false;">
-        <div class="form-group mb-3">
+        <div class="d-none form-group mb-3">
             <label class="mb-1" for="username">Author</label>
             <div class="position-relative text-white-50">
                 <span class="position-absolute top-50 translate-middle-y ps-2">
@@ -19,7 +19,7 @@ export default {
             </div>
         </div>
         <div class="form-group mb-3">
-            <label class="mb-1" for="title">Title</label>
+            <label class="mb-1" for="title">Post Title</label>
             <input type="text"
                 class="form-control bg-dark border-dark text-white"
                 placeholder="Enter an attention grabbing title" v-model="postTitle"
@@ -44,9 +44,12 @@ export default {
         <button v-for="item in isntBenned" type="button"
             @click="addBen(item.account, item.weight)">Include Contract
             {{item.contract}}</button>
-        <div class="text-center">
+        <div class="d-flex align-items-center flex-wrap bg-dark rounded mt-3 p-3">
+          <p class="mb-0 lead">
+            Publish your blog post to the blockchain 
+          </p>
             <button ref="publishButton" type="button" @keyUp="buildTags()"
-                class="btn btn-primary" data-toggle="tooltip" data-placement="top"
+                class="ms-auto btn btn-primary" data-toggle="tooltip" data-placement="top"
                 title="Publish to HIVE" :disable="!validPost"
                 @click="post()"><i class="fa-solid fa-fw fa-flag-checkered me-2"></i>Publish</button>
         </div>

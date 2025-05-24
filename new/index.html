@@ -227,7 +227,41 @@
                                     -->
                             </ul>
                         </div>
+                        <!-- blog buttons -->
+                        <div class="d-flex justify-content-center ms-auto"
+                            v-if="postCustom_json.vrHash == 'blog'">
+                            
+                           <div class="d-flex flex-wrap align-items-center ms-autojustify-content-center">
 
+							<div class="dropdown">
+								<button type="button" class="btn btn-outline-secondary dropdown-toggle mx-1"
+									data-bs-toggle="dropdown" aria-expanded="false">
+									<i class="fa-solid fa-fw fa-folder-open me-2"></i>Drafts
+								</button>
+								<ul class="dropdown-menu bg-black dropdown-menu-dark">
+									<li>
+										<h6 class="dropdown-header">LOCAL STORAGE</h6>
+									</li>
+									<li>
+										<hr class="dropdown-divider mt-0 mb-1">
+									</li>
+									<li class="text-center lead mb-2" v-if="!pendingTokens.length">Empty</li>
+									<li class="d-flex align-items-center justify-content-between"
+										v-for="pend of pendingTokens">
+										<a @click="loadNewToken(pend)" class="mx-1 dropdown-item rounded"
+											role="button">{{pend}}</a>
+										<a @click="deleteNewToken(pend)" class="mx-1 btn btn-sm btn-outline-danger"
+											role="button"><i class="fa-solid fa-trash-can fa-fw"></i></a>
+									</li>
+								</ul>
+							</div>
+							<button type="button" class="btn btn-outline-primary mx-1" @click="saveNewToken()"><i
+									class="fa-solid fa-fw fa-floppy-disk me-2" aria-hidden="true"></i>Save</button>
+							<button type="button" class="btn btn-outline-success mx-1"><i
+									class="fa-solid fa-fw fa-flag-checkered me-2"
+									aria-hidden="true"></i>Publish</button>
+						</div>
+                        </div>
                         <!-- 360 toggle buttons -->
                         <div class="d-flex justify-content-center ms-auto"
                             v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'">

@@ -11,8 +11,8 @@ export default {
 <th></th>
 </tr>
 </thead>
-<tbody class="table-group-divider">
-<tr v-for="ben in bennies">
+<tbody class="border-0 border-top border-2">
+<tr v-for="ben in bennies" class="border-0 border-bottom">
 <td class="ps-0 w-50">@{{ben.account}}</td>
 <td class="text-center">
 <span class="pe-05"><button type="button" class="btn btn-sm btn-secondary" @click="decBen(ben)">-</button></span>
