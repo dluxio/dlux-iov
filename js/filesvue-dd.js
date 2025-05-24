@@ -14,15 +14,42 @@ export default {
     template: `
 <div ref="container" class="d-flex flex-grow-1 flex-column rounded" >
     <div class="pt-1">
-        <!-- ACTION BAR -->
-        <div class="d-flex border-bottom border-white-50">
-            <div class="d-flex mb-1">
-                    <!-- warning message -->
-                    <div v-if="usedBytes > availableBytes" class="mx-auto d-flex flex-column bg-dark border border-warning rounded p-2 text-center" role="alert" style="max-width: 600px">
-                        <p class="lead">Your files are larger than your drive size!</p>
-                        <p>File pinning contracts may not renew after the initial 30 days expires due to insufficient resource credits. Power Up BROCA to increase your storage.</p>
+        <div v-if="usedBytes > availableBytes">
+            <!-- warning message -->
+            <div class="alert alert-warning d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mb-3" role="alert">
+                <i class="fa-solid fa-triangle-exclamation fa-fw text-warning m-1 fs-1"></i>
+                <div class="d-flex flex-column">
+                    <p class="lead">You are out of storage space! Power Up BROCA to increase your storage. </p>
+                    <p class="text-white-50">File pinning contracts may not renew when the initial 30 days expires due to insufficient resource credits. Files that no longer have valid pinning contracts will be garbage collected and removed. <a class="text-info no-decoration" href="#" data-bs-toggle="modal" data-bs-target="#contractsModal">Power up Broca and turn on auto-renew</a> for files you want to keep online.</p>
+                </div>
+                <div class="position-relative">
+                    <div class="text-center position-relative">
+                        <div class="ratio ratio-1x1 wallet-token-img">
+                            <div
+                                class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
+                                <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1"
+                                    alt="BROCA Token Logo">
+                            </div>
+                        </div>
+                        <div class="position-absolute badge-type-offset top-0 start-0 translate-middle">
+                            <span
+                                class="badge badge-type bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                <i class="fa-solid fa-bolt-lightning"></i>
+                            </span>
+                        </div>
+                        <div class="position-absolute badge-perk-offset top-100 start-100 translate-middle">
+                            <span
+                                class="badge badge-perk bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                <i class="fa-solid fa-hard-drive"></i>
+                            </span>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        <!-- ACTION BAR -->
+        <div class="d-flex border-bottom border-white-50">
+            
             <div class="d-flex gap-2 flex-wrap align-items-start justify-content-center flex-grow-1 mb-1">
                 <div class="d-flex flex-grow-1 flex-column">
                     <!-- Search -->

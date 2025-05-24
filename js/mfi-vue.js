@@ -1,7 +1,7 @@
 export default {
   name: "MFI",
   template: `<!-- Get Token Modal-->
-            <div class="modal fade" :id="bsid" tabindex="-1" role="dialog" aria-labelledby="buyDluxModalTitle"
+            <div class="modal fade" :id="bsid" tabindex="-1" role="dialog" aria-labelledby="buyTokenModal"
                 aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered" role="document" :id="bsid + 'buy-modal'">
                     <div class="modal-content">
@@ -115,8 +115,12 @@ export default {
                                         </div>
                                         <div class="d-flex flex-row flex-fill mt-1 align-items-center">
                                             <div class="d-flex align-items-center">
-                                                <div class="circle2 d-flex align-items-center justify-content-around">
-                                                    <img src="/img/dlux-hive-logo-alpha.svg" width="70%">
+                                                <div class="circle2 border border-light d-flex align-items-center justify-content-around">
+                                                    <img v-if="protocol.TOKEN == 'DLUX'" src="/img/dlux-hive-logo-alpha.svg" width="70%">
+                                                    <img v-if="protocol.TOKEN == 'DUAT'" src="/img/ragnarok.png" width="70%">
+                                                    <img v-if="protocol.TOKEN == 'SPK'" src="/img/spknetwork/spk_icon.png" width="70%">
+                                                    <img v-if="protocol.TOKEN == 'LARYNX'" src="/img/spknetwork/larynx_icon.png" width="70%">
+                                                    <img v-if="protocol.TOKEN == 'BROCA'" src="/img/spknetwork/broca_icon.png" width="70%">
                                                 </div>
                                                 <h2 class="p-0 m-0 ms-2 font-weight-bold">
                                                     {{ protocol.TOKEN }}
