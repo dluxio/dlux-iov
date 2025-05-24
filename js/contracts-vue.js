@@ -147,7 +147,7 @@ export default {
 <div class="card-body p-0">
     <!-- registered -->
     <div v-if="saccountapi.pubKey != 'NA'">
-        <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-4 mb-3">
+        <div class="row row-cols-1 row-cols-lg-2 row-cols-xl-4">
             <!-- BROCA token widget -->
             <div class="order-lg-3 order-xl-0 mb-3 col spk-widg">
                 <div class="card-header d-flex align-items-center border-bottom border-1 px-2 py-1 fs-4"><i
@@ -257,6 +257,72 @@ export default {
                 </div>
             </div>
         </div>
+        <div class="mx-1">
+                        <!-- Broca Features -->
+                        <div class="card-group mb-3 rounded">
+                            <div class="card bg-img-none text-center">
+                                <div class="card-header bg-info-50 text-dark">
+                                    <h3 class="card-title mb-0">Storage Rate</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2 justify-content-center">
+                                        <h5 class="mb-0 card-title text-info">
+                                            {{fancyBytes((1000000 *
+                            1024) * (864000/144000))}}
+                                        </h5>
+                                        <h5 class="mb-0 mx-1 card-title text-info">/</h5>
+                                        <p class="mb-0 me-1 lead text-warning">1 BROCA</p>
+                                        <div class="d-flex align-items-center text-warning">
+                                            <span
+                                                class="badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                                                <i class="fa-solid fa-bolt-lightning"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <p class="card-text text-white-50">Current SPK Network IPFS Pinning Service size per
+                                        one BROCA Power
+                                    </p>
+                                </div>
+                                <div class="card-footer bg-card">
+                                    <small class="text-body-secondary">Pinned for 30 Days</small>
+                                </div>
+                            </div>
+                            <div class="card bg-img-none text-center">
+                                <div class="card-header bg-info-50 text-dark">
+                                    <h3 class="card-title mb-0">Upload Limit</h3>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title text-info">
+                                        {{fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) *
+                        1024)}}
+                                    </h5>
+                                    <p class="card-text text-white-50">Your available storage based on your current
+                                        BROCA Power
+                                        resources</p>
+                                </div>
+                                <div class="card-footer bg-card">
+                                    <small class="text-body-secondary">Regenerates Every 5 Days</small>
+                                </div>
+                            </div>
+                            <div class="card bg-img-none text-center">
+                                <div class="card-header bg-info-50 text-dark">
+                                    <h3 class="card-title mb-0">Drive Size</h3>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title text-info">
+                                        ~{{(fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) *
+                        6000))}}
+                                    </h5>
+                                    <p class="card-text text-white-50">Your perpetual storage when files are set to
+                                        autorenew at current
+                                        network rates</p>
+                                </div>
+                                <div class="card-footer bg-card">
+                                    <small class="text-body-secondary">Rolling Storage Over 30 Days</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
         <!-- no contracts -->
         <div v-show="!contracts.length">
             <div class="ms-auto me-auto d-flex justify-content-center">

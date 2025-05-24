@@ -16,31 +16,68 @@ export default {
     <div class="pt-1">
         <!-- ACTION BAR -->
         <div class="d-flex border-bottom border-white-50">
-            <div class="d-flex flex-wrap align-items-center justify-content-center mx-1 flex-grow-1">
-
-                <!-- Search -->
-                <div class="position-relative flex-grow-1 mb-1 me-1">
-                    <span class="position-absolute top-50 translate-middle-y ps-2"><i
-                            class="fa-solid fa-magnifying-glass fa-fw"></i></span>
-                    <input @keyup="render()" @change="render()" @search="render()"
-                        class="ps-4 form-control border-0 bg-dark text-info" type="search" placeholder="Search filename"
-                        v-model="filesSelect.search">
+            <div class="d-flex mb-1">
+                    <!-- warning message -->
+                    <div v-if="usedBytes > availableBytes" class="mx-auto d-flex flex-column bg-dark border border-warning rounded p-2 text-center" role="alert" style="max-width: 600px">
+                        <p class="lead">Your files are larger than your drive size!</p>
+                        <p>File pinning contracts may not renew after the initial 30 days expires due to insufficient resource credits. Power Up BROCA to increase your storage.</p>
+                    </div>
                 </div>
-
-                <!-- choices-js-->
-                <div class=" mb-1 mx-1" style="min-width: 300px !important;">
-
-                    <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_function="search" prop_type="tags"
-                        @data="handleTag($event)"></choices-vue>
+            <div class="d-flex gap-2 flex-wrap align-items-start justify-content-center flex-grow-1 mb-1">
+                <div class="d-flex flex-grow-1 flex-column">
+                    <!-- Search -->
+                    <div class="position-relative flex-grow-1 mb-1" >
+                        <span class="position-absolute top-50 translate-middle-y ps-2"><i
+                                class="fa-solid fa-magnifying-glass fa-fw"></i></span>
+                        <input @keyup="render()" @change="render()" @search="render()"
+                            class="ps-4 pe-4 rounded-pill form-control border-0 bg-dark text-info" type="search" placeholder="Search in Drive"
+                            v-model="filesSelect.search" style="height: 50px;">
+                        <a class="position-absolute top-50 end-0 translate-middle-y pe-2" data-bs-toggle="collapse" href="#choicesCollapse" role="button" aria-expanded="false" aria-controls="choicesCollapse">
+                            <i class="fa-solid fa-sliders fa-fw"></i>
+                        </a>
+                    </div>
+                    <div class="collapse" id="choicesCollapse">
+                            <div class="d-flex gap-2 flex-grow-1 flex-wrap">
+                                <!-- choices-js-->
+                                <div class="mb-1 flex-fill">
+                                    <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_function="search" prop_type="tags"
+                                        @data="handleTag($event)"></choices-vue>
+                                </div>
+                                <div class="mb-1 flex-fill">
+                                    <choices-vue ref="select-label" :prop_selections="filterLabels" prop_function="search"
+                                        prop_type="labels" @data="handleLabel($event)"></choices-vue>
+                                </div>
+                            </div>
+                    </div>
                 </div>
-                <div class="mb-1 mx-1" style="min-width: 300px !important;">
-
-                    <choices-vue ref="select-label" :prop_selections="filterLabels" prop_function="search"
-                        prop_type="labels" @data="handleLabel($event)"></choices-vue>
+                
+                <div class="d-flex mb-1 flex-wrap align-items-center">
+                    <!-- storage widget -->
+                    <a class="ms-auto d-flex align-items-center btn btn-dark" data-bs-toggle="modal"
+                        data-bs-target="#contractsModal">
+                        <div class="spk-widg">
+                            <div class="d-flex flex-column">
+                                <div class="d-none mb-1 fw-light text-center" style="font-size: 1.1rem !important;"
+                                    v-if="saccountapi">{{fancyBytes(usedBytes)}} of {{fancyBytes(availableBytes)}} used
+                                </div>
+                                <div class="progress bg-dark-4" role="progressbar" aria-label="Basic example"
+                                    aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="min-width: 100px;">
+                                    <div class="progress-bar"
+                                        :style="'width:' + (usedBytes && availableBytes ? (usedBytes/availableBytes)*100 : 0) + '%;'">
+                                        {{formatNumber((usedBytes && availableBytes ? (usedBytes/availableBytes)*100 :
+                                        0),'2','.',',')}}%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <i class="fa-solid fa-angle-down fa-fw ms-2"></i>
+                        </div>
+                    </a>
                 </div>
+            </div>
 
                 <!-- Sort -->
-                <div class="dropdown ms-1 mb-1">
+                <div class="d-none dropdown ms-1 mb-1">
                     <button class="btn btn-dark w-100"
                         style="padding-top: 11px !important; padding-bottom: 11px !important;" type="button"
                         data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-sort fa-fw ms-1"></i>

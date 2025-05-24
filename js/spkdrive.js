@@ -166,111 +166,7 @@ export default {
         </div>
         <!-- file system view -->
         <div v-if="!cc">
-            <div class="d-flex flex-column">
-                <div class="d-flex flex-wrap align-items-center mb-3">
-                    <div class="hero-subtitle d-none align-items-top me-auto">SPK Network IPFS Drive</div>
-                    <!-- storage widget -->
-                    <a class="d-flex align-items-center no-decoration" data-bs-toggle="collapse" href="#brocaRates" role="button"
-                        aria-expanded="false" aria-controls="brocaRates">
-                        <div class="spk-widg">
-                            <div class="d-flex flex-column card-body px-2 py-1">
-                                <div class="mb-1 fw-light text-center" style="font-size: 1.1rem !important;"
-                                    v-if="saccountapi">{{fancyBytes(usedBytes)}} of {{fancyBytes(availableBytes)}} used
-                                </div>
-                                <div class="progress mb-1" role="progressbar" aria-label="Basic example"
-                                    aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                                    <div class="progress-bar"
-                                        :style="'width:' + (usedBytes && availableBytes ? (usedBytes/availableBytes)*100 : 0) + '%;'">
-                                        {{formatNumber((usedBytes && availableBytes ? (usedBytes/availableBytes)*100 :
-                                        0),'2','.',',')}}%</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                        <i class="fa-solid fa-angle-down fa-fw fs-3 ms-1"></i>
-                        </div>
-                    </a>
-                    <!-- warning message -->
-                    <div v-if="usedBytes > availableBytes" class="mx-auto d-flex flex-column bg-dark border border-warning rounded p-2 text-center" role="alert" style="max-width: 600px">
-                        <p class="lead">Your files are larger than your drive size!</p>
-                        <p>File pinning contracts may not renew after the initial 30 days expires due to insufficient resource credits. Power Up BROCA to increase your storage.</p>
-                    </div>
-                    <!-- contract modal button -->
-                    <button class="ms-auto btn btn-outline-light rounded-pill" data-bs-toggle="modal"
-                        data-bs-target="#contractsModal">
-                        <i class="fa-solid fa-magnifying-glass fa-fw me-2"></i>{{contracts.length}}
-                        Contract{{contracts.length !== 1 ? 's' : ''}}
-                    </button>
-                </div>
-                <div class="collapse" id="brocaRates">
-                    <div class="">
-                        <!-- Broca Features -->
-                        <div class="card-group mb-3 mt-2 rounded">
-                            <div class="card bg-img-none text-center">
-                                <div class="card-header bg-info-50 text-dark">
-                                    <h3 class="card-title mb-0">Storage Rate</h3>
-                                </div>
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center mb-2 justify-content-center">
-                                        <h5 class="mb-0 card-title text-info">
-                                            {{fancyBytes((1000000 *
-                            1024) * (864000/144000))}}
-                                        </h5>
-                                        <h5 class="mb-0 mx-1 card-title text-info">/</h5>
-                                        <p class="mb-0 me-1 lead text-warning">1 BROCA</p>
-                                        <div class="d-flex align-items-center text-warning">
-                                            <span
-                                                class="badge badge-type-append bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
-                                                <i class="fa-solid fa-bolt-lightning"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <p class="card-text text-white-50">Current SPK Network IPFS Pinning Service size per
-                                        one BROCA Power
-                                    </p>
-                                </div>
-                                <div class="card-footer bg-card">
-                                    <small class="text-body-secondary">Pinned for 30 Days</small>
-                                </div>
-                            </div>
-                            <div class="card bg-img-none text-center">
-                                <div class="card-header bg-info-50 text-dark">
-                                    <h3 class="card-title mb-0">Upload Limit</h3>
-                                </div>
-                                <div class="card-body">
-                                    <h5 class="card-title text-info">
-                                        {{fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) *
-                        1024)}}
-                                    </h5>
-                                    <p class="card-text text-white-50">Your available storage based on your current
-                                        BROCA Power
-                                        resources</p>
-                                </div>
-                                <div class="card-footer bg-card">
-                                    <small class="text-body-secondary">Regenerates Every 5 Days</small>
-                                </div>
-                            </div>
-                            <div class="card bg-img-none text-center">
-                                <div class="card-header bg-info-50 text-dark">
-                                    <h3 class="card-title mb-0">Drive Size</h3>
-                                </div>
-                                <div class="card-body">
-                                    <h5 class="card-title text-info">
-                                        ~{{(fancyBytes((Number(broca_calc(saccountapi.broca)) || 0) *
-                        6000))}}
-                                    </h5>
-                                    <p class="card-text text-white-50">Your perpetual storage when files are set to
-                                        autorenew at current
-                                        network rates</p>
-                                </div>
-                                <div class="card-footer bg-card">
-                                    <small class="text-body-secondary">Rolling Storage Over 30 Days</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            
 
             <!-- no files -->
             <div v-show="!contracts.length">
@@ -316,9 +212,9 @@ export default {
         <div class="modal fade" id="contractsModal" tabindex="-1" role="dialog" aria-labelledby="contractsModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
-                <div class="modal-content bg-darker text-white">
+                <div class="modal-content text-white bg-dark-80">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="contractsModalLabel">Contracts</h5>
+                        <h5 class="modal-title" id="contractsModalLabel">SPK Network</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-0">

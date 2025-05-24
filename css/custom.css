@@ -12395,6 +12395,10 @@ body {
   text-decoration: none;
 }
 
+.bg-dark-80 {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
 .card-bg {
   border: none;
   box-shadow: inset 1px 1px rgba(255, 255, 255, 0.2), inset -1px -1px rgba(255, 255, 255, 0.1), 1px 3px 24px -1px rgba(0, 0, 0, 0.15);
