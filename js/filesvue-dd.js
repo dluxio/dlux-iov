@@ -1658,6 +1658,7 @@ export default {
         dropOnFolder(event, folder) {
             event.preventDefault();
             event.stopPropagation();
+            if(folder.path == 'Trash')return
             const targetPath = folder.path;
 
             // Check for external files first
