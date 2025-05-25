@@ -1658,7 +1658,6 @@ export default {
         dropOnFolder(event, folder) {
             event.preventDefault();
             event.stopPropagation();
-            if(folder.path == 'Trash')return
             const targetPath = folder.path;
 
             // Check for external files first
@@ -3235,6 +3234,10 @@ export default {
 
             // Check for external files first
             if (event.dataTransfer.items && event.dataTransfer.items.length > 0) {
+                if(targetPath == 'Trash'){
+                    console.log('Dropped on trash')
+                    return
+                }
                 console.log('Dropped on background - event.dataTransfer.items:', event.dataTransfer.items);
                 this.processDroppedItems(event.dataTransfer.items).then(processedFiles => {
                     if (processedFiles.length > 0) {
