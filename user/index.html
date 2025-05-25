@@ -3143,7 +3143,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-0 p-md-1">
-                    <spk-vue v-if="reloaded" node="false" :account="pageAccount" :me="pageAccount == account" :test="true"
+                    <spk-vue v-if="reloaded" node="false" :account="account" :test="true"
                         @tosign="sendIt($event);log($event)" />
                 </div>
                 <div class="modal-footer">
