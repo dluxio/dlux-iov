@@ -3222,19 +3222,9 @@ export default {
         },
         dragOverBackground(event) {
             event.preventDefault();
-            const filesDiv = event.currentTarget; // Assuming this is the .files div
-            const specificTargetActive = this.$refs.container?.querySelector('.file-grid.drag-over-active, .folder-row.drag-over-active, .breadcrumb-item.drag-over-active');
-
-            if (!specificTargetActive) {
-                if (!filesDiv.classList.contains('drag-over-active')) {
-                    filesDiv.classList.add('drag-over-active');
-                }
-            } else {
-                // If a specific target is active, ensure background is not
-                if (filesDiv.classList.contains('drag-over-active')) {
-                    filesDiv.classList.remove('drag-over-active');
-                }
-            }
+            this.clearAllDragHighlights();
+            // Only highlight background if the event is directly on it, not bubbling from a child
+            event.currentTarget.classList.add('drag-over-active');
         },
         dropOnBackground(event) {
             event.preventDefault();
@@ -3323,25 +3313,13 @@ export default {
             // Rebuild and render
             this.buildFolderTrees();
             this.render();
+            this.clearAllDragHighlights(); // Ensure cleanup on drop
         },
         handleDragEnterFolder(event, folder) {
-            event.preventDefault();
-            event.stopPropagation(); // Important: stop event from bubbling to dragOverBackground
+            event.preventDefault(); // Still needed for dnd
+            // event.stopPropagation(); // Not strictly needed here if dragover handles highlight exclusively
 
-            // Clear highlight from background and other items
-            const filesDiv = this.$refs.container?.querySelector('.files');
-            if (filesDiv && filesDiv.classList.contains('drag-over-active')) {
-                filesDiv.classList.remove('drag-over-active');
-            }
-            this.$refs.container?.querySelectorAll('.file-grid.drag-over-active, .folder-row.drag-over-active, .breadcrumb-item.drag-over-active').forEach(el => {
-                if (el !== event.currentTarget) {
-                    el.classList.remove('drag-over-active');
-                }
-            });
-
-            // Add highlight to current folder
-            event.currentTarget.classList.add('drag-over-active');
-
+            // Highlight is now handled by dragOverFolder
             // Original hover-to-navigate logic
             clearTimeout(this.dragHoverTimeout);
             this.dragHoverTargetPath = folder.path;
@@ -3355,23 +3333,10 @@ export default {
             }, 1000); // 1 second delay
         },
         handleDragEnterBreadcrumb(event, path) {
-            event.preventDefault();
-            event.stopPropagation(); // Important: stop event from bubbling to dragOverBackground
-
-            // Clear highlight from background and other items
-            const filesDiv = this.$refs.container?.querySelector('.files');
-            if (filesDiv && filesDiv.classList.contains('drag-over-active')) {
-                filesDiv.classList.remove('drag-over-active');
-            }
-            this.$refs.container?.querySelectorAll('.file-grid.drag-over-active, .folder-row.drag-over-active, .breadcrumb-item.drag-over-active').forEach(el => {
-                if (el !== event.currentTarget) {
-                    el.classList.remove('drag-over-active');
-                }
-            });
+            event.preventDefault(); // Still needed for dnd
+            // event.stopPropagation(); // Not strictly needed here if dragover handles highlight exclusively
             
-            // Add highlight to current breadcrumb item
-            event.currentTarget.classList.add('drag-over-active');
-
+            // Highlight is now handled by dragOverBreadcrumb
             // Original hover-to-navigate logic
             clearTimeout(this.dragHoverTimeout);
             this.dragHoverTargetPath = path;
@@ -3763,15 +3728,16 @@ export default {
                 }
             }, 0);
         },
-        dragOverFolder(event) {
+        dragOverFolder(event, folder) {
             event.preventDefault();
+            event.stopPropagation(); // Prevent background from highlighting
+            this.clearAllDragHighlights();
+            event.currentTarget.classList.add('drag-over-active');
         },
         dropOnFolder(event, folder) {
             event.preventDefault();
             event.stopPropagation();
-            if (event.currentTarget.classList.contains('drag-over-active')) {
-                event.currentTarget.classList.remove('drag-over-active');
-            }
+            this.clearAllDragHighlights(); // Ensure cleanup on drop
             let itemIds = [];
 
             // Check for multiple items being dragged
@@ -3980,15 +3946,15 @@ export default {
                 this.render();
             });
         },
-        dragOverBreadcrumb(event) {
+        dragOverBreadcrumb(event, path) {
             event.preventDefault();
+            event.stopPropagation(); // Prevent background from highlighting
+            this.clearAllDragHighlights();
+            event.currentTarget.classList.add('drag-over-active');
         },
         dropOnBreadcrumb(path, event) {
             event.preventDefault();
-            // event.stopPropagation(); // Not strictly necessary here but good practice if there were nested dropzones
-            if (event.currentTarget.classList.contains('drag-over-active')) {
-                event.currentTarget.classList.remove('drag-over-active');
-            }
+            this.clearAllDragHighlights(); // Ensure cleanup on drop
             let itemIds = [];
 
             // Check for multiple items
@@ -4807,6 +4773,20 @@ export default {
             activeElements?.forEach(el => el.classList.remove('drag-over-active'));
             console.log('Cleaned up all drag-over-active on global dragend');
         },
+        clearAllDragHighlights() {
+            this.$refs.container?.querySelectorAll('.drag-over-active').forEach(el => el.classList.remove('drag-over-active'));
+            const filesDiv = this.$refs.container?.querySelector('.files');
+            if(filesDiv?.classList.contains('drag-over-active')) {
+                filesDiv.classList.remove('drag-over-active');
+            }
+        },
+        handleComponentDragLeave(event) {
+            // If relatedTarget is null, it means we left the window or a non-browser area
+            if (!event.relatedTarget || event.relatedTarget.nodeName === 'HTML') {
+                this.clearAllDragHighlights();
+                console.log('Drag left component/window, cleared all highlights');
+            }
+        },
     },
     computed: {
         hasFiles() {
@@ -4998,10 +4978,18 @@ export default {
             }
         });
         document.documentElement.addEventListener('dragend', this.handleGlobalDragEnd);
+        // Add component-level dragleave listener
+        if (this.$refs.container) {
+            this.$refs.container.addEventListener('dragleave', this.handleComponentDragLeave);
+        }
     },
     beforeUnmount() {
         // Clean up event listeners
         window.removeEventListener('mouseup', this.endSelectionBox);
         document.documentElement.removeEventListener('dragend', this.handleGlobalDragEnd);
+        // Remove component-level dragleave listener
+        if (this.$refs.container) {
+            this.$refs.container.removeEventListener('dragleave', this.handleComponentDragLeave);
+        }
     }
 };
