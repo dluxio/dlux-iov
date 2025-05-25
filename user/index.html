@@ -1691,7 +1691,7 @@
                                             <!-- spk test wallet -->
                                             <div role="tabpanel" class="tab-pane show active" id="spk-test"
                                                 aria-labelledby="spktesttab">
-                                                <spk-vue v-if="reloaded" node="false" :account="account" :test="true"
+                                                <spk-vue v-if="reloaded" node="false" :account="pageAccount" :me="pageAccount == account" :test="true"
                                                     @tosign="sendIt($event);log($event)" />
                                             </div>
                                         </div>
