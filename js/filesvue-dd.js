@@ -14,7 +14,7 @@ export default {
     template: `
 <div ref="container" class="d-flex flex-grow-1 flex-column rounded" >
     <div class="pt-1">
-        <div v-if="usedBytes > availableBytes">
+        <div v-if="computedData.usedBytes > computedData.availableBytes">
             <!-- warning message -->
             <div class="alert alert-warning d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mb-3" role="alert">
                 <i class="fa-solid fa-triangle-exclamation fa-fw text-warning m-1 fs-1"></i>
@@ -85,13 +85,13 @@ export default {
                         <div class="spk-widg">
                             <div class="d-flex flex-column">
                                 <div class="d-none mb-1 fw-light text-center" style="font-size: 1.1rem !important;"
-                                    v-if="saccountapi">{{fancyBytes(usedBytes)}} of {{fancyBytes(availableBytes)}} used
+                                    v-if="saccountapi">{{fancyBytes(computedData.usedBytes)}} of {{fancyBytes(computedData.availableBytes)}} used
                                 </div>
                                 <div class="progress bg-dark-4" role="progressbar" aria-label="Basic example"
                                     aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="min-width: 100px;">
                                     <div class="progress-bar"
-                                        :style="'width:' + (usedBytes && availableBytes ? (usedBytes/availableBytes)*100 : 0) + '%;'">
-                                        {{formatNumber((usedBytes && availableBytes ? (usedBytes/availableBytes)*100 :
+                                        :style="'width:' + (computedData.usedBytes && computedData.availableBytes ? (computedData.usedBytes/computedData.availableBytes)*100 : 0) + '%;'">
+                                        {{formatNumber((computedData.usedBytes && computedData.availableBytes ? (computedData.usedBytes/computedData.availableBytes)*100 :
                                         0),'2','.',',')}}%</div>
                                 </div>
                             </div>
@@ -855,6 +855,15 @@ export default {
         },
         cc: {
             default: false,
+        },
+        computedData: {
+            type: Object,
+            default: function() {
+                return {
+                    usedBytes: 0,
+                    availableBytes: 0,
+                };
+            },
         },
         broca: {
             type: String,

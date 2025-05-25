@@ -201,7 +201,7 @@ export default {
             </div>
             <!-- has files -->
             <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center">
-                <files-vue ref="filesVue" :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" 
+                <files-vue ref="filesVue" :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" :computed-data="{usedBytes: usedBytes, availableBytes: availableBytes}"
                     @refresh-contracts="refreshContracts" 
                     @tosign="sendIt($event)" :signedtx="signedtx"></files-vue>
             </div>
