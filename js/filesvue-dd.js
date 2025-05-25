@@ -3222,9 +3222,17 @@ export default {
         },
         dragOverBackground(event) {
             event.preventDefault();
+            // Add a class to the drop zone for visual feedback
+            if (event.currentTarget.classList.contains('files')) {
+                event.currentTarget.classList.add('drag-over-active');
+            }
         },
         dropOnBackground(event) {
             event.preventDefault();
+            // Remove the visual feedback class
+            if (event.currentTarget.classList.contains('files')) {
+                event.currentTarget.classList.remove('drag-over-active');
+            }
             const targetPath = this.currentFolderPath; // Target is the current folder when dropping on background
 
             // Check for external files first
@@ -3343,6 +3351,11 @@ export default {
                 clearTimeout(this.dragHoverTimeout);
                 console.log('Truly leaving hover target:', this.dragHoverTargetPath);
                 this.dragHoverTargetPath = null;
+
+                // Remove visual feedback class if leaving the main files drop zone
+                if (currentTarget.classList.contains('files')) {
+                    currentTarget.classList.remove('drag-over-active');
+                }
             } else {
                 console.log('Moving within the same element, not clearing timeout');
             }
