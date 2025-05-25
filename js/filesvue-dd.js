@@ -374,11 +374,11 @@ export default {
             <div class="d-flex flex-grow-1 files" @contextmenu.prevent="showContextMenu($event, 'background', null)"
                 @dragover="dragOverBackground($event)" @drop="dropOnBackground($event)"
                 @mousedown="startSelectionBox($event)" @mousemove="updateSelectionBox($event)"
-                @mouseup="endSelectionBox" style="position: relative; min-height: 200px;">
+                @mouseup="endSelectionBox" 
+                style="background-color:rgba(0, 0, 0, 0.2); position: relative; min-height: 200px; border: 2px solid rgba(0, 0, 0, 0); border-radius: 8px; padding: 10px;">
                 <!-- Remove the template-based selection box overlay -->
 
-                <div v-if="viewOpts.fileView === 'grid'" class="d-flex flex-grow-1 flex-wrap"
-                    style="background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px;">
+                <div v-if="viewOpts.fileView === 'grid'" class="d-flex flex-grow-1 flex-wrap">
                     <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="folder.path"
                         class="file-grid m-2 p-2 rounded text-center"
                         :class="{ 'bg-dark': !isFolderSelected(folder), 'bg-primary': isFolderSelected(folder) }"

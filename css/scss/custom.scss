@@ -26,18 +26,7 @@ body {
   background-color: rgba(13, 110, 253, 0.1) !important; /* Light blue background */
   border: 2px dashed #0d6efd !important; /* Dashed blue border */
   box-shadow: 0 0 10px rgba(13, 110, 253, 0.5) !important; /* Optional: a subtle glow */
-}
-
-/* Optional: specific tweaks if needed, for example, if padding causes issues on some elements */
-.breadcrumb-item.drag-over-active {
-  /* You might want slightly different padding or border radius for breadcrumbs */
-  border-radius: 4px; /* Ensure it matches the breadcrumb's original style if any */
-}
-
-.file-grid.drag-over-active {
-    transform: translateY(-3px) scale(1.03) !important; /* Add a slight lift and scale */
-    box-shadow: 0 6px 12px rgba(0,0,0,0.4) !important; /* Enhance shadow */
-    border-color: #0d6efd !important; /* Ensure border color is prominent */
+  border-radius: 8px;
 }
 
 .folder-row.drag-over-active td { /* Target table cells for list view folders */

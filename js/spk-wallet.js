@@ -133,7 +133,7 @@ export default {
                             <i class="fa-solid fa-atom"></i>
                         </span>
                     </h5>
-                    <div class="btn-group" role="group" aria-label="SPK Actions">
+                    <div v-if="me" class="btn-group" role="group" aria-label="BROCA Actions">
                         <button type="button" class="btn btn-light p-0">
                             <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="send"
                                 :mypfp="mypfp" token="liq_broca" :test="test" :tokenuser="saccountapi"
@@ -145,7 +145,7 @@ export default {
                             </modal-vue>
                         </button>
                         <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
-                        <div class="btn-group" role="group" v-if="me">
+                        <div class="btn-group" role="group">
                             <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
@@ -218,7 +218,7 @@ export default {
                             <i class="fa-solid fa-bolt-lightning"></i>
                         </span>
                     </h5>
-                    <div class="btn-group" role="group" aria-label="Power Actions">
+                    <div  v-if="me" class="btn-group" role="group" aria-label="Power Actions">
                         <button type="button" class="btn btn-light p-0">
                             <!-- register -->
                             <div class="px-2 text-nowrap" v-if="saccountapi.pubKey == 'NA'" @click="updatePubkey">
@@ -236,7 +236,7 @@ export default {
                             </div>
                         </button>
                         <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
-                        <div class="btn-group" role="group" v-if="me">
+                        <div class="btn-group" role="group">
                             <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
@@ -370,7 +370,7 @@ export default {
                             <i class="fa-solid fa-atom"></i>
                         </span>
                     </h5>
-                    <div class="btn-group" role="group" aria-label="SPK Actions">
+                    <div v-if="me" class="btn-group" role="group" aria-label="SPK Actions">
                         <button type="button" class="btn btn-light p-0">
                             <modal-vue v-if="protocolspk.head_block && saccountapi.head_block" func="send"
                                 :mypfp="mypfp" token="spk" :test="test" :tokenuser="saccountapi" :account="account"
@@ -381,7 +381,7 @@ export default {
                             </modal-vue>
                         </button>
                         <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
-                        <div class="btn-group" role="group" v-if="me">
+                        <div class="btn-group" role="group">
                             <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
@@ -447,14 +447,14 @@ export default {
                             <i class="fa-solid fa-bolt-lightning"></i>
                         </span>
                     </h5>
-                    <div class="btn-group" role="group" aria-label="Power Actions">
+                    <div  v-if="me" class="btn-group" role="group" aria-label="Power Actions">
                         <!-- vote btn -->
                         <button class="dropdown text-nowrap btn btn-light" href="#" role="button"
                             id="settingsDropdownBtn" data-bs-toggle="collapse" data-bs-target="#collapseVote"
                             aria-expanded="false" aria-controls="collapseVote">
                             <i class="me-2 fa-solid fa-person-booth"></i>Vote</button>
                         <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
-                        <div class="btn-group" role="group" v-if="me">
+                        <div class="btn-group" role="group">
                             <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
@@ -608,7 +608,7 @@ export default {
                             <i class="fa-solid fa-atom"></i>
                         </span>
                     </h5>
-                    <div class="btn-group" role="group" aria-label="LARYNX Actions">
+                    <div v-if="me" class="btn-group" role="group" aria-label="LARYNX Actions">
                         <button type="button" class="btn btn-light p-0">
                             <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" func="send"
                                 :mypfp="mypfp" :test="test" :tokenuser="saccountapi" :account="account"
@@ -617,7 +617,7 @@ export default {
                             </modal-vue>
                         </button>
                         <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
-                        <div class="btn-group" role="group" v-if="me">
+                        <div class="btn-group" role="group">
                             <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false"></button>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black dropdown-menu-end text-white"
@@ -713,7 +713,7 @@ export default {
                             <i class="fa-solid fa-bolt-lightning"></i>
                         </span>
                     </h5>
-                    <div class="btn-group" role="group" aria-label="LARYNX Actions">
+                    <div v-if="me" class="btn-group" role="group" aria-label="LARYNX Actions">
                         <button class="btn btn-light p-0" type="button">
                             <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" func="powdel"
                                 :test="test" :tokenuser="saccountapi" :account="account" :tokenprotocol="protocollarynx"
@@ -723,7 +723,7 @@ export default {
                             </modal-vue>
                         </button>
                         <button type="button" class="btn btn-dark ms-0 me-0 ps-0 pe-0" disabled></button>
-                        <div class="btn-group" role="group" v-if="me">
+                        <div class="btn-group" role="group">
                             <button id="btnGroupDrop1" type="button" class="btn btn-light dropdown-toggle"
                                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
 

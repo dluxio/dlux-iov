@@ -197,7 +197,7 @@ export default {
                             }}%</div>
                     </div>
                     <a href="#" data-bs-toggle="modal" data-bs-target="#buyTokenModal"
-                        class="text-center text-primary">Get more power</a>
+                        class="d-none text-center text-primary">Get more power</a>
                 </div>
             </div>
             <!-- storage widget -->
@@ -215,7 +215,7 @@ export default {
                             0),'2','.',',')}}%</div>
                     </div>
                     <a href="#" data-bs-toggle="modal" data-bs-target="#buyTokenModal"
-                        class="text-center text-primary">Get more storage</a>
+                        class="d-none text-center text-primary">Get more storage</a>
                 </div>
             </div>
             <!-- contract widget -->
