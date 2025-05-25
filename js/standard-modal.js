@@ -131,7 +131,7 @@ export default {
 
     },
     prefillToField() {
-      if (typeof this.to_account == "object" && (this.func === 'powdel' || this.func === 'powdn' || this.func === 'govdn')) {
+      if (typeof this.to_account == "object" && (this.func === 'powdel' || this.func === 'powdn' || this.func === 'govdn' || this.func === 'send')) {
         for (var key in this.to_account) {
           this.form[key] = this.to_account[key]
           this.validateField(key)
