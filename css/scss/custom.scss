@@ -19,9 +19,29 @@
 body {
   background-color: $dark-2;
 }
-.files.drag-over-active {
-  background-color: rgba(0, 123, 255, 0.1) !important; /* A light blue, adjust as needed */
-  border: 2px dashed #007bff !important; /* A dashed blue border */
+.files.drag-over-active,
+.file-grid.drag-over-active,
+.folder-row.drag-over-active, /* For list view folders */
+.breadcrumb-item.drag-over-active {
+  background-color: rgba(13, 110, 253, 0.1) !important; /* Light blue background */
+  border: 2px dashed #0d6efd !important; /* Dashed blue border */
+  box-shadow: 0 0 10px rgba(13, 110, 253, 0.5) !important; /* Optional: a subtle glow */
+}
+
+/* Optional: specific tweaks if needed, for example, if padding causes issues on some elements */
+.breadcrumb-item.drag-over-active {
+  /* You might want slightly different padding or border radius for breadcrumbs */
+  border-radius: 4px; /* Ensure it matches the breadcrumb's original style if any */
+}
+
+.file-grid.drag-over-active {
+    transform: translateY(-3px) scale(1.03) !important; /* Add a slight lift and scale */
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4) !important; /* Enhance shadow */
+    border-color: #0d6efd !important; /* Ensure border color is prominent */
+}
+
+.folder-row.drag-over-active td { /* Target table cells for list view folders */
+    background-color: rgba(13, 110, 253, 0.15) !important; /* Slightly more pronounced for rows */
 }
 #app {
   overflow: visible;

@@ -3222,15 +3222,23 @@ export default {
         },
         dragOverBackground(event) {
             event.preventDefault();
-            // Add a class to the drop zone for visual feedback
-            if (event.currentTarget.classList.contains('files')) {
-                event.currentTarget.classList.add('drag-over-active');
+            const filesDiv = event.currentTarget; // Assuming this is the .files div
+            const specificTargetActive = this.$refs.container?.querySelector('.file-grid.drag-over-active, .folder-row.drag-over-active, .breadcrumb-item.drag-over-active');
+
+            if (!specificTargetActive) {
+                if (!filesDiv.classList.contains('drag-over-active')) {
+                    filesDiv.classList.add('drag-over-active');
+                }
+            } else {
+                // If a specific target is active, ensure background is not
+                if (filesDiv.classList.contains('drag-over-active')) {
+                    filesDiv.classList.remove('drag-over-active');
+                }
             }
         },
         dropOnBackground(event) {
             event.preventDefault();
-            // Remove the visual feedback class
-            if (event.currentTarget.classList.contains('files')) {
+            if (event.currentTarget.classList.contains('drag-over-active')) {
                 event.currentTarget.classList.remove('drag-over-active');
             }
             const targetPath = this.currentFolderPath; // Target is the current folder when dropping on background
@@ -3317,6 +3325,24 @@ export default {
             this.render();
         },
         handleDragEnterFolder(event, folder) {
+            event.preventDefault();
+            event.stopPropagation(); // Important: stop event from bubbling to dragOverBackground
+
+            // Clear highlight from background and other items
+            const filesDiv = this.$refs.container?.querySelector('.files');
+            if (filesDiv && filesDiv.classList.contains('drag-over-active')) {
+                filesDiv.classList.remove('drag-over-active');
+            }
+            this.$refs.container?.querySelectorAll('.file-grid.drag-over-active, .folder-row.drag-over-active, .breadcrumb-item.drag-over-active').forEach(el => {
+                if (el !== event.currentTarget) {
+                    el.classList.remove('drag-over-active');
+                }
+            });
+
+            // Add highlight to current folder
+            event.currentTarget.classList.add('drag-over-active');
+
+            // Original hover-to-navigate logic
             clearTimeout(this.dragHoverTimeout);
             this.dragHoverTargetPath = folder.path;
             console.log('Entering folder:', folder.path);
@@ -3329,6 +3355,24 @@ export default {
             }, 1000); // 1 second delay
         },
         handleDragEnterBreadcrumb(event, path) {
+            event.preventDefault();
+            event.stopPropagation(); // Important: stop event from bubbling to dragOverBackground
+
+            // Clear highlight from background and other items
+            const filesDiv = this.$refs.container?.querySelector('.files');
+            if (filesDiv && filesDiv.classList.contains('drag-over-active')) {
+                filesDiv.classList.remove('drag-over-active');
+            }
+            this.$refs.container?.querySelectorAll('.file-grid.drag-over-active, .folder-row.drag-over-active, .breadcrumb-item.drag-over-active').forEach(el => {
+                if (el !== event.currentTarget) {
+                    el.classList.remove('drag-over-active');
+                }
+            });
+            
+            // Add highlight to current breadcrumb item
+            event.currentTarget.classList.add('drag-over-active');
+
+            // Original hover-to-navigate logic
             clearTimeout(this.dragHoverTimeout);
             this.dragHoverTargetPath = path;
             console.log('Entering breadcrumb:', path);
@@ -3341,24 +3385,40 @@ export default {
             }, 1000); // 1 second delay
         },
         handleDragLeave(event) {
-            // Only clear the timeout if we're truly leaving the element
-            // Check if the related target (what we're moving to) is a child of the current target (what we're leaving)
             const currentTarget = event.currentTarget;
             const relatedTarget = event.relatedTarget;
 
-            // If relatedTarget is null or not a descendant of currentTarget, we're truly leaving
-            if (!relatedTarget || !currentTarget.contains(relatedTarget)) {
-                clearTimeout(this.dragHoverTimeout);
-                console.log('Truly leaving hover target:', this.dragHoverTargetPath);
-                this.dragHoverTargetPath = null;
-
-                // Remove visual feedback class if leaving the main files drop zone
-                if (currentTarget.classList.contains('files')) {
-                    currentTarget.classList.remove('drag-over-active');
-                }
-            } else {
-                console.log('Moving within the same element, not clearing timeout');
+            // Visual feedback: Remove highlight from the element being left
+            if (currentTarget.classList.contains('drag-over-active')) {
+                currentTarget.classList.remove('drag-over-active');
             }
+
+            // Hover Navigation Timeout Logic
+            // Check if the element we are leaving is the one for which a navigation timeout was set.
+            let isLeavingHoverTarget = false;
+            if (this.dragHoverTargetPath !== null) {
+                if (currentTarget.dataset.key && currentTarget.dataset.key === this.dragHoverTargetPath) { // Folders have data-key
+                    isLeavingHoverTarget = true;
+                } else if (currentTarget.classList.contains('breadcrumb-item')) {
+                    // For breadcrumbs, check if dragHoverTargetPath matches based on text content or a future data attribute
+                    const potentialPath = this.dragHoverTargetPath;
+                    const isRootBreadcrumb = potentialPath === '' && currentTarget.textContent.includes('My Drive');
+                    const isSubBreadcrumb = potentialPath !== '' && currentTarget.textContent.trim().startsWith(potentialPath.split('/').pop() || '');
+                    if (isRootBreadcrumb || isSubBreadcrumb) {
+                        isLeavingHoverTarget = true;
+                    }
+                }
+            }
+            
+            // If we are truly leaving the bounds of the element that had the hover timeout
+            if (isLeavingHoverTarget && (!relatedTarget || !currentTarget.contains(relatedTarget))) {
+                clearTimeout(this.dragHoverTimeout);
+                console.log('Cleared nav timeout for:', this.dragHoverTargetPath);
+                this.dragHoverTargetPath = null;
+            }
+
+            // If relatedTarget is the main .files div, its own dragover (dragOverBackground)
+            // will handle adding the class back to it if no other specific target is entered.
         },
         isFileSelected(file) {
             return this.selectedFiles.includes(file.f);
@@ -3709,6 +3769,9 @@ export default {
         dropOnFolder(event, folder) {
             event.preventDefault();
             event.stopPropagation();
+            if (event.currentTarget.classList.contains('drag-over-active')) {
+                event.currentTarget.classList.remove('drag-over-active');
+            }
             let itemIds = [];
 
             // Check for multiple items being dragged
@@ -3922,6 +3985,10 @@ export default {
         },
         dropOnBreadcrumb(path, event) {
             event.preventDefault();
+            // event.stopPropagation(); // Not strictly necessary here but good practice if there were nested dropzones
+            if (event.currentTarget.classList.contains('drag-over-active')) {
+                event.currentTarget.classList.remove('drag-over-active');
+            }
             let itemIds = [];
 
             // Check for multiple items
@@ -3930,10 +3997,12 @@ export default {
                 try {
                     itemIds = JSON.parse(itemIdsStr);
                 } catch (e) {
+                    // Fallback to text/plain if parsing fails
                     const textData = event.dataTransfer.getData("text/plain");
                     if (textData) itemIds = textData.split('\n');
                 }
             } else {
+                // Fallback to text/plain if itemids is missing
                 const textData = event.dataTransfer.getData("text/plain");
                 if (textData) itemIds = textData.split('\n');
             }
@@ -4734,11 +4803,9 @@ export default {
             this.showExtensionDialog = true;
         },
         handleGlobalDragEnd() {
-            const filesDiv = this.$refs.container?.querySelector('.files.drag-over-active');
-            if (filesDiv) {
-                filesDiv.classList.remove('drag-over-active');
-                console.log('Cleaned up drag-over-active on global dragend');
-            }
+            const activeElements = this.$refs.container?.querySelectorAll('.drag-over-active');
+            activeElements?.forEach(el => el.classList.remove('drag-over-active'));
+            console.log('Cleaned up all drag-over-active on global dragend');
         },
     },
     computed: {
