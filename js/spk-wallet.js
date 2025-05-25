@@ -630,7 +630,7 @@ export default {
                                         <i class="fas fa-angle-double-up fa-fw me-2"></i>Power Up</button>
                                 </modal-vue>
 
-                                <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" type="register"
+                                <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" type="move"
                                     :test="test" func="service" :account="account" class="dropdown-menu-item"
                                     @tosign="sendIt($event)" v-slot:trigger>
                                     <button class="dropdown-item trigger" type="button"><i
@@ -639,7 +639,7 @@ export default {
                                         A Service
                                     </button>
                                 </modal-vue>
-                                <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" type="register"
+                                <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" type="move"
                                     :test="test" func="type" :account="account" class="dropdown-menu-item"
                                     @tosign="sendIt($event)" v-slot:trigger>
                                     <button class="dropdown-item trigger" type="button"><i
@@ -648,7 +648,7 @@ export default {
                                         A Service Type
                                     </button>
                                 </modal-vue>
-                                <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" type="register"
+                                <modal-vue v-if="protocollarynx.head_block && saccountapi.head_block" type="move"
                                     :test="test" func="val" :account="account" class="dropdown-menu-item"
                                     @tosign="sendIt($event)" v-slot:trigger>
                                     <button :class="!isNode || isValidator ? 'disabled' : ''"
