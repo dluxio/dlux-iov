@@ -11,204 +11,220 @@ export default {
         "choices-vue": ChoicesVue,
         "upload-everywhere": Upload
     },
-    template: `
-<div ref="container" class="d-flex flex-grow-1 flex-column rounded" >
-    <div class="pt-1">
-        <div v-if="computedData.usedBytes > computedData.availableBytes">
-            <!-- warning message -->
-            <div class="alert alert-warning d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mb-3" role="alert">
-                <i class="fa-solid fa-triangle-exclamation fa-fw text-warning m-1 fs-1"></i>
-                <div class="d-flex flex-column">
-                    <p class="lead">You are out of storage space! Power Up BROCA to increase your storage. </p>
-                    <p class="text-white-50">File pinning contracts may not renew when the initial 30 days expires due to insufficient resource credits. Files that no longer have valid pinning contracts will be garbage collected and removed. <a class="text-info no-decoration" href="#" data-bs-toggle="modal" data-bs-target="#contractsModal">Power up Broca and turn on auto-renew</a> for files you want to keep online.</p>
-                </div>
-                <div class="position-relative">
-                    <div class="text-center position-relative">
-                        <div class="ratio ratio-1x1 wallet-token-img">
-                            <div
-                                class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
-                                <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1"
-                                    alt="BROCA Token Logo">
-                            </div>
-                        </div>
-                        <div class="position-absolute badge-type-offset top-0 start-0 translate-middle">
-                            <span
-                                class="badge badge-type bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
-                                <i class="fa-solid fa-bolt-lightning"></i>
-                            </span>
-                        </div>
-                        <div class="position-absolute badge-perk-offset top-100 start-100 translate-middle">
-                            <span
-                                class="badge badge-perk bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
-                                <i class="fa-solid fa-hard-drive"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
+    template: `<div ref="container" class="d-flex flex-grow-1 flex-column rounded">
+    <!-- warning message -->
+    <div v-if="computedData.usedBytes > computedData.availableBytes">
+        <div class="alert alert-warning d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mb-3"
+            role="alert">
+            <i class="fa-solid fa-triangle-exclamation fa-fw text-warning m-1 fs-1"></i>
+            <div class="d-flex flex-column">
+                <p class="lead">You are out of storage space! Power Up BROCA to increase your storage. </p>
+                <p class="text-white-50">File pinning contracts may not renew when the initial 30 days expires due
+                    to insufficient resource credits. Files that no longer have valid pinning contracts will be
+                    garbage collected and removed. <a class="text-info no-decoration" href="#" data-bs-toggle="modal"
+                        data-bs-target="#contractsModal">Power up Broca and turn on
+                        auto-renew</a> for files you want to keep online.</p>
             </div>
-        </div>
-        <!-- ACTION BAR -->
-        <div class="d-flex border-bottom border-white-50">
-            
-            <div class="d-flex gap-2 flex-wrap align-items-start justify-content-center flex-grow-1 mb-1">
-                <div class="d-flex flex-grow-1 flex-column">
-                    <!-- Search -->
-                    <div class="position-relative flex-grow-1 mb-1" >
-                        <span class="position-absolute top-50 translate-middle-y ps-2"><i
-                                class="fa-solid fa-magnifying-glass fa-fw"></i></span>
-                        <input @keyup="render()" @change="render()" @search="render()"
-                            class="ps-4 pe-4 rounded-pill form-control border-0 bg-dark text-info" type="search" placeholder="Search in Drive"
-                            v-model="filesSelect.search" style="height: 50px;">
-                        <a class="position-absolute top-50 end-0 translate-middle-y pe-2" data-bs-toggle="collapse" href="#choicesCollapse" role="button" aria-expanded="false" aria-controls="choicesCollapse">
-                            <i class="fa-solid fa-sliders fa-fw"></i>
-                        </a>
+            <div class="position-relative">
+                <div class="text-center position-relative">
+                    <div class="ratio ratio-1x1 wallet-token-img">
+                        <div
+                            class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
+                            <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1"
+                                alt="BROCA Token Logo">
+                        </div>
                     </div>
-                    <div class="collapse" id="choicesCollapse">
-                            <div class="d-flex gap-2 flex-grow-1 flex-wrap">
-                                <!-- choices-js-->
-                                <div class="mb-1 flex-fill">
-                                    <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_function="search" prop_type="tags"
-                                        @data="handleTag($event)"></choices-vue>
-                                </div>
-                                <div class="mb-1 flex-fill">
-                                    <choices-vue ref="select-label" :prop_selections="filterLabels" prop_function="search"
-                                        prop_type="labels" @data="handleLabel($event)"></choices-vue>
-                                </div>
-                            </div>
+                    <div class="position-absolute badge-type-offset top-0 start-0 translate-middle">
+                        <span
+                            class="badge badge-type bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                            <i class="fa-solid fa-bolt-lightning"></i>
+                        </span>
+                    </div>
+                    <div class="position-absolute badge-perk-offset top-100 start-100 translate-middle">
+                        <span
+                            class="badge badge-perk bg-warning text-dark d-flex align-items-center justify-content-center rounded-circle">
+                            <i class="fa-solid fa-hard-drive"></i>
+                        </span>
                     </div>
                 </div>
-                
-                <div class="d-flex mb-1 flex-wrap align-items-center">
-                    <!-- storage widget -->
-                    <a class="ms-auto d-flex align-items-center btn btn-dark" data-bs-toggle="modal"
-                        data-bs-target="#contractsModal">
-                        <div class="spk-widg">
-                            <div class="d-flex flex-column">
-                                <div class="d-none mb-1 fw-light text-center" style="font-size: 1.1rem !important;"
-                                    v-if="saccountapi">{{fancyBytes(computedData.usedBytes)}} of {{fancyBytes(computedData.availableBytes)}} used
-                                </div>
-                                <div class="progress bg-dark-4" role="progressbar" aria-label="Basic example"
-                                    aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="min-width: 100px;">
-                                    <div class="progress-bar"
-                                        :style="'width:' + (computedData.usedBytes && computedData.availableBytes ? (computedData.usedBytes/computedData.availableBytes)*100 : 0) + '%;'">
-                                        {{formatNumber((computedData.usedBytes && computedData.availableBytes ? (computedData.usedBytes/computedData.availableBytes)*100 :
-                                        0),'2','.',',')}}%</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <i class="fa-solid fa-angle-down fa-fw ms-2"></i>
-                        </div>
-                    </a>
-                </div>
-            </div>
-
-                <!-- Sort -->
-                <div class="d-none dropdown ms-1 mb-1">
-                    <button class="btn btn-dark w-100"
-                        style="padding-top: 11px !important; padding-bottom: 11px !important;" type="button"
-                        data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-sort fa-fw ms-1"></i>
-                        {{filesSelect.sort.charAt(0).toUpperCase() + filesSelect.sort.slice(1)}} {{filesSelect.dir ==
-                        'asc' ? 'Ascending' : 'Descending'}}
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black">
-                        <li>
-                            <a @click="filesSelect.dir='asc';filesSelect.sort='time';render()"
-                                class="dropdown-item d-flex align-items-center" role="button"><i
-                                    class="fa-solid fa-calendar-days fa-fw me-1"></i>Created<i
-                                    class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
-                        </li>
-                        <li>
-                            <a @click="filesSelect.dir='dec';filesSelect.sort='time';render()"
-                                class="dropdown-item d-flex align-items-center" role="button"><i
-                                    class="fa-solid fa-calendar-days fa-fw me-1"></i>Created<i
-                                    class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <a @click="filesSelect.dir='asc';filesSelect.sort='exp';render()"
-                                class="dropdown-item d-flex align-items-center" role="button"><i
-                                    class="fa-solid fa-clock fa-fw me-1"></i><span class="me-1">Expiration</span><i
-                                    class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
-                        </li>
-                        <li>
-                            <a @click="filesSelect.dir='dec';filesSelect.sort='exp';render()"
-                                class="dropdown-item d-flex align-items-center" role="button"><i
-                                    class="fa-solid fa-clock fa-fw me-1"></i><span class="me-1">Expiration</span><i
-                                    class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <a @click="filesSelect.dir='asc';filesSelect.sort='size';render()"
-                                class="dropdown-item d-flex align-items-center" role="button"><i
-                                    class="fa-solid fa-database fa-fw me-1"></i>Size<i
-                                    class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
-                        </li>
-                        <li>
-                            <a @click="filesSelect.dir='dec';filesSelect.sort='size';render()"
-                                class="dropdown-item d-flex align-items-center" role="button"><i
-                                    class="fa-solid fa-database fa-fw me-1"></i>Size<i
-                                    class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <a @click="filesSelect.dir='dec';filesSelect.sort='name';render()"
-                                class="dropdown-item d-flex align-items-center" role="button"><i
-                                    class="fa-solid fa-file fa-fw me-1"></i>Name<i
-                                    class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
-                        </li>
-                        <li>
-                            <a @click="filesSelect.dir='asc';filesSelect.sort='name';render()"
-                                class="dropdown-item d-flex align-items-center" role="button"><i
-                                    class="fa-solid fa-file fa-fw me-1"></i>Name<i
-                                    class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
-                        </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li>
-                            <a @click="filesSelect.dir='asc';filesSelect.sort='type';render()"
-                                class="dropdown-item d-flex align-items-center" role="button"><i
-                                    class="fa-solid fa-layer-group fa-fw me-1"></i>Type<i
-                                    class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
-                        </li>
-                        <li>
-                            <a @click="filesSelect.dir='dec';filesSelect.sort='type';render()"
-                                class="dropdown-item d-flex align-items-center" role="button"><i
-                                    class="fa-solid fa-layer-group fa-fw me-1"></i>Type<i
-                                    class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
-                        </li>
-
-                    </ul>
-                </div>
-
             </div>
         </div>
     </div>
-        <div class="breadcrumb d-flex align-items-center w-100 rounded bg-darkg mt-2">
-            <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1" style="cursor: pointer; border-radius: 4px;">
-            <i class="fa-fw fa-solid fa-hard-drive me-1"></i>My Drive
-            
-                <!-- Added: Search result count for root -->
-                <span v-if="breadcrumbCounts && breadcrumbCounts[''] > 0" class="badge bg-info ms-1">{{ breadcrumbCounts[''] }}</span>
-            </span>
-             <span class="mx-1" v-if="currentFolderPath">/</span>
-            <template v-for="(part, index) in currentFolderPath.split('/').filter(Boolean)" :key="index">
-                <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragover.prevent="dragOverBreadcrumb($event)" @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'), $event)" @dragenter="handleDragEnterBreadcrumb($event, currentFolderPath.split('/').slice(0, index + 1).join('/'))" @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 mx-1" style="cursor: pointer; border-radius: 4px;">{{ part }}
-                    <!-- Added: Search result count for this folder level -->
-                    <span v-if="breadcrumbCounts && breadcrumbCounts[currentFolderPath.split('/').slice(0, index + 1).join('/')] > 0" class="badge bg-info ms-1">{{ breadcrumbCounts[currentFolderPath.split('/').slice(0, index + 1).join('/')] }}</span>
-                </span>
-                <span class="mx-1">/</span>
-            </template>
+    <!-- ACTION BAR -->
+    <div class="d-flex border-bottom border-white-50">
+
+        <div class="d-flex gap-2 flex-wrap align-items-start justify-content-center flex-grow-1 mb-1">
+            <div class="d-flex flex-grow-1 flex-column">
+                <!-- Search -->
+                <div class="position-relative flex-grow-1 mb-1">
+                    <span class="position-absolute top-50 translate-middle-y ps-2"><i
+                            class="fa-solid fa-magnifying-glass fa-fw"></i></span>
+                    <input @keyup="render()" @change="render()" @search="render()"
+                        class="ps-4 pe-4 rounded-pill form-control border-0 bg-dark text-info" type="search"
+                        placeholder="Search in Drive" v-model="filesSelect.search" style="height: 50px;">
+                    <a class="position-absolute top-50 end-0 translate-middle-y pe-2" data-bs-toggle="collapse"
+                        href="#choicesCollapse" role="button" aria-expanded="false" aria-controls="choicesCollapse">
+                        <i class="fa-solid fa-sliders fa-fw"></i>
+                    </a>
+                </div>
+                <div class="collapse" id="choicesCollapse">
+                    <div class="d-flex gap-2 flex-grow-1 flex-wrap">
+                        <!-- choices-js-->
+                        <div class="mb-1 flex-fill">
+                            <choices-vue ref="select-tag" :prop_selections="filterFlags" prop_function="search"
+                                prop_type="tags" @data="handleTag($event)"></choices-vue>
+                        </div>
+                        <div class="mb-1 flex-fill">
+                            <choices-vue ref="select-label" :prop_selections="filterLabels" prop_function="search"
+                                prop_type="labels" @data="handleLabel($event)"></choices-vue>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex mb-1 flex-wrap align-items-center">
+                <!-- storage widget -->
+                <a class="ms-auto d-flex align-items-center btn btn-dark" data-bs-toggle="modal"
+                    data-bs-target="#contractsModal">
+                    <div class="spk-widg">
+                        <div class="d-flex flex-column">
+                            <div class="d-none mb-1 fw-light text-center" style="font-size: 1.1rem !important;"
+                                v-if="saccountapi">{{fancyBytes(computedData.usedBytes)}} of
+                                {{fancyBytes(computedData.availableBytes)}} used
+                            </div>
+                            <div class="progress bg-dark-4" role="progressbar" aria-label="Basic example"
+                                aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="min-width: 100px;">
+                                <div class="progress-bar"
+                                    :style="'width:' + (computedData.usedBytes && computedData.availableBytes ? (computedData.usedBytes/computedData.availableBytes)*100 : 0) + '%;'">
+                                    {{formatNumber((computedData.usedBytes && computedData.availableBytes ?
+                                    (computedData.usedBytes/computedData.availableBytes)*100 :
+                                    0),'2','.',',')}}%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <i class="fa-solid fa-angle-down fa-fw ms-2"></i>
+                    </div>
+                </a>
+            </div>
         </div>
-       
-<!-- Filesystem View -->
+
+        <!-- Sort -->
+        <div class="d-none dropdown ms-1 mb-1">
+            <button class="btn btn-dark w-100" style="padding-top: 11px !important; padding-bottom: 11px !important;"
+                type="button" data-bs-toggle="dropdown" aria-expanded="false"><i
+                    class="fa-solid fa-sort fa-fw ms-1"></i>
+                {{filesSelect.sort.charAt(0).toUpperCase() + filesSelect.sort.slice(1)}} {{filesSelect.dir ==
+                'asc' ? 'Ascending' : 'Descending'}}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-black">
+                <li>
+                    <a @click="filesSelect.dir='asc';filesSelect.sort='time';render()"
+                        class="dropdown-item d-flex align-items-center" role="button"><i
+                            class="fa-solid fa-calendar-days fa-fw me-1"></i>Created<i
+                            class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
+                </li>
+                <li>
+                    <a @click="filesSelect.dir='dec';filesSelect.sort='time';render()"
+                        class="dropdown-item d-flex align-items-center" role="button"><i
+                            class="fa-solid fa-calendar-days fa-fw me-1"></i>Created<i
+                            class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <a @click="filesSelect.dir='asc';filesSelect.sort='exp';render()"
+                        class="dropdown-item d-flex align-items-center" role="button"><i
+                            class="fa-solid fa-clock fa-fw me-1"></i><span class="me-1">Expiration</span><i
+                            class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
+                </li>
+                <li>
+                    <a @click="filesSelect.dir='dec';filesSelect.sort='exp';render()"
+                        class="dropdown-item d-flex align-items-center" role="button"><i
+                            class="fa-solid fa-clock fa-fw me-1"></i><span class="me-1">Expiration</span><i
+                            class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <a @click="filesSelect.dir='asc';filesSelect.sort='size';render()"
+                        class="dropdown-item d-flex align-items-center" role="button"><i
+                            class="fa-solid fa-database fa-fw me-1"></i>Size<i
+                            class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
+                </li>
+                <li>
+                    <a @click="filesSelect.dir='dec';filesSelect.sort='size';render()"
+                        class="dropdown-item d-flex align-items-center" role="button"><i
+                            class="fa-solid fa-database fa-fw me-1"></i>Size<i
+                            class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <a @click="filesSelect.dir='dec';filesSelect.sort='name';render()"
+                        class="dropdown-item d-flex align-items-center" role="button"><i
+                            class="fa-solid fa-file fa-fw me-1"></i>Name<i
+                            class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
+                </li>
+                <li>
+                    <a @click="filesSelect.dir='asc';filesSelect.sort='name';render()"
+                        class="dropdown-item d-flex align-items-center" role="button"><i
+                            class="fa-solid fa-file fa-fw me-1"></i>Name<i
+                            class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <a @click="filesSelect.dir='asc';filesSelect.sort='type';render()"
+                        class="dropdown-item d-flex align-items-center" role="button"><i
+                            class="fa-solid fa-layer-group fa-fw me-1"></i>Type<i
+                            class="fa-solid fa-caret-up fa-fw ms-auto"></i></a>
+                </li>
+                <li>
+                    <a @click="filesSelect.dir='dec';filesSelect.sort='type';render()"
+                        class="dropdown-item d-flex align-items-center" role="button"><i
+                            class="fa-solid fa-layer-group fa-fw me-1"></i>Type<i
+                            class="fa-solid fa-caret-down fa-fw ms-auto"></i></a>
+                </li>
+
+            </ul>
+        </div>
+
+    </div>
+    <!-- breadcrumb -->
+    <div class="breadcrumb d-flex align-items-center w-100 rounded bg-darkg mt-2">
+        <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)"
+            @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')"
+            @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1"
+            style="cursor: pointer; border-radius: 4px;">
+            <i class="fa-fw fa-solid fa-hard-drive me-1"></i>My Drive
+
+            <!-- Added: Search result count for root -->
+            <span v-if="breadcrumbCounts && breadcrumbCounts[''] > 0" class="badge bg-info ms-1">{{ breadcrumbCounts['']
+                }}</span>
+        </span>
+        <span class="mx-1" v-if="currentFolderPath">/</span>
+        <template v-for="(part, index) in currentFolderPath.split('/').filter(Boolean)" :key="index">
+            <span @click="navigateTo(currentFolderPath.split('/').slice(0, index + 1).join('/'))"
+                @dragover.prevent="dragOverBreadcrumb($event)"
+                @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'), $event)"
+                @dragenter="handleDragEnterBreadcrumb($event, currentFolderPath.split('/').slice(0, index + 1).join('/'))"
+                @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 mx-1"
+                style="cursor: pointer; border-radius: 4px;">{{ part }}
+                <!-- Added: Search result count for this folder level -->
+                <span
+                    v-if="breadcrumbCounts && breadcrumbCounts[currentFolderPath.split('/').slice(0, index + 1).join('/')] > 0"
+                    class="badge bg-info ms-1">{{ breadcrumbCounts[currentFolderPath.split('/').slice(0, index +
+                    1).join('/')] }}</span>
+            </span>
+            <span class="mx-1">/</span>
+        </template>
+    </div>
+    <!-- Filesystem View -->
     <div class="d-flex flex-column flex-grow-1 flex-wrap">
         <h3 class="d-none">@{{ selectedUser }}</h3>
 
@@ -217,27 +233,32 @@ export default {
             <div class="d-flex align-items-center my-1 mx-1">
                 <!-- Added: Search results explanation -->
                 <h5 v-if="filesSelect.search || filterLabels || filterFlags > 0" class="mb-0">
-                    <span class="text-info">Search results:</span> {{filesArray.length}} File{{filesArray.length > 1 ? 's' : ''}}
-                    <span v-if="currentFolderPath" class="text-muted small"> in "{{ currentFolderPath }}" and subfolders</span>
+                    <span class="text-info">Search results:</span> {{filesArray.length}} File{{filesArray.length > 1 ?
+                    's' :
+                    ''}}
+                    <span v-if="currentFolderPath" class="text-muted small"> in "{{ currentFolderPath }}" and
+                        subfolders</span>
                 </h5>
-                <h5 v-else-if="viewOpts.view === 'grid' || viewOpts.view === 'list'" class="mb-0">{{filesArray.length}} File{{filesArray.length > 1 ? 's' : ''}}</h5>
-                <h5 v-else class="mb-0">{{ getSubfolderCount }} Folder{{ getSubfolderCount === 1 ? '' : 's' }} & {{ currentFileCount }} File{{ currentFileCount === 1 ? '' : 's' }}</h5>
+                <h5 v-else-if="viewOpts.view === 'grid' || viewOpts.view === 'list'" class="mb-0">{{filesArray.length}}
+                    File{{filesArray.length > 1 ? 's' : ''}}</h5>
+                <h5 v-else class="mb-0">{{ getSubfolderCount }} Folder{{ getSubfolderCount === 1 ? '' : 's' }} & {{
+                    currentFileCount }} File{{ currentFileCount === 1 ? '' : 's' }}</h5>
             </div>
             <div class="d-flex flex-wrap ms-auto">
-                <upload-everywhere v-if="selectedUser == account" 
-                                   :account="account" 
-                                   :saccountapi="saccountapi"
-                                   :external-drop="droppedExternalFiles" 
-                                   @update:externalDrop="droppedExternalFiles = $event" 
-                                   @tosign="sendIt($event)" 
-                                   @done="handleUploadDone($event)" 
-                                   teleportref="#UEController"/>
-                <button class="btn btn-secondary btn-sm" @click="createNewFolder"><i class="fa-solid fa-folder-plus me-1"></i>New Folder</button>
-                <button class="btn btn-success btn-sm ms-2" @click="saveChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-save me-1"></i>Save</button>
-                <button class="btn btn-danger btn-sm ms-2" @click="revertPendingChanges" v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-undo me-1"></i>Revert</button>
+                <upload-everywhere v-if="selectedUser == account" :account="account" :saccountapi="saccountapi"
+                    :external-drop="droppedExternalFiles" @update:externalDrop="droppedExternalFiles = $event"
+                    @tosign="sendIt($event)" @done="handleUploadDone($event)" teleportref="#UEController" />
+                <button class="btn btn-secondary btn-sm" @click="createNewFolder"><i
+                        class="fa-solid fa-folder-plus me-1"></i>New Folder</button>
+                <button class="btn btn-success btn-sm ms-2" @click="saveChanges"
+                    v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-save me-1"></i>Save</button>
+                <button class="btn btn-danger btn-sm ms-2" @click="revertPendingChanges"
+                    v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-undo me-1"></i>Revert</button>
                 <div class="btn-group ms-2">
-                    <button class="btn btn-sm" :class="viewOpts.fileView === 'grid' ? 'btn-primary' : 'btn-secondary'" @click="viewOpts.fileView = 'grid'"><i class="fa-solid fa-th-large"></i></button>
-                    <button class="btn btn-sm" :class="viewOpts.fileView === 'list' ? 'btn-primary' : 'btn-secondary'" @click="viewOpts.fileView = 'list'"><i class="fa-solid fa-list"></i></button>
+                    <button class="btn btn-sm" :class="viewOpts.fileView === 'grid' ? 'btn-primary' : 'btn-secondary'"
+                        @click="viewOpts.fileView = 'grid'"><i class="fa-solid fa-th-large"></i></button>
+                    <button class="btn btn-sm" :class="viewOpts.fileView === 'list' ? 'btn-primary' : 'btn-secondary'"
+                        @click="viewOpts.fileView = 'list'"><i class="fa-solid fa-list"></i></button>
                 </div>
             </div>
         </div>
@@ -253,17 +274,19 @@ export default {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="file in filesArray" :key="file.f" 
-                        :class="{ 'table-primary': isFileSelected(file) }"
-                        draggable="true" 
-                        @dragstart="dragStartItem($event, file, 'file')" 
+                    <tr v-for="file in filesArray" :key="file.f" :class="{ 'table-primary': isFileSelected(file) }"
+                        draggable="true" @dragstart="dragStartItem($event, file, 'file')"
                         @click="handleFileClick($event, file)"
                         @contextmenu.prevent.stop="showContextMenu($event, 'file', file)">
                         <td>
-                            <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="50" />
-                            <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" width="50">
+                            <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
+                                :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="50" />
+                            <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800"
+                                style="enable-background:new 0 0 800 800;" xml:space="preserve" width="50">
                                 <g>
-                                    <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10S555.5,210,550,210z" />
+                                    <path class="st0"
+                                        d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10S555.5,210,550,210z" />
                                     <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10 s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
                                 C660,305.2,655.5,309.7,650,309.7z" />
                                     <path class="st0"
@@ -286,30 +309,36 @@ export default {
                         <td>@{{ file.o }}</td>
                         <td>{{ fancyBytes(file.s) }}</td>
                         <td>
-                            <div v-if="currentFolderPath !== 'Trash'" class="d-flex flex-wrap align-items-center justify-content-center">
+                            <div v-if="currentFolderPath !== 'Trash'"
+                                class="d-flex flex-wrap align-items-center justify-content-center">
                                 <!-- colors -->
                                 <div v-if="file.lc" class="d-flex me-1 align-items-center" style="margin-left: 15px">
-                                        <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :style="'margin-left: ' + -15 +'px !important;'"></i>
+                                    <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa"
+                                        :style="'margin-left: ' + -15 +'px !important;'"></i>
                                 </div>
                                 <!-- labels -->
                                 <div class="me-1" v-for="label in labelsDecode(file.l)">
                                     <span class="d-flex align-items-center">
-                                        <pop-vue :id="'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')" :title="label.l" trigger="hover">
+                                        <pop-vue :id="'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')"
+                                            :title="label.l" trigger="hover">
                                             <i :class="label.fa"></i>
                                         </pop-vue>
                                     </span>
                                 </div>
                                 <!-- flags -->
                                 <div class="d-flex align-items-center">
-                                <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)" >
+                                    <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)">
                                         <!-- title="Labels"  -->
-                                        <pop-vue :id="'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')" :title="flag.l" trigger="hover">
+                                        <pop-vue :id="'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')"
+                                            :title="flag.l" trigger="hover">
                                             <i :class="flag.fa"></i>
                                         </pop-vue>
                                     </div>
                                 </div>
                                 <div>
-                                    <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id="'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
+                                    <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa"
+                                        :id="'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic"
+                                        :title="lic.l" trigger="hover">
                                         <i :class="lic.fa"></i>
                                     </pop-vue>
                                 </div>
@@ -320,7 +349,8 @@ export default {
                         </td>
                     </tr>
                     <!-- Empty state row for table view -->
-                    <tr v-if="getSubfolders(selectedUser, currentFolderPath).length === 0 && getFiles(selectedUser, currentFolderPath).length === 0">
+                    <tr
+                        v-if="getSubfolders(selectedUser, currentFolderPath).length === 0 && getFiles(selectedUser, currentFolderPath).length === 0">
                         <td colspan="5" class="text-center p-5">
                             <div class="text-muted">
                                 <i class="fa-solid fa-folder-
@@ -335,81 +365,85 @@ export default {
         <!-- Upload Everywhere Controller -->
         <div id="UEController"></div>
         <!-- Warning Box for Trash Folder -->
-        <div v-if="currentFolderPath === 'Trash'" class="alert alert-warning d-flex align-items-center my-2" role="alert">
+        <div v-if="currentFolderPath === 'Trash'" class="alert alert-warning d-flex align-items-center my-2"
+            role="alert">
             <i class="fa-solid fa-triangle-exclamation fa-fw me-2 fs-1 text-warning"></i>
             <p class="mb-0 lead">Files in Trash will be permanently deleted after their deletion date.</p>
         </div>
         <div v-if="!filesSelect.search" class="d-flex flex-grow-1">
-            <div class="d-flex flex-grow-1 files" @contextmenu.prevent="showContextMenu($event, 'background', null)" 
-                @dragover="dragOverBackground($event)" 
-                @drop="dropOnBackground($event)"
-                @mousedown="startSelectionBox($event)"
-                @mousemove="updateSelectionBox($event)"
-                @mouseup="endSelectionBox"
-                style="position: relative; min-height: 200px;">
+            <div class="d-flex flex-grow-1 files" @contextmenu.prevent="showContextMenu($event, 'background', null)"
+                @dragover="dragOverBackground($event)" @drop="dropOnBackground($event)"
+                @mousedown="startSelectionBox($event)" @mousemove="updateSelectionBox($event)"
+                @mouseup="endSelectionBox" style="position: relative; min-height: 200px;">
                 <!-- Remove the template-based selection box overlay -->
-                
-                <div v-if="viewOpts.fileView === 'grid'" class="d-flex flex-grow-1 flex-wrap" style="background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px;">
-                    <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="folder.path" 
-                        class="file-grid m-2 p-2 rounded text-center" 
+
+                <div v-if="viewOpts.fileView === 'grid'" class="d-flex flex-grow-1 flex-wrap"
+                    style="background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px;">
+                    <div v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="folder.path"
+                        class="file-grid m-2 p-2 rounded text-center"
                         :class="{ 'bg-dark': !isFolderSelected(folder), 'bg-primary': isFolderSelected(folder) }"
-                        :data-key="folder.path"  
-                        :data-is-preset="folder.isPreset ? 'true' : null" 
-                        :data-type="'folder'"
-                        draggable="true"
-                        @dragstart="dragStartItem($event, folder, 'folder')"
-                        @dblclick="navigateTo(folder.path)" 
-                        @click="handleFolderClick($event, folder)"
-                        @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)" 
-                        @dragover="dragOverFolder($event)" 
-                        @drop="dropOnFolder($event, folder)" 
-                        @dragenter="handleDragEnterFolder($event, folder)" 
-                        @dragleave="handleDragLeave"
+                        :data-key="folder.path" :data-is-preset="folder.isPreset ? 'true' : null" :data-type="'folder'"
+                        draggable="true" @dragstart="dragStartItem($event, folder, 'folder')"
+                        @dblclick="navigateTo(folder.path)" @click="handleFolderClick($event, folder)"
+                        @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)"
+                        @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)"
+                        @dragenter="handleDragEnterFolder($event, folder)" @dragleave="handleDragLeave"
                         style="width: 120px; height: 120px; position: relative; border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: pointer;"
                         @mouseenter="$event.currentTarget.style.transform = 'translateY(-3px)'; $event.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)'; $event.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'"
                         @mouseleave="$event.currentTarget.style.transform = ''; $event.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)'; $event.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'">
-                        <div class="d-flex align-items-center justify-content-center" style="height: 70px; width: 100%;">
+                        <div class="d-flex align-items-center justify-content-center"
+                            style="height: 70px; width: 100%;">
                             <i class="fa-solid fa-folder fa-3x" style="color: #ffd166;"></i>
                         </div>
-                        <div class="text-truncate pb-1" style="max-width: 110px; font-size: 0.9rem;">{{ folder.name }}</div>
+                        <div class="text-truncate pb-1" style="max-width: 110px; font-size: 0.9rem;">{{ folder.name }}
+                        </div>
                     </div>
-                    <div v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" 
-                        class="file-grid m-2 p-2 rounded text-center" 
-                        :class="{ 'bg-primary': isFileSelected(file) }"
-                        :data-key="file.f"  
-                        :data-type="'file'"
-                        :data-file-id="file.f"
-                        draggable="true" 
-                        @dragstart="dragStartItem($event, file, 'file')" 
-                        @click="handleFileClick($event, file)"
+                    <div v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f"
+                        class="file-grid m-2 p-2 rounded text-center" :class="{ 'bg-primary': isFileSelected(file) }"
+                        :data-key="file.f" :data-type="'file'" :data-file-id="file.f" draggable="true"
+                        @dragstart="dragStartItem($event, file, 'file')" @click="handleFileClick($event, file)"
                         @contextmenu.prevent.stop="showContextMenu($event, 'file', file)"
                         style="width: 120px; height: 120px; position: relative; border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: pointer;"
                         @mouseenter="$event.currentTarget.style.transform = 'translateY(-3px)'; $event.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)'; $event.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'"
                         @mouseleave="$event.currentTarget.style.transform = ''; $event.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)'; $event.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'">
-                        <div class="file-icon-container d-flex align-items-center justify-content-center" style="height: 70px; width: 100%;">
-                            <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" style="max-height: 70px; max-width: 100%; object-fit: contain;" />
-                            <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" width="70">
+                        <div class="file-icon-container d-flex align-items-center justify-content-center"
+                            style="height: 70px; width: 100%;">
+                            <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
+                                :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid"
+                                style="max-height: 70px; max-width: 100%; object-fit: contain;" />
+                            <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800"
+                                style="enable-background:new 0 0 800 800;" xml:space="preserve" width="70">
                                 <g>
-                                    <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10 S655.5,210,650,210z" />
-                                    <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10 s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7 C660,305.2,655.5,309.7,650,309.7z" />
-                                    <path class="st0" d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400 c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
-                                    <path class="st0" d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
-                                    <path class="st0" d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
-                                    <path class="st0" d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3 c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
+                                    <path class="st0"
+                                        d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10 S655.5,210,650,210z" />
+                                    <path class="st0"
+                                        d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10 s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7 C660,305.2,655.5,309.7,650,309.7z" />
+                                    <path class="st0"
+                                        d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400 c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
+                                    <path class="st0"
+                                        d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
+                                    <path class="st0"
+                                        d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
+                                    <path class="st0"
+                                        d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3 c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
                                 c0,22.1,17.9,40,40,40h500c22.1,0,40-17.9,40-40V349.7c-0.1-22-17.8-39.8-39.8-40l-500-3.3H150z" />
-                                    <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2" style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
+                                    <text transform="matrix(1 0 0 1 233.3494 471.9725)" class="st1 st2"
+                                        style="text-transform: uppercase; font-size: 149px;">{{newMeta[file.i][file.f].type}}</text>
                                 </g>
                             </svg>
-                    </div>
-                        <div class="text-truncate pb-1" style="max-width: 110px; font-size: 0.9rem;">{{ newMeta[file.i][file.f].name || file.f }}</div>
-                        <div v-if="flagsDecode(newMeta[file.i][file.f].flags, 1).length" class="position-absolute bottom-0 end-0 bg-dark rounded-circle p-1" style="margin: 2px;">
+                        </div>
+                        <div class="text-truncate pb-1" style="max-width: 110px; font-size: 0.9rem;">{{
+                            newMeta[file.i][file.f].name || file.f }}</div>
+                        <div v-if="flagsDecode(newMeta[file.i][file.f].flags, 1).length"
+                            class="position-absolute bottom-0 end-0 bg-dark rounded-circle p-1" style="margin: 2px;">
                             <i class="fa-solid fa-lock fa-sm"></i>
                         </div>
                     </div>
-                    
+
                     <!-- Empty state for grid view -->
-                    <div v-if="getSubfolders(selectedUser, currentFolderPath).length === 0 && getFiles(selectedUser, currentFolderPath).length === 0" 
-                        class="w-100 text-center p-5 d-flex flex-column align-items-center justify-content-center" 
+                    <div v-if="getSubfolders(selectedUser, currentFolderPath).length === 0 && getFiles(selectedUser, currentFolderPath).length === 0"
+                        class="w-100 text-center p-5 d-flex flex-column align-items-center justify-content-center"
                         style="min-height: 180px;">
                         <div v-if="currentFolderPath === 'Trash'">
                             <i class="fa-solid fa-trash fa-3x mb-3" style="color: #adb5bd;"></i>
@@ -417,16 +451,13 @@ export default {
                         </div>
                         <div v-if="currentFolderPath != 'Trash'">
                             <i class="fa-solid fa-folder-open fa-3x mb-3" style="color: #adb5bd;"></i>
-                            <p class="text-muted">This folder is empty. Drag and drop files here or create a new folder.</p>
+                            <p class="text-muted">This folder is empty. Drag and drop files here or create a new folder.
+                            </p>
                             <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
-                                <upload-everywhere class="my-2" v-if="selectedUser == account" 
-                                        :account="account" 
-                                        :saccountapi="saccountapi"
-                                        :external-drop="droppedExternalFiles" 
-                                        @update:externalDrop="droppedExternalFiles = $event" 
-                                        @tosign="sendIt($event)" 
-                                        @done="handleUploadDone($event)" 
-                                        teleportref="#UEController"/>
+                                <upload-everywhere class="my-2" v-if="selectedUser == account" :account="account"
+                                    :saccountapi="saccountapi" :external-drop="droppedExternalFiles"
+                                    @update:externalDrop="droppedExternalFiles = $event" @tosign="sendIt($event)"
+                                    @done="handleUploadDone($event)" teleportref="#UEController" />
                                 <button class="btn btn-outline-secondary btn-sm my-2" @click="createNewFolder">
                                     <i class="fa-solid fa-folder-plus me-1"></i>New Folder
                                 </button>
@@ -446,44 +477,43 @@ export default {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="folder in getSubfolders(selectedUser, currentFolderPath)" :key="'folder-' + folder.path" 
-                                class="folder-row" 
-                                :data-key="folder.path" 
-                                :data-type="'folder'" 
-                                :data-is-preset="folder.isPreset ? 'true' : null"
-                                draggable="true"
-                                @dragstart="dragStartItem($event, folder, 'folder')"
-                                @dblclick="navigateTo(folder.path)" 
-                                @click="handleFolderClick($event, folder)" 
-                                @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)" 
-                                @dragover="dragOverFolder($event)" 
-                                @drop="dropOnFolder($event, folder)" 
-                                @dragenter="handleDragEnterFolder($event, folder)" 
-                                @dragleave="handleDragLeave">
+                            <tr v-for="folder in getSubfolders(selectedUser, currentFolderPath)"
+                                :key="'folder-' + folder.path" class="folder-row" :data-key="folder.path"
+                                :data-type="'folder'" :data-is-preset="folder.isPreset ? 'true' : null" draggable="true"
+                                @dragstart="dragStartItem($event, folder, 'folder')" @dblclick="navigateTo(folder.path)"
+                                @click="handleFolderClick($event, folder)"
+                                @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)"
+                                @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)"
+                                @dragenter="handleDragEnterFolder($event, folder)" @dragleave="handleDragLeave">
                                 <td><i class="fa-solid fa-folder"></i></td>
                                 <td>{{ folder.name }}</td>
                                 <td></td>
                                 <td></td>
                                 <td></td>
                             </tr>
-                            <tr v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f" 
-                                :class="{ 'table-primary': isFileSelected(file) }"
-                                draggable="true" 
-                                @dragstart="dragStartItem($event, file, 'file')" 
-                                @click="handleFileClick($event, file)"
+                            <tr v-for="file in getFiles(selectedUser, currentFolderPath)" :key="file.f"
+                                :class="{ 'table-primary': isFileSelected(file) }" draggable="true"
+                                @dragstart="dragStartItem($event, file, 'file')" @click="handleFileClick($event, file)"
                                 @contextmenu.prevent.stop="showContextMenu($event, 'file', file)">
                                 <td>
-                                    <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)" :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="50" />
-                                    <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800" style="enable-background:new 0 0 800 800;" xml:space="preserve" width="50">
+                                    <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
+                                        :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid"
+                                        width="50" />
+                                    <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg"
+                                        xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800"
+                                        style="enable-background:new 0 0 800 800;" xml:space="preserve" width="50">
                                         <g>
-                                            <path class="st0" d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10S555.5,210,550,210z" />
+                                            <path class="st0"
+                                                d="M650,210H500c-5.5,0-10-4.5-10-10V50c0-5.5,4.5-10,10-10s10,4.5,10,10v140h140c5.5,0,10,4.5,10,10S555.5,210,550,210z" />
                                             <path class="st0" d="M650,309.7c-5.5,0-10-4.5-10-10v-95.5L495.9,60H200c-22.1,0-40,17.9-40,40v196.3c0,5.5-4.5,10-10,10 s-10-4.5-10-10V100c0-33.1,26.9-60,60-60h300c2.7,0,5.2,1,7.1,2.9l150,150c1.9,1.9,2.9,4.4,2.9,7.1v99.7
                                         C660,305.2,655.5,309.7,650,309.7z" />
                                             <path class="st0"
                                                 d="M600,760H200c-33.1,0-60-26.9-60-60V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150c0,22.1,17.9,40,40,40h400
                                         c22.1,0,40-17.9,40-40V550c0-5.5,4.5-10,10-10s10,4.5,10,10v150C660,733.1,633.1,760,600,760z" />
-                                            <path class="st0" d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
-                                            <path class="st0" d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
+                                            <path class="st0"
+                                                d="M550,560H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h300c5.5,0,10,4.5,10,10S555.5,560,550,560z" />
+                                            <path class="st0"
+                                                d="M400,660H250c-5.5,0-10-4.5-10-10s4.5-10,10-10h150c5.5,0,10,4.5,10,10S405.5,660,400,660z" />
                                             <path class="st0"
                                                 d="M650,560H150c-33.1,0-60-26.9-60-60l0,0V346.3c0-33.1,26.9-60,60-60l0,0h0.4l500,3.3
                                         c32.9,0.3,59.5,27.1,59.6,60V500C710,533.1,683.2,560,650,560C650,560,650,560,650,560z M150,306.3c-22.1,0-40,17.9-40,40V500
@@ -497,30 +527,39 @@ export default {
                                 <td>@{{ file.o }}</td>
                                 <td>{{ fancyBytes(file.s) }}</td>
                                 <td>
-                                    <div v-if="currentFolderPath !== 'Trash'" class="d-flex flex-wrap align-items-center justify-content-center">
+                                    <div v-if="currentFolderPath !== 'Trash'"
+                                        class="d-flex flex-wrap align-items-center justify-content-center">
                                         <!-- colors -->
-                                        <div v-if="file.lc" class="d-flex me-1 align-items-center" style="margin-left: 15px">
-                                                <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa" :style="'margin-left: ' + -15 +'px !important;'"></i>
+                                        <div v-if="file.lc" class="d-flex me-1 align-items-center"
+                                            style="margin-left: 15px">
+                                            <i v-for="(color, num) in labelsDecode(file.lc)" :class="color.fa"
+                                                :style="'margin-left: ' + -15 +'px !important;'"></i>
                                         </div>
                                         <!-- labels -->
                                         <div class="me-1" v-for="label in labelsDecode(file.l)">
                                             <span class="d-flex align-items-center">
-                                                <pop-vue :id="'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')" :title="label.l" trigger="hover">
+                                                <pop-vue
+                                                    :id="'popperL-' + file.i + file.index + label.l + (cc ? 'cc' : '')"
+                                                    :title="label.l" trigger="hover">
                                                     <i :class="label.fa"></i>
                                                 </pop-vue>
                                             </span>
                                         </div>
                                         <!-- flags -->
                                         <div class="d-flex align-items-center">
-                                        <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)" >
+                                            <div v-for="flag in flagsDecode(newMeta[file.i][file.f].flags, 0, 3)">
                                                 <!-- title="Labels"  -->
-                                                <pop-vue :id="'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')" :title="flag.l" trigger="hover">
+                                                <pop-vue
+                                                    :id="'popper-' + file.i + file.index + flag.l + (cc ? 'cc' : '')"
+                                                    :title="flag.l" trigger="hover">
                                                     <i :class="flag.fa"></i>
                                                 </pop-vue>
                                             </div>
                                         </div>
                                         <div>
-                                            <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa" :id="'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic" :title="lic.l" trigger="hover">    
+                                            <pop-vue v-if="licenses[file.lic]" v-for="lic in licenses[file.lic].fa"
+                                                :id="'popper-Lic' + (cc ? 'cc' : '') + file.i + file.index + file.lic"
+                                                :title="lic.l" trigger="hover">
                                                 <i :class="lic.fa"></i>
                                             </pop-vue>
                                         </div>
@@ -531,7 +570,8 @@ export default {
                                 </td>
                             </tr>
                             <!-- Empty state row for table view -->
-                            <tr v-if="getSubfolders(selectedUser, currentFolderPath).length === 0 && getFiles(selectedUser, currentFolderPath).length === 0">
+                            <tr
+                                v-if="getSubfolders(selectedUser, currentFolderPath).length === 0 && getFiles(selectedUser, currentFolderPath).length === 0">
                                 <td colspan="5" class="text-center p-5">
                                     <div class="text-muted">
                                         <i class="fa-solid fa-folder-open fa-2x mb-3"></i>
@@ -545,290 +585,308 @@ export default {
             </div>
         </div>
     </div>
-<!-- Context menu -->
-<Teleport to="body">
-  <div v-if="contextMenu.show" @click.stop
-    :style="{ position: 'fixed', left: contextMenu.x + 'px', top: contextMenu.y + 'px', zIndex: 1000 }"
-    class="dropdown ">
-    <ul class="dropdown-menu dropdown-menu-dark bg-dark border-dark bg-img-none show">
-      <!-- Background Options -->
-      <li v-if="contextMenu.type === 'background' && selectedUser === account">
-        <a class="dropdown-item py-1" href="#" @click="createNewFolder(); hideContextMenu();">
-            New Folder
-        </a>
-      </li>
-      <!-- File Options -->
-      <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)">
-        <a class="dropdown-item py-1" href="#" @click="renameItem(contextMenu.item, 'file'); hideContextMenu();">
-            Rename File
-        </a>
-      </li>
-      <!-- Changed: Conditionally show Move to Trash -->
-      <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item) && currentFolderPath !== 'Trash'">
-        <a class="dropdown-item py-1" href="#" @click="deleteFile(contextMenu.item); hideContextMenu();">
-            Move to Trash
-        </a>
-      </li>
-      <!-- Added: Restore option for Trash -->
-      <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item) && currentFolderPath === 'Trash'">
-        <a class="dropdown-item py-1" href="#" @click="restoreFile(contextMenu.item); hideContextMenu();">
-            Restore File
-        </a>
-      </li>
-      <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)" class="dropdown-divider"></li>
-      <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)">
-        <a class="dropdown-item py-1" href="#" @click="openMetadataEditor(contextMenu.item); hideContextMenu();">
-            Edit Metadata
-        </a>
-      </li>
-      <li v-if="contextMenu.type === 'file'" class="dropdown-divider"></li>
-      <li v-if="contextMenu.type === 'file' && flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length && !contract[contextMenu.item.i].encryption.key">
-        <a class="dropdown-item py-1" href="#" @click="decryptFile(contextMenu.item); hideContextMenu();">
-            Decrypt File
-        </a>
-      </li>
-      <li v-if="contextMenu.type === 'file' && ( !flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length || (flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length && contract[contextMenu.item.i].encryption.key))">
-        <a class="dropdown-item py-1" href="#" @click="downloadFile(contextMenu.item); hideContextMenu();">
-            Download File
-        </a>
-      </li>
-      <!-- Folder Options -->
-      <li v-if="contextMenu.type === 'folder' && isEditableFolder(contextMenu.item)">
-        <a class="dropdown-item py-1" href="#" @click="renameItem(contextMenu.item, 'folder'); hideContextMenu();">
-            Rename Folder
-        </a>
-      </li>
-      <li v-if="contextMenu.type === 'folder' && isEditableFolder(contextMenu.item)">
-        <a class="dropdown-item py-1" href="#" @click="deleteFolder(contextMenu.item); hideContextMenu();">
-            Delete Folder
-        </a>
-      </li>
-      <!-- Folder operations for contracts - only shown if user has a storage node or broca balance -->
-      <li v-if="contextMenu.type === 'folder' && (hasStorage() || account)" class="dropdown-divider"></li>
-      <li v-if="contextMenu.type === 'folder' && account">
-        <a class="dropdown-item py-1" href="#" @click="extendFolderContracts(contextMenu.item); hideContextMenu();">
-            Extend All Contracts in Folder
-        </a>
-      </li>
-      <li v-if="contextMenu.type === 'folder' && hasStorage()">
-        <a class="dropdown-item py-1" href="#" @click="storeFolderContracts(contextMenu.item, false); hideContextMenu();">
-            Store All Files in Folder
-        </a>
-      </li>
-      <li v-if="contextMenu.type === 'folder' && hasStorage()">
-        <a class="dropdown-item py-1" href="#" @click="storeFolderContracts(contextMenu.item, true); hideContextMenu();">
-            Remove All Files in Folder from Storage
-        </a>
-      </li>
-      <li v-if="contextMenu.type === 'file'">
-        <a class="dropdown-item py-1" href="#" @click="openDetailsViewer(contextMenu.item); hideContextMenu();">
-            View Details
-        </a>
-      </li>
-      <!-- Add Extend option for any user with broca balance -->
-      <li v-if="contextMenu.type === 'file' && account">
-        <a class="dropdown-item py-1" href="#" @click="openExtensionDialog(contextMenu.item); hideContextMenu();">
-            Extend Contract
-        </a>
-      </li>
-      <!-- Add Store option for storage node operators who aren't storing this file -->
-      <li v-if="contextMenu.type === 'file' && hasStorage() && contract[contextMenu.item?.i] && !isStored(contract[contextMenu.item.i])">
-        <a class="dropdown-item py-1" href="#" @click="store(contextMenu.item, false); hideContextMenu();">
-            Store File
-        </a>
-      </li>
-      <!-- Add Remove option for storage node operators who are storing this file -->
-      <li v-if="contextMenu.type === 'file' && hasStorage() && contract[contextMenu.item?.i] && isStored(contract[contextMenu.item.i])">
-        <a class="dropdown-item py-1" href="#" @click="store(contextMenu.item, true); hideContextMenu();">
-            Remove File from Storage
-        </a>
-      </li>
-    </ul>
-  </div>
-</Teleport>
+    <!-- Save Changes Footer -->
+    <div v-if="Object.keys(pendingChanges).length > 0" class="border-top bg-dark mt-3 p-3 d-flex justify-content-end">
+        <button class="btn btn-warning me-2" @click="saveChanges" :disabled="updatesPayloadTooLarge"
+            :title="updatesPayloadTooLarge ? 'Payload size exceeds the maximum allowed size (7500 bytes)' : ''">
+            Save Changes ({{ Object.keys(pendingChanges).length }} contracts, ~{{ Math.round(updatesPayloadSize / 1024 *
+            10)
+            / 10 }}KB)
+            <span v-if="updatesPayloadTooLarge" class="text-danger ms-1">
+                <i class="fa-solid fa-exclamation-triangle"></i>
+            </span>
+        </button>
+        <button class="btn btn-secondary" @click="revertPendingChanges">Revert Pending Changes</button>
+    </div>
+    <!-- Context menu -->
+    <Teleport to="body">
+        <div v-if="contextMenu.show" @click.stop
+            :style="{ position: 'fixed', left: contextMenu.x + 'px', top: contextMenu.y + 'px', zIndex: 1000 }"
+            class="dropdown ">
+            <ul class="dropdown-menu dropdown-menu-dark bg-dark border-dark bg-img-none show">
+                <!-- Background Options -->
+                <li v-if="contextMenu.type === 'background' && selectedUser === account">
+                    <a class="dropdown-item py-1" href="#" @click="createNewFolder(); hideContextMenu();">
+                        New Folder
+                    </a>
+                </li>
+                <!-- File Options -->
+                <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)">
+                    <a class="dropdown-item py-1" href="#"
+                        @click="renameItem(contextMenu.item, 'file'); hideContextMenu();">
+                        Rename File
+                    </a>
+                </li>
+                <!-- Changed: Conditionally show Move to Trash -->
+                <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item) && currentFolderPath !== 'Trash'">
+                    <a class="dropdown-item py-1" href="#" @click="deleteFile(contextMenu.item); hideContextMenu();">
+                        Move to Trash
+                    </a>
+                </li>
+                <!-- Added: Restore option for Trash -->
+                <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item) && currentFolderPath === 'Trash'">
+                    <a class="dropdown-item py-1" href="#" @click="restoreFile(contextMenu.item); hideContextMenu();">
+                        Restore File
+                    </a>
+                </li>
+                <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)" class="dropdown-divider"></li>
+                <li v-if="contextMenu.type === 'file' && isEditable(contextMenu.item)">
+                    <a class="dropdown-item py-1" href="#"
+                        @click="openMetadataEditor(contextMenu.item); hideContextMenu();">
+                        Edit Metadata
+                    </a>
+                </li>
+                <li v-if="contextMenu.type === 'file'" class="dropdown-divider"></li>
+                <li
+                    v-if="contextMenu.type === 'file' && flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length && !contract[contextMenu.item.i].encryption.key">
+                    <a class="dropdown-item py-1" href="#" @click="decryptFile(contextMenu.item); hideContextMenu();">
+                        Decrypt File
+                    </a>
+                </li>
+                <li
+                    v-if="contextMenu.type === 'file' && ( !flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length || (flagsDecode(newMeta[contextMenu.item.i][contextMenu.item.f].flags, 1).length && contract[contextMenu.item.i].encryption.key))">
+                    <a class="dropdown-item py-1" href="#" @click="downloadFile(contextMenu.item); hideContextMenu();">
+                        Download File
+                    </a>
+                </li>
+                <!-- Folder Options -->
+                <li v-if="contextMenu.type === 'folder' && isEditableFolder(contextMenu.item)">
+                    <a class="dropdown-item py-1" href="#"
+                        @click="renameItem(contextMenu.item, 'folder'); hideContextMenu();">
+                        Rename Folder
+                    </a>
+                </li>
+                <li v-if="contextMenu.type === 'folder' && isEditableFolder(contextMenu.item)">
+                    <a class="dropdown-item py-1" href="#" @click="deleteFolder(contextMenu.item); hideContextMenu();">
+                        Delete Folder
+                    </a>
+                </li>
+                <!-- Folder operations for contracts - only shown if user has a storage node or broca balance -->
+                <li v-if="contextMenu.type === 'folder' && (hasStorage() || account)" class="dropdown-divider"></li>
+                <li v-if="contextMenu.type === 'folder' && account">
+                    <a class="dropdown-item py-1" href="#"
+                        @click="extendFolderContracts(contextMenu.item); hideContextMenu();">
+                        Extend All Contracts in Folder
+                    </a>
+                </li>
+                <li v-if="contextMenu.type === 'folder' && hasStorage()">
+                    <a class="dropdown-item py-1" href="#"
+                        @click="storeFolderContracts(contextMenu.item, false); hideContextMenu();">
+                        Store All Files in Folder
+                    </a>
+                </li>
+                <li v-if="contextMenu.type === 'folder' && hasStorage()">
+                    <a class="dropdown-item py-1" href="#"
+                        @click="storeFolderContracts(contextMenu.item, true); hideContextMenu();">
+                        Remove All Files in Folder from Storage
+                    </a>
+                </li>
+                <li v-if="contextMenu.type === 'file'">
+                    <a class="dropdown-item py-1" href="#"
+                        @click="openDetailsViewer(contextMenu.item); hideContextMenu();">
+                        View Details
+                    </a>
+                </li>
+                <!-- Add Extend option for any user with broca balance -->
+                <li v-if="contextMenu.type === 'file' && account">
+                    <a class="dropdown-item py-1" href="#"
+                        @click="openExtensionDialog(contextMenu.item); hideContextMenu();">
+                        Extend Contract
+                    </a>
+                </li>
+                <!-- Add Store option for storage node operators who aren't storing this file -->
+                <li
+                    v-if="contextMenu.type === 'file' && hasStorage() && contract[contextMenu.item?.i] && !isStored(contract[contextMenu.item.i])">
+                    <a class="dropdown-item py-1" href="#" @click="store(contextMenu.item, false); hideContextMenu();">
+                        Store File
+                    </a>
+                </li>
+                <!-- Add Remove option for storage node operators who are storing this file -->
+                <li
+                    v-if="contextMenu.type === 'file' && hasStorage() && contract[contextMenu.item?.i] && isStored(contract[contextMenu.item.i])">
+                    <a class="dropdown-item py-1" href="#" @click="store(contextMenu.item, true); hideContextMenu();">
+                        Remove File from Storage
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </Teleport>
+    <!-- Metadata Editor Overlay -->
+    <Teleport to="body">
+        <div v-if="showMetadataEditor" class="metadata-editor-overlay d-flex justify-content-center align-items-center"
+            @click.self="closeMetadataEditor"
+            style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.7); z-index: 1050;">
 
-<!-- Metadata Editor Overlay -->
-<Teleport to="body">
-    <div v-if="showMetadataEditor" 
-         class="metadata-editor-overlay d-flex justify-content-center align-items-center"
-         @click.self="closeMetadataEditor" 
-         style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.7); z-index: 1050;">
-        
-        <div class="bg-dark text-white p-4 rounded shadow-lg" style="min-width: 400px; max-width: 90%;">
-            <h5 class="mb-3">Edit Metadata for: <code class="text-info">{{ fileToEditMetadata?.n || fileToEditMetadata?.f }}</code></h5>
-            
-            <!-- Labels -->
-            <div class="mb-3">
-                <label class="form-label">Labels</label>
-                <choices-vue ref="editLabelsChoices" 
-                             prop_type="labels" 
-                             :prop_selections="tempMetadata.labels" 
-                             @data="handleTempLabel"></choices-vue>
-            </div>
+            <div class="bg-dark text-white p-4 rounded shadow-lg" style="min-width: 400px; max-width: 90%;">
+                <h5 class="mb-3">Edit Metadata for: <code
+                        class="text-info">{{ fileToEditMetadata?.n || fileToEditMetadata?.f }}</code></h5>
 
-            <!-- License -->
-            <div class="mb-3">
-                <label class="form-label">License <a href="https://creativecommons.org/share-your-work/cclicenses/" target="_blank"><i class="fa-solid fa-section fa-xs"></i></a></label>
-                 <choices-vue ref="editLicenseChoices" 
-                              prop_type="license" 
-                              :prop_selections="tempMetadata.license" 
-                              :prop_max_items="1" 
-                              @data="handleTempLic"></choices-vue>
-            </div>
+                <!-- Labels -->
+                <div class="mb-3">
+                    <label class="form-label">Labels</label>
+                    <choices-vue ref="editLabelsChoices" prop_type="labels" :prop_selections="tempMetadata.labels"
+                        @data="handleTempLabel"></choices-vue>
+                </div>
 
-            <!-- Flags -->
-            <div class="mb-3">
-                 <label class="form-label">Flags</label>
-                 <choices-vue ref="editFlagsChoices" 
-                              :prop_options="availableFlags" 
-                              :prop_selections="tempMetadata.flags"
-                              @data="handleTempFlag"></choices-vue>
-            </div>
+                <!-- License -->
+                <div class="mb-3">
+                    <label class="form-label">License <a href="https://creativecommons.org/share-your-work/cclicenses/"
+                            target="_blank"><i class="fa-solid fa-section fa-xs"></i></a></label>
+                    <choices-vue ref="editLicenseChoices" prop_type="license" :prop_selections="tempMetadata.license"
+                        :prop_max_items="1" @data="handleTempLic"></choices-vue>
+                </div>
 
-            <!-- Actions -->
-            <div class="d-flex justify-content-end mt-4">
-                <button class="btn btn-secondary me-2" @click="closeMetadataEditor">Cancel</button>
-                <button class="btn btn-primary" @click="saveMetadataChanges">Save Changes</button>
+                <!-- Flags -->
+                <div class="mb-3">
+                    <label class="form-label">Flags</label>
+                    <choices-vue ref="editFlagsChoices" :prop_options="availableFlags"
+                        :prop_selections="tempMetadata.flags" @data="handleTempFlag"></choices-vue>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex justify-content-end mt-4">
+                    <button class="btn btn-secondary me-2" @click="closeMetadataEditor">Cancel</button>
+                    <button class="btn btn-primary" @click="saveMetadataChanges">Save Changes</button>
+                </div>
             </div>
         </div>
-    </div>
-</Teleport>
+    </Teleport>
+    <!-- Added: Details Viewer Overlay -->
+    <Teleport to="body">
+        <div v-if="showDetailsViewer && detailsData"
+            class="details-viewer-overlay d-flex justify-content-center align-items-center"
+            @click.self="closeDetailsViewer"
+            style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.8); z-index: 1055; overflow-y: auto; padding: 20px;">
 
-<!-- Added: Details Viewer Overlay -->
-<Teleport to="body">
-    <div v-if="showDetailsViewer && detailsData"
-         class="details-viewer-overlay d-flex justify-content-center align-items-center"
-         @click.self="closeDetailsViewer"
-         style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.8); z-index: 1055; overflow-y: auto; padding: 20px;">
+            <div class="bg-dark text-white p-4 rounded shadow-lg" style="min-width: 500px; max-width: 800px;">
+                <h5 class="mb-3 border-bottom pb-2">File Details: <code
+                        class="text-info">{{ detailsData.file.name }}</code>
+                </h5>
 
-        <div class="bg-dark text-white p-4 rounded shadow-lg" style="min-width: 500px; max-width: 800px;">
-            <h5 class="mb-3 border-bottom pb-2">File Details: <code class="text-info">{{ detailsData.file.name }}</code></h5>
+                <div class="row">
+                    <!-- File Info Column -->
+                    <div class="col-md-6 mb-3">
+                        <h6>File Information</h6>
+                        <ul class="list-unstyled small">
+                            <li><strong>CID:</strong> <code class="text-break">{{ detailsData.file.cid }}</code> <i
+                                    class="fa-regular fa-copy fa-fw ms-1" role="button"
+                                    @click="copyText(detailsData.file.cid)"></i></li>
+                            <li><strong>Owner:</strong> @{{ detailsData.file.owner }}</li>
+                            <li><strong>Size:</strong> {{ detailsData.file.size }}</li>
+                            <li><strong>Path:</strong> {{ detailsData.file.path || '/' }}</li>
+                            <li><strong>Type:</strong> {{ detailsData.file.type }}</li>
+                            <li><strong>Encrypted:</strong> {{ detailsData.file.encrypted ? 'Yes' : 'No' }}</li>
+                            <li><strong>Created:</strong> {{ detailsData.file.creationTime }} (Block: {{
+                                detailsData.file.creationBlock }})</li>
+                            <li><strong>Review/Expire:</strong>{{ detailsData.file.expirationTime }} (Block {{
+                                detailsData.file.expirationBlock }})</li>
+                            <li><span class="text-muted">...Empties Trash</span></li>
+                            <li v-if="detailsData.file.thumbCid"><strong>Thumbnail CID:</strong> <code
+                                    class="text-break">{{ detailsData.file.thumbCid }}</code> <i
+                                    class="fa-regular fa-copy fa-fw ms-1" role="button"
+                                    @click="copyText(detailsData.file.thumbCid)"></i></li>
+                            <li v-if="detailsData.file.thumbData" class="mt-2">
+                                <strong>Thumbnail:</strong><br>
+                                <img :src="detailsData.file.thumbData" class="img-fluid mt-1 border rounded"
+                                    style="max-height: 100px; max-width: 100px; object-fit: contain;" />
+                            </li>
+                            <li v-if="detailsData.file.flags.length > 0" class="mt-2">
+                                <strong>Flags:</strong>
+                                <span v-for="flag in detailsData.file.flags" :key="flag.l" class="ms-2">
+                                    <i :class="flag.fa" :title="flag.l"></i>
+                                </span>
+                            </li>
+                            <li v-if="detailsData.file.labels.length > 0" class="mt-2">
+                                <strong>Labels:</strong>
+                                <span v-for="label in detailsData.file.labels" :key="label.l" class="ms-2">
+                                    <i :class="label.fa" :title="label.l"></i>
+                                </span>
+                            </li>
+                            <li v-if="detailsData.file.license" class="mt-2">
+                                <strong>License:</strong> {{ detailsData.file.license.name }}
+                                <span v-for="lic in detailsData.file.license.fa" :key="lic.l" class="ms-1">
+                                    <i :class="lic.fa" :title="lic.l"></i>
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
 
-            <div class="row">
-                <!-- File Info Column -->
-                <div class="col-md-6 mb-3">
-                    <h6>File Information</h6>
-                    <ul class="list-unstyled small">
-                        <li><strong>CID:</strong> <code class="text-break">{{ detailsData.file.cid }}</code> <i class="fa-regular fa-copy fa-fw ms-1" role="button" @click="copyText(detailsData.file.cid)"></i></li>
-                        <li><strong>Owner:</strong> @{{ detailsData.file.owner }}</li>
-                        <li><strong>Size:</strong> {{ detailsData.file.size }}</li>
-                        <li><strong>Path:</strong> {{ detailsData.file.path || '/' }}</li>
-                        <li><strong>Type:</strong> {{ detailsData.file.type }}</li>
-                        <li><strong>Encrypted:</strong> {{ detailsData.file.encrypted ? 'Yes' : 'No' }}</li>
-                        <li><strong>Created:</strong> {{ detailsData.file.creationTime }} (Block: {{ detailsData.file.creationBlock }})</li>
-                        <li><strong>Review/Expire:</strong>{{ detailsData.file.expirationTime }} (Block {{ detailsData.file.expirationBlock }})</li>
-                        <li><span class="text-muted">...Empties Trash</span></li>
-                        <li v-if="detailsData.file.thumbCid"><strong>Thumbnail CID:</strong> <code class="text-break">{{ detailsData.file.thumbCid }}</code> <i class="fa-regular fa-copy fa-fw ms-1" role="button" @click="copyText(detailsData.file.thumbCid)"></i></li>
-                        <li v-if="detailsData.file.thumbData" class="mt-2">
-                            <strong>Thumbnail:</strong><br>
-                            <img :src="detailsData.file.thumbData" class="img-fluid mt-1 border rounded" style="max-height: 100px; max-width: 100px; object-fit: contain;" />
-                        </li>
-                        <li v-if="detailsData.file.flags.length > 0" class="mt-2">
-                            <strong>Flags:</strong>
-                            <span v-for="flag in detailsData.file.flags" :key="flag.l" class="ms-2">
-                                <i :class="flag.fa" :title="flag.l"></i>
-                            </span>
-                        </li>
-                        <li v-if="detailsData.file.labels.length > 0" class="mt-2">
-                            <strong>Labels:</strong>
-                            <span v-for="label in detailsData.file.labels" :key="label.l" class="ms-2">
-                                <i :class="label.fa" :title="label.l"></i>
-                            </span>
-                        </li>
-                         <li v-if="detailsData.file.license" class="mt-2">
-                            <strong>License:</strong> {{ detailsData.file.license.name }}
-                            <span v-for="lic in detailsData.file.license.fa" :key="lic.l" class="ms-1">
-                                <i :class="lic.fa" :title="lic.l"></i>
-                            </span>
-                        </li>
-                    </ul>
+                    <!-- Contract Info Column -->
+                    <div class="col-md-6 mb-3">
+                        <h6>Contract Information</h6>
+                        <ul class="list-unstyled small">
+                            <li><strong>Contract ID:</strong> <code
+                                    class="text-break">{{ detailsData.contract.id }}</code>
+                                <i class="fa-regular fa-copy fa-fw ms-1" role="button"
+                                    @click="copyText(detailsData.contract.id)"></i>
+                            </li>
+                            <li><strong>Contract Owner:</strong> @{{ detailsData.contract.owner }}</li>
+                            <li><strong>Storage Nodes:</strong>
+                                <div v-for="node in detailsData.contract.nodes" :key="node">@{{ node }}</div>
+                            </li>
+                            <li><strong>Incentivized Nodes:</strong> {{ detailsData.contract.prominence }} </li>
+                            <li><strong>Pay Scale:</strong> {{ detailsData.contract.payScale }} </li>
+                            <li><strong>Price/Month:</strong> {{ detailsData.contract.cost }} BROCA </li>
+                            <li><strong>Total Size Stored:</strong> {{ detailsData.contract.totalSizeStored }}</li>
+                            <li><strong>Auto-Renew:</strong> {{ detailsData.contract.autoRenew ? 'Yes' : 'No' }}</li>
+                            <li><strong>Contract Encrypted:</strong> {{ detailsData.contract.encrypted ? 'Yes' : 'No' }}
+                            </li>
+                            <li v-if="detailsData.contract.encryptionAccounts.length > 0">
+                                <strong>Encrypted For:</strong>
+                                <ul>
+                                    <li v-for="acc in detailsData.contract.encryptionAccounts" :key="acc">@{{ acc }}
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
 
-                <!-- Contract Info Column -->
-                <div class="col-md-6 mb-3">
-                     <h6>Contract Information</h6>
-                     <ul class="list-unstyled small">
-                        <li><strong>Contract ID:</strong> <code class="text-break">{{ detailsData.contract.id }}</code> <i class="fa-regular fa-copy fa-fw ms-1" role="button" @click="copyText(detailsData.contract.id)"></i></li>
-                        <li><strong>Contract Owner:</strong> @{{ detailsData.contract.owner }}</li>
-                        <li><strong>Storage Nodes:</strong> <div v-for="node in detailsData.contract.nodes" :key="node">@{{ node }}</div></li>
-                        <li><strong>Incentivized Nodes:</strong> {{ detailsData.contract.prominence }} </li>
-                        <li><strong>Pay Scale:</strong> {{ detailsData.contract.payScale }} </li>
-                        <li><strong>Price/Month:</strong> {{ detailsData.contract.cost }} BROCA </li>
-                        <li><strong>Total Size Stored:</strong> {{ detailsData.contract.totalSizeStored }}</li>
-                        <li><strong>Auto-Renew:</strong> {{ detailsData.contract.autoRenew ? 'Yes' : 'No' }}</li>
-                        <li><strong>Contract Encrypted:</strong> {{ detailsData.contract.encrypted ? 'Yes' : 'No' }}</li>
-                        <li v-if="detailsData.contract.encryptionAccounts.length > 0">
-                             <strong>Encrypted For:</strong>
-                             <ul>
-                                <li v-for="acc in detailsData.contract.encryptionAccounts" :key="acc">@{{ acc }}</li>
-                             </ul>
-                        </li>
-                     </ul>
+                <!-- Actions -->
+                <div class="d-flex justify-content-end mt-3 border-top pt-3">
+                    <button class="btn btn-secondary" @click="closeDetailsViewer">Close</button>
                 </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="d-flex justify-content-end mt-3 border-top pt-3">
-                <button class="btn btn-secondary" @click="closeDetailsViewer">Close</button>
             </div>
         </div>
-    </div>
-</Teleport>
+    </Teleport>
+    <!-- Extension Dialog Overlay -->
+    <Teleport to="body">
+        <div v-if="showExtensionDialog"
+            class="extension-dialog-overlay d-flex justify-content-center align-items-center"
+            @click.self="closeExtensionDialog"
+            style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.7); z-index: 1060;">
 
-<!-- Save Changes Footer -->
-<div v-if="Object.keys(pendingChanges).length > 0" class="border-top bg-dark mt-3 p-3 d-flex justify-content-end">
-  <button 
-    class="btn btn-warning me-2" 
-    @click="saveChanges" 
-    :disabled="updatesPayloadTooLarge"
-    :title="updatesPayloadTooLarge ? 'Payload size exceeds the maximum allowed size (7500 bytes)' : ''"
-  >
-    Save Changes ({{ Object.keys(pendingChanges).length }} contracts, ~{{ Math.round(updatesPayloadSize / 1024 * 10) / 10 }}KB)
-    <span v-if="updatesPayloadTooLarge" class="text-danger ms-1">
-        <i class="fa-solid fa-exclamation-triangle"></i>
-    </span>
-  </button>
-  <button class="btn btn-secondary" @click="revertPendingChanges">Revert Pending Changes</button>
-</div>
+            <div class="bg-dark text-white p-4 rounded shadow-lg" style="min-width: 400px; max-width: 90%;">
+                <h5 class="mb-3">Extend Contract: <code class="text-info">{{ extensionFile?.i }}</code></h5>
 
-<!-- Extension Dialog Overlay -->
-<Teleport to="body">
-    <div v-if="showExtensionDialog" 
-         class="extension-dialog-overlay d-flex justify-content-center align-items-center"
-         @click.self="closeExtensionDialog" 
-         style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.7); z-index: 1060;">
-        
-        <div class="bg-dark text-white p-4 rounded shadow-lg" style="min-width: 400px; max-width: 90%;">
-            <h5 class="mb-3">Extend Contract: <code class="text-info">{{ extensionFile?.i }}</code></h5>
-            
-            <div class="mb-3">
-                <label class="form-label">Extension Period (days)</label>
-                <div class="d-flex align-items-center">
-                    <input type="range" class="form-range flex-grow-1 me-2" min="7" max="90" step="7" v-model="extensionDays">
-                    <span class="badge bg-primary">{{ extensionDays }} days</span>
+                <div class="mb-3">
+                    <label class="form-label">Extension Period (days)</label>
+                    <div class="d-flex align-items-center">
+                        <input type="range" class="form-range flex-grow-1 me-2" min="7" max="90" step="7"
+                            v-model="extensionDays">
+                        <span class="badge bg-primary">{{ extensionDays }} days</span>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label">BROCA Cost</label>
-                <div class="input-group">
-                    <input type="number" class="form-control" v-model="extensionAmount" min="1" :max="brocaBalance">
-                    <span class="input-group-text">BROCA (max: {{ brocaBalance }})</span>
+
+                <div class="mb-3">
+                    <label class="form-label">BROCA Cost</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" v-model="extensionAmount" min="1" :max="brocaBalance">
+                        <span class="input-group-text">BROCA (max: {{ brocaBalance }})</span>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="d-flex justify-content-end mt-4">
-                <button class="btn btn-secondary me-2" @click="closeExtensionDialog">Cancel</button>
-                <button class="btn btn-primary" @click="confirmExtension" :disabled="extensionAmount <= 0 || extensionAmount > brocaBalance">
-                    Extend Contract
-                </button>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <button class="btn btn-secondary me-2" @click="closeExtensionDialog">Cancel</button>
+                    <button class="btn btn-primary" @click="confirmExtension"
+                        :disabled="extensionAmount <= 0 || extensionAmount > brocaBalance">
+                        Extend Contract
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-</Teleport>
-
-</div>
-   `,
+    </Teleport>
+</div>`,
     props: {
         signedtx: Array,
         assets: {
