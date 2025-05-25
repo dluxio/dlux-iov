@@ -4733,6 +4733,13 @@ export default {
             
             this.showExtensionDialog = true;
         },
+        handleGlobalDragEnd() {
+            const filesDiv = this.$refs.container?.querySelector('.files.drag-over-active');
+            if (filesDiv) {
+                filesDiv.classList.remove('drag-over-active');
+                console.log('Cleaned up drag-over-active on global dragend');
+            }
+        },
     },
     computed: {
         hasFiles() {
@@ -4923,9 +4930,11 @@ export default {
                 this.endSelectionBox();
             }
         });
+        document.documentElement.addEventListener('dragend', this.handleGlobalDragEnd);
     },
     beforeUnmount() {
         // Clean up event listeners
         window.removeEventListener('mouseup', this.endSelectionBox);
+        document.documentElement.removeEventListener('dragend', this.handleGlobalDragEnd);
     }
 };
