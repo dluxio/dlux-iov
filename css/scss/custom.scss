@@ -19,7 +19,10 @@
 body {
   background-color: $dark-2;
 }
-
+.files.drag-over-active {
+  background-color: rgba(0, 123, 255, 0.1) !important; /* A light blue, adjust as needed */
+  border: 2px dashed #007bff !important; /* A dashed blue border */
+}
 #app {
   overflow: visible;
 }
