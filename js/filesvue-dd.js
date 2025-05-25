@@ -14,12 +14,12 @@ export default {
     template: `<div ref="container" class="d-flex flex-grow-1 flex-column rounded">
     <!-- warning message -->
     <div v-if="computedData.usedBytes > computedData.availableBytes">
-        <div class="alert alert-warning d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 bg-img-none align-items-center mb-3"
+        <div class="alert alert-warning d-flex text-center text-lg-start flex-column flex-lg-row gap-2 gap-lg-3 align-items-center mb-3"
             role="alert">
             <i class="fa-solid fa-triangle-exclamation fa-fw text-warning m-1 fs-1"></i>
             <div class="d-flex flex-column">
-                <p class="lead">You are out of storage space! Power Up BROCA to increase your storage. </p>
-                <p class="text-white-50">File pinning contracts may not renew when the initial 30 days expires due
+                <p class="lead text-light">You are out of storage space! Power Up BROCA to increase your storage. </p>
+                <p class="text-light">File pinning contracts may not renew when the initial 30 days expires due
                     to insufficient resource credits. Files that no longer have valid pinning contracts will be
                     garbage collected and removed. <a class="text-info no-decoration" href="#" data-bs-toggle="modal"
                         data-bs-target="#contractsModal">Power up Broca and turn on
