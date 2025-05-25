@@ -3065,17 +3065,17 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <!-- drive tab -->
-                    <div role="tabpanel" ref="driveTab" class="tab-pane fade" id="drive" aria-labelledby="drivetab">
-                        <div class="container card bg-img-none px-1 px-md-3 mb-4"
-                            style="background-color: rgba(61, 61, 61, 0.708);">
-                            <div class="my-3">
-                                <div>
-                                    <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
-                                        :mypfp="mypfp" :protocol="protocol.broca" :stats="spkStats"
-                                        @tosign="toSign = $event" :prop_contracts="contracts" :accountinfo="accountinfo"
-                                        :spkapi="spkapi" @done="getSapi"></contract-vue>
+                        <!-- drive tab -->
+                        <div role="tabpanel" ref="driveTab" class="tab-pane fade" id="drive" aria-labelledby="drivetab">
+                            <div class="container card bg-img-none px-1 px-md-3 mb-4"
+                                style="background-color: rgba(61, 61, 61, 0.708);">
+                                <div class="my-3">
+                                    <div>
+                                        <contract-vue v-if="reloaded" :nodeview="false" :account="pageAccount"
+                                            :mypfp="mypfp" :protocol="protocol.broca" :stats="spkStats"
+                                            @tosign="toSign = $event" :prop_contracts="contracts" :accountinfo="accountinfo"
+                                            :spkapi="spkapi" @done="getSapi"></contract-vue>
+                                    </div>
                                 </div>
                             </div>
                         </div>
