@@ -138,13 +138,8 @@ createApp({
         ACTcost: 0,
       },
       dotEnv: "",
-      dotEnvTemplate: `domain=$DOMAIN
-account=$ACCOUNT
-active=
-msowner=$OWNER
-mspublic=$PUBOWNER
-PORT=3000
-`,
+      dotEnvTemplate: `domain=$DOMAIN\naccount=$ACCOUNT\nactive=\nmsowner=$OWNER\nmspublic=$PUBOWNER\nPORT=3000\n`,
+      configText: ``, // Restored: Original content unknown, left as empty.
       newToken: {
         token: "",
         longname: "",
@@ -224,7 +219,7 @@ PORT=3000
           FEATDROP: false,
           IPFSRATE: 0,
           BUDGETRATE: 0,
-          CURRATIONRATE: 0,
+          CURRATIONRATE: 0, // Note: "CURRATIONRATE" might be a typo for "CURATIONRATE"
           DELEGATIONRATE: 0,
           MARKETINGRATE: 0,
           MAXBUDGET: 0,
@@ -246,1305 +241,36 @@ PORT=3000
           ICON: "",
           DES: "",
           WP: "",
-
         },
-        configText: `require("dotenv").config()
-        const { getPathObj, getPathNum } = require("./getPathObj")
-        const { store } = require("./index");
-        const { chronAssign } = require("./lil_ops")
-        const ENV = process.env;
-        const username = ENV.account || "$LEADER";
-        const active = ENV.active || "";
-        const follow = ENV.follow || "$LEADER";
-        const msowner = ENV.msowner || "";
-        const mspublic = ENV.mspublic || "";
-        const memoKey = ENV.memo || "";
-        const hookurl = ENV.discordwebhook || "";
-        const NODEDOMAIN = ENV.domain || "$MAINAPI"
-        const acm = ENV.account_creator || false 
-        const mirror = ENV.mirror || false
-        const port = ENV.PORT || 3001
-        const pintoken = ENV.pintoken || ""
-        const pinurl = ENV.pinurl || ""
-        const status = ENV.status || true
-        const dbcs = ENV.DATABASE_URL || ""
-        const dbmods = ENV.DATABASE_MODS || []
-        const typeDefs = ENV.APPTYPES || {}
-        const history = ENV.history || 3600
-        const stream = ENV.stream || "irreversible"
-        const mode = ENV.mode || "normal"
-        const timeoutStart = ENV.timeoutStart || 180000;
-        const timeoutContinuous = ENV.timeoutContinuous || 30000;
-        
-        // testing configs for replays
-        const override = ENV.override || 0 //69116600 //will use standard restarts after this blocknumber
-        const engineCrank = ENV.startingHash || "QmconUD3faVGbgC2jAXRiueEuLarjfaUiDz5SA74kptuvu" //but this state will be inserted before
-        
-        const ipfshost = ENV.ipfshost || "127.0.0.1" //IPFS upload/download provider provider
-        const ipfsport = ENV.ipfsport || "5001" //IPFS upload/download provider provider
-        const ipfsprotocol = ENV.ipfsprotocol || "http" //IPFS upload/download protocol
-        var ipfsLinks = ENV.ipfsLinks
-          ? ENV.ipfsLinks.split(" ")
-          : [
-              \`\${ipfsprotocol}://\${ipfshost}:\${ipfsport}/ipfs/\`,
-              "https://ipfs.dlux.io/ipfs/",
-              "https://ipfs.3speak.tv/ipfs/",
-              "https://infura-ipfs.io/ipfs/",
-              "https://ipfs.alloyxuast.co.uk/ipfs/",
-            ];
-        
-        const bidRate = ENV.BIDRATE || 2500 //
-        
-        //HIVE CONFIGS
-        var startURL = ENV.STARTURL || "https://hive-api.dlux.io/";
-        var clientURL = ENV.APIURL || "https://hive-api.dlux.io/";
-        const clients = ENV.clients
-          ? ENV.clients.split(" ")
-          : [
-              "https://hive-api.dlux.io/",
-              "https://api.deathwing.me/",
-              "https://api.hive.blog/",
-              "https://rpc.ecency.com/",
-              "https://hived.emre.sh/",
-              "https://rpc.ausbit.dev/",
-            ];
-        
-        //!!!!!!! -- THESE ARE COMMUNITY CONSTANTS -- !!!!!!!!!//
-        //TOKEN CONFIGS -- ALL COMMUNITY RUNNERS NEED THESE SAME VALUES
-        const starting_block = $STARTINGBLOCK
-        const prefix = "$PREFIX"
-        const TOKEN = "$TOKEN"
-        const precision = $PRECISION
-        const tag = "$TAG"
-        const jsonTokenName = "$JSONTOKEN"
-        const leader = "$LEADER" 
-        const ben = "$BEN"
-        const delegation = "$DEL"
-        const delegationWeight = $DELW
-        const msaccount = "$MS"
-        const msPubMemo = "$MSPUBMEMO"
-        const msPriMemo = "$MSPRIMEMO"
-        const msmeta = ""
-        const mainAPI = "$MAINAPI"
-        const mainRender = "$MAINRENDER"
-        const mainFE = "$MAINFE"
-        const mainIPFS = "$MAINIPFS"
-        const mainICO = "$MAINICO"
-        const footer = "\n$FOOTER";
-        const hive_service_fee = $HIVESERVICEFEE
-        const features = {
-            pob: $FEATPOB,
-            delegate: $FEATDEL,
-            daily: $FEATDAILY,
-            liquidity: $FEATLIQ,
-            ico: $FEATICO,
-            inflation: $FEATINF,
-            dex: $FEATDEX,
-            nft: $FEATNFT,
-            state: $FEATSTATE,
-            claimdrop: $FEATDROP
-        }
-        
-        const CustomJsonProcessing = []
-        const CustomOperationsProcessing = []
-        const CustomAPI = []
-        const CustomChron = []
-        const stateStart = {
-          "balances": {
-              "ra": 0,
-              "rb": 0,
-              "rc": 0,
-              "rd": 0,
-              "re": 0,
-              "ri": 0,
-              "rm": 0,
-              "rn": 0,
-              "rr": 0
-          },
-          "delegations": {},
-          "dex": {
-              "hbd": {
-                  "tick": "0.012500",
-                  "buyBook": ""
-              },
-              "hive": {
-                  "tick": "0.100000",
-                  "buyBook": ""
-              }
-          },
-          "gov": {
-              ["$LEADER"]: 1,
-              "t": 1 
-          },
-          "markets": {
-              "node": {
-                  ["$LEADER"]: {
-                      "attempts": 0,
-                      "bidRate": 2000,
-                      "contracts": 0,
-                      "domain": $"MAINAPI",
-                      "escrow": true,
-                      "escrows": 0,
-                      "lastGood": $STARTINGBLOCK,
-                      "marketingRate": 0,
-                      "self": ["$LEADER"],
-                      "wins": 0,
-                      "yays": 0
-                  }
-              }
-          },
-          "pow": {
-              ["$LEADER"]: 0,
-              "t": 0
-          },
-          "queue": {
-              "0": ["$LEADER"]
-          },
-          "runners": {
-              ["$LEADER"]: {
-                  "g": 1,
-              }
-          },
-          "stats": {
-              "IPFSRate": $IPFSRATE,
-              "budgetRate": $BUDGETRATE,
-              "currationRate": $CURRATIONRATE,
-              "delegationRate": $DELEGATIONRATE,
-              "hashLastIBlock": "Genesis",
-              "icoPrice": 0, 
-              "interestRate": $APYINT,
-              "lastBlock": "",
-              "marketingRate": $MARKETINGRATE,
-              "maxBudget": $MAXBUDGET,
-              "MSHeld":{
-                  "HIVE": $HIVEBAL,
-                  "HBD": $HBDBAL
-              }, 
-              "nodeRate": $NODERATE,
-              "outOnBlock": 0,
-              "savingsRate": $SAVINGSRATE,
-              "tokenSupply": $TOKENSUPPLY
-          }
-        }
-        
-        const featuresModel = {
-          claim_id: "drop_claim",
-          claim_S: "Airdrop",
-          claim_B: false,
-          claim_json: "drop_claim",
-          rewards_id: "claim",
-          rewards_S: "Rewards",
-          rewards_B: true,
-          rewards_json: "claim",
-          rewardSel: false,
-          reward2Gov: true,
-          send_id: "send",
-          send_S: "Send",
-          send_B: true,
-          send_json: "send",
-          powup_id: "power_up",
-          powup_B: false,
-          pow_val: "",
-          powdn_id: "power_down",
-          powdn_B: false,
-          powsel_up: false,
-          govup_id: "gov_up",
-          govup_B: true,
-          gov_val: "",
-          govsel_up: true,
-          govdn_id: "gov_down",
-          govdn_B: true,
-          node: {
-            id: "node_add",
-            enabled: true,
-            opts: [
-              {
-                S: "Domain",
-                type: "text",
-                info: "https://no-trailing-slash.com",
-                json: "domain",
-                val: "",
-              },
-              {
-                S: "DEX Fee Vote",
-                type: "number",
-                info: "500 = .5%",
-                max: 1000,
-                min: 0,
-                json: "bidRate",
-                val: "",
-              },
-              {
-                S: "DEX Max Vote",
-                type: "number",
-                info: "10000 = 100%",
-                max: 10000,
-                min: 0,
-                json: "dm",
-                val: "",
-              },
-              {
-                S: "DEX Slope Vote",
-                type: "number",
-                info: "10000 = 100%",
-                max: 10000,
-                min: 0,
-                json: "ds",
-                val: "",
-              },
-            ],
-          },
-          nft: [
-            {
-              id: "ft_sell",
-              enabled: true,
-              props: [
-                {
-                  name: "set",
-                  type: "string",
-                  help: "Set the FT to buy",
-                },
-                {
-                  name: "uid",
-                  type: "string",
-                  help: "UID of the FT to buy",
-                },
-                {
-                  name: "bid_amount",
-                  type: "number",
-                  help: \`milli$TOKEN\`,
-                },
-              ],
-            },
-            {
-              id: "ft_buy",
-              enabled: true,
-              props: [
-                {
-                  name: "set",
-                  type: "string",
-                  help: "Set the FT to buy",
-                },
-                {
-                  name: "uid",
-                  type: "string",
-                  help: "UID of the FT to buy",
-                },
-              ],
-            },
-            {
-              id: "nft_sell_cancel",
-              enabled: true,
-              props: [
-                {
-                  name: "set",
-                  type: "string",
-                  help: "Set the FT to cancel sell",
-                },
-                {
-                  name: "uid",
-                  type: "string",
-                  help: "UID of the FT to cancel sell",
-                },
-              ],
-            },
-            {
-              id: "ft_sell_cancel",
-              enabled: true,
-              props: [
-                {
-                  name: "set",
-                  type: "string",
-                  help: "Set the FT to cancel sell",
-                },
-                {
-                  name: "uid",
-                  type: "string",
-                  help: "UID of the FT to cancel sell",
-                },
-              ],
-            },
-            {
-              id: "ft_auction",
-              enabled: true,
-              props: [
-                {
-                  name: "set",
-                  type: "string",
-                  help: "Set the NFT to be auctioned",
-                },
-                {
-                  name: "uid",
-                  type: "string",
-                  help: "UID of the NFT to be auctioned",
-                },
-                {
-                  name: "price",
-                  type: "number",
-                  help: "milliTYPE",
-                },
-                {
-                  name: "type",
-                  type: "string",
-                  help: "HIVE or HBD",
-                },
-                {
-                  name: "time",
-                  type: "number",
-                  help: "Number of Days, 7 Max.",
-                },
-              ],
-            },
-            {
-              id: "ft_bid",
-              enabled: true,
-              props: [
-                {
-                  name: "set",
-                  type: "string",
-                  help: "Set the NFT to be bid on",
-                },
-                {
-                  name: "uid",
-                  type: "string",
-                  help: "UID of the NFT to be bid on",
-                },
-                {
-                  name: "bid_amount",
-                  type: "number",
-                  help: \`milli$TOKEN\`,
-                },
-              ],
-            },
-            {
-              id: "nft_hauction",
-              enabled: false,
-              props: [
-                {
-                  name: "set",
-                  type: "string",
-                  help: "Set the NFT to be auctioned",
-                },
-                {
-                  name: "uid",
-                  type: "string",
-                  help: "UID of the NFT to be auctioned",
-                },
-                {
-                  name: "price",
-                  type: "number",
-                  help: "milliTYPE",
-                },
-                {
-                  name: "type",
-                  type: "string",
-                  help: "HIVE or HBD",
-                },
-                {
-                  name: "time",
-                  type: "number",
-                  help: "Number of Days, 7 Max.",
-                },
-              ],
-            },
-            {
-              id: "fth_buy",
-              enabled: true,
-              props: [
-                {
-                  name: "amount",
-                  type: "number",
-                  help: \`milli$TOKEN\`,
-                },
-                {
-                  name: "qty",
-                  type: "number",
-                  help: "Purchase Quantity",
-                },
-                {
-                  name: "set",
-                  type: "string",
-                  help: "Set Name",
-                },
-                {
-                  name: "item",
-                  type: "string",
-                  help: "contract name",
-                },
-              ],
-            },
-          ]
-        }
-        const adverts = [
-            $ADVERTS
-        ]     
-        const detail = {
-                        name: "$LONGNAME",
-                        symbol: $TOKEN,
-                        icon: "$ICON",
-                        supply:"$TOKENSUPPLY",
-                        wp:"$WP",
-                        ws:"$MAINFE",
-                        be:"https://hiveblockexplorer.com/",
-                        text: "$DES"
-                    }
-        
-        let config = {
-          username,
-            active,
-            msowner,
-            mspublic,
-            memoKey,
-            timeoutContinuous,
-            timeoutStart,
-            follow,
-            NODEDOMAIN,
-            hookurl,
-            status,
-            history,
-            dbcs,
-            dbmods,
-            typeDefs,
-            mirror,
-            bidRate,
-            engineCrank,
-            port,
-            pintoken,
-            pinurl,
-            clientURL,
-            startURL,
-            clients,
-            acm,
-            override,
-            ipfshost,
-            ipfsprotocol,
-            ipfsport,
-            ipfsLinks,
-            starting_block,
-            prefix,
-            leader,
-            msaccount,
-            msPubMemo,
-            msPriMemo,
-            msmeta,
-            ben,
-            adverts,
-            delegation,
-            delegationWeight,
-            TOKEN,
-            precision,
-            tag,
-            mainAPI,
-            jsonTokenName,
-            mainFE,
-            mainRender,
-            mainIPFS,
-            mainICO,
-            detail,
-            footer,
-            hive_service_fee,
-            features,
-            stream,
-            mode,
-            featuresModel,
-            CustomJsonProcessing,
-            CustomOperationsProcessing,
-            CustomAPI,
-            CustomChron,
-            stateStart
-        };
-        
-        module.exports = config;
-        `,
+      }, // End of newToken
+      // Restored/maintained properties:
+      displayPost: {
+        item: null,
+        index: null
       },
+      posturls: {},
       disablePost: true,
       inventory: true,
       mypfp: '/img/no-user.png',
-      File: [],
-      FileInfo: {},
-      postTitle: "",
-      postBody: "",
-      postTags: "",
-      postPermlink: "",
-      postCustom_json: {
-        "app": "dlux/0.1.0",
-        "xr": true,
-        "Hash360": "",
-        "format": "markdown",
-        "assets": [
-        ],
-        "tags": [
-          "dlux"
-        ],
-        "vrHash": "blog"
-      },
-      nftTradeTabTo: "",
-      reloaded: true,
-      nftTradeTabToken: "",
-      nftTradeTabPrice: 0,
-      nftSellTabToken: "",
-      nftSellTabPrice: 0,
-      nftAuctionTabToken: "",
-      nftAuctionTabPrice: 0,
-      nftAuctionTabTime: 0,
-      transferMint: false,
-      transferModal: {},
-      transferTabTo: "",
       toSign: {},
-      account: user,
-      focusItem: {
-        token: "dlux",
-      },
-      FTtrades: [],
-      NFTtrades: [],
-      FTmenu: {
-        to: "",
-        amount: 0,
-      },
-      NFTmenu: {
-        to: "",
-        amount: 0,
-      },
-      providers: [
-        { api: "https://token.dlux.io", token: "dlux" },
-        { api: "https://inconceivable.hivehoneycomb.com", token: "duat" },
-      ],
-      scripts: {},
-      nftscripts: {},
-      types: 'ts,img',
-      baseScript: {},
-      NFTs: [],
-      rNFTs: [],
-      allNFTs: [],
-      saleNFTs: [],
-      auctionNFTs: [],
-      itemModal: {
-        hidden: true,
-        item: {
-          setname: "",
-          set: {},
-          uid: "",
-          owner: "",
-        },
-        items: [],
-        index: 0,
-        auction: {
-          bidder: "",
-          bids: 0,
-          buy: "",
-          by: "",
-          days: 30,
-          initial_price: {
-            amount: "",
-            token: "",
-            precision: 2,
-          },
-          name_long: "",
-          price: {
-            amount: "",
-            token: "",
-            precision: 2,
-          },
-          script: "",
-          set: "",
-          setname: "",
-          time: "",
-        },
-        sale: {
-          by: "",
-          name_long: "",
-          price: {
-            amount: "",
-            token: "",
-            precision: 2,
-          },
-          script: "",
-          set: "",
-          setname: "",
-          uid: "",
-        },
-      },
-      selectedNFTs: [],
-      contractIDs: {},
-      NFTselect: {
-        start: 0,
-        amount: 30,
-        searchTerm: "",
-        searchDefault: "Search UIDs and ",
-        searchDeep: false,
-        searchDeepKey: "",
-        searchDeepK: false,
-        saleOnly: false,
-        auctionOnly: false,
-        dir: "asc",
-        sort: "uid",
-        showDeleted: false,
-        searching: false,
-      },
-      focusSetCalc: {
-        owners: 0,
-        deleted: 0,
-        af: {
-          HIVE: 0,
-          HBD: 0,
-          TOKEN: 0,
-        },
-        sf: {
-          HIVE: 0,
-          HBD: 0,
-          TOKEN: 0,
-        },
-        forSale: 0,
-        forAuction: 0,
-        forSaleMint: 0,
-        forAuctionMint: 0,
-        attributeKeys: [],
-        attributes: {},
-        attributesC: {},
-        amf: {
-          HIVE: 0,
-          HBD: 0,
-          TOKEN: 0,
-        },
-        smf: {
-          HIVE: 0,
-          HBD: 0,
-          TOKEN: 0,
-        },
-      },
-      iOwn: [],
-      iOwnCheckbox: false,
-      highBidder: [],
-      highBidderCheckbox: false,
-      auctions: [],
-      sales: [],
-      price: {},
-      mintAuctions: [],
-      mintSales: [],
-      mintData: [],
-      activeIndex: 0,
-      giveFTusername: "",
-      giveFTqty: 1,
-      services: {},
-      NFTselect: {
-        start: 0,
-        amount: 30,
-        searchTerm: "",
-        searchDefault: "Search Inventory",
-        searchDeep: false,
-        searchDeepKey: "",
-        searchDeepK: false,
-        saleOnly: false,
-        auctionOnly: false,
-        dir: "asc",
-        sort: "uid",
-        showDeleted: false,
-        searching: false,
-      },
-      ipfsProviders: {},
-      accountRNFTs: [],
-      accountNFTs: [],
-      displayNFTs: [],
-      mint_detail: {
-        set: "",
-        setname: "",
-        token: "",
-      },
-      focusSet: {
-        computed: {},
-        link: "",
-        fee: {
-          amount: "",
-          token: "",
-          precision: 2,
-        },
-        bond: {
-          amount: "",
-          token: "",
-          precision: 2,
-        },
-        setname: "dlux",
-        set: {},
-        permlink: "",
-        author: "",
-        script: "",
-        encoding: "",
-        royalty: 1,
-        type: 1,
-        name: "",
-        minted: 0,
-        max: 0,
-      },
-      pageAccount: "",
-      pagePermlink: "",
-      pfp: {
-        setname: "",
-        uid: "",
-      },
-      hasDrop: false,
-      focus: {
-        account: "",
-        posting_json_metadata: {
-          profile: {
-            about: "",
-          },
-        },
-        hbd: {
-          pendingInterestHbd: 0,
-          canClaimInterest: 0,
-          nextClaimDate: 0
-        }
-      },
-      hbdclaim: {},
-      focusdata: {
-        balance: 0,
-        gov: 0,
-        claim: 0,
-        poweredUp: 0,
-      },
-      spkStats: {
-        spk_rate_ldel: "0.00015",
-        spk_rate_lgov: "0.001",
-        spk_rate_lpow: "0.0001",
-      },
-      saccountapi: {
-        balance: 0,
-        spk: 0,
-        gov: 0,
-        tick: 0.01,
-        claim: 0,
-        granted: {
-          t: 0,
-        },
-        granting: {
-          t: 0,
-        },
-        poweredUp: 0,
-        powerDowns: [],
-        power_downs: {},
-        drop: {
-          last_claim: 0,
-          availible: {
-            amount: 0,
-          },
-        },
-      },
-      dluxval: 0,
-      spkval: 0,
-      focusval: 0,
-      me: false,
-      sendModal: {
-        amount: 0,
-        to: "",
-        TOKEN: "DLUX",
-      },
-      dropnai: "",
-      balance: "0.000",
-      bartoken: "",
-      barhive: "",
-      barhbd: "",
-      bargov: "",
-      barpow: "",
-      buyFormValid: false,
-      sellFormValid: false,
-      govFormValid: false,
-      powFormValid: false,
-      sendFormValid: false,
-      hiveFormValid: false,
-      hbdFormValid: false,
-      lapi: lapi,
-      larynxbehind: -1,
-      hapi: hapi,
-      accountapi: {
-        balance: 0,
-        gov: 0,
-        tick: 0.01,
-        claim: 0,
-        poweredUp: 0,
-        power_downs: {},
-        gov_downs: {},
-        head_block: 0,
-        drop: {
-          last_claim: 0,
-          availible: {
-            amount: 0,
-          },
-        },
-      },
-      hiveprice: {
-        hive: {
-          usd: 1,
-        },
-      },
-      hbdprice: {
-        hive_dollar: {
-          usd: 1,
-        },
-      },
-      nodes: {},
-      runners: [],
-      runnersSearch: [],
-      marketnodes: {},
-      smarkets: {
-        node: {
-          na: {
-            self: "",
-          },
-        },
-      },
-      sstats: {
-        spk_rate_lgov: "0.001",
-        spk_rate_lpow: "0.0001",
-        spk_rate_ldel: "0.00015",
-      },
-      dexapi: {
-        markets: {
-          hive: {
-            tick: 0.001,
-          },
-          hbd: {
-            tick: 0.001,
-          },
-        },
-      },
-      prefix: "",
-      multisig: "",
-      jsontoken: "",
-      node: "",
-      spk2gov: false,
-      dlux2gov: false,
-      showTokens: {},
-      behind: "",
-      stats: {},
-      hivestats: {
-        total_vesting_fund_hive: 0,
-        total_vesting_shares: 0,
-      },
-      denoms: {
-        HIVE: {
-          checked: false,
-          balance: 0
-        },
-        HBD: {
-          checked: false,
-          balance: 0
-        },
-      },
-      behindTitle: "",
-      builder: false,
-      petitionStatus: "Choose One",
-      TOKEN: "DLUX",
-      sendTo: "",
-      sendAmount: 0,
-      sendMemo: "",
-      sendAllowed: false,
-      sendHiveTo: "",
-      sendHiveAllowed: false,
-      sendHiveAmount: 0,
-      sendHiveMemo: "",
-      sendHBDTo: "",
-      sendHBDAllowed: false,
-      sendHBDAmount: 0,
-      sendHBDMemo: "",
-      rewardFund: {},
-      feedPrice: {},
-      recenthive: {},
-      recenthbd: {},
-      openorders: [],
-      toasts: [],
-      tokenGov: {
-        title: "SPK VOTE",
-        options: [
-          {
-            id: "spk_cycle_length",
-            range_low: 28800,
-            range_high: 2592000,
-            info: "Time in blocks to complete a power down cycle. 4 cycles to completely divest. 28800 blocks per day.",
-            val: 200000,
-            step: 1,
-            unit: "Blocks",
-            title: "Down Power Period"
-          },
-          {
-            id: "dex_fee",
-            range_low: 0,
-            range_high: 0.01,
-            info: "Share of DEX completed DEX trades to allocate over the collateral group.",
-            val: 0.00505,
-            step: 0.000001,
-            unit: "",
-            title: "DEX Fee"
-          },
-          {
-            id: "dex_max",
-            range_low: 28800,
-            range_high: 2592000,
-            info: "Largest open trade size in relation to held collateral.",
-            val: 97.38,
-            step: 1,
-            unit: "%",
-            title: "Max Trade Size"
-          },
-          {
-            id: "dex_slope",
-            range_low: 0,
-            range_high: 100,
-            info: "0 Allows any size buy orders to be placed. 1 will disallow large buy orders at low prices.",
-            val: 48.02,
-            step: 0.01,
-            unit: "%",
-            title: "Max Lowball Trade Size"
-          },
-          {
-            id: "spk_rate_ldel",
-            range_low: 0.00001, //current lpow
-            range_high: 0.0001, //current lgov
-            info: "SPK generation rate for delegated LARYNX Power",
-            val: 0.00015,
-            step: 1,
-            unit: "",
-            title: "SPK Gen Rate: Delegated"
-          },
-          {
-            id: "spk_rate_lgov",
-            range_low: 0.00015, //current ldel
-            range_high: 0.01,
-            info: "SPK generation rate for Larynx Locked",
-            val: 0.001,
-            step: 0.000001,
-            unit: "",
-            title: "SPK Gen Rate: Locked"
-          },
-          {
-            id: "spk_rate_lpow",
-            range_low: 0.000001,
-            range_high: 0.00015, //current ldel
-            info: "SPK generation rate for undelegated Larynx Power",
-            val: 0.0001,
-            step: 0.000001,
-            unit: "",
-            title: "Min SPK Gen Rate: Min"
-          },
-          {
-            id: "max_coll_members",
-            range_low: 25,
-            range_high: 79,
-            info: "The Max number of accounts that can share DEX fees. The richer half of this group controls outflows from the multisig wallet.",
-            val: 25,
-            step: 1,
-            unit: "Accounts",
-            title: "Size of collateral group"
-          }
-        ]
-      },
-      features: {
-        claim_id: "claim",
-        claim_S: "Airdrop",
-        claim_B: true,
-        claim_json: "drop",
-        rewards_id: "shares_claim",
-        rewards_S: "Rewards",
-        rewards_B: true,
-        rewards_json: "claim",
-        rewardSel: false,
-        reward2Gov: false,
-        send_id: "send",
-        send_S: "Send",
-        send_B: true,
-        send_json: "send",
-        powup_id: "power_up",
-        powup_B: false,
-        pow_val: "",
-        powdn_id: "power_down",
-        powdn_B: false,
-        powsel_up: true,
-        govup_id: "gov_up",
-        govup_B: true,
-        gov_val: "",
-        govsel_up: true,
-        govdn_id: "gov_down",
-        govdn_B: true,
-        node: {
-          id: "node_add",
-          opts: [
-            {
-              S: "Domain",
-              type: "text",
-              info: "https://no-trailing-slash.com",
-              json: "domain",
-              val: "",
-            },
-            {
-              S: "DEX Fee Vote",
-              type: "number",
-              info: "500 = .5%",
-              max: 1000,
-              min: 0,
-              json: "bidRate",
-              val: "",
-            },
-            {
-              S: "DEX Max Vote",
-              type: "number",
-              info: "10000 = 100%",
-              max: 10000,
-              min: 0,
-              json: "dm",
-              val: "",
-            },
-            {
-              S: "DEX Slope Vote",
-              type: "number",
-              info: "10000 = 100%",
-              max: 10000,
-              min: 0,
-              json: "ds",
-              val: "",
-            },
-            {
-              S: "DAO Claim Vote",
-              type: "number",
-              info: "1500 = 15%",
-              max: 10000,
-              min: 0,
-              json: "dv",
-              val: "",
-            },
-          ],
-        },
-      },
-      accountinfo: {},
-      rcinfo: {
-        current: 0,
-        max: 0
-      },
-      serviceWorker: false,
-      filterusers: {
-        checked: true,
-        value: "",
-      },
-      filteraccount: {
-        checked: false,
-        value: "",
-        usera: false,
-        userd: false,
-        gova: false,
-        govd: true,
-        apia: false,
-        apid: false,
-      },
-      lockgov: {
-        checked: true,
-      },
-      unlockgov: {
-        checked: false,
-      },
-      buyhive: {
-        checked: true,
-      },
-      buyhbd: {
-        checked: false,
-      },
-      buylimit: {
-        checked: true,
-      },
-      buymarket: {
-        checked: false,
-      },
-      selllimit: {
-        checked: true,
-      },
-      sellmarket: {
-        checked: false,
-      },
-      pwrup: {
-        checked: true,
-      },
-      pwrdown: {
-        checked: false,
-      },
-      govlock: {
-        checked: true,
-      },
-      govunlock: {
-        checked: false,
-      },
-      posturls: {},
-      new: [],
-      theirs: [],
-      trending: [],
-      promoted: [],
-      search: [],
-      postSelect: {
-        sort: "time",
-        searchTerm: "",
-        bitMask: 0,
-        entry: "theirs",
-        search: {
-          a: 10,
-          o: 0,
-          e: false,
-          p: false,
-        },
-        new: {
-          a: 10, //amount
-          o: 0, //offset
-          e: false, //end
-          p: false, //pending - One pending request
-        },
-        trending: {
-          a: 10,
-          o: 0,
-          e: false,
-          p: false,
-        },
-        promoted: {
-          a: 10,
-          o: 0,
-          e: false,
-          p: false,
-        },
-        theirs: {
-          a: 10,
-          o: 0,
-          e: false,
-          p: false,
-        },
-        sortDir: "desc",
-        types: {
-          VR: {
-            checked: true,
-            icon: "fa-solid fa-vr-cardboard me-2",
-            launch: "3D / VR Experience",
-            location: "/dlux/@",
-            hint: "",
-            bitFlag: 1,
-          },
-          AR: {
-            checked: true,
-            icon: "fa-solid fa-glasses me-2",
-            launch: "AR Experience",
-            location: "/dlux/@",
-            hint: "",
-            bitFlag: 2,
-          },
-          XR: {
-            checked: true,
-            icon: "fa-brands fa-unity me-2",
-            launch: "Extended Reality Experience",
-            location: "/dlux/@",
-            hint: "",
-            bitFlag: 4,
-          },
-          APP: {
-            checked: true,
-            icon: "fa-solid fa-mobile-screen-button me-2",
-            launch: "Unstoppable App",
-            location: "/dlux/@",
-            hint: "",
-            bitFlag: 8,
-          },
-          ["360"]: {
-            checked: true,
-            icon: "fa-solid fa-globe me-2",
-            launch: "360 Photo Gallery",
-            location: "/dlux/@",
-            hint: "",
-            bitFlag: 16,
-          },
-          ["3D"]: {
-            checked: true,
-            icon: "fa-solid fa-shapes me-2",
-            launch: "3D / VR Experience",
-            location: "/dlux/@",
-            hint: "",
-            bitFlag: 32,
-          },
-          Audio: {
-            checked: true,
-            icon: "fa-solid fa-music me-2",
-            launch: "Unstoppable Audio",
-            location: "/dlux/@",
-            hint: "",
-            bitFlag: 64,
-          },
-          Video: {
-            checked: true,
-            icon: "fa-solid fa-film me-2",
-            launch: "Unstoppable Video",
-            location: "/dlux/@",
-            hint: "",
-            bitFlag: 128,
-          },
-          Blog: {
-            checked: false,
-            icon: "fa-solid fa-book me-2",
-            launch: "Visit Full Blog",
-            location: "/blog/@",
-            hint: "",
-            bitFlag: 256,
-          },
-        },
-      },
-      displayPosts: [],
-      displayPost: {
-        index: 0,
-        item: {
-          author: "",
-          permlink: "",
-          ago: "",
-          pic: "",
-          preview: "",
-          appurl: "",
-          id: "",
-          slider: 10000,
-          flag: false,
-          title: "",
-          type: "360",
-          url: "",
-          children: [],
-          total_payout_value: 0,
-          active_votes: [],
-          upVotes: 0,
-          downVotes: 0,
-          body: "",
-          json_metadata: {},
-          created: "",
-        },
-        items: [],
-      },
-      authors: {},
-      spkapi: {
-        balance: 0,
-        broca: '0,0',
-        spk: 0,
-        channels: [],
-        file_contracts: [],
-        spk_power: 0,
-        gov: 0,
-        tick: 0.01,
-        claim: 0,
-        granted: {
-          t: 0,
-        },
-        granting: {
-          t: 0,
-        },
-        poweredUp: 0,
-        powerDowns: [],
-        power_downs: {},
-        drop: {
-          last_claim: 0,
-          availible: {
-            amount: 0,
-          },
-        },
-      },
+      account: user, 
+      sstats: { broca_refill: 0, head_block: 0 }, 
+      spkapi: { broca: '0,0', spk_power: 0, storage: [] }, 
+      contracts: [], 
       extendcost: {},
-      contracts: [],
-      numitems: 0,
-      postBens: [],
-      serviceWorkerPromises: {}
+      postSelect: { types: {} }, 
+      voteVal: 0, 
+      accountapi: { balance: 0, gov: 0, tick: 0.01, claim: 0, poweredUp: 0, power_downs: {}, gov_downs: {}, head_block: 0, drop: { last_claim: 0, availible: { amount: 0 }}},
+      saccountapi: { balance: 0, spk:0, gov: 0, tick: 0.01, claim: 0, granted: {t:0}, granting: {t:0}, poweredUp: 0, powerDowns: [], power_downs: {}, drop: {last_claim:0, availible:{amount:0}}},
+      spkStats:{ spk_rate_ldel: "0.00015", spk_rate_lgov: "0.001", spk_rate_lpow: "0.0001"},
+      hiveprice: { hive: { usd: 1}},
+      hbdprice: { hive_dollar: { usd: 1}},
+      accountinfo: {}, 
+      focus: { posting_json_metadata: { profile: { about: "" } } },
+      
+      // New properties for modal control
+      detailModalInstance: null,
+      originalPathBeforeModal: null,
     };
   },
   components: {
@@ -3043,19 +1769,30 @@ function buyNFT(setname, uid, price, type, callback){
       this[modal].item = this[modal].items[this[modal].index];
     },
     modalSelect(key) {
-      if (key.indexOf('/@') > 0)
-        key = '/@' + key.split('/@')[1];
-      this.displayPost.index = key;
-      this.displayPost.item = this.posturls[key];
-      window.history.pushState("Blog Modal", this.displayPost.item.title, "/blog/@" + key.split('/@')[1]);
-      if (
-        this.displayPost.item?.children &&
-        !this.displayPost.item.replies.length
-      ) this.getReplies(
-        this.displayPost.item.author,
-        this.displayPost.item.permlink,
-        true
-      )
+      if (this.posturls[key]) {
+        this.displayPost.item = this.posturls[key];
+        this.displayPost.index = this.posturls[key].url;
+        if(this.originalPathBeforeModal === null) { // Store current path only if not already stored (modal already open)
+            this.originalPathBeforeModal = window.location.pathname + window.location.search + window.location.hash;
+        }
+        window.history.pushState({ modalOpen: true, postPath: key }, this.posturls[key].title, key);
+        this.$nextTick(() => {
+          if (this.detailModalInstance) {
+            this.detailModalInstance.show();
+          } else {
+            // Fallback or error handling if modal instance isn't ready
+            console.error("detailModalInstance not initialized");
+            // Potentially try to initialize it here again, though it should be in mounted
+            const modalElement = document.getElementById('detailModal');
+            if (modalElement) {
+                this.detailModalInstance = new bootstrap.Modal(modalElement);
+                this.detailModalInstance.show();
+            }
+          }
+        });
+      } else {
+        this.getContent(key.split('/')[0].replace('@', ''), key.split('/')[1], 'detailModal')
+      }
     },
     calHSF() {
       newToken.hiveServiceFee = parseInt(newToken.preHiveServiceFee * 100)
@@ -4949,25 +3686,83 @@ function buyNFT(setname, uid, price, type, callback){
       }
 
     },
+    modalSelect(key) {
+      if (this.posturls[key]) {
+        this.displayPost.item = this.posturls[key];
+        this.displayPost.index = this.posturls[key].url;
+        if(this.originalPathBeforeModal === null) { // Store current path only if not already stored (modal already open)
+            this.originalPathBeforeModal = window.location.pathname + window.location.search + window.location.hash;
+        }
+        window.history.pushState({ modalOpen: true, postPath: key }, this.posturls[key].title, key);
+        this.$nextTick(() => {
+          if (this.detailModalInstance) {
+            this.detailModalInstance.show();
+          } else {
+            // Fallback or error handling if modal instance isn't ready
+            console.error("detailModalInstance not initialized");
+            // Potentially try to initialize it here again, though it should be in mounted
+            const modalElement = document.getElementById('detailModal');
+            if (modalElement) {
+                this.detailModalInstance = new bootstrap.Modal(modalElement);
+                this.detailModalInstance.show();
+            }
+          }
+        });
+      } else {
+        this.getContent(key.split('/')[0].replace('@', ''), key.split('/')[1], 'detailModal')
+      }
+    },
   },
   mounted() {
-    // Check for active service worker
-    if ('serviceWorker' in navigator) {
-      if (navigator.onLine) {
-        this.serviceWorker = true;
-        // recieve messages
-        navigator.serviceWorker.addEventListener('message', event => {
-          try {
-            this.serviceWorkerPromises[`${event.data.script}:${event.data.uid}`].resolve(event.data);
-            delete this.serviceWorkerPromises[`${event.data.script}:${event.data.uid}`]
-          } catch (e) { console.log(e) }
-        });
-        navigator.serviceWorker.startMessages();
+    this.init();
+    window.addEventListener("scroll", this.handleScroll);
+    window.addEventListener("popstate", (event) => {
+      if (event.state && event.state.modalOpen === true) {
+        // This is a popstate to a state where the modal should be open.
+        // If the modal isn't currently shown, show it.
+        // This handles cases where user navigates back to a modal-open state.
+        if (this.detailModalInstance && !this.detailModalInstance._isShown) {
+             this.modalSelect(event.state.postPath); // Re-trigger modal select to ensure correct content and display
+        }
       } else {
-        this.serviceWorker = false;
+        // This is a popstate to a state where the modal should be closed (e.g., user clicked back from modal)
+        if (this.detailModalInstance && this.detailModalInstance._isShown) {
+          this.detailModalInstance.hide();
+        }
+        // Reset originalPath when modal is definitively closed by back navigation
+        this.originalPathBeforeModal = null; 
       }
+      // If a specific path was associated with the modal being closed, navigate to it
+      // This part depends on how you want to handle history when modal closes not by back button
+      // For now, let popstate handle restoration or rely on the hide.bs.modal listener.
+    });
+
+    // Initialize the Bootstrap modal instance
+    const modalElement = document.getElementById('detailModal');
+    if (modalElement) {
+      this.detailModalInstance = new bootstrap.Modal(modalElement);
+      
+      // Add listener for when Bootstrap *starts* to hide the modal
+      modalElement.addEventListener('hide.bs.modal', () => {
+        // Check if history.state indicates we are in a modal-pushed state
+        if (history.state && history.state.modalOpen === true) {
+            // If originalPathBeforeModal is set, go back to it. Otherwise, just go back.
+            if (this.originalPathBeforeModal) {
+                // window.history.replaceState(null, '', this.originalPathBeforeModal); // Or history.go if it was a push
+                // Using goBack might be simpler if the hide.bs.modal in index.html is also doing it.
+                // For now, let's ensure we clear our path tracking.
+            } else {
+                // If there's no specific original path, just go back one step
+                // window.history.back(); // This might be redundant if index.html also does it.
+            }
+        }
+        this.originalPathBeforeModal = null; // Reset path once modal is hidden
+      });
+    } else {
+      console.error("Could not find #detailModal element to initialize Bootstrap modal.");
     }
-    this.pendingTokens = JSON.parse(localStorage.getItem(`pendingTokens`)) || []
+
+    // scroll watcher
     this.boundScrollHandler = this.handleScroll.bind(this); // Create a bound reference
     //window.addEventListener('scroll', this.boundScrollHandler); - Changed target below
     
@@ -5011,6 +3806,46 @@ function buyNFT(setname, uid, price, type, callback){
       this.init(true)
     }
     this.rcCosts()
+
+    // Initialize the Bootstrap modal instance for detailModal
+    const detailModalElement = document.getElementById('detailModal');
+    if (detailModalElement) {
+      // Ensure Bootstrap's Modal class is available
+      if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        this.detailModalInstance = new bootstrap.Modal(detailModalElement);
+        
+        detailModalElement.addEventListener('hide.bs.modal', () => {
+          // Check if the current path is the modal path before going back
+          // This check needs to be robust based on your actual URL structure for modals
+          const currentPath = window.location.pathname + window.location.hash;
+          if (currentPath.includes('/blog/@') || currentPath.includes('/dlux/@') || currentPath.includes('#/@')) { // Adjusted to be more general
+            // Check if history state indicates it was a modal push
+            if(window.history.state === "Blog Modal" || window.history.state === "Detail Modal") { // Assuming you might use a generic state
+                 window.history.back();
+            } else if (this.originalPathBeforeModal) { // Fallback to a stored original path
+                 window.history.replaceState(null, '', this.originalPathBeforeModal);
+                 this.originalPathBeforeModal = null; // Clear it after use
+            } else {
+                // If no specific modal state, and not clearly on a modal path, consider not going back automatically
+                // or using a more sophisticated check. For now, let's be cautious.
+                // console.log("Modal hidden, but not navigating back due to unclear state/path.");
+            }
+          }
+        });
+
+      } else {
+        console.error('Bootstrap Modal class not found. Make sure Bootstrap JS is loaded.');
+      }
+    } else {
+      // It's possible #detailModal is inside a v-if and not present at initial mount.
+      // We will rely on the fallback in modalSelect or ensure detail-vue is always in DOM (e.g., using v-show).
+      console.warn('Modal element #detailModal not found in mounted hook. Will attempt to initialize on first use.');
+    }
+    
+    if(typeof this.init === 'function') {
+        this.init(); 
+    }
+    // ... existing code ...
   },
   beforeDestroy() {
     this.observer.disconnect();

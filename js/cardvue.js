@@ -45,7 +45,7 @@ export default {
       </div >
    </div >
    <div class="card-body px-2">
-      <a href="#detailModal" class="no-decoration" data-bs-toggle="modal"
+      <a href="#detailModal" class="no-decoration"
          @click="modalSelect(post.url)">
          <h3 class="lead text-white truncate1">{{ post.title }}</h3>
          <p class="text-white-50 mb-1 truncate2">{{ post.preview }}</p>
