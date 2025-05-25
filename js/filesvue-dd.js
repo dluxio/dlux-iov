@@ -199,7 +199,7 @@ export default {
     <div class="breadcrumb d-flex align-items-center w-100 rounded bg-darkg mt-2">
         <span @click="navigateTo('')" @dragover.prevent="dragOverBreadcrumb($event)"
             @drop="dropOnBreadcrumb('', $event)" @dragenter="handleDragEnterBreadcrumb($event, '')"
-            @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 me-1"
+            @dragleave="handleDragLeave($event)" class="breadcrumb-item px-2 py-1 me-1"
             style="cursor: pointer; border-radius: 4px;">
             <i class="fa-fw fa-solid fa-hard-drive me-1"></i>My Drive
 
@@ -213,7 +213,7 @@ export default {
                 @dragover.prevent="dragOverBreadcrumb($event)"
                 @drop="dropOnBreadcrumb(currentFolderPath.split('/').slice(0, index + 1).join('/'), $event)"
                 @dragenter="handleDragEnterBreadcrumb($event, currentFolderPath.split('/').slice(0, index + 1).join('/'))"
-                @dragleave="handleDragLeave" class="breadcrumb-item px-2 py-1 mx-1"
+                @dragleave="handleDragLeave($event)" class="breadcrumb-item px-2 py-1 mx-1"
                 style="cursor: pointer; border-radius: 4px;">{{ part }}
                 <!-- Added: Search result count for this folder level -->
                 <span
@@ -387,7 +387,7 @@ export default {
                         @dblclick="navigateTo(folder.path)" @click="handleFolderClick($event, folder)"
                         @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)"
                         @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)"
-                        @dragenter="handleDragEnterFolder($event, folder)" @dragleave="handleDragLeave"
+                        @dragenter="handleDragEnterFolder($event, folder)" @dragleave="handleDragLeave($event)"
                         style="width: 120px; height: 120px; position: relative; border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: pointer;"
                         @mouseenter="$event.currentTarget.style.transform = 'translateY(-3px)'; $event.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)'; $event.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'"
                         @mouseleave="$event.currentTarget.style.transform = ''; $event.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)'; $event.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'">
@@ -484,7 +484,7 @@ export default {
                                 @click="handleFolderClick($event, folder)"
                                 @contextmenu.prevent.stop="showContextMenu($event, 'folder', folder)"
                                 @dragover="dragOverFolder($event)" @drop="dropOnFolder($event, folder)"
-                                @dragenter="handleDragEnterFolder($event, folder)" @dragleave="handleDragLeave">
+                                @dragenter="handleDragEnterFolder($event, folder)" @dragleave="handleDragLeave($event)">
                                 <td><i class="fa-solid fa-folder"></i></td>
                                 <td>{{ folder.name }}</td>
                                 <td></td>
