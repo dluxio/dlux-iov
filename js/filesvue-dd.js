@@ -454,10 +454,10 @@ export default {
                             <p class="text-muted">This folder is empty. Drag and drop files here or create a new folder.
                             </p>
                             <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
-                                <!--<upload-everywhere class="my-2" v-if="selectedUser == account" :account="account"
+                                <upload-everywhere class="my-2" v-if="selectedUser == account" :account="account"
                                     :saccountapi="saccountapi" :external-drop="droppedExternalFiles"
                                     @update:externalDrop="droppedExternalFiles = $event" @tosign="sendIt($event)"
-                                    @done="handleUploadDone($event)" teleportref="#UEController" /> -->
+                                    @done="handleUploadDone($event)" teleportref="#UEController" />
                                 <button class="btn btn-outline-secondary btn-sm my-2" @click="createNewFolder">
                                     <i class="fa-solid fa-folder-plus me-1"></i>New Folder
                                 </button>
