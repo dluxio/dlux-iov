@@ -57,7 +57,7 @@
                 <div class="hover-gap"></div>
                 <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="tokenDropdownBtn"
                   style="min-width: 300px;">
-                  <li>
+                  <li class="d-none">
                     <h6 class="dropdown-header text-center">HIVE / HBD</h6>
                   </li>
                   <!-- DLUX -->
@@ -175,16 +175,25 @@
               <div class="hover-gap"></div>
               <ul class="dropdown-menu dropdown-menu-dark bg-black p-2">
                 <div class="d-flex flex-wrap" style="min-width: 300px;">
-                  <li class="w-100 d-flex">
-                    <div class="circle2 border border-light d-flex align-items-center justify-content-around p-1">
+                  <li class="w-100 d-flex align-items-center gap-2 bg-black rounded p-1">
+                    <div class="circle-3  border-light d-flex align-items-center justify-content-around">
                       <img v-if="TOKEN == 'DLUX'" src="/img/tokens/dlux_icon.png" class="img-fluid">
                       <img v-if="TOKEN == 'DUAT'" src="/img/tokens/duat_icon.png" class="img-fluid">
                       <img v-if="TOKEN == 'SPK'" src="/img/tokens/spk_icon.png" class="img-fluid">
                       <img v-if="TOKEN == 'LARYNX'" src="/img/tokens/larynx_icon.png" class="img-fluid">
                       <img v-if="TOKEN == 'BROCA'" src="/img/tokens/broca_icon.png" class="img-fluid">
                     </div>
-                    <h6 class="dropdown-header text-center">{{TOKEN}} WALLET
-                    </h6>
+                    <div class="d-flex flex-column">
+                      <h6 class="lead text-white mb-0">{{TOKEN}}</h6>
+                      <p class="text-white-50 mb-0">
+                        ${{formatNumber(
+                          ((toFixed((dexapi.markets ? dexapi.markets.hive.tick : 0) * hiveprice.hive.usd, 6)) * 
+                          ( accountapi.balance/pow10(protocol.precision)
+                          + accountapi.poweredUp/pow10(protocol.precision)
+                          + accountapi.gov/pow10(protocol.precision))
+                          ),2,'.',',')}}
+                      </p>
+                    </div>
                   </li>
                   <!-- Balances Summary -->
                   <div class="w-100 mx-1 mb-2 border-bottom border-white-50">
