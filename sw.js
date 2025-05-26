@@ -103,6 +103,8 @@ var urlsToCache = [
   `/img/spknetwork.png`,
   `/img/tokens/dlux_icon.png`,
   `/img/tokens/duat_icon.png`,
+  `/img/tokens/hive_icon.svg`,
+  `/img/tokens/hbd_icon.svg`,
   `/img/tokens/broca_icon.png`,
   `/img/tokens/broca_logomark.png`,
   `/img/tokens/larynx_icon.png`,
