@@ -1165,6 +1165,9 @@ createApp({
           if(data.features.claim){
             features.claim = data.features.claim
           }
+          if(data.features.reward){
+            features.reward = data.features.reward
+          }
           if(data.features.send){
             features.send = data.features.send
           }
