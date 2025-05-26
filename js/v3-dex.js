@@ -1161,7 +1161,31 @@ createApp({
           this.TOKEN = data.jsontoken.toUpperCase();
           location.hash = data.jsontoken;
           this.node = data.node;
-          this.features = data.features ? data.features : this.features;
+          var features = {}
+          if(data.features.send){
+            features.send = data.features.send
+          }
+          if(data.features.powdel){
+            features.powdel = data.features.powdel
+          }
+          if(data.features.powup){
+            features.powup = data.features.powup
+          }
+          if(data.features.powdn){
+            features.powdn = data.features.powdn
+          }
+          if(data.features.govup){
+            features.govup = data.features.govup
+          }
+          if(data.features.govdn){
+            features.govdn = data.features.govdn
+          }
+          for(var feat in data.features){
+            if(!features[feat]){
+              features[feat] = data.features[feat]
+            }
+          }
+          this.features = features
           this.behind = data.behind;
           this.behindTitle = data.behind + " Blocks Behind Hive";
           this.getRecents()
