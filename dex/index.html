@@ -67,7 +67,7 @@
                       <div
                         class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
                         style="height: 40px; width: 40px;">
-                        <img src="/img/dlux-logo.png" class="img-fluid" alt="DLUX ICON">
+                        <img src="/img/tokens/dlux_icon.png" class="img-fluid" alt="DLUX ICON">
                       </div>
                       <span class="ms-2 hero-subtitle fs-3">DLUX</span>
                     </a>
@@ -78,9 +78,9 @@
                       @click="setApi('https://duat.hivehoneycomb.com')"
                       v-bind:class="{'text-warning': TOKEN == 'DUAT'}">
                       <div
-                        class="d-flex justify-content-center align-items-center rounded-circle bg-dark border border-light"
-                        style="height: 40px; width: 40px; padding: 2px;">
-                        <img src="/img/ragnarok.png" class="img-fluid" alt="DUAT ICON">
+                        class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
+                        style="height: 40px; width: 40px;">
+                        <img src="/img/tokens/duat_icon.png" class="img-fluid" alt="DUAT ICON">
                       </div>
                       <span class="ms-2 hero-subtitle fs-3">DUAT</span>
                     </a>
@@ -93,7 +93,7 @@
                       <div
                         class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
                         style="height: 40px; width: 40px;">
-                        <img src="/img/spknetwork/larynx_icon.png" class="img-fluid" alt="LARYNX ICON">
+                        <img src="/img/tokens/larynx_icon.png" class="img-fluid" alt="LARYNX ICON">
                       </div>
                       <span class="ms-2 hero-subtitle fs-3">LARYNX</span>
                     </a>
@@ -106,7 +106,7 @@
                       <div
                         class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
                         style="height: 40px; width: 40px;">
-                        <img src="/img/spknetwork/broca_icon.png" class="img-fluid" alt="BROCA ICON">
+                        <img src="/img/tokens/broca_icon.png" class="img-fluid" alt="BROCA ICON">
                       </div>
                       <span class="mx-2 hero-subtitle fs-3">BROCA</span>
                       <span class="badge rounded-pill text-bg-info text-black ms-auto " style="font-size: 1ch;">TEST
@@ -120,7 +120,7 @@
                       <div
                         class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
                         style="height: 40px; width: 40px;">
-                        <img src="/img/spknetwork/spk_icon.png" class="img-fluid" alt="SPK ICON">
+                        <img src="/img/tokens/spk_icon.png" class="img-fluid" alt="SPK ICON">
                       </div>
                       <span class="mx-2 hero-subtitle fs-3">SPK</span>
                       <span class="badge rounded-pill text-bg-info text-black ms-auto " style="font-size: 1ch;">TEST
@@ -136,7 +136,7 @@
                       <div
                         class="d-flex justify-content-center align-items-center rounded-circle p-05 bg-dark border border-light"
                         style="height: 40px; width: 40px;">
-                        <img src="/img/spknetwork/larynx_icon.png" class="img-fluid" alt="LARYNX ICON">
+                        <img src="/img/tokens/larynx_icon.png" class="img-fluid" alt="LARYNX ICON">
                       </div>
                       <span class="mx-2 hero-subtitle fs-3">LARYNX</span>
                       <span class="badge rounded-pill text-bg-info text-black ms-auto " style="font-size: 1ch;">TEST
@@ -149,7 +149,8 @@
               <button :title="behindTitle + ' with ' + runners.length + ' node runners in concensus'" type="button"
                 class="btn btn-outline-light square rounded-end-pill" data-bs-toggle="modal"
                 data-bs-target="#runnerStatusModal">
-                <span class="d-none" :class="[{'text-success':behind < 30},{'text-warning':behind >= 30 && behind < 60},{'text-danger':behind >= 60}]"> 
+                <span class="d-none"
+                  :class="[{'text-success':behind < 30},{'text-warning':behind >= 30 && behind < 60},{'text-danger':behind >= 60}]">
                 </span>
                 {{runners.length}}
                 <i class="ms-1 fas fa-satellite-dish"></i>
@@ -174,10 +175,17 @@
               <div class="hover-gap"></div>
               <ul class="dropdown-menu dropdown-menu-dark bg-black p-2">
                 <div class="d-flex flex-wrap" style="min-width: 300px;">
-                  <li class="w-100">
+                  <li class="w-100 d-flex">
+                    <div class="circle2 border border-light d-flex align-items-center justify-content-around p-1">
+                      <img v-if="TOKEN == 'DLUX'" src="/img/tokens/dlux_icon.png" class="img-fluid">
+                      <img v-if="TOKEN == 'DUAT'" src="/img/tokens/duat_icon.png" class="img-fluid">
+                      <img v-if="TOKEN == 'SPK'" src="/img/tokens/spk_icon.png" class="img-fluid">
+                      <img v-if="TOKEN == 'LARYNX'" src="/img/tokens/larynx_icon.png" class="img-fluid">
+                      <img v-if="TOKEN == 'BROCA'" src="/img/tokens/broca_icon.png" class="img-fluid">
+                    </div>
                     <h6 class="dropdown-header text-center">{{TOKEN}} WALLET
-                      </h6>
-                    </li>
+                    </h6>
+                  </li>
                   <!-- Balances Summary -->
                   <div class="w-100 mx-1 mb-2 border-bottom border-white-50">
                     <div class="d-flex flex-column text-center py-2">
@@ -224,7 +232,8 @@
                       </div>
                     </div>
                     <!-- wallet functions -->
-                    <div v-else-if="!(action.id == 'rewards' || action.id == 'claim')" class="d-flex" style="width: 150px;">
+                    <div v-else-if="!(action.id == 'rewards' || action.id == 'claim')" class="d-flex"
+                      style="width: 150px;">
                       <modal-vue v-if="protocol.head_block && accountapi.head_block" :func="func" :mypfp="mypfp"
                         :token="TOKEN" :tokenuser="accountapi" :account="account" :tokenprotocol="protocol" :api="lapi"
                         :tokenstats="stats" @tosign="toSign = $event" v-slot:trigger class="d-flex w-100">

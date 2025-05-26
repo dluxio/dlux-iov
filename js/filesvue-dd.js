@@ -30,7 +30,7 @@ export default {
                     <div class="ratio ratio-1x1 wallet-token-img">
                         <div
                             class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
-                            <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1"
+                            <img src="/img/tokens/broca_icon.png" class="rounded img-fluid p-1"
                                 alt="BROCA Token Logo">
                         </div>
                     </div>

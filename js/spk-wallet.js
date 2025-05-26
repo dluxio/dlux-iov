@@ -102,7 +102,7 @@ export default {
         </div>
         <!-- broca banner -->
         <div class="d-flex justify-content-center align-items-center bg-dark my-3 p-2 rounded">
-            <img src="/img/spknetwork/broca_logomark.png" class="img-fluid" alt="BROCA Logomark" style="height: 70px;">
+            <img src="/img/tokens/broca_logomark.png" class="img-fluid" alt="BROCA Logomark" style="height: 70px;">
         </div>
         <!-- Liquid BROCA -->
         <div class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
@@ -111,7 +111,7 @@ export default {
                     <div class="ratio ratio-1x1 wallet-token-img">
                         <div
                             class="rounded-circle border border-light bg-dark d-flex justify-content-center align-items-center">
-                            <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1"
+                            <img src="/img/tokens/broca_icon.png" class="rounded img-fluid p-1"
                                 alt="BROCA Token Logo">
                         </div>
                     </div>
@@ -176,7 +176,7 @@ export default {
                     <div class="ratio ratio-1x1 wallet-token-img">
                         <div
                             class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
-                            <img src="/img/spknetwork/broca_icon.png" class="rounded img-fluid p-1"
+                            <img src="/img/tokens/broca_icon.png" class="rounded img-fluid p-1"
                                 alt="BROCA Token Logo">
                         </div>
                     </div>
@@ -339,7 +339,7 @@ export default {
         </div>
         <!-- spk banner -->
         <div class="d-flex justify-content-center align-items-center bg-dark my-3 p-2 rounded">
-            <img src="/img/spknetwork/spk_logomark.png" class="img-fluid" alt="SPK Logomark" style="height: 70px;">
+            <img src="/img/tokens/spk_logomark.png" class="img-fluid" alt="SPK Logomark" style="height: 70px;">
         </div>
         <!-- Liquid SPK -->
         <div class="border-bottom border-white-50  px-3 py-4 px-lg-1 py-lg-3">
@@ -349,7 +349,7 @@ export default {
                     <div class="ratio ratio-1x1 wallet-token-img">
                         <div
                             class="rounded-circle border border-light bg-dark d-flex justify-content-center align-items-center">
-                            <img src="/img/spknetwork/spk_icon.png" class="rounded img-fluid p-1" alt="SPK Token Logo">
+                            <img src="/img/tokens/spk_icon.png" class="rounded img-fluid p-1" alt="SPK Token Logo">
                         </div>
                     </div>
                 </div>
@@ -412,7 +412,7 @@ export default {
                     <div class="ratio ratio-1x1 wallet-token-img">
                         <div
                             class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
-                            <img src="/img/spknetwork/spk_icon.png" class="rounded img-fluid p-1" alt="SPK Token Logo">
+                            <img src="/img/tokens/spk_icon.png" class="rounded img-fluid p-1" alt="SPK Token Logo">
                         </div>
                     </div>
                     <div class="position-absolute badge-type-offset top-0 start-0 translate-middle">
@@ -579,7 +579,7 @@ export default {
         </div>
         <!-- larynx banner -->
         <div class="d-flex justify-content-center align-items-center bg-dark my-3 p-2 rounded">
-            <img src="/img/spknetwork/larynx_logomark.png" class="img-fluid" alt="LARYNX Logomark"
+            <img src="/img/tokens/larynx_logomark.png" class="img-fluid" alt="LARYNX Logomark"
                 style="height: 70px;">
         </div>
         <!--larynx token-->
@@ -589,7 +589,7 @@ export default {
                     <div class="ratio ratio-1x1 wallet-token-img">
                         <div
                             class="rounded-circle border border-light bg-dark d-flex justify-content-center align-items-center">
-                            <img src="/img/spknetwork/larynx_icon.png" class="rounded img-fluid p-1"
+                            <img src="/img/tokens/larynx_icon.png" class="rounded img-fluid p-1"
                                 alt="LARYNX Token Logo">
                         </div>
                     </div>
@@ -677,7 +677,7 @@ export default {
                     <div class="ratio ratio-1x1 wallet-token-img">
                         <div
                             class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
-                            <img src="/img/spknetwork/larynx_icon.png" class="rounded img-fluid p-1"
+                            <img src="/img/tokens/larynx_icon.png" class="rounded img-fluid p-1"
                                 alt="LARYNX Token Logo">
                         </div>
                     </div>
@@ -778,7 +778,7 @@ export default {
                     <div class="ratio ratio-1x1 wallet-token-img">
                         <div
                             class="rounded-circle border border-warning d-flex justify-content-center align-items-center bg-dark">
-                            <img src="/img/spknetwork/larynx_icon.png" class="rounded img-fluid p-1"
+                            <img src="/img/tokens/larynx_icon.png" class="rounded img-fluid p-1"
                                 alt="LARYNX Token Logo">
                         </div>
                     </div>

@@ -115,12 +115,12 @@ export default {
                                         </div>
                                         <div class="d-flex flex-row flex-fill mt-1 align-items-center">
                                             <div class="d-flex align-items-center">
-                                                <div class="circle2 border border-light d-flex align-items-center justify-content-around">
-                                                    <img v-if="protocol.TOKEN == 'DLUX'" src="/img/dlux-hive-logo-alpha.svg" width="70%">
-                                                    <img v-if="protocol.TOKEN == 'DUAT'" src="/img/ragnarok.png" width="70%">
-                                                    <img v-if="protocol.TOKEN == 'SPK'" src="/img/spknetwork/spk_icon.png" width="70%">
-                                                    <img v-if="protocol.TOKEN == 'LARYNX'" src="/img/spknetwork/larynx_icon.png" width="70%">
-                                                    <img v-if="protocol.TOKEN == 'BROCA'" src="/img/spknetwork/broca_icon.png" width="70%">
+                                                <div class="circle2 border border-light d-flex align-items-center justify-content-around p-1">
+                                                    <img v-if="protocol.TOKEN == 'DLUX'" src="/img/tokens/dlux_icon.png">
+                                                    <img v-if="protocol.TOKEN == 'DUAT'" src="/img/tokens/duat_icon.png">
+                                                    <img v-if="protocol.TOKEN == 'SPK'" src="/img/tokens/spk_icon.png">
+                                                    <img v-if="protocol.TOKEN == 'LARYNX'" src="/img/tokens/larynx_icon.png">
+                                                    <img v-if="protocol.TOKEN == 'BROCA'" src="/img/tokens/broca_icon.png">
                                                 </div>
                                                 <h2 class="p-0 m-0 ms-2 font-weight-bold">
                                                     {{ protocol.TOKEN }}
