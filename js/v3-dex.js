@@ -1162,6 +1162,9 @@ createApp({
           location.hash = data.jsontoken;
           this.node = data.node;
           var features = {}
+          if(data.features.claim){
+            features.claim = data.features.claim
+          }
           if(data.features.send){
             features.send = data.features.send
           }
