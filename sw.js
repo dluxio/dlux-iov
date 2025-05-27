@@ -1,4 +1,4 @@
-this.version = "2025.05.26.5";
+this.version = "2025.05.27.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -101,17 +101,17 @@ var urlsToCache = [
   `/img/spk192.png`,
   `/img/spk512.png`,
   `/img/spknetwork.png`,
-  `/img/tokens/dlux_icon.png`,
-  `/img/tokens/duat_icon.png`,
-  `/img/tokens/hive_icon.svg`,
-  `/img/tokens/hbd_icon.svg`,
+  `/img/sting_white.svg`,
   `/img/tokens/broca_icon.png`,
   `/img/tokens/broca_logomark.png`,
+  `/img/tokens/dlux_icon.png`,
+  `/img/tokens/duat_icon.png`,
+  `/img/tokens/hbd_icon.svg`,
+  `/img/tokens/hive_icon.svg`,
   `/img/tokens/larynx_icon.png`,
   `/img/tokens/larynx_logomark.png`,
   `/img/tokens/spk_icon.png`,
   `/img/tokens/spk_logomark.png`,
-  `/img/sting_white.svg`,
   `/img/txt-file-type-svgrepo-com.svg`,
   `/img/wav-file-type-svgrepo-com.svg`,
   `/img/word-file-type-svgrepo-com.svg`,

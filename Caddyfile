@@ -1,0 +1,73 @@
+
+# Caddy file is provided to show how we handle single page directives, and dynamic content for bots and head requests(link previews / SEO). 
+# dlux.io (redirects to www.dlux.io) and www.dlux.io
+https://dlux.io {
+    redir https://www.dlux.io{uri}
+}
+
+https://www.dlux.io {
+    root * /var/www/dlux-io-live
+    file_server
+
+    handle /nfts/set/* {
+        @staticFiles {
+            file
+        }
+        file_server @staticFiles
+        rewrite * /nfts/set/index.html
+        file_server
+    }
+
+    handle /@* {
+        @bots expression {http.request.method} == 'HEAD' && {http.request.header.User-Agent}.matches('.*bot.*')
+        reverse_proxy @bots 127.0.0.1:3000
+        @staticFiles {
+            file
+        }
+        file_server @staticFiles
+        rewrite * /user/index.html
+        file_server
+    }
+
+    handle /me* {
+        rewrite * /user/index.html
+        file_server
+    }
+
+    handle /vr/@* {
+        rewrite * /vr/index.html
+        file_server
+    }
+
+    handle /docs* {
+        root * /var/www/dlux-docs/.vitepress/dist
+        try_files {path} {path}.html {path}/index.html
+        file_server
+        error 404 /404.html
+        header /assets/* Cache-Control "public, immutable, max-age=31536000"
+    }
+
+    handle /dlux/* {
+        @bots expression {http.request.method} == 'HEAD' && {http.request.header.User-Agent}.matches('.*bot.*')
+        reverse_proxy @bots 127.0.0.1:3000
+        @staticFiles {
+            file
+        }
+        file_server @staticFiles
+        rewrite * /dlux/index.html
+        file_server
+    }
+
+    handle /blog/* {
+        @bots expression {http.request.method} == 'HEAD' && {http.request.header.User-Agent}.matches('.*bot.*')
+        reverse_proxy @bots 127.0.0.1:3000
+        @staticFiles {
+            file
+        }
+        file_server @staticFiles
+        rewrite * /blog/index.html
+        file_server
+    }
+
+
+}
