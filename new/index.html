@@ -410,7 +410,7 @@
                                         href="#spkNetwork"></a>
                                 </div>
                                 <div class="modal-body">
-                                    <contract-vue :nodeview="false" :account="account" :cc="true"
+                                    <contract-vue :nodeview="false" v-if="account" :account="account" :cc="true"
                                         @tosign="sendIt($event)" @bens="addBens($event)" :postpage="true"
                                         :prop_contracts="contracts" :assets="true" @addasset="addAsset($event)"
                                         :accountinfo="accountinfo"></contract-vue>
