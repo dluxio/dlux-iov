@@ -227,7 +227,8 @@
                             </ul>
                         </div>
                         <!-- blog buttons -->
-                        <div class="d-flex justify-content-center ms-auto d-none" v-if="postCustom_json.vrHash == 'blog'">
+                        <div class="d-flex justify-content-center ms-auto d-none"
+                            v-if="postCustom_json.vrHash == 'blog'">
                             <div class="d-flex flex-wrap align-items-center ms-autojustify-content-center">
                                 <button type="button" class="btn btn-sm btn-secondary rounded-pill px-2 mx-1"
                                     @click="saveNewToken()"><i class="fa-solid fa-fw fa-floppy-disk me-2"
@@ -605,11 +606,10 @@
                         </div>
                     </div>
                 </div>
+            </div>
         </main>
         <!-- Footer -->
-        <div>
-            <foot-vue />
-        </div>
+        <foot-vue />
     </div>
     <!-- Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
