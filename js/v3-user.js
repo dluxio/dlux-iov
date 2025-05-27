@@ -3219,6 +3219,7 @@ function buyNFT(setname, uid, price, type, callback){
         });
     },
     async getRecurrentTransfers(username, key) {
+      if(!username) return
       try {
         const transfers = await this.hiveApiCall('database_api.find_recurrent_transfers', { from: username });
         if (!transfers.recurrent_transfers.length) return
