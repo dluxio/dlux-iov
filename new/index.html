@@ -543,7 +543,7 @@
                             <div id="ipfsDrive" class="accordion-collapse collapse show"
                                 data-bs-parent="#accordionExample">
                                 <div class="accordion-body">
-                                    <contract-vue :nodeview="false" :account="pageAccount" :mypfp="mypfp"
+                                    <contract-vue v-if="account" :nodeview="false" :account="pageAccount" :mypfp="mypfp"
                                         :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
                                         :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
                                         @done="getSapi"></contract-vue>
