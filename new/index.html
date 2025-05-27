@@ -227,8 +227,7 @@
                             </ul>
                         </div>
                         <!-- blog buttons -->
-                        <div class="d-flex justify-content-center ms-auto" v-if="postCustom_json.vrHash == 'blog'">
-
+                        <div class="d-flex justify-content-center ms-auto d-none" v-if="postCustom_json.vrHash == 'blog'">
                             <div class="d-flex flex-wrap align-items-center ms-autojustify-content-center">
                                 <button type="button" class="btn btn-sm btn-secondary rounded-pill px-2 mx-1"
                                     @click="saveNewToken()"><i class="fa-solid fa-fw fa-floppy-disk me-2"
