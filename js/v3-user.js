@@ -4887,6 +4887,7 @@ function buyNFT(setname, uid, price, type, callback){
     },
     init(reset = false) {
       if (reset) {
+        this.pageAccount = null
         this.delegationsFetched = false
         this.rcAccount = null
         this.hpDelegationsOut = []
