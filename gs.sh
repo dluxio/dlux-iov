@@ -1,7 +1,16 @@
 #!/bin/bash
 
-# Prompt for commit description
-read -p "Commit description: " desc
+# Initialize DEPLOY flag as false
+DEPLOY=false
+
+# Parse command-line options
+while getopts "d" opt; do
+    case $opt in
+        d) DEPLOY=true ;;
+        *) echo "Invalid option: -$OPTARG" >&2; exit 1 ;;
+    esac
+done
+shift $((OPTIND - 1))
 
 # Pull the latest changes from the repository
 git pull
@@ -70,11 +79,20 @@ if [ -f "$file" ]; then
     fi
 else
     echo "$file does not exist in the current directory."
-    exit 1
+    #exit or use as a git hail Mary script
+    current_day=$(date +%Y.%m.%d)
+    new_version="$current_day"
+    #exit 1
+fi
+
+if [ "$DEPLOY" = true ]; then
+    commit_message="Deploy $new_version"
+else
+    commit_message="$new_version"
 fi
 
 # Stage, commit, and push changes
 git add . && \
 git add -u && \
-git commit -m "$desc" && \
+git commit -m "$commit_message" && \
 git push
