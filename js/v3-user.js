@@ -95,6 +95,7 @@ createApp({
       error: null,
       fileRequests: {},
       protocol: {},
+      sapi: 'https://spktest.dlux.io',
       videosrc: null,
       videoMsg: "Drop a video file to transcode",
       ffmpeg: "Loading...",
@@ -110,6 +111,8 @@ createApp({
       csvError: "", // Added for CSV upload error messages
       lastScroll: 0,
       activeTab: "blog",
+      accountDistributionChart: null, // Added for account distribution chart
+      typeDistributionChart: null, // Added for type distribution chart
       relations: { "follows": false, "ignores": false, "blacklists": false, "follows_blacklists": false, "follows_muted": false },
       sets: {},
       chains: {
@@ -1588,8 +1591,9 @@ PORT=3000
       }
       const reader = new FileReader();
       reader.onload = (e) => {
+        console.log('📁 CSV file loaded, processing...');
         const text = e.target.result;
-        const lines = text.split(/\r\n|\n/).filter(line => line.trim() !== ''); // Split by new line and remove empty lines
+        const lines = text.split(/\r\n|\n/).filter(line => line.trim() !== '');
         if (lines.length === 0) {
           this.csvError = "Error: CSV file is empty.";
           return;
@@ -1654,7 +1658,10 @@ PORT=3000
           }
           newDist[account] = { l, p, g };
         }
+        console.log('📁 Processed CSV data:', newDist);
+        console.log('📁 About to update this.newToken.dist...');
         this.newToken.dist = { ...this.newToken.dist, ...newDist };
+        console.log('📁 Updated this.newToken.dist:', this.newToken.dist);
         event.target.value = null; // Reset file input
       };
       reader.onerror = () => {
@@ -5038,6 +5045,309 @@ function buyNFT(setname, uid, price, type, callback){
       }
 
     },
+    initializeCharts() {
+      this.initAccountDistributionChart();
+      this.initTypeDistributionChart();
+    },
+    initAccountDistributionChart() {
+      console.log('🔧 Initializing account distribution chart...');
+      try {
+        const ctx = document.getElementById('accountDistributionChart');
+        if (!ctx) {
+          console.warn('❌ Account distribution chart canvas not found');
+          return;
+        }
+        console.log('✅ Canvas found for account distribution chart');
+
+        // Destroy existing chart if it exists
+        if (this.accountDistributionChart) {
+          console.log('🗑️ Destroying existing account distribution chart');
+          this.accountDistributionChart.destroy();
+          this.accountDistributionChart = null;
+        }
+
+        console.log('📊 Creating new account distribution chart...');
+        this.accountDistributionChart = new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: [],
+            datasets: [{
+              label: 'Account Distribution',
+              data: [],
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.7)',
+                'rgba(54, 162, 235, 0.7)',
+                'rgba(255, 206, 86, 0.7)',
+                'rgba(75, 192, 192, 0.7)',
+                'rgba(153, 102, 255, 0.7)',
+                'rgba(255, 159, 64, 0.7)'
+              ],
+              borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+              ],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false, // Disable animations to prevent issues
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: {
+                  color: 'white'
+                }
+              },
+              title: {
+                display: false,
+                text: 'Distribution by Account'
+              }
+            }
+          }
+        });
+        console.log('✅ Account distribution chart created successfully');
+      } catch (error) {
+        console.error('❌ Error initializing account distribution chart:', error);
+        this.accountDistributionChart = null;
+      }
+    },
+    initTypeDistributionChart() {
+      console.log('🔧 Initializing type distribution chart...');
+      try {
+        const ctx = document.getElementById('typeDistributionChart');
+        if (!ctx) {
+          console.warn('❌ Type distribution chart canvas not found');
+          return;
+        }
+        console.log('✅ Canvas found for type distribution chart');
+
+        // Destroy existing chart if it exists
+        if (this.typeDistributionChart) {
+          console.log('🗑️ Destroying existing type distribution chart');
+          this.typeDistributionChart.destroy();
+          this.typeDistributionChart = null;
+        }
+
+        console.log('📊 Creating new type distribution chart...');
+        this.typeDistributionChart = new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: ['Liquid', 'Power', 'Governance'],
+            datasets: [{
+              label: 'Type Distribution',
+              data: [0, 0, 0], // Initialize with zeros instead of empty array
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.7)',
+                'rgba(54, 162, 235, 0.7)',
+                'rgba(255, 206, 86, 0.7)'
+              ],
+              borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)'
+              ],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false, // Disable animations to prevent issues
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: {
+                  color: 'white'
+                }
+              },
+              title: {
+                display: false,
+                text: 'Distribution by Type'
+              }
+            }
+          }
+        });
+        console.log('✅ Type distribution chart created successfully');
+      } catch (error) {
+        console.error('❌ Error initializing type distribution chart:', error);
+        this.typeDistributionChart = null;
+      }
+    },
+    updateAccountDistributionChart() {
+      console.log('🔄 Starting account distribution chart update...');
+      try {
+        // Check if canvas exists in DOM
+        const canvas = document.getElementById('accountDistributionChart');
+        if (!canvas) {
+          console.warn('❌ Canvas not found in DOM, skipping update');
+          return; // Canvas not in DOM, skip update
+        }
+        console.log('✅ Canvas found in DOM');
+
+        // Always destroy and recreate the chart to avoid Chart.js state issues
+        if (this.accountDistributionChart) {
+          console.log('🗑️ Destroying existing chart before recreating...');
+          try {
+            this.accountDistributionChart.destroy();
+          } catch (destroyError) {
+            console.warn('⚠️ Error destroying chart:', destroyError);
+          }
+          this.accountDistributionChart = null;
+        }
+
+        console.log('📊 Processing distribution data...');
+        const distData = this.newToken.dist || {};
+        console.log('📊 Distribution data:', distData);
+        const labels = Object.keys(distData);
+        const data = labels.map(acc => {
+          const accountData = distData[acc] || {};
+          return (parseFloat(accountData.l) || 0) + (parseFloat(accountData.p) || 0) + (parseFloat(accountData.g) || 0);
+        });
+        console.log('📊 Processed labels:', labels);
+        console.log('📊 Processed data:', data);
+
+        // Generate colors for all accounts
+        const colors = [];
+        const borderColors = [];
+        for (let i = 0; i < labels.length; i++) {
+          const r = Math.floor(Math.random() * 255);
+          const g = Math.floor(Math.random() * 255);
+          const b = Math.floor(Math.random() * 255);
+          colors.push(`rgba(${r}, ${g}, ${b}, 0.7)`);
+          borderColors.push(`rgba(${r}, ${g}, ${b}, 1)`);
+        }
+
+        console.log('📊 Creating new chart with data...');
+        // Create new chart with the data
+        this.accountDistributionChart = new Chart(canvas, {
+          type: 'pie',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Account Distribution',
+              data: data,
+              backgroundColor: colors,
+              borderColor: borderColors,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false, // Disable animations to prevent issues
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: {
+                  color: 'white'
+                }
+              },
+              title: {
+                display: false,
+                text: 'Distribution by Account'
+              }
+            }
+          }
+        });
+        console.log('✅ Account distribution chart created successfully');
+      } catch (error) {
+        console.error('❌ Error updating account distribution chart:', error);
+        console.error('❌ Error stack:', error.stack);
+        // Reset chart on error
+        this.accountDistributionChart = null;
+      }
+    },
+    updateTypeDistributionChart() {
+      console.log('🔄 Starting type distribution chart update...');
+      try {
+        // Check if canvas exists in DOM
+        const canvas = document.getElementById('typeDistributionChart');
+        if (!canvas) {
+          console.warn('❌ Canvas not found in DOM, skipping update');
+          return; // Canvas not in DOM, skip update
+        }
+        console.log('✅ Canvas found in DOM');
+
+        // Always destroy and recreate the chart to avoid Chart.js state issues
+        if (this.typeDistributionChart) {
+          console.log('🗑️ Destroying existing chart before recreating...');
+          try {
+            this.typeDistributionChart.destroy();
+          } catch (destroyError) {
+            console.warn('⚠️ Error destroying chart:', destroyError);
+          }
+          this.typeDistributionChart = null;
+        }
+
+        console.log('📊 Processing distribution data...');
+        const distData = this.newToken.dist || {};
+        let liquidTotal = 0;
+        let powerTotal = 0;
+        let governanceTotal = 0;
+
+        for (const acc in distData) {
+          const accountData = distData[acc] || {};
+          liquidTotal += parseFloat(accountData.l) || 0;
+          powerTotal += parseFloat(accountData.p) || 0;
+          governanceTotal += parseFloat(accountData.g) || 0;
+        }
+
+        console.log('📊 Totals - Liquid:', liquidTotal, 'Power:', powerTotal, 'Governance:', governanceTotal);
+
+        console.log('📊 Creating new chart with data...');
+        // Create new chart with the data
+        this.typeDistributionChart = new Chart(canvas, {
+          type: 'pie',
+          data: {
+            labels: ['Liquid', 'Power', 'Governance'],
+            datasets: [{
+              label: 'Type Distribution',
+              data: [liquidTotal, powerTotal, governanceTotal],
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.7)',
+                'rgba(54, 162, 235, 0.7)',
+                'rgba(255, 206, 86, 0.7)'
+              ],
+              borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)'
+              ],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false, // Disable animations to prevent issues
+            plugins: {
+              legend: {
+                position: 'top',
+                labels: {
+                  color: 'white'
+                }
+              },
+              title: {
+                display: false,
+                text: 'Distribution by Type'
+              }
+            }
+          }
+        });
+        console.log('✅ Type distribution chart created successfully');
+      } catch (error) {
+        console.error('❌ Error updating type distribution chart:', error);
+        console.error('❌ Error stack:', error.stack);
+        // Reset chart on error
+        this.typeDistributionChart = null;
+      }
+    },
   },
   mounted() {
     // Check for active service worker
@@ -5100,9 +5410,28 @@ function buyNFT(setname, uid, price, type, callback){
       this.init(true)
     }
     this.rcCosts()
+    this.initializeCharts(); // Make sure charts are initialized on mount
+    //this.init();
+    //this.getSNodes();
+    if (localStorage.getItem("user")) {
+      this.account = localStorage.getItem("user");
+      this.getTokenUser(this.account);
+      this.getHiveUser(this.account);
+      this.getSapi(this.account);
+      this.getRcAccount(this.account);
+    }
+    if (localStorage.getItem("pendingTokens")) {
+      this.pendingTokens = JSON.parse(localStorage.getItem("pendingTokens"));
+    }
+    this.getHiveStats();
+    this.getRewardFund();
+    this.getFeedPrice();
+    this.getProtocol();
+    this.rcCosts();
   },
   beforeDestroy() {
     this.observer.disconnect();
+    window.removeEventListener("scroll", this.handleScroll);
   },
   unmounted() {
     //window.removeEventListener('scroll', this.boundScrollHandler); // Use the same bound reference - Temporarily disabled
@@ -5120,7 +5449,35 @@ function buyNFT(setname, uid, price, type, callback){
         this.postSelect[this.postSelect.entry].e = false;
       }
     },
-
+    "newToken.dist": {
+      handler() {
+        console.log('👀 newToken.dist watcher triggered');
+        console.log('👀 Current dist data:', this.newToken.dist);
+        // Use setTimeout to ensure this runs after the current execution stack
+        setTimeout(() => {
+          try {
+            console.log('🚀 Starting chart updates from watcher...');
+            this.updateAccountDistributionChart();
+            this.updateTypeDistributionChart();
+            console.log('✅ Chart updates completed from watcher');
+          } catch (error) {
+            console.error('❌ Error in chart update watcher:', error);
+            console.error('❌ Error stack:', error.stack);
+          }
+        }, 0);
+      },
+      deep: true,
+    },
+    "account": {
+      handler(newValue) {
+        this.getHiveUser(newValue);
+        //this.getSpkStats();
+        this.getSapi(newValue);
+        this.getRcAccount(newValue); // Fetch RC account data
+        //this.fetchDelegationsData(); // Fetch delegations data
+        this.initializeCharts(); // Initialize charts
+      },
+    },
   },
   computed: {
     canClaim: {
