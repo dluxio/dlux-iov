@@ -852,6 +852,11 @@
 												data-bs-parent="#accordionNewToken">
 												<div class="accordion-body">
 													<label class="lead">Token Distribution</label>
+													<div class="mb-3">
+														<label for="distCsv" class="form-label">Upload CSV</label>
+														<input class="form-control" type="file" id="distCsv" @change="handleDistFileUpload($event)" accept=".csv">
+														<div id="csvError" class="form-text text-danger">{{csvError}}</div>
+													</div>
 													<table class="table">
 														<thead>
 															<tr>

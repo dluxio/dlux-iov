@@ -107,6 +107,7 @@ createApp({
         time: 0,
         claim_account_operation: { "operation": "claim_account_operation", "rc_needed": "11789110900859", "hp_needed": 6713.599180835442 }
       },
+      csvError: "", // Added for CSV upload error messages
       lastScroll: 0,
       activeTab: "blog",
       relations: { "follows": false, "ignores": false, "blacklists": false, "follows_blacklists": false, "follows_muted": false },
@@ -1575,6 +1576,92 @@ PORT=3000
   },
   methods: {
     ...MCommon,
+    handleDistFileUpload(event) {
+      this.csvError = "";
+      const file = event.target.files[0];
+      if (!file) {
+        return;
+      }
+      if (file.type !== "text/csv" && !file.name.endsWith('.csv')) {
+        this.csvError = "Error: Please select a CSV file.";
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target.result;
+        const lines = text.split(/\r\n|\n/).filter(line => line.trim() !== ''); // Split by new line and remove empty lines
+        if (lines.length === 0) {
+          this.csvError = "Error: CSV file is empty.";
+          return;
+        }
+        const newDist = {};
+        // Check header or assume order: account,l,p,g
+        const header = lines[0].toLowerCase().split(',').map(h => h.trim());
+        const accountIndex = header.indexOf('account');
+        const lIndex = header.indexOf('l');
+        const pIndex = header.indexOf('p');
+        const gIndex = header.indexOf('g');
+
+        let startIndex = 0;
+        if (accountIndex !== -1 && lIndex !== -1) { // Header detected
+            startIndex = 1;
+        } else if (header.length >= 2) { // Assume order if no header
+             // No specific error, proceed with assumed order if at least 2 columns
+        } else {
+            this.csvError = "Error: CSV must have at least 'account' and 'l' columns, or be in the order: account, l, p, g.";
+            return;
+        }
+
+        for (let i = startIndex; i < lines.length; i++) {
+          const values = lines[i].split(',').map(v => v.trim());
+          let account, l, p = 0, g = 0;
+
+          if (startIndex === 1) { // Header was present
+            if (values.length <= Math.max(accountIndex, lIndex)) {
+              this.csvError = `Error: Line ${i + 1} is missing required account or liquid (l) values.`
+              return;
+            }
+            account = values[accountIndex];
+            l = parseFloat(values[lIndex]);
+            if (pIndex !== -1 && values[pIndex]) p = parseFloat(values[pIndex]);
+            if (gIndex !== -1 && values[gIndex]) g = parseFloat(values[gIndex]);
+          } else { // No header, assume order
+            if (values.length < 2) {
+              this.csvError = `Error: Line ${i + 1} must have at least account and liquid (l) values. Format: account,l,p,g`;
+              return;
+            }
+            account = values[0];
+            l = parseFloat(values[1]);
+            if (values.length > 2 && values[2]) p = parseFloat(values[2]);
+            if (values.length > 3 && values[3]) g = parseFloat(values[3]);
+          }
+
+          if (!account) {
+            this.csvError = `Error: Account name is missing in line ${i + 1}.`;
+            return;
+          }
+          if (isNaN(l)) {
+            this.csvError = `Error: Invalid liquid value for account ${account} in line ${i + 1}. Must be a number.`;
+            return;
+          }
+          if (isNaN(p)) {
+            this.csvError = `Error: Invalid power value for account ${account} in line ${i + 1}. Must be a number.`;
+            p = 0;
+          }
+          if (isNaN(g)) {
+            this.csvError = `Error: Invalid governance value for account ${account} in line ${i + 1}. Must be a number.`;
+            g = 0;
+          }
+          newDist[account] = { l, p, g };
+        }
+        this.newToken.dist = { ...this.newToken.dist, ...newDist };
+        event.target.value = null; // Reset file input
+      };
+      reader.onerror = () => {
+        this.csvError = "Error: Could not read the file.";
+      };
+      reader.readAsText(file);
+    },
     getSetPhotos(s, c) {
       return s.setname ? `https://ipfs.dlux.io/ipfs/${s.set[c]}` : "";
     },
