@@ -3152,7 +3152,7 @@ function buyNFT(setname, uid, price, type, callback){
       )
     },
     calHSF() {
-      newToken.hiveServiceFee = parseInt(newToken.preHiveServiceFee * 100)
+      this.newToken.hiveServiceFee = parseInt(this.newToken.preHiveServiceFee * 100)
     },
     getRewardFund() {
       fetch(this.hapi, {
@@ -4779,17 +4779,18 @@ function buyNFT(setname, uid, price, type, callback){
       var lastDown = 0
       var lastUp = 0
       const INT = 1000000
-      const WPY = ((1 + (this.newToken.apy / 201600)) ** (2016 * 52) - 1) / 52 //how to normalize APY to WPY
-      const SAT = INT + parseInt(INT * WPY)
+      const SAT = INT * (1 + this.newToken.apy / 100) // Target after one year: principal + APY%
       var oneOff = false
       var j = 0
       while (binSearch != lastFit) {
         j++
-        console.log(binSearch, lastFit, WPY, SAT)
+        console.log(binSearch, lastFit, SAT)
         lastFit = binSearch
         var int = INT
         for (var i = 0; i < 2016; i++) {
           int += parseInt(int / binSearch)
+          // Smart break: if we've already exceeded the target, no need to continue
+          if (int >= SAT) break
         }
         if (int > SAT) {
           lastDown = binSearch
