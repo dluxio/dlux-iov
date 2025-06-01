@@ -198,6 +198,10 @@ export default {
               backdrop: 'static',
               keyboard: true
             });
+            
+            // Set higher z-index to appear above management modal
+            modalElement.style.zIndex = '2060';
+            
             modal.show();
             
             // Handle modal close events
@@ -207,18 +211,33 @@ export default {
               this.keyError = "";
               this.keyLoading = false;
               
-              // Force cleanup of backdrops
+              // Reset z-index
+              modalElement.style.zIndex = '';
+              
+              // Force cleanup of backdrops, but be careful not to remove the management modal backdrop
               setTimeout(() => {
                 const backdrops = document.querySelectorAll('.modal-backdrop');
-                backdrops.forEach(backdrop => backdrop.remove());
-                document.body.classList.remove('modal-open');
-                document.body.style.overflow = '';
-                document.body.style.paddingRight = '';
+                // Only remove the last backdrop (the key modal's backdrop)
+                if (backdrops.length > 1) {
+                  backdrops[backdrops.length - 1].remove();
+                }
+                // Don't remove modal-open class if there are still modals open
+                if (backdrops.length <= 1) {
+                  document.body.classList.remove('modal-open');
+                  document.body.style.overflow = '';
+                  document.body.style.paddingRight = '';
+                }
               }, 50);
             }, { once: true });
             
             // Focus on key input when modal is shown
             modalElement.addEventListener('shown.bs.modal', () => {
+              // Set backdrop z-index to be just below the modal
+              const backdrops = document.querySelectorAll('.modal-backdrop');
+              if (backdrops.length > 0) {
+                backdrops[backdrops.length - 1].style.zIndex = '2059';
+              }
+              
               const keyInput = this.$refs.keyInput;
               if (keyInput) {
                 keyInput.focus();
@@ -2707,9 +2726,11 @@ export default {
       this.keyLoading = true;
       this.keyError = "";
       
+      // Store original user outside try-catch for proper scoping
+      const originalUser = this.user;
+      
       try {
         // Use the existing storeKey method but for the editing account
-        const originalUser = this.user;
         this.user = this.editingAccount; // Temporarily change user for validation
         
         await this.storeKey(this.editingKeyType, this.privateKey.trim());
@@ -3738,7 +3759,7 @@ export default {
           <div class="mb-3">
             <label class="form-label">Keys to Export</label>
             <div v-for="keyType in Object.keys(decrypted.accounts[exportAccount] || {})" :key="keyType">
-              <div v-if="decrypted.accounts[exportAccount][keyType] && decrypted.accounts[exportAccount][keyType].trim() !== ''" 
+              <div v-if="keyType !== 'noPrompt' && typeof decrypted.accounts[exportAccount][keyType] === 'string' && decrypted.accounts[exportAccount][keyType] && decrypted.accounts[exportAccount][keyType].trim() !== ''" 
                    class="form-check">
                 <input class="form-check-input" type="checkbox" :value="keyType" v-model="exportKeys" :id="'export-' + keyType">
                 <label class="form-check-label text-capitalize" :for="'export-' + keyType">
@@ -3763,52 +3784,7 @@ export default {
       </div>
     </div>
   </div>
-  <!-- PIN Change Modal -->
-  <div class="modal fade" id="changePinModal" tabindex="-1" aria-labelledby="changePinModalLabel" aria-hidden="true" v-show="showChangePinModal" data-bs-backdrop="static">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="changePinModalLabel">
-            Change PIN
-          </h5>
-          <button type="button" class="btn-close" @click="closeChangePinModal()" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div v-if="changePinLoading">
-            <p class="small text-muted mb-3">
-              Please wait while we update your PIN.
-            </p>
-            <div class="mb-3">
-              <label class="form-label">Current PIN</label>
-              <input type="password" v-model="currentPin" class="form-control bg-dark border-dark text-light" 
-                     placeholder="Enter your current PIN" @keyup.enter="handlePinChange()" ref="currentPinInput">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">New PIN (minimum 4 characters)</label>
-              <input type="password" v-model="newPinChange" class="form-control bg-dark border-dark text-light" 
-                     placeholder="Enter new PIN" @keyup.enter="handlePinChange()" ref="newPinChangeInput">
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Confirm New PIN</label>
-              <input type="password" v-model="confirmPinChange" class="form-control bg-dark border-dark text-light" 
-                     placeholder="Confirm new PIN" @keyup.enter="handlePinChange()" ref="confirmPinChangeInput">
-            </div>
-          </div>
-          <div v-if="changePinError" class="alert alert-danger small">
-            {{ changePinError }}
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" @click="closeChangePinModal()" :disabled="changePinLoading">Cancel</button>
-          <button type="button" class="btn btn-primary" @click="handlePinChange()" :disabled="changePinLoading">
-            <span v-if="changePinLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            <span v-if="changePinLoading">Updating...</span>
-            <span v-else>Update PIN</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+
   <!-- PIN Change Modal -->
   <div class="modal fade" id="changePinModal" tabindex="-1" aria-labelledby="changePinModalLabel" aria-hidden="true" v-show="showChangePinModal" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
