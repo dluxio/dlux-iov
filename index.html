@@ -386,7 +386,28 @@
       };
       document.head.appendChild(aframeScript);
     });
-
+    const sqrt8 = Math.sqrt(8);
+    AFRAME.registerComponent('cloak', {
+      init: function () {
+        var geometry = new THREE.PlaneGeometry(sqrt8, 6);
+        var material = new THREE.MeshBasicMaterial({ colorWrite: false });
+        var mesh = new THREE.Mesh(geometry, material);
+        this.el.object3D.add(mesh);
+      }
+    });
+    AFRAME.registerComponent('cloak-tri', {
+      init: function () {
+        let v1 = new THREE.Vector3(0, 2, 0);
+        let v2 = new THREE.Vector3(0, 0, 2);
+        let v3 = new THREE.Vector3(2, 0, 0);
+        let geometry = new THREE.BufferGeometry().setFromPoints([v1, v2, v3]);
+        let material = new THREE.MeshBasicMaterial({
+          colorWrite: false
+        });
+        let mesh = new THREE.Mesh(geometry, material);
+        this.el.object3D.add(mesh);
+      }
+    });
     // Run on resize
     window.addEventListener("resize", updateAFramePosition);
 
