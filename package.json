@@ -4,5 +4,9 @@
   },
   "dependencies": {
     "tar": "^6.1.15"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@types/node": "^22.15.29"
   }
 }

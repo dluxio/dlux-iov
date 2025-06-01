@@ -1,4 +1,4 @@
-this.version = "2025.05.28.3";
+this.version = "2025.05.31.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -524,42 +524,234 @@ self.addEventListener('fetch', function(event) {
         return; // Let browser handle all other external requests
     }
 
-    // For same-origin requests, use cache-first strategy
-    event.respondWith(
-        caches.match(event.request)
-            .then(cachedResponse => {
-                // Return cached response if available
-                if (cachedResponse) {
-                    return cachedResponse;
-                }
-
-                // Otherwise fetch from network
-                return fetch(event.request)
-                    .then(networkResponse => {
-                        // Check if we got a valid response
-                        if (!networkResponse || networkResponse.status !== 200) {
-                            return networkResponse;
-                        }
-
-                        // Clone the response for caching
-                        const responseToCache = networkResponse.clone();
-
-                        // Cache the new response
-                        caches.open(CACHE_NAME)
-                            .then(cache => {
-                                cache.put(event.request, responseToCache)
-                                    .catch(error => console.error('Cache put failed:', event.request.url, error));
-                            });
-
-                        return networkResponse;
-                    })
-                    .catch(error => {
-                        console.error('Network error for:', event.request.url, error);
-                        return new Response(null, { status: 503 }); // Service Unavailable
-                    });
-            })
-    );
+    // Handle routing rules from Caddyfile for same-origin requests
+    event.respondWith(handleRouting(event.request));
 });
+
+// Handle routing based on Caddyfile rules
+async function handleRouting(request) {
+    const url = new URL(request.url);
+    const pathname = url.pathname;
+    
+    // Helper function to try serving a static file, fallback to rewrite
+    async function tryStaticOrRewrite(rewriteTarget) {
+        // First try to get the exact file from cache
+        const cachedResponse = await caches.match(request);
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+        
+        // Try to fetch the exact file from network
+        try {
+            const networkResponse = await fetch(request);
+            if (networkResponse && networkResponse.ok) {
+                // Cache the response
+                const responseToCache = networkResponse.clone();
+                caches.open(CACHE_NAME)
+                    .then(cache => {
+                        cache.put(request, responseToCache)
+                            .catch(error => console.error('Cache put failed:', request.url, error));
+                    });
+                return networkResponse;
+            }
+        } catch (error) {
+            console.log('File not found, falling back to rewrite:', request.url);
+        }
+        
+        // File doesn't exist, rewrite to target
+        const rewriteRequest = new Request(rewriteTarget, {
+            method: request.method,
+            headers: request.headers,
+            body: request.body,
+            mode: request.mode,
+            credentials: request.credentials,
+            cache: request.cache,
+            redirect: request.redirect,
+            referrer: request.referrer
+        });
+        
+        return cacheFirstStrategy(rewriteRequest);
+    }
+    
+    // Handle /nfts/set/* -> rewrite to /nfts/set/index.html if file doesn't exist
+    if (pathname.startsWith('/nfts/set/')) {
+        return tryStaticOrRewrite('/nfts/set/index.html');
+    }
+    
+    // Handle /@* -> rewrite to /user/index.html if file doesn't exist
+    // Note: Bot handling with reverse proxy is not implemented in SW (can't proxy to 127.0.0.1:3000)
+    if (pathname.startsWith('/@')) {
+        return tryStaticOrRewrite('/user/index.html');
+    }
+    
+    // Handle /me* -> rewrite to /user/index.html
+    if (pathname.startsWith('/me')) {
+        const rewriteRequest = new Request('/user/index.html', {
+            method: request.method,
+            headers: request.headers,
+            body: request.body,
+            mode: request.mode,
+            credentials: request.credentials,
+            cache: request.cache,
+            redirect: request.redirect,
+            referrer: request.referrer
+        });
+        return cacheFirstStrategy(rewriteRequest);
+    }
+    
+    // Handle /vr/@* -> rewrite to /vr/index.html
+    if (pathname.startsWith('/vr/@')) {
+        const rewriteRequest = new Request('/vr/index.html', {
+            method: request.method,
+            headers: request.headers,
+            body: request.body,
+            mode: request.mode,
+            credentials: request.credentials,
+            cache: request.cache,
+            redirect: request.redirect,
+            referrer: request.referrer
+        });
+        return cacheFirstStrategy(rewriteRequest);
+    }
+    
+    // Handle /docs* -> try files in order: {path}, {path}.html, {path}/index.html, fallback to 404.html
+    // Note: Different root directory handling not implemented in SW (would need different cache)
+    if (pathname.startsWith('/docs')) {
+        // Try exact path first
+        let cachedResponse = await caches.match(request);
+        if (cachedResponse) {
+            return cachedResponse;
+        }
+        
+        try {
+            let networkResponse = await fetch(request);
+            if (networkResponse && networkResponse.ok) {
+                const responseToCache = networkResponse.clone();
+                caches.open(CACHE_NAME)
+                    .then(cache => cache.put(request, responseToCache));
+                return networkResponse;
+            }
+        } catch (error) {
+            // Continue to try alternatives
+        }
+        
+        // Try with .html extension
+        if (!pathname.endsWith('.html')) {
+            const htmlRequest = new Request(pathname + '.html', {
+                method: request.method,
+                headers: request.headers,
+                body: request.body,
+                mode: request.mode,
+                credentials: request.credentials,
+                cache: request.cache,
+                redirect: request.redirect,
+                referrer: request.referrer
+            });
+            
+            cachedResponse = await caches.match(htmlRequest);
+            if (cachedResponse) {
+                return cachedResponse;
+            }
+            
+            try {
+                let networkResponse = await fetch(htmlRequest);
+                if (networkResponse && networkResponse.ok) {
+                    const responseToCache = networkResponse.clone();
+                    caches.open(CACHE_NAME)
+                        .then(cache => cache.put(htmlRequest, responseToCache));
+                    return networkResponse;
+                }
+            } catch (error) {
+                // Continue to try alternatives
+            }
+        }
+        
+        // Try with /index.html
+        if (!pathname.endsWith('/')) {
+            const indexRequest = new Request(pathname + '/index.html', {
+                method: request.method,
+                headers: request.headers,
+                body: request.body,
+                mode: request.mode,
+                credentials: request.credentials,
+                cache: request.cache,
+                redirect: request.redirect,
+                referrer: request.referrer
+            });
+            
+            cachedResponse = await caches.match(indexRequest);
+            if (cachedResponse) {
+                return cachedResponse;
+            }
+            
+            try {
+                let networkResponse = await fetch(indexRequest);
+                if (networkResponse && networkResponse.ok) {
+                    const responseToCache = networkResponse.clone();
+                    caches.open(CACHE_NAME)
+                        .then(cache => cache.put(indexRequest, responseToCache));
+                    return networkResponse;
+                }
+            } catch (error) {
+                // Continue to fallback
+            }
+        }
+        
+        // Fallback to 404.html for docs
+        return cacheFirstStrategy(new Request('/404.html', {
+            method: request.method,
+            headers: request.headers,
+            body: request.body,
+            mode: request.mode,
+            credentials: request.credentials,
+            cache: request.cache,
+            redirect: request.redirect,
+            referrer: request.referrer
+        }));
+    }
+    
+    // Handle /dlux/* -> rewrite to /dlux/index.html if file doesn't exist
+    // Note: Bot handling with reverse proxy is not implemented in SW
+    if (pathname.startsWith('/dlux/')) {
+        return tryStaticOrRewrite('/dlux/index.html');
+    }
+    
+    // Handle /blog/* -> rewrite to /blog/index.html if file doesn't exist
+    // Note: Bot handling with reverse proxy is not implemented in SW
+    if (pathname.startsWith('/blog/')) {
+        return tryStaticOrRewrite('/blog/index.html');
+    }
+    
+    // Default cache-first strategy for all other requests
+    return cacheFirstStrategy(request);
+}
+
+// Cache-first strategy implementation
+async function cacheFirstStrategy(request) {
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+        return cachedResponse;
+    }
+
+    try {
+        const networkResponse = await fetch(request);
+        if (!networkResponse || networkResponse.status !== 200) {
+            return networkResponse;
+        }
+
+        const responseToCache = networkResponse.clone();
+        caches.open(CACHE_NAME)
+            .then(cache => {
+                cache.put(request, responseToCache)
+                    .catch(error => console.error('Cache put failed:', request.url, error));
+            });
+
+        return networkResponse;
+    } catch (error) {
+        console.error('Network error for:', request.url, error);
+        return new Response(null, { status: 503 }); // Service Unavailable
+    }
+}
 
 self.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'SKIP_WAITING') {
