@@ -1,4 +1,4 @@
-this.version = "2025.05.31.1";
+this.version = "2025.05.31.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -16,9 +16,6 @@ var urlsToCache = [
   `/css/bootstrap/bootstrap-reboot.css`,
   `/css/bootstrap/bootstrap-utilities.css`,
   `/css/bootstrap/bootstrap.css`,
-  `/css/bootstrap/tests/jasmine.js`,
-  `/css/bootstrap/tests/sass-true/register.js`,
-  `/css/bootstrap/tests/sass-true/runner.js`,
   `/css/codemirror-monokai.min.css`,
   `/css/codemirror.min.css`,
   `/css/custom-old.css`,
@@ -415,10 +412,13 @@ var urlsToCache = [
   `/playground/index.html`,
   `/playground/last-try.html`,
   `/playground/new.html`,
+  `/playwright.config.js`,
   `/qr/index.html`,
   `/reg-sw.js`,
   `/storage/index.html`,
   `/sw.js`,
+  `/tests-examples/demo-todo-app.spec.js`,
+  `/tests/example.spec.js`,
   `/update.html`,
   `/update/index.html`,
   `/user/detailmodal.html`,
