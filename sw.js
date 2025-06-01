@@ -1,4 +1,4 @@
-this.version = "2025.06.01.1";
+this.version = "2025.06.01.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -234,6 +234,9 @@ const importantResources = [
   `/vid/stills/gold_wave.jpg`,
   `/vid/stills/orange_cube.jpg`,
   `/vr/vue.html`,
+  `/ipfs/current.html`,
+  `/ipfs/index.html`,
+  `/qr/index.html`,
 ];
 
 // PRIORITY 3: Page-specific resource groups (cached on-demand)
@@ -242,6 +245,7 @@ const pageSpecificResources = {
     `/create/index.html`,
     `/js/uploadvue.js`,
     `/js/filesvue.js`,
+    `/js/sw-monitor.js`,
     `/js/mde.js`,
     `/js/tagify.min.js`,
     `/css/smde.css`,

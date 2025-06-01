@@ -1,5 +1,6 @@
 import ToastVue from "/js/toastvue.js";
 import StWidget from "/js/stwidget.js";
+import SwMonitor from "/js/sw-monitor.js";
 
 export default {
   data() {
@@ -55,6 +56,7 @@ export default {
   },
   components: {
     "toast-vue": ToastVue,
+    "sw-monitor": SwMonitor,
   },
   emits: ["login", "logout", "refresh", "ack"],
   props: {
@@ -973,6 +975,32 @@ export default {
 
       document.getElementById("stingChat").appendChild(element);
     },
+    handleToast(toastData) {
+      // Handle toast messages from SW monitor
+      const toastType = toastData.type || 'info';
+      const toastMessage = toastData.message || 'Service Worker notification';
+      
+      // Create a toast object that matches the existing toast system
+      const toast = {
+        time: new Date().getTime(),
+        status: toastMessage,
+        delay: 5000,
+        title: 'App Status',
+        msg: toastMessage,
+        ops: [] // Empty ops array for compatibility
+      };
+      
+      // Add to ops array to display via existing toast system
+      this.ops.push(toast);
+      
+      // Auto-remove after delay
+      setTimeout(() => {
+        const index = this.ops.indexOf(toast);
+        if (index > -1) {
+          this.ops.splice(index, 1);
+        }
+      }, toast.delay);
+    },
   },
   mounted() {
     console.log('[NavVue] Component mounted. User:', this.user, 'Signer:', localStorage.getItem('signer'));
@@ -1235,6 +1263,9 @@ export default {
             <a class="dropdown-extra" role="button" href="#/" @click="logout()">Logout</a>
           </li>
         </ul>
+      </li>
+      <li class="nav-item nav-hide">
+        <sw-monitor @toast="handleToast" />
       </li>
       <li class="nav-more dropdown nav-dropdown">
         <a class="nav-link nav-highlight nav-title dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"

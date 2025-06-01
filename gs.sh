@@ -238,6 +238,15 @@ if [ -f "$file" ]; then
         find . -name "reg-sw.js" -exec sed -i "s/const version = '[0-9.]*'/const version = '$new_version'/" {} \;
         echo "📝 Updated version in reg-sw.js files"
         
+        # Update version in sw-monitor.js file
+        sw_monitor_file="./js/sw-monitor.js"
+        if [ -f "$sw_monitor_file" ]; then
+            sed -i "s/desiredVersion: '[0-9.]*'/desiredVersion: '$new_version'/" "$sw_monitor_file"
+            echo "📝 Updated version in sw-monitor.js to $new_version"
+        else
+            echo "⚠️  Warning: sw-monitor.js not found at $sw_monitor_file"
+        fi
+        
     else
         echo "Invalid format in the first line of $file."
         exit 1
