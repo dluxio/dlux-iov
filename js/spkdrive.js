@@ -764,7 +764,7 @@ export default {
         
                 const removeSave = new Promise((res, rej) => {
                     this.toSign = {
-                        type: "cja",
+                        type: "cj",
                         cj: cja,
                         id: `spkccT_update_metadata`,
                         msg: `Updating Metadata for Contract: ${contractId}`,
