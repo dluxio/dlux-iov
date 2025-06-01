@@ -1,4 +1,4 @@
-this.version = "2025.06.01.5";
+this.version = "2025.06.01.7";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -7,6 +7,13 @@ const criticalResources = [
   // Core HTML pages
   `/index.html`,
   `/about/index.html`,
+  
+  // SPA route target pages (critical for routing)
+  `/user/index.html`,
+  `/nfts/set/index.html`,
+  `/dlux/index.html`,
+  `/blog/index.html`,
+  `/vr/index.html`,
   
   // Essential CSS for layout and theming
   `/css/bootstrap/bootstrap.css`,
@@ -29,7 +36,6 @@ const criticalResources = [
   // Core utilities
   `/reg-sw.js`,
   `/sw.js`,
-  `/vr/index.html`,
 ];
 
 // PRIORITY 2: Important resources for common interactions
@@ -37,12 +43,9 @@ const importantResources = [
   // Common HTML pages
   `/create/index.html`,
   `/nfts/index.html`,
-  `/user/index.html`,
-  `/dlux/index.html`,
   `/dex/index.html`,
   `/hub/index.html`,
   `/dao/index.html`,
-  `/blog/index.html`,
   
   // Additional CSS
   `/css/bootstrap/bootstrap-grid.css`,
@@ -735,6 +738,8 @@ async function handleRouting(request) {
     const url = new URL(request.url);
     const pathname = url.pathname;
     
+    console.log('SW: Handling route:', pathname, 'Full URL:', url.href);
+    
     // Helper function to try serving a static file, fallback to rewrite
     async function tryStaticOrRewrite(rewriteTarget) {
         // First try to get the exact file from cache
@@ -788,6 +793,7 @@ async function handleRouting(request) {
     
     // Handle /me* -> rewrite to /user/index.html
     if (pathname.startsWith('/me')) {
+        console.log('SW: Rewriting /me route to /user/index.html');
         const rewriteRequest = new Request('/user/index.html', {
             method: request.method,
             headers: request.headers,
@@ -930,14 +936,26 @@ async function handleRouting(request) {
 
 // Cache-first strategy implementation
 async function cacheFirstStrategy(request) {
+    const url = new URL(request.url);
+    console.log('SW: Cache-first strategy for:', url.pathname);
+    
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
+        console.log('SW: Serving from cache:', url.pathname);
         return cachedResponse;
     }
 
     try {
+        console.log('SW: Fetching from network:', url.pathname);
         const networkResponse = await fetch(request);
-        if (!networkResponse || networkResponse.status !== 200) {
+        
+        if (!networkResponse) {
+            console.error('SW: No network response for:', url.pathname);
+            return new Response('Service Unavailable', { status: 503 });
+        }
+        
+        if (networkResponse.status !== 200) {
+            console.warn('SW: Non-200 response for:', url.pathname, 'Status:', networkResponse.status);
             return networkResponse;
         }
 
@@ -945,13 +963,28 @@ async function cacheFirstStrategy(request) {
         caches.open(CACHE_NAME)
             .then(cache => {
                 cache.put(request, responseToCache)
-                    .catch(error => console.error('Cache put failed:', request.url, error));
+                    .catch(error => console.error('SW: Cache put failed:', request.url, error));
             });
 
+        console.log('SW: Serving from network and cached:', url.pathname);
         return networkResponse;
     } catch (error) {
-        console.error('Network error for:', request.url, error);
-        return new Response(null, { status: 503 }); // Service Unavailable
+        console.error('SW: Network error for:', request.url, error);
+        // Try to return a more helpful error page
+        return new Response(`
+            <html>
+                <body>
+                    <h1>Service Unavailable</h1>
+                    <p>Unable to load ${url.pathname}</p>
+                    <p>Error: ${error.message}</p>
+                    <p>Please check your connection and try again.</p>
+                </body>
+            </html>
+        `, { 
+            status: 503, 
+            statusText: 'Service Unavailable',
+            headers: { 'Content-Type': 'text/html' }
+        });
     }
 }
 
