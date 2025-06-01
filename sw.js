@@ -1,4 +1,4 @@
-this.version = "2025.06.01.7";
+this.version = "2025.06.01.8";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -769,8 +769,7 @@ async function handleRouting(request) {
         const rewriteRequest = new Request(rewriteTarget, {
             method: request.method,
             headers: request.headers,
-            body: request.body,
-            mode: request.mode,
+            body: request.method === 'GET' ? null : request.body,
             credentials: request.credentials,
             cache: request.cache,
             redirect: request.redirect,
@@ -797,8 +796,7 @@ async function handleRouting(request) {
         const rewriteRequest = new Request('/user/index.html', {
             method: request.method,
             headers: request.headers,
-            body: request.body,
-            mode: request.mode,
+            body: request.method === 'GET' ? null : request.body,
             credentials: request.credentials,
             cache: request.cache,
             redirect: request.redirect,
@@ -809,11 +807,11 @@ async function handleRouting(request) {
     
     // Handle /vr/@* -> rewrite to /vr/index.html
     if (pathname.startsWith('/vr/@')) {
+        console.log('SW: Rewriting /vr/@ route to /vr/index.html');
         const rewriteRequest = new Request('/vr/index.html', {
             method: request.method,
             headers: request.headers,
-            body: request.body,
-            mode: request.mode,
+            body: request.method === 'GET' ? null : request.body,
             credentials: request.credentials,
             cache: request.cache,
             redirect: request.redirect,
@@ -848,8 +846,7 @@ async function handleRouting(request) {
             const htmlRequest = new Request(pathname + '.html', {
                 method: request.method,
                 headers: request.headers,
-                body: request.body,
-                mode: request.mode,
+                body: request.method === 'GET' ? null : request.body,
                 credentials: request.credentials,
                 cache: request.cache,
                 redirect: request.redirect,
@@ -879,8 +876,7 @@ async function handleRouting(request) {
             const indexRequest = new Request(pathname + '/index.html', {
                 method: request.method,
                 headers: request.headers,
-                body: request.body,
-                mode: request.mode,
+                body: request.method === 'GET' ? null : request.body,
                 credentials: request.credentials,
                 cache: request.cache,
                 redirect: request.redirect,
@@ -909,8 +905,7 @@ async function handleRouting(request) {
         return cacheFirstStrategy(new Request('/404.html', {
             method: request.method,
             headers: request.headers,
-            body: request.body,
-            mode: request.mode,
+            body: request.method === 'GET' ? null : request.body,
             credentials: request.credentials,
             cache: request.cache,
             redirect: request.redirect,
