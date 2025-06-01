@@ -1,4 +1,4 @@
-this.version = "2025.06.01.8";
+this.version = "2025.06.01.9";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -820,98 +820,7 @@ async function handleRouting(request) {
         return cacheFirstStrategy(rewriteRequest);
     }
     
-    // Handle /docs* -> try files in order: {path}, {path}.html, {path}/index.html, fallback to 404.html
-    // Note: Different root directory handling not implemented in SW (would need different cache)
-    if (pathname.startsWith('/docs')) {
-        // Try exact path first
-        let cachedResponse = await caches.match(request);
-        if (cachedResponse) {
-            return cachedResponse;
-        }
-        
-        try {
-            let networkResponse = await fetch(request);
-            if (networkResponse && networkResponse.ok) {
-                const responseToCache = networkResponse.clone();
-                caches.open(CACHE_NAME)
-                    .then(cache => cache.put(request, responseToCache));
-                return networkResponse;
-            }
-        } catch (error) {
-            // Continue to try alternatives
-        }
-        
-        // Try with .html extension
-        if (!pathname.endsWith('.html')) {
-            const htmlRequest = new Request(pathname + '.html', {
-                method: request.method,
-                headers: request.headers,
-                body: request.method === 'GET' ? null : request.body,
-                credentials: request.credentials,
-                cache: request.cache,
-                redirect: request.redirect,
-                referrer: request.referrer
-            });
-            
-            cachedResponse = await caches.match(htmlRequest);
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-            
-            try {
-                let networkResponse = await fetch(htmlRequest);
-                if (networkResponse && networkResponse.ok) {
-                    const responseToCache = networkResponse.clone();
-                    caches.open(CACHE_NAME)
-                        .then(cache => cache.put(htmlRequest, responseToCache));
-                    return networkResponse;
-                }
-            } catch (error) {
-                // Continue to try alternatives
-            }
-        }
-        
-        // Try with /index.html
-        if (!pathname.endsWith('/')) {
-            const indexRequest = new Request(pathname + '/index.html', {
-                method: request.method,
-                headers: request.headers,
-                body: request.method === 'GET' ? null : request.body,
-                credentials: request.credentials,
-                cache: request.cache,
-                redirect: request.redirect,
-                referrer: request.referrer
-            });
-            
-            cachedResponse = await caches.match(indexRequest);
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-            
-            try {
-                let networkResponse = await fetch(indexRequest);
-                if (networkResponse && networkResponse.ok) {
-                    const responseToCache = networkResponse.clone();
-                    caches.open(CACHE_NAME)
-                        .then(cache => cache.put(indexRequest, responseToCache));
-                    return networkResponse;
-                }
-            } catch (error) {
-                // Continue to fallback
-            }
-        }
-        
-        // Fallback to 404.html for docs
-        return cacheFirstStrategy(new Request('/404.html', {
-            method: request.method,
-            headers: request.headers,
-            body: request.method === 'GET' ? null : request.body,
-            credentials: request.credentials,
-            cache: request.cache,
-            redirect: request.redirect,
-            referrer: request.referrer
-        }));
-    }
+
     
     // Handle /dlux/* -> rewrite to /dlux/index.html if file doesn't exist
     // Note: Bot handling with reverse proxy is not implemented in SW
