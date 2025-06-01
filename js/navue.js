@@ -1216,8 +1216,8 @@ export default {
                     src="/img/hiveauth.svg" class="img-responsive" style="height:50px !important;"></button></li>
               <li class="p-2" v-if="!node"><button class="btn btn-hivesigner h-100 w-100" @click="useHS()"><img
                     src="/img/hivesigner.svg" class="img-responsive" style="height:50px !important;"></button></li>
-              <li class="p-2 d-none"><button class="btn btn-pen h-100 w-100" @click="usePEN()"><img
-                    src="/img/dlux-pen.png" class="img-responsive" style="height:50px !important;"></button></li>
+                                <li class="p-2"><button class="btn btn-pen h-100 w-100" @click="usePEN()"><img
+                        src="/img/dlux-pen.png" class="img-responsive" style="height:50px !important;"></button></li>
             </ul>
           </div>
           <!-- login method description -->
@@ -1225,7 +1225,7 @@ export default {
             <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension</span>
             <span v-if="HAS">Hive Auth requires websockets and a PKSA Application</span>
             <span v-if="HSR">Hive Signer generates a link</span>
-            <span v-if="PEN">dlux Pen stores your active key locally</span>
+                            <span v-if="PEN">dluxPEN lets you sign transactions with locally stored and encrypted keys</span>
           </div>
         </div>
       </div>

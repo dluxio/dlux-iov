@@ -1,6 +1,7 @@
 import ToastVue from "/js/toastvue.js";
 import StWidget from "/js/stwidget.js";
 import SwMonitor from "/js/sw-monitor.js";
+import Mcommon from "/js/methods-common.js";
 
 export default {
   data() {
@@ -108,46 +109,279 @@ export default {
     },
   },
   methods: {
+    ...Mcommon,
     toggleChat() {
       this.chatVisible = !this.chatVisible;
     },
-    storeKey(level, key) {
-      //get hive user
-      fetch("https://hive-api.dlux.io", {
-        method: "POST",
-        body: JSON.stringify([
-          "get_accounts",
-          [[this.account]],
-        ]),
-
-      }).then(r => {
+    // Benchmark PBKDF2 to find iteration count for target duration
+    async benchmarkPBKDF2(targetDurationMs = 2000) {
+      const testPassword = "benchmark-test-password";
+      const testSalt = crypto.getRandomValues(new Uint8Array(32));
+      
+      // Start with a reasonable baseline
+      let iterations = 100000;
+      let duration = 0;
+      
+      // Binary search approach to find optimal iteration count
+      let minIterations = 50000;
+      let maxIterations = 1000000;
+      
+      while (maxIterations - minIterations > 10000) {
+        const startTime = performance.now();
+        
+        const encoder = new TextEncoder();
+        const keyMaterial = await crypto.subtle.importKey(
+          "raw",
+          encoder.encode(testPassword),
+          { name: "PBKDF2" },
+          false,
+          ["deriveBits"]
+        );
+        
+        await crypto.subtle.deriveBits(
+          {
+            name: "PBKDF2",
+            salt: testSalt,
+            iterations: iterations,
+            hash: "SHA-256"
+          },
+          keyMaterial,
+          256
+        );
+        
+        duration = performance.now() - startTime;
+        
+        if (duration < targetDurationMs * 0.9) {
+          minIterations = iterations;
+          iterations = Math.floor((iterations + maxIterations) / 2);
+        } else if (duration > targetDurationMs * 1.1) {
+          maxIterations = iterations;
+          iterations = Math.floor((minIterations + iterations) / 2);
+        } else {
+          break;
+        }
+      }
+      
+      console.log(`PBKDF2 benchmark: ${iterations} iterations = ${Math.round(duration)}ms`);
+      return iterations;
+    },
+    
+    // Generate cryptographically secure salt
+    generateSalt() {
+      return crypto.getRandomValues(new Uint8Array(32));
+    },
+    
+    // Derive key using PBKDF2
+    async deriveKey(password, salt, iterations) {
+      const encoder = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        encoder.encode(password),
+        { name: "PBKDF2" },
+        false,
+        ["deriveBits"]
+      );
+      
+      const derivedBits = await crypto.subtle.deriveBits(
+        {
+          name: "PBKDF2",
+          salt: salt,
+          iterations: iterations,
+          hash: "SHA-256"
+        },
+        keyMaterial,
+        256
+      );
+      
+      return new Uint8Array(derivedBits);
+    },
+    
+    // Convert Uint8Array to hex string
+    uint8ArrayToHex(uint8Array) {
+      return Array.from(uint8Array)
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+    },
+    
+    // Convert hex string to Uint8Array
+    hexToUint8Array(hexString) {
+      const bytes = new Uint8Array(hexString.length / 2);
+      for (let i = 0; i < hexString.length; i += 2) {
+        bytes[i / 2] = parseInt(hexString.substr(i, 2), 16);
+      }
+      return bytes;
+    },
+    
+    // Hardened encryption using PBKDF2 + AES
+    async encryptWithPBKDF2(data, password) {
+      try {
+        // Generate salt and determine iteration count
+        const salt = this.generateSalt();
+        const iterations = await this.benchmarkPBKDF2(2000); // Target 2 seconds
+        
+        // Derive key using PBKDF2
+        const derivedKey = await this.deriveKey(password, salt, iterations);
+        
+        // Convert derived key to CryptoJS format
+        const keyHex = this.uint8ArrayToHex(derivedKey);
+        const key = CryptoJS.enc.Hex.parse(keyHex);
+        
+        // Encrypt the data using CBC mode (more widely supported)
+        const encrypted = CryptoJS.AES.encrypt(JSON.stringify(data), key, {
+          mode: CryptoJS.mode.CBC,
+          padding: CryptoJS.pad.Pkcs7
+        });
+        
+        // Package everything together
+        const packagedData = {
+          version: "1.0",
+          salt: this.uint8ArrayToHex(salt),
+          iterations: iterations,
+          encrypted: encrypted.toString(),
+          timestamp: Date.now()
+        };
+        
+        return JSON.stringify(packagedData);
+      } catch (error) {
+        console.error("Encryption failed:", error);
+        throw new Error("Failed to encrypt data");
+      }
+    },
+    
+    // Hardened decryption using PBKDF2 + AES
+    async decryptWithPBKDF2(encryptedPackage, password) {
+      try {
+        const packagedData = JSON.parse(encryptedPackage);
+        
+        // Validate package format
+        if (!packagedData.salt || !packagedData.iterations || !packagedData.encrypted) {
+          throw new Error("Invalid encrypted package format");
+        }
+        
+        // Convert salt back to Uint8Array
+        const salt = this.hexToUint8Array(packagedData.salt);
+        
+        // Derive the same key using stored parameters
+        const derivedKey = await this.deriveKey(password, salt, packagedData.iterations);
+        
+        // Convert derived key to CryptoJS format
+        const keyHex = this.uint8ArrayToHex(derivedKey);
+        const key = CryptoJS.enc.Hex.parse(keyHex);
+        
+        // Decrypt the data using CBC mode
+        const decrypted = CryptoJS.AES.decrypt(packagedData.encrypted, key, {
+          mode: CryptoJS.mode.CBC,
+          padding: CryptoJS.pad.Pkcs7
+        });
+        
+        const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
+        if (!decryptedString) {
+          throw new Error("Failed to decrypt - incorrect password or corrupted data");
+        }
+        
+        return JSON.parse(decryptedString);
+      } catch (error) {
+        console.error("Decryption failed:", error);
+        throw new Error("Failed to decrypt data - check password");
+      }
+    },
+    
+    async storeKey(level, key) {
+      try {
+        // Fix: use this.user instead of this.account
+        const response = await fetch("https://hive-api.dlux.io", {
+          method: "POST",
+          body: JSON.stringify([
+            "get_accounts",
+            [[this.user]],
+          ]),
+        });
+        
+        const data = await response.json();
+        const accountData = data.result[0];
+        
+        if (!accountData) {
+          this.PENstatus = "User not found";
+          return;
+        }
+        
+        // Verify the key matches the account
         var PublicKey = hiveTx.PublicKey.from(
-          r[0][level].key_auths[0][0]
+          accountData[level].key_auths[0][0]
         );
         var PrivateKey = hiveTx.PrivateKey.from(key);
         var success = PublicKey.verify(
           "Testing123",
           PrivateKey.sign("Testing123")
         );
+        
         if (success) {
-          if (!this.decrypted.accounts[this.account]) this.decrypted[this.account] = {};
-          this.decrypted[this.account][level] = key;
-          var encrypted = CryptoJS.AES.encrypt(
-            JSON.stringify(this.decrypted),
+          // Initialize user account if not exists
+          if (!this.decrypted.accounts[this.user]) {
+            this.decrypted.accounts[this.user] = {};
+          }
+          this.decrypted.accounts[this.user][level] = key;
+          
+          // Use hardened encryption
+          const encrypted = await this.encryptWithPBKDF2(
+            this.decrypted,
             this.PIN
           );
+          
           localStorage.setItem("PEN", encrypted);
+          this.PENstatus = "Key stored successfully";
         } else {
           this.PENstatus = "Invalid Key";
         }
-      })
+      } catch (error) {
+        console.error("Failed to store key:", error);
+        this.PENstatus = "Failed to store key";
+      }
     },
-    decryptPEN(user = this.account) {
-      var PEN = localStorage.getItem("PEN");
-      if (PEN) {
-        var decrypted = CryptoJS.AES.decrypt(encrypted, this.PIN);
-        this.decrypt = JSON.parse(decrypted);
-        sessionStorage.setItem('pen', decrypted)
+    
+    async decryptPEN(user = this.user) {
+      try {
+        const PEN = localStorage.getItem("PEN");
+        if (!PEN) {
+          console.log("No PEN data found");
+          return;
+        }
+        
+        // Try new hardened decryption first
+        try {
+          const decrypted = await this.decryptWithPBKDF2(PEN, this.PIN);
+          this.decrypted = decrypted;
+          sessionStorage.setItem('pen', JSON.stringify(decrypted));
+          console.log("Successfully decrypted with PBKDF2");
+          return;
+        } catch (pbkdf2Error) {
+          console.log("PBKDF2 decryption failed, trying legacy method:", pbkdf2Error.message);
+        }
+        
+        // Fallback to legacy decryption for backward compatibility
+        try {
+          const decrypted = CryptoJS.AES.decrypt(PEN, this.PIN);
+          const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
+          if (decryptedString) {
+            this.decrypted = JSON.parse(decryptedString);
+            sessionStorage.setItem('pen', decryptedString);
+            console.log("Successfully decrypted with legacy method");
+            
+            // Upgrade to new encryption format
+            console.log("Upgrading to PBKDF2 encryption...");
+            const upgraded = await this.encryptWithPBKDF2(this.decrypted, this.PIN);
+            localStorage.setItem("PEN", upgraded);
+            console.log("Encryption upgraded successfully");
+          } else {
+            throw new Error("Legacy decryption failed");
+          }
+        } catch (legacyError) {
+          console.error("Both PBKDF2 and legacy decryption failed:", legacyError);
+          throw new Error("Failed to decrypt PEN data");
+        }
+      } catch (error) {
+        console.error("Failed to decrypt PEN:", error);
+        this.PENstatus = "Failed to decrypt - check PIN";
       }
     },
     useHAS() {
@@ -172,12 +406,21 @@ export default {
       this.PEN = false;
       localStorage.setItem("signer", "HKC");
     },
-    usePEN() {
+    async usePEN() {
       this.HAS = false;
       this.HKC = false;
       this.HSR = false;
       this.PEN = true;
       localStorage.setItem("signer", "PEN");
+      
+      // Try to decrypt PEN data if user is logged in
+      if (this.user) {
+        try {
+          await this.decryptPEN();
+        } catch (error) {
+          console.error("Failed to decrypt PEN data:", error);
+        }
+      }
     },
     broadcastCJ(obj) {
       var op = [
@@ -871,54 +1114,46 @@ export default {
         this.setUser();
       }
     },
-    queueUser() {
-      fetch("https://hive-api.dlux.io", {
-        method: "POST",
-        body: JSON.stringify([
-          "get_accounts",
-          [[this.userField]],
-        ]),
-
-      }).then(r => {
-        if (r[0].active.key_auths[0][0]) {
+    async queueUser() {
+      try {
+        const response = await fetch("https://hive-api.dlux.io", {
+          method: "POST",
+          body: JSON.stringify([
+            "get_accounts",
+            [[this.userField]],
+          ]),
+        });
+        
+        const data = await response.json();
+        const accountData = data.result[0];
+        
+        if (accountData && accountData.active.key_auths[0][0]) {
           this.userPinFeedback = "Valid User";
           this.pinSetup = {
             account: this.userField,
-            activePub: r[0].active.key_auths[0],
-            postingPub: r[0].posting.key_auths[0],
-            memoPub: r[0].memo_key,
-            ownerPub: r[0].owner.key_auths[0],
+            activePub: accountData.active.key_auths[0],
+            postingPub: accountData.posting.key_auths[0],
+            memoPub: accountData.memo_key,
+            ownerPub: accountData.owner.key_auths[0],
+          }
+          
+          // Initialize account structure for this user
+          if (!this.decrypted.accounts[this.userField]) {
+            this.decrypted.accounts[this.userField] = {
+              posting: "",
+              active: "",
+              memo: "",
+              owner: "",
+              master: "",
+            };
           }
         } else {
           this.userPinFeedback = "Invalid User";
         }
-        var PublicKey = hiveTx.PublicKey.from(
-          r[0][level].key_auths[0][0]
-        );
-        var PrivateKey = hiveTx.PrivateKey.from(key);
-        var success = PublicKey.verify(
-          "Testing123",
-          PrivateKey.sign("Testing123")
-        );
-        if (success) {
-          if (!this.decrypted.accounts[this.account]) this.decrypted[this.account] = {};
-          this.decrypted[this.account][level] = key;
-          var encrypted = CryptoJS.AES.encrypt(
-            JSON.stringify(this.decrypted),
-            this.PIN
-          );
-          localStorage.setItem("PEN", encrypted);
-        } else {
-          this.PENstatus = "Invalid Key";
-        }
-      })
-      this.decrypted.accounts[this.account] = {
-        posting: "",
-        active: "",
-        memo: "",
-        owner: "",
-        master: "",
-      };
+      } catch (error) {
+        console.error("Failed to queue user:", error);
+        this.userPinFeedback = "Error checking user";
+      }
     },
     cleanOps(txid) {
       const ops = this.ops;
@@ -1002,14 +1237,14 @@ export default {
       }, toast.delay);
     },
   },
-  mounted() {
+  async mounted() {
     console.log('[NavVue] Component mounted. User:', this.user, 'Signer:', localStorage.getItem('signer'));
     const signer = localStorage.getItem("signer");
     const decrypted = sessionStorage.getItem('pen')
     if (decrypted) this.decrypted = JSON.parse(decrypted)
     if (signer == "HSR") this.useHS();
     else if (signer == "HAS") this.useHAS();
-    else if (signer == "PEN" && this.decrypted) this.usePEN();
+    else if (signer == "PEN") await this.usePEN();
     else this.useKC();
     this.getUser();
     this.getRecentUsers();
@@ -1356,7 +1591,7 @@ export default {
                         src="/img/hiveauth.svg" class="img-responsive" style="height:50px !important;"></button></li>
                   <li class="p-2" v-if="!node"><button class="btn btn-hivesigner h-100 w-100" @click="useHS()"><img
                         src="/img/hivesigner.svg" class="img-responsive" style="height:50px !important;"></button></li>
-                  <li class="p-2 d-none"><button class="btn btn-pen h-100 w-100" @click="usePEN()"><img
+                  <li class="p-2"><button class="btn btn-pen h-100 w-100" @click="usePEN()"><img
                         src="/img/dlux-pen.png" class="img-responsive" style="height:50px !important;"></button></li>
                 </ul>
               </div>
@@ -1365,7 +1600,7 @@ export default {
                 <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension</span>
                 <span v-if="HAS">Hive Auth requires websockets and a PKSA Application</span>
                 <span v-if="HSR">Hive Signer generates a link</span>
-                <span v-if="PEN">dlux Pen stores your active key locally</span>
+                <span v-if="PEN">dluxPEN lets you sign transactions with locally stored and encrypted keys</span>
               </div>
             </div>
           </div>

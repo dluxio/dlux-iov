@@ -418,7 +418,7 @@
 								<hr class="my-4 bg-light">
 								<p>All data you publish or access through DLUX is recorded permanently on the Hive blockchain, which is publicly available and immutable. While DLUX, as a front end, can filter or hide content for display, and assets stored on IPFS may be garbage-collected, the blockchain record remains accessible forever.
 								</p>
-								<p>DLUX does not store any user data on its servers. Authentication is handled securely via the Hive Keychain extension or other methods provided in the user login menu, ensuring user keys never leave your device. For user convenience, DLUX stores minimal, non-identifiable data in your browser's localStorage, including:</p>
+								<p>DLUX does not store any user data on its servers. Authentication is handled securely via the Hive Keychain extension or other methods provided in the user login menu, ensuring user keys never leave your device. When using dluxPEN, private keys are encrypted using PBKDF2 with adaptive iteration counts (targeting 2 seconds of computation time) and cryptographically secure salts before being stored locally in your browser. For user convenience, DLUX stores minimal, non-identifiable data in your browser's localStorage, including:</p>
 								<ul>
 									<li>
 										<b>Chosen account names:</b> Unverified Hive account names you select (e.g., whale_account) to simplify navigation (e.g., home page links) and prefill transaction forms. These are public and do not grant signing authority, which is secured by your wallet software and Hive's RPC.
@@ -428,6 +428,9 @@
 									</li>
 									<li>
 										<b>Transaction IDs (txids) and pending transactions:</b> Temporary storage of transaction IDs when you initiate a transaction, used to poll Hive or Layer 2 APIs for confirmation and to refresh page data. Pending transactions so your changes aren't lost while navigating.  These are cleared after completion.
+									</li>
+									<li>
+										<b>Encrypted private keys (dluxPEN only):</b> When using dluxPEN authentication, your private keys are encrypted using industry-standard PBKDF2 key derivation with SHA-256, adaptive iteration counts, and unique cryptographic salts before being stored locally. This hardened encryption makes brute force attacks computationally expensive while keeping your keys under your control on your device.
 									</li>
 								</ul>
 								<p>This data remains on your device, is not linked to your Hive account for tracking purposes, and is used solely for functionality. DLUX does not track user activity, collect personal data, or use cookies. When polling APIs, DLUX transmits only necessary data (e.g., txids) to public Hive or Layer 2 endpoints, with no additional user identifiers.</p>
@@ -462,7 +465,7 @@
 								<h3>3. User Responsibilities</h3>
 								<ul>
 									<li>Use DLUX in compliance with applicable local and international laws and regulations.</li>
-									<li>Secure your private keys and authentication methods (e.g., Hive Keychain).</li>
+									<li>Secure your private keys and authentication methods (e.g., Hive Keychain, dluxPEN). If using dluxPEN, maintain the security of your PIN/password and understand that encrypted keys are stored locally on your device.</li>
 									<li>Verify the trustworthiness of dApps / third-party subdomains (e.g., author1.dlux.io) before interacting.</li>
 									<li>Not engage in illegal activities, including fraud, money laundering, or distributing malicious code.</li>
 									<li>Not attempt to disrupt DLUX or the Hive blockchain (e.g., through hacking or spamming).</li>
@@ -471,7 +474,7 @@
 								<p>User applications on subdomains (e.g., author1.dlux.io), accessible via user profiles or dApp listings like the Hub, are controlled by third-party authors, not DLUX. These may contain malicious code, collect data, or access URL parameters (e.g., ?account=whale_account). DLUX is not responsible for the content, security, or actions of third-party subdomains. Use them at your own risk.
 								</p>
 								<h3>5. Data Practices</h3>
-								<p>DLUX's use of localStorage for unverified account names (e.g., whale_account), preferences (e.g., viewpoint=dark), transaction IDs, and pending transactions, as well as URL parameters for data passing, is detailed in our Privacy Policy. By using DLUX, you agree to these practices.</p>
+								<p>DLUX's use of localStorage for unverified account names (e.g., whale_account), preferences (e.g., viewpoint=dark), transaction IDs, pending transactions, and encrypted private keys (dluxPEN only), as well as URL parameters for data passing, is detailed in our Privacy Policy. By using DLUX, you agree to these practices. When using dluxPEN, you acknowledge that your private keys are encrypted and stored locally on your device and that you are solely responsible for maintaining the security of your encryption password/PIN.</p>
 								<h3>6. Limitation of Liability</h3>
 								<p>To the fullest extent permitted by law, DLUX and its contributors shall not be liable for any direct, indirect, incidental, special, or consequential damages arising from your use of DLUX, including but not limited to loss of funds, data, or profits. You assume all risks associated with cryptocurrencies, DEX trading, and third-party subdomains.</p>
 								<h3>7. Termination</h3>

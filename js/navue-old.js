@@ -1093,7 +1093,7 @@ export default {
           <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension</span>
           <span v-if="HAS">Hive Auth requires websockets and a PKSA Application</span>
           <span v-if="HSR">Hive Signer generates a link</span>
-          <span v-if="PEN">dlux Pen stores your active key locally</span>
+                          <span v-if="PEN">dluxPEN lets you sign transactions with locally stored and encrypted keys</span>
         </div>
           
 
