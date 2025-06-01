@@ -4,7 +4,7 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.01.4', // Should match sw.js version
+      desiredVersion: '2025.06.01.5', // Should match sw.js version
       
       // PWA Install states
       installStatus: 'unknown', // unknown, available, installed, not-supported
@@ -228,14 +228,22 @@ export default {
           this.swStatus = 'updated';
           this.showUpdateNotification = true;
           break;
+        case 'CACHE_STARTED':
+          this.swStatus = 'installing';
+          break;
         case 'CACHE_PROGRESS':
           this.cacheProgress = data.progress;
           break;
         case 'CACHE_COMPLETE':
+          // Reset status to current when caching is complete
+          this.swStatus = 'current';
+          this.showUpdateNotification = false;
           this.updateCacheStats();
+          this.showToast('App updated successfully!', 'success');
           break;
         case 'ERROR':
           this.errors.push(data.message);
+          this.swStatus = 'error';
           break;
       }
     },
@@ -300,19 +308,23 @@ export default {
         const registration = await navigator.serviceWorker.getRegistration('/');
         
         if (registration) {
+          this.swStatus = 'installing';
+          this.showUpdateNotification = false;
+          
           if (registration.waiting) {
             // Tell the waiting service worker to skip waiting
             registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+            // Note: SW_UPDATED message will be received, which sets status to 'updated'
+            // Then user needs to reload. CACHE_COMPLETE will come after activation.
           } else {
-            // Force update check
+            // Force update check - this will trigger background caching
             await registration.update();
+            // Background caching will send CACHE_COMPLETE when done
           }
-          
-          this.swStatus = 'installing';
-          this.showUpdateNotification = false;
         }
       } catch (error) {
         console.error('[SW Monitor] Error updating service worker:', error);
+        this.swStatus = 'error';
         this.showToast('Update failed', 'error');
       }
     },

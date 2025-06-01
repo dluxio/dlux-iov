@@ -1,4 +1,4 @@
-this.version = "2025.06.01.4";
+this.version = "2025.06.01.5";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -540,6 +540,15 @@ async function cacheImportantResources() {
         const cache = await caches.open(CACHE_NAME);
         console.log("SW: Background caching important resources...");
         
+        // Notify clients that caching has started
+        self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
+            .then(clients => {
+                clients.forEach(client => {
+                    client.postMessage({ type: 'CACHE_STARTED' });
+                });
+            })
+            .catch(error => console.error('Failed to notify clients of cache start:', error));
+        
         // Cache in smaller batches to avoid overwhelming the browser
         const batchSize = 10;
         for (let i = 0; i < importantResources.length; i += batchSize) {
@@ -558,8 +567,26 @@ async function cacheImportantResources() {
         
         priorityTwoCached = true;
         console.log("SW: Important resources background caching completed");
+        
+        // Notify all clients that caching is complete
+        self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
+            .then(clients => {
+                clients.forEach(client => {
+                    client.postMessage({ type: 'CACHE_COMPLETE' });
+                });
+            })
+            .catch(error => console.error('Failed to notify clients of cache completion:', error));
     } catch (error) {
         console.error('SW: Background caching failed:', error);
+        
+        // Notify clients of caching error
+        self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
+            .then(clients => {
+                clients.forEach(client => {
+                    client.postMessage({ type: 'ERROR', data: { message: 'Background caching failed' } });
+                });
+            })
+            .catch(err => console.error('Failed to notify clients of cache error:', err));
     } finally {
         backgroundCacheInProgress = false;
     }
