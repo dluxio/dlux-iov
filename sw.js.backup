@@ -1,4 +1,4 @@
-this.version = "2025.06.01.2";
+this.version = "2025.06.01.3";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -27,7 +27,7 @@ const criticalResources = [
   `/img/no-user.png`,
   
   // Core utilities
-  `/reg-sw.js`
+  `/reg-sw.js`,
   `/sw.js`,
   `/vr/index.html`,
 ];
@@ -64,7 +64,7 @@ const importantResources = [
   `/img/tokens/dlux_icon.png`,
   `/img/tokens/hive_icon.svg`,
   `/img/tokens/hbd_icon.svg`,
-  `/img/spknetwork.png`
+  `/img/spknetwork.png`,
   `/build/index.html`,
   `/css/bootstrap/bootstrap-reboot.css`,
   `/css/codemirror-monokai.min.css`,
@@ -234,6 +234,9 @@ const importantResources = [
   `/vid/stills/gold_wave.jpg`,
   `/vid/stills/orange_cube.jpg`,
   `/vr/vue.html`,
+  `/ipfs/current.html`,
+  `/ipfs/index.html`,
+  `/qr/index.html`,
 ];
 
 // PRIORITY 3: Page-specific resource groups (cached on-demand)
@@ -246,7 +249,7 @@ const pageSpecificResources = {
     `/js/mde.js`,
     `/js/tagify.min.js`,
     `/css/smde.css`,
-    `/css/simplemde-bs-dark.css`
+    `/css/simplemde-bs-dark.css`,
     `/js/v3-qr.js`,
   ],
   
@@ -256,7 +259,7 @@ const pageSpecificResources = {
     `/js/aframe.min.js`,
     `/js/aframe-extras.min.js`,
     `/js/aframe-environment-component.min.js`,
-    `/img/aframe.png`
+    `/img/aframe.png`,
     `/naf-playground/aframe/aframe.min.js`,
     `/naf-playground/aframe/networked-aframe.min.js`,
     `/naf-playground/assets/textures/sky/milkyway.jpg`,
