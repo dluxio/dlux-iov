@@ -1,4 +1,4 @@
-this.version = "2025.06.01.3";
+this.version = "2025.06.01.12";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -7,6 +7,13 @@ const criticalResources = [
   // Core HTML pages
   `/index.html`,
   `/about/index.html`,
+  
+  // SPA route target pages (critical for routing)
+  `/user/index.html`,
+  `/nfts/set/index.html`,
+  `/dlux/index.html`,
+  `/blog/index.html`,
+  `/vr/index.html`,
   
   // Essential CSS for layout and theming
   `/css/bootstrap/bootstrap.css`,
@@ -29,7 +36,6 @@ const criticalResources = [
   // Core utilities
   `/reg-sw.js`,
   `/sw.js`,
-  `/vr/index.html`,
 ];
 
 // PRIORITY 2: Important resources for common interactions
@@ -37,12 +43,9 @@ const importantResources = [
   // Common HTML pages
   `/create/index.html`,
   `/nfts/index.html`,
-  `/user/index.html`,
-  `/dlux/index.html`,
   `/dex/index.html`,
   `/hub/index.html`,
   `/dao/index.html`,
-  `/blog/index.html`,
   
   // Additional CSS
   `/css/bootstrap/bootstrap-grid.css`,
@@ -486,6 +489,12 @@ const skippedResources = [
   `/qr/index.html`,
   `/tests-examples/demo-todo-app.spec.js`,
   `/tests/example.spec.js`,
+  `/aframe-builder/index2.html`,
+  `/honeyblocks/block/index.html`,
+  `/honeyblocks/detail/index.html`,
+  `/honeyblocks/index.html`,
+  `/naf-playground/aframe/aframe-inspector.min.js`,
+  `/sw-monitor-test.html`,
 ];
 
 // Cache management flags
@@ -534,6 +543,15 @@ async function cacheImportantResources() {
         const cache = await caches.open(CACHE_NAME);
         console.log("SW: Background caching important resources...");
         
+        // Notify clients that caching has started
+        self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
+            .then(clients => {
+                clients.forEach(client => {
+                    client.postMessage({ type: 'CACHE_STARTED' });
+                });
+            })
+            .catch(error => console.error('Failed to notify clients of cache start:', error));
+        
         // Cache in smaller batches to avoid overwhelming the browser
         const batchSize = 10;
         for (let i = 0; i < importantResources.length; i += batchSize) {
@@ -552,8 +570,26 @@ async function cacheImportantResources() {
         
         priorityTwoCached = true;
         console.log("SW: Important resources background caching completed");
+        
+        // Notify all clients that caching is complete
+        self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
+            .then(clients => {
+                clients.forEach(client => {
+                    client.postMessage({ type: 'CACHE_COMPLETE' });
+                });
+            })
+            .catch(error => console.error('Failed to notify clients of cache completion:', error));
     } catch (error) {
         console.error('SW: Background caching failed:', error);
+        
+        // Notify clients of caching error
+        self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
+            .then(clients => {
+                clients.forEach(client => {
+                    client.postMessage({ type: 'ERROR', data: { message: 'Background caching failed' } });
+                });
+            })
+            .catch(err => console.error('Failed to notify clients of cache error:', err));
     } finally {
         backgroundCacheInProgress = false;
     }
@@ -702,6 +738,8 @@ async function handleRouting(request) {
     const url = new URL(request.url);
     const pathname = url.pathname;
     
+    console.log('SW: Handling route:', pathname, 'Full URL:', url.href);
+    
     // Helper function to try serving a static file, fallback to rewrite
     async function tryStaticOrRewrite(rewriteTarget) {
         // First try to get the exact file from cache
@@ -731,8 +769,7 @@ async function handleRouting(request) {
         const rewriteRequest = new Request(rewriteTarget, {
             method: request.method,
             headers: request.headers,
-            body: request.body,
-            mode: request.mode,
+            body: request.method === 'GET' ? null : request.body,
             credentials: request.credentials,
             cache: request.cache,
             redirect: request.redirect,
@@ -755,11 +792,11 @@ async function handleRouting(request) {
     
     // Handle /me* -> rewrite to /user/index.html
     if (pathname.startsWith('/me')) {
+        console.log('SW: Rewriting /me route to /user/index.html');
         const rewriteRequest = new Request('/user/index.html', {
             method: request.method,
             headers: request.headers,
-            body: request.body,
-            mode: request.mode,
+            body: request.method === 'GET' ? null : request.body,
             credentials: request.credentials,
             cache: request.cache,
             redirect: request.redirect,
@@ -770,11 +807,11 @@ async function handleRouting(request) {
     
     // Handle /vr/@* -> rewrite to /vr/index.html
     if (pathname.startsWith('/vr/@')) {
+        console.log('SW: Rewriting /vr/@ route to /vr/index.html');
         const rewriteRequest = new Request('/vr/index.html', {
             method: request.method,
             headers: request.headers,
-            body: request.body,
-            mode: request.mode,
+            body: request.method === 'GET' ? null : request.body,
             credentials: request.credentials,
             cache: request.cache,
             redirect: request.redirect,
@@ -783,101 +820,7 @@ async function handleRouting(request) {
         return cacheFirstStrategy(rewriteRequest);
     }
     
-    // Handle /docs* -> try files in order: {path}, {path}.html, {path}/index.html, fallback to 404.html
-    // Note: Different root directory handling not implemented in SW (would need different cache)
-    if (pathname.startsWith('/docs')) {
-        // Try exact path first
-        let cachedResponse = await caches.match(request);
-        if (cachedResponse) {
-            return cachedResponse;
-        }
-        
-        try {
-            let networkResponse = await fetch(request);
-            if (networkResponse && networkResponse.ok) {
-                const responseToCache = networkResponse.clone();
-                caches.open(CACHE_NAME)
-                    .then(cache => cache.put(request, responseToCache));
-                return networkResponse;
-            }
-        } catch (error) {
-            // Continue to try alternatives
-        }
-        
-        // Try with .html extension
-        if (!pathname.endsWith('.html')) {
-            const htmlRequest = new Request(pathname + '.html', {
-                method: request.method,
-                headers: request.headers,
-                body: request.body,
-                mode: request.mode,
-                credentials: request.credentials,
-                cache: request.cache,
-                redirect: request.redirect,
-                referrer: request.referrer
-            });
-            
-            cachedResponse = await caches.match(htmlRequest);
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-            
-            try {
-                let networkResponse = await fetch(htmlRequest);
-                if (networkResponse && networkResponse.ok) {
-                    const responseToCache = networkResponse.clone();
-                    caches.open(CACHE_NAME)
-                        .then(cache => cache.put(htmlRequest, responseToCache));
-                    return networkResponse;
-                }
-            } catch (error) {
-                // Continue to try alternatives
-            }
-        }
-        
-        // Try with /index.html
-        if (!pathname.endsWith('/')) {
-            const indexRequest = new Request(pathname + '/index.html', {
-                method: request.method,
-                headers: request.headers,
-                body: request.body,
-                mode: request.mode,
-                credentials: request.credentials,
-                cache: request.cache,
-                redirect: request.redirect,
-                referrer: request.referrer
-            });
-            
-            cachedResponse = await caches.match(indexRequest);
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-            
-            try {
-                let networkResponse = await fetch(indexRequest);
-                if (networkResponse && networkResponse.ok) {
-                    const responseToCache = networkResponse.clone();
-                    caches.open(CACHE_NAME)
-                        .then(cache => cache.put(indexRequest, responseToCache));
-                    return networkResponse;
-                }
-            } catch (error) {
-                // Continue to fallback
-            }
-        }
-        
-        // Fallback to 404.html for docs
-        return cacheFirstStrategy(new Request('/404.html', {
-            method: request.method,
-            headers: request.headers,
-            body: request.body,
-            mode: request.mode,
-            credentials: request.credentials,
-            cache: request.cache,
-            redirect: request.redirect,
-            referrer: request.referrer
-        }));
-    }
+
     
     // Handle /dlux/* -> rewrite to /dlux/index.html if file doesn't exist
     // Note: Bot handling with reverse proxy is not implemented in SW
@@ -897,14 +840,26 @@ async function handleRouting(request) {
 
 // Cache-first strategy implementation
 async function cacheFirstStrategy(request) {
+    const url = new URL(request.url);
+    console.log('SW: Cache-first strategy for:', url.pathname);
+    
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
+        console.log('SW: Serving from cache:', url.pathname);
         return cachedResponse;
     }
 
     try {
+        console.log('SW: Fetching from network:', url.pathname);
         const networkResponse = await fetch(request);
-        if (!networkResponse || networkResponse.status !== 200) {
+        
+        if (!networkResponse) {
+            console.error('SW: No network response for:', url.pathname);
+            return new Response('Service Unavailable', { status: 503 });
+        }
+        
+        if (networkResponse.status !== 200) {
+            console.warn('SW: Non-200 response for:', url.pathname, 'Status:', networkResponse.status);
             return networkResponse;
         }
 
@@ -912,13 +867,28 @@ async function cacheFirstStrategy(request) {
         caches.open(CACHE_NAME)
             .then(cache => {
                 cache.put(request, responseToCache)
-                    .catch(error => console.error('Cache put failed:', request.url, error));
+                    .catch(error => console.error('SW: Cache put failed:', request.url, error));
             });
 
+        console.log('SW: Serving from network and cached:', url.pathname);
         return networkResponse;
     } catch (error) {
-        console.error('Network error for:', request.url, error);
-        return new Response(null, { status: 503 }); // Service Unavailable
+        console.error('SW: Network error for:', request.url, error);
+        // Try to return a more helpful error page
+        return new Response(`
+            <html>
+                <body>
+                    <h1>Service Unavailable</h1>
+                    <p>Unable to load ${url.pathname}</p>
+                    <p>Error: ${error.message}</p>
+                    <p>Please check your connection and try again.</p>
+                </body>
+            </html>
+        `, { 
+            status: 503, 
+            statusText: 'Service Unavailable',
+            headers: { 'Content-Type': 'text/html' }
+        });
     }
 }
 

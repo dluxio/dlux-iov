@@ -1,4 +1,4 @@
-this.version = "2025.06.01.11";
+this.version = "2025.06.01.12";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -495,6 +495,7 @@ const skippedResources = [
   `/honeyblocks/index.html`,
   `/naf-playground/aframe/aframe-inspector.min.js`,
   `/sw-monitor-test.html`,
+  `/test-pbkdf2.html`,
 ];
 
 // Cache management flags
