@@ -3099,6 +3099,16 @@ export default {
     },
   },
   async mounted() {
+    console.log('[NavVue] Component mounted. User:', this.user, 'Signer:', localStorage.getItem('signer'));
+    
+    // Add click handler to prevent nav-bell dropdown from dismissing
+    const navBellDropdown = document.querySelector('.nav-bell .dropdown-menu');
+    if (navBellDropdown) {
+        navBellDropdown.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+    
     const signer = localStorage.getItem("signer");
     const decrypted = sessionStorage.getItem('pen')
     if (decrypted) this.decrypted = JSON.parse(decrypted)
@@ -3378,7 +3388,7 @@ export default {
           </li>
         </ul>
       </li>
-      <li style="max-width: 72px; !important" class="nav-bell dropdown nav-dropdown dropdown-end">
+      <li class="nav-bell dropdown nav-dropdown dropdown-end">
         <a class="d-flex align-items-center justify-content-center nav-link nav-highlight" href="#" role="button" 
            data-bs-toggle="dropdown" aria-expanded="false">
           <div class="position-relative">
@@ -3390,7 +3400,7 @@ export default {
           </div>
         </a>
          <div class="hover-gap"></div>
-        <div class="dropdown-menu dropdown-menu-end px-3 py-1" style="min-width: 320px;">
+        <div class="dropdown-menu container dropdown-menu-end px-3 py-1" style="min-width: 320px;">
           <sw-monitor @toast="handleToast" />
         </div>
       </li>

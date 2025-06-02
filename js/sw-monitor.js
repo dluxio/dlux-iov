@@ -6,6 +6,7 @@ export default {
       swVersion: null,
       desiredVersion: '2025.06.02.1', // Should match sw.js version
 
+
       // PWA Install states
       installStatus: 'unknown', // unknown, available, installed, not-supported
       deferredPrompt: null,
@@ -130,7 +131,7 @@ export default {
           top: 0;
           left: 0;
           right: 0;
-          z-index: 9999;
+          z-index: 1049;
           background: #0d6efd;
           color: white;
           border: none;
@@ -174,6 +175,12 @@ export default {
           transition: top 0.3s ease-out;
         }
         
+        /* Handle all fixed-top elements */
+        body.pwa-banner-active .fixed-top {
+          top: var(--pwa-banner-height) !important;
+          transition: top 0.3s ease-out;
+        }
+        
         body.pwa-banner-active #app {
           padding-top: var(--pwa-banner-height);
           box-sizing: border-box;
@@ -193,6 +200,10 @@ export default {
           
           body.pwa-banner-active .navbar-floating {
             top: calc(var(--navbar-default-top) + var(--pwa-banner-height-mobile)) !important;
+          }
+          
+          body.pwa-banner-active .fixed-top {
+            top: var(--pwa-banner-height-mobile) !important;
           }
           
           body.pwa-banner-active #app {
@@ -247,11 +258,9 @@ export default {
       // Add event listeners
       const installBtn = this.bannerElement.querySelector('.install-btn');
       const notNowBtn = this.bannerElement.querySelector('.not-now-btn');
-      const closeBtn = this.bannerElement.querySelector('.close-btn');
 
       installBtn.addEventListener('click', () => this.installPWA());
       notNowBtn.addEventListener('click', () => this.dismissInstallPrompt());
-      closeBtn.addEventListener('click', () => this.dismissInstallPrompt());
     },
 
     showBanner() {
@@ -582,26 +591,31 @@ export default {
       <div class="">
           <nav>
             <div class="nav nav-tabs nav-bell-nav mb-3" id="nav-tab" role="tablist">
-              <button class="nav-link border-0 active" id="nav-notifications-tab" data-bs-toggle="tab" data-bs-target="#nav-notifications" type="button" role="tab" aria-controls="nav-notifications" aria-selected="true">Notifications</button>
-              <button class="nav-link border-0" id="nav-details-tab" data-bs-toggle="tab" data-bs-target="#nav-details" type="button" role="tab" aria-controls="nav-details" aria-selected="false">Tx Details</button>
+              <button class="nav-link border-0 active" id="nav-activity-tab" data-bs-toggle="tab" data-bs-target="#nav-activity" type="button" role="tab" aria-controls="nav-activity" aria-selected="true">
+                Activities
+              </button>
+              <button class="nav-link border-0" id="nav-transactions-tab" data-bs-toggle="tab" data-bs-target="#nav-transactions" type="button" role="tab" aria-controls="nav-transactions" aria-selected="false">
+                Transactions
+              </button>
               <button class=" border-0 nav-link " id="nav-app-tab" data-bs-toggle="tab" data-bs-target="#nav-app" type="button" role="tab" aria-controls="nav-app" aria-selected="false">
                 <div class="d-flex align-items-center">
                   <i class="fa-solid fa-download fa-fw me-1" v-if="swStatus === 'update-available'"></i> 
                   <i class="fa-solid fa-sync fa-spin fa-fw me-1" v-else-if="swStatus === 'installing'"></i> 
                   <i class="fa-solid fa-exclamation-triangle fa-fw me-1" v-else-if="swStatus === 'error'"></i> 
                   <i class="fa-solid fa-download fa-fw me-1" v-else-if="installStatus === 'available'"></i>
-                  <span>App</span>
+                  <span>System</span>
                   <span class="d-none" v-if="showUpdateNotification || installStatus === 'available'">!</span> 
+                </div>
               </button>
                </div>
           </nav>
           <div class="tab-content" id="nav-tabContent">
-            <div class="tab-pane fade show active" id="nav-notifications" role="tabpanel" aria-labelledby="nav-notifications-tab" tabindex="0">
+            <div class="tab-pane fade show active" id="nav-activity" role="tabpanel" aria-labelledby="nav-activity-tab" tabindex="0">
               <div class="d-flex flex-column w-100">
                 <!-- for each transaction -->
                 <div class="d-flex flex-grow-1 gap-2 mb-2">
                   <!-- user thumbnail -->
-                  <div class="d-flex">
+                  <div class="ratio ratio-1x1">
                     <img class="img-fluid" src="/img/no-user.png" alt="">
                   </div>
                   <!-- message -->
@@ -612,7 +626,7 @@ export default {
                 </div>
               </div>
             </div>
-            <div class="tab-pane fade" id="nav-details" role="tabpanel" aria-labelledby="nav-details-tab" tabindex="0">
+            <div class="tab-pane fade" id="nav-transactions" role="tabpanel" aria-labelledby="nav-transactions-tab" tabindex="0">
               <div class="d-flex flex-column w-100">
                 <!-- for each transaction -->
                 <div class="d-flex flex-grow-1 gap-2 mb-2">

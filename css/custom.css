@@ -14566,6 +14566,10 @@ html {
     height: 64px;
     width: 64px;
   }
+  .navbar-nav .nav-bell {
+    height: 64px;
+    width: 64px;
+  }
   .navbar-subbar-container {
     margin-top: 64px;
   }
@@ -14591,12 +14595,15 @@ html {
     width: 90%;
   }
   .nav-item .dropdown-menu {
-    left: calc(50% - 4.5px) !important;
-    transform: translateX(-50%);
+    left: -74px !important;
     width: calc(100vw - 24px) !important;
   }
   .nav-more .dropdown-menu {
     right: -1px !important;
+    width: calc(100vw - 24px) !important;
+  }
+  .nav-bell .dropdown-menu {
+    right: -65px !important;
     width: calc(100vw - 24px) !important;
   }
   .how-grid {
@@ -14811,15 +14818,16 @@ body[data-touch=false] .js-hoverable-dropdown:hover > .dropdown-menu {
   z-index: 1021;
 }
 body[data-touch=false] .dropdown-start.js-hoverable-dropdown:hover > .dropdown-menu {
-  top: 60px;
+  top: 52px;
 }
 body[data-touch=false] .dropdown-center.js-hoverable-dropdown:hover > .dropdown-menu {
-  top: 60px;
+  top: 52px;
   left: 50%;
   transform: translateX(-50%);
 }
 body[data-touch=false] .dropdown-end.js-hoverable-dropdown:hover > .dropdown-menu {
-  left: 0;
+  top: 52px;
+  right: 0;
 }
 body[data-touch=false] .nav-more.nav-dropdown:hover > .dropdown-menu,
 body[data-touch=false] .nav-more.js-hoverable-dropdown:hover > .dropdown-menu {

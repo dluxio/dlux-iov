@@ -48,7 +48,6 @@
   <meta name="theme-color" content="#111222">
   <meta name="apple-mobile-web-app-title" content="DLUX">
   <script src="/reg-sw.js"></script>
-  <script src="/js/aframe.min.js"></script>
 </head>
 
 <body>
@@ -315,7 +314,7 @@
           <p class="hero-title mb-3 text-light-1 text-center">DePIN</p>
         </div>
         <div style="max-width: 600px;" class="mx-auto">
-          <p class="hero-lead mb-4 text-mint text-center">Node are rewarded with tokens for providing services to the
+          <p class="hero-lead mb-4 text-mint text-center">Nodes are rewarded with tokens for providing services to the
             Decentralized Physical Infrastructure Network.</p>
         </div>
         <div class="hero-buttons mx-auto">
@@ -348,68 +347,77 @@
       clipRect.setAttribute('y', '333');
       clipRect.setAttribute('height', '0');
 
-      const aframeScript = document.createElement('script');
-      aframeScript.src = '/js/aframe.min.js';
-      aframeScript.async = true;
-      
-      // Animate logo fill
-      let progress = 0;
-      const loadingInterval = setInterval(() => {
-        if (progress < 90) {
-          progress += Math.random() * 10;
-          const height = Math.min(progress, 90) * 3.33; // Convert percentage to SVG units
-          clipRect.setAttribute('y', 333 - height);
-          clipRect.setAttribute('height', height);
-        }
-      }, 100);
+      // Load A-Frame script only if not already loaded
+      if (!window.AFRAME) {
+        const aframeScript = document.createElement('script');
+        aframeScript.src = '/js/aframe.min.js';
+        aframeScript.async = true;
+        
+        // Animate logo fill
+        let progress = 0;
+        const loadingInterval = setInterval(() => {
+          if (progress < 90) {
+            progress += Math.random() * 10;
+            const height = Math.min(progress, 90) * 3.33; // Convert percentage to SVG units
+            clipRect.setAttribute('y', 333 - height);
+            clipRect.setAttribute('height', height);
+          }
+        }, 100);
 
-      aframeScript.onload = function() {
-        // Initialize A-Frame scene after script loads
-        const scene = document.querySelector('a-scene');
-        scene.addEventListener('loaded', function() {
-          clearInterval(loadingInterval);
-          // Complete the fill
-          clipRect.setAttribute('y', '0');
-          clipRect.setAttribute('height', '333');
-          
-          // Hide loading logo after a short delay
-          setTimeout(() => {
-            const loadingElement = document.getElementById('aframe-loading');
-            if (loadingElement) {
-              loadingElement.style.opacity = '0';
-              loadingElement.style.transition = 'opacity 0.5s ease-out';
-              setTimeout(() => {
-                loadingElement.style.display = 'none';
-              }, 500);
+        aframeScript.onload = function() {
+          // Register A-Frame components after A-Frame is loaded
+          const sqrt8 = Math.sqrt(8);
+          AFRAME.registerComponent('cloak', {
+            init: function () {
+              var geometry = new THREE.PlaneGeometry(sqrt8, 6);
+              var material = new THREE.MeshBasicMaterial({ colorWrite: false });
+              var mesh = new THREE.Mesh(geometry, material);
+              this.el.object3D.add(mesh);
             }
-            updateAFramePosition();
-          }, 200);
-        });
-      };
-      document.head.appendChild(aframeScript);
-    });
-    const sqrt8 = Math.sqrt(8);
-    AFRAME.registerComponent('cloak', {
-      init: function () {
-        var geometry = new THREE.PlaneGeometry(sqrt8, 6);
-        var material = new THREE.MeshBasicMaterial({ colorWrite: false });
-        var mesh = new THREE.Mesh(geometry, material);
-        this.el.object3D.add(mesh);
+          });
+          
+          AFRAME.registerComponent('cloak-tri', {
+            init: function () {
+              let v1 = new THREE.Vector3(0, 2, 0);
+              let v2 = new THREE.Vector3(0, 0, 2);
+              let v3 = new THREE.Vector3(2, 0, 0);
+              let geometry = new THREE.BufferGeometry().setFromPoints([v1, v2, v3]);
+              let material = new THREE.MeshBasicMaterial({
+                colorWrite: false
+              });
+              let mesh = new THREE.Mesh(geometry, material);
+              this.el.object3D.add(mesh);
+            }
+          });
+
+          // Initialize A-Frame scene after script loads
+          const scene = document.querySelector('a-scene');
+          if (scene) {
+            scene.addEventListener('loaded', function() {
+              clearInterval(loadingInterval);
+              // Complete the fill
+              clipRect.setAttribute('y', '0');
+              clipRect.setAttribute('height', '333');
+              
+              // Hide loading logo after a short delay
+              setTimeout(() => {
+                const loadingElement = document.getElementById('aframe-loading');
+                if (loadingElement) {
+                  loadingElement.style.opacity = '0';
+                  loadingElement.style.transition = 'opacity 0.5s ease-out';
+                  setTimeout(() => {
+                    loadingElement.style.display = 'none';
+                  }, 500);
+                }
+                updateAFramePosition();
+              }, 200);
+            });
+          }
+        };
+        document.head.appendChild(aframeScript);
       }
     });
-    AFRAME.registerComponent('cloak-tri', {
-      init: function () {
-        let v1 = new THREE.Vector3(0, 2, 0);
-        let v2 = new THREE.Vector3(0, 0, 2);
-        let v3 = new THREE.Vector3(2, 0, 0);
-        let geometry = new THREE.BufferGeometry().setFromPoints([v1, v2, v3]);
-        let material = new THREE.MeshBasicMaterial({
-          colorWrite: false
-        });
-        let mesh = new THREE.Mesh(geometry, material);
-        this.el.object3D.add(mesh);
-      }
-    });
+
     // Run on resize
     window.addEventListener("resize", updateAFramePosition);
 
