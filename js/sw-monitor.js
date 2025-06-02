@@ -4,7 +4,7 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.01.19', // Should match sw.js version
+      desiredVersion: '2025.06.01.20', // Should match sw.js version
 
       // PWA Install states
       installStatus: 'unknown', // unknown, available, installed, not-supported
@@ -578,15 +578,21 @@ export default {
       this.bannerElement = null;
     }
   },
-  /* 
-          */
   template: `<!-- Dropdown menu -->
       <div class="">
           <nav>
             <div class="nav nav-tabs nav-bell-nav mb-3" id="nav-tab" role="tablist">
               <button class="nav-link border-0 active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Notifications</button>
               <button class="nav-link border-0" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Tx Details</button>
-              <button class="border-0 nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Alerts</button>
+              <button class=" border-0 nav-link " id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
+                <div class="d-flex align-items-center">
+                  <i class="fa-solid fa-download fa-fw me-1" v-if="swStatus === 'update-available'"></i> 
+                  <i class="fa-solid fa-sync fa-spin fa-fw me-1" v-else-if="swStatus === 'installing'"></i> 
+                  <i class="fa-solid fa-exclamation-triangle fa-fw me-1" v-else-if="swStatus === 'error'"></i> 
+                  <i class="fa-solid fa-mobile-screen fa-fw me-1" v-else-if="installStatus === 'available'"></i>
+                  <span>Alerts</span>
+                  <span class="d-none" v-if="showUpdateNotification || installStatus === 'available'">!</span> 
+              </button>
                </div>
           </nav>
           <div class="tab-content" id="nav-tabContent">
