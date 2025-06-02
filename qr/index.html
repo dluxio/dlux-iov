@@ -29,33 +29,139 @@
   <script src="https://cdn.jsdelivr.net/npm/hive-tx/dist/hive-tx.min.js"></script>
   <!-- Script required for account creation (key generation) -->
   <script src="https://unpkg.com/@hiveio/dhive@latest/dist/dhive.js"></script>
+  <!-- Solana Web3.js for Solana transactions -->
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
   <script>
     var client = new dhive.Client(["https://hive-api.dlux.io", "https://hive-api.dlux.io", "https://anyx.io", "https://api.openhive.network"]);
   </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator
-        .serviceWorker
-        .register(
-          // path to the service worker file
-          '/sw.js'
-        )
-        // the registration is async and it returns a promise
-        .then(function (reg) {
-          console.log('Registration Successful');
-        });
-    }
-  </script>
+  <script src="/reg-sw.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script type="module" src="/js/v3-qr.js"></script>
+  
+  <!-- Onboarding Styles -->
+  <style>
+    /* Step Indicator Styles */
+    .step-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0.5;
+      transition: opacity 0.3s ease;
+    }
+    
+    .step-indicator.active,
+    .step-indicator.completed {
+      opacity: 1;
+    }
+    
+    .step-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #495057;
+      color: white;
+      font-weight: bold;
+      margin-bottom: 8px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .step-indicator.active .step-number {
+      background-color: #007bff;
+    }
+    
+    .step-indicator.completed .step-number {
+      background-color: #28a745;
+    }
+    
+    .step-label {
+      font-size: 0.875rem;
+      text-align: center;
+      font-weight: 500;
+    }
+    
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background-color: #495057;
+      margin: 0 15px;
+      align-self: center;
+      transition: background-color 0.3s ease;
+      margin-top: -20px;
+    }
+    
+    .step-line.completed {
+      background-color: #28a745;
+    }
+    
+    /* Wallet Card Styles */
+    .wallet-card {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+    
+    .wallet-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    }
+    
+    .wallet-card.border-primary {
+      border-color: #007bff !important;
+      box-shadow: 0 0 15px rgba(0, 123, 255, 0.4);
+    }
+    
+    .wallet-icon {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+    
+    /* Crypto Icon Styles */
+    .crypto-icon {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+    
+    /* Background Classes */
+    .bg-darker {
+      background-color: #1a1a1a !important;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+      .step-indicator {
+        font-size: 0.75rem;
+      }
+      
+      .step-number {
+        width: 32px;
+        height: 32px;
+        font-size: 0.875rem;
+      }
+      
+      .step-line {
+        margin: 0 8px;
+        margin-top: -16px;
+      }
+      
+      .wallet-icon {
+        width: 24px;
+        height: 24px;
+      }
+    }
+  </style>
 </head>
 
 <body class="d-flex h-100 align-items-stretch text-white">
   <div id="app" v-cloak class="d-flex w-100 flex-column w-100">
     <!-- navbar -->
     <div>
-      <nav-vue @login="account = $event" @logout="account = '';removeUser()" @ack="removeOp($event)"
-        @refresh="run($event)" :op="toSign" :lapi="lapi" />
+      <nav-vue ref="navComponent" @login="account = $event" @logout="account = '';removeUser()" @ack="removeOp($event)"
+        @refresh="run($event)" @store-new-account="handleStoreNewAccount($event)" :op="toSign" :lapi="lapi" />
     </div>
     <main role="main" class="mb-auto" style="margin-top: 94px;">
       
@@ -68,24 +174,865 @@
           </span>
         </div>
       </div>
-      <div class="ms-auto me-auto" style="max-width: 25rem;">
-      <div v-if="!account">
-        <div class="ms-auto me-auto" >
-          <div class="fs-3 mb-2">Check New Account Status</div>
-          <div class="text-start">
-            <div class="mb-3">
-              <label class="form-label">Username</label>
-              <div class="position-relative has-validation">
-                <span class="position-absolute top-50 translate-middle-y ps-2 text-white">
-                  <i class="fa-solid fa-at fa-fw"></i>
-                </span>
-                <input autocapitalize="off" placeholder="username"
-                  class="px-4 form-control bg-dark border-dark text-info">
+      <div v-if="!account" class="container-fluid px-3">
+        <!-- Key Recovery Option -->
+        <div class="row justify-content-center mb-4">
+          <div class="col-lg-8 col-xl-6">
+            <div class="alert alert-info">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <i class="fa-solid fa-key me-2"></i>
+                  <strong>Already have keys?</strong> Recover your HIVE account keys generated with a crypto wallet
+                </div>
+                <button class="btn btn-info btn-sm" @click="startKeyRecovery">
+                  <i class="fa-solid fa-undo me-1"></i>Key Recovery
+                </button>
               </div>
             </div>
           </div>
-          <div class="text-end mb-3">
-            <button class="btn btn-primary">Check</button>
+        </div>
+
+        <!-- Key Recovery Mode -->
+        <div v-if="recoveryMode" class="row justify-content-center">
+          <div class="col-lg-8 col-xl-6">
+            <div class="card bg-dark border-warning">
+              <div class="card-header">
+                <h5 class="mb-0">
+                  <i class="fa-solid fa-key me-2"></i>Key Recovery
+                  <button class="btn btn-outline-secondary btn-sm float-end" @click="cancelKeyRecovery">
+                    <i class="fa-solid fa-times"></i>
+                  </button>
+                </h5>
+              </div>
+              <div class="card-body">
+                
+                <!-- Step 1: Enter Username -->
+                <div v-if="recoveryStep === 1">
+                  <h6 class="mb-3">Step 1: Enter Your Username</h6>
+                  <div class="mb-3">
+                    <label class="form-label">HIVE Username</label>
+                    <div class="position-relative">
+                      <span class="position-absolute top-50 translate-middle-y ps-3 text-muted">@</span>
+                      <input 
+                        v-model="recoveryData.username" 
+                        @keyup.enter="recoveryStep = 2"
+                        placeholder="your-username"
+                        class="ps-5 form-control bg-dark border-dark text-light">
+                    </div>
+                    <small class="text-muted">Enter the username for which you want to recover keys</small>
+                  </div>
+                  <div class="text-end">
+                    <button class="btn btn-warning" @click="recoveryStep = 2" :disabled="!recoveryData.username">
+                      Next: Select Wallet
+                      <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Step 2: Select Wallet -->
+                <div v-if="recoveryStep === 2">
+                  <h6 class="mb-3">Step 2: Select Your Wallet</h6>
+                  <p class="text-muted mb-3">Choose the same wallet you used to generate your keys originally:</p>
+                  
+                  <div class="row g-3 mb-4">
+                    <div v-for="wallet in detectedWallets" :key="wallet.name" class="col-6 col-md-4">
+                      <div class="card bg-darker border-secondary h-100 wallet-card" 
+                           :class="{'border-warning': recoveryData.selectedWallet === wallet.name}"
+                           @click="recoveryData.selectedWallet = wallet.name">
+                        <div class="card-body text-center p-3">
+                          <img :src="wallet.icon" :alt="wallet.name" class="wallet-icon mb-2">
+                          <div class="small fw-bold">{{ wallet.name }}</div>
+                          <div class="text-muted small">{{ wallet.network }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-if="detectedWallets.length === 0" class="alert alert-warning">
+                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                    No compatible wallets detected. Please install and unlock your wallet.
+                  </div>
+
+                  <div class="d-flex justify-content-between">
+                    <button class="btn btn-secondary" @click="recoveryStep = 1">
+                      <i class="fa-solid fa-arrow-left me-1"></i>Back
+                    </button>
+                    <button class="btn btn-warning" @click="recoveryStep = 3" :disabled="!recoveryData.selectedWallet">
+                      Next: Recover Keys
+                      <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Step 3: Key Recovery -->
+                <div v-if="recoveryStep === 3">
+                  <h6 class="mb-3">Step 3: Recover Your Keys</h6>
+                  
+                  <div class="alert alert-warning mb-3">
+                    <i class="fa-solid fa-info-circle me-2"></i>
+                    <strong>Important:</strong> You'll need to sign the same message you used when originally generating your keys.
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Recovery Message</label>
+                    <input 
+                      v-model="recoveryData.message" 
+                      class="form-control bg-dark border-dark text-light"
+                      :placeholder="`Generate HIVE keys for account: ${recoveryData.username}`">
+                    <small class="text-muted">
+                      This should be the exact message you signed originally (usually: "Generate HIVE keys for account: username")
+                    </small>
+                  </div>
+
+                  <div class="mb-4">
+                    <button class="btn btn-warning w-100" @click="recoverKeys" :disabled="recoveryLoading || !recoveryData.message">
+                      <span v-if="recoveryLoading" class="spinner-border spinner-border-sm me-2"></span>
+                      <i v-else class="fa-solid fa-key me-2"></i>
+                      {{ recoveryLoading ? 'Recovering Keys...' : 'Sign Message & Recover Keys' }}
+                    </button>
+                  </div>
+
+                  <!-- Recovered Keys Display -->
+                  <div v-if="recoveredKeys && Object.keys(recoveredKeys).length > 0" class="mb-4">
+                    <div class="alert alert-success">
+                      <i class="fa-solid fa-check me-2"></i>
+                      <strong>Keys recovered successfully!</strong> Your keys have been restored in dluxPEN.
+                    </div>
+                    
+                    <div class="card bg-darker border-secondary">
+                      <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Recovered Keys</h6>
+                        <button class="btn btn-outline-secondary btn-sm" @click="showRecoveredKeys = !showRecoveredKeys">
+                          <i :class="showRecoveredKeys ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                          {{ showRecoveredKeys ? 'Hide' : 'Show' }}
+                        </button>
+                      </div>
+                      <div class="card-body" v-if="showRecoveredKeys">
+                        <div v-for="(key, type) in recoveredKeys" :key="type" class="mb-3">
+                          <label class="form-label text-capitalize">{{ type }} Key</label>
+                          <div class="input-group">
+                            <input 
+                              type="text"
+                              :value="key" 
+                              class="form-control bg-dark border-dark text-light font-monospace small"
+                              readonly>
+                            <button class="btn btn-outline-secondary" @click="copyToClipboard(key)">
+                              <i class="fa-solid fa-copy"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mt-3">
+                      <button class="btn btn-primary w-100" @click="completeKeyRecovery">
+                        <i class="fa-solid fa-check me-2"></i>Complete Recovery
+                      </button>
+                    </div>
+                  </div>
+
+                  <div v-if="recoveryError" class="alert alert-danger">
+                    <i class="fa-solid fa-exclamation-triangle me-2"></i>{{ recoveryError }}
+                  </div>
+
+                  <div class="d-flex justify-content-between">
+                    <button class="btn btn-secondary" @click="recoveryStep = 2" :disabled="recoveryLoading">
+                      <i class="fa-solid fa-arrow-left me-1"></i>Back
+                    </button>
+                    <button class="btn btn-outline-secondary" @click="cancelKeyRecovery" :disabled="recoveryLoading">
+                      Cancel Recovery
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- New User Onboarding System -->
+        <div v-if="!recoveryMode" class="row justify-content-center">
+          <div class="col-lg-8 col-xl-6">
+            
+            <!-- Welcome Header -->
+            <div class="text-center mb-4">
+              <h1 class="fs-2 mb-2">Welcome to HIVE</h1>
+              <p class="text-muted">Create your new account in just a few steps</p>
+            </div>
+
+            <!-- Step Indicator -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="step-indicator" :class="{'active': onboardingStep >= 1, 'completed': onboardingStep > 1}">
+                  <div class="step-number">1</div>
+                  <div class="step-label">Choose Username</div>
+                </div>
+                <div class="step-line" :class="{'completed': onboardingStep > 1}"></div>
+                <div class="step-indicator" :class="{'active': onboardingStep >= 2, 'completed': onboardingStep > 2}">
+                  <div class="step-number">2</div>
+                  <div class="step-label">Generate Keys</div>
+                </div>
+                <div class="step-line" :class="{'completed': onboardingStep > 2}"></div>
+                <div class="step-indicator" :class="{'active': onboardingStep >= 3, 'completed': onboardingStep > 3}">
+                  <div class="step-number">3</div>
+                  <div class="step-label">Account Creation</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 1: Username Selection -->
+            <div v-if="onboardingStep === 1" class="card bg-dark border-secondary">
+              <div class="card-header">
+                <h5 class="mb-0"><i class="fa-solid fa-user me-2"></i>Choose Your Username</h5>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="form-label">Username</label>
+                  <div class="position-relative">
+                    <span class="position-absolute top-50 translate-middle-y ps-3 text-muted">
+                      <i class="fa-solid fa-at"></i>
+                    </span>
+                    <input 
+                      v-model="newAccount.username" 
+                      @input="checkUsernameAvailability"
+                      @keyup.enter="onboardingStep = 2"
+                      autocapitalize="off" 
+                      placeholder="your-username"
+                      class="ps-5 form-control bg-dark border-dark text-light"
+                      :class="{
+                        'border-success': usernameStatus === 'available',
+                        'border-danger': usernameStatus === 'taken' || usernameStatus === 'invalid',
+                        'border-warning': usernameStatus === 'checking'
+                      }">
+                  </div>
+                  <div class="mt-2">
+                    <small v-if="usernameStatus === 'checking'" class="text-warning">
+                      <i class="fa-solid fa-spinner fa-spin me-1"></i>Checking availability...
+                    </small>
+                    <small v-if="usernameStatus === 'available'" class="text-success">
+                      <i class="fa-solid fa-check me-1"></i>Username is available!
+                    </small>
+                    <small v-if="usernameStatus === 'taken'" class="text-danger">
+                      <i class="fa-solid fa-times me-1"></i>Username is already taken
+                    </small>
+                    <small v-if="usernameStatus === 'invalid'" class="text-danger">
+                      <i class="fa-solid fa-times me-1"></i>{{ usernameError }}
+                    </small>
+                    <small v-if="!usernameStatus" class="text-muted">
+                      3-16 characters, lowercase letters, numbers, dots, and hyphens only
+                    </small>
+                  </div>
+                </div>
+                <div class="text-end">
+                  <button 
+                    class="btn btn-primary" 
+                    @click="onboardingStep = 2"
+                    :disabled="usernameStatus !== 'available'">
+                    Next: Generate Keys
+                    <i class="fa-solid fa-arrow-right ms-1"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2: Key Generation -->
+            <div v-if="onboardingStep === 2" class="card bg-dark border-secondary">
+              <div class="card-header">
+                <h5 class="mb-0"><i class="fa-solid fa-key me-2"></i>Generate Secure Keys</h5>
+              </div>
+              <div class="card-body">
+                
+                <!-- Wallet Detection -->
+                <div class="mb-4">
+                  <h6 class="mb-3">Detected Wallets</h6>
+                  <div class="row g-3">
+                    <div v-for="wallet in detectedWallets" :key="wallet.name" class="col-6 col-md-4">
+                      <div class="card bg-darker border-secondary h-100 wallet-card" 
+                           :class="{'border-primary': selectedWallet === wallet.name}"
+                           @click="selectWallet(wallet.name)">
+                        <div class="card-body text-center p-3">
+                          <img :src="wallet.icon" :alt="wallet.name" class="wallet-icon mb-2">
+                          <div class="small fw-bold">{{ wallet.name }}</div>
+                          <div class="text-muted small">{{ wallet.network }}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="detectedWallets.length === 0" class="col-12">
+                      <div class="text-center text-muted py-3">
+                        <i class="fa-solid fa-wallet fa-2x mb-2"></i>
+                        <p>No compatible wallets detected</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Key Generation Method Selection -->
+                <div class="mb-4">
+                  <h6 class="mb-3">Key Generation Method</h6>
+                  <div class="form-check mb-3">
+                    <input class="form-check-input" type="radio" v-model="keyGenMethod" value="wallet" id="method-wallet" :disabled="detectedWallets.length === 0">
+                    <label class="form-check-label" for="method-wallet">
+                      <strong>Use Crypto Wallet Signature</strong> <span class="badge bg-success ms-2">Recommended</span>
+                      <div class="small text-muted">Generate keys from your existing wallet signature - more secure and easier to recover</div>
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" v-model="keyGenMethod" value="random" id="method-random">
+                    <label class="form-check-label" for="method-random">
+                      <strong>Generate Random Keys</strong>
+                      <div class="small text-muted">Create completely new random keys - you'll need to store them securely</div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Privacy and Terms Agreement -->
+                <div class="mb-4">
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" v-model="agreedToPrivacy" id="privacyCheck">
+                    <label class="form-check-label" for="privacyCheck">
+                      I agree to the <a href="/about#privacy" target="_blank" class="text-info">Privacy Policy</a>
+                    </label>
+                  </div>
+                  <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" v-model="agreedToTerms" id="termsCheck">
+                    <label class="form-check-label" for="termsCheck">
+                      I agree to the <a href="/about#terms" target="_blank" class="text-info">Terms of Service</a>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Generate Keys Button -->
+                <div class="mb-4">
+                  <button 
+                    class="btn btn-primary w-100" 
+                    @click="generateKeys"
+                    :disabled="keyGenLoading || (!keyGenMethod || (keyGenMethod === 'wallet' && !selectedWallet) || !agreedToPrivacy || !agreedToTerms)">
+                    <span v-if="keyGenLoading" class="spinner-border spinner-border-sm me-2"></span>
+                    <i v-else class="fa-solid fa-key me-2"></i>
+                    {{ keyGenLoading ? 'Generating Keys...' : 'Generate Keys' }}
+                  </button>
+                  <button 
+                    v-if="keyGenLoading" 
+                    class="btn btn-outline-secondary w-100 mt-2" 
+                    @click="cancelKeyGeneration">
+                    <i class="fa-solid fa-times me-2"></i>Cancel
+                  </button>
+                </div>
+
+                <!-- Generated Keys Display -->
+                <div v-if="newAccount.keys && Object.keys(newAccount.keys).length > 0" class="mb-4">
+                  <div class="alert alert-warning">
+                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                    <strong>Important:</strong> Your keys have been generated and will be stored securely in dluxPEN.
+                    {{ keyGenMethod === 'wallet' ? 'You can recover these keys using your ' + selectedWallet + ' wallet.' : 'Make sure to backup these keys safely!' }}
+                  </div>
+                  
+                  <!-- Download Backup Button - Highlighted -->
+                  <div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                      <i class="fa-solid fa-download me-2"></i>
+                      <strong>Recommended:</strong> Download a backup of your keys for safekeeping
+                    </div>
+                    <button class="btn btn-warning btn-sm" @click="downloadBackup">
+                      <i class="fa-solid fa-download me-1"></i>Download Backup
+                    </button>
+                  </div>
+                  
+                  <div class="card bg-darker border-secondary">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                      <h6 class="mb-0">Generated Keys</h6>
+                      <button class="btn btn-outline-secondary btn-sm" @click="toggleKeysVisibility">
+                        <i :class="showKeys ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                        {{ showKeys ? 'Hide' : 'Show' }}
+                      </button>
+                    </div>
+                    <div class="card-body">
+                      <div v-for="(key, type) in newAccount.keys" :key="type" class="mb-3">
+                        <label class="form-label text-capitalize">
+                          {{ type === 'master' ? 'Master Password' : type + ' Key' }}
+                          <span v-if="type === 'master'" class="badge bg-warning text-dark ms-2">Recovery Seed</span>
+                        </label>
+                        <div class="input-group">
+                          <input 
+                            :type="showKeys ? 'text' : 'password'"
+                            :value="key" 
+                            class="form-control bg-dark border-dark text-light font-monospace small"
+                            readonly>
+                          <button class="btn btn-outline-secondary" @click="copyToClipboard(key)">
+                            <i class="fa-solid fa-copy"></i>
+                          </button>
+                        </div>
+                        <small v-if="type === 'master'" class="text-muted">
+                          This master password can be used to regenerate all your keys if needed
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="d-flex justify-content-between">
+                  <button class="btn btn-secondary" @click="onboardingStep = 1">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Back
+                  </button>
+                  <button 
+                    class="btn btn-primary" 
+                    @click="onboardingStep = 3"
+                    :disabled="!newAccount.keys || Object.keys(newAccount.keys).length === 0">
+                    Next: Create Account
+                    <i class="fa-solid fa-arrow-right ms-1"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3: Account Creation -->
+            <div v-if="onboardingStep === 3" class="card bg-dark border-secondary">
+              <div class="card-header">
+                <h5 class="mb-0"><i class="fa-solid fa-credit-card me-2"></i>Create Your Account</h5>
+              </div>
+              <div class="card-body">
+                
+                <!-- Account Summary -->
+                <div class="mb-4">
+                  <div class="card bg-darker border-secondary">
+                    <div class="card-body">
+                      <h6 class="mb-3">Account Summary</h6>
+                      <div class="row">
+                        <div class="col-sm-6">
+                          <strong>Username:</strong> @{{ newAccount.username }}
+                        </div>
+                        <div class="col-sm-6">
+                          <strong>Keys:</strong> {{ Object.keys(newAccount.keys || {}).length }} generated
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Payment Options -->
+                <div class="mb-4">
+                  <h6 class="mb-3">Choose Payment Method</h6>
+                  
+                  <!-- Crypto Payment -->
+                  <div class="card bg-darker border-secondary mb-3">
+                    <div class="card-header">
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" v-model="paymentMethod" value="crypto" id="payment-crypto">
+                        <label class="form-check-label fw-bold" for="payment-crypto">
+                          Pay with Cryptocurrency
+                        </label>
+                      </div>
+                    </div>
+                    <div v-if="paymentMethod === 'crypto'" class="card-body">
+                      <!-- Pricing Info Header -->
+                      <div class="alert alert-info mb-3" v-if="!pricingLoading && !pricingError">
+                        <div class="row">
+                          <div class="col-md-6">
+                            <small class="text-muted">HIVE Price:</small>
+                            <div class="fw-bold">${{ hivePriceUSD.toFixed(6) }} USD</div>
+                          </div>
+                          <div class="col-md-6">
+                            <small class="text-muted">Account Creation Cost:</small>
+                            <div class="fw-bold">${{ accountCreationCostUSD.toFixed(2) }} USD</div>
+                            <small class="text-muted">Based on 3x HIVE price + 50% + transfer fees</small>
+                          </div>
+                        </div>
+                        <div v-if="lastPricingUpdate" class="mt-2">
+                          <small class="text-muted">Last updated: {{ new Date(lastPricingUpdate).toLocaleString() }}</small>
+                        </div>
+                      </div>
+
+                      <div class="table-responsive">
+                        <table class="table table-dark table-striped">
+                          <thead>
+                            <tr>
+                              <th>Currency</th>
+                              <th>Network</th>
+                              <th>Price</th>
+                              <th>Amount Needed</th>
+                              <th>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-if="pricingLoading">
+                              <td colspan="5" class="text-center">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Loading pricing...
+                              </td>
+                            </tr>
+                            <tr v-else-if="pricingError">
+                              <td colspan="5" class="text-center text-warning">
+                                <i class="fa-solid fa-exclamation-triangle"></i> {{ pricingError }}
+                                <div class="mt-1">
+                                  <button class="btn btn-sm btn-outline-warning" @click="loadCryptoPricing()">
+                                    <i class="fa-solid fa-refresh me-1"></i>Retry
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr v-else v-for="crypto in cryptoPricing" :key="crypto.symbol">
+                              <td>
+                                <img :src="crypto.icon" :alt="crypto.name" class="crypto-icon me-2" width="24" height="24">
+                                {{ crypto.name }} ({{ crypto.symbol }})
+                                <span v-if="crypto.fallback" class="badge bg-warning text-dark ms-2 small">Fallback</span>
+                              </td>
+                              <td>{{ crypto.network }}</td>
+                              <td>${{ crypto.currentPrice }}</td>
+                              <td>
+                                <div class="fw-bold">{{ crypto.totalAmount }} {{ crypto.symbol }}</div>
+                                <small class="text-muted">
+                                  {{ crypto.requiredAmount }} + {{ crypto.transferFee ? crypto.transferFee.toFixed(6) : '0' }} fee
+                                </small>
+                              </td>
+                              <td>
+                                <button class="btn btn-primary btn-sm" @click="initiateCryptoPayment(crypto)" 
+                                        :disabled="!selectedWallet || pricingLoading || paymentLoading">
+                                  <span v-if="paymentLoading">
+                                    <i class="fa-solid fa-spinner fa-spin me-1"></i>Processing...
+                                  </span>
+                                  <span v-else>
+                                    Pay {{ crypto.totalAmount }} {{ crypto.symbol }}
+                                  </span>
+                                </button>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <!-- Real-time Payment Monitor -->
+                      <div v-if="paymentDetails" class="mt-3">
+                        <!-- WebSocket Connection Status -->
+                        <div class="alert mb-3" :class="{
+                          'alert-success': wsConnectionStatus === 'connected',
+                          'alert-warning': wsConnectionStatus === 'connecting',
+                          'alert-danger': wsConnectionStatus === 'disconnected'
+                        }">
+                          <div class="d-flex align-items-center">
+                            <i :class="{
+                              'fa-solid fa-wifi text-success': wsConnectionStatus === 'connected',
+                              'fa-solid fa-spinner fa-spin text-warning': wsConnectionStatus === 'connecting',
+                              'fa-solid fa-wifi text-danger': wsConnectionStatus === 'disconnected'
+                            }"></i>
+                            <span class="ms-2">
+                              {{ wsConnectionStatus === 'connected' ? 'Connected to payment monitor' :
+                                 wsConnectionStatus === 'connecting' ? 'Connecting to payment monitor...' :
+                                 'Disconnected from payment monitor' }}
+                            </span>
+                          </div>
+                        </div>
+
+                        <!-- Payment Progress -->
+                        <div class="card bg-darker border-secondary mb-3">
+                          <div class="card-header">
+                            <h6 class="mb-0">
+                              <i class="fa-solid fa-chart-line me-2"></i>Payment Progress
+                            </h6>
+                          </div>
+                          <div class="card-body">
+                            <!-- Progress Bar -->
+                            <div class="mb-3">
+                              <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="fs-5 fw-bold">{{ paymentStatus.message || '⚡ Initializing...' }}</div>
+                                <div class="badge bg-primary">{{ paymentStatus.progress || 0 }}%</div>
+                              </div>
+                              <div class="progress" style="height: 8px;">
+                                <div class="progress-bar progress-bar-striped" 
+                                     :class="{'progress-bar-animated': paymentStatus.progress < 100}"
+                                     :style="`width: ${paymentStatus.progress || 0}%`"></div>
+                              </div>
+                              <div class="text-muted small mt-1">{{ paymentStatus.details || 'Setting up payment channel...' }}</div>
+                            </div>
+
+                            <!-- Payment Instructions -->
+                            <div v-if="paymentStatus.code === 'waiting_payment'" class="alert alert-info">
+                              <h6><i class="fa-solid fa-wallet me-2"></i>Send Payment</h6>
+                              <div class="row">
+                                <div class="col-md-6 mb-3">
+                                  <label class="small text-muted">Amount</label>
+                                  <div class="fw-bold">{{ paymentDetails.amountFormatted }}</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                  <label class="small text-muted">Network</label>
+                                  <div class="fw-bold">{{ paymentDetails.cryptoType }}</div>
+                                </div>
+                              </div>
+                              <div class="mb-3">
+                                <label class="small text-muted">Send to Address</label>
+                                <div class="input-group">
+                                  <input type="text" :value="paymentDetails.address" 
+                                         class="form-control bg-dark border-dark text-light font-monospace small" readonly>
+                                  <button class="btn btn-outline-secondary" @click="copyToClipboard(paymentDetails.address)">
+                                    <i class="fa-solid fa-copy"></i>
+                                  </button>
+                                </div>
+                              </div>
+                              <div v-if="paymentDetails.memo" class="mb-3">
+                                <label class="small text-muted">Include Memo</label>
+                                <div class="input-group">
+                                  <input type="text" :value="paymentDetails.memo" 
+                                         class="form-control bg-dark border-dark text-light font-monospace small" readonly>
+                                  <button class="btn btn-outline-secondary" @click="copyToClipboard(paymentDetails.memo)">
+                                    <i class="fa-solid fa-copy"></i>
+                                  </button>
+                                </div>
+                              </div>
+                              
+                              <!-- Payment Options -->
+                              <div class="row mb-3">
+                                <!-- Wallet Payment Button -->
+                                <div class="col-md-6 mb-2" v-if="selectedWallet">
+                                  <button class="btn btn-primary w-100" @click="payWithWallet" :disabled="walletPaymentLoading">
+                                    <span v-if="walletPaymentLoading" class="spinner-border spinner-border-sm me-2"></span>
+                                    <img v-else :src="getWalletIcon(selectedWallet)" class="me-2" style="width: 20px; height: 20px;">
+                                    {{ walletPaymentLoading ? 'Processing...' : `Pay with ${selectedWallet}` }}
+                                  </button>
+                                </div>
+                                
+                                <!-- QR Code Payment -->
+                                <div class="col-md-6 mb-2">
+                                  <button class="btn btn-outline-primary w-100" @click="togglePaymentQR">
+                                    <i class="fa-solid fa-qrcode me-2"></i>
+                                    {{ showPaymentQR ? 'Hide QR Code' : 'Show QR Code' }}
+                                  </button>
+                                </div>
+                              </div>
+
+                              <!-- QR Code Display -->
+                              <div v-if="showPaymentQR" class="mb-3">
+                                <div class="card bg-darker border-secondary">
+                                  <div class="card-header">
+                                    <h6 class="mb-0"><i class="fa-solid fa-qrcode me-2"></i>Payment QR Code</h6>
+                                  </div>
+                                  <div class="card-body text-center">
+                                    <div id="paymentQrCode" class="d-inline-block p-3 bg-white rounded mb-3"></div>
+                                    <div class="small text-muted mb-3">
+                                      Scan with any {{ paymentDetails.cryptoType }} compatible wallet
+                                    </div>
+                                    <div class="alert alert-info small text-start">
+                                      <strong>QR Code Format:</strong>
+                                      <div v-if="paymentDetails.cryptoType === 'SOL'" class="mt-1">
+                                        Contains recipient address, amount, and memo in JSON format
+                                      </div>
+                                      <div v-else class="mt-1">
+                                        Standard {{ paymentDetails.cryptoType }} payment URI format
+                                      </div>
+                                      <div class="mt-2">
+                                        <strong>If QR doesn't work:</strong> Copy the address and amount manually from above
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <!-- Mark as Sent Button -->
+                              <div class="mt-3">
+                                <div class="mb-2">
+                                  <input type="text" v-model="userTxHash" 
+                                         class="form-control bg-dark border-dark text-light" 
+                                         placeholder="Transaction hash (optional but recommended)">
+                                </div>
+                                <button class="btn btn-warning w-100" @click="markPaymentSent()" 
+                                        :disabled="paymentSentMarked">
+                                  <i class="fa-solid fa-paper-plane me-2"></i>
+                                  {{ paymentSentMarked ? '✅ Payment Marked as Sent' : 'I Sent the Payment' }}
+                                </button>
+                              </div>
+                            </div>
+
+                            <!-- Countdown Timer -->
+                            <div v-if="paymentCountdown && paymentCountdown.timeLeft > 0" class="alert alert-warning">
+                              <div class="d-flex justify-content-between align-items-center">
+                                <span>⏱️ Time remaining:</span>
+                                <span class="fw-bold">{{ formatCountdown(paymentCountdown.timeLeft) }}</span>
+                              </div>
+                            </div>
+                            
+                            <!-- Expired Warning -->
+                            <div v-if="paymentStatus.code === 'expired'" class="alert alert-danger">
+                              <i class="fa-solid fa-clock me-2"></i>
+                              Payment window has expired. Please start a new payment.
+                            </div>
+
+                            <!-- Success Message -->
+                            <div v-if="paymentStatus.code === 'completed'" class="alert alert-success">
+                              <div class="text-center">
+                                <i class="fa-solid fa-check-circle fa-3x mb-3"></i>
+                                <h5>🎉 Account Created Successfully!</h5>
+                                <p class="mb-0">Welcome to HIVE, @{{ newAccount.username }}!</p>
+                              </div>
+                            </div>
+
+                            <!-- Error State -->
+                            <div v-if="paymentStatus.code === 'failed'" class="alert alert-danger">
+                              <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                              Account creation failed. Please contact support or try again.
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Activity Log -->
+                        <div class="card bg-darker border-secondary">
+                          <div class="card-header">
+                            <h6 class="mb-0">
+                              <i class="fa-solid fa-list me-2"></i>Real-time Activity Log
+                            </h6>
+                          </div>
+                          <div class="card-body">
+                            <div class="log-container" style="height: 200px; overflow-y: auto;">
+                              <div v-for="(log, index) in paymentLogs" :key="index" 
+                                   class="log-entry border-bottom border-secondary pb-2 mb-2">
+                                <div class="d-flex justify-content-between">
+                                  <small class="text-muted">{{ formatLogTime(log.timestamp) }}</small>
+                                  <span v-if="log.type" class="badge" :class="{
+                                    'bg-info': log.type === 'info',
+                                    'bg-success': log.type === 'success', 
+                                    'bg-warning': log.type === 'warning',
+                                    'bg-danger': log.type === 'error'
+                                  }">{{ log.type }}</span>
+                                </div>
+                                <div class="mt-1">{{ log.message }}</div>
+                              </div>
+                              <div v-if="paymentLogs.length === 0" class="text-muted text-center py-3">
+                                <i class="fa-solid fa-clock me-2"></i>Waiting for payment activity...
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div v-if="paymentError" class="alert alert-danger mt-3">
+                        <i class="fa-solid fa-exclamation-triangle me-2"></i>{{ paymentError }}
+                      </div>
+
+                      <div v-if="!selectedWallet" class="alert alert-warning">
+                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                        Please connect a compatible wallet to pay with cryptocurrency.
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Request from Friend -->
+                  <div class="card bg-darker border-secondary mb-3">
+                    <div class="card-header">
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" v-model="paymentMethod" value="request" id="payment-request">
+                        <label class="form-check-label fw-bold" for="payment-request">
+                          Request from HIVE User
+                        </label>
+                      </div>
+                    </div>
+                    <div v-if="paymentMethod === 'request'" class="card-body">
+                      <p class="text-muted">Send a request to an existing HIVE user to create your account.</p>
+                      <div class="mb-3">
+                        <label class="form-label">HIVE Username</label>
+                        <div class="position-relative">
+                          <span class="position-absolute top-50 translate-middle-y ps-3 text-muted">@</span>
+                          <input 
+                            v-model="requestUsername" 
+                            placeholder="friend-username"
+                            class="ps-5 form-control bg-dark border-dark text-light">
+                        </div>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">Message (Optional)</label>
+                        <textarea 
+                          v-model="requestMessage" 
+                          placeholder="Hi! Could you help me create my HIVE account?"
+                          class="form-control bg-dark border-dark text-light"
+                          rows="3"></textarea>
+                      </div>
+                      <button class="btn btn-primary" @click="sendAccountRequest" :disabled="!requestUsername">
+                        Send Request
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Manual Instructions -->
+                  <div class="card bg-darker border-secondary">
+                    <div class="card-header">
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" v-model="paymentMethod" value="manual" id="payment-manual">
+                        <label class="form-check-label fw-bold" for="payment-manual">
+                          Manual Account Creation
+                        </label>
+                      </div>
+                    </div>
+                    <div v-if="paymentMethod === 'manual'" class="card-body">
+                      <div class="alert alert-warning">
+                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                        <strong>Note:</strong> Manual creation methods won't preserve your generated username/keys. You'll need to use the keys shown above.
+                      </div>
+                      
+                      <!-- QR Code for Friend -->
+                      <div class="mb-4">
+                        <h6>Friend Account Creation (In-Person)</h6>
+                        <p class="text-muted small">Have a friend with Hive Keychain scan this QR code to create your account:</p>
+                        <div class="text-center mb-3">
+                          <div id="friendQrCode" class="d-inline-block p-3 bg-white rounded"></div>
+                        </div>
+                        <button class="btn btn-outline-secondary btn-sm w-100" @click="generateFriendQR">
+                          <i class="fa-solid fa-qrcode me-2"></i>Generate QR Code for Friend
+                        </button>
+                      </div>
+                      
+                      <!-- External Services -->
+                      <div class="mb-4">
+                        <h6>Online Signup Services</h6>
+                        <div class="d-grid gap-2">
+                          <a href="https://signup.hive.io/" target="_blank" class="btn btn-outline-primary">
+                            <i class="fa-solid fa-external-link me-2"></i>
+                            Official HIVE Signup
+                            <small class="d-block text-muted">Create account with phone verification</small>
+                          </a>
+                        </div>
+                      </div>
+                      
+                      <!-- Public Keys Export -->
+                      <div>
+                        <h6>Export Keys for Manual Setup</h6>
+                        <button class="btn btn-outline-info w-100" @click="showPublicKeys">
+                          <i class="fa-solid fa-key me-2"></i>
+                          Download Public Keys File
+                        </button>
+                        <small class="text-muted d-block mt-1">Use these public keys if creating account manually elsewhere</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="d-flex justify-content-between">
+                  <button class="btn btn-secondary" @click="onboardingStep = 2">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Back
+                  </button>
+                  <button class="btn btn-success" @click="completeOnboarding" v-if="accountCreated">
+                    <i class="fa-solid fa-check me-2"></i>
+                    Complete Setup
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Success State -->
+            <div v-if="onboardingStep === 4" class="card bg-dark border-success">
+              <div class="card-body text-center py-5">
+                <i class="fa-solid fa-check-circle fa-4x text-success mb-3"></i>
+                <h3 class="text-success mb-3">Welcome to HIVE!</h3>
+                <p class="text-muted mb-4">Your account @{{ newAccount.username }} has been set up successfully.</p>
+                <div class="d-grid gap-2 col-6 mx-auto">
+                  <button class="btn btn-primary" @click="loginNewAccount">
+                    <i class="fa-solid fa-sign-in-alt me-2"></i>
+                    Login to Your Account
+                  </button>
+                  <a href="/hub" class="btn btn-outline-primary">
+                    <i class="fa-solid fa-home me-2"></i>
+                    Explore HIVE
+                  </a>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>

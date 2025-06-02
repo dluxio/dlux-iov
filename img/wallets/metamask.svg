@@ -1,0 +1,6 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="16" cy="16" r="15" fill="#F6851B" stroke="#E2761B" stroke-width="2"/>
+  <path d="M16 8L12 12L16 16L20 12L16 8Z" fill="#FFFFFF"/>
+  <path d="M16 18L12 22L16 26L20 22L16 18Z" fill="#FFFFFF"/>
+  <text x="16" y="28" text-anchor="middle" fill="#FFFFFF" font-size="4" font-family="Arial">MM</text>
+</svg> 

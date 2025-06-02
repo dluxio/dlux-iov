@@ -3,6 +3,8 @@ import StWidget from "/js/stwidget.js";
 import SwMonitor from "/js/sw-monitor.js";
 import Mcommon from "/js/methods-common.js";
 
+let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+
 export default {
   data() {
     return {
@@ -15,6 +17,11 @@ export default {
         accounts: {
         },
       },
+      notifications: [],
+      notificationsLoading: false,
+      notificationsError: null,
+      notificationsCount: 0,
+      hapi: hapi,
       HAS: false,
       HKC: true,
       HSR: false,
@@ -58,6 +65,7 @@ export default {
       isCreatingPin: false,
       pinLoading: false,
       pendingOperation: null, // Store operation that's waiting for PIN
+      pendingAccountData: null, // Store pending new account data
       showKeyModal: false,
       keyType: "posting",
       privateKey: "",
@@ -103,7 +111,7 @@ export default {
     "toast-vue": ToastVue,
     "sw-monitor": SwMonitor,
   },
-  emits: ["login", "logout", "refresh", "ack"],
+  emits: ["login", "logout", "refresh", "ack", "store-new-account"],
   props: {
     op: {
       type: Object,
@@ -690,6 +698,32 @@ export default {
         throw new Error("Invalid private key format. Must start with '5' and be at least 50 characters long.");
       }
       
+      // Check if this is a pending account (skip verification)
+      const isPendingAccount = this.decrypted.accounts[this.user] && 
+                               this.decrypted.accounts[this.user].isPendingCreation;
+      
+      if (isPendingAccount) {
+        // Skip verification for pending accounts
+        console.log("Skipping key verification for pending account:", this.user);
+        
+        // Initialize user account if not exists
+        if (!this.decrypted.accounts[this.user]) {
+          this.decrypted.accounts[this.user] = {};
+        }
+        this.decrypted.accounts[this.user][level] = trimmedKey;
+        
+        // Use hardened encryption
+        const encrypted = await this.encryptWithPBKDF2(
+          this.decrypted,
+          this.PIN
+        );
+        
+        localStorage.setItem("PEN", encrypted);
+        sessionStorage.setItem('pen', JSON.stringify(this.decrypted));
+        this.PENstatus = "Key stored successfully (pending account)";
+        return;
+      }
+      
       try {
         const response = await fetch("https://api.hive.blog", {
           method: "POST",
@@ -808,6 +842,52 @@ export default {
       }
     },
     
+    // Method to store new accounts from onboarding
+    async storeNewAccount(accountData) {
+      try {
+        console.log('Storing new account in dluxPEN:', accountData);
+        
+        // Ensure PIN is set up
+        if (!this.PIN) {
+          this.setupNewPin();
+          throw new Error("PIN not set up");
+        }
+        
+        // Initialize accounts structure if needed
+        if (!this.decrypted.accounts) {
+          this.decrypted.accounts = {};
+        }
+        
+        // Store the new account data
+        this.decrypted.accounts[accountData.username] = {
+          posting: accountData.keys.posting || '',
+          active: accountData.keys.active || '',
+          memo: accountData.keys.memo || '',
+          owner: accountData.keys.owner || '',
+          master: accountData.keys.master || '',
+          noPrompt: {},
+          isPendingCreation: accountData.isPendingCreation || true,
+          publicKeys: accountData.publicKeys || {},
+          recoveryMethod: accountData.recoveryMethod || null
+        };
+        
+        // Encrypt and save
+        const encrypted = await this.encryptWithPBKDF2(this.decrypted, this.PIN);
+        localStorage.setItem("PEN", encrypted);
+        sessionStorage.setItem('pen', JSON.stringify(this.decrypted));
+        
+        this.PENstatus = `New account @${accountData.username} stored successfully`;
+        
+        console.log('New account stored successfully in dluxPEN');
+        return true;
+        
+      } catch (error) {
+        console.error("Failed to store new account:", error);
+        this.PENstatus = "Failed to store new account: " + error.message;
+        throw error;
+      }
+    },
+    
     async decryptPEN(user = this.user) {
       try {
         const PEN = localStorage.getItem("PEN");
@@ -888,6 +968,29 @@ export default {
           pin: false,
           accounts: {}
         };
+      }
+      
+      // Check for pending new account from onboarding
+      const pendingAccount = localStorage.getItem('pendingNewAccount');
+      if (pendingAccount) {
+        try {
+          const accountData = JSON.parse(pendingAccount);
+          console.log('Found pending new account, storing in PEN:', accountData);
+          
+          // If no PIN set up yet, trigger PIN setup
+          if (!this.PIN && !localStorage.getItem("PEN")) {
+            this.setupNewPin();
+            // Store the pending account data to be processed after PIN setup
+            this.pendingAccountData = accountData;
+          } else if (this.PIN) {
+            // PIN already available, store immediately
+            await this.storeNewAccount(accountData);
+            localStorage.removeItem('pendingNewAccount');
+          }
+        } catch (error) {
+          console.error('Failed to process pending account:', error);
+          localStorage.removeItem('pendingNewAccount');
+        }
       }
       
       // Check if there's existing PEN data
@@ -977,6 +1080,18 @@ export default {
           
           this.closePinModalProperly();
           this.PENstatus = "PIN created successfully. You can now store keys.";
+          
+          // Process pending account data if available
+          if (this.pendingAccountData) {
+            try {
+              await this.storeNewAccount(this.pendingAccountData);
+              localStorage.removeItem('pendingNewAccount');
+              this.pendingAccountData = null;
+              this.PENstatus = "PIN created and new account stored successfully!";
+            } catch (error) {
+              console.error('Failed to store pending account after PIN setup:', error);
+            }
+          }
         } catch (error) {
           console.error("Failed to save initial PEN data:", error);
           this.pinError = "Failed to save PIN setup: " + error.message;
@@ -1919,6 +2034,12 @@ export default {
       } else if (this.HAS) {
         this.HASlogin();
       }
+      this.getNotifications()
+    },
+    getNotifications() {
+      this.hiveApiCall('bridge.account_notifications', `{"account":"${this.user}","limit":100}`).then(res => {
+        console.log(res)
+      })
     },
     logout() {
       localStorage.removeItem("user");
@@ -2978,7 +3099,6 @@ export default {
     },
   },
   async mounted() {
-    console.log('[NavVue] Component mounted. User:', this.user, 'Signer:', localStorage.getItem('signer'));
     const signer = localStorage.getItem("signer");
     const decrypted = sessionStorage.getItem('pen')
     if (decrypted) this.decrypted = JSON.parse(decrypted)
