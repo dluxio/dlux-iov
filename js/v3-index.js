@@ -1,4 +1,4 @@
-import Vue from "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.esm.browser.js";
+import { createApp } from "https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.esm-browser.js";
 import Navue from "/js/v3-nav.js";
 import FootVue from "/js/footvue.js";
 
@@ -42,10 +42,8 @@ console.log({
   lapi,
 });
 
-// createApp({ // vue 3
-var app = new Vue({
-  // vue 2
-  el: "#app", // vue 2
+// Create Vue 3 app
+const app = createApp({
   data() {
     return {
       account: user,
@@ -780,7 +778,7 @@ var app = new Vue({
       dappstats: 159,
     };
   },
-  beforeDestroy() {
+  beforeUnmount() {
   },
   components: {
     "nav-vue": Navue,
@@ -1033,3 +1031,10 @@ var app = new Vue({
     }
   },
 });
+
+// Register components
+app.component('nav-vue', Navue);
+app.component('foot-vue', FootVue);
+
+// Mount the app
+app.mount('#app');
