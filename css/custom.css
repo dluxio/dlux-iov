@@ -14827,7 +14827,8 @@ body[data-touch=false] .dropdown-center.js-hoverable-dropdown:hover > .dropdown-
   transform: translateX(-50%);
 }
 body[data-touch=false] .dropdown-end.js-hoverable-dropdown:hover > .dropdown-menu {
-  left: 0;
+  top: 60px;
+  right: 0;
 }
 body[data-touch=false] .nav-more.nav-dropdown:hover > .dropdown-menu,
 body[data-touch=false] .nav-more.js-hoverable-dropdown:hover > .dropdown-menu {

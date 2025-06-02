@@ -2659,7 +2659,8 @@ body[data-touch="false"] {
 
   .dropdown-end.js-hoverable-dropdown {
     &:hover>.dropdown-menu {
-      left:0;
+      top: 60px;
+      right:0;
     }
   }
 

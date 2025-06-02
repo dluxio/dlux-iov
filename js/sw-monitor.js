@@ -4,7 +4,7 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.02.5', // Should match sw.js version
+      desiredVersion: '2025.06.02.6', // Should match sw.js version
 
       // PWA Install states
       installStatus: 'unknown', // unknown, available, installed, not-supported
@@ -130,7 +130,7 @@ export default {
           top: 0;
           left: 0;
           right: 0;
-          /* z-index: 9999; */
+          z-index: 1049;
           background: #0d6efd;
           color: white;
           border: none;
