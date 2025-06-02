@@ -1,4 +1,4 @@
-import Vue from "https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.esm.browser.js";
+import { createApp, toRaw } from '/js/vue.esm-browser.js'
 import Navue from "/js/v3-nav.js";
 import FootVue from "/js/footvue.js";
 
@@ -43,10 +43,7 @@ console.log({
   lapi,
 });
 
-// createApp({ // vue 3
-var app = new Vue({
-  // vue 2
-  el: "#app", // vue 2
+createApp({ // vue 3
   data() {
     return {
       account: user,
@@ -2111,4 +2108,4 @@ var app = new Vue({
       },
     }
   },
-});
+}).mount('#app')
