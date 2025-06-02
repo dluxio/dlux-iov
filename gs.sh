@@ -26,8 +26,8 @@ if [ -f "$file" ]; then
     # Get the current date in YYYY.MM.DD format
     current_day=$(date +%Y.%m.%d)
 
-    # Regex to match the version string, e.g., this.version = "2025.02.13.15";
-    version_regex='this.version = "([0-9]{4}\.[0-9]{2}\.[0-9]{2})\.([0-9]+)";'
+    # Regex to match the version string, e.g., const version = "2025.02.13.15";
+    version_regex='const version = "([0-9]{4}\.[0-9]{2}\.[0-9]{2})\.([0-9]+)";'
 
     if [[ $first_line =~ $version_regex ]]; then
         # Extract version date and letter
@@ -38,11 +38,11 @@ if [ -f "$file" ]; then
         if [[ $version_date == $current_day ]]; then
             new_version_letter=$((version_letter + 1))
             new_version="$current_day.$new_version_letter"
-            sed -i "" "1 s/^.*$/this.version = \"$new_version\";/" "$file"
+            sed -i "" "1 s/^.*$/const version = \"$new_version\";/" "$file"
             echo "First line of $file incremented to: $new_version"
         else
             new_version="$current_day.1"
-            sed -i "" "1 s/^.*$/this.version = \"$new_version\";/" "$file"
+            sed -i "" "1 s/^.*$/const version = \"$new_version\";/" "$file"
             echo "First line of $file updated to: $new_version"
         fi
 
