@@ -4,7 +4,7 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.02.11', // Should match sw.js version
+      desiredVersion: '2025.06.02.12', // Should match sw.js version
 
 
       // PWA Install states

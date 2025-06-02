@@ -589,7 +589,12 @@
             <!-- Step 3: Account Creation -->
             <div v-if="onboardingStep === 3" class="card bg-dark border-secondary">
               <div class="card-header">
-                <h5 class="mb-0"><i class="fa-solid fa-credit-card me-2"></i>Create Your Account</h5>
+                <h5 class="mb-0">
+                  <i class="fa-solid fa-credit-card me-2"></i>Create Your Account
+                  <span v-if="paymentChannelId" class="badge bg-info ms-2 small">
+                    Channel: {{ paymentChannelId.substring(0, 8) }}...
+                  </span>
+                </h5>
               </div>
               <div class="card-body">
                 
@@ -708,17 +713,25 @@
                           'alert-warning': wsConnectionStatus === 'connecting',
                           'alert-danger': wsConnectionStatus === 'disconnected'
                         }">
-                          <div class="d-flex align-items-center">
-                            <i :class="{
-                              'fa-solid fa-wifi text-success': wsConnectionStatus === 'connected',
-                              'fa-solid fa-spinner fa-spin text-warning': wsConnectionStatus === 'connecting',
-                              'fa-solid fa-wifi text-danger': wsConnectionStatus === 'disconnected'
-                            }"></i>
-                            <span class="ms-2">
-                              {{ wsConnectionStatus === 'connected' ? 'Connected to payment monitor' :
-                                 wsConnectionStatus === 'connecting' ? 'Connecting to payment monitor...' :
-                                 'Disconnected from payment monitor' }}
-                            </span>
+                          <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                              <i :class="{
+                                'fa-solid fa-wifi text-success': wsConnectionStatus === 'connected',
+                                'fa-solid fa-spinner fa-spin text-warning': wsConnectionStatus === 'connecting',
+                                'fa-solid fa-wifi text-danger': wsConnectionStatus === 'disconnected'
+                              }"></i>
+                              <span class="ms-2">
+                                {{ wsConnectionStatus === 'connected' ? 'Connected to payment monitor' :
+                                   wsConnectionStatus === 'connecting' ? 'Connecting to payment monitor...' :
+                                   'Disconnected from payment monitor' }}
+                              </span>
+                            </div>
+                            <button 
+                              v-if="wsConnectionStatus === 'disconnected' && wsReconnectAttempts >= wsMaxReconnectAttempts"
+                              class="btn btn-danger btn-sm" 
+                              @click="retryWebSocketConnection()">
+                              <i class="fa-solid fa-refresh me-1"></i>Retry
+                            </button>
                           </div>
                         </div>
 

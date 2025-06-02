@@ -1017,6 +1017,9 @@ createApp({ // vue 3
           instructions: data.payment.instructions || []
         };
         
+        // Add channel ID to URL for page refresh persistence
+        this.updateUrlWithChannelId(data.payment.channelId);
+        
         this.addPaymentLog(`Payment channel created: ${data.payment.channelId}`, 'success');
         this.addPaymentLog(`Amount required: ${data.payment.amountFormatted}`, 'info');
         
@@ -1171,6 +1174,8 @@ createApp({ // vue 3
           this.accountCreated = true;
           this.onboardingStep = 4;
           this.stopCountdown();
+          // Clear channel ID from URL since account creation is complete
+          this.clearUrlChannelId();
           break;
           
         case 'failed':
@@ -1215,6 +1220,12 @@ createApp({ // vue 3
       setTimeout(() => {
         this.initializeWebSocket();
       }, delay);
+    },
+    
+    retryWebSocketConnection() {
+      this.wsReconnectAttempts = 0; // Reset retry count
+      this.addPaymentLog('Manual retry initiated...', 'info');
+      this.initializeWebSocket();
     },
     
     startWebSocketPing() {
@@ -1519,6 +1530,9 @@ createApp({ // vue 3
       if (this.ws) {
         this.ws.close();
       }
+      
+      // Clear channel ID from URL
+      this.clearUrlChannelId();
     },
     
     // ===========================================
@@ -1828,6 +1842,99 @@ createApp({ // vue 3
       return decimals[symbol] || 6;
     },
     
+    // URL Management Methods
+    updateUrlWithChannelId(channelId) {
+      const url = new URL(window.location);
+      url.searchParams.set('channelId', channelId);
+      window.history.replaceState({}, '', url);
+    },
+    
+    clearUrlChannelId() {
+      const url = new URL(window.location);
+      url.searchParams.delete('channelId');
+      window.history.replaceState({}, '', url);
+    },
+    
+    async restorePaymentFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const channelId = urlParams.get('channelId');
+      
+      if (!channelId) {
+        return false;
+      }
+      
+      this.addPaymentLog(`Restoring payment channel: ${channelId}`, 'info');
+      
+      try {
+        // Fetch channel status from backend
+        const apiHost = 'data.dlux.io';
+        const apiProtocol = 'https:';
+        const apiUrl = `${apiProtocol}//${apiHost}/api/onboarding/payment/status/${channelId}`;
+        
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to restore payment channel');
+        }
+        
+        // Restore payment state
+        this.paymentChannelId = channelId;
+        this.paymentDetails = {
+          channelId: channelId,
+          cryptoType: data.channel.cryptoType,
+          amountFormatted: data.channel.amountFormatted,
+          address: data.channel.address,
+          memo: data.channel.memo,
+          expiresAt: new Date(data.channel.expiresAt),
+          instructions: data.channel.instructions || []
+        };
+        
+        // Restore account details if available
+        if (data.channel.username) {
+          this.newAccount.username = data.channel.username;
+        }
+        if (data.channel.publicKeys) {
+          this.newAccount.publicKeys = data.channel.publicKeys;
+        }
+        
+        // Update payment status
+        this.updatePaymentStatus({
+          status: data.channel.status,
+          message: data.channel.statusMessage,
+          details: data.channel.statusDetails,
+          progress: data.channel.progress,
+          channel: data.channel
+        });
+        
+        // Set appropriate onboarding step
+        if (data.channel.status === 'completed') {
+          this.accountCreated = true;
+          this.onboardingStep = 4;
+        } else {
+          this.onboardingStep = 3;
+          this.paymentMethod = 'crypto';
+        }
+        
+        this.addPaymentLog('Payment channel restored from URL', 'success');
+        
+        // Initialize WebSocket for continued monitoring
+        this.initializeWebSocket();
+        
+        return true;
+        
+      } catch (error) {
+        console.error('Failed to restore payment channel:', error);
+        this.addPaymentLog(`Failed to restore channel: ${error.message}`, 'error');
+        // Clear invalid channel ID from URL
+        this.clearUrlChannelId();
+        return false;
+      }
+    },
+    
     // New payment UI methods
     getWalletIcon(walletName) {
       const icons = {
@@ -2100,6 +2207,9 @@ createApp({ // vue 3
     
     // Load crypto pricing
     this.loadCryptoPricing();
+    
+    // Check for existing payment channel in URL and restore if needed
+    this.restorePaymentFromUrl();
   },
   computed: {
     canClaim: {
