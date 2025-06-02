@@ -3258,8 +3258,10 @@ export default {
           </li>
         </ul>
       </li>
-      <li class="nav-item nav-hide">
-        <sw-monitor @toast="handleToast" />
+      <li class="nav-item nav-hide" style="max-width: 72px; !important">
+
+          <sw-monitor @toast="handleToast" />
+
       </li>
       <li class="nav-more dropdown nav-dropdown">
         <a class="nav-link nav-highlight nav-title dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"

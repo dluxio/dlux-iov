@@ -4,7 +4,7 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.01.15', // Should match sw.js version
+      desiredVersion: '2025.06.01.16', // Should match sw.js version
       
       // PWA Install states
       installStatus: 'unknown', // unknown, available, installed, not-supported
@@ -580,10 +580,8 @@ export default {
   },
   
   template: `
-    <div class="sw-monitor">
-      <!-- Indicator in nav bar -->
-      <div v-if="showIndicator" class="nav-item dropdown">
-        <a class="nav-link position-relative" href="#" role="button" 
+    <div class="sw-monitor" style="width: 100%; height: 100%;" v-if="showIndicator" class="dropdown">
+        <a class="nav-link nav-highlight" href="#" role="button" 
            data-bs-toggle="dropdown" aria-expanded="false"
            :class="indicatorClass">
           <i class="fa-solid fa-download" v-if="swStatus === 'update-available'"></i>
