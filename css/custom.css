@@ -14819,15 +14819,15 @@ body[data-touch=false] .js-hoverable-dropdown:hover > .dropdown-menu {
   z-index: 1021;
 }
 body[data-touch=false] .dropdown-start.js-hoverable-dropdown:hover > .dropdown-menu {
-  top: 60px;
+  top: 52px;
 }
 body[data-touch=false] .dropdown-center.js-hoverable-dropdown:hover > .dropdown-menu {
-  top: 60px;
+  top: 52px;
   left: 50%;
   transform: translateX(-50%);
 }
 body[data-touch=false] .dropdown-end.js-hoverable-dropdown:hover > .dropdown-menu {
-  top: 60px;
+  top: 52px;
   right: 0;
 }
 body[data-touch=false] .nav-more.nav-dropdown:hover > .dropdown-menu,
