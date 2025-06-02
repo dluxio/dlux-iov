@@ -4,7 +4,7 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.01.22', // Should match sw.js version
+      desiredVersion: '2025.06.01.23', // Should match sw.js version
 
       // PWA Install states
       installStatus: 'unknown', // unknown, available, installed, not-supported
@@ -599,71 +599,69 @@ export default {
             <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">notifications</div>
             <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab" tabindex="0">tx details</div>
             <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab" tabindex="0">
-            <!-- Service Worker Status -->
-            <div class="mb-3">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-bold">Cache Status:</span>
-                <span class="badge" :class="{
-                  'bg-success': swStatus === 'current',
-                  'bg-warning': swStatus === 'update-available',
-                  'bg-info': swStatus === 'installing',
-                  'bg-danger': swStatus === 'error'
-                  }">{{ indicatorText }}
-                </span>
+              <!-- Service Worker Status -->
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="fw-bold">Cache Status:</span>
+                  <span class="badge" :class="{
+                    'bg-success': swStatus === 'current',
+                    'bg-warning': swStatus === 'update-available',
+                    'bg-info': swStatus === 'installing',
+                    'bg-danger': swStatus === 'error'
+                    }">{{ indicatorText }}
+                  </span>
+                </div>
+              
+                <div v-if="swVersion" class="small">
+                  Version: {{ swVersion }}
+                </div>
+                
+                <div v-if="cacheStats.resourceCount > 0" class="small">
+                  {{ cacheStats.resourceCount }} resources cached ({{ formatBytes(cacheStats.totalSize) }})
+                </div>
+                
+                <!-- Update Actions -->
+                <div v-if="swStatus === 'update-available'" class="mt-2">
+                  <button @click="updateServiceWorker" class="btn btn-primary btn-sm w-100">
+                    <i class="fa-solid fa-download me-1"></i>
+                    Update Cache
+                  </button>
+                </div>
+                
+                <div v-if="swStatus === 'updated'" class="mt-2">
+                  <button @click="reloadPage" class="btn btn-success btn-sm w-100">
+                    <i class="fa-solid fa-refresh me-1"></i>
+                    Reload to Apply
+                  </button>
+                </div>
               </div>
-            
-            <div v-if="swVersion" class="small">
-              Version: {{ swVersion }}
-            </div>
-            
-            <div v-if="cacheStats.resourceCount > 0" class="small">
-              {{ cacheStats.resourceCount }} resources cached ({{ formatBytes(cacheStats.totalSize) }})
-            </div>
-            
-            <!-- Update Actions -->
-            <div v-if="swStatus === 'update-available'" class="mt-2">
-              <button @click="updateServiceWorker" class="btn btn-primary btn-sm w-100">
-                <i class="fa-solid fa-download me-1"></i>
-                Update Cache
-              </button>
-            </div>
-            
-            <div v-if="swStatus === 'updated'" class="mt-2">
-              <button @click="reloadPage" class="btn btn-success btn-sm w-100">
-                <i class="fa-solid fa-refresh me-1"></i>
-                Reload to Apply
-              </button>
+          
+              <!-- PWA Install -->
+              <div v-if="installStatus === 'available'" class="mb-3">
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="fw-bold">Install App:</span>
+                  <span class="badge bg-info">Available</span>
+                </div>
+                <p class="small mb-2">
+                  Install DLUX as an app for better performance and offline access.
+                </p>
+                <button @click="installPWA" class="btn btn-primary btn-sm w-100">
+                  <i class="fa-solid fa-download me-1"></i>
+                  {{ installButtonText }}
+                </button>
+              </div>
+          
+              <!-- Error Display -->
+              <div v-if="errors.length > 0" class="mb-3">
+                <hr>
+                <h6 class="text-danger">Issues:</h6>
+                <div v-for="error in errors" class="small text-danger mb-1">
+                  {{ error }}
+                </div>
+              </div>
             </div>
           </div>
-          
-          <!-- PWA Install -->
-          <div v-if="installStatus === 'available'" class="mb-3">
-            <hr>
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <span class="fw-bold">Install App:</span>
-              <span class="badge bg-info">Available</span>
-            </div>
-            <p class="small mb-2">
-              Install DLUX as an app for better performance and offline access.
-            </p>
-            <button @click="installPWA" class="btn btn-outline-primary btn-sm w-100">
-              <i class="fa-solid fa-download me-1"></i>
-              {{ installButtonText }}
-            </button>
-          </div>
-          
-          <!-- Error Display -->
-          <div v-if="errors.length > 0" class="mt-3">
-            <hr>
-            <h6 class="text-danger">Issues:</h6>
-            <div v-for="error in errors" class="small text-danger mb-1">
-              {{ error }}
-            </div>
-          </div>
-        </div>
-      </div>
-
-          
     </div>
   `
 };
