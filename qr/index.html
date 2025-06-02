@@ -726,12 +726,20 @@
                                    'Disconnected from payment monitor' }}
                               </span>
                             </div>
-                            <button 
-                              v-if="wsConnectionStatus === 'disconnected' && wsReconnectAttempts >= wsMaxReconnectAttempts"
-                              class="btn btn-danger btn-sm" 
-                              @click="retryWebSocketConnection()">
-                              <i class="fa-solid fa-refresh me-1"></i>Retry
-                            </button>
+                            <div class="btn-group" v-if="wsConnectionStatus === 'disconnected'">
+                              <button 
+                                v-if="wsReconnectAttempts >= wsMaxReconnectAttempts"
+                                class="btn btn-danger btn-sm" 
+                                @click="retryWebSocketConnection()">
+                                <i class="fa-solid fa-refresh me-1"></i>Retry WebSocket
+                              </button>
+                              <button 
+                                v-if="!fallbackPollingInterval"
+                                class="btn btn-warning btn-sm" 
+                                @click="startFallbackPolling()">
+                                <i class="fa-solid fa-clock me-1"></i>Use Polling
+                              </button>
+                            </div>
                           </div>
                         </div>
 
