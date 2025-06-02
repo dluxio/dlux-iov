@@ -4,7 +4,7 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.01.18', // Should match sw.js version
+      desiredVersion: '2025.06.01.19', // Should match sw.js version
 
       // PWA Install states
       installStatus: 'unknown', // unknown, available, installed, not-supported
@@ -610,7 +610,7 @@ export default {
               Version: {{ swVersion }}
             </div>
             
-            <div v-if="cacheStats.resourceCount > 0" class="small text-muted">
+            <div v-if="cacheStats.resourceCount > 0" class="small">
               {{ cacheStats.resourceCount }} resources cached ({{ formatBytes(cacheStats.totalSize) }})
             </div>
             
