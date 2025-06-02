@@ -4,7 +4,7 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.01.24', // Should match sw.js version
+      desiredVersion: '2025.06.01.25', // Should match sw.js version
 
       // PWA Install states
       installStatus: 'unknown', // unknown, available, installed, not-supported
@@ -582,9 +582,9 @@ export default {
       <div class="">
           <nav>
             <div class="nav nav-tabs nav-bell-nav mb-3" id="nav-tab" role="tablist">
-              <button class="nav-link border-0 active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Notifications</button>
-              <button class="nav-link border-0" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Tx Details</button>
-              <button class=" border-0 nav-link " id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">
+              <button class="nav-link border-0 active" id="nav-notifications-tab" data-bs-toggle="tab" data-bs-target="#nav-notifications" type="button" role="tab" aria-controls="nav-notifications" aria-selected="true">Notifications</button>
+              <button class="nav-link border-0" id="nav-details-tab" data-bs-toggle="tab" data-bs-target="#nav-details" type="button" role="tab" aria-controls="nav-details" aria-selected="false">Tx Details</button>
+              <button class=" border-0 nav-link " id="nav-app-tab" data-bs-toggle="tab" data-bs-target="#nav-app" type="button" role="tab" aria-controls="nav-app" aria-selected="false">
                 <div class="d-flex align-items-center">
                   <i class="fa-solid fa-download fa-fw me-1" v-if="swStatus === 'update-available'"></i> 
                   <i class="fa-solid fa-sync fa-spin fa-fw me-1" v-else-if="swStatus === 'installing'"></i> 
@@ -596,9 +596,39 @@ export default {
                </div>
           </nav>
           <div class="tab-content" id="nav-tabContent">
-            <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">notifications</div>
-            <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab" tabindex="0">tx details</div>
-            <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab" tabindex="0">
+            <div class="tab-pane fade show active" id="nav-notifications" role="tabpanel" aria-labelledby="nav-notifications-tab" tabindex="0">
+              <div class="d-flex flex-column w-100">
+                <!-- for each transaction -->
+                <div class="d-flex flex-grow-1 gap-2 mb-2">
+                  <!-- user thumbnail -->
+                  <div class="d-flex">
+                    <img class="img-fluid" src="/img/no-user.png" alt="">
+                  </div>
+                  <!-- message -->
+                  <div class="d-flex flex-column">
+                    <div class="">The message about the notification or transaction goes here</div>
+                    <div class="small">Timestamp</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="nav-details" role="tabpanel" aria-labelledby="nav-details-tab" tabindex="0">
+              <div class="d-flex flex-column w-100">
+                <!-- for each transaction -->
+                <div class="d-flex flex-grow-1 gap-2 mb-2">
+                  <!-- user thumbnail -->
+                  <div class="d-flex">
+                    <img class="img-fluid" src="/img/no-user.png" alt="">
+                  </div>
+                  <!-- message -->
+                  <div class="d-flex flex-column">
+                    <div class="">The message about the notification or transaction goes here</div>
+                    <div class="small">Timestamp</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="nav-app" role="tabpanel" aria-labelledby="nav-app-tab" tabindex="0">
               <!-- Service Worker Status -->
               <div class="mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
