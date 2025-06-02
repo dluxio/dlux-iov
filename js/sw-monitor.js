@@ -4,7 +4,7 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.01.20', // Should match sw.js version
+      desiredVersion: '2025.06.01.21', // Should match sw.js version
 
       // PWA Install states
       installStatus: 'unknown', // unknown, available, installed, not-supported
@@ -589,7 +589,7 @@ export default {
                   <i class="fa-solid fa-download fa-fw me-1" v-if="swStatus === 'update-available'"></i> 
                   <i class="fa-solid fa-sync fa-spin fa-fw me-1" v-else-if="swStatus === 'installing'"></i> 
                   <i class="fa-solid fa-exclamation-triangle fa-fw me-1" v-else-if="swStatus === 'error'"></i> 
-                  <i class="fa-solid fa-mobile-screen fa-fw me-1" v-else-if="installStatus === 'available'"></i>
+                  <i class="fa-solid fa-download fa-fw me-1" v-else-if="installStatus === 'available'"></i>
                   <span>Alerts</span>
                   <span class="d-none" v-if="showUpdateNotification || installStatus === 'available'">!</span> 
               </button>
