@@ -3270,7 +3270,7 @@ export default {
           </div>
         </a>
          <div class="hover-gap"></div>
-        <div class="dropdown-menu dropdown-menu-end px-3 pb-3 pt-1" style="min-width: 320px;">
+        <div class="dropdown-menu dropdown-menu-end px-3 py-1" style="min-width: 320px;">
           <sw-monitor @toast="handleToast" />
         </div>
       </li>

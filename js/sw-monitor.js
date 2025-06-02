@@ -4,7 +4,7 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.01.17', // Should match sw.js version
+      desiredVersion: '2025.06.01.18', // Should match sw.js version
 
       // PWA Install states
       installStatus: 'unknown', // unknown, available, installed, not-supported
@@ -606,7 +606,7 @@ export default {
                 </span>
               </div>
             
-            <div v-if="swVersion" class="small text-muted">
+            <div v-if="swVersion" class="small">
               Version: {{ swVersion }}
             </div>
             
