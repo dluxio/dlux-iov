@@ -3258,10 +3258,21 @@ export default {
           </li>
         </ul>
       </li>
-      <li class="nav-item nav-hide" style="max-width: 72px; !important">
-
+      <li style="max-width: 72px; !important" class="nav-bell dropdown nav-dropdown dropdown-end">
+        <a class="d-flex align-items-center justify-content-center nav-link nav-highlight" href="#" role="button" 
+           data-bs-toggle="dropdown" aria-expanded="false">
+          <div class="position-relative">
+            <i class="fa-solid fa-bell fs-4"></i>
+            <span class="position-absolute d-flex align-items-center top-0 start-100 translate-middle badge border border-light rounded-pill bg-danger">
+              <span class="visually-hidden">unread messages</span>
+              <span style="font-size: .5rem;">123</span>
+            </span>
+          </div>
+        </a>
+         <div class="hover-gap"></div>
+        <div class="dropdown-menu dropdown-menu-end px-3 pb-3 pt-1" style="min-width: 320px;">
           <sw-monitor @toast="handleToast" />
-
+        </div>
       </li>
       <li class="nav-more dropdown nav-dropdown">
         <a class="nav-link nav-highlight nav-title dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"

@@ -4,39 +4,39 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.01.16', // Should match sw.js version
-      
+      desiredVersion: '2025.06.01.17', // Should match sw.js version
+
       // PWA Install states
       installStatus: 'unknown', // unknown, available, installed, not-supported
       deferredPrompt: null,
       isStandalone: false,
-      
+
       // UI states
       showUpdateNotification: false,
       showInstallPrompt: false,
       updateProgress: 0,
       cacheProgress: 0,
-      
+
       // Cache statistics
       cacheStats: {
         totalSize: 0,
         resourceCount: 0,
         lastUpdated: null
       },
-      
+
       // Error states
       errors: [],
-      
+
       // Banner DOM element
       bannerElement: null
     };
   },
-  
+
   computed: {
     showIndicator() {
       return this.swStatus !== 'current' || this.installStatus === 'available';
     },
-    
+
     indicatorClass() {
       const baseClass = 'sw-monitor-indicator';
       switch (this.swStatus) {
@@ -50,7 +50,7 @@ export default {
           return baseClass;
       }
     },
-    
+
     indicatorText() {
       switch (this.swStatus) {
         case 'loading':
@@ -67,7 +67,7 @@ export default {
           return 'Up to Date';
       }
     },
-    
+
     installButtonText() {
       switch (this.installStatus) {
         case 'available':
@@ -79,41 +79,41 @@ export default {
       }
     }
   },
-  
+
   methods: {
     async initializeMonitor() {
       console.log('[SW Monitor] Initializing service worker monitor');
-      
+
       // Check if PWA is already installed
       this.checkStandaloneMode();
-      
+
       // Check service worker support
       if (!('serviceWorker' in navigator)) {
         this.swStatus = 'error';
         this.errors.push('Service Workers not supported');
         return;
       }
-      
+
       // Set up service worker monitoring
       await this.setupServiceWorkerMonitoring();
-      
+
       // Set up PWA install monitoring
       this.setupPWAInstallMonitoring();
-      
+
       // Get cache statistics
       await this.updateCacheStats();
-      
+
       // Set up periodic checks
       this.setupPeriodicChecks();
-      
+
       // Add CSS for banner positioning
       this.addBannerStyles();
     },
-    
+
     addBannerStyles() {
       // Check if styles already exist
       if (document.getElementById('sw-banner-styles')) return;
-      
+
       const style = document.createElement('style');
       style.id = 'sw-banner-styles';
       style.textContent = `
@@ -207,7 +207,7 @@ export default {
       `;
       document.head.appendChild(style);
     },
-    
+
     toggleBodyPadding(show) {
       if (show) {
         document.body.classList.add('pwa-banner-active');
@@ -218,7 +218,7 @@ export default {
 
     createBannerElement() {
       if (this.bannerElement) return;
-      
+
       this.bannerElement = document.createElement('div');
       this.bannerElement.className = 'pwa-install-banner alert alert-primary alert-dismissible m-0';
       this.bannerElement.innerHTML = `
@@ -232,10 +232,10 @@ export default {
             </div>
             <div class="d-flex flex-column align-items-center">
               <div class="d-flex gap-2">
-                <button class="btn btn-light btn-sm install-btn">
-                  Install
+                <button class="btn btn-light rounded-pill px-2 btn-sm install-btn">
+                 <i class="fa-solid fa-download fa-fw me-1"></i> Install
                 </button>
-                <button class="btn btn-outline-light btn-sm not-now-btn">
+                <button class="btn btn-outline-light rounded-pill px-2 btn-sm not-now-btn">
                   <span class="d-none d-sm-flex">Not Now</span>
                   <i class="fa-solid fa-xmark d-sm-none"></i>
                 </button>
@@ -243,29 +243,29 @@ export default {
             </div>
           </div>
       `;
-      
+
       // Add event listeners
       const installBtn = this.bannerElement.querySelector('.install-btn');
       const notNowBtn = this.bannerElement.querySelector('.not-now-btn');
       const closeBtn = this.bannerElement.querySelector('.close-btn');
-      
+
       installBtn.addEventListener('click', () => this.installPWA());
       notNowBtn.addEventListener('click', () => this.dismissInstallPrompt());
       closeBtn.addEventListener('click', () => this.dismissInstallPrompt());
     },
-    
+
     showBanner() {
       if (!this.bannerElement) {
         this.createBannerElement();
       }
-      
+
       if (!document.body.contains(this.bannerElement)) {
         document.body.insertBefore(this.bannerElement, document.body.firstChild);
       }
-      
+
       this.toggleBodyPadding(true);
     },
-    
+
     hideBanner() {
       if (this.bannerElement && document.body.contains(this.bannerElement)) {
         document.body.removeChild(this.bannerElement);
@@ -277,17 +277,17 @@ export default {
       try {
         // Get current registration
         const registration = await navigator.serviceWorker.getRegistration('/');
-        
+
         if (registration) {
           this.checkServiceWorkerVersion(registration);
-          
+
           // Listen for updates
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             if (newWorker) {
               this.swStatus = 'installing';
               this.showUpdateNotification = true;
-              
+
               newWorker.addEventListener('statechange', () => {
                 switch (newWorker.state) {
                   case 'installed':
@@ -311,27 +311,27 @@ export default {
           this.swStatus = 'error';
           this.errors.push('No service worker registration found');
         }
-        
+
         // Listen for messages from service worker
         navigator.serviceWorker.addEventListener('message', (event) => {
           this.handleServiceWorkerMessage(event);
         });
-        
+
       } catch (error) {
         console.error('[SW Monitor] Error setting up service worker monitoring:', error);
         this.swStatus = 'error';
         this.errors.push(`SW setup error: ${error.message}`);
       }
     },
-    
+
     checkServiceWorkerVersion(registration) {
       if (registration.active) {
         const activeSWURL = registration.active.scriptURL;
         const urlParams = new URLSearchParams(activeSWURL.split('?')[1]);
         const activeVersion = urlParams.get('v');
-        
+
         this.swVersion = activeVersion;
-        
+
         if (activeVersion === this.desiredVersion) {
           this.swStatus = 'current';
         } else {
@@ -347,28 +347,28 @@ export default {
         this.swStatus = 'error';
       }
     },
-    
+
     setupPWAInstallMonitoring() {
       // Check if already installed
       if (this.isStandalone) {
         this.installStatus = 'installed';
         return;
       }
-      
+
       // Listen for beforeinstallprompt event
       window.addEventListener('beforeinstallprompt', (e) => {
         console.log('[SW Monitor] beforeinstallprompt event fired');
         e.preventDefault();
         this.deferredPrompt = e;
         this.installStatus = 'available';
-        
+
         // Show install prompt after a delay to avoid interrupting user flow
         setTimeout(() => {
           this.showInstallPrompt = true;
           this.showBanner();
         }, 5000);
       });
-      
+
       // Listen for app installed event
       window.addEventListener('appinstalled', () => {
         console.log('[SW Monitor] PWA was installed');
@@ -379,21 +379,21 @@ export default {
         this.showToast('App installed successfully!', 'success');
       });
     },
-    
+
     checkStandaloneMode() {
       // Check if running in standalone mode (PWA)
       this.isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                         window.navigator.standalone ||
-                         document.referrer.includes('android-app://');
-      
+        window.navigator.standalone ||
+        document.referrer.includes('android-app://');
+
       if (this.isStandalone) {
         this.installStatus = 'installed';
       }
     },
-    
+
     handleServiceWorkerMessage(event) {
       const { type, data } = event.data;
-      
+
       switch (type) {
         case 'SW_UPDATED':
           this.swStatus = 'updated';
@@ -418,19 +418,19 @@ export default {
           break;
       }
     },
-    
+
     async updateCacheStats() {
       try {
         if ('caches' in window) {
           const cacheNames = await caches.keys();
           let totalSize = 0;
           let resourceCount = 0;
-          
+
           for (const name of cacheNames) {
             const cache = await caches.open(name);
             const keys = await cache.keys();
             resourceCount += keys.length;
-            
+
             // Estimate cache size (rough calculation)
             for (const request of keys) {
               const response = await cache.match(request);
@@ -440,7 +440,7 @@ export default {
               }
             }
           }
-          
+
           this.cacheStats = {
             totalSize,
             resourceCount,
@@ -451,21 +451,21 @@ export default {
         console.error('[SW Monitor] Error updating cache stats:', error);
       }
     },
-    
+
     async installPWA() {
       if (!this.deferredPrompt) {
         this.showToast('Install prompt not available', 'warning');
         return;
       }
-      
+
       try {
         const { outcome } = await this.deferredPrompt.prompt();
         console.log('[SW Monitor] User response to install prompt:', outcome);
-        
+
         if (outcome === 'accepted') {
           this.installStatus = 'installing';
         }
-        
+
         this.deferredPrompt = null;
         this.showInstallPrompt = false;
         this.hideBanner();
@@ -474,15 +474,15 @@ export default {
         this.showToast('Install failed', 'error');
       }
     },
-    
+
     async updateServiceWorker() {
       try {
         const registration = await navigator.serviceWorker.getRegistration('/');
-        
+
         if (registration) {
           this.swStatus = 'installing';
           this.showUpdateNotification = false;
-          
+
           if (registration.waiting) {
             // Tell the waiting service worker to skip waiting
             registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -500,24 +500,24 @@ export default {
         this.showToast('Update failed', 'error');
       }
     },
-    
+
     reloadPage() {
       window.location.reload();
     },
-    
+
     dismissInstallPrompt() {
       this.showInstallPrompt = false;
       this.hideBanner();
       this.deferredPrompt = null;
-      
+
       // Don't show again for this session
       sessionStorage.setItem('installPromptDismissed', 'true');
     },
-    
+
     dismissUpdateNotification() {
       this.showUpdateNotification = false;
     },
-    
+
     setupPeriodicChecks() {
       // Check for updates every 30 minutes
       setInterval(async () => {
@@ -530,13 +530,13 @@ export default {
           console.error('[SW Monitor] Periodic update check failed:', error);
         }
       }, 30 * 60 * 1000);
-      
+
       // Update cache stats every 5 minutes
       setInterval(() => {
         this.updateCacheStats();
       }, 5 * 60 * 1000);
     },
-    
+
     formatBytes(bytes) {
       if (bytes === 0) return '0 Bytes';
       const k = 1024;
@@ -544,13 +544,13 @@ export default {
       const i = Math.floor(Math.log(bytes) / Math.log(k));
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     },
-    
+
     showToast(message, type = 'info') {
       // Emit event for toast system
       this.$emit('toast', { message, type });
     }
   },
-  
+
   watch: {
     showInstallPrompt(newVal) {
       // Update banner visibility when install prompt changes
@@ -561,16 +561,16 @@ export default {
       }
     }
   },
-  
+
   mounted() {
     // Don't show install prompt if dismissed this session
     if (sessionStorage.getItem('installPromptDismissed')) {
       this.showInstallPrompt = false;
     }
-    
+
     this.initializeMonitor();
   },
-  
+
   beforeUnmount() {
     // Clean up banner and body padding when component is destroyed
     this.hideBanner();
@@ -578,38 +578,33 @@ export default {
       this.bannerElement = null;
     }
   },
-  
-  template: `
-    <div class="sw-monitor" style="width: 100%; height: 100%;" v-if="showIndicator" class="dropdown">
-        <a class="nav-link nav-highlight" href="#" role="button" 
-           data-bs-toggle="dropdown" aria-expanded="false"
-           :class="indicatorClass">
-          <i class="fa-solid fa-download" v-if="swStatus === 'update-available'"></i>
-          <i class="fa-solid fa-sync fa-spin" v-else-if="swStatus === 'installing'"></i>
-          <i class="fa-solid fa-exclamation-triangle" v-else-if="swStatus === 'error'"></i>
-          <i class="fa-solid fa-mobile-screen" v-else-if="installStatus === 'available'"></i>
-          
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary"
-                v-if="showUpdateNotification || installStatus === 'available'">
-            !
-          </span>
-        </a>
-        
-        <!-- Dropdown menu -->
-        <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 320px;">
-          <h6 class="dropdown-header">App Status</h6>
-          
-          <!-- Service Worker Status -->
-          <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <span class="fw-bold">Cache Status:</span>
-              <span class="badge" :class="{
-                'bg-success': swStatus === 'current',
-                'bg-warning': swStatus === 'update-available',
-                'bg-info': swStatus === 'installing',
-                'bg-danger': swStatus === 'error'
-              }">{{ indicatorText }}</span>
-            </div>
+  /* 
+          */
+  template: `<!-- Dropdown menu -->
+      <div class="">
+          <nav>
+            <div class="nav nav-tabs nav-bell-nav mb-3" id="nav-tab" role="tablist">
+              <button class="nav-link border-0 active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Notifications</button>
+              <button class="nav-link border-0" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Tx Details</button>
+              <button class="border-0 nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Alerts</button>
+               </div>
+          </nav>
+          <div class="tab-content" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" tabindex="0">notifications</div>
+            <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab" tabindex="0">tx details</div>
+            <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab" tabindex="0">
+            <!-- Service Worker Status -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold">Cache Status:</span>
+                <span class="badge" :class="{
+                  'bg-success': swStatus === 'current',
+                  'bg-warning': swStatus === 'update-available',
+                  'bg-info': swStatus === 'installing',
+                  'bg-danger': swStatus === 'error'
+                  }">{{ indicatorText }}
+                </span>
+              </div>
             
             <div v-if="swVersion" class="small text-muted">
               Version: {{ swVersion }}
@@ -642,7 +637,7 @@ export default {
               <span class="fw-bold">Install App:</span>
               <span class="badge bg-info">Available</span>
             </div>
-            <p class="small text-muted mb-2">
+            <p class="small mb-2">
               Install DLUX as an app for better performance and offline access.
             </p>
             <button @click="installPWA" class="btn btn-outline-primary btn-sm w-100">
@@ -661,25 +656,8 @@ export default {
           </div>
         </div>
       </div>
-      
-      <!-- Update Available toast -->
-      <div v-if="showUpdateNotification" 
-           class="position-fixed top-0 start-50 translate-middle-x mt-3 alert alert-info alert-dismissible fade show"
-           style="z-index: 1060; max-width: 400px;" role="alert">
-        <i class="fa-solid fa-download me-2"></i>
-        <strong>App Update Available!</strong><br>
-        <small>New features and improvements are ready.</small>
-        <div class="mt-2">
-          <button @click="updateServiceWorker" class="btn btn-primary btn-sm me-2">
-            Update Now
-          </button>
-          <button @click="dismissUpdateNotification" class="btn btn-outline-secondary btn-sm">
-            Later
-          </button>
-        </div>
-        <button @click="dismissUpdateNotification" type="button" class="btn-close" aria-label="Close"></button>
-      </div>
 
+          
     </div>
   `
 };

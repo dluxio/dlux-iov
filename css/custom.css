@@ -13991,6 +13991,39 @@ html {
   left: unset !important;
 }
 
+.navbar-nav .nav-bell {
+  height: 72px;
+  width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  position: relative;
+}
+
+.navbar-nav .nav-bell .dropdown-menu {
+  position: absolute;
+  align-self: flex-end;
+  top: 100%;
+  background-color: rgb(232, 233, 232);
+  background-image: none;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid #282C31;
+  z-index: 1050;
+  margin-top: 6px;
+  color: #282C31;
+  padding: 0;
+  flex-direction: column;
+  overflow-y: auto;
+  max-height: calc(100vh - 170px);
+  width: 484px;
+  border-radius: 0.8rem;
+}
+
+.navbar-nav .nav-bell .dropdown-menu.show {
+  left: unset !important;
+}
+
 .navbar-nav .nav-item .dropdown-menu {
   position: absolute;
   /* align-self: flex-start; */
@@ -14330,6 +14363,41 @@ html {
   justify-content: center;
   position: relative;
   box-sizing: border-box;
+}
+
+.nav-bell .nav-link {
+  height: 100%;
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-sizing: border-box;
+  border-right: #000 1px solid;
+  color: #282C31;
+}
+
+.nav-bell-nav .nav-link.active {
+  background-color: unset !important;
+  border-bottom: #000 3px solid !important;
+  color: #000;
+  font-weight: 700 !important;
+}
+
+.nav-bell-nav .nav-link.active:hover {
+  cursor: disabled;
+  color: #434343 !important;
+}
+
+.nav-bell-nav .nav-link {
+  background-color: unset !important;
+  font-weight: 500 !important;
+}
+
+.nav-bell-nav .nav-link:hover {
+  color: #3a8fd9 !important;
 }
 
 @media (max-width: 1400px) {
@@ -14751,8 +14819,7 @@ body[data-touch=false] .dropdown-center.js-hoverable-dropdown:hover > .dropdown-
   transform: translateX(-50%);
 }
 body[data-touch=false] .dropdown-end.js-hoverable-dropdown:hover > .dropdown-menu {
-  top: 60px;
-  right: 0px;
+  left: 0;
 }
 body[data-touch=false] .nav-more.nav-dropdown:hover > .dropdown-menu,
 body[data-touch=false] .nav-more.js-hoverable-dropdown:hover > .dropdown-menu {
