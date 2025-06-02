@@ -14566,6 +14566,10 @@ html {
     height: 64px;
     width: 64px;
   }
+  .navbar-nav .nav-bell {
+    height: 64px;
+    width: 64px;
+  }
   .navbar-subbar-container {
     margin-top: 64px;
   }
@@ -14597,6 +14601,10 @@ html {
   }
   .nav-more .dropdown-menu {
     right: -1px !important;
+    width: calc(100vw - 24px) !important;
+  }
+  .nav-bell .dropdown-menu {
+    right: -65px !important;
     width: calc(100vw - 24px) !important;
   }
   .how-grid {

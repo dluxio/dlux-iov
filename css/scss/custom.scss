@@ -2360,6 +2360,11 @@ html {
     width: 64px;
   }
 
+  .navbar-nav .nav-bell {
+    height: 64px;
+    width: 64px;
+  }
+
   .navbar-subbar-container {
     margin-top: 64px;
   }
@@ -2399,6 +2404,11 @@ html {
 
   .nav-more .dropdown-menu {
     right: -1px !important;
+    width: calc(100vw - 24px) !important;
+  }
+
+  .nav-bell .dropdown-menu {
+   right: -65px !important;
     width: calc(100vw - 24px) !important;
   }
 
@@ -2653,12 +2663,8 @@ body[data-touch="false"] {
     }
   }
 
-  // Specific rule for .nav-more or other right-aligned nav dropdowns (by parent type)
-  // This applies if the parent dictates end-alignment for its direct menu child.
   .nav-more.nav-dropdown,
-  // Targets the existing nav-more in the main navigation
   .nav-more.js-hoverable-dropdown {
-
     // In case .nav-more could also be a .js-hoverable-dropdown
     &:hover>.dropdown-menu {
       top: 100%; // Or adjust if it should drop up or sideways from .nav-more

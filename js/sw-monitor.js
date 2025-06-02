@@ -4,7 +4,7 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.02.2', // Should match sw.js version
+      desiredVersion: '2025.06.02.3', // Should match sw.js version
 
       // PWA Install states
       installStatus: 'unknown', // unknown, available, installed, not-supported
@@ -600,7 +600,7 @@ export default {
                 <!-- for each transaction -->
                 <div class="d-flex flex-grow-1 gap-2 mb-2">
                   <!-- user thumbnail -->
-                  <div class="d-flex">
+                  <div class="ratio ratio-1x1">
                     <img class="img-fluid" src="/img/no-user.png" alt="">
                   </div>
                   <!-- message -->
