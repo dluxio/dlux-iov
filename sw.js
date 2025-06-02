@@ -1,4 +1,4 @@
-this.version = "2025.06.02.2";
+this.version = "2025.06.02.10";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -11,6 +11,7 @@ const criticalResources = [
     `/nfts/index.html`,
     `/dex/index.html`,
     `/hub/index.html`,
+    '/qr/index.html',
 
     // SPA route target pages (critical for routing)
     `/user/index.html`,
@@ -246,7 +247,6 @@ const importantResources = [
     `/vr/vue.html`,
     `/ipfs/current.html`,
     `/ipfs/index.html`,
-    `/qr/index.html`,
   `/img/crypto/bnb.svg`,
   `/img/crypto/ethereum.svg`,
   `/img/crypto/polygon.svg`,
