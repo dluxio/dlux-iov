@@ -4,7 +4,7 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.01.25', // Should match sw.js version
+      desiredVersion: '2025.06.02.1', // Should match sw.js version
 
       // PWA Install states
       installStatus: 'unknown', // unknown, available, installed, not-supported
@@ -247,11 +247,9 @@ export default {
       // Add event listeners
       const installBtn = this.bannerElement.querySelector('.install-btn');
       const notNowBtn = this.bannerElement.querySelector('.not-now-btn');
-      const closeBtn = this.bannerElement.querySelector('.close-btn');
 
       installBtn.addEventListener('click', () => this.installPWA());
       notNowBtn.addEventListener('click', () => this.dismissInstallPrompt());
-      closeBtn.addEventListener('click', () => this.dismissInstallPrompt());
     },
 
     showBanner() {
@@ -592,6 +590,7 @@ export default {
                   <i class="fa-solid fa-download fa-fw me-1" v-else-if="installStatus === 'available'"></i>
                   <span>App</span>
                   <span class="d-none" v-if="showUpdateNotification || installStatus === 'available'">!</span> 
+                </div>
               </button>
                </div>
           </nav>
