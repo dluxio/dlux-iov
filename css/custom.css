@@ -14595,8 +14595,7 @@ html {
     width: 90%;
   }
   .nav-item .dropdown-menu {
-    left: calc(50% - 4.5px) !important;
-    transform: translateX(-50%);
+    left: -74px !important;
     width: calc(100vw - 24px) !important;
   }
   .nav-more .dropdown-menu {
