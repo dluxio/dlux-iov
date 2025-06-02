@@ -4,7 +4,6 @@
 @import "../bootswatch/quartz/_bootswatch.scss";
 
 @mixin activate-dropdown-on-hover-basic {
-
   // Applied to the .dropdown or .dropdown-center element
   &:hover>.dropdown-menu {
     // Using direct child selector for clarity

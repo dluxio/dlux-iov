@@ -25,7 +25,10 @@ export default {
       },
       
       // Error states
-      errors: []
+      errors: [],
+      
+      // Banner DOM element
+      bannerElement: null
     };
   },
   
@@ -102,8 +105,174 @@ export default {
       
       // Set up periodic checks
       this.setupPeriodicChecks();
+      
+      // Add CSS for banner positioning
+      this.addBannerStyles();
     },
     
+    addBannerStyles() {
+      // Check if styles already exist
+      if (document.getElementById('sw-banner-styles')) return;
+      
+      const style = document.createElement('style');
+      style.id = 'sw-banner-styles';
+      style.textContent = `
+        :root {
+          --pwa-banner-height: 65px;
+          --pwa-banner-height-mobile: 65px;
+          --navbar-default-top: 8px;
+        }
+        
+        .pwa-install-banner {
+          position: fixed;
+          display: flex;
+          align-items: center;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 9999;
+          background: #0d6efd;
+          color: white;
+          border: none;
+          border-radius: 0;
+          margin: 0;
+          padding: 0.75rem 1rem;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+          animation: slideDownBanner 0.3s ease-out;
+          height: var(--pwa-banner-height);
+        }
+        
+        @keyframes slideDownBanner {
+          from {
+            transform: translateY(-100%);
+          }
+          to {
+            transform: translateY(0);
+          }
+        }
+        
+        .pwa-install-banner .btn-light {
+          background: rgba(255,255,255,0.9);
+          border: none;
+          color: #0d6efd;
+          font-weight: 600;
+        }
+        
+        .pwa-install-banner .btn-outline-light {
+          border-color: rgba(255,255,255,0.5);
+          color: white;
+        }
+        
+        .pwa-install-banner .btn-outline-light:hover {
+          background: rgba(255,255,255,0.1);
+          border-color: white;
+        }
+        
+        /* Clean single approach: adjust navbar top position and app padding */
+        body.pwa-banner-active .navbar-floating {
+          top: calc(var(--navbar-default-top) + var(--pwa-banner-height)) !important;
+          transition: top 0.3s ease-out;
+        }
+        
+        body.pwa-banner-active #app {
+          padding-top: var(--pwa-banner-height);
+          box-sizing: border-box;
+          transition: padding-top 0.3s ease-out;
+        }
+        
+        body.pwa-banner-active #app.vh-100,
+        body.pwa-banner-active #app .vh-100 {
+          height: calc(100vh - var(--pwa-banner-height));
+        }
+        
+        /* Mobile adjustments - single media query */
+        @media (max-width: 768px) {
+          .pwa-install-banner {
+            height: var(--pwa-banner-height-mobile);
+          }
+          
+          body.pwa-banner-active .navbar-floating {
+            top: calc(var(--navbar-default-top) + var(--pwa-banner-height-mobile)) !important;
+          }
+          
+          body.pwa-banner-active #app {
+            padding-top: var(--pwa-banner-height-mobile);
+          }
+          
+          body.pwa-banner-active #app.vh-100,
+          body.pwa-banner-active #app .vh-100 {
+            height: calc(100vh - var(--pwa-banner-height-mobile));
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    },
+    
+    toggleBodyPadding(show) {
+      if (show) {
+        document.body.classList.add('pwa-banner-active');
+      } else {
+        document.body.classList.remove('pwa-banner-active');
+      }
+    },
+
+    createBannerElement() {
+      if (this.bannerElement) return;
+      
+      this.bannerElement = document.createElement('div');
+      this.bannerElement.className = 'pwa-install-banner alert alert-primary alert-dismissible m-0';
+      this.bannerElement.innerHTML = `
+          <div class="d-flex flex-grow-1 align-items-center gap-2">
+            <div class="d-flex flex-column align-items-center">
+              <i class="ms-1 fa-solid fa-mobile-screen fs-5"></i>
+            </div>
+            <div class="d-flex flex-grow-1 flex-column align-items-center">
+              <div class="w-100 fw-bold mb-0 d-flex"><span class="d-none d-sm-flex me-1">Install</span>DLUX App</div>
+              <div class="w-100 text-start small opacity-75 d-none d-sm-flex">Get faster loading and offline access</div>
+            </div>
+            <div class="d-flex flex-column align-items-center">
+              <div class="d-flex gap-2">
+                <button class="btn btn-light btn-sm install-btn">
+                  Install
+                </button>
+                <button class="btn btn-outline-light btn-sm not-now-btn">
+                  <span class="d-none d-sm-flex">Not Now</span>
+                  <i class="fa-solid fa-xmark d-sm-none"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+      `;
+      
+      // Add event listeners
+      const installBtn = this.bannerElement.querySelector('.install-btn');
+      const notNowBtn = this.bannerElement.querySelector('.not-now-btn');
+      const closeBtn = this.bannerElement.querySelector('.close-btn');
+      
+      installBtn.addEventListener('click', () => this.installPWA());
+      notNowBtn.addEventListener('click', () => this.dismissInstallPrompt());
+      closeBtn.addEventListener('click', () => this.dismissInstallPrompt());
+    },
+    
+    showBanner() {
+      if (!this.bannerElement) {
+        this.createBannerElement();
+      }
+      
+      if (!document.body.contains(this.bannerElement)) {
+        document.body.insertBefore(this.bannerElement, document.body.firstChild);
+      }
+      
+      this.toggleBodyPadding(true);
+    },
+    
+    hideBanner() {
+      if (this.bannerElement && document.body.contains(this.bannerElement)) {
+        document.body.removeChild(this.bannerElement);
+      }
+      this.toggleBodyPadding(false);
+    },
+
     async setupServiceWorkerMonitoring() {
       try {
         // Get current registration
@@ -196,6 +365,7 @@ export default {
         // Show install prompt after a delay to avoid interrupting user flow
         setTimeout(() => {
           this.showInstallPrompt = true;
+          this.showBanner();
         }, 5000);
       });
       
@@ -204,6 +374,7 @@ export default {
         console.log('[SW Monitor] PWA was installed');
         this.installStatus = 'installed';
         this.showInstallPrompt = false;
+        this.hideBanner();
         this.deferredPrompt = null;
         this.showToast('App installed successfully!', 'success');
       });
@@ -297,6 +468,7 @@ export default {
         
         this.deferredPrompt = null;
         this.showInstallPrompt = false;
+        this.hideBanner();
       } catch (error) {
         console.error('[SW Monitor] Error installing PWA:', error);
         this.showToast('Install failed', 'error');
@@ -335,6 +507,7 @@ export default {
     
     dismissInstallPrompt() {
       this.showInstallPrompt = false;
+      this.hideBanner();
       this.deferredPrompt = null;
       
       // Don't show again for this session
@@ -378,6 +551,17 @@ export default {
     }
   },
   
+  watch: {
+    showInstallPrompt(newVal) {
+      // Update banner visibility when install prompt changes
+      if (newVal && this.installStatus === 'available') {
+        this.showBanner();
+      } else {
+        this.hideBanner();
+      }
+    }
+  },
+  
   mounted() {
     // Don't show install prompt if dismissed this session
     if (sessionStorage.getItem('installPromptDismissed')) {
@@ -385,6 +569,14 @@ export default {
     }
     
     this.initializeMonitor();
+  },
+  
+  beforeUnmount() {
+    // Clean up banner and body padding when component is destroyed
+    this.hideBanner();
+    if (this.bannerElement) {
+      this.bannerElement = null;
+    }
   },
   
   template: `
@@ -472,7 +664,7 @@ export default {
         </div>
       </div>
       
-      <!-- Update notification toast -->
+      <!-- Update Available toast -->
       <div v-if="showUpdateNotification" 
            class="position-fixed top-0 start-50 translate-middle-x mt-3 alert alert-info alert-dismissible fade show"
            style="z-index: 1060; max-width: 400px;" role="alert">
@@ -489,24 +681,7 @@ export default {
         </div>
         <button @click="dismissUpdateNotification" type="button" class="btn-close" aria-label="Close"></button>
       </div>
-      
-      <!-- Install prompt -->
-      <div v-if="showInstallPrompt && installStatus === 'available'" 
-           class="position-fixed bottom-0 start-50 translate-middle-x mb-3 alert alert-primary alert-dismissible fade show"
-           style="z-index: 1060; max-width: 400px;" role="alert">
-        <i class="fa-solid fa-mobile-screen me-2"></i>
-        <strong>Install DLUX App</strong><br>
-        <small>Get faster loading and offline access.</small>
-        <div class="mt-2">
-          <button @click="installPWA" class="btn btn-primary btn-sm me-2">
-            Install
-          </button>
-          <button @click="dismissInstallPrompt" class="btn btn-outline-secondary btn-sm">
-            Not Now
-          </button>
-        </div>
-        <button @click="dismissInstallPrompt" type="button" class="btn-close" aria-label="Close"></button>
-      </div>
+
     </div>
   `
-}; 
+};
