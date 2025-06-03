@@ -3793,7 +3793,7 @@ export default {
         </ul>
       </li>
       <li class="nav-bell dropdown nav-dropdown dropdown-end">
-        <a class="d-flex align-items-center justify-content-center nav-link nav-highlight" href="#" role="button" 
+        <a class="nav-link nav-highlight nav-title dropdown-toggle d-flex align-items-center justify-content-center nav-link nav-highlight" href="#" role="button" 
            data-bs-toggle="dropdown" aria-expanded="false">
           <div class="position-relative">
             <i class="fa-solid fa-bell fs-4"></i>

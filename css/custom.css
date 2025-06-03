@@ -14023,12 +14023,12 @@ html {
   max-height: calc(100vh - 170px);
   width: 484px;
   border-radius: 0.8rem;
-  right: -65px !important;
+  right: -72px !important;
 }
 
 .navbar-nav .nav-bell .dropdown-menu.show {
   left: unset !important;
-  right: -65px !important;
+  right: -72px !important;
 }
 
 .navbar-nav .nav-item .dropdown-menu {
