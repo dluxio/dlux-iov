@@ -116,7 +116,6 @@ export default {
   props: {
     op: {
       type: Object,
-      required: true,
       default: function () {
         return {}
       }
@@ -3862,6 +3861,7 @@ export default {
       <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body p-0">
+      <!-- stwidget -->
       <div id="stingChat" class=""></div>
     </div>
   </div>

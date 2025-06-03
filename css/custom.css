@@ -13885,6 +13885,11 @@ html {
   border-bottom: 0 !important;
 }
 
+.navbar-nav .nav-item .dropdown-menu {
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+
 /* .navbar-nav .nav-item:hover {
     background: black;
 }
@@ -14018,10 +14023,12 @@ html {
   max-height: calc(100vh - 170px);
   width: 484px;
   border-radius: 0.8rem;
+  right: -65px !important;
 }
 
 .navbar-nav .nav-bell .dropdown-menu.show {
   left: unset !important;
+  right: -65px !important;
 }
 
 .navbar-nav .nav-item .dropdown-menu {
