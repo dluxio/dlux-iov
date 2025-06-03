@@ -1207,7 +1207,7 @@ createApp({ // vue 3
         // Log initial state
         console.log('WebSocket created, initial readyState:', this.ws.readyState);
         console.log('WebSocket URL:', this.ws.url);
-        console.log('WebSocket protocol:', this.ws.protocol);
+        console.log('WebSocket protocol:', this.ws);
         
         // Add shorter connection timeout since the connection is failing immediately
         const connectionTimeout = setTimeout(() => {
