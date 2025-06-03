@@ -515,7 +515,9 @@ export default {
     reloadPage() {
       window.location.reload();
     },
-    
+    blogLink(url){
+        return `${location.origin}/${url}`
+    },
     // Notification helper methods
     getNotificationAvatar(notification) {
       if (notification.type === 'account_request') {
@@ -706,7 +708,7 @@ export default {
                   </div>
                   
                   <!-- Notification item -->
-                  <component :is="notification.data.url ? 'a' : 'div'" :href="notification.data.url ? notification.data.url : null" :target="notification.data.url ? '_blank' : null"  v-for="notification in $parent.notifications" :key="notification.id" 
+                  <component :is="notification.data.url ? 'a' : 'div'" :href="notification.data.url ? blogLink(notification.data.url) : null" :target="notification.data.url ? '_blank' : null"  v-for="notification in $parent.notifications" :key="notification.id" 
                        class="d-flex gap-2 mb-2 p-2 rounded text-decoration-none text-dark position-relative"
                        :class="{
                          'bg-light border-start border-warning border-3': notification.type === 'account_request' && notification.data.direction === 'received',
