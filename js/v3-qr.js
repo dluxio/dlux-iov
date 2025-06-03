@@ -1101,16 +1101,8 @@ createApp({ // vue 3
         this.addPaymentLog(`Payment channel created: ${data.payment.channelId}`, 'success');
         this.addPaymentLog(`Amount required: ${data.payment.amountFormatted}`, 'info');
         
-        // Initialize WebSocket connection for real-time monitoring
-        this.initializeWebSocket();
-        
-        // Start fallback polling as backup in case WebSocket fails immediately
-        setTimeout(() => {
-          if (this.wsConnectionStatus !== 'connected' && this.paymentChannelId) {
-            this.addPaymentLog('WebSocket not connected after 2 seconds, starting fallback polling', 'warning');
-            this.startFallbackPolling();
-          }
-        }, 2000);
+        // Start robust monitoring (polling first, then try WebSocket)
+        this.startPaymentMonitoring();
         
         console.log('Payment details set:', this.paymentDetails);
         
@@ -1165,8 +1157,8 @@ createApp({ // vue 3
         
         this.addPaymentLog('Payment channel restored successfully', 'success');
         
-        // Initialize WebSocket for continued monitoring
-        this.initializeWebSocket();
+        // Start robust monitoring (polling first, then try WebSocket)
+        this.startPaymentMonitoring();
         
         console.log('Payment channel restored:', this.paymentDetails);
         
@@ -1187,7 +1179,7 @@ createApp({ // vue 3
       this.addPaymentLog('Connecting to payment monitor...', 'info');
       
       try {
-        const wsUrl = 'wss://data.dlux.io/ws/payment-monitor'
+        const wsUrl = '/ws/payment-monitor'
         console.log('Connecting to WebSocket:', wsUrl);
         console.log('Current location:', location.href);
         console.log('Detected environment:', { 
@@ -1207,18 +1199,17 @@ createApp({ // vue 3
         // Log initial state
         console.log('WebSocket created, initial readyState:', this.ws.readyState);
         console.log('WebSocket URL:', this.ws.url);
-        console.log('WebSocket protocol:', this.ws);
         
-        // Add shorter connection timeout since the connection is failing immediately
+        // Increase connection timeout for slower networks and add progressive fallback
         const connectionTimeout = setTimeout(() => {
           if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
-            console.log('WebSocket connection timeout after 5 seconds');
-            this.addPaymentLog('Connection timeout after 5 seconds - switching to polling', 'warning');
+            console.log('WebSocket connection timeout after 10 seconds');
+            this.addPaymentLog('Connection timeout - network may be slow, using polling', 'warning');
             this.ws.close();
             // Start fallback polling immediately on timeout
             this.startFallbackPolling();
           }
-        }, 5000);
+        }, 10000); // Increased from 5 to 10 seconds
         
         this.ws.onopen = () => {
           clearTimeout(connectionTimeout);
@@ -1241,14 +1232,16 @@ createApp({ // vue 3
               } catch (sendError) {
                 console.error('Failed to send subscription:', sendError);
                 this.addPaymentLog('Failed to subscribe to channel', 'error');
+                // Fall back to polling if subscription fails
+                this.startFallbackPolling();
               }
             }
             
             // Start ping to keep connection alive
             this.startWebSocketPing();
-          }, 100);
+          }, 250); // Increased delay for stability
         };
-        
+
         this.ws.onmessage = (event) => {
           try {
             console.log('WebSocket message received:', event.data);
@@ -1259,7 +1252,7 @@ createApp({ // vue 3
             this.addPaymentLog('Failed to parse WebSocket message', 'error');
           }
         };
-        
+
         this.ws.onclose = (event) => {
           clearTimeout(connectionTimeout);
           this.wsConnectionStatus = 'disconnected';
@@ -1276,9 +1269,10 @@ createApp({ // vue 3
             1001: 'Going Away',
             1002: 'Protocol Error', 
             1003: 'Unsupported Data',
-            1006: 'Abnormal Closure (network issue/proxy problem)',
+            1006: 'Abnormal Closure (network/proxy/origin issue)',
             1011: 'Internal Server Error',
-            1012: 'Service Restart'
+            1012: 'Service Restart',
+            1013: 'Try Again Later'
           };
           
           const closeReason = closeReasons[event.code] || `Unknown (${event.code})`;
@@ -1286,25 +1280,32 @@ createApp({ // vue 3
           
           this.stopWebSocketPing();
           
-          // Handle different close scenarios
+          // Handle different close scenarios with better logic
           if (event.code === 1000) {
             // Normal closure - don't reconnect
             this.addPaymentLog(`Connection closed normally`, 'info');
-          } else if (event.code === 1006 && this.paymentChannelId) {
-            // Abnormal closure - likely network/proxy issue
-            this.addPaymentLog(`${closeReason} - using polling instead`, 'warning');
-            // For 1006 errors, start fallback polling immediately instead of reconnecting
-            console.log('Starting fallback polling due to abnormal closure (1006)');
+          } else if (event.code === 1006) {
+            // Abnormal closure - likely network/proxy/origin issue - use polling
+            this.addPaymentLog(`${closeReason} - switching to reliable polling`, 'warning');
+            console.log('Starting fallback polling due to abnormal closure (1006) - likely network/origin issue');
             this.startFallbackPolling();
-          } else if (this.paymentChannelId) {
-            // Other errors - try to reconnect
-            this.addPaymentLog(`${closeReason} - attempting reconnect`, 'warning');
+          } else if (event.code === 1002 || event.code === 1003) {
+            // Protocol or data errors - use polling
+            this.addPaymentLog(`${closeReason} - switching to polling`, 'warning');
+            this.startFallbackPolling();
+          } else if (this.paymentChannelId && this.wsReconnectAttempts < this.wsMaxReconnectAttempts) {
+            // Other errors - try to reconnect with backoff
+            this.addPaymentLog(`${closeReason} - attempting reconnect (${this.wsReconnectAttempts + 1}/${this.wsMaxReconnectAttempts})`, 'warning');
             this.attemptWebSocketReconnect();
+          } else if (this.paymentChannelId) {
+            // Max reconnects reached
+            this.addPaymentLog(`Max reconnection attempts reached - switching to polling`, 'warning');
+            this.startFallbackPolling();
           } else {
             this.addPaymentLog(`${closeReason}`, 'info');
           }
         };
-        
+
         this.ws.onerror = (error) => {
           clearTimeout(connectionTimeout);
           console.error('WebSocket error occurred');
@@ -1324,19 +1325,24 @@ createApp({ // vue 3
           };
           
           const currentState = this.ws ? stateNames[this.ws.readyState] || this.ws.readyState : 'null';
-          this.addPaymentLog(`WebSocket error (state: ${currentState}) - falling back to polling`, 'warning');
+          this.addPaymentLog(`WebSocket error (state: ${currentState}) - using polling`, 'warning');
           
-          // If the WebSocket fails during connection, start fallback polling immediately
-          if (this.ws && this.ws.readyState === WebSocket.CLOSED && this.paymentChannelId) {
-            console.log('WebSocket failed during connection, starting fallback polling');
+          // Start fallback polling immediately on any error during connection
+          if (this.paymentChannelId) {
+            console.log('WebSocket error occurred, starting fallback polling immediately');
             this.startFallbackPolling();
           }
         };
-        
+
       } catch (error) {
         this.wsConnectionStatus = 'disconnected';
-        this.addPaymentLog(`Failed to connect: ${error.message}`, 'error');
+        this.addPaymentLog(`Failed to connect: ${error.message} - using polling`, 'warning');
         console.error('WebSocket connection failed:', error);
+        
+        // Start polling if WebSocket creation fails
+        if (this.paymentChannelId) {
+          this.startFallbackPolling();
+        }
       }
     },
     
@@ -1447,22 +1453,25 @@ createApp({ // vue 3
     
     attemptWebSocketReconnect() {
       if (this.wsReconnectAttempts >= this.wsMaxReconnectAttempts) {
-        this.addPaymentLog('Maximum reconnection attempts reached, switching to fallback polling', 'error');
+        this.addPaymentLog('Maximum reconnection attempts reached, switching to reliable polling', 'warning');
         this.startFallbackPolling();
         return;
       }
       
       this.wsReconnectAttempts++;
-      // Use longer delays for 1006 errors which might be network/proxy related
-      const baseDelay = 3000; // Start with 3 seconds
-      const delay = baseDelay * Math.pow(1.5, this.wsReconnectAttempts - 1); // More conservative backoff
+      // Use longer delays with exponential backoff for better stability
+      const baseDelay = 5000; // Start with 5 seconds
+      const delay = Math.min(baseDelay * Math.pow(2, this.wsReconnectAttempts - 1), 30000); // Cap at 30 seconds
       
-      this.addPaymentLog(`Attempting to reconnect in ${Math.round(delay/1000)}s... (${this.wsReconnectAttempts}/${this.wsMaxReconnectAttempts})`, 'warning');
+      this.addPaymentLog(`Reconnecting in ${Math.round(delay/1000)}s... (${this.wsReconnectAttempts}/${this.wsMaxReconnectAttempts})`, 'warning');
       
       setTimeout(() => {
-        if (this.paymentChannelId) { // Only reconnect if we still have a payment channel
+        if (this.paymentChannelId && this.wsReconnectAttempts < this.wsMaxReconnectAttempts) { 
           console.log(`WebSocket reconnect attempt ${this.wsReconnectAttempts}/${this.wsMaxReconnectAttempts}`);
           this.initializeWebSocket();
+        } else if (this.wsReconnectAttempts >= this.wsMaxReconnectAttempts) {
+          console.log('Max reconnect attempts reached, starting polling');
+          this.startFallbackPolling();
         } else {
           console.log('Skipping WebSocket reconnect - no payment channel');
         }
@@ -1489,7 +1498,7 @@ createApp({ // vue 3
       this.addPaymentLog('Starting payment monitoring via polling (real-time monitoring unavailable)', 'info');
       console.log('Starting fallback polling for channel:', this.paymentChannelId);
       
-      // Do an immediate poll first
+      // Do an immediate poll first to ensure we have payment details
       this.performPollCheck();
       
       this.fallbackPollingInterval = setInterval(() => {
@@ -1512,6 +1521,35 @@ createApp({ // vue 3
           const data = await response.json();
           if (data.success) {
             console.log('Poll response:', data.channel.status, data.channel.statusMessage);
+            
+            // CRITICAL: Ensure payment details are always populated for wallet functionality
+            if (!this.paymentDetails || !this.paymentDetails.address) {
+              this.paymentDetails = {
+                channelId: data.channel.channelId,
+                cryptoType: data.channel.cryptoType,
+                amountFormatted: data.channel.amountFormatted,
+                address: data.channel.address,
+                memo: data.channel.memo,
+                expiresAt: new Date(data.channel.expiresAt),
+                instructions: data.channel.instructions || []
+              };
+              
+              console.log('Payment details restored from polling:', this.paymentDetails);
+              this.addPaymentLog('Payment details restored - wallet functionality available', 'success');
+              
+              // Generate QR code if not already shown and ensure UI is ready
+              this.$nextTick(() => {
+                if (this.showPaymentQR) {
+                  this.generatePaymentQR();
+                }
+              });
+            }
+            
+            // Restore public keys if they exist and we don't have them
+            if (data.channel.publicKeys && !this.newAccount.publicKeys) {
+              this.newAccount.publicKeys = data.channel.publicKeys;
+              console.log('Public keys restored from polling');
+            }
             
             // Update payment status
             this.updatePaymentStatus({
@@ -2413,8 +2451,8 @@ createApp({ // vue 3
         
         this.addPaymentLog('Payment channel restored from URL', 'success');
         
-        // Initialize WebSocket for continued monitoring
-        this.initializeWebSocket();
+        // Start robust monitoring (polling first, then try WebSocket)
+        this.startPaymentMonitoring();
         
         return true;
         
@@ -2440,9 +2478,19 @@ createApp({ // vue 3
     },
     
     async payWithWallet() {
-      if (!this.selectedWallet || !this.paymentDetails) {
-        alert('Please select a wallet and ensure payment details are available');
+      if (!this.selectedWallet) {
+        alert('Please select a wallet');
         return;
+      }
+
+      // Ensure payment details are available before attempting payment
+      if (!this.paymentDetails || !this.paymentDetails.address) {
+        this.addPaymentLog('Payment details not available, fetching...', 'warning');
+        const detailsAvailable = await this.ensurePaymentDetailsAvailable();
+        if (!detailsAvailable) {
+          alert('Payment details not available. Please refresh the page and try again.');
+          return;
+        }
       }
       
       this.walletPaymentLoading = true;
@@ -2598,10 +2646,16 @@ createApp({ // vue 3
       }
     },
     
-    generatePaymentQR() {
-      if (!this.paymentDetails) {
-        console.error('No payment details available for QR generation');
-        return;
+    async generatePaymentQR() {
+      // Ensure payment details are available before generating QR
+      if (!this.paymentDetails || !this.paymentDetails.address) {
+        console.log('Payment details not available for QR generation, fetching...');
+        const detailsAvailable = await this.ensurePaymentDetailsAvailable();
+        if (!detailsAvailable) {
+          console.error('Cannot generate QR - payment details not available');
+          this.addPaymentLog('Cannot generate QR code - payment details not available', 'error');
+          return;
+        }
       }
       
       try {
@@ -2639,8 +2693,10 @@ createApp({ // vue 3
             qrData = address;
         }
         
-        // Clear previous QR code
-        const qrContainer = document.getElementById('paymentQrCode');
+        console.log('Generating QR for:', qrData);
+        
+        // Clear any existing QR code
+        const qrContainer = this.$refs.paymentQR;
         if (qrContainer) {
           qrContainer.innerHTML = '';
           
@@ -2654,13 +2710,100 @@ createApp({ // vue 3
             correctLevel: QRCode.CorrectLevel.M
           });
           
-          this.addPaymentLog(`Payment QR code generated for ${cryptoType}`, 'info');
-          console.log('Payment QR data:', qrData);
+          console.log('QR code generated successfully');
+        } else {
+          console.error('QR container not found');
         }
         
       } catch (error) {
-        console.error('Failed to generate payment QR code:', error);
+        console.error('Error generating QR code:', error);
         this.addPaymentLog(`QR generation failed: ${error.message}`, 'error');
+      }
+    },
+
+    // Ensure payment details are available for wallet functionality
+    async ensurePaymentDetailsAvailable() {
+      if (this.paymentDetails && this.paymentDetails.address) {
+        return true; // Already have details
+      }
+
+      if (!this.paymentChannelId) {
+        console.log('Cannot ensure payment details - no channel ID');
+        return false;
+      }
+
+      try {
+        this.addPaymentLog('Fetching payment details for wallet functionality...', 'info');
+        const apiUrl = `https://data.dlux.io/api/onboarding/payment/status/${this.paymentChannelId}`;
+        
+        const response = await fetch(apiUrl);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            this.paymentDetails = {
+              channelId: data.channel.channelId,
+              cryptoType: data.channel.cryptoType,
+              amountFormatted: data.channel.amountFormatted,
+              address: data.channel.address,
+              memo: data.channel.memo,
+              expiresAt: new Date(data.channel.expiresAt),
+              instructions: data.channel.instructions || []
+            };
+            
+            // Also restore other state if needed
+            if (data.channel.publicKeys && !this.newAccount.publicKeys) {
+              this.newAccount.publicKeys = data.channel.publicKeys;
+            }
+            
+            console.log('Payment details ensured:', this.paymentDetails);
+            this.addPaymentLog('Payment details retrieved - wallet functionality ready', 'success');
+            return true;
+          }
+        }
+        
+        console.error('Failed to fetch payment details');
+        this.addPaymentLog('Failed to retrieve payment details', 'error');
+        return false;
+        
+      } catch (error) {
+        console.error('Error ensuring payment details:', error);
+        this.addPaymentLog(`Error retrieving payment details: ${error.message}`, 'error');
+        return false;
+      }
+    },
+
+    // Robust monitoring startup that prioritizes reliability
+    startPaymentMonitoring() {
+      if (!this.paymentChannelId) {
+        console.log('Cannot start payment monitoring - no channel ID');
+        return;
+      }
+
+      console.log('Starting payment monitoring for channel:', this.paymentChannelId);
+      this.addPaymentLog('Initializing payment monitoring...', 'info');
+
+      // Always start with polling for reliability
+      this.startFallbackPolling();
+
+      // Try WebSocket as an enhancement, but don't rely on it
+      try {
+        this.initializeWebSocket();
+        
+        // If WebSocket connects successfully, we can stop polling after a delay
+        setTimeout(() => {
+          if (this.wsConnectionStatus === 'connected' && this.fallbackPollingInterval) {
+            console.log('WebSocket connected successfully, stopping polling');
+            this.addPaymentLog('WebSocket connected - switching to real-time monitoring', 'success');
+            this.stopFallbackPolling();
+          } else {
+            console.log('WebSocket not connected, continuing with polling');
+            this.addPaymentLog('WebSocket not connected - continuing with polling', 'info');
+          }
+        }, 5000);
+        
+      } catch (error) {
+        console.error('Failed to initialize WebSocket:', error);
+        this.addPaymentLog('WebSocket initialization failed - using polling', 'warning');
       }
     },
   },
