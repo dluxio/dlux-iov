@@ -1,4 +1,4 @@
-this.version = "2025.06.03.14";
+this.version = "2025.06.03.16";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -507,6 +507,10 @@ const skippedResources = [
   `/test-pbkdf2.html`,
   `/test-server-routines/onboarding.js`,
   `/test-server-routines/websocket_monitor.js`,
+  `/css/bootstrap-grid.css`,
+  `/css/bootstrap-reboot.css`,
+  `/css/bootstrap-utilities.css`,
+  `/css/bootstrap.css`,
 ];
 
 // Cache management flags

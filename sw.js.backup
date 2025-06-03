@@ -1,4 +1,4 @@
-this.version = "2025.06.02.1";
+this.version = "2025.06.03.16";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -11,6 +11,7 @@ const criticalResources = [
     `/nfts/index.html`,
     `/dex/index.html`,
     `/hub/index.html`,
+    '/qr/index.html',
 
     // SPA route target pages (critical for routing)
     `/user/index.html`,
@@ -246,7 +247,15 @@ const importantResources = [
     `/vr/vue.html`,
     `/ipfs/current.html`,
     `/ipfs/index.html`,
-    `/qr/index.html`,
+  `/img/crypto/bnb.svg`,
+  `/img/crypto/ethereum.svg`,
+  `/img/crypto/polygon.svg`,
+  `/img/crypto/solana.svg`,
+  `/img/wallets/coinbase.svg`,
+  `/img/wallets/metamask.svg`,
+  `/img/wallets/phantom.svg`,
+  `/img/wallets/trust.svg`,
+  `/img/wallets/walletconnect.svg`,
 ];
 
 // PRIORITY 3: Page-specific resource groups (cached on-demand)
@@ -495,6 +504,9 @@ const skippedResources = [
     `/honeyblocks/index.html`,
     `/naf-playground/aframe/aframe-inspector.min.js`,
     `/sw-monitor-test.html`,
+  `/test-pbkdf2.html`,
+  `/test-server-routines/onboarding.js`,
+  `/test-server-routines/websocket_monitor.js`,
 ];
 
 // Cache management flags

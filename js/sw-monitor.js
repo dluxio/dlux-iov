@@ -697,7 +697,7 @@ export default {
                     <button @click="$parent.getNotifications()" 
                             class="btn btn-sm btn-dark rounded-pill d-flex align-items-center gap-1"
                             :disabled="$parent.notificationsLoading" >
-                      <i class="fa-solid fa-refresh" :class="{'fa-spin': $parent.notificationsLoading}"></i>
+                      <i class="fa-solid fa-rotate" :class="{'fa-spin': $parent.notificationsLoading}"></i>
                       <span class="d-none d-sm-inline">Refresh</span>
                     </button>
                     <button @click="$parent.markAllNotificationsRead()" 
@@ -813,7 +813,7 @@ export default {
                 </div>
               </div>
             </div>
-            <div class="tab-pane fade" id="nav-app" role="tabpanel" aria-labelledby="nav-app-tab" tabindex="0">
+            <div class="tab-pane fade px-3 pt-1" id="nav-app" role="tabpanel" aria-labelledby="nav-app-tab" tabindex="0">
               <!-- Service Worker Status -->
               <div class="mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -838,14 +838,14 @@ export default {
                 <!-- Update Actions -->
                 <div v-if="swStatus === 'update-available'" class="mt-2">
                   <button @click="updateServiceWorker" class="btn btn-primary btn-sm w-100">
-                    <i class="fa-solid fa-download me-1"></i>
+                    <i class="fa-solid fa-rotate-right me-1"></i>
                     Update Cache
                   </button>
                 </div>
                 
                 <div v-if="swStatus === 'updated'" class="mt-2">
                   <button @click="reloadPage" class="btn btn-success btn-sm w-100">
-                    <i class="fa-solid fa-refresh me-1"></i>
+                    <i class="fa-solid fa-rotate me-1"></i>
                     Reload to Apply
                   </button>
                 </div>
