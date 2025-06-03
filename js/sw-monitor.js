@@ -516,7 +516,7 @@ export default {
       window.location.reload();
     },
     blogLink(url){
-        return `${location.origin}/${url}`
+        return `${location.origin}/blog/${url}`
     },
     // Notification helper methods
     getNotificationAvatar(notification) {
