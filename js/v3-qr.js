@@ -1179,7 +1179,7 @@ createApp({ // vue 3
       this.addPaymentLog('Connecting to payment monitor...', 'info');
       
       try {
-        const wsUrl = '/ws/payment-monitor'
+        const wsUrl = `${location.protocol == 'https:' ? 'wss:' : 'ws:'}//${location.hostname}/ws/payment-monitor`
         console.log('Connecting to WebSocket:', wsUrl);
         console.log('Current location:', location.href);
         console.log('Detected environment:', { 
