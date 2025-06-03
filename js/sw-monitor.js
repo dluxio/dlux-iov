@@ -4,7 +4,6 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.03.1', // Should match sw.js version
 
 
       // PWA Install states
@@ -761,7 +760,7 @@ export default {
                            target="_blank" 
                            class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1">
                           <i class="fa-solid fa-external-link-alt"></i>
-                          <span class="d-none d-sm-inline">View on PeakD</span>
+                          <span class="d-none d-sm-inline">View Post</span>
                         </a>
                       </div>
                       
