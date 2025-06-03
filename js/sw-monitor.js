@@ -685,7 +685,7 @@ export default {
                 </div>
                 
                 <!-- No notifications -->
-                <div v-else-if="$parent.notifications.length === 0" class="text-center py-3 text-muted">
+                <div v-else-if="$parent.notifications.length === 0" class="text-center py-3">
                   <i class="fa-solid fa-bell-slash"></i>
                   <div class="small">No notifications</div>
                 </div>
@@ -695,13 +695,13 @@ export default {
                   <!-- Action buttons -->
                   <div class="d-flex justify-content-between align-items-center mb-2 px-2">
                     <button @click="$parent.getNotifications()" 
-                            class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
-                            :disabled="$parent.notificationsLoading">
+                            class="btn btn-sm btn-dark rounded-pill d-flex align-items-center gap-1"
+                            :disabled="$parent.notificationsLoading" >
                       <i class="fa-solid fa-refresh" :class="{'fa-spin': $parent.notificationsLoading}"></i>
                       <span class="d-none d-sm-inline">Refresh</span>
                     </button>
                     <button @click="$parent.markAllNotificationsRead()" 
-                            class="btn btn-sm btn-outline-success d-flex align-items-center gap-1">
+                            class="btn btn-sm btn-light border-dark border-1 rounded-pill d-flex align-items-center gap-1">
                       <i class="fa-solid fa-check-double"></i>
                       <span class="d-none d-sm-inline">Mark All Read</span>
                     </button>
@@ -709,23 +709,26 @@ export default {
                   
                   <!-- Notification item -->
                   <component :is="notification.data.url ? 'a' : 'div'" :href="notification.data.url ? blogLink(notification.data.url) : null" :target="notification.data.url ? '_blank' : null"  v-for="notification in $parent.notifications" :key="notification.id" 
-                       class="d-flex gap-2 mb-2 p-2 rounded text-decoration-none text-dark position-relative"
+                       class="d-flex gap-2 mb-1 p-2 rounded text-decoration-none text-dark position-relative"
                        :class="{
-                         'bg-light border-start border-warning border-3': notification.type === 'account_request' && notification.data.direction === 'received',
-                         'bg-light border-start border-danger border-3': (notification.type === 'account_request' && notification.data.direction === 'sent') || notification.status === 'unread',
-                         'border-start border-info border-1': notification.priority === 'high' && notification.type !== 'account_request',
-                         'opacity-75': notification.status === 'read'
+                         'bg-light-2 border-start border-warning border-3': notification.type === 'account_request' && notification.data.direction === 'received',
+                         'bg-light-2 border-start border-danger border-3': (notification.type === 'account_request' && notification.data.direction === 'sent') || notification.status === 'unread',
+                         'bg-light-2 border-start border-info border-1': notification.priority === 'high' && notification.type !== 'account_request',
+                         'bg-light-2 opacity-75': notification.status === 'read'
                        }"
                        :style="notification.data.url ? 'cursor: pointer;' : ''"
                        @mouseenter="notification.data.url ? $event.target.classList.add('bg-primary-subtle') : null"
                        @mouseleave="notification.data.url ? $event.target.classList.remove('bg-primary-subtle') : null" >
                     
                     <!-- User thumbnail -->
-                    <div class="ratio ratio-1x1" style="width: 40px; height: 40px;">
-                      <img class="rounded-circle img-fluid" 
-                           :src="getNotificationAvatar(notification)" 
-                           :alt="getNotificationUser(notification)"
-                           @error="$event.target.src='/img/no-user.png'">
+                    <div class="d-flex">
+                      <div class="ratio ratio-1x1" style="min-width: 40px; min-height: 40px;">
+                        <img class="rounded-circle img-fluid" 
+                            :src="getNotificationAvatar(notification)" 
+                            :alt="getNotificationUser(notification)"
+                            @error="$event.target.src='/img/no-user.png'"
+                            style="width: 40px; height: 40px;">
+                      </div>
                     </div>
                     
                     <!-- Notification content -->
@@ -743,7 +746,7 @@ export default {
                         
                         <!-- Create with ACT button -->
                         <button @click="$parent.createAccountForFriend(notification.data, true)"
-                                class="btn btn-xs btn-success d-flex align-items-center gap-1"
+                                class="btn btn-xs btn-primary d-flex align-items-center gap-1"
                                 title="Use Account Creation Token (free with RCs)"
                                 style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
                           <i class="fa-solid fa-circle-dot"></i>
@@ -752,7 +755,7 @@ export default {
                         
                         <!-- Create with HIVE button -->
                         <button @click="$parent.createAccountForFriend(notification, false)"
-                                class="btn btn-xs btn-primary d-flex align-items-center gap-1"
+                                class="btn btn-xs btn-hive d-flex align-items-center gap-1"
                                 title="Create account with 3 HIVE delegation"
                                 style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
                           <i class="fa-brands fa-hive"></i>
@@ -761,7 +764,7 @@ export default {
                         
                         <!-- Ignore button -->
                         <button @click="$parent.ignoreAccountRequest(notification.data.request_id)"
-                                class="btn btn-xs btn-outline-secondary d-flex align-items-center gap-1"
+                                class="btn btn-xs btn-secondary d-flex align-items-center gap-1"
                                 title="Ignore this request"
                                 style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
                           <i class="fa-solid fa-eye-slash"></i>

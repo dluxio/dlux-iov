@@ -3804,7 +3804,7 @@ export default {
           </div>
         </a>
          <div class="hover-gap"></div>
-        <div class="dropdown-menu container dropdown-menu-end px-3 py-1" style="min-width: 320px;">
+        <div class="dropdown-menu container dropdown-menu-end px-1 py-1" style="min-width: 320px;">
           <sw-monitor @toast="handleToast" />
         </div>
       </li>
@@ -3903,7 +3903,7 @@ export default {
                 </ul>
               </div>
               <!-- login method description -->
-              <div class="small text-muted text-center mt-2">
+              <div class="small text-white-50 text-center mt-2">
                 <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension</span>
                 <span v-if="HAS">Hive Auth requires websockets and a PKSA Application</span>
                 <span v-if="HSR">Hive Signer generates a link</span>
@@ -3987,7 +3987,7 @@ export default {
                 </label>
               </div>
             </div>
-            <div class="small text-muted text-center mt-1 mb-2">
+            <div class="small text-white-50 text-center mt-1 mb-2">
               Usernames are stored locally without verification. You must posses the associated private keys to make transactions. <a class="no-decoration text-info" target="_blank"
                 href="https://signup.hive.io/">Get Account</a>
             </div>
@@ -4036,7 +4036,7 @@ export default {
         </div>
         <div class="modal-body">
           <div v-if="isCreatingPin">
-            <p class="small text-muted mb-3">
+            <p class="small text-white-50 mb-3">
               Create a secure PIN to encrypt your private keys. This PIN will be required each time you want to use dluxPEN.
             </p>
             <div class="mb-3">
@@ -4051,7 +4051,7 @@ export default {
             </div>
           </div>
           <div v-else>
-            <p class="small text-muted mb-3">
+            <p class="small text-white-50 mb-3">
               Enter your PIN to decrypt your stored private keys.
             </p>
             <div class="mb-3">
@@ -4086,7 +4086,7 @@ export default {
           <button type="button" class="btn-close" @click="closeKeyModal()" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p class="small text-muted mb-3">
+          <p class="small text-white-50 mb-3">
             {{ editingAccount ? 
                (isUpdatingKey ? 
                 'Update the private ' + keyType + ' key for @' + editingAccount + '. The new key will replace the existing one.' :
@@ -4129,9 +4129,9 @@ export default {
           <!-- Overview Mode -->
           <div v-if="penManagementMode === 'overview'">
             <div class="text-center">
-              <i class="fa-solid fa-wallet fa-3x text-muted mb-3"></i>
+              <i class="fa-solid fa-wallet fa-3x text-white-50 mb-3"></i>
               <h6>No dluxPEN wallet found</h6>
-              <p class="text-muted">Create a wallet by selecting dluxPEN as your signing method and setting up a PIN.</p>
+              <p class="text-white-50">Create a wallet by selecting dluxPEN as your signing method and setting up a PIN.</p>
             </div>
           </div>
           
@@ -4140,7 +4140,7 @@ export default {
             <div class="text-center mb-4">
               <i class="fa-solid fa-lock fa-3x text-warning mb-3"></i>
               <h6>Wallet is Encrypted</h6>
-              <p class="text-muted">Enter your PIN to decrypt and manage your stored keys.</p>
+              <p class="text-white-50">Enter your PIN to decrypt and manage your stored keys.</p>
             </div>
             <div class="mb-3">
               <label class="form-label">PIN</label>
@@ -4167,7 +4167,7 @@ export default {
                 <h6 class="mb-0">
                   <i class="fa-solid fa-unlock text-success me-2"></i>Wallet Decrypted
                 </h6>
-                <small class="text-muted">{{ Object.keys(decrypted.accounts || {}).length }} account(s) stored</small>
+                <small class="text-white-50">{{ Object.keys(decrypted.accounts || {}).length }} account(s) stored</small>
               </div>
                              <div>
                  <button type="button" class="btn btn-outline-warning btn-sm me-2" @click="openChangePinModal()">
@@ -4187,7 +4187,7 @@ export default {
             </div>
             
             <!-- Accounts List -->
-            <div v-if="getAllAccountsInWallet().length === 0" class="text-center text-muted py-4">
+            <div v-if="getAllAccountsInWallet().length === 0" class="text-center text-white-50 py-4">
               <i class="fa-solid fa-folder-open fa-2x mb-2"></i>
               <p>No accounts in wallet</p>
             </div>
@@ -4242,10 +4242,10 @@ export default {
                         @dblclick="copyKeyToClipboard(decrypted.accounts[account][keyType])"
                         style="cursor: pointer;"
                         :title="'Double-click to copy ' + keyType + ' key'">
-                      <small class="text-muted">Double-click to copy to clipboard</small>
+                      <small class="text-white-50">Double-click to copy to clipboard</small>
                     </div>
                     <div v-else class="mt-2">
-                      <div class="form-control bg-darker border-secondary text-muted small text-center py-2">
+                      <div class="form-control bg-darker border-secondary text-white-50 small text-center py-2">
                         <i class="fa-solid fa-plus me-1"></i>Click + to add {{ keyType }} key
                       </div>
                     </div>
@@ -4292,14 +4292,14 @@ export default {
               <input class="form-check-input" type="radio" v-model="exportFormat" value="text" id="formatText">
               <label class="form-check-label" for="formatText">
                 <i class="fa-solid fa-file-text me-2"></i>Text File
-                <small class="text-muted d-block">Download as .txt file</small>
+                <small class="text-white-50 d-block">Download as .txt file</small>
               </label>
             </div>
             <div class="form-check">
               <input class="form-check-input" type="radio" v-model="exportFormat" value="qr" id="formatQR">
               <label class="form-check-label" for="formatQR">
                 <i class="fa-solid fa-qrcode me-2"></i>QR Code
-                <small class="text-muted d-block">Generate QR code for mobile import</small>
+                <small class="text-white-50 d-block">Generate QR code for mobile import</small>
               </label>
             </div>
           </div>
@@ -4344,7 +4344,7 @@ export default {
           <button type="button" class="btn-close" @click="closeChangePinModal()" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p class="small text-muted mb-3">
+          <p class="small text-white-50 mb-3">
             Change your wallet PIN. You'll need to enter your current PIN first.
           </p>
           <div class="mb-3">
@@ -4391,7 +4391,7 @@ export default {
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label small text-muted">Signing Account</label>
+                <label class="form-label small text-white-50">Signing Account</label>
                 <div class="d-flex align-items-center">
                   <img :src="'https://images.hive.blog/u/' + confirmAccount + '/avatar'" 
                        class="rounded-circle me-2" width="32" height="32">
@@ -4401,7 +4401,7 @@ export default {
             </div>
             <div class="col-md-6">
               <div class="mb-3">
-                <label class="form-label small text-muted">Key Type</label>
+                <label class="form-label small text-white-50">Key Type</label>
                 <div>
                   <span class="badge bg-info text-capitalize">{{ confirmKeyType }}</span>
                 </div>
@@ -4410,7 +4410,7 @@ export default {
           </div>
           
           <div class="mb-3">
-            <label class="form-label small text-muted">Operations</label>
+            <label class="form-label small text-white-50">Operations</label>
             <div class="card bg-dark border-secondary">
               <div class="card-body p-3">
                 <div v-for="(operation, index) in confirmOperations" :key="index" class="mb-2 last:mb-0">
@@ -4418,7 +4418,7 @@ export default {
                     <span class="badge bg-primary me-2 mt-1">{{ index + 1 }}</span>
                     <div class="flex-grow-1">
                       <div class="fw-bold text-info">{{ getReadableOperationType(operation[0]) }}</div>
-                      <div class="small text-muted">{{ formatOperationDetails(operation) }}</div>
+                      <div class="small text-white-50">{{ formatOperationDetails(operation) }}</div>
                     </div>
                   </div>
                   <hr v-if="index < confirmOperations.length - 1" class="my-2">
