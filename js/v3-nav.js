@@ -18,6 +18,7 @@ export default {
         },
       },
       notifications: [],
+      accountRequests: [],
       notificationsLoading: false,
       notificationsError: null,
       notificationsCount: 0,
@@ -143,13 +144,13 @@ export default {
             if (existingModal) {
               existingModal.dispose();
             }
-            
+
             const modal = new bootstrap.Modal(modalElement, {
               backdrop: 'static',
               keyboard: true
             });
             modal.show();
-            
+
             // Handle modal close events
             modalElement.addEventListener('hidden.bs.modal', () => {
               this.showPinModal = false;
@@ -157,7 +158,7 @@ export default {
               this.newPin = "";
               this.confirmPin = "";
               this.pinLoading = false;
-              
+
               // Force cleanup of backdrops
               setTimeout(() => {
                 const backdrops = document.querySelectorAll('.modal-backdrop');
@@ -166,19 +167,19 @@ export default {
                 document.body.style.overflow = '';
                 document.body.style.paddingRight = '';
               }, 50);
-              
+
               // If there was a pending operation, reject it
               if (this.pendingOperation) {
                 this.pendingOperation.reject(new Error("PIN entry cancelled"));
                 this.pendingOperation = null;
               }
-              
+
               // Don't clear PIN if it was successfully set up
               if (this.isCreatingPin && !this.decrypted.pin) {
                 this.PIN = "";
               }
             }, { once: true });
-            
+
             // Focus on PIN input when modal is shown
             modalElement.addEventListener('shown.bs.modal', () => {
               const pinInput = this.$refs.pinInput;
@@ -201,27 +202,27 @@ export default {
             if (existingModal) {
               existingModal.dispose();
             }
-            
+
             const modal = new bootstrap.Modal(modalElement, {
               backdrop: 'static',
               keyboard: true
             });
-            
+
             // Set higher z-index to appear above management modal
             modalElement.style.zIndex = '2060';
-            
+
             modal.show();
-            
+
             // Handle modal close events
             modalElement.addEventListener('hidden.bs.modal', () => {
               this.showKeyModal = false;
               this.privateKey = "";
               this.keyError = "";
               this.keyLoading = false;
-              
+
               // Reset z-index
               modalElement.style.zIndex = '';
-              
+
               // Force cleanup of backdrops, but be careful not to remove the management modal backdrop
               setTimeout(() => {
                 const backdrops = document.querySelectorAll('.modal-backdrop');
@@ -237,7 +238,7 @@ export default {
                 }
               }, 50);
             }, { once: true });
-            
+
             // Focus on key input when modal is shown
             modalElement.addEventListener('shown.bs.modal', () => {
               // Set backdrop z-index to be just below the modal
@@ -245,7 +246,7 @@ export default {
               if (backdrops.length > 0) {
                 backdrops[backdrops.length - 1].style.zIndex = '2059';
               }
-              
+
               const keyInput = this.$refs.keyInput;
               if (keyInput) {
                 keyInput.focus();
@@ -266,20 +267,20 @@ export default {
             if (existingModal) {
               existingModal.dispose();
             }
-            
+
             const modal = new bootstrap.Modal(modalElement, {
               backdrop: 'static',
               keyboard: true
             });
             modal.show();
-            
+
             // Handle modal close events
             modalElement.addEventListener('hidden.bs.modal', () => {
               this.showPenModal = false;
               this.penDecryptPassword = "";
               this.penDecryptError = "";
               this.penManagementMode = 'overview';
-              
+
               // Force cleanup of backdrops
               setTimeout(() => {
                 const backdrops = document.querySelectorAll('.modal-backdrop');
@@ -304,20 +305,20 @@ export default {
             if (existingModal) {
               existingModal.dispose();
             }
-            
+
             const modal = new bootstrap.Modal(modalElement, {
               backdrop: 'static',
               keyboard: true
             });
             modal.show();
-            
+
             // Handle modal close events
             modalElement.addEventListener('hidden.bs.modal', () => {
               this.showExportModal = false;
               this.exportAccount = '';
               this.exportKeys = [];
               this.exportFormat = 'text';
-              
+
               // Force cleanup of backdrops
               setTimeout(() => {
                 const backdrops = document.querySelectorAll('.modal-backdrop');
@@ -342,13 +343,13 @@ export default {
             if (existingModal) {
               existingModal.dispose();
             }
-            
+
             const modal = new bootstrap.Modal(modalElement, {
               backdrop: 'static',
               keyboard: true
             });
             modal.show();
-            
+
             // Handle modal close events
             modalElement.addEventListener('hidden.bs.modal', () => {
               this.showChangePinModal = false;
@@ -357,7 +358,7 @@ export default {
               this.confirmPinChange = '';
               this.changePinError = '';
               this.changePinLoading = false;
-              
+
               // Force cleanup of backdrops
               setTimeout(() => {
                 const backdrops = document.querySelectorAll('.modal-backdrop');
@@ -382,13 +383,13 @@ export default {
             if (existingModal) {
               existingModal.dispose();
             }
-            
+
             const modal = new bootstrap.Modal(modalElement, {
               backdrop: 'static',
               keyboard: true
             });
             modal.show();
-            
+
             // Handle modal close events
             modalElement.addEventListener('hidden.bs.modal', () => {
               this.showConfirmModal = false;
@@ -397,7 +398,7 @@ export default {
               this.confirmOperations = [];
               this.confirmKeyType = '';
               this.confirmDontAsk = false;
-              
+
               // Force cleanup of backdrops
               setTimeout(() => {
                 const backdrops = document.querySelectorAll('.modal-backdrop');
@@ -406,7 +407,7 @@ export default {
                 document.body.style.overflow = '';
                 document.body.style.paddingRight = '';
               }, 50);
-              
+
               // Reject pending transaction if modal was closed without confirmation
               if (this.pendingConfirmReject) {
                 this.pendingConfirmReject(new Error("Transaction cancelled by user"));
@@ -455,18 +456,18 @@ export default {
     async benchmarkPBKDF2(targetDurationMs = 2000) {
       const testPassword = "benchmark-test-password";
       const testSalt = crypto.getRandomValues(new Uint8Array(32));
-      
+
       // Start with a reasonable baseline
       let iterations = 100000;
       let duration = 0;
-      
+
       // Binary search approach to find optimal iteration count
       let minIterations = 50000;
       let maxIterations = 1000000;
-      
+
       while (maxIterations - minIterations > 10000) {
         const startTime = performance.now();
-        
+
         const encoder = new TextEncoder();
         const keyMaterial = await crypto.subtle.importKey(
           "raw",
@@ -475,7 +476,7 @@ export default {
           false,
           ["deriveBits"]
         );
-        
+
         await crypto.subtle.deriveBits(
           {
             name: "PBKDF2",
@@ -486,9 +487,9 @@ export default {
           keyMaterial,
           256
         );
-        
+
         duration = performance.now() - startTime;
-        
+
         if (duration < targetDurationMs * 0.9) {
           minIterations = iterations;
           iterations = Math.floor((iterations + maxIterations) / 2);
@@ -499,16 +500,16 @@ export default {
           break;
         }
       }
-      
+
       console.log(`PBKDF2 benchmark: ${iterations} iterations = ${Math.round(duration)}ms`);
       return iterations;
     },
-    
+
     // Generate cryptographically secure salt
     generateSalt() {
       return crypto.getRandomValues(new Uint8Array(32));
     },
-    
+
     // Derive key using PBKDF2
     async deriveKey(password, salt, iterations) {
       const encoder = new TextEncoder();
@@ -519,7 +520,7 @@ export default {
         false,
         ["deriveBits"]
       );
-      
+
       const derivedBits = await crypto.subtle.deriveBits(
         {
           name: "PBKDF2",
@@ -530,17 +531,17 @@ export default {
         keyMaterial,
         256
       );
-      
+
       return new Uint8Array(derivedBits);
     },
-    
+
     // Convert Uint8Array to hex string
     uint8ArrayToHex(uint8Array) {
       return Array.from(uint8Array)
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
     },
-    
+
     // Convert hex string to Uint8Array
     hexToUint8Array(hexString) {
       const bytes = new Uint8Array(hexString.length / 2);
@@ -549,33 +550,33 @@ export default {
       }
       return bytes;
     },
-    
+
     // Hardened encryption using PBKDF2 + AES
     async encryptWithPBKDF2(data, password) {
       try {
         // Generate salt using CryptoJS for better compatibility
         const salt = CryptoJS.lib.WordArray.random(32); // 32 bytes
-        
+
         // Use a reasonable default iteration count for now (can be adjusted later)
         const iterations = 100000; // Still secure but much faster than 996k
-        
+
         // Convert to string first
         const dataString = JSON.stringify(data);
         console.log("Data to encrypt length:", dataString.length);
-        
+
         // Use simpler CryptoJS encryption with PBKDF2
         const key = CryptoJS.PBKDF2(password, salt, {
           keySize: 8, // 8 * 32 bits = 256 bits
           iterations: iterations
         });
-        
+
         console.log("Key generated, encrypting...");
-        
+
         // Use simple AES encryption with the derived key
         const encrypted = CryptoJS.AES.encrypt(dataString, key.toString());
-        
+
         console.log("Encryption successful");
-        
+
         // Package everything together
         const packagedData = {
           version: "3.0", // New simpler version
@@ -584,26 +585,26 @@ export default {
           encrypted: encrypted.toString(),
           timestamp: Date.now()
         };
-        
+
         return JSON.stringify(packagedData);
       } catch (error) {
         console.error("Encryption failed:", error);
         throw new Error("Failed to encrypt data: " + error.message);
       }
     },
-    
+
     // Hardened decryption using PBKDF2 + AES
     async decryptWithPBKDF2(encryptedPackage, password) {
       try {
         const packagedData = JSON.parse(encryptedPackage);
-        
+
         // Validate package format
         if (!packagedData.salt || !packagedData.iterations || !packagedData.encrypted) {
           throw new Error("Invalid encrypted package format");
         }
-        
+
         console.log("Decrypting version:", packagedData.version || "1.0");
-        
+
         // Handle different versions
         if (packagedData.version === "3.0") {
           // Use simplified CryptoJS approach for v3.0
@@ -612,41 +613,41 @@ export default {
             keySize: 8,
             iterations: packagedData.iterations
           });
-          
+
           console.log("Decryption key generated for v3.0");
-          
+
           // Decrypt using the derived key as string
           const decrypted = CryptoJS.AES.decrypt(packagedData.encrypted, key.toString());
           const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
-          
+
           if (!decryptedString) {
             throw new Error("Failed to decrypt - incorrect password or corrupted data");
           }
-          
+
           return JSON.parse(decryptedString);
         } else if (packagedData.version === "2.0") {
           // Use CryptoJS PBKDF2 directly for v2.0
           const salt = CryptoJS.enc.Hex.parse(packagedData.salt);
           const key = CryptoJS.PBKDF2(password, salt, {
-            keySize: 256/32,
+            keySize: 256 / 32,
             iterations: packagedData.iterations,
             hasher: CryptoJS.algo.SHA256
           });
-          
+
           console.log("Decryption key generated:", {
             keySize: key.sigBytes,
             saltSize: salt.sigBytes,
             iterations: packagedData.iterations
           });
-          
+
           // Decrypt using default settings
           const decrypted = CryptoJS.AES.decrypt(packagedData.encrypted, key);
           const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
-          
+
           if (!decryptedString) {
             throw new Error("Failed to decrypt - incorrect password or corrupted data");
           }
-          
+
           return JSON.parse(decryptedString);
         } else {
           // Fallback to Web Crypto API method for v1.0
@@ -654,24 +655,24 @@ export default {
           const derivedKey = await this.deriveKey(password, salt, packagedData.iterations);
           const keyHex = this.uint8ArrayToHex(derivedKey);
           const key = CryptoJS.enc.Hex.parse(keyHex);
-          
+
           // Parse IV if present (for v1.0 format)
           let decryptOptions = {
             mode: CryptoJS.mode.CBC,
             padding: CryptoJS.pad.Pkcs7
           };
-          
+
           if (packagedData.iv) {
             decryptOptions.iv = CryptoJS.enc.Hex.parse(packagedData.iv);
           }
-          
+
           const decrypted = CryptoJS.AES.decrypt(packagedData.encrypted, key, decryptOptions);
           const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
-          
+
           if (!decryptedString) {
             throw new Error("Failed to decrypt - incorrect password or corrupted data");
           }
-          
+
           return JSON.parse(decryptedString);
         }
       } catch (error) {
@@ -679,7 +680,7 @@ export default {
         throw new Error("Failed to decrypt data - check password");
       }
     },
-    
+
     async storeKey(level, key) {
       // Check if PIN is set up
       if (!this.PIN) {
@@ -687,43 +688,43 @@ export default {
         this.setupNewPin();
         throw new Error("PIN not set up");
       }
-      
+
       // Validate key format
       if (!key || !key.trim()) {
         throw new Error("Private key cannot be empty");
       }
-      
+
       const trimmedKey = key.trim();
       if (!trimmedKey.startsWith('5') || trimmedKey.length < 50) {
         throw new Error("Invalid private key format. Must start with '5' and be at least 50 characters long.");
       }
-      
+
       // Check if this is a pending account (skip verification)
-      const isPendingAccount = this.decrypted.accounts[this.user] && 
-                               this.decrypted.accounts[this.user].isPendingCreation;
-      
+      const isPendingAccount = this.decrypted.accounts[this.user] &&
+        this.decrypted.accounts[this.user].isPendingCreation;
+
       if (isPendingAccount) {
         // Skip verification for pending accounts
         console.log("Skipping key verification for pending account:", this.user);
-        
+
         // Initialize user account if not exists
         if (!this.decrypted.accounts[this.user]) {
           this.decrypted.accounts[this.user] = {};
         }
         this.decrypted.accounts[this.user][level] = trimmedKey;
-        
+
         // Use hardened encryption
         const encrypted = await this.encryptWithPBKDF2(
           this.decrypted,
           this.PIN
         );
-        
+
         localStorage.setItem("PEN", encrypted);
         sessionStorage.setItem('pen', JSON.stringify(this.decrypted));
         this.PENstatus = "Key stored successfully (pending account)";
         return;
       }
-      
+
       try {
         const response = await fetch("https://api.hive.blog", {
           method: "POST",
@@ -737,33 +738,33 @@ export default {
             id: 1
           }),
         });
-        
+
         if (!response.ok) {
           throw new Error(`API request failed: ${response.status} ${response.statusText}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.error) {
           throw new Error(`API error: ${data.error.message || data.error}`);
         }
-        
+
         const accountData = data.result && data.result[0];
-        
+
         if (!accountData) {
           throw new Error(`User @${this.user} not found on Hive blockchain`);
         }
-        
+
         // Verify the key matches the account by comparing public keys
         const expectedPublicKey = accountData[level].key_auths[0][0];
         let success = false;
-        
+
         try {
           const PrivateKey = hiveTx.PrivateKey.from(trimmedKey);
-          
+
           // Get the public key - try the most common methods
           let derivedPublicKey;
-          
+
           if (PrivateKey.publicKey && typeof PrivateKey.publicKey.toString === 'function') {
             derivedPublicKey = PrivateKey.publicKey.toString();
           } else if (PrivateKey.toPublic && typeof PrivateKey.toPublic === 'function') {
@@ -774,10 +775,10 @@ export default {
             console.log("Available methods:", Object.getOwnPropertyNames(PrivateKey));
             throw new Error("Unable to derive public key from private key - unsupported library version");
           }
-          
+
           console.log("Expected public key:", expectedPublicKey);
           console.log("Derived public key:", derivedPublicKey);
-          
+
           // Normalize both keys for comparison (remove prefixes)
           const normalizeKey = (key) => {
             if (typeof key !== 'string') return '';
@@ -785,18 +786,18 @@ export default {
             if (key.startsWith('TST')) return key.substring(3);
             return key;
           };
-          
+
           const normalizedExpected = normalizeKey(expectedPublicKey);
           const normalizedDerived = normalizeKey(derivedPublicKey);
-          
+
           console.log("Normalized expected:", normalizedExpected);
           console.log("Normalized derived:", normalizedDerived);
-          
+
           // Compare normalized keys
           success = normalizedExpected === normalizedDerived;
-          
+
           console.log("Key validation result:", success);
-          
+
         } catch (keyError) {
           console.error("Error deriving public key:", keyError);
           // For now, if we can't verify the key, let's assume it's valid if it passes basic format checks
@@ -804,20 +805,20 @@ export default {
           console.log("Skipping public key verification due to library limitations");
           success = true; // Allow the key to be stored
         }
-        
+
         if (success) {
           // Initialize user account if not exists
           if (!this.decrypted.accounts[this.user]) {
             this.decrypted.accounts[this.user] = {};
           }
           this.decrypted.accounts[this.user][level] = trimmedKey;
-          
+
           // Use hardened encryption
           const encrypted = await this.encryptWithPBKDF2(
             this.decrypted,
             this.PIN
           );
-          
+
           localStorage.setItem("PEN", encrypted);
           sessionStorage.setItem('pen', JSON.stringify(this.decrypted));
           this.PENstatus = "Key stored successfully";
@@ -826,7 +827,7 @@ export default {
         }
       } catch (error) {
         console.error("Failed to store key:", error);
-        
+
         // Handle specific error types
         if (error.message.includes("invalid private key") || error.message.includes("Invalid private key")) {
           throw new Error("Invalid private key format or key does not match account");
@@ -841,23 +842,23 @@ export default {
         }
       }
     },
-    
+
     // Method to store new accounts from onboarding
     async storeNewAccount(accountData) {
       try {
         console.log('Storing new account in dluxPEN:', accountData);
-        
+
         // Ensure PIN is set up
         if (!this.PIN) {
           this.setupNewPin();
           throw new Error("PIN not set up");
         }
-        
+
         // Initialize accounts structure if needed
         if (!this.decrypted.accounts) {
           this.decrypted.accounts = {};
         }
-        
+
         // Store the new account data
         this.decrypted.accounts[accountData.username] = {
           posting: accountData.keys.posting || '',
@@ -870,24 +871,24 @@ export default {
           publicKeys: accountData.publicKeys || {},
           recoveryMethod: accountData.recoveryMethod || null
         };
-        
+
         // Encrypt and save
         const encrypted = await this.encryptWithPBKDF2(this.decrypted, this.PIN);
         localStorage.setItem("PEN", encrypted);
         sessionStorage.setItem('pen', JSON.stringify(this.decrypted));
-        
+
         this.PENstatus = `New account @${accountData.username} stored successfully`;
-        
+
         console.log('New account stored successfully in dluxPEN');
         return true;
-        
+
       } catch (error) {
         console.error("Failed to store new account:", error);
         this.PENstatus = "Failed to store new account: " + error.message;
         throw error;
       }
     },
-    
+
     async decryptPEN(user = this.user) {
       try {
         const PEN = localStorage.getItem("PEN");
@@ -895,7 +896,7 @@ export default {
           console.log("No PEN data found");
           return;
         }
-        
+
         // Try new hardened decryption first
         try {
           const decrypted = await this.decryptWithPBKDF2(PEN, this.PIN);
@@ -906,7 +907,7 @@ export default {
         } catch (pbkdf2Error) {
           console.log("PBKDF2 decryption failed, trying legacy method:", pbkdf2Error.message);
         }
-        
+
         // Fallback to legacy decryption for backward compatibility
         try {
           const decrypted = CryptoJS.AES.decrypt(PEN, this.PIN);
@@ -915,7 +916,7 @@ export default {
             this.decrypted = JSON.parse(decryptedString);
             sessionStorage.setItem('pen', decryptedString);
             console.log("Successfully decrypted with legacy method");
-            
+
             // Upgrade to new encryption format
             console.log("Upgrading to PBKDF2 encryption...");
             const upgraded = await this.encryptWithPBKDF2(this.decrypted, this.PIN);
@@ -961,7 +962,7 @@ export default {
       this.HSR = false;
       this.PEN = true;
       localStorage.setItem("signer", "PEN");
-      
+
       // Initialize basic decrypted structure if not exists
       if (!this.decrypted) {
         this.decrypted = {
@@ -969,14 +970,14 @@ export default {
           accounts: {}
         };
       }
-      
+
       // Check for pending new account from onboarding
       const pendingAccount = localStorage.getItem('pendingNewAccount');
       if (pendingAccount) {
         try {
           const accountData = JSON.parse(pendingAccount);
           console.log('Found pending new account, storing in PEN:', accountData);
-          
+
           // If no PIN set up yet, trigger PIN setup
           if (!this.PIN && !localStorage.getItem("PEN")) {
             this.setupNewPin();
@@ -992,11 +993,11 @@ export default {
           localStorage.removeItem('pendingNewAccount');
         }
       }
-      
+
       // Check if there's existing PEN data
       const existingPEN = localStorage.getItem("PEN");
       const sessionPin = sessionStorage.getItem('penPin');
-      
+
       if (existingPEN && this.user) {
         if (sessionPin) {
           // We have a PIN in session, try to decrypt automatically
@@ -1020,7 +1021,7 @@ export default {
       }
       // Note: PIN setup will be triggered when user logs in if they don't have existing data
     },
-    
+
     setupNewPin() {
       this.isCreatingPin = true;
       this.pinError = "";
@@ -1028,7 +1029,7 @@ export default {
       this.confirmPin = "";
       this.showPinModal = true;
     },
-    
+
     requestPinForDecryption(pendingOp = null) {
       this.isCreatingPin = false;
       this.pinError = "";
@@ -1036,7 +1037,7 @@ export default {
       this.pendingOperation = pendingOp;
       this.showPinModal = true;
     },
-    
+
     async handlePinSubmit() {
       if (this.isCreatingPin) {
         // Creating a new PIN
@@ -1048,14 +1049,14 @@ export default {
           this.pinError = "PINs do not match";
           return;
         }
-        
+
         this.pinLoading = true;
         this.pinError = "";
-        
+
         try {
           this.PIN = this.newPin;
           this.decrypted.pin = true;
-          
+
           // Initialize accounts structure for current user
           if (!this.decrypted.accounts) {
             this.decrypted.accounts = {};
@@ -1070,17 +1071,17 @@ export default {
               noPrompt: {} // Store transaction type preferences
             };
           }
-          
+
           // Store the initial empty structure
           const encrypted = await this.encryptWithPBKDF2(this.decrypted, this.PIN);
           localStorage.setItem("PEN", encrypted);
           sessionStorage.setItem('pen', JSON.stringify(this.decrypted));
           // Store PIN in session for this session
           sessionStorage.setItem('penPin', this.PIN);
-          
+
           this.closePinModalProperly();
           this.PENstatus = "PIN created successfully. You can now store keys.";
-          
+
           // Process pending account data if available
           if (this.pendingAccountData) {
             try {
@@ -1104,17 +1105,17 @@ export default {
           this.pinError = "Please enter your PIN";
           return;
         }
-        
+
         this.pinLoading = true;
         this.pinError = "";
-        
+
         try {
           await this.decryptPEN();
           // Store PIN in session for this session
           sessionStorage.setItem('penPin', this.PIN);
           this.closePinModalProperly();
           this.PENstatus = "Successfully decrypted PEN data";
-          
+
           // If there was a pending operation, retry it
           if (this.pendingOperation) {
             console.log("Retrying pending operation after PIN entry");
@@ -1137,7 +1138,7 @@ export default {
         }
       }
     },
-    
+
     closePinModal() {
       // Hide the Bootstrap modal first
       const modalElement = document.getElementById('pinModal');
@@ -1147,26 +1148,26 @@ export default {
           modal.hide();
         }
       }
-      
+
       // Clear state (this will also be handled by the modal event listener)
       this.showPinModal = false;
       this.pinError = "";
       this.newPin = "";
       this.confirmPin = "";
       this.pinLoading = false;
-      
+
       // If there was a pending operation, reject it
       if (this.pendingOperation) {
         this.pendingOperation.reject(new Error("PIN entry cancelled"));
         this.pendingOperation = null;
       }
-      
+
       // Don't clear PIN if it was successfully set up
       if (this.isCreatingPin && !this.decrypted.pin) {
         this.PIN = "";
       }
     },
-    
+
     closePinModalProperly() {
       // Force hide the Bootstrap modal and clean up backdrop
       const modalElement = document.getElementById('pinModal');
@@ -1175,7 +1176,7 @@ export default {
         if (modal) {
           modal.hide();
         }
-        
+
         // Force cleanup of any remaining backdrops
         setTimeout(() => {
           const backdrops = document.querySelectorAll('.modal-backdrop');
@@ -1185,7 +1186,7 @@ export default {
           document.body.style.paddingRight = '';
         }, 100);
       }
-      
+
       // Clear state
       this.showPinModal = false;
       this.pinError = "";
@@ -1193,7 +1194,7 @@ export default {
       this.confirmPin = "";
       this.pinLoading = false;
     },
-    
+
     requestPrivateKey(keyType) {
       this.keyType = keyType;
       this.privateKey = "";
@@ -1201,7 +1202,7 @@ export default {
       this.keyLoading = false;
       this.showKeyModal = true;
     },
-    
+
     closeKeyModal() {
       const modalElement = document.getElementById('keyModal');
       if (modalElement) {
@@ -1209,7 +1210,7 @@ export default {
         if (modal) {
           modal.hide();
         }
-        
+
         // Force cleanup of backdrops
         setTimeout(() => {
           const backdrops = document.querySelectorAll('.modal-backdrop');
@@ -1219,45 +1220,45 @@ export default {
           document.body.style.paddingRight = '';
         }, 100);
       }
-      
+
       this.showKeyModal = false;
       this.privateKey = "";
       this.keyError = "";
       this.keyLoading = false;
-      
+
       // Clear editing state
       this.editingAccount = '';
       this.editingKeyType = '';
       this.editingKeyValue = '';
       this.isUpdatingKey = false;
     },
-    
+
     async handleKeySubmit() {
       // If we're in editing mode, use the enhanced handler
       if (this.editingAccount) {
         return await this.handleKeyEdit();
       }
-      
+
       // Original functionality for adding keys to current user
       if (!this.privateKey || !this.privateKey.trim()) {
         this.keyError = "Please enter a private key";
         return;
       }
-      
+
       this.keyLoading = true;
       this.keyError = "";
-      
+
       try {
         await this.storeKey(this.keyType, this.privateKey.trim());
         this.closeKeyModal();
         this.PENstatus = `${this.keyType} key stored successfully`;
-        
+
         // If there was a pending operation, retry it after key storage
         if (this.pendingOperation) {
           console.log("Retrying pending operation after key storage");
           const op = this.pendingOperation;
           this.pendingOperation = null;
-          
+
           // Retry the operation with a small delay
           setTimeout(() => {
             if (op.type === 'sign') {
@@ -1267,7 +1268,7 @@ export default {
             }
           }, 100);
         }
-        
+
       } catch (error) {
         console.error("Failed to store key:", error);
         this.keyError = "Failed to store key: " + error.message;
@@ -1275,7 +1276,7 @@ export default {
         this.keyLoading = false;
       }
     },
-    
+
     broadcastCJ(obj) {
       var op = [
         this.user,
@@ -1529,11 +1530,11 @@ export default {
       return new Promise(async (res, rej) => {
         if (typeof op[1] == "string") op[1] = JSON.parse(op[1]);
         console.log(op);
-        
+
         // Check if PIN is set up
         if (!this.PIN) {
           console.log("PENsignOnly: No PIN found. PIN value:", this.PIN, "Session PIN:", sessionStorage.getItem('penPin'));
-          
+
           // Check if there's encrypted PEN data that needs decryption
           const existingPEN = localStorage.getItem("PEN");
           if (existingPEN) {
@@ -1554,14 +1555,14 @@ export default {
           }
           return;
         }
-        
+
         // Check if user data structure exists
         if (!this.decrypted.accounts || !this.decrypted.accounts[this.user]) {
           this.PENstatus = "User account structure not found";
           rej(new Error("Account structure missing"));
           return;
         }
-        
+
         // Get key from decrypted storage
         var key = this.decrypted.accounts[this.user][op[2]];
         if (!key || key.trim() === "") {
@@ -1576,21 +1577,21 @@ export default {
           this.requestPrivateKey(op[2]);
           return; // Don't reject, let the retry handle it
         }
-        
+
         // Validate the key format
         if (!key.startsWith('5') || key.length < 50) {
           this.PENstatus = `Invalid ${op[2]} key format`;
           rej(new Error(`Invalid private key format for ${op[2]}`));
           return;
         }
-        
+
         try {
           const tx = new hiveTx.Transaction();
           await tx.create(op[0]); // Create transaction for the user
-          
+
           // Add the operations to the transaction
           tx.operations = op[1];
-          
+
           console.log("Transaction before signing:", tx.transaction);
           const privateKey = hiveTx.PrivateKey.from(key);
           tx.sign(privateKey);
@@ -1821,11 +1822,11 @@ export default {
       return new Promise(async (resolve, reject) => {
         if (typeof op[1] == "string") op[1] = JSON.parse(op[1]);
         console.log(op);
-        
+
         // Check if PIN is set up
         if (!this.PIN) {
           console.log("PENsign: No PIN found. PIN value:", this.PIN, "Session PIN:", sessionStorage.getItem('penPin'));
-          
+
           // Check if there's encrypted PEN data that needs decryption
           const existingPEN = localStorage.getItem("PEN");
           if (existingPEN) {
@@ -1846,14 +1847,14 @@ export default {
           }
           return;
         }
-        
+
         // Check if user data structure exists
         if (!this.decrypted.accounts || !this.decrypted.accounts[this.user]) {
           this.PENstatus = "User account structure not found";
           reject(new Error("Account structure missing"));
           return;
         }
-        
+
         // Show transaction confirmation if needed
         try {
           await this.showTransactionConfirmation(op);
@@ -1862,14 +1863,14 @@ export default {
           reject(error);
           return;
         }
-        
+
         const keyHierarchy = ['posting', 'active', 'owner'];
         // Get key from decrypted storage
         var key = this.decrypted.accounts[this.user][op[2]];
-        if(!key){
-          for(let i = keyHierarchy.indexOf(op[2]); i < keyHierarchy.length; i++){
+        if (!key) {
+          for (let i = keyHierarchy.indexOf(op[2]); i < keyHierarchy.length; i++) {
             key = this.decrypted.accounts[this.user][keyHierarchy[i]];
-            if(key){
+            if (key) {
               break;
             }
           }
@@ -1886,21 +1887,21 @@ export default {
           this.requestPrivateKey(op[2]);
           return; // Don't reject, let the retry handle it
         }
-        
+
         // Validate the key format
         if (!key.startsWith('5') || key.length < 50) {
           this.PENstatus = `Invalid ${op[2]} key format`;
           reject(new Error(`Invalid private key format for ${op[2]}`));
           return;
         }
-        
+
         try {
           const tx = new hiveTx.Transaction();
           await tx.create(op[1]); // Create transaction for the user
-          
+
           // Add the operations to the transaction
           //tx.operations = op[1];
-          
+
           console.log("Transaction before signing:", tx.transaction);
           const privateKey = hiveTx.PrivateKey.from(key);
           tx.sign(privateKey);
@@ -1927,7 +1928,7 @@ export default {
         this.ops.push(obj);
         this.cleanOps(); //also stores it in localStorage
         this.statusPinger(response.result.id, obj.api, 0);
-      } else if (response.result.status == "unkown"){
+      } else if (response.result.status == "unkown") {
         obj.status = "Hive TX Success:\nAwaiting Layer 2 confirmation...";
         obj.delay = 100000;
         obj.link = "https://hivehub.dev/tx/" + response.result.tx_id;
@@ -2036,10 +2037,313 @@ export default {
       }
       this.getNotifications()
     },
-    getNotifications() {
-      this.hiveApiCall('bridge.account_notifications', `{"account":"${this.user}","limit":100}`).then(res => {
-        console.log(res)
-      })
+
+    // Refresh notifications (can be called from outside)
+    refreshNotifications() {
+      this.getNotifications();
+    },
+    async getNotifications() {
+      if (!this.user) return;
+
+      this.notificationsLoading = true;
+      this.notificationsError = null;
+
+      try {
+        const response = await fetch(`https://data.dlux.io/api/onboarding/notifications/${this.user}/merged`);
+
+        if (response.ok) {
+          const data = await response.json();
+          this.notifications = data.notifications || [];
+          this.notificationsCount = data.summary.unreadNotifications || 0;
+
+          // Store account requests separately for easier access
+          this.accountRequests = this.notifications.filter(n => n.type === 'account_request');
+
+          console.log('Merged notifications loaded:', data.summary);
+          return;
+        }
+
+
+        // Fallback to HIVE Bridge API only (no local notifications)
+        const hiveNotifications = await this.hiveApiCall('bridge.account_notifications', JSON.stringify({
+          account: this.user,
+          limit: 50
+        }));
+
+        this.notifications = hiveNotifications.map(notification => ({
+          id: `hive_${notification.id}`,
+          type: 'hive_notification',
+          subtype: notification.type,
+          title: this.getHiveNotificationTitle(notification),
+          message: this.getHiveNotificationMessage(notification),
+          data: {
+            hive_notification: notification,
+            url: notification.url,
+            score: notification.score,
+            community: notification.community,
+            community_title: notification.community_title
+          },
+          status: 'read',
+          priority: this.getHiveNotificationPriority(notification),
+          createdAt: new Date(notification.date),
+          source: 'hive_bridge'
+        }));
+
+        this.notificationsCount = 0; // HIVE notifications are considered read
+        this.accountRequests = []; // No account requests available without auth
+
+        console.log('HIVE-only notifications loaded:', this.notifications.length);
+
+      } catch (error) {
+        console.error('Error loading notifications:', error);
+        this.notificationsError = error.message;
+        this.notifications = [];
+        this.notificationsCount = 0;
+        this.accountRequests = [];
+      } finally {
+        this.notificationsLoading = false;
+      }
+    },
+
+    // Helper methods for HIVE notifications
+    getHiveNotificationTitle(notification) {
+      const titles = {
+        vote: '👍 Vote Received',
+        mention: '@️ Mentioned',
+        follow: '👥 New Follower',
+        reblog: '🔄 Content Reblogged',
+        reply: '💬 Reply to Your Post',
+        transfer: '💰 Transfer Received',
+        delegate: '⚡ Delegation Received',
+        undelegate: '⚡ Delegation Removed',
+        power_up: '🔋 Power Up',
+        power_down: '🔋 Power Down',
+        witness_vote: '🗳️ Witness Vote',
+        proposal_vote: '📋 Proposal Vote',
+        receive_reward: '🎁 Rewards Received',
+        comment_benefactor_reward: '🎁 Benefactor Reward',
+        comment_author_reward: '✍️ Author Reward',
+        comment_curator_reward: '🔍 Curator Reward',
+        inactive: '😴 Account Inactive Warning'
+      };
+      return titles[notification.type] || '📢 HIVE Notification';
+    },
+
+    getHiveNotificationMessage(notification) {
+      const { type, msg, score } = notification;
+
+      switch (type) {
+        case 'vote':
+          return `@${notification.msg.split(' voted on')[0]} voted on your ${notification.url.includes('/comments/') ? 'comment' : 'post'}${score ? ` (+${score})` : ''}`;
+        case 'mention':
+          return `@${notification.msg.split(' mentioned you')[0]} mentioned you in a ${notification.url.includes('/comments/') ? 'comment' : 'post'}`;
+        case 'follow':
+          return `@${notification.msg.split(' ')[0]} started following you`;
+        case 'reblog':
+          return `@${notification.msg.split(' reblogged')[0]} reblogged your post`;
+        case 'reply':
+          return `@${notification.msg.split(' replied')[0]} replied to your ${notification.url.includes('/comments/') ? 'comment' : 'post'}`;
+        case 'transfer':
+          return notification.msg;
+        case 'delegate':
+          return notification.msg;
+        case 'undelegate':
+          return notification.msg;
+        case 'receive_reward':
+          return notification.msg;
+        default:
+          return notification.msg || 'HIVE blockchain activity';
+      }
+    },
+
+    getHiveNotificationPriority(notification) {
+      const highPriorityTypes = ['transfer', 'delegate', 'mention'];
+      const normalPriorityTypes = ['vote', 'follow', 'reblog', 'reply'];
+
+      if (highPriorityTypes.includes(notification.type)) {
+        return 'high';
+      } else if (normalPriorityTypes.includes(notification.type)) {
+        return 'normal';
+      } else {
+        return 'low';
+      }
+    },
+
+    // Check if we have valid HIVE authentication
+    hasValidHiveAuth() {
+      // Check for different auth methods
+      return this.HAS || this.HKC || this.PEN || this.decrypted.pin;
+    },
+
+    // Get public key for authentication
+    getPublicKey() {
+      if (this.HAS && this.HAS_.auth_key) {
+        return this.HAS_.auth_key;
+      } else if (this.HKC) {
+        // For Keychain, we need to extract the public key
+        // This is simplified - in practice you'd need the actual public key
+        return localStorage.getItem(`${this.user}_posting_key_public`);
+      } else if (this.PEN && this.decrypted.accounts[this.user]) {
+        // For PEN, extract from decrypted accounts
+        const account = this.decrypted.accounts[this.user];
+        return account.posting ? account.posting.public : null;
+      }
+      return null;
+    },
+
+    // Sign challenge for authentication
+    async signChallenge(challenge) {
+      if (this.HAS) {
+        return await this.HASsignChallenge(challenge);
+      } else if (this.HKC) {
+        return await this.HKCsignChallenge(challenge);
+      } else if (this.PEN) {
+        return await this.PENsignChallenge(challenge);
+      }
+      throw new Error('No authentication method available');
+    },
+
+    // Sign challenge using HAS
+    async HASsignChallenge(challenge) {
+      return new Promise((resolve, reject) => {
+        // Implement HAS signing logic
+        // This would use the HAS WebSocket connection
+        reject(new Error('HAS challenge signing not implemented'));
+      });
+    },
+
+    // Sign challenge using Keychain
+    async HKCsignChallenge(challenge) {
+      return new Promise((resolve, reject) => {
+        if (window.hive_keychain) {
+          window.hive_keychain.requestSignBuffer(
+            this.user,
+            challenge,
+            'Posting',
+            (result) => {
+              if (result.success) {
+                resolve(result.result);
+              } else {
+                reject(new Error(result.message || 'Keychain signing failed'));
+              }
+            }
+          );
+        } else {
+          reject(new Error('Keychain not available'));
+        }
+      });
+    },
+
+    // Sign challenge using PEN
+    async PENsignChallenge(challenge) {
+      if (!this.decrypted.accounts[this.user] || !this.decrypted.accounts[this.user].posting) {
+        throw new Error('PEN posting key not available');
+      }
+
+      try {
+        const hiveTx = await import('hive-tx');
+        const privateKey = this.decrypted.accounts[this.user].posting.private;
+        const signature = hiveTx.sign(challenge, privateKey);
+        return signature;
+      } catch (error) {
+        throw new Error('PEN signing failed: ' + error.message);
+      }
+    },
+
+    // Handle account creation request actions
+    async createAccountForFriend(requestId, useACT = true) {
+      if (!this.hasValidHiveAuth()) {
+        this.handleToast({
+          title: 'Authentication Required',
+          body: 'Please sign in to create accounts for friends',
+          type: 'error'
+        });
+        return;
+      }
+
+      try {
+        const challenge = Math.floor(Date.now() / 1000);
+        const signature = await this.signChallenge(challenge.toString());
+        const pubKey = this.getPublicKey();
+
+        const response = await fetch(`/api/onboarding/request/${requestId}/create-account`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-account': this.user,
+            'x-challenge': challenge.toString(),
+            'x-pubkey': pubKey,
+            'x-signature': signature
+          },
+          body: JSON.stringify({ useACT })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          this.handleToast({
+            title: 'Account Created!',
+            body: result.message,
+            type: 'success'
+          });
+
+          // Refresh notifications
+          await this.getNotifications();
+        } else {
+          this.handleToast({
+            title: 'Creation Failed',
+            body: result.error,
+            type: 'error'
+          });
+        }
+      } catch (error) {
+        console.error('Error creating account for friend:', error);
+        this.handleToast({
+          title: 'Error',
+          body: 'Failed to create account: ' + error.message,
+          type: 'error'
+        });
+      }
+    },
+
+    async ignoreAccountRequest(requestId) {
+      // This will use the existing dismiss notification endpoint
+      const notification = this.notifications.find(n =>
+        n.type === 'account_request' && n.data.request_id === requestId
+      );
+
+      if (notification) {
+        await this.dismissNotification(notification.id.replace('request_', 'local_'));
+      }
+    },
+
+    async dismissNotification(notificationId) {
+      if (!this.hasValidHiveAuth()) return;
+
+      try {
+        const challenge = Math.floor(Date.now() / 1000);
+        const signature = await this.signChallenge(challenge.toString());
+        const pubKey = this.getPublicKey();
+
+        const response = await fetch(`https://data.dlux.io/api/onboarding/notifications/${notificationId}/dismiss`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-account': this.user,
+            'x-challenge': challenge.toString(),
+            'x-pubkey': pubKey,
+            'x-signature': signature
+          }
+        });
+
+        if (response.ok) {
+          // Remove from local notifications
+          this.notifications = this.notifications.filter(n => n.id !== notificationId);
+          this.notificationsCount = Math.max(0, this.notificationsCount - 1);
+        }
+      } catch (error) {
+        console.error('Error dismissing notification:', error);
+      }
     },
     logout() {
       localStorage.removeItem("user");
@@ -2061,28 +2365,28 @@ export default {
         this.consentError = true;
         return;
       }
-      
-      this.consentError = false; 
+
+      this.consentError = false;
 
       this.HAS_.token = "";
       this.haspic = "/img/hiveauth.svg";
       this.haspich = 50;
-      
+
       const userToAdd = id ? id : this.userField;
       if (!userToAdd) return;
 
       this.user = userToAdd;
-      
-      if(isAddingNewUser) {
-        this.userField = ""; 
-        this.addRecentUser(this.user); 
+
+      if (isAddingNewUser) {
+        this.userField = "";
+        this.addRecentUser(this.user);
         this.consentPrivacy = false;
         this.consentTerms = false;
       }
-      
+
       localStorage.setItem("user", this.user);
       this.$emit("login", this.user);
-      
+
       // Handle PEN setup for new user - only if wallet isn't already decrypted
       if (this.PEN && this.user) {
         const existingPEN = localStorage.getItem("PEN");
@@ -2093,7 +2397,7 @@ export default {
           // No existing data, set up PIN
           this.setupNewPin();
         }
-        
+
         // If wallet is already decrypted, ensure new user has account structure
         if (this.PIN && this.decrypted.accounts) {
           if (!this.decrypted.accounts[this.user]) {
@@ -2105,7 +2409,7 @@ export default {
               master: "",
               noPrompt: {}
             };
-            
+
             // Update storage with new account structure
             this.encryptWithPBKDF2(this.decrypted, this.PIN).then(encrypted => {
               localStorage.setItem("PEN", encrypted);
@@ -2116,7 +2420,7 @@ export default {
           }
         }
       }
-      
+
       if (this.HAS) this.HASsetup();
     },
     addRecentUser(user) {
@@ -2156,10 +2460,10 @@ export default {
             [[this.userField]],
           ]),
         });
-        
+
         const data = await response.json();
         const accountData = data.result[0];
-        
+
         if (accountData && accountData.active.key_auths[0][0]) {
           this.userPinFeedback = "Valid User";
           this.pinSetup = {
@@ -2169,7 +2473,7 @@ export default {
             memoPub: accountData.memo_key,
             ownerPub: accountData.owner.key_auths[0],
           }
-          
+
           // Initialize account structure for this user
           if (!this.decrypted.accounts[this.userField]) {
             this.decrypted.accounts[this.userField] = {
@@ -2248,7 +2552,7 @@ export default {
       // Handle toast messages from SW monitor
       const toastType = toastData.type || 'info';
       const toastMessage = toastData.message || 'Service Worker notification';
-      
+
       // Create a toast object that matches the existing toast system
       const toast = {
         time: new Date().getTime(),
@@ -2258,10 +2562,10 @@ export default {
         msg: toastMessage,
         ops: [] // Empty ops array for compatibility
       };
-      
+
       // Add to ops array to display via existing toast system
       this.ops.push(toast);
-      
+
       // Auto-remove after delay
       setTimeout(() => {
         const index = this.ops.indexOf(toast);
@@ -2282,13 +2586,13 @@ export default {
       }
       this.showPenModal = true;
     },
-    
+
     async handlePenDecrypt() {
       if (!this.penDecryptPassword) {
         this.penDecryptError = "Please enter your PIN";
         return;
       }
-      
+
       try {
         this.PIN = this.penDecryptPassword;
         await this.decryptPEN();
@@ -2302,13 +2606,13 @@ export default {
         console.error("Failed to decrypt PEN:", error);
       }
     },
-    
+
     toggleShowKey(account, keyType) {
       const keyId = `${account}-${keyType}`;
       this.showPenKeys[keyId] = !this.showPenKeys[keyId];
       this.$forceUpdate(); // Force Vue to re-render
     },
-    
+
     async copyKeyToClipboard(key) {
       try {
         await navigator.clipboard.writeText(key);
@@ -2339,21 +2643,21 @@ export default {
         document.body.removeChild(textArea);
       }
     },
-    
+
     async deleteKey(account, keyType) {
       if (!confirm(`Are you sure you want to delete the ${keyType} key for @${account}?`)) {
         return;
       }
-      
+
       try {
         if (this.decrypted.accounts[account]) {
           this.decrypted.accounts[account][keyType] = '';
-          
+
           // Re-encrypt and save
           const encrypted = await this.encryptWithPBKDF2(this.decrypted, this.PIN);
           localStorage.setItem("PEN", encrypted);
           sessionStorage.setItem('pen', JSON.stringify(this.decrypted));
-          
+
           this.PENstatus = `${keyType} key deleted for @${account}`;
         }
       } catch (error) {
@@ -2361,21 +2665,21 @@ export default {
         this.PENstatus = "Failed to delete key";
       }
     },
-    
+
     async deleteAccount(account) {
       if (!confirm(`Are you sure you want to delete all keys for @${account}? This cannot be undone.`)) {
         return;
       }
-      
+
       try {
         if (this.decrypted.accounts[account]) {
           delete this.decrypted.accounts[account];
-          
+
           // Re-encrypt and save
           const encrypted = await this.encryptWithPBKDF2(this.decrypted, this.PIN);
           localStorage.setItem("PEN", encrypted);
           sessionStorage.setItem('pen', JSON.stringify(this.decrypted));
-          
+
           this.PENstatus = `Account @${account} deleted`;
         }
       } catch (error) {
@@ -2383,37 +2687,37 @@ export default {
         this.PENstatus = "Failed to delete account";
       }
     },
-    
+
     deleteWallet() {
       if (!confirm("Are you sure you want to delete the entire dluxPEN wallet? This will remove all stored keys and cannot be undone.")) {
         return;
       }
-      
+
       if (!confirm("This action is PERMANENT. All private keys will be lost. Are you absolutely sure?")) {
         return;
       }
-      
+
       // Clear all PEN data
       localStorage.removeItem("PEN");
       sessionStorage.removeItem('pen');
       sessionStorage.removeItem('penPin');
-      
+
       // Reset state
       this.PIN = "";
       this.decrypted = {
         pin: false,
         accounts: {}
       };
-      
+
       this.showPenModal = false;
       this.PENstatus = "dluxPEN wallet deleted";
     },
-    
+
     openExportModal(account) {
       this.exportAccount = account;
       this.exportKeys = [];
       this.exportFormat = 'text';
-      
+
       // Pre-select all available keys for the account
       const accountData = this.decrypted.accounts[account];
       if (accountData) {
@@ -2423,10 +2727,10 @@ export default {
           }
         });
       }
-      
+
       this.showExportModal = true;
     },
-    
+
     closeExportModal() {
       const modalElement = document.getElementById('exportModal');
       if (modalElement) {
@@ -2437,37 +2741,37 @@ export default {
       }
       this.showExportModal = false;
     },
-    
+
     performExport() {
       const accountData = this.decrypted.accounts[this.exportAccount];
       if (!accountData) {
         return;
       }
-      
+
       if (this.exportFormat === 'text') {
         this.exportAsTextFile();
       } else if (this.exportFormat === 'qr') {
         this.generateQRCode();
       }
     },
-    
+
     exportAsTextFile() {
       try {
         const accountData = this.decrypted.accounts[this.exportAccount];
         let content = `# dluxPEN Export for @${this.exportAccount}\n`;
         content += `# Generated on ${new Date().toISOString()}\n`;
         content += `# WARNING: Keep this file secure and delete after use\n\n`;
-        
+
         this.exportKeys.forEach(keyType => {
           if (accountData[keyType] && accountData[keyType].trim() !== '') {
             content += `${keyType.toUpperCase()}_KEY=${accountData[keyType]}\n`;
           }
         });
-        
+
         if (content.split('\n').length <= 4) {
           throw new Error('No keys selected for export');
         }
-        
+
         // Create and download file
         const blob = new Blob([content], { type: 'text/plain' });
         const url = window.URL.createObjectURL(blob);
@@ -2478,7 +2782,7 @@ export default {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        
+
         // Show success feedback
         const toast = {
           time: new Date().getTime(),
@@ -2495,29 +2799,29 @@ export default {
             this.ops.splice(index, 1);
           }
         }, toast.delay);
-        
+
         this.closeExportModal();
       } catch (error) {
         console.error('Export failed:', error);
         alert('Export failed: ' + error.message);
       }
     },
-    
+
     generateQRCode() {
       try {
         const accountData = this.decrypted.accounts[this.exportAccount];
         const exportData = {};
-        
+
         this.exportKeys.forEach(keyType => {
           if (accountData[keyType] && accountData[keyType].trim() !== '') {
             exportData[keyType] = accountData[keyType];
           }
         });
-        
+
         if (Object.keys(exportData).length === 0) {
           throw new Error('No keys selected for export');
         }
-        
+
         // Create Hive Keychain compatible import format
         const qrData = {
           type: 'hive_keychain_import',
@@ -2527,17 +2831,17 @@ export default {
           timestamp: Date.now(),
           source: 'dluxPEN'
         };
-        
+
         const qrString = JSON.stringify(qrData);
-        
+
         // Check if data is too large for QR code
         if (qrString.length > 2000) {
           throw new Error('Too much data for QR code. Try exporting fewer keys or use text export.');
         }
-        
+
         // Create QR code URL with better error correction
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&ecc=M&data=${encodeURIComponent(qrString)}`;
-        
+
         // Open QR code in new window/tab with better styling
         const qrWindow = window.open('', '_blank', 'width=600,height=700,scrollbars=no,resizable=yes');
         qrWindow.document.write(`
@@ -2621,7 +2925,7 @@ export default {
             </body>
           </html>
         `);
-        
+
         // Show success feedback
         const toast = {
           time: new Date().getTime(),
@@ -2638,14 +2942,14 @@ export default {
             this.ops.splice(index, 1);
           }
         }, toast.delay);
-        
+
         this.closeExportModal();
       } catch (error) {
         console.error('QR generation failed:', error);
         alert('QR code generation failed: ' + error.message);
       }
     },
-    
+
     closePenModal() {
       const modalElement = document.getElementById('penModal');
       if (modalElement) {
@@ -2656,23 +2960,23 @@ export default {
       }
       this.showPenModal = false;
     },
-    
+
     getKeyTypesForAccount(account) {
       const accountData = this.decrypted.accounts[account];
       if (!accountData) return [];
-      
-      return Object.keys(accountData).filter(keyType => 
+
+      return Object.keys(accountData).filter(keyType =>
         keyType !== 'noPrompt' && // Skip the noPrompt object
         typeof accountData[keyType] === 'string' && // Only check string values
-        accountData[keyType] && 
+        accountData[keyType] &&
         accountData[keyType].trim() !== ''
       );
     },
-    
+
     hasAnyKeys(account) {
       return this.getKeyTypesForAccount(account).length > 0;
     },
-    
+
     closeWallet() {
       // Clear session data but keep encrypted wallet
       sessionStorage.removeItem('penPin');
@@ -2683,7 +2987,7 @@ export default {
         accounts: {}
       };
       this.PENstatus = "dluxPEN wallet locked";
-      
+
       // Show feedback
       const toast = {
         time: new Date().getTime(),
@@ -2701,7 +3005,7 @@ export default {
         }
       }, toast.delay);
     },
-    
+
     openChangePinModal() {
       this.currentPin = '';
       this.newPinChange = '';
@@ -2710,7 +3014,7 @@ export default {
       this.changePinLoading = false;
       this.showChangePinModal = true;
     },
-    
+
     closeChangePinModal() {
       const modalElement = document.getElementById('changePinModal');
       if (modalElement) {
@@ -2721,39 +3025,39 @@ export default {
       }
       this.showChangePinModal = false;
     },
-    
+
     async handlePinChange() {
       // Validate inputs
       if (!this.currentPin) {
         this.changePinError = "Please enter your current PIN";
         return;
       }
-      
+
       if (!this.newPinChange || this.newPinChange.length < 4) {
         this.changePinError = "New PIN must be at least 4 characters long";
         return;
       }
-      
+
       if (this.newPinChange !== this.confirmPinChange) {
         this.changePinError = "New PINs do not match";
         return;
       }
-      
+
       if (this.currentPin === this.newPinChange) {
         this.changePinError = "New PIN must be different from current PIN";
         return;
       }
-      
+
       this.changePinLoading = true;
       this.changePinError = '';
-      
+
       try {
         // First verify current PIN by trying to decrypt
         const existingPEN = localStorage.getItem("PEN");
         if (!existingPEN) {
           throw new Error("No encrypted wallet found");
         }
-        
+
         // Try to decrypt with current PIN
         let tempDecrypted;
         try {
@@ -2761,20 +3065,20 @@ export default {
         } catch (error) {
           throw new Error("Current PIN is incorrect");
         }
-        
+
         // If we get here, current PIN is correct
         // Now re-encrypt with new PIN
         const newEncrypted = await this.encryptWithPBKDF2(tempDecrypted, this.newPinChange);
-        
+
         // Save the new encrypted data
         localStorage.setItem("PEN", newEncrypted);
-        
+
         // Update current session
         this.PIN = this.newPinChange;
         sessionStorage.setItem('penPin', this.newPinChange);
         this.decrypted = tempDecrypted;
         sessionStorage.setItem('pen', JSON.stringify(tempDecrypted));
-        
+
         // Show success feedback
         const toast = {
           time: new Date().getTime(),
@@ -2791,10 +3095,10 @@ export default {
             this.ops.splice(index, 1);
           }
         }, toast.delay);
-        
+
         this.closeChangePinModal();
         this.PENstatus = "PIN changed successfully";
-        
+
       } catch (error) {
         console.error("Failed to change PIN:", error);
         this.changePinError = error.message;
@@ -2802,65 +3106,65 @@ export default {
         this.changePinLoading = false;
       }
     },
-    
+
     // Enhanced key management methods
     getAllAccountsInWallet() {
       // Get all accounts that have been added to the wallet, even if they have no keys
       return Object.keys(this.decrypted.accounts || {});
     },
-    
+
     getAllKeyTypes() {
       return ['posting', 'active', 'memo', 'owner', 'master'];
     },
-    
+
     hasKey(account, keyType) {
-      return this.decrypted.accounts[account] && 
-             this.decrypted.accounts[account][keyType] && 
-             typeof this.decrypted.accounts[account][keyType] === 'string' &&
-             this.decrypted.accounts[account][keyType].trim() !== '';
+      return this.decrypted.accounts[account] &&
+        this.decrypted.accounts[account][keyType] &&
+        typeof this.decrypted.accounts[account][keyType] === 'string' &&
+        this.decrypted.accounts[account][keyType].trim() !== '';
     },
-    
+
     editKey(account, keyType, isUpdate = false) {
       this.editingAccount = account;
       this.editingKeyType = keyType;
       this.isUpdatingKey = isUpdate;
-      
+
       if (isUpdate && this.hasKey(account, keyType)) {
         this.editingKeyValue = this.decrypted.accounts[account][keyType];
       } else {
         this.editingKeyValue = '';
       }
-      
+
       this.keyType = keyType; // Set for the existing key modal
       this.privateKey = this.editingKeyValue;
       this.keyError = '';
       this.keyLoading = false;
       this.showKeyModal = true;
     },
-    
+
     async handleKeyEdit() {
       if (!this.privateKey || !this.privateKey.trim()) {
         this.keyError = "Please enter a private key";
         return;
       }
-      
+
       this.keyLoading = true;
       this.keyError = "";
-      
+
       // Store original user outside try-catch for proper scoping
       const originalUser = this.user;
-      
+
       try {
         // Use the existing storeKey method but for the editing account
         this.user = this.editingAccount; // Temporarily change user for validation
-        
+
         await this.storeKey(this.editingKeyType, this.privateKey.trim());
-        
+
         this.user = originalUser; // Restore original user
-        
+
         this.closeKeyModal();
         this.PENstatus = `${this.editingKeyType} key ${this.isUpdatingKey ? 'updated' : 'added'} for @${this.editingAccount}`;
-        
+
       } catch (error) {
         console.error("Failed to edit key:", error);
         this.keyError = "Failed to save key: " + error.message;
@@ -2869,21 +3173,21 @@ export default {
         this.keyLoading = false;
       }
     },
-    
+
     async addNewAccountToWallet() {
       const accountName = prompt("Enter the account name to add to wallet:");
       if (!accountName || !accountName.trim()) {
         return;
       }
-      
+
       const trimmedAccount = accountName.trim().toLowerCase();
-      
+
       // Validate account name format
       if (!/^[a-z0-9.-]{3,16}$/.test(trimmedAccount)) {
         alert("Invalid account name. Must be 3-16 characters, lowercase letters, numbers, dots, and hyphens only.");
         return;
       }
-      
+
       try {
         // Check if account exists on Hive
         const response = await fetch("https://api.hive.blog", {
@@ -2898,15 +3202,15 @@ export default {
             id: 1
           }),
         });
-        
+
         const data = await response.json();
         const accountData = data.result && data.result[0];
-        
+
         if (!accountData) {
           alert(`Account @${trimmedAccount} does not exist on Hive blockchain`);
           return;
         }
-        
+
         // Add account to wallet
         if (!this.decrypted.accounts[trimmedAccount]) {
           this.decrypted.accounts[trimmedAccount] = {
@@ -2917,23 +3221,23 @@ export default {
             master: "",
             noPrompt: {}
           };
-          
+
           // Save to storage
           const encrypted = await this.encryptWithPBKDF2(this.decrypted, this.PIN);
           localStorage.setItem("PEN", encrypted);
           sessionStorage.setItem('pen', JSON.stringify(this.decrypted));
-          
+
           this.PENstatus = `Account @${trimmedAccount} added to wallet`;
         } else {
           alert(`Account @${trimmedAccount} is already in the wallet`);
         }
-        
+
       } catch (error) {
         console.error("Failed to add account:", error);
         alert("Failed to verify account. Please check your connection and try again.");
       }
     },
-    
+
     // Transaction confirmation methods
     getOperationType(op) {
       // Extract operation type from op[1] array
@@ -2945,29 +3249,29 @@ export default {
       }
       return null;
     },
-    
+
     shouldShowConfirmation(account, operationType) {
       // Check if user has set no-prompt for this operation type
       if (!this.decrypted.accounts[account] || !this.decrypted.accounts[account].noPrompt) {
         return true; // Show confirmation if no preferences set
       }
-      
+
       return !this.decrypted.accounts[account].noPrompt[operationType];
     },
-    
+
     async showTransactionConfirmation(op) {
       return new Promise((resolve, reject) => {
         const account = op[0];
         const operations = op[1];
         const keyType = op[2];
         const operationType = this.getOperationType(op);
-        
+
         // If user has set no-prompt for this operation type, skip confirmation
         if (!this.shouldShowConfirmation(account, operationType)) {
           resolve(true);
           return;
         }
-        
+
         // Set up confirmation modal data
         this.confirmAccount = account;
         this.confirmOperations = operations;
@@ -2976,12 +3280,12 @@ export default {
         this.confirmDontAsk = false;
         this.pendingConfirmResolve = resolve;
         this.pendingConfirmReject = reject;
-        
+
         // Show the modal
         this.showConfirmModal = true;
       });
     },
-    
+
     async handleTransactionConfirm() {
       try {
         // Save no-prompt preference if checked
@@ -2992,19 +3296,19 @@ export default {
               this.decrypted.accounts[this.confirmAccount].noPrompt = {};
             }
             this.decrypted.accounts[this.confirmAccount].noPrompt[operationType] = true;
-            
+
             // Save to storage
             const encrypted = await this.encryptWithPBKDF2(this.decrypted, this.PIN);
             localStorage.setItem("PEN", encrypted);
             sessionStorage.setItem('pen', JSON.stringify(this.decrypted));
           }
         }
-        
+
         // Resolve the promise to continue with transaction
         if (this.pendingConfirmResolve) {
           this.pendingConfirmResolve(true);
         }
-        
+
         this.closeConfirmModal();
       } catch (error) {
         console.error("Failed to save preferences:", error);
@@ -3015,14 +3319,14 @@ export default {
         this.closeConfirmModal();
       }
     },
-    
+
     handleTransactionCancel() {
       if (this.pendingConfirmReject) {
         this.pendingConfirmReject(new Error("Transaction cancelled by user"));
       }
       this.closeConfirmModal();
     },
-    
+
     closeConfirmModal() {
       const modalElement = document.getElementById('confirmModal');
       if (modalElement) {
@@ -3033,7 +3337,7 @@ export default {
       }
       this.showConfirmModal = false;
     },
-    
+
     getReadableOperationType(opType) {
       const typeMap = {
         'transfer': 'Transfer',
@@ -3050,47 +3354,47 @@ export default {
       };
       return typeMap[opType] || opType;
     },
-    
+
     formatOperationDetails(op) {
       if (!op || op.length < 2) return 'Unknown operation';
-      
+
       const opType = op[0];
       const opData = op[1];
-      
-      switch(opType) {
+
+      switch (opType) {
         case 'transfer':
           return `Transfer ${opData.amount} to @${opData.to}${opData.memo ? ` (${opData.memo})` : ''}`;
         case 'custom_json':
           return `Custom JSON (${opData.id})${opData.json ? ` - ${opData.json.substring(0, 50)}...` : ''}`;
         case 'vote':
-          return `${opData.weight > 0 ? 'Upvote' : 'Downvote'} @${opData.author}/${opData.permlink} (${opData.weight/100}%)`;
+          return `${opData.weight > 0 ? 'Upvote' : 'Downvote'} @${opData.author}/${opData.permlink} (${opData.weight / 100}%)`;
         case 'comment':
           return `${opData.parent_author ? 'Comment on' : 'Post:'} ${opData.title || opData.permlink}`;
         default:
           return `${this.getReadableOperationType(opType)} operation`;
       }
     },
-    
+
     getNoPromptPreferences(account) {
       if (!this.decrypted.accounts[account] || !this.decrypted.accounts[account].noPrompt) {
         return {};
       }
       return this.decrypted.accounts[account].noPrompt;
     },
-    
+
     async removeNoPromptPreference(account, operationType) {
       if (!this.decrypted.accounts[account] || !this.decrypted.accounts[account].noPrompt) {
         return;
       }
-      
+
       delete this.decrypted.accounts[account].noPrompt[operationType];
-      
+
       try {
         // Save to storage
         const encrypted = await this.encryptWithPBKDF2(this.decrypted, this.PIN);
         localStorage.setItem("PEN", encrypted);
         sessionStorage.setItem('pen', JSON.stringify(this.decrypted));
-        
+
         this.PENstatus = `Removed no-prompt preference for ${this.getReadableOperationType(operationType)}`;
       } catch (error) {
         console.error("Failed to remove preference:", error);
@@ -3100,30 +3404,30 @@ export default {
   },
   async mounted() {
     console.log('[NavVue] Component mounted. User:', this.user, 'Signer:', localStorage.getItem('signer'));
-    
+
     // Add click handler to prevent nav-bell dropdown from dismissing
     const navBellDropdown = document.querySelector('.nav-bell .dropdown-menu');
     if (navBellDropdown) {
-        navBellDropdown.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
+      navBellDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
     }
-    
+
     const signer = localStorage.getItem("signer");
     const decrypted = sessionStorage.getItem('pen')
     if (decrypted) this.decrypted = JSON.parse(decrypted)
-    
+
     // Restore PIN from session if available
     const sessionPin = sessionStorage.getItem('penPin');
     if (sessionPin && signer === "PEN") {
       this.PIN = sessionPin;
     }
-    
+
     if (signer == "HSR") this.useHS();
     else if (signer == "HAS") this.useHAS();
     else if (signer == "PEN") await this.usePEN();
     else this.useKC();
-    
+
     // Handle login modal close to also close PIN modal
     this.$nextTick(() => {
       const loginModal = document.getElementById('loginModal');
@@ -3393,9 +3697,9 @@ export default {
            data-bs-toggle="dropdown" aria-expanded="false">
           <div class="position-relative">
             <i class="fa-solid fa-bell fs-4"></i>
-            <span class="position-absolute d-flex align-items-center top-0 start-100 translate-middle badge border border-light rounded-pill bg-danger">
+            <span v-if="notificationsCount > 0" class="position-absolute d-flex align-items-center top-0 start-100 translate-middle badge border border-light rounded-pill bg-danger">
               <span class="visually-hidden">unread messages</span>
-              <span style="font-size: .5rem;">123</span>
+              <span style="font-size: .5rem;">{{notificationsCount}}</span>
             </span>
           </div>
         </a>

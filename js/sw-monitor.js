@@ -4,7 +4,7 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.02.13', // Should match sw.js version
+      desiredVersion: '2025.06.03.1', // Should match sw.js version
 
 
       // PWA Install states
@@ -371,11 +371,14 @@ export default {
         this.deferredPrompt = e;
         this.installStatus = 'available';
 
-        // Show install prompt after a delay to avoid interrupting user flow
-        setTimeout(() => {
-          this.showInstallPrompt = true;
-          this.showBanner();
-        }, 5000);
+        // Only show install prompt if user hasn't dismissed it this session
+        if (!sessionStorage.getItem('installPromptDismissed')) {
+          // Show install prompt after a delay to avoid interrupting user flow
+          setTimeout(() => {
+            this.showInstallPrompt = true;
+            this.showBanner();
+          }, 5000);
+        }
       });
 
       // Listen for app installed event
@@ -513,6 +516,58 @@ export default {
     reloadPage() {
       window.location.reload();
     },
+    
+    // Notification helper methods
+    getNotificationAvatar(notification) {
+      if (notification.type === 'account_request') {
+        const username = notification.data.direction === 'received' 
+          ? notification.data.requester_username 
+          : notification.data.requested_by;
+        return `https://images.hive.blog/u/${username}/avatar/small`;
+      } else if (notification.type === 'hive_notification' && notification.data.hive_notification) {
+        // Extract username from HIVE notification message
+        const msg = notification.data.hive_notification.msg;
+        const usernameMatch = msg.match(/@([a-z0-9\-\.]+)/);
+        if (usernameMatch) {
+          return `https://images.hive.blog/u/${usernameMatch[1]}/avatar/small`;
+        }
+      }
+      return '/img/no-user.png';
+    },
+    
+    getNotificationUser(notification) {
+      if (notification.type === 'account_request') {
+        return notification.data.direction === 'received' 
+          ? notification.data.requester_username 
+          : notification.data.requested_by;
+      } else if (notification.type === 'hive_notification' && notification.data.hive_notification) {
+        const msg = notification.data.hive_notification.msg;
+        const usernameMatch = msg.match(/@([a-z0-9\-\.]+)/);
+        return usernameMatch ? usernameMatch[1] : 'HIVE';
+      }
+      return 'System';
+    },
+    
+    formatNotificationTime(dateString) {
+      const now = new Date();
+      const date = new Date(dateString);
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+      
+      if (diffMins < 1) {
+        return 'Just now';
+      } else if (diffMins < 60) {
+        return `${diffMins}m ago`;
+      } else if (diffHours < 24) {
+        return `${diffHours}h ago`;
+      } else if (diffDays < 7) {
+        return `${diffDays}d ago`;
+      } else {
+        return date.toLocaleDateString();
+      }
+    },
 
     dismissInstallPrompt() {
       this.showInstallPrompt = false;
@@ -612,16 +667,118 @@ export default {
           <div class="tab-content" id="nav-tabContent">
             <div class="tab-pane fade show active" id="nav-activity" role="tabpanel" aria-labelledby="nav-activity-tab" tabindex="0">
               <div class="d-flex flex-column w-100">
-                <!-- for each transaction -->
-                <div class="d-flex flex-grow-1 gap-2 mb-2">
-                  <!-- user thumbnail -->
-                  <div class="ratio ratio-1x1">
-                    <img class="img-fluid" src="/img/no-user.png" alt="">
-                  </div>
-                  <!-- message -->
-                  <div class="d-flex flex-column">
-                    <div class="">The message about the notification or transaction goes here</div>
-                    <div class="small">Timestamp</div>
+                
+                <!-- Loading state -->
+                <div v-if="$parent.notificationsLoading" class="text-center py-3">
+                  <i class="fa-solid fa-spinner fa-spin"></i>
+                  <div class="small">Loading notifications...</div>
+                </div>
+                
+                <!-- Error state -->
+                <div v-else-if="$parent.notificationsError" class="text-center py-3 text-danger">
+                  <i class="fa-solid fa-exclamation-triangle"></i>
+                  <div class="small">{{ $parent.notificationsError }}</div>
+                  <button @click="$parent.getNotifications()" class="btn btn-sm btn-outline-primary mt-2">
+                    Retry
+                  </button>
+                </div>
+                
+                <!-- No notifications -->
+                <div v-else-if="$parent.notifications.length === 0" class="text-center py-3 text-muted">
+                  <i class="fa-solid fa-bell-slash"></i>
+                  <div class="small">No notifications</div>
+                </div>
+                
+                <!-- Notifications list -->
+                <div v-else>
+                  <!-- Notification item -->
+                  <div v-for="notification in $parent.notifications" :key="notification.id" 
+                       class="d-flex gap-2 mb-3 p-2 rounded"
+                       :class="{
+                         'bg-light border-start border-warning border-3': notification.type === 'account_request' && notification.data.direction === 'received',
+                         'bg-light border-start border-info border-2': notification.type === 'account_request' && notification.data.direction === 'sent',
+                         'border-start border-success border-1': notification.priority === 'high' && notification.type !== 'account_request',
+                         'opacity-75': notification.status === 'read'
+                       }">
+                    
+                    <!-- User thumbnail -->
+                    <div class="ratio ratio-1x1" style="width: 40px; height: 40px;">
+                      <img class="rounded-circle img-fluid" 
+                           :src="getNotificationAvatar(notification)" 
+                           :alt="getNotificationUser(notification)"
+                           @error="$event.target.src='/img/no-user.png'">
+                    </div>
+                    
+                    <!-- Notification content -->
+                    <div class="flex-grow-1">
+                      <div class="d-flex justify-content-between align-items-start mb-1">
+                        <div class="fw-semibold small">{{ notification.title }}</div>
+                        <div class="small text-muted">{{ formatNotificationTime(notification.createdAt) }}</div>
+                      </div>
+                      
+                      <div class="small text-muted mb-2">{{ notification.message }}</div>
+                      
+                      <!-- Account Creation Request Actions -->
+                      <div v-if="notification.type === 'account_request' && notification.data.direction === 'received'" 
+                           class="d-flex gap-2 mt-2">
+                        
+                        <!-- Create with ACT button -->
+                        <button @click="$parent.createAccountForFriend(notification.data.request_id, true)"
+                                class="btn btn-sm btn-success d-flex align-items-center gap-1"
+                                title="Use Account Creation Token (free with RCs)">
+                          <i class="fa-solid fa-circle-dot"></i>
+                          <span class="d-none d-sm-inline">Use ACT</span>
+                        </button>
+                        
+                        <!-- Create with HIVE button -->
+                        <button @click="$parent.createAccountForFriend(notification.data.request_id, false)"
+                                class="btn btn-sm btn-primary d-flex align-items-center gap-1"
+                                title="Create account with 3 HIVE delegation">
+                          <i class="fa-brands fa-hive"></i>
+                          <span class="d-none d-sm-inline">3 HIVE</span>
+                        </button>
+                        
+                        <!-- Ignore button -->
+                        <button @click="$parent.ignoreAccountRequest(notification.data.request_id)"
+                                class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
+                                title="Ignore this request">
+                          <i class="fa-solid fa-eye-slash"></i>
+                          <span class="d-none d-sm-inline">Ignore</span>
+                        </button>
+                      </div>
+                      
+                      <!-- Sent request status -->
+                      <div v-else-if="notification.type === 'account_request' && notification.data.direction === 'sent'"
+                           class="small text-info">
+                        <i class="fa-solid fa-clock"></i>
+                        Waiting for response...
+                      </div>
+                      
+                      <!-- HIVE notification link -->
+                      <div v-else-if="notification.type === 'hive_notification' && notification.data.url"
+                           class="mt-2">
+                        <a :href="notification.data.url" 
+                           target="_blank" 
+                           class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1">
+                          <i class="fa-solid fa-external-link-alt"></i>
+                          <span class="d-none d-sm-inline">View on PeakD</span>
+                        </a>
+                      </div>
+                      
+                      <!-- Priority indicator -->
+                      <div v-if="notification.priority === 'urgent'" 
+                           class="position-absolute top-0 end-0 mt-1 me-1">
+                        <span class="badge bg-danger">
+                          <i class="fa-solid fa-exclamation"></i>
+                        </span>
+                      </div>
+                      
+                      <!-- Unread indicator -->
+                      <div v-if="notification.status === 'unread'" 
+                           class="position-absolute top-50 start-0 translate-middle">
+                        <span class="badge bg-primary rounded-pill" style="width: 8px; height: 8px;"></span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
