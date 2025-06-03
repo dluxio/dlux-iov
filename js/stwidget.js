@@ -1,4 +1,4 @@
-//version 1.05
+//version 1.06
 class StWidget {
     static widgetNum = 0;
     static dhiveClient = null;
@@ -6,8 +6,10 @@ class StWidget {
         this.element = null;
         this.iframe = null;
         this.user = null;
+        this.method = 'any';
         this.properties = null;
         this.initialized = false;
+        this.enablePeakVaultPassthrough = true;
         this.enableKeychainPassthrough = true;
         this.postingKey = null;
         this.allowedOps = ["comment", "comment_options", "vote"];
@@ -20,6 +22,7 @@ class StWidget {
         this.url = url.indexOf('?')===-1?(url+'?embed='+this.widgetNum):(url+'&embed='+this.widgetNum);
         this.dhive = null;
         this.hivejs = null;
+        this.wallet = null;
     }
     createElement(width=450, height=556, overlay=true, resizable=true) {
         this.initialize();
@@ -76,9 +79,10 @@ class StWidget {
         this.postMessage([this.messageName, "setProperties", JSON.stringify(this.properties)]);
     }
     pause(value) { return this.postMessage([this.messageName, "pause", JSON.stringify(value)]); }
-    setUser(user) { 
+    setUser(user, walletType='keychain') { 
         this.user = user;
-        this.postMessage([this.messageName, "setUser", JSON.stringify(user)])
+        this.method = walletType;
+        this.postMessage([this.messageName, "setUser", JSON.stringify(user), JSON.stringify(walletType)])
         this.reload();
     }
     setPostingKey(key, dhiveOrHivejs) {
@@ -91,10 +95,38 @@ class StWidget {
             this.hivejs = dhiveOrHivejs;
         }
     }
+    /* Set enabled wallets.
+       @type 'peakvault' or 'keychain' or 'any' or 'none'/null*/
+    enabledWalletType(type) {
+        if(type == null) {
+            this.enablePeakVaultPassthrough = false;
+            this.enableKeychainPassthrough = false;
+        }
+        switch(type) {
+            case 'peakvault':
+                this.enablePeakVaultPassthrough = true;
+                this.enableKeychainPassthrough = false;
+            break;
+            case 'keychain':
+                this.enablePeakVaultPassthrough = false;
+                this.enableKeychainPassthrough = true;
+            break;
+            case 'any':
+                this.enablePeakVaultPassthrough = true;
+                this.enableKeychainPassthrough = true;
+            break;
+            default:
+                throw 'invalid value: \''+type+'\''; 
+        }
+    }
+    /** @wallet - Hive Wallet SDK wallet instance */
+    setHiveWallet(wallet) {
+        this.wallet = wallet;
+    }
     getDhiveClient() {
         if (StWidget.dhiveClient === null) {
             var dhiveClient = this.dhive.Client;
-            StWidget.dhiveClient = new dhiveClient(["https://hive-api.dlux.io", "https://hive-api.dlux.io", "https://api.openhive.network", "https://rpc.ecency.com"]);
+            StWidget.dhiveClient = new dhiveClient(["https://api.hive.blog", "https://anyx.io", "https://api.openhive.network", "https://rpc.ecency.com"]);
         }
         return StWidget.dhiveClient;
     }
@@ -154,8 +186,21 @@ class StWidget {
                         })], event.origin);
                     }
                 }
-                else if(_this.enableKeychainPassthrough) {
+                else if(_this.wallet) {
+                    _this.handleWithHiveWallet(event, msgId, name, args);
+                }
+                else if(_this.enablePeakVaultPassthrough && window.peakvault != null && 
+                    (_this.method === 'any' || _this.method === 'peakvault') ) {
+                    _this.handleWithPeakVault(event, msgId, name, args);
+                }
+                else if(_this.enableKeychainPassthrough && window.hive_keychain != null &&
+                    (_this.method === 'any' || _this.method === 'keychain')) {
                     _this.handleWithKeychain(event, msgId, name, args);
+                }
+                else {
+                    event.source.postMessage([_this.messageName, msgId, JSON.stringify({
+                            success: false, error: 'No available wallet.', result: null
+                        })], event.origin);
                 }
             break;
         }
@@ -165,6 +210,88 @@ class StWidget {
         for(var op of ops) 
             if(this.allowedOps.indexOf(op[0]) === -1) return false;
         return true;
+    }
+    handleWithHiveWallet(event, msgId, name, args) {
+        var _this = this;
+        var wallet = this.wallet;
+        var result = (r)=> {
+            event.source.postMessage([_this.messageName, msgId, JSON.stringify(r)], event.origin);
+        };
+        try {
+            var p = null;
+            switch(name) {
+                case "requestBroadcast":
+                    if(this.isAllowedOperation(args[1]) && args[2] === 'Posting') {
+                        p = wallet.broadcast(args[0], args[1], 'posting');
+                    }
+                break;
+                case "requestCustomJson":
+                    if(this.allowedCustomJson.indexOf(args[1]) !== -1 && args[2] === 'Posting') {
+                        p = wallet.customJson(args[0], args[1], 'posting', args[3], args[4]);
+                    }
+                break;
+                case "requestVerifyKey":
+                    if(args[2] === 'Posting')
+                        p = wallet.requestVerifyKey(args[0], args[1], 'posting');
+                break;
+                case "requestSignBuffer":
+                    if(args[2] === 'Posting')
+                        p = wallet.signBuffer(args[0], 'posting', args[1]);
+                break;
+                case "requestEncodeMessage":
+                    if(args[3] === 'Posting')
+                        p = wallet.encodeWithKeys(args[0], 'posting', [ args[4] ], args[2]).then((r)=>{
+                            if(r.result && Array.isArray(r.result))
+                                r.result = r.result.length>0?r.result[0]:null;
+                            return r;
+                        });
+                break;
+            }
+            if(p != null) { p.then(result).catch(result); return; }
+        }
+        catch(e) { console.log(e); }
+        result({ success: false, error: "unknown function " + name, result: null });
+    }
+    handleWithPeakVault(event, msgId, name, args) {
+        var _this = this;
+        var vault = window.peakvault;
+        var result = (r)=> {
+            event.source.postMessage([_this.messageName, msgId, JSON.stringify(r)], event.origin);
+        };
+        try {
+            var p = null;
+            switch(name) {
+                case "requestBroadcast":
+                    if(this.isAllowedOperation(args[1]) && args[2] === 'Posting') {
+                        p = vault.requestBroadcast(args[0], args[1], 'posting');
+                    }
+                break;
+                case "requestCustomJson":
+                    if(this.allowedCustomJson.indexOf(args[1]) !== -1 && args[2] === 'Posting') {
+                        p = vault.requestCustomJson(args[0], args[1], 'posting', args[3], args[4]);
+                    }
+                break;
+                case "requestVerifyKey":
+                    if(args[2] === 'Posting')
+                        p = vault.requestDecode(args[0], args[1], 'posting');
+                break;
+                case "requestSignBuffer":
+                    if(args[2] === 'Posting')
+                        p = vault.requestSignBuffer(args[0], 'posting', args[1]);
+                break;
+                case "requestEncodeMessage":
+                    if(args[3] === 'Posting')
+                        p = vault.requestEncodeWithKeys(args[0], 'posting', [ args[4] ], args[2]).then((r)=>{
+                            if(r.result && Array.isArray(r.result))
+                                r.result = r.result.length>0?r.result[0]:null;
+                            return r;
+                        });
+                break;
+            }
+            if(p != null) { p.then(result).catch(result); return; }
+        }
+        catch(e) { console.log(e); }
+        result({ success: false, error: "unknown function " + name, result: null });
     }
     handleWithKeychain(event, msgId, name, args) {
         var _this = this;
@@ -418,7 +545,14 @@ class StWidget {
                 console.log(e);
             }
         }
-        else if(this.enableKeychainPassthrough) {
+        else if(this.enablePeakVaultPassthrough && window.peakvault != null && 
+                (this.method === 'any' || this.method === 'peakvault')) {
+            window.peakvault.requestSignBuffer(user, 'posting', signableText).then((result)=>{
+                if(result.success) fnWrite(result.result);
+            });
+        } 
+        else if(this.enableKeychainPassthrough && window.hive_keychain != null && 
+                    (this.method === 'any' || this.method === 'keychain')) {
             window.hive_keychain.requestSignBuffer(user, signableText, 'Posting', (result)=>{
                 if(result.success) fnWrite(result.result);
             });
@@ -452,4 +586,4 @@ class StWidget {
     }
 }
 
-export default StWidget
+export default StWidget;
