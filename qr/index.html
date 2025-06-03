@@ -174,10 +174,24 @@
           </span>
         </div>
       </div>
-      <div v-if="!account" class="container-fluid px-3">
-        <!-- Key Recovery Option -->
-        <div class="row justify-content-center mb-4">
+      <div class="container-fluid px-3">
+        <!-- Account Creation and Key Recovery Options - Always Available -->
+        <div v-if="account || onboardingStep === 0" class="row justify-content-center mb-4">
           <div class="col-lg-8 col-xl-6">
+            <!-- Main Action - Create Account -->
+            <div class="alert alert-primary mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <i class="fa-solid fa-user-plus me-2"></i>
+                  <strong>Create a new HIVE account</strong> - Join the decentralized social media revolution
+                </div>
+                <button class="btn btn-primary btn-sm" @click="startAccountCreation">
+                  <i class="fa-solid fa-arrow-right me-1"></i>Get Started
+                </button>
+              </div>
+            </div>
+            
+            <!-- Secondary Action - Key Recovery -->
             <div class="alert alert-info">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
@@ -350,8 +364,8 @@
           </div>
         </div>
 
-        <!-- New User Onboarding System -->
-        <div v-if="!recoveryMode" class="row justify-content-center">
+        <!-- New User Onboarding System - Always Available -->
+        <div v-if="!recoveryMode && onboardingStep > 0" class="row justify-content-center">
           <div class="col-lg-8 col-xl-6">
             
             <!-- Welcome Header -->
@@ -572,7 +586,7 @@
 
                 <!-- Navigation -->
                 <div class="d-flex justify-content-between">
-                  <button class="btn btn-secondary" @click="onboardingStep = 1">
+                  <button class="btn btn-secondary" @click="goBackToUsernameStep">
                     <i class="fa-solid fa-arrow-left me-1"></i>Back
                   </button>
                   <button 
@@ -969,6 +983,42 @@
                     </div>
                   </div>
 
+                  <!-- Create Account Yourself -->
+                  <div class="card bg-darker border-secondary mb-3" v-if="account">
+                    <div class="card-header">
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" v-model="paymentMethod" value="yourself" id="payment-yourself">
+                        <label class="form-check-label fw-bold" for="payment-yourself">
+                          Create Account Yourself
+                        </label>
+                      </div>
+                    </div>
+                    <div v-if="paymentMethod === 'yourself'" class="card-body">
+                      <div class="alert alert-info">
+                        <i class="fa-solid fa-info-circle me-2"></i>
+                                                 <strong>You're logged in as @{{ account }}</strong>
+                        <div class="small mt-1">You can create this account directly using your HIVE or Account Creation Tokens</div>
+                      </div>
+                      
+                      <div class="mb-3">
+                        <h6>Account to Create</h6>
+                        <div class="bg-dark p-3 rounded border">
+                          <div class="fw-bold">@{{ newAccount.username }}</div>
+                          <div class="small text-muted">Keys generated and stored in dluxPEN</div>
+                        </div>
+                      </div>
+                      
+                      <button class="btn btn-success w-100" @click="createAccountYourself">
+                        <i class="fa-solid fa-user-plus me-2"></i>
+                        Create Account Now
+                      </button>
+                      
+                      <div class="small text-muted mt-2">
+                        This will use your Account Creation Tokens or HIVE balance to create the account immediately.
+                      </div>
+                    </div>
+                  </div>
+
                   <!-- Manual Instructions -->
                   <div class="card bg-darker border-secondary">
                     <div class="card-header">
@@ -1024,7 +1074,7 @@
 
                 <!-- Navigation -->
                 <div class="d-flex justify-content-between">
-                  <button class="btn btn-secondary" @click="onboardingStep = 2">
+                  <button class="btn btn-secondary" @click="goBackToKeyGenStep">
                     <i class="fa-solid fa-arrow-left me-1"></i>Back
                   </button>
                   <button class="btn btn-success" @click="completeOnboarding" v-if="accountCreated">
@@ -1056,17 +1106,33 @@
 
           </div>
         </div>
+        
+        <!-- Help Others Create Accounts - For Logged In Users -->
+        <div v-if="account && !recoveryMode && onboardingStep === 0" class="row justify-content-center mb-4">
+          <div class="col-lg-8 col-xl-6">
+            <div class="alert alert-success">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <i class="fa-solid fa-user-plus me-2"></i>
+                  <strong>Help someone create a HIVE account!</strong> You can use this tool to help friends join HIVE
+                </div>
+                <button class="btn btn-success btn-sm" @click="startAccountCreation">
+                  <i class="fa-solid fa-arrow-up me-1"></i>Start Creating
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="container mt-3" v-if="account">
+      <div class="container mt-3" v-if="account && onboardingStep === 0">
         <div class="d-flex justify-content-center">
           <!-- contact card qr code -->
           <a v-bind:href="'/@' + account" class="card w-100 mb-3 no-decoration">
             <div>
               <div class="card-img-top d-flex justify-content-center mt-3 w-100" ref="qrcode"></div>
               <div class="card-title text-center mt-2">
-                <div>Scan this QR code to find</div>
-                <div class="fs-5 mt-1 mb-3 text-primary">@{{account}} on HIVE</div>
+                <div>Scan this QR code to join HIVE with @{{account}}</div>
               </div>
               <!-- add to apple wallet -->
               <div class="d-none">
@@ -1097,7 +1163,7 @@
               <button class="btn btn-outline-info ms-auto" @click="claimACT">Claim ACT</button>
             </div>
             <div class="mt-2 text-end">
-              <small>Claiming ACTs requires ≈15,000 HIVE Power</small>
+              <small>Claiming ACTs requires ≈{{ claimActHpNeeded }} HIVE Power</small>
             </div>
           </div>
         </div>

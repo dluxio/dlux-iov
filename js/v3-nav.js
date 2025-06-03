@@ -847,10 +847,28 @@ export default {
       try {
         console.log('Storing new account in dluxPEN:', accountData);
 
+        // Ensure we have a valid username
+        if (!accountData.username) {
+          throw new Error("Username is required");
+        }
+
+        // Check if there's an existing encrypted wallet first
+        const existingPEN = localStorage.getItem("PEN");
+        
+        if (existingPEN && !this.PIN) {
+          // We have an encrypted wallet but no PIN - need to decrypt first
+          console.log('Found existing encrypted wallet, requesting PIN for decryption...');
+          this.pendingAccountData = accountData;
+          this.requestPinForDecryption();
+          return; // Return early, will be processed after PIN is entered
+        }
+        
         // Ensure PIN is set up
         if (!this.PIN) {
+          console.log('No PIN found, setting up new PIN...');
+          this.pendingAccountData = accountData;
           this.setupNewPin();
-          throw new Error("PIN not set up");
+          return; // Return early, will be processed after PIN is created
         }
 
         // Initialize accounts structure if needed
@@ -879,6 +897,11 @@ export default {
         this.PENstatus = `New account @${accountData.username} stored successfully`;
 
         console.log('New account stored successfully in dluxPEN');
+        
+        // Clear any pending account data
+        this.pendingAccountData = null;
+        localStorage.removeItem('pendingNewAccount');
+        
         return true;
 
       } catch (error) {
@@ -1054,13 +1077,22 @@ export default {
 
         try {
           this.PIN = this.newPin;
-          this.decrypted.pin = true;
+          
+          // Check if we already have decrypted data (from existing wallet)
+          if (!this.decrypted || !this.decrypted.accounts) {
+            this.decrypted = {
+              pin: true,
+              accounts: {}
+            };
+          } else {
+            this.decrypted.pin = true;
+          }
 
-          // Initialize accounts structure for current user
+          // Initialize accounts structure for current user only if not exists
           if (!this.decrypted.accounts) {
             this.decrypted.accounts = {};
           }
-          if (!this.decrypted.accounts[this.user]) {
+          if (this.user && !this.decrypted.accounts[this.user]) {
             this.decrypted.accounts[this.user] = {
               posting: "",
               active: "",
@@ -1071,7 +1103,7 @@ export default {
             };
           }
 
-          // Store the initial empty structure
+          // Store the structure
           const encrypted = await this.encryptWithPBKDF2(this.decrypted, this.PIN);
           localStorage.setItem("PEN", encrypted);
           sessionStorage.setItem('pen', JSON.stringify(this.decrypted));
@@ -1085,11 +1117,10 @@ export default {
           if (this.pendingAccountData) {
             try {
               await this.storeNewAccount(this.pendingAccountData);
-              localStorage.removeItem('pendingNewAccount');
-              this.pendingAccountData = null;
               this.PENstatus = "PIN created and new account stored successfully!";
             } catch (error) {
               console.error('Failed to store pending account after PIN setup:', error);
+              this.PENstatus = "PIN created but failed to store new account: " + error.message;
             }
           }
         } catch (error) {
@@ -1114,6 +1145,17 @@ export default {
           sessionStorage.setItem('penPin', this.PIN);
           this.closePinModalProperly();
           this.PENstatus = "Successfully decrypted PEN data";
+
+          // Process pending account data if available (from onboarding)
+          if (this.pendingAccountData) {
+            try {
+              await this.storeNewAccount(this.pendingAccountData);
+              this.PENstatus = "Wallet decrypted and new account stored successfully!";
+            } catch (error) {
+              console.error('Failed to store pending account after decryption:', error);
+              this.PENstatus = "Wallet decrypted but failed to store new account: " + error.message;
+            }
+          }
 
           // If there was a pending operation, retry it
           if (this.pendingOperation) {
@@ -2345,6 +2387,7 @@ export default {
             'Content-Type': 'application/json',
           }
         });
+        
         if (response.ok) {
           // Remove from local notifications
           this.notifications = this.notifications.map(n => n.status = n.id == response.id ? 'completed' : n.status);
