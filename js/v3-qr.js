@@ -1107,10 +1107,10 @@ createApp({ // vue 3
         // Start fallback polling as backup in case WebSocket fails immediately
         setTimeout(() => {
           if (this.wsConnectionStatus !== 'connected' && this.paymentChannelId) {
-            this.addPaymentLog('WebSocket not connected after 3 seconds, starting fallback polling', 'warning');
+            this.addPaymentLog('WebSocket not connected after 2 seconds, starting fallback polling', 'warning');
             this.startFallbackPolling();
           }
-        }, 3000);
+        }, 2000);
         
         console.log('Payment details set:', this.paymentDetails);
         
@@ -1190,18 +1190,35 @@ createApp({ // vue 3
         const wsUrl = 'wss://data.dlux.io/ws/payment-monitor'
         console.log('Connecting to WebSocket:', wsUrl);
         console.log('Current location:', location.href);
-        console.log('Detected environment:', { protocol: location.protocol, hostname: location.hostname });
+        console.log('Detected environment:', { 
+          protocol: location.protocol, 
+          hostname: location.hostname,
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString()
+        });
+        
+        // Test if WebSocket is supported
+        if (!window.WebSocket) {
+          throw new Error('WebSocket not supported by this browser');
+        }
         
         this.ws = new WebSocket(wsUrl);
         
-        // Add connection timeout
+        // Log initial state
+        console.log('WebSocket created, initial readyState:', this.ws.readyState);
+        console.log('WebSocket URL:', this.ws.url);
+        console.log('WebSocket protocol:', this.ws.protocol);
+        
+        // Add shorter connection timeout since the connection is failing immediately
         const connectionTimeout = setTimeout(() => {
           if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
-            console.log('WebSocket connection timeout after 10 seconds');
-            this.addPaymentLog('Connection timeout after 10 seconds', 'error');
+            console.log('WebSocket connection timeout after 5 seconds');
+            this.addPaymentLog('Connection timeout after 5 seconds - switching to polling', 'warning');
             this.ws.close();
+            // Start fallback polling immediately on timeout
+            this.startFallbackPolling();
           }
-        }, 10000);
+        }, 5000);
         
         this.ws.onopen = () => {
           clearTimeout(connectionTimeout);
@@ -1265,14 +1282,26 @@ createApp({ // vue 3
           };
           
           const closeReason = closeReasons[event.code] || `Unknown (${event.code})`;
-          this.addPaymentLog(`Disconnected: ${closeReason}`, 'warning');
           console.log(`Close reason: ${closeReason}`);
           
           this.stopWebSocketPing();
           
-          // Only attempt reconnect if not a normal closure and we still have a payment channel
-          if (event.code !== 1000 && this.paymentChannelId) {
+          // Handle different close scenarios
+          if (event.code === 1000) {
+            // Normal closure - don't reconnect
+            this.addPaymentLog(`Connection closed normally`, 'info');
+          } else if (event.code === 1006 && this.paymentChannelId) {
+            // Abnormal closure - likely network/proxy issue
+            this.addPaymentLog(`${closeReason} - using polling instead`, 'warning');
+            // For 1006 errors, start fallback polling immediately instead of reconnecting
+            console.log('Starting fallback polling due to abnormal closure (1006)');
+            this.startFallbackPolling();
+          } else if (this.paymentChannelId) {
+            // Other errors - try to reconnect
+            this.addPaymentLog(`${closeReason} - attempting reconnect`, 'warning');
             this.attemptWebSocketReconnect();
+          } else {
+            this.addPaymentLog(`${closeReason}`, 'info');
           }
         };
         
@@ -1295,7 +1324,13 @@ createApp({ // vue 3
           };
           
           const currentState = this.ws ? stateNames[this.ws.readyState] || this.ws.readyState : 'null';
-          this.addPaymentLog(`WebSocket error (state: ${currentState})`, 'error');
+          this.addPaymentLog(`WebSocket error (state: ${currentState}) - falling back to polling`, 'warning');
+          
+          // If the WebSocket fails during connection, start fallback polling immediately
+          if (this.ws && this.ws.readyState === WebSocket.CLOSED && this.paymentChannelId) {
+            console.log('WebSocket failed during connection, starting fallback polling');
+            this.startFallbackPolling();
+          }
         };
         
       } catch (error) {
@@ -1447,43 +1482,68 @@ createApp({ // vue 3
       }
       
       if (!this.paymentChannelId) {
+        console.log('Cannot start fallback polling - no payment channel ID');
         return;
       }
       
-      this.addPaymentLog('Starting fallback polling (WebSocket unavailable)', 'warning');
+      this.addPaymentLog('Starting payment monitoring via polling (real-time monitoring unavailable)', 'info');
+      console.log('Starting fallback polling for channel:', this.paymentChannelId);
       
-      this.fallbackPollingInterval = setInterval(async () => {
-        try {
-          const apiUrl = `https://data.dlux.io/api/onboarding/payment/status/${this.paymentChannelId}`;
-          
-          const response = await fetch(apiUrl);
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success) {
-              // Update payment status
-              this.updatePaymentStatus({
-                status: data.channel.status,
-                message: data.channel.statusMessage,
-                details: data.channel.statusDetails,
-                progress: data.channel.progress,
-                channel: data.channel
-              });
-              
-              // Update countdown if payment is waiting
-              if (data.channel.expiresAt) {
-                this.updateCountdown(data.channel.expiresAt);
-              }
-              
-              // Stop polling if account is completed or failed
-              if (data.channel.status === 'completed' || data.channel.status === 'failed') {
-                this.stopFallbackPolling();
-              }
-            }
-          }
-        } catch (error) {
-          console.error('Fallback polling error:', error);
-        }
+      // Do an immediate poll first
+      this.performPollCheck();
+      
+      this.fallbackPollingInterval = setInterval(() => {
+        this.performPollCheck();
       }, 5000); // Poll every 5 seconds
+    },
+    
+    async performPollCheck() {
+      if (!this.paymentChannelId) {
+        this.stopFallbackPolling();
+        return;
+      }
+      
+      try {
+        const apiUrl = `https://data.dlux.io/api/onboarding/payment/status/${this.paymentChannelId}`;
+        console.log('Polling payment status:', apiUrl);
+        
+        const response = await fetch(apiUrl);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            console.log('Poll response:', data.channel.status, data.channel.statusMessage);
+            
+            // Update payment status
+            this.updatePaymentStatus({
+              status: data.channel.status,
+              message: data.channel.statusMessage,
+              details: data.channel.statusDetails,
+              progress: data.channel.progress,
+              channel: data.channel
+            });
+            
+            // Update countdown if payment is waiting
+            if (data.channel.expiresAt) {
+              this.updateCountdown(data.channel.expiresAt);
+            }
+            
+            // Stop polling if account is completed or failed
+            if (data.channel.status === 'completed' || data.channel.status === 'failed' || data.channel.status === 'expired') {
+              console.log('Payment completed/failed, stopping polling');
+              this.stopFallbackPolling();
+            }
+          } else {
+            console.error('Poll response error:', data.error);
+            this.addPaymentLog(`Status check error: ${data.error}`, 'warning');
+          }
+        } else {
+          console.error('Poll HTTP error:', response.status, response.statusText);
+          this.addPaymentLog(`Status check failed (HTTP ${response.status})`, 'warning');
+        }
+      } catch (error) {
+        console.error('Fallback polling error:', error);
+        this.addPaymentLog(`Status check failed: ${error.message}`, 'warning');
+      }
     },
     
     stopFallbackPolling() {
