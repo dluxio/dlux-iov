@@ -4852,50 +4852,30 @@ function buyNFT(setname, uid, price, type, callback){
     sanitizeHTML(html) {
       if (!html || typeof html !== 'string') return '';
       
-      // Comprehensive sanitization to prevent XSS attacks including dialog takeovers
+      // Less restrictive sanitization for NFTs - allow rich content while preventing XSS
       return DOMPurify.sanitize(html, {
-        // Forbid dangerous tags that can execute scripts or take over layout
+        // Only forbid the most dangerous tags
         FORBID_TAGS: [
-          'script', 'style', 'object', 'embed', 'applet', 'meta', 
-          'link', 'base', 'dialog', 'iframe', 'frame', 'frameset',
-          'form', 'input', 'button', 'textarea', 'select', 'option'
+          'script', 'object', 'embed', 'applet', 'meta', 
+          'link', 'base', 'dialog', 'iframe', 'frame', 'frameset'
         ],
-        // Forbid dangerous attributes including event handlers and positioning
+        // Only forbid the most dangerous attributes - allow styling and some interactivity
         FORBID_ATTR: [
           'onload', 'onerror', 'onclick', 'onmouseover', 'onfocus', 'onblur',
           'onchange', 'onsubmit', 'onreset', 'onselect', 'onunload', 'onbeforeunload',
-          'onabort', 'onafterprint', 'onbeforeprint', 'oncanplay', 'oncanplaythrough',
-          'oncontextmenu', 'ondblclick', 'ondrag', 'ondragend', 'ondragenter',
-          'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'ondurationchange',
-          'onemptied', 'onended', 'oninput', 'oninvalid', 'onkeydown', 'onkeypress',
-          'onkeyup', 'onloadeddata', 'onloadedmetadata', 'onloadstart', 'onmousedown',
-          'onmousemove', 'onmouseout', 'onmouseup', 'onmousewheel', 'onoffline',
-          'ononline', 'onpagehide', 'onpageshow', 'onpause', 'onplay', 'onplaying',
-          'onpopstate', 'onprogress', 'onratechange', 'onresize', 'onscroll',
-          'onseeked', 'onseeking', 'onstalled', 'onstorage', 'onsuspend',
-          'ontimeupdate', 'onvolumechange', 'onwaiting', 'onwheel',
-          'style', 'srcdoc', 'sandbox', 'allowfullscreen', 'open', 'autofocus',
-          'autoplay', 'controls', 'defer', 'hidden', 'loop', 'multiple', 'muted',
-          'readonly', 'required', 'reversed', 'selected'
+          'onabort', 'onafterprint', 'onbeforeprint', 'oncontextmenu', 'ondblclick',
+          'ondrag', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 
+          'ondragstart', 'ondrop', 'oninput', 'oninvalid', 'onkeydown', 'onkeypress',
+          'onkeyup', 'onmousedown', 'onmousemove', 'onmouseout', 'onmouseup', 
+          'onmousewheel', 'onoffline', 'ononline', 'onpagehide', 'onpageshow',
+          'onpopstate', 'onresize', 'onscroll', 'onstorage', 'onwheel',
+          'srcdoc', 'sandbox', 'open'
         ],
-        // Only allow safe protocols
-        ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp|ipfs):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
-        // Keep only safe HTML elements for NFT display
-        ALLOWED_TAGS: [
-          'a', 'b', 'blockquote', 'br', 'code', 'div', 'em', 'h1', 'h2', 'h3', 
-          'h4', 'h5', 'h6', 'hr', 'i', 'img', 'li', 'ol', 'p', 'pre', 'span', 
-          'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'th', 'thead', 'tr', 
-          'u', 'ul', 'del', 'ins', 'small', 'mark', 'q', 'cite', 'abbr', 'dfn', 
-          'time', 'address', 'figure', 'figcaption', 'kbd', 'samp', 'var',
-          'canvas', 'svg', 'path', 'circle', 'rect', 'line', 'g', 'text'
-        ],
-        // Keep only safe attributes
-        ALLOWED_ATTR: [
-          'href', 'title', 'alt', 'src', 'width', 'height', 'class', 'id',
-          'target', 'rel', 'type', 'datetime', 'cite', 'start', 'reversed',
-          'data-*', 'aria-*', 'role', 'tabindex', 'd', 'viewBox', 'xmlns',
-          'fill', 'stroke', 'stroke-width', 'cx', 'cy', 'r', 'x', 'y', 'x1', 'y1', 'x2', 'y2'
-        ],
+        // Allow broader range of protocols for NFT content
+        ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp|ipfs|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+        // Allow more HTML elements for rich NFT content
+        ADD_TAGS: ['style'],
+        ADD_ATTR: ['style', 'allowfullscreen', 'controls', 'autoplay', 'loop', 'muted'],
         // Additional safety measures
         SANITIZE_DOM: true,
         KEEP_CONTENT: true,
