@@ -241,7 +241,15 @@ createApp({ // vue 3
   beforeDestroy() {
     // Clean up WebSocket connection
     if (this.ws) {
-      this.ws.close();
+      console.log('Cleaning up WebSocket connection on destroy');
+      this.ws.onopen = null;
+      this.ws.onmessage = null;
+      this.ws.onclose = null;
+      this.ws.onerror = null;
+      if (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING) {
+        this.ws.close(1000, 'Component destroyed');
+      }
+      this.ws = null;
     }
     this.stopWebSocketPing();
     this.stopCountdown();
@@ -1172,6 +1180,7 @@ createApp({ // vue 3
     initializeWebSocket() {
       if (this.ws) {
         this.ws.close();
+        this.ws = null;
       }
       
       this.wsConnectionStatus = 'connecting';
@@ -1202,26 +1211,34 @@ createApp({ // vue 3
           console.log('WebSocket connection opened successfully');
           console.log('WebSocket ready state:', this.ws.readyState);
           
-          // Subscribe to our payment channel
-          if (this.paymentChannelId) {
-            console.log('Subscribing to payment channel:', this.paymentChannelId);
-            this.ws.send(JSON.stringify({
-              type: 'subscribe',
-              channelId: this.paymentChannelId
-            }));
-            this.addPaymentLog(`Subscribed to channel: ${this.paymentChannelId}`, 'info');
-          }
-          
-          // Start ping to keep connection alive
-          this.startWebSocketPing();
+          // Wait a brief moment before subscribing to ensure connection is stable
+          setTimeout(() => {
+            if (this.ws && this.ws.readyState === WebSocket.OPEN && this.paymentChannelId) {
+              try {
+                console.log('Subscribing to payment channel:', this.paymentChannelId);
+                this.ws.send(JSON.stringify({
+                  type: 'subscribe',
+                  channelId: this.paymentChannelId
+                }));
+                this.addPaymentLog(`Subscribed to channel: ${this.paymentChannelId}`, 'info');
+              } catch (sendError) {
+                console.error('Failed to send subscription:', sendError);
+                this.addPaymentLog('Failed to subscribe to channel', 'error');
+              }
+            }
+            
+            // Start ping to keep connection alive
+            this.startWebSocketPing();
+          }, 100);
         };
         
         this.ws.onmessage = (event) => {
           try {
+            console.log('WebSocket message received:', event.data);
             const data = JSON.parse(event.data);
             this.handleWebSocketMessage(data);
           } catch (error) {
-            console.error('Failed to parse WebSocket message:', error);
+            console.error('Failed to parse WebSocket message:', error, 'Raw data:', event.data);
             this.addPaymentLog('Failed to parse WebSocket message', 'error');
           }
         };
@@ -1233,7 +1250,7 @@ createApp({ // vue 3
             code: event.code,
             reason: event.reason,
             wasClean: event.wasClean,
-            readyState: this.ws.readyState
+            readyState: this.ws ? this.ws.readyState : 'null'
           });
           
           // More detailed logging for close codes
@@ -1252,19 +1269,33 @@ createApp({ // vue 3
           console.log(`Close reason: ${closeReason}`);
           
           this.stopWebSocketPing();
-          this.attemptWebSocketReconnect();
+          
+          // Only attempt reconnect if not a normal closure and we still have a payment channel
+          if (event.code !== 1000 && this.paymentChannelId) {
+            this.attemptWebSocketReconnect();
+          }
         };
         
         this.ws.onerror = (error) => {
           clearTimeout(connectionTimeout);
-          console.error('WebSocket error details:', {
-            error: error,
-            readyState: this.ws.readyState,
-            url: this.ws.url,
-            protocol: this.ws.protocol,
-            extensions: this.ws.extensions
+          console.error('WebSocket error occurred');
+          console.error('Error event:', error);
+          console.error('WebSocket state:', {
+            readyState: this.ws ? this.ws.readyState : 'null',
+            url: this.ws ? this.ws.url : 'null',
+            protocol: this.ws ? this.ws.protocol : 'null'
           });
-          this.addPaymentLog('WebSocket connection error - check console for details', 'error');
+          
+          // Log the error state
+          const stateNames = {
+            0: 'CONNECTING',
+            1: 'OPEN', 
+            2: 'CLOSING',
+            3: 'CLOSED'
+          };
+          
+          const currentState = this.ws ? stateNames[this.ws.readyState] || this.ws.readyState : 'null';
+          this.addPaymentLog(`WebSocket error (state: ${currentState})`, 'error');
         };
         
       } catch (error) {
@@ -1387,12 +1418,19 @@ createApp({ // vue 3
       }
       
       this.wsReconnectAttempts++;
-      const delay = 2000 * Math.pow(2, this.wsReconnectAttempts - 1);
+      // Use longer delays for 1006 errors which might be network/proxy related
+      const baseDelay = 3000; // Start with 3 seconds
+      const delay = baseDelay * Math.pow(1.5, this.wsReconnectAttempts - 1); // More conservative backoff
       
-      this.addPaymentLog(`Attempting to reconnect in ${delay/1000}s... (${this.wsReconnectAttempts}/${this.wsMaxReconnectAttempts})`, 'warning');
+      this.addPaymentLog(`Attempting to reconnect in ${Math.round(delay/1000)}s... (${this.wsReconnectAttempts}/${this.wsMaxReconnectAttempts})`, 'warning');
       
       setTimeout(() => {
-        this.initializeWebSocket();
+        if (this.paymentChannelId) { // Only reconnect if we still have a payment channel
+          console.log(`WebSocket reconnect attempt ${this.wsReconnectAttempts}/${this.wsMaxReconnectAttempts}`);
+          this.initializeWebSocket();
+        } else {
+          console.log('Skipping WebSocket reconnect - no payment channel');
+        }
       }, delay);
     },
     
@@ -1457,9 +1495,21 @@ createApp({ // vue 3
     },
     
     startWebSocketPing() {
+      // Clear any existing ping interval
+      this.stopWebSocketPing();
+      
       this.pingInterval = setInterval(() => {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-          this.ws.send(JSON.stringify({ type: 'ping' }));
+          try {
+            this.ws.send(JSON.stringify({ type: 'ping' }));
+            console.log('WebSocket ping sent');
+          } catch (error) {
+            console.error('Failed to send WebSocket ping:', error);
+            this.addPaymentLog('WebSocket ping failed', 'warning');
+          }
+        } else {
+          console.log('WebSocket ping skipped - connection not open');
+          this.stopWebSocketPing();
         }
       }, 30000);
     },
@@ -1735,6 +1785,15 @@ createApp({ // vue 3
     startAccountCreation() {
       this.onboardingStep = 1;
       this.recoveryMode = false;
+      
+      // If we have a follow parameter, skip to step 3 (payment) and set request method
+      if (this.requestUsername) {
+        // Pre-populate a username suggestion based on follow parameter
+        if (!this.newAccount.username) {
+          this.newAccount.username = this.requestUsername + '-friend';
+        }
+        // Will be set to request method when reaching step 3
+      }
     },
     
     goBackToUsernameStep() {
@@ -2553,7 +2612,7 @@ createApp({ // vue 3
     
     this.getHiveStats();
     this.rcCosts();
-    if (this.account) {
+    if (this.account && this.account != 'GUEST') {
       this.getHiveUser();
       this.makeQr("qrcode", `https://dlux.io/qr?follow=${this.account}`, {
         width: 256,
@@ -2575,8 +2634,13 @@ createApp({ // vue 3
     const followParam = urlParams.get('follow');
     if (followParam) {
       this.requestUsername = followParam;
-      if(this.account){
-        window.location.href = `/@${followParam}` // Fixed variable name
+      // Set payment method to request when follow parameter is provided
+      this.paymentMethod = 'request';
+      // Only redirect if user is logged in AND not in onboarding mode
+      if(this.account && this.account != 'GUEST' && this.onboardingStep === 0){
+        console.log("followParam", followParam, this.account);
+        // Don't redirect immediately - let user choose to help create account or view profile
+        // window.location.href = `/@${followParam}`
       }
     }
     
@@ -2591,6 +2655,14 @@ createApp({ // vue 3
     
     // Check for existing payment channel in URL and restore if needed
     this.restorePaymentFromUrl();
+  },
+  watch: {
+    // Auto-select request method when reaching step 3 with a follow parameter
+    onboardingStep(newStep) {
+      if (newStep === 3 && this.requestUsername && !this.paymentMethod) {
+        this.paymentMethod = 'request';
+      }
+    }
   },
   computed: {
     canClaim: {
