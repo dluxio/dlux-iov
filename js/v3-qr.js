@@ -165,8 +165,8 @@ createApp({ // vue 3
         time: 0,
         claim_account_operation: {"operation":"claim_account_operation","rc_needed":"11789110900859","hp_needed":6713.599180835442}
       },
-      // New Onboarding System Data
-      onboardingStep: 1,
+      // New Onboarding System Data  
+      onboardingStep: 0, // 0 = not started, 1-4 = steps
       newAccount: {
         username: '',
         keys: {},
@@ -261,17 +261,17 @@ createApp({ // vue 3
         time: 0,
         claim_account_operation: {"operation":"claim_account_operation","rc_needed":"11789110900859","hp_needed":6713.599180835442}
       };
-      if(this.rcCost.time < new Date().getTime() - 86400000)fetch("https://beacon.peakd.com/api/rc/costs")
+      if(this.rcCost.time < new Date().getTime() - 86400000)fetch("https://data.dlux.io/api/rc/costs")
         .then((r) => {
           return r.json();
         })
         .then((re) => {
           console.log(re.costs)
           for(var i = 0; i < re.costs.length; i++){
-            this.rcCost[re.costs[i].operation] = re.costs[i].rc_needed
+            this.rcCost[re.costs[i].operation] = re.costs[i]
           }
           this.rcCost.time = new Date().getTime();
-          localStorage.setItem("rcCost", JSON.stringify(this.rcCost));
+          localStorage.setItem("rcCosts", JSON.stringify(this.rcCost));
         });
     },
     checkAccount(name, key) {
@@ -709,7 +709,7 @@ createApp({ // vue 3
     
     // Username Validation Methods
     async checkUsernameAvailability() {
-      const username = this.newAccount.username.toLowerCase().trim();
+      const username = this.newAccount.username ? this.newAccount.username.toLowerCase().trim() : '';
       
       // Clear previous timeout
       if (this.usernameCheckTimeout) {
@@ -767,8 +767,18 @@ createApp({ // vue 3
           
           if (data.result && data.result.length > 0) {
             this.usernameStatus = 'taken';
+            // Clear any generated keys if username is taken or changed
+            if (this.newAccount.username !== username) {
+              this.clearGeneratedKeys();
+            }
           } else {
             this.usernameStatus = 'available';
+            // Clear keys if username changed from previous successful generation
+            if (this.newAccount.username && this.newAccount.username !== username && 
+                Object.keys(this.newAccount.keys || {}).length > 0) {
+              console.log('Username changed, clearing generated keys');
+              this.clearGeneratedKeys();
+            }
             this.newAccount.username = username; // Store the validated username
           }
         } catch (error) {
@@ -777,6 +787,32 @@ createApp({ // vue 3
           this.usernameError = 'Failed to check username availability';
         }
       }, 500);
+    },
+    
+    clearGeneratedKeys() {
+      console.log('Clearing generated keys due to username change');
+      this.newAccount.keys = {};
+      this.newAccount.publicKeys = {};
+      this.newAccount.recoveryMethod = null;
+      this.showKeys = false;
+      
+      // Clear payment related data if keys are cleared
+      this.paymentDetails = null;
+      this.paymentChannelId = null;
+      this.paymentSentMarked = false;
+      this.userTxHash = '';
+      
+      // Close WebSocket if open
+      if (this.ws) {
+        this.ws.close();
+      }
+      
+      // Stop monitoring
+      this.stopFallbackPolling();
+      this.stopCountdown();
+      
+      // Clear URL channel ID
+      this.clearUrlChannelId();
     },
     
     // Key Generation Methods
@@ -788,6 +824,13 @@ createApp({ // vue 3
       }
 
       this.keyGenLoading = true;
+      
+      // Auto-select crypto payment if using wallet method and no follow parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const followParam = urlParams.get('follow');
+      if (this.keyGenMethod === 'wallet' && !followParam) {
+        this.paymentMethod = 'crypto';
+      }
       
       try {
         if (this.keyGenMethod === 'wallet' && this.selectedWallet) {
@@ -937,28 +980,29 @@ createApp({ // vue 3
          // dluxPEN Integration Methods
      async storeNewAccountInPEN() {
        try {
+         // Validate username before storing
+         if (!this.newAccount.username || this.newAccount.username.trim() === '') {
+           throw new Error('Username is required and cannot be empty');
+         }
+         
          // Get reference to nav component and call its method directly
          const navComponent = this.$refs.navComponent || this.$children.find(child => child.$options.name === 'nav-vue');
          
+         const accountData = {
+           username: this.newAccount.username.trim(),
+           keys: this.newAccount.keys,
+           publicKeys: this.newAccount.publicKeys,
+           recoveryMethod: this.newAccount.recoveryMethod,
+           isPendingCreation: true
+         };
+         
          if (navComponent && navComponent.storeNewAccount) {
-           await navComponent.storeNewAccount({
-             username: this.newAccount.username,
-             keys: this.newAccount.keys,
-             publicKeys: this.newAccount.publicKeys,
-             recoveryMethod: this.newAccount.recoveryMethod,
-             isPendingCreation: true
-           });
+           await navComponent.storeNewAccount(accountData);
          } else {
            // Fallback: trigger PEN setup if nav component not found
            console.warn('Nav component not found, triggering PEN setup');
            // Store data temporarily in localStorage for nav component to pick up
-           localStorage.setItem('pendingNewAccount', JSON.stringify({
-             username: this.newAccount.username,
-             keys: this.newAccount.keys,
-             publicKeys: this.newAccount.publicKeys,
-             recoveryMethod: this.newAccount.recoveryMethod,
-             isPendingCreation: true
-           }));
+           localStorage.setItem('pendingNewAccount', JSON.stringify(accountData));
          }
          
          console.log('New account stored in dluxPEN');
@@ -995,12 +1039,36 @@ createApp({ // vue 3
           })
         });
         
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
         const data = await response.json();
         console.log('Payment initiation response:', data);
+        
+        if (!response.ok) {
+          if (response.status === 409) {
+            // Handle channel already exists
+            if (data.existingChannel.existingChannel) {
+              this.addPaymentLog(`Found existing payment channel: ${data.existingChannel.channelId}`, 'warning');
+              this.addPaymentLog('Resuming existing payment channel...', 'info');
+              
+              // Use the existing channel
+              this.paymentChannelId = data.existingChannel.channelId;
+              
+              // Try to restore the payment details
+              try {
+                await this.restorePaymentChannel(data.channelId);
+                return; // Successfully restored
+              } catch (restoreError) {
+                console.error('Failed to restore existing channel:', restoreError);
+                this.addPaymentLog('Failed to restore existing channel, will create new one', 'warning');
+                // Continue to create new channel after error
+              }
+            } else {
+              // 409 without channel ID - generic conflict
+              throw new Error('Payment channel conflict - please try again in a moment');
+            }
+          } else {
+            throw new Error(`HTTP error! status: ${response.status} - ${data.error || 'Unknown error'}`);
+          }
+        }
         
         if (!data.success) {
           throw new Error(data.error || 'Failed to initiate payment');
@@ -1044,6 +1112,59 @@ createApp({ // vue 3
         this.addPaymentLog(`Error: ${error.message}`, 'error');
       } finally {
         this.paymentLoading = false;
+      }
+    },
+    
+    async restorePaymentChannel(channelId) {
+      try {
+        // Use correct API URL based on environment
+        const apiHost = 'data.dlux.io';
+        const apiProtocol = 'https:';
+        const apiUrl = `${apiProtocol}//${apiHost}/api/onboarding/payment/status/${channelId}`;
+        
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to restore payment channel');
+        }
+        
+        // Restore payment state
+        this.paymentDetails = {
+          channelId: channelId,
+          cryptoType: data.channel.cryptoType,
+          amountFormatted: data.channel.amountFormatted,
+          address: data.channel.address,
+          memo: data.channel.memo,
+          expiresAt: new Date(data.channel.expiresAt),
+          instructions: data.channel.instructions || []
+        };
+        
+        // Update payment status
+        this.updatePaymentStatus({
+          status: data.channel.status,
+          message: data.channel.statusMessage,
+          details: data.channel.statusDetails,
+          progress: data.channel.progress,
+          channel: data.channel
+        });
+        
+        // Add channel ID to URL for persistence
+        this.updateUrlWithChannelId(channelId);
+        
+        this.addPaymentLog('Payment channel restored successfully', 'success');
+        
+        // Initialize WebSocket for continued monitoring
+        this.initializeWebSocket();
+        
+        console.log('Payment channel restored:', this.paymentDetails);
+        
+      } catch (error) {
+        console.error('Failed to restore payment channel:', error);
+        throw error;
       }
     },
     
@@ -1611,8 +1732,47 @@ createApp({ // vue 3
       }
     },
     
-    resetOnboardingState() {
+    startAccountCreation() {
       this.onboardingStep = 1;
+      this.recoveryMode = false;
+    },
+    
+    goBackToUsernameStep() {
+      // If we have generated keys, warn user
+      if (Object.keys(this.newAccount.keys || {}).length > 0) {
+        if (!confirm('Going back will clear your generated keys. Are you sure?')) {
+          return;
+        }
+        this.clearGeneratedKeys();
+      }
+      this.onboardingStep = 1;
+    },
+    
+    goBackToKeyGenStep() {
+      // Clear any payment channel data when going back
+      if (this.paymentChannelId || this.paymentDetails) {
+        this.paymentDetails = null;
+        this.paymentChannelId = null;
+        this.paymentSentMarked = false;
+        this.userTxHash = '';
+        
+        // Close WebSocket if open
+        if (this.ws) {
+          this.ws.close();
+        }
+        
+        // Stop monitoring
+        this.stopFallbackPolling();
+        this.stopCountdown();
+        
+        // Clear URL channel ID
+        this.clearUrlChannelId();
+      }
+      this.onboardingStep = 2;
+    },
+    
+    resetOnboardingState() {
+      this.onboardingStep = 0;
       this.newAccount = {
         username: '',
         keys: {},
@@ -1632,17 +1792,29 @@ createApp({ // vue 3
       this.walletPaymentLoading = false;
       this.paymentDetails = null;
       this.paymentChannelId = null;
+      this.paymentSentMarked = false;
+      this.userTxHash = '';
+      
+      // Clear username check timeout
+      if (this.usernameCheckTimeout) {
+        clearTimeout(this.usernameCheckTimeout);
+        this.usernameCheckTimeout = null;
+      }
       
       // Close WebSocket if open
       if (this.ws) {
         this.ws.close();
       }
       
-      // Stop fallback polling
+      // Stop fallback polling and countdowns
       this.stopFallbackPolling();
+      this.stopCountdown();
       
       // Clear channel ID from URL
       this.clearUrlChannelId();
+      
+      // Clear any pending account data
+      localStorage.removeItem('pendingNewAccount');
     },
     
     // ===========================================
@@ -1777,6 +1949,97 @@ createApp({ // vue 3
       
       // Optionally trigger login if the account exists
       this.$emit('login', this.recoveryData.username);
+    },
+    
+    // Create Account Yourself functionality
+    async createAccountYourself() {
+      if (!this.newAccount.username || !this.newAccount.publicKeys) {
+        alert('Please complete username selection and key generation first');
+        return;
+      }
+      
+      // Get reference to nav component
+      const navComponent = this.$refs.navComponent;
+      if (!navComponent) {
+        alert('Navigation component not available');
+        return;
+      }
+      
+      // Check if user is logged in
+      if (!this.account) {
+        alert('You must be logged in to create an account for someone else');
+        return;
+      }
+      
+      try {
+        // Create a request object that matches the format expected by createAccountForFriend
+        const request = {
+          status: 'done',
+          requester_username: this.newAccount.username,
+          public_keys: this.newAccount.publicKeys
+        };
+        
+        // Get chain properties to determine if we can use ACT
+        const response = await fetch('https://hive-api.dlux.io', {
+          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${this.account}"]], "id":1}`,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          method: "POST",
+        });
+        
+        const data = await response.json();
+        const userAccount = data.result[0];
+        
+        if (!userAccount) {
+          alert('Unable to verify your account status');
+          return;
+        }
+        
+        // Check if user has ACTs or sufficient HIVE
+        const hasACT = userAccount.pending_claimed_accounts > 0;
+        const hiveBalance = parseFloat(userAccount.balance.split(' ')[0]);
+        
+        // Get account creation fee
+        const propsResponse = await fetch('https://hive-api.dlux.io', {
+          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_chain_properties", "params":[], "id":1}`,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          method: "POST",
+        });
+        
+        const propsData = await propsResponse.json();
+        const accountCreationFee = parseFloat(propsData.result.account_creation_fee.split(' ')[0]);
+        
+        // Confirm the action with the user
+        let confirmMessage;
+        if (hasACT) {
+          confirmMessage = `Create account @${this.newAccount.username} using 1 Account Creation Token?\n\nThis will use one of your ${userAccount.pending_claimed_accounts} ACTs.`;
+        } else if (hiveBalance >= accountCreationFee) {
+          confirmMessage = `Create account @${this.newAccount.username} for ${accountCreationFee} HIVE?\n\nYour balance: ${hiveBalance} HIVE`;
+        } else {
+          alert(`Insufficient funds. You need either:\n• 1 Account Creation Token, or\n• ${accountCreationFee} HIVE (you have ${hiveBalance} HIVE)`);
+          return;
+        }
+        
+        if (!confirm(confirmMessage)) {
+          return;
+        }
+        
+        // Call the nav component's createAccountForFriend method
+        await navComponent.createAccountForFriend(request, hasACT);
+        
+        // Mark account as created and move to success step
+        this.accountCreated = true;
+        this.onboardingStep = 4;
+        
+        alert(`Account creation transaction submitted!\n\nUsername: @${this.newAccount.username}\nMethod: ${hasACT ? 'Account Creation Token' : accountCreationFee + ' HIVE'}`);
+        
+      } catch (error) {
+        console.error('Failed to create account:', error);
+        alert('Failed to create account: ' + error.message);
+      }
     },
     
     // Event handler for nav component
@@ -2282,12 +2545,17 @@ createApp({ // vue 3
       }
     },
   },
-  mounted() {
+      mounted() {
+    // Ensure newAccount is properly initialized
+    if (!this.newAccount.username) {
+      this.newAccount.username = '';
+    }
+    
     this.getHiveStats();
     this.rcCosts();
     if (this.account) {
       this.getHiveUser();
-      this.makeQr("qrcode", `https://dlux.io/@${this.account}`, {
+      this.makeQr("qrcode", `https://dlux.io/qr?follow=${this.account}`, {
         width: 256,
         height: 256,
       });
@@ -2307,6 +2575,9 @@ createApp({ // vue 3
     const followParam = urlParams.get('follow');
     if (followParam) {
       this.requestUsername = followParam;
+      if(this.account){
+        window.location.href = `/@${followParam}` // Fixed variable name
+      }
     }
     
     // Check for recovery parameter
@@ -2326,6 +2597,20 @@ createApp({ // vue 3
       get() {
         return this.account?.rcs > this.rcCost["claim_account_operation"] ? true : false
       },
+    },
+    
+    claimActHpNeeded: {
+      get() {
+        const claimActCost = this.rcCost.claim_account_operation || this.rcCost["claim_account_operation"];
+        if (claimActCost && claimActCost.hp_needed) {
+          return Math.ceil(claimActCost.hp_needed).toLocaleString();
+        } else if (claimActCost && claimActCost.rc_needed) {
+          // Calculate HP needed from RC needed (approximation: 1 HP ≈ 1.67 billion RC)
+          const hpNeeded = parseFloat(claimActCost.rc_needed) / 1670000000;
+          return Math.ceil(hpNeeded).toLocaleString();
+        }
+        return "15,000"; // fallback
+      }
     }
   },
 }).mount('#app')
