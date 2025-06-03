@@ -425,7 +425,6 @@ export default {
         op.status = "Pending your approval";
         op.delay = 5000;
         op.title = op.id ? op.id : op.cj ? op.cj.memo : "No Waiter";
-        if (!op.api) op.api = this.lapi;
         this.ops.push(op);
         this.$emit("ack", op.txid);
         if (op.type == "cja") {
@@ -1920,7 +1919,7 @@ export default {
         this.cleanOps();
         return;
       }
-      if (response.success == true) {
+      if (response.success == true && obj.api) {
         obj.status = "Hive TX Success:\nAwaiting Layer 2 confirmation...";
         obj.delay = 100000;
         obj.link = "https://hivehub.dev/tx/" + response.result.id;
@@ -1928,7 +1927,7 @@ export default {
         this.ops.push(obj);
         this.cleanOps(); //also stores it in localStorage
         this.statusPinger(response.result.id, obj.api, 0);
-      } else if (response.result.status == "unkown") {
+      } else if (response.result.status == "unkown" && obj.api) {
         obj.status = "Hive TX Success:\nAwaiting Layer 2 confirmation...";
         obj.delay = 100000;
         obj.link = "https://hivehub.dev/tx/" + response.result.tx_id;
@@ -1936,6 +1935,14 @@ export default {
         this.ops.push(obj);
         this.cleanOps(); //also stores it in localStorage
         this.statusPinger(response.result.id, obj.api, 0);
+      } else if (response.success == true && !obj.api) { 
+        // Hive Level 1 TX Handler (no API)
+        obj.status = "Hive TX Success";
+        obj.txid = response.result.id;
+        for (var i = 0; i < obj.ops.length; i++) {
+          if(typeof this[obj.ops[i]] == "function") this[obj.ops[i]](obj)
+          else this.$emit(obj.ops[i], obj)
+        }
       }
     },
     statusPinger(txid, api, r) {
@@ -2017,6 +2024,25 @@ export default {
         this[key] = value;
       }
     },
+    markAllNotificationsRead() {
+      let date = new Date().toISOString().replace(/\.\d{3}(Z|[+-]\d{2}:\d{2})$/, '')
+      let op = {
+        type: "cj",
+        op: "setLastRead",
+        id: "notify",
+        cj: ["setLastRead", {date}],
+        msg: `Marking all notifications as read`,
+        ops: ["refreshNotifications"],
+        api: null,
+        txid: `setLastRead`,
+      }
+      op.time = new Date().getTime();
+        op.status = "Pending your approval";
+        op.delay = 5000;
+        op.title = op.id ? op.id : op.cj ? op.cj.memo : "No Waiter";
+        this.broadcastCJ(op);
+        this.broadcastRaw(op);
+    },
     getUser() {
       this.user = localStorage.getItem("user");
       this.$emit("login", this.user);
@@ -2039,7 +2065,8 @@ export default {
     },
 
     // Refresh notifications (can be called from outside)
-    refreshNotifications() {
+    refreshNotifications(obj) {
+      if(obj.txid)this.dismissNotification(obj.txid)
       this.getNotifications();
     },
     async getNotifications() {
@@ -2251,58 +2278,80 @@ export default {
     },
 
     // Handle account creation request actions
-    async createAccountForFriend(requestId, useACT = true) {
-      if (!this.hasValidHiveAuth()) {
-        this.handleToast({
-          title: 'Authentication Required',
-          body: 'Please sign in to create accounts for friends',
-          type: 'error'
-        });
-        return;
+    async createAccountForFriend(request, useACT = true) {
+      console.log(request)
+      if(!request.status == 'done') return
+      fetch('https://hive-api.dlux.io', {
+        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_chain_properties", "params":[], "id":1}`,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        method: "POST",
+      }).then((response) => response.json())
+        .then((data) => {
+      const ownerAuth = { "weight_threshold": 1, "account_auths": [], "key_auths": [ [ request.public_keys.owner, 1 ] ] }
+      const activeAuth = { "weight_threshold": 1, "account_auths": [], "key_auths": [ [ request.public_keys.active, 1 ] ] }
+      const postingAuth = { "weight_threshold": 1, "account_auths": [], "key_auths": [ [ request.public_keys.posting, 1 ] ] }
+      const memoKey = request.public_keys.memo
+      const CAop = useACT ? [
+        'create_claimed_account',
+        {
+          creator: this.user,
+          new_account_name: request.requester_username,
+          owner: ownerAuth,
+          active: activeAuth,
+          posting: postingAuth,
+          memo_key: memoKey,
+          json_metadata: '',
+          extensions: []
+        },
+      ] : [
+        'account_create',
+        {
+          fee: data.result.account_creation_fee,
+          creator: this.user,
+          new_account_name: request.requester_username,
+          owner: ownerAuth,
+          active: activeAuth,
+          posting: postingAuth,
+          memo_key: memoKey,
+          json_metadata: '',
+        },
+      ]
+      let op = {
+        type: "raw",
+        key: "active",
+        op: [CAop],
+        callbacks: [],
+        txid: "Create Account",
+        msg: `Creating account for friend`,
+        ops: ["createAccountFeedback"],
+        api: null,
+        txid: `createAccount`,
       }
-
+      op.time = new Date().getTime();
+        op.status = "Pending your approval";
+        op.delay = 5000;
+        op.title = op.id ? op.id : op.cj ? op.cj.memo : "No Waiter";
+        this.ops.push(op)
+        this.broadcastRaw(op);
+    })
+    },
+    async createAccountFeedback(obj) {
       try {
-        const challenge = Math.floor(Date.now() / 1000);
-        const signature = await this.signChallenge(challenge.toString());
-        const pubKey = this.getPublicKey();
-
-        const response = await fetch(`/api/onboarding/request/${requestId}/create-account`, {
+        const response = await fetch(`https://data.dlux.io/api/onboarding/notifications/accept/${obj.txid}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-account': this.user,
-            'x-challenge': challenge.toString(),
-            'x-pubkey': pubKey,
-            'x-signature': signature
-          },
-          body: JSON.stringify({ useACT })
+          }
         });
-
-        const result = await response.json();
-
-        if (result.success) {
-          this.handleToast({
-            title: 'Account Created!',
-            body: result.message,
-            type: 'success'
-          });
-
-          // Refresh notifications
-          await this.getNotifications();
-        } else {
-          this.handleToast({
-            title: 'Creation Failed',
-            body: result.error,
-            type: 'error'
-          });
+        if (response.ok) {
+          // Remove from local notifications
+          this.notifications = this.notifications.map(n => n.status = n.id == response.id ? 'completed' : n.status);
+          this.notificationsCount -= 1
         }
       } catch (error) {
-        console.error('Error creating account for friend:', error);
-        this.handleToast({
-          title: 'Error',
-          body: 'Failed to create account: ' + error.message,
-          type: 'error'
-        });
+        console.error('Error dismissing notification:', error);
       }
     },
 
@@ -2313,19 +2362,33 @@ export default {
       );
 
       if (notification) {
-        await this.dismissNotification(notification.id.replace('request_', 'local_'));
+        await this.ignoreNotification(notification.id.replace('request_', 'local_'));
       }
     },
 
     async dismissNotification(notificationId) {
-      if (!this.hasValidHiveAuth()) return;
-
+      try {
+        const response = await fetch(`https://data.dlux.io/api/onboarding/notifications/dismiss/${notificationId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        if (response.ok) {
+          // Remove from local notifications
+          this.notifications = this.notifications.map(n => n.status = 'read');
+          this.notificationsCount = 0
+        }
+      } catch (error) {
+        console.error('Error dismissing notification:', error);
+      }
+    },
+    async ignoreNotification(notificationId) {
       try {
         const challenge = Math.floor(Date.now() / 1000);
         const signature = await this.signChallenge(challenge.toString());
         const pubKey = this.getPublicKey();
-
-        const response = await fetch(`https://data.dlux.io/api/onboarding/notifications/${notificationId}/dismiss`, {
+        const response = await fetch(`https://data.dlux.io/api/onboarding/notifications/${notificationId}/ignore`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -2335,11 +2398,10 @@ export default {
             'x-signature': signature
           }
         });
-
         if (response.ok) {
           // Remove from local notifications
-          this.notifications = this.notifications.filter(n => n.id !== notificationId);
-          this.notificationsCount = Math.max(0, this.notificationsCount - 1);
+          this.notifications = this.notifications.map(n => n.status = 'read');
+          this.notificationsCount -= 1
         }
       } catch (error) {
         console.error('Error dismissing notification:', error);

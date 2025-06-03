@@ -670,7 +670,7 @@ export default {
                 <!-- Loading state -->
                 <div v-if="$parent.notificationsLoading" class="text-center py-3">
                   <i class="fa-solid fa-spinner fa-spin"></i>
-                  <div class="small">Loading notifications...</div>
+                  <div class="small text-dark">Loading notifications...</div>
                 </div>
                 
                 <!-- Error state -->
@@ -690,15 +690,33 @@ export default {
                 
                 <!-- Notifications list -->
                 <div v-else>
+                  <!-- Action buttons -->
+                  <div class="d-flex justify-content-between align-items-center mb-2 px-2">
+                    <button @click="$parent.getNotifications()" 
+                            class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
+                            :disabled="$parent.notificationsLoading">
+                      <i class="fa-solid fa-refresh" :class="{'fa-spin': $parent.notificationsLoading}"></i>
+                      <span class="d-none d-sm-inline">Refresh</span>
+                    </button>
+                    <button @click="$parent.markAllNotificationsRead()" 
+                            class="btn btn-sm btn-outline-success d-flex align-items-center gap-1">
+                      <i class="fa-solid fa-check-double"></i>
+                      <span class="d-none d-sm-inline">Mark All Read</span>
+                    </button>
+                  </div>
+                  
                   <!-- Notification item -->
-                  <div v-for="notification in $parent.notifications" :key="notification.id" 
-                       class="d-flex gap-2 mb-3 p-2 rounded"
+                  <component :is="notification.data.url ? 'a' : 'div'" :href="notification.data.url ? notification.data.url : null" :target="notification.data.url ? '_blank' : null"  v-for="notification in $parent.notifications" :key="notification.id" 
+                       class="d-flex gap-2 mb-2 p-2 rounded text-decoration-none text-dark position-relative"
                        :class="{
                          'bg-light border-start border-warning border-3': notification.type === 'account_request' && notification.data.direction === 'received',
-                         'bg-light border-start border-info border-2': notification.type === 'account_request' && notification.data.direction === 'sent',
-                         'border-start border-success border-1': notification.priority === 'high' && notification.type !== 'account_request',
+                         'bg-light border-start border-danger border-3': (notification.type === 'account_request' && notification.data.direction === 'sent') || notification.status === 'unread',
+                         'border-start border-info border-1': notification.priority === 'high' && notification.type !== 'account_request',
                          'opacity-75': notification.status === 'read'
-                       }">
+                       }"
+                       :style="notification.data.url ? 'cursor: pointer;' : ''"
+                       @mouseenter="notification.data.url ? $event.target.classList.add('bg-primary-subtle') : null"
+                       @mouseleave="notification.data.url ? $event.target.classList.remove('bg-primary-subtle') : null" >
                     
                     <!-- User thumbnail -->
                     <div class="ratio ratio-1x1" style="width: 40px; height: 40px;">
@@ -711,36 +729,39 @@ export default {
                     <!-- Notification content -->
                     <div class="flex-grow-1">
                       <div class="d-flex justify-content-between align-items-start mb-1">
-                        <div class="fw-semibold small">{{ notification.title }}</div>
-                        <div class="small text-muted">{{ formatNotificationTime(notification.createdAt) }}</div>
+                        <div class="fw-semibold small text-dark">{{ notification.title }}</div>
+                        <div class="small text-dark">{{ formatNotificationTime(notification.createdAt) }}</div>
                       </div>
                       
-                      <div class="small text-muted mb-2">{{ notification.message }}</div>
+                      <div class="small mb-1 text-dark">{{ notification.message }}</div>
                       
                       <!-- Account Creation Request Actions -->
                       <div v-if="notification.type === 'account_request' && notification.data.direction === 'received'" 
-                           class="d-flex gap-2 mt-2">
+                           class="d-flex gap-1 mt-1">
                         
                         <!-- Create with ACT button -->
-                        <button @click="$parent.createAccountForFriend(notification.data.request_id, true)"
-                                class="btn btn-sm btn-success d-flex align-items-center gap-1"
-                                title="Use Account Creation Token (free with RCs)">
+                        <button @click="$parent.createAccountForFriend(notification.data, true)"
+                                class="btn btn-xs btn-success d-flex align-items-center gap-1"
+                                title="Use Account Creation Token (free with RCs)"
+                                style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
                           <i class="fa-solid fa-circle-dot"></i>
                           <span class="d-none d-sm-inline">Use ACT</span>
                         </button>
                         
                         <!-- Create with HIVE button -->
-                        <button @click="$parent.createAccountForFriend(notification.data.request_id, false)"
-                                class="btn btn-sm btn-primary d-flex align-items-center gap-1"
-                                title="Create account with 3 HIVE delegation">
+                        <button @click="$parent.createAccountForFriend(notification, false)"
+                                class="btn btn-xs btn-primary d-flex align-items-center gap-1"
+                                title="Create account with 3 HIVE delegation"
+                                style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
                           <i class="fa-brands fa-hive"></i>
                           <span class="d-none d-sm-inline">3 HIVE</span>
                         </button>
                         
                         <!-- Ignore button -->
                         <button @click="$parent.ignoreAccountRequest(notification.data.request_id)"
-                                class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
-                                title="Ignore this request">
+                                class="btn btn-xs btn-outline-secondary d-flex align-items-center gap-1"
+                                title="Ignore this request"
+                                style="font-size: 0.75rem; padding: 0.25rem 0.5rem;">
                           <i class="fa-solid fa-eye-slash"></i>
                           <span class="d-none d-sm-inline">Ignore</span>
                         </button>
@@ -751,17 +772,6 @@ export default {
                            class="small text-info">
                         <i class="fa-solid fa-clock"></i>
                         Waiting for response...
-                      </div>
-                      
-                      <!-- HIVE notification link -->
-                      <div v-else-if="notification.type === 'hive_notification' && notification.data.url"
-                           class="mt-2">
-                        <a :href="notification.data.url" 
-                           target="_blank" 
-                           class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1">
-                          <i class="fa-solid fa-external-link-alt"></i>
-                          <span class="d-none d-sm-inline">View Post</span>
-                        </a>
                       </div>
                       
                       <!-- Priority indicator -->
@@ -778,7 +788,7 @@ export default {
                         <span class="badge bg-primary rounded-pill" style="width: 8px; height: 8px;"></span>
                       </div>
                     </div>
-                  </div>
+                  </component>
                 </div>
               </div>
             </div>
