@@ -85,10 +85,13 @@ jobs:
       run: |
         if [ -f "generate-cache-manifest.sh" ]; then
           chmod +x generate-cache-manifest.sh
-          ./generate-cache-manifest.sh "${{ steps.version.outputs.new_version }}"
-          echo "Cache manifest updated successfully"
+          # For automated updates, assume new files are "important" by default
+          # This is safer for 3rd party PRs and automated processing
+          ./generate-cache-manifest.sh "${{ steps.version.outputs.new_version }}" --auto-important
+          echo "Cache manifest updated successfully with auto-categorization"
         else
           echo "Warning: generate-cache-manifest.sh not found"
+          echo "Skipping cache manifest update"
         fi
 
     - name: Update related files
@@ -137,30 +140,56 @@ jobs:
     - name: Create summary
       if: steps.check-changes.outputs.has_changes == 'true'
       run: |
-        echo "## Cache Manifest Update Summary" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**New Version:** \`${{ steps.version.outputs.new_version }}\`" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        
-        if [ -f "sw.js" ]; then
-          total_files=$(grep -o '"[^"]*":' sw.js | grep '^"/' | wc -l)
-          critical_files=$(grep -A 3 '"priority": "critical"' sw.js | grep -c '"priority": "critical"')
-          important_files=$(grep -A 3 '"priority": "important"' sw.js | grep -c '"priority": "important"')
-          pagespecific_files=$(grep -A 3 '"priority": "page-specific"' sw.js | grep -c '"priority": "page-specific"')
-          lazy_files=$(grep -A 3 '"priority": "lazy"' sw.js | grep -c '"priority": "lazy"')
+        {
+          echo "## Cache Manifest Update Summary"
+          echo ""
+          echo "**New Version:** \`${{ steps.version.outputs.new_version }}\`"
+          echo ""
+          echo "**Trigger:** ${{ github.event_name }}"
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "**Commit:** ${{ github.sha }}"
+          fi
+          echo ""
           
-          echo "**Cache Statistics:**" >> $GITHUB_STEP_SUMMARY
-          echo "- 🚀 Critical: $critical_files files" >> $GITHUB_STEP_SUMMARY
-          echo "- ⚡ Important: $important_files files" >> $GITHUB_STEP_SUMMARY
-          echo "- 🎯 Page-specific: $pagespecific_files files" >> $GITHUB_STEP_SUMMARY
-          echo "- 😴 Lazy: $lazy_files files" >> $GITHUB_STEP_SUMMARY
-          echo "- 📝 **Total: $total_files files**" >> $GITHUB_STEP_SUMMARY
-        fi
-        
-        if [ "${{ steps.git-check.outputs.changes }}" = "true" ]; then
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Changes committed and pushed successfully" >> $GITHUB_STEP_SUMMARY
-        else
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "ℹ️ No changes needed - cache manifest is up to date" >> $GITHUB_STEP_SUMMARY
-        fi 
+          # Safely extract cache statistics
+          if [ -f "sw.js" ] && grep -q "self.cacheManifest" sw.js; then
+            echo "**Cache Statistics:**"
+            
+            # Use safer grep commands with error handling
+            critical_files=$(grep -o '"priority": "critical"' sw.js 2>/dev/null | wc -l || echo "0")
+            important_files=$(grep -o '"priority": "important"' sw.js 2>/dev/null | wc -l || echo "0")
+            pagespecific_files=$(grep -o '"priority": "page-specific"' sw.js 2>/dev/null | wc -l || echo "0")
+            lazy_files=$(grep -o '"priority": "lazy"' sw.js 2>/dev/null | wc -l || echo "0")
+            total_files=$((critical_files + important_files + pagespecific_files + lazy_files))
+            
+            echo "- 🚀 Critical: $critical_files files"
+            echo "- ⚡ Important: $important_files files"
+            echo "- 🎯 Page-specific: $pagespecific_files files"
+            echo "- 😴 Lazy: $lazy_files files"
+            echo "- 📝 **Total: $total_files files**"
+            
+            # Show total cache size if available
+            if command -v du >/dev/null 2>&1; then
+              cache_size=$(du -sh . 2>/dev/null | cut -f1 || echo "unknown")
+              echo "- 💾 Repository size: $cache_size"
+            fi
+          else
+            echo "⚠️ Could not extract cache statistics (sw.js not found or no cache manifest)"
+          fi
+          
+          echo ""
+          if [ "${{ steps.git-check.outputs.changes }}" = "true" ]; then
+            echo "✅ Changes committed and pushed successfully"
+            echo ""
+            echo "**Automated Actions Performed:**"
+            echo "- Updated service worker version"
+            echo "- Regenerated cache manifest with checksums"
+            echo "- Auto-categorized new files as 'important' (safe default)"
+            echo "- Updated related files (reg-sw.js, sw-monitor.js)"
+          else
+            echo "ℹ️ No changes needed - cache manifest is up to date"
+          fi
+          
+          echo ""
+          echo "**Note for 3rd Party PRs:** New files are automatically categorized as 'important' for safety. Manual review recommended for optimal performance."
+        } >> $GITHUB_STEP_SUMMARY 

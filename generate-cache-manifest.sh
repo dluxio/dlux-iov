@@ -1,9 +1,21 @@
 #!/bin/bash
 
 # Cross-platform cache manifest generator with MD5 checksums
-# Usage: ./generate-cache-manifest.sh [version]
+# Usage: ./generate-cache-manifest.sh [version] [--auto-important]
 
-echo "🔧 Generating cache manifest with checksums..."
+# Parse arguments
+VERSION="$1"
+AUTO_IMPORTANT=false
+
+if [[ "$2" == "--auto-important" ]] || [[ "$3" == "--auto-important" ]]; then
+    AUTO_IMPORTANT=true
+fi
+
+if [ "$AUTO_IMPORTANT" = true ]; then
+    echo "🤖 Generating cache manifest with auto-categorization (new files as important)..."
+else
+    echo "🔧 Generating cache manifest with checksums..."
+fi
 
 # Detect platform for MD5 command
 if command -v md5sum >/dev/null 2>&1; then
@@ -26,8 +38,8 @@ TEMP_MANIFEST="temp-manifest.json"
 echo "📋 Platform: $(uname -s), MD5 command: $MD5_CMD"
 
 # Get version from argument or generate timestamp
-if [ -n "$1" ]; then
-    TIMESTAMP="$1"
+if [ -n "$VERSION" ]; then
+    TIMESTAMP="$VERSION"
     echo "🕐 Using provided version: $TIMESTAMP"
 else
     TIMESTAMP=$(date +"%Y.%m.%d.%H")
@@ -63,7 +75,7 @@ echo "   ⚡ Important files: ${#IMPORTANT_FILES[@]}"
 echo "   🎯 Page-specific files: ${#PAGE_SPECIFIC_FILES[@]}"
 echo "   🐌 Skipped files (will be lazy): ${#SKIPPED_FILES[@]}"
 
-# Validate extraction
+# Validate extraction and handle auto-categorization
 if [ ${#CRITICAL_FILES[@]} -eq 0 ] && [ ${#IMPORTANT_FILES[@]} -eq 0 ]; then
     echo "❌ Error: No files extracted from service worker!"
     echo "   Using fallback file list..."
@@ -76,8 +88,52 @@ if [ ${#CRITICAL_FILES[@]} -eq 0 ] && [ ${#IMPORTANT_FILES[@]} -eq 0 ]; then
         "js/v3-nav.js"
         "sw.js"
     )
-    IMPORTANT_FILES=()
-    SKIPPED_FILES=()
+    
+    # If auto-important mode, find all cacheable files and categorize them
+    if [ "$AUTO_IMPORTANT" = true ]; then
+        echo "🤖 Auto-categorizing all cacheable files for GitHub Actions..."
+        
+        # Get all cacheable files from git (same logic as gs.sh)
+        ALL_FILES=($(git ls-files -- '*.html' '*.css' '*.js' '*.png' '*.jpg' '*.svg' '*.ico' '*.woff' '*.woff2' '*.ttf' '*.eot' | \
+                    grep -vE '(.*/test/.*|.*/tests/.*|node_modules/.*|\.git/.*)'))
+        
+        # Auto-categorize based on patterns
+        for file in "${ALL_FILES[@]}"; do
+            # Remove leading slash if present
+            clean_file="${file#/}"
+            
+            # Skip if already in critical
+            if [[ " ${CRITICAL_FILES[@]} " =~ " ${clean_file} " ]]; then
+                continue
+            fi
+            
+            # Critical patterns (override fallback)
+            if [[ "$clean_file" =~ ^(index\.html|about/index\.html)$ ]] || \
+               [[ "$clean_file" =~ \.(css)$ && "$clean_file" =~ (bootstrap|custom|v3) ]] || \
+               [[ "$clean_file" =~ ^js/(vue\.esm|v3-nav|bootstrap\.bundle) ]]; then
+                CRITICAL_FILES+=("$clean_file")
+            # Page-specific patterns
+            elif [[ "$clean_file" =~ (aframe|monaco|playground|chat|naf-playground) ]]; then
+                PAGE_SPECIFIC_FILES+=("$clean_file")
+            # Lazy patterns (old files, tests, etc.)
+            elif [[ "$clean_file" =~ (-old\.|test|spec|debug|env_thumbs) ]] || \
+                 [[ "$clean_file" =~ (monaco-editor/vs/basic-languages|monaco-editor/vs/nls\.messages) ]]; then
+                SKIPPED_FILES+=("$clean_file")
+            # Everything else becomes important (safe default for PRs)
+            else
+                IMPORTANT_FILES+=("$clean_file")
+            fi
+        done
+        
+        echo "🤖 Auto-categorization complete:"
+        echo "   🚀 Critical: ${#CRITICAL_FILES[@]} files"
+        echo "   ⚡ Important: ${#IMPORTANT_FILES[@]} files"
+        echo "   🎯 Page-specific: ${#PAGE_SPECIFIC_FILES[@]} files"
+        echo "   😴 Lazy: ${#SKIPPED_FILES[@]} files"
+    else
+        IMPORTANT_FILES=()
+        SKIPPED_FILES=()
+    fi
 fi
 
 # Function to add file with checksum
