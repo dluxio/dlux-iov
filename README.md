@@ -1,6 +1,6 @@
-# DLUX IOV - Decentralized Content Platform
+# DLUX - Decentralized Limitless User eXperiences
 
-A decentralized platform for immersive content, NFTs, and virtual reality experiences built on the Hive blockchain.
+A decentralized platform for immersive content, NFTs, and virtual reality experiences built on the Hive blockchain. This code base is the static open source front end. 
 
 ## 🚀 Features
 
@@ -29,18 +29,19 @@ This project uses an advanced cache management system that automatically handles
 
 **When adding new files:**
 
-1. **Automatic** (Recommended): Just push your changes
+1. **Automatic** (Recommended for contributors): Just push your changes
    - GitHub Action detects cacheable files (`.html`, `.css`, `.js`, images, fonts)
    - New files are auto-categorized as "important" (safe default)
    - Cache manifest is updated automatically with new version
+   - **No manual intervention needed** - normal git workflow!
 
-2. **Manual** (For fine-tuning):
+2. **Manual** (For maintainers only):
    ```bash
-   # Run the version script to categorize new files
-   ./gs.sh
-   
-   # Or manually update cache manifest
+   # Manual cache manifest regeneration (rarely needed)
    ./generate-cache-manifest.sh "2025.01.15.3"
+   
+   # Version script with cache updates (for complex changes)
+   ./gs.sh
    ```
 
 **File categorization patterns:**

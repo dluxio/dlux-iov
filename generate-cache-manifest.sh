@@ -54,20 +54,44 @@ cat > "$TEMP_MANIFEST" << EOF
   "files": {
 EOF
 
-# Extract file arrays dynamically from sw.js
-echo "📋 Extracting file lists from service worker..."
+# Extract file arrays from existing cacheManifest in sw.js
+echo "📋 Extracting file lists from service worker cache manifest..."
 
-# Extract critical files
-CRITICAL_FILES=($(awk '/const criticalResources = \[/,/^\];$/' sw.js | grep -o '`/[^`]*`' | sed 's/`\///g' | sed 's/`//g'))
-
-# Extract important files  
-IMPORTANT_FILES=($(awk '/const importantResources = \[/,/^\];$/' sw.js | grep -o '`/[^`]*`' | sed 's/`\///g' | sed 's/`//g'))
-
-# Extract page-specific files
-PAGE_SPECIFIC_FILES=($(awk '/const pageSpecificResources = \{/,/^\};$/' sw.js | grep -o '`/[^`]*`' | sed 's/`\///g' | sed 's/`//g'))
-
-# Extract skipped files
-SKIPPED_FILES=($(awk '/const skippedResources = \[/,/^\];$/' sw.js | grep -o '`/[^`]*`' | sed 's/`\///g' | sed 's/`//g'))
+# Check if we have an existing cache manifest to extract from
+if grep -q "self.cacheManifest =" sw.js; then
+    echo "   📝 Found existing cache manifest, extracting files..."
+    
+    # Extract files by priority from cacheManifest
+    CRITICAL_FILES=($(awk '/self\.cacheManifest = /,/^};?$/' sw.js | \
+                     grep -A 3 '"priority": "critical"' | \
+                     grep -B 3 '"priority": "critical"' | \
+                     grep -o '"/[^"]*"' | \
+                     sed 's/"//g' | sed 's|^/||'))
+    
+    IMPORTANT_FILES=($(awk '/self\.cacheManifest = /,/^};?$/' sw.js | \
+                      grep -A 3 '"priority": "important"' | \
+                      grep -B 3 '"priority": "important"' | \
+                      grep -o '"/[^"]*"' | \
+                      sed 's/"//g' | sed 's|^/||'))
+    
+    PAGE_SPECIFIC_FILES=($(awk '/self\.cacheManifest = /,/^};?$/' sw.js | \
+                          grep -A 3 '"priority": "page-specific"' | \
+                          grep -B 3 '"priority": "page-specific"' | \
+                          grep -o '"/[^"]*"' | \
+                          sed 's/"//g' | sed 's|^/||'))
+    
+    SKIPPED_FILES=($(awk '/self\.cacheManifest = /,/^};?$/' sw.js | \
+                    grep -A 3 '"priority": "lazy"' | \
+                    grep -B 3 '"priority": "lazy"' | \
+                    grep -o '"/[^"]*"' | \
+                    sed 's/"//g' | sed 's|^/||'))
+else
+    echo "   📝 No existing cache manifest found, will use fallback..."
+    CRITICAL_FILES=()
+    IMPORTANT_FILES=()
+    PAGE_SPECIFIC_FILES=()
+    SKIPPED_FILES=()
+fi
 
 echo "📊 Extracted from service worker:"
 echo "   🚀 Critical files: ${#CRITICAL_FILES[@]}"
