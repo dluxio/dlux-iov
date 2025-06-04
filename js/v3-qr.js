@@ -224,6 +224,9 @@ createApp({ // vue 3
       showPaymentQR: false,
       walletPaymentLoading: false,
       
+      // Wallet persistence for page refresh
+      lastSelectedWallet: null,
+      
       // Key Recovery state
       recoveryMode: false,
       recoveryStep: 1,
@@ -863,6 +866,9 @@ createApp({ // vue 3
           providerType: typeof wallet.provider
         });
       });
+      
+      // Restore previously selected wallet if available and detected
+      this.restoreSelectedWallet();
     },
     
     // Enhanced Solana wallet detection using Jupiter Wallet Kit
@@ -882,6 +888,9 @@ createApp({ // vue 3
     
     selectWallet(walletName) {
       this.selectedWallet = walletName;
+      this.lastSelectedWallet = walletName;
+      // Store in localStorage for persistence across page refreshes
+      localStorage.setItem('lastSelectedWallet', walletName);
       // Auto-select wallet method if wallet is selected
       if (this.detectedWallets.length > 0) {
         this.keyGenMethod = 'wallet';
@@ -894,6 +903,19 @@ createApp({ // vue 3
       setTimeout(() => {
         this.detectWallets();
       }, 1000);
+    },
+    
+    // Restore previously selected wallet
+    restoreSelectedWallet() {
+      const storedWallet = localStorage.getItem('lastSelectedWallet');
+      if (storedWallet && this.detectedWallets.some(w => w.name === storedWallet)) {
+        console.log('Restoring previously selected wallet:', storedWallet);
+        this.selectedWallet = storedWallet;
+        this.lastSelectedWallet = storedWallet;
+        if (this.detectedWallets.length > 0) {
+          this.keyGenMethod = 'wallet';
+        }
+      }
     },
     
     // Username Validation Methods
@@ -1633,8 +1655,13 @@ createApp({ // vue 3
           break;
           
         case 'expired':
-          this.addPaymentLog('Payment window expired', 'error');
+          this.addPaymentLog('Payment window expired - stopping monitoring', 'error');
           this.stopCountdown();
+          this.stopFallbackPolling();
+          // Close WebSocket if open
+          if (this.ws) {
+            this.ws.close(1000, 'Channel expired');
+          }
           break;
       }
     },
@@ -1741,6 +1768,12 @@ createApp({ // vue 3
               console.log('Payment details restored from polling:', this.paymentDetails);
               this.addPaymentLog('Payment details restored - wallet functionality available', 'success');
               
+              // Re-detect wallets to ensure they're available for the payment UI
+              if (this.detectedWallets.length === 0) {
+                console.log('Re-detecting wallets for payment functionality...');
+                this.detectWallets();
+              }
+              
               // Generate QR code if not already shown and ensure UI is ready
               this.$nextTick(() => {
                 if (this.showPaymentQR) {
@@ -1769,10 +1802,16 @@ createApp({ // vue 3
               this.updateCountdown(data.channel.expiresAt);
             }
             
-            // Stop polling if account is completed or failed
+            // Stop polling if account is completed, failed, or expired
             if (data.channel.status === 'completed' || data.channel.status === 'failed' || data.channel.status === 'expired') {
-              console.log('Payment completed/failed, stopping polling');
+              console.log(`Payment ${data.channel.status}, stopping polling`);
               this.stopFallbackPolling();
+              if (data.channel.status === 'expired') {
+                // Also close WebSocket for expired channels
+                if (this.ws) {
+                  this.ws.close(1000, 'Channel expired');
+                }
+              }
             }
           } else {
             console.error('Poll response error:', data.error);
@@ -2143,8 +2182,11 @@ createApp({ // vue 3
       this.usernameStatus = '';
       this.usernameError = '';
       this.selectedWallet = null;
+      this.lastSelectedWallet = null;
       this.keyGenMethod = 'random';
       this.showKeys = false;
+      // Clear stored wallet selection
+      localStorage.removeItem('lastSelectedWallet');
       this.paymentMethod = 'manual';
       this.requestUsername = '';
       this.requestMessage = '';
@@ -3099,10 +3141,11 @@ createApp({ // vue 3
       this.showPaymentQR = !this.showPaymentQR;
       
       if (this.showPaymentQR) {
-        // Generate QR code when showing
-        this.$nextTick(() => {
+        console.log('Showing payment QR, payment details available:', !!this.paymentDetails);
+        // Generate QR code when showing with a small delay to ensure DOM is ready
+        setTimeout(() => {
           this.generatePaymentQR();
-        });
+        }, 100);
       }
     },
     
@@ -3110,10 +3153,12 @@ createApp({ // vue 3
       // Ensure payment details are available before generating QR
       if (!this.paymentDetails || !this.paymentDetails.address) {
         console.log('Payment details not available for QR generation, fetching...');
+        this.addPaymentLog('Fetching payment details for QR code...', 'info');
         const detailsAvailable = await this.ensurePaymentDetailsAvailable();
         if (!detailsAvailable) {
           console.error('Cannot generate QR - payment details not available');
           this.addPaymentLog('Cannot generate QR code - payment details not available', 'error');
+          alert('Payment details are not available. Please refresh the page and try again.');
           return;
         }
       }
@@ -3122,7 +3167,7 @@ createApp({ // vue 3
         const amount = parseFloat(this.paymentDetails.amountFormatted.split(' ')[0]);
         const cryptoType = this.paymentDetails.cryptoType;
         const address = this.paymentDetails.address;
-        const memo = this.paymentDetails.memo;
+        const memo = this.paymentDetails.memo || '';
         
         let qrData = '';
         
@@ -3130,7 +3175,7 @@ createApp({ // vue 3
         switch (cryptoType) {
           case 'SOL':
             // Use simple JSON format that most Solana wallets can parse
-            qrData = `solana:${address}?amount=${amount}&memo=${memo}`;
+            qrData = memo ? `solana:${address}?amount=${amount}&memo=${memo}` : `solana:${address}?amount=${amount}`;
             break;
             
           case 'ETH':
@@ -3154,10 +3199,25 @@ createApp({ // vue 3
         }
         
         console.log('Generating QR for:', qrData);
+        this.addPaymentLog('Generating QR code...', 'info');
         
-        // Clear any existing QR code
-        const qrContainer = this.$refs.paymentQR;
+        // Wait for next tick to ensure DOM is updated
+        await this.$nextTick();
+        
+        // Try multiple ways to find the QR container
+        let qrContainer = this.$refs.paymentQR;
+        if (!qrContainer) {
+          qrContainer = document.getElementById('paymentQR');
+        }
+        if (!qrContainer) {
+          qrContainer = document.querySelector('[ref="paymentQR"]');
+        }
+        if (!qrContainer) {
+          qrContainer = document.querySelector('.payment-qr-container');
+        }
+        
         if (qrContainer) {
+          // Clear any existing QR code
           qrContainer.innerHTML = '';
           
           // Generate new QR code
@@ -3171,13 +3231,17 @@ createApp({ // vue 3
           });
           
           console.log('QR code generated successfully');
+          this.addPaymentLog('QR code generated successfully', 'success');
         } else {
-          console.error('QR container not found');
+          console.error('QR container not found in DOM');
+          this.addPaymentLog('QR container not found - ensure QR section is visible', 'error');
+          alert('QR code container not found. Please ensure the QR section is visible and try again.');
         }
         
       } catch (error) {
         console.error('Error generating QR code:', error);
         this.addPaymentLog(`QR generation failed: ${error.message}`, 'error');
+        alert(`Failed to generate QR code: ${error.message}`);
       }
     },
 
@@ -3266,6 +3330,32 @@ createApp({ // vue 3
         this.addPaymentLog('WebSocket initialization failed - using polling', 'warning');
       }
     },
+    
+    // Debug method to check payment state
+    debugPaymentState() {
+      console.log('=== Payment State Debug ===');
+      console.log('Payment Channel ID:', this.paymentChannelId);
+      console.log('Payment Details:', this.paymentDetails);
+      console.log('Show Payment QR:', this.showPaymentQR);
+      console.log('Selected Wallet:', this.selectedWallet);
+      console.log('Detected Wallets:', this.detectedWallets.length);
+      console.log('WebSocket Status:', this.wsConnectionStatus);
+      console.log('Polling Active:', !!this.fallbackPollingInterval);
+      console.log('Onboarding Step:', this.onboardingStep);
+      console.log('Payment Method:', this.paymentMethod);
+      
+      // Check for QR container
+      const qrContainer = this.$refs.paymentQR || document.getElementById('paymentQR');
+      console.log('QR Container Found:', !!qrContainer);
+      
+      if (this.paymentDetails) {
+        console.log('Payment Address:', this.paymentDetails.address);
+        console.log('Payment Amount:', this.paymentDetails.amountFormatted);
+        console.log('Payment Crypto:', this.paymentDetails.cryptoType);
+      }
+      
+      console.log('=== End Debug ===');
+    },
   },
       mounted() {
     // Ensure newAccount is properly initialized
@@ -3297,6 +3387,12 @@ createApp({ // vue 3
       console.log('Second retry - checking for wallets...');
       this.detectWallets();
     }, 5000);
+    
+    // Final retry for wallets that load very late
+    setTimeout(() => {
+      console.log('Final retry - checking for wallets...');
+      this.detectWallets();
+    }, 10000);
     
     // Set default key generation method based on wallet availability
     if (this.detectedWallets.length === 0) {

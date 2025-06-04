@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.33",
-  "generated": "2025-06-04T21:39:24Z",
+  "version": "2025.06.04.18",
+  "generated": "2025-06-04T21:46:55Z",
   "files": {
-    "/css/customaf.css": {
-      "checksum": "77f6758aadb843a30c49b08f154a042b",
-      "size": 300474,
-      "priority": "critical"
-    },
     "/css/v3.css": {
       "checksum": "7056941e006936405769b10c0162a6f6",
       "size": 16143,
@@ -614,11 +609,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/honeyblocks/block/index.html": {
-      "checksum": "efc02e0ee6711a7818934367c74f2440",
-      "size": 31304,
-      "priority": "important"
     },
     "/honeyblocks/detail/index.html": {
       "checksum": "bd30022a2dc617f85ce7cb4b6099475d",
@@ -1401,7 +1391,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "12c50fc8a9dc68bffed9173fac63970a",
+      "checksum": "34f4e36a5c0fced51eb8d7542188538f",
       "size": 36317,
       "priority": "important"
     },
@@ -1471,8 +1461,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-qr.js": {
-      "checksum": "5db5beb32c7405db97d75ba76f8997ef",
-      "size": 120367,
+      "checksum": "8330be66c272737161c0ae59989f1d4e",
+      "size": 124733,
       "priority": "important"
     },
     "/js/v3-user.js": {
@@ -1591,7 +1581,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "82628ecc51095a9f82f4aa0bcf3ac5ab",
+      "checksum": "bc41eb6d210adeb646a138006ce477dc",
       "size": 7300,
       "priority": "important"
     },
@@ -1664,11 +1654,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/assets/textures/sky/milkyway.jpg": {
-      "checksum": "82c7278828d85ace9036d87c72801e20",
-      "size": 124780,
-      "priority": "page-specific"
     },
     "/naf-playground/css/style.css": {
       "checksum": "7597b95ad89083ebdd726b24009e0c5c",
