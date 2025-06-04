@@ -1,4 +1,4 @@
-this.version = "2025.06.04.28";
+this.version = "2025.06.04.29";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.28",
-  "generated": "2025-06-04T20:56:48Z",
+  "version": "2025.06.04.14",
+  "generated": "2025-06-04T21:06:11Z",
   "files": {
-    "/css/bootstrap-reboot.css": {
-      "checksum": "4092253288fe829ab354cc4a7d73450a",
-      "size": 11895,
-      "priority": "critical"
-    },
     "/css/bootstrap-utilities.css": {
       "checksum": "de92f706ebf333fb981cbb719aa5130d",
       "size": 101679,
@@ -654,11 +649,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/css/smde-comment.css": {
-      "checksum": "a2a7d007f4c51ffdba6937b4c79e29f7",
-      "size": 13071,
-      "priority": "important"
     },
     "/css/smde.css": {
       "checksum": "80e8346c6b7648cc3b82c94f279de4d4",
@@ -1481,7 +1471,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "0c5f6f44158a4336508b2607fd248476",
+      "checksum": "0f4e44c1b0451601f5b01644b79400fd",
       "size": 36317,
       "priority": "important"
     },
@@ -1671,7 +1661,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "ed81df163b8620586c1e5d415f7aafd3",
+      "checksum": "65c53d4912856ee05ead54818700bcb5",
       "size": 7300,
       "priority": "important"
     },
@@ -1744,11 +1734,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/js/aframe-environment-component.min.js": {
-      "checksum": "b24c9108753f2af21987ba83c9674ff1",
-      "size": 49209,
-      "priority": "page-specific"
     },
     "/js/aframe-extras.min.js": {
       "checksum": "0a0818f80d22eea6b402187404738a23",
@@ -2644,11 +2629,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/js/navue-old.js": {
-      "checksum": "22b4cad654ee4fba41856abd5057b0ef",
-      "size": 49954,
-      "priority": "lazy"
     },
     "/js/onlyhash-old.js": {
       "checksum": "5fbe0450d3cf05ca50a32db1388d35b7",

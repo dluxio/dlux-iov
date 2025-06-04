@@ -3642,16 +3642,30 @@ export default {
         }
         .auth-method-btn {
           width: 100%;
+          min-height: 50px;
           height: 50px;
+          max-height: 50px;
           background-color: #1a1a1a;
           border: 2px solid #333;
           border-radius: 8px;
           padding: 0.5rem;
+          display: -webkit-box;
+          display: -ms-flexbox;
           display: flex;
+          -webkit-box-orient: vertical;
+          -webkit-box-direction: normal;
+          -ms-flex-direction: column;
+          flex-direction: column;
+          -webkit-box-align: center;
+          -ms-flex-align: center;
           align-items: center;
+          -webkit-box-pack: center;
+          -ms-flex-pack: center;
           justify-content: center;
+          -webkit-transition: all 0.2s ease;
           transition: all 0.2s ease;
           cursor: pointer;
+          position: relative;
         }
         .auth-method-btn:hover:not(:disabled) {
           background-color: #2a2a2a;
@@ -3668,7 +3682,19 @@ export default {
         .auth-method-btn img {
           max-width: 100%;
           max-height: 100%;
+          -o-object-fit: contain;
           object-fit: contain;
+          position: relative;
+          z-index: 1;
+        }
+        .auth-method-btn small {
+          position: relative;
+          z-index: 1;
+          margin-top: 0.25rem;
+        }
+        .auth-method-btn .badge {
+          position: relative;
+          z-index: 1;
         }
       `;
       document.head.appendChild(style);
@@ -3985,17 +4011,17 @@ export default {
               <!-- PEN Management Button -->
               <div v-if="PEN" class="mb-2">
               
-                <div class="row row-cols-2 g-2">
+                <div class="row">
                   <!-- No Wallet / Set Password -->
-                  <div v-if="!hasEncryptedWallet" class="col">
+                  <div v-if="!hasEncryptedWallet" class="col-4 p-1 mx-auto">
                     <button class="bg-card text-dark btn btn-primary btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="setupNewPin()" style="border: #000 solid 1px;">
                       <i class="fa-solid fa-wallet mb-1"></i>
                       <small>Set Password</small>
-                      <span class="badge bg-dark mt-1">* * *</span>
+                       <span class="badge bg-dark mt-1">* * *</span>
                     </button>
                   </div>
                   <!-- Has Wallet -->
-                  <div class="col" v-if="hasEncryptedWallet">
+                  <div class="col-4 p-1" v-if="hasEncryptedWallet">
                     <!-- Manage Keys -->
                     <button class="bg-card text-dark btn btn-info btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="openPenManagement()" style="border: #000 solid 1px;">
                       <i class="fa-solid fa-key mb-1"></i>
@@ -4005,7 +4031,7 @@ export default {
                       </span>
                     </button>
                   </div>
-                  <div class="col" v-if="hasEncryptedWallet">
+                  <div class="col-4 p-1" v-if="hasEncryptedWallet">
                     <!-- Unlock Wallet -->
                     <button v-if="!PIN && !decrypted.pin" class="bg-card text-dark btn btn-warning btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="requestPinForDecryption()" style="border: #000 solid 1px;">
                       <i class="fa-solid fa-lock mb-1"></i>
@@ -4017,7 +4043,7 @@ export default {
                       <small>Lock Wallet</small>
                     </button>
                   </div>
-                  <div class="col" v-if="hasEncryptedWallet">
+                  <div class="col-4 p-1" v-if="hasEncryptedWallet">
                     <button type="button" class="bg-card btn btn-danger text-dark btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="deleteWallet()" style="border: #000 solid 1px;">
                       <i class="fa-solid fa-trash mb-1"></i>
                       <small>Delete</small>
