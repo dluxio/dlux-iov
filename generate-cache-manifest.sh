@@ -19,9 +19,9 @@ else
     exit 1
 fi
 
-# Output files
-MANIFEST_FILE="cache-manifest.json"
+# Output files (no longer need separate cache-manifest.json)
 TEMP_SW="sw-temp.js"
+TEMP_MANIFEST="temp-manifest.json"
 
 echo "📋 Platform: $(uname -s), MD5 command: $MD5_CMD"
 
@@ -35,7 +35,7 @@ else
 fi
 
 # Initialize manifest
-cat > "$MANIFEST_FILE" << EOF
+cat > "$TEMP_MANIFEST" << EOF
 {
   "version": "$TIMESTAMP",
   "generated": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
@@ -54,10 +54,14 @@ IMPORTANT_FILES=($(awk '/const importantResources = \[/,/^\];$/' sw.js | grep -o
 # Extract page-specific files
 PAGE_SPECIFIC_FILES=($(awk '/const pageSpecificResources = \{/,/^\};$/' sw.js | grep -o '`/[^`]*`' | sed 's/`\///g' | sed 's/`//g'))
 
+# Extract skipped files
+SKIPPED_FILES=($(awk '/const skippedResources = \[/,/^\];$/' sw.js | grep -o '`/[^`]*`' | sed 's/`\///g' | sed 's/`//g'))
+
 echo "📊 Extracted from service worker:"
 echo "   🚀 Critical files: ${#CRITICAL_FILES[@]}"
 echo "   ⚡ Important files: ${#IMPORTANT_FILES[@]}"
 echo "   🎯 Page-specific files: ${#PAGE_SPECIFIC_FILES[@]}"
+echo "   🐌 Skipped files (will be lazy): ${#SKIPPED_FILES[@]}"
 
 # Validate extraction
 if [ ${#CRITICAL_FILES[@]} -eq 0 ] && [ ${#IMPORTANT_FILES[@]} -eq 0 ]; then
@@ -73,6 +77,7 @@ if [ ${#CRITICAL_FILES[@]} -eq 0 ] && [ ${#IMPORTANT_FILES[@]} -eq 0 ]; then
         "sw.js"
     )
     IMPORTANT_FILES=()
+    SKIPPED_FILES=()
 fi
 
 # Function to add file with checksum
@@ -87,11 +92,11 @@ add_file_checksum() {
         local checksum=$(eval "$MD5_CMD \"$file\" | $MD5_EXTRACT")
         local size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "0")
         
-        echo "    \"/$file\": {" >> "$MANIFEST_FILE"
-        echo "      \"checksum\": \"$checksum\"," >> "$MANIFEST_FILE"
-        echo "      \"size\": $size," >> "$MANIFEST_FILE"
-        echo "      \"priority\": \"$priority\"" >> "$MANIFEST_FILE"
-        echo "    }," >> "$MANIFEST_FILE"
+        echo "    \"/$file\": {" >> "$TEMP_MANIFEST"
+        echo "      \"checksum\": \"$checksum\"," >> "$TEMP_MANIFEST"
+        echo "      \"size\": $size," >> "$TEMP_MANIFEST"
+        echo "      \"priority\": \"$priority\"" >> "$TEMP_MANIFEST"
+        echo "    }," >> "$TEMP_MANIFEST"
         
         echo "✅ /$file ($checksum)"
     else
@@ -114,12 +119,17 @@ for file in "${PAGE_SPECIFIC_FILES[@]}"; do
     add_file_checksum "$file" "page-specific"
 done
 
-# Remove trailing comma and close JSON
-sed -i.bak '$ s/,$//' "$MANIFEST_FILE" && rm "${MANIFEST_FILE}.bak"
-echo "  }" >> "$MANIFEST_FILE"
-echo "}" >> "$MANIFEST_FILE"
+echo "📁 Processing skipped files (as lazy)..."
+for file in "${SKIPPED_FILES[@]}"; do
+    add_file_checksum "$file" "lazy"
+done
 
-echo "📦 Generated cache manifest: $MANIFEST_FILE"
+# Remove trailing comma and close JSON
+sed -i.bak '$ s/,$//' "$TEMP_MANIFEST" && rm "${TEMP_MANIFEST}.bak"
+echo "  }" >> "$TEMP_MANIFEST"
+echo "}" >> "$TEMP_MANIFEST"
+
+echo "📦 Generated temporary cache manifest"
 
 # Now update the service worker with the new version and manifest
 echo "🔄 Updating service worker..."
@@ -141,25 +151,27 @@ cat >> "$TEMP_SW" << 'EOF'
 self.cacheManifest = 
 EOF
 
-cat "$MANIFEST_FILE" >> "$TEMP_SW"
+cat "$TEMP_MANIFEST" >> "$TEMP_SW"
 echo ";" >> "$TEMP_SW"
 
 # Replace original service worker
 mv "$TEMP_SW" sw.js
 
 echo "✅ Updated sw.js with version $TIMESTAMP and cache manifest"
-echo "📊 Manifest contains $(grep -c '"checksum"' "$MANIFEST_FILE") files"
+echo "📊 Manifest contains $(grep -c '"checksum"' "$TEMP_MANIFEST") files"
 
 # Calculate total size
-total_size=$(jq -r '.files | to_entries | map(.value.size) | add' "$MANIFEST_FILE" 2>/dev/null || echo "unknown")
+total_size=$(jq -r '.files | to_entries | map(.value.size) | add' "$TEMP_MANIFEST" 2>/dev/null || echo "unknown")
 if [ "$total_size" != "unknown" ] && [ "$total_size" -gt 0 ]; then
     total_mb=$(echo "scale=2; $total_size / 1024 / 1024" | bc 2>/dev/null || echo "$(($total_size / 1024 / 1024))")
     echo "📏 Total cache size: ${total_mb}MB"
 fi
 
-echo "🎉 Cache manifest generation complete!"
+# Clean up temporary manifest file
+rm -f "$TEMP_MANIFEST"
+
+echo "🎉 Cache manifest integration complete!"
 echo ""
-echo "Next steps:"
-echo "1. Commit the updated sw.js"
-echo "2. Deploy to enable smart cache updates"
-echo "3. Users will only download changed files on next visit" 
+echo "✅ All files now managed through self.cacheManifest in sw.js"
+echo "✅ Duplicate file arrays can now be removed from sw.js"
+echo "✅ No more separate cache-manifest.json file needed"

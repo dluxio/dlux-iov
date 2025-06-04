@@ -89,32 +89,35 @@ if [ -f "$file" ]; then
         all_files=$(git ls-files -- '*.html' '*.css' '*.js' '*.png' '*.jpg' '*.svg' '*.ico' '*.woff' '*.woff2' '*.ttf' '*.eot' | \
                    grep -vE '(.*/test/.*|.*/tests/.*|node_modules/.*|\.git/.*)')
 
-        # Extract current cached files from sw.js
-        echo "Extracting currently cached files from service worker..."
-        critical_files=$(awk '/const criticalResources = \[/,/^\];$/' "$file" | grep -o '`/[^`]*`' | sed 's/`\///g' | sed 's/`//g')
-        important_files=$(awk '/const importantResources = \[/,/^\];$/' "$file" | grep -o '`/[^`]*`' | sed 's/`\///g' | sed 's/`//g')
-        pagespecific_files=$(awk '/const pageSpecificResources = \{/,/^\};$/' "$file" | grep -o '`/[^`]*`' | sed 's/`\///g' | sed 's/`//g')
-        skipped_files=$(awk '/const skippedResources = \[/,/^\];$/' "$file" | grep -o '`/[^`]*`' | sed 's/`\///g' | sed 's/`//g')
+        # Extract current cached files from cacheManifest in sw.js
+        echo "Extracting currently cached files from cache manifest..."
+        
+        # Extract files from the cacheManifest object
+        cached_files=$(awk '/self\.cacheManifest = /,/^};?$/' "$file" | \
+                      grep -E '^\s*"/' | \
+                      sed 's/.*"\([^"]*\)".*/\1/' | \
+                      sed 's|^/||' | \
+                      sort | uniq)
 
-        cached_files=$(echo -e "$critical_files\n$important_files\n$pagespecific_files\n$skipped_files" | sort | uniq | grep -v '^$')
+        # Count files by priority
+        critical_count=$(awk '/self\.cacheManifest = /,/^};?$/' "$file" | grep -A 3 '"priority": "critical"' | grep -c '"priority": "critical"')
+        important_count=$(awk '/self\.cacheManifest = /,/^};?$/' "$file" | grep -A 3 '"priority": "important"' | grep -c '"priority": "important"')
+        pagespecific_count=$(awk '/self\.cacheManifest = /,/^};?$/' "$file" | grep -A 3 '"priority": "page-specific"' | grep -c '"priority": "page-specific"')
+        lazy_count=$(awk '/self\.cacheManifest = /,/^};?$/' "$file" | grep -A 3 '"priority": "lazy"' | grep -c '"priority": "lazy"')
 
         total_cached=$(echo "$cached_files" | grep -v '^$' | wc -l)
-        critical_count=$(echo "$critical_files" | grep -v '^$' | wc -l)
-        important_count=$(echo "$important_files" | grep -v '^$' | wc -l)
-        pagespecific_count=$(echo "$pagespecific_files" | grep -v '^$' | wc -l)
-        skipped_count=$(echo "$skipped_files" | grep -v '^$' | wc -l)
 
-        echo "📊 Current service worker cache status:"
+        echo "📊 Current cache manifest status:"
         echo "   🚀 Critical: $critical_count files"
         echo "   ⚡ Important: $important_count files"
         echo "   🎯 Page-specific: $pagespecific_count files"
-        echo "   ❌ Skipped: $skipped_count files"
+        echo "   😴 Lazy: $lazy_count files"
         echo "   📝 Total tracked: $total_cached files"
 
         if [ "$total_cached" -lt 50 ]; then
             echo "⚠️  Warning: Expected more tracked files, only found $total_cached"
         else
-            echo "✅ Cache extraction looks good"
+            echo "✅ Cache manifest extraction looks good"
         fi
 
         new_files=()
@@ -126,146 +129,35 @@ if [ -f "$file" ]; then
 
         if [ ${#new_files[@]} -gt 0 ]; then
             echo ""
-            echo "🔍 Found ${#new_files[@]} new cacheable files not in service worker:"
+            echo "🔍 Found ${#new_files[@]} new cacheable files not in cache manifest:"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             for new_file in "${new_files[@]}"; do echo "📄 $new_file"; done
 
             echo ""
-            echo "Categorization Guide:"
+            echo "❗ IMPORTANT: The cache manifest system has changed!"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "🚀 [C]ritical - Essential for first paint"
-            echo "⚡ [I]mportant - Common functionality"
-            echo "🎯 [P]age-specific - Specialized features"
-            echo "❌ [S]kip - Non-essential or generated files"
+            echo "The service worker now uses a cache manifest instead of hardcoded arrays."
+            echo "To add these files to the cache:"
             echo ""
-
-            critical_additions=()
-            important_additions=()
-            page_additions=()
-            skipped_additions=()
-
-            for new_file in "${new_files[@]}"; do
-                suggestion=""
-                if [[ "$new_file" =~ ^(index\.html|about/index\.html)$ ]]; then
-                    suggestion=" (suggested: Critical)"
-                elif [[ "$new_file" =~ \.(css)$ ]] && [[ "$new_file" =~ (bootstrap|custom|v3) ]]; then
-                    suggestion=" (suggested: Critical)"
-                elif [[ "$new_file" =~ ^js/(v3-|vue\.esm|bootstrap\.bundle) ]]; then
-                    suggestion=" (suggested: Critical)"
-                elif [[ "$new_file" =~ ^(create|nfts|user|dlux|dex|hub|dao|blog)/index\.html$ ]]; then
-                    suggestion=" (suggested: Important)"
-                elif [[ "$new_file" =~ ^js/(v3-|methods-|nav|session|data) ]]; then
-                    suggestion=" (suggested: Important)"
-                elif [[ "$new_file" =~ (aframe|monaco|playground|chat) ]]; then
-                    suggestion=" (suggested: Page-specific)"
-                elif [[ "$new_file" =~ (test|spec|example|demo) ]]; then
-                    suggestion=" (suggested: Skip)"
-                fi
-
-                while true; do
-                    echo -n "📄 $new_file$suggestion - [C/I/P/S]: "
-                    read -r choice
-                    case $choice in
-                        [Cc]* ) critical_additions+=("$new_file"); break ;;
-                        [Ii]* ) important_additions+=("$new_file"); break ;;
-                        [Pp]* ) 
-                            echo -n "   Which page group? [create/aframe/monaco/playground/chat/mint/other]: "
-                            read -r page_group
-                            page_additions+=("$page_group:$new_file")
-                            break ;;
-                        [Ss]* ) skipped_additions+=("$new_file"); break ;;
-                        * ) echo "   ❌ Please choose C, I, P, or S." ;;
-                    esac
-                done
-            done
-
-            if [ ${#critical_additions[@]} -gt 0 ] || [ ${#important_additions[@]} -gt 0 ] || [ ${#page_additions[@]} -gt 0 ] || [ ${#skipped_additions[@]} -gt 0 ]; then
-                echo ""
-                echo "📝 Updating service worker with new categorizations..."
-                cp "$file" "${file}.backup"
-
-                for new_file in "${critical_additions[@]}"; do
-                    cross_platform_sed "/const criticalResources = \[/,/\];/{
-                        /\];/{
-                            i\\
-  \`/$new_file\`,
-                        }
-                    }" "$file"
-                done
-
-                for new_file in "${important_additions[@]}"; do
-                    cross_platform_sed "/const importantResources = \[/,/\];/{
-                        /\];/{
-                            i\\
-  \`/$new_file\`,
-                        }
-                    }" "$file"
-                done
-
-                for addition in "${page_additions[@]}"; do
-                    page_group="${addition%%:*}"
-                    new_file="${addition#*:}"
-                    cross_platform_sed "/'\\/$page_group': \\[/,/\]/{ 
-                        /\]/{
-                            i\\
-    \`/$new_file\`,
-                        }
-                    }" "$file"
-                done
-
-                for new_file in "${skipped_additions[@]}"; do
-                    cross_platform_sed "/const skippedResources = \[/,/\];/{
-                        /\];/{
-                            i\\
-  \`/$new_file\`,
-                        }
-                    }" "$file"
-                done
-
-                echo ""
-                echo "📊 Categorization Summary:"
-                echo "   🚀 Critical: ${#critical_additions[@]} files"
-                echo "   ⚡ Important: ${#important_additions[@]} files" 
-                echo "   🎯 Page-specific: ${#page_additions[@]} files"
-                echo "   ❌ Skipped: ${#skipped_additions[@]} files"
-                echo ""
-                echo "   🎉 Service worker updated successfully!"
-                echo "   💾 Backup saved as ${file}.backup"
-                
-                # Generate cache manifest after service worker updates
-                echo ""
-                echo "🔄 Generating cache manifest with checksums..."
-                if [ -f "./generate-cache-manifest.sh" ]; then
-                    chmod +x ./generate-cache-manifest.sh
-                    ./generate-cache-manifest.sh "$new_version"
-                    if [ $? -eq 0 ]; then
-                        echo "✅ Cache manifest generated successfully"
-                    else
-                        echo "❌ Cache manifest generation failed"
-                        echo "   Continuing with deployment..."
-                    fi
-                else
-                    echo "⚠️  generate-cache-manifest.sh not found, skipping cache manifest generation"
-                fi
-            fi
-        else
-            echo "✅ No new cacheable files found - service worker is up to date!"
+            echo "1. 🛠️  Run: ./generate-cache-manifest.sh \"$new_version\""
+            echo "   This will categorize and add the new files automatically"
+            echo ""
+            echo "2. 📝 Or manually edit the generated manifest if needed"
+            echo ""
+            echo "3. 🔧 For automated management, consider using GitHub Actions"
+            echo ""
+            echo "Categorization Guide:"
+            echo "🚀 Critical - Essential for first paint (index.html, main CSS/JS)"
+            echo "⚡ Important - Common functionality (navigation, auth, core features)"
+            echo "🎯 Page-specific - Specialized features (aframe, monaco, playground)"
+            echo "😴 Lazy - Non-essential files (old versions, tests, optional assets)"
             
-            # Still generate cache manifest to catch any file changes
             echo ""
-            echo "🔄 Checking for file changes and updating cache manifest..."
-            if [ -f "./generate-cache-manifest.sh" ]; then
-                chmod +x ./generate-cache-manifest.sh
-                ./generate-cache-manifest.sh "$new_version"
-                if [ $? -eq 0 ]; then
-                    echo "✅ Cache manifest updated successfully"
-                else
-                    echo "❌ Cache manifest update failed"
-                    echo "   Continuing with deployment..."
-                fi
-            else
-                echo "⚠️  generate-cache-manifest.sh not found, skipping cache manifest generation"
-            fi
+            echo "✅ Version updated to $new_version"
+            echo "ℹ️  Run ./generate-cache-manifest.sh \"$new_version\" to update cache manifest"
+        else
+            echo "✅ No new cacheable files found - cache manifest is up to date!"
+            echo "ℹ️  To regenerate cache manifest: ./generate-cache-manifest.sh \"$new_version\""
         fi
 
         # Cross-platform compatible in-place editing

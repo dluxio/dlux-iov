@@ -1,0 +1,166 @@
+name: Update Cache Manifest
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - '**.html'
+      - '**.css'
+      - '**.js'
+      - '**.png'
+      - '**.jpg'
+      - '**.svg'
+      - '**.ico'
+      - '**.woff'
+      - '**.woff2'
+      - '**.ttf'
+      - '**.eot'
+  workflow_dispatch:
+
+jobs:
+  update-cache-manifest:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Check for cacheable file changes
+      id: check-changes
+      run: |
+        # Get the list of changed files in the push
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "Manual trigger - checking all cacheable files"
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+        else
+          changed_files=$(git diff --name-only ${{ github.event.before }}..${{ github.sha }} | grep -E '\.(html|css|js|png|jpg|svg|ico|woff|woff2|ttf|eot)$' | grep -vE '(.*/test/.*|.*/tests/.*|node_modules/.*|\.git/.*)' || true)
+          if [ -n "$changed_files" ]; then
+            echo "Found cacheable file changes:"
+            echo "$changed_files"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "No cacheable file changes detected"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+        fi
+
+    - name: Generate new version
+      if: steps.check-changes.outputs.has_changes == 'true'
+      id: version
+      run: |
+        current_day=$(date +%Y.%m.%d)
+        
+        # Extract current version from sw.js
+        if [ -f "sw.js" ]; then
+          current_version=$(head -n 1 sw.js | grep -o '"[0-9]\{4\}\.[0-9]\{2\}\.[0-9]\{2\}\.[0-9]\+"' | tr -d '"')
+          version_date=$(echo $current_version | cut -d. -f1-3)
+          version_number=$(echo $current_version | cut -d. -f4)
+          
+          if [ "$version_date" = "$current_day" ]; then
+            new_number=$((version_number + 1))
+            new_version="$current_day.$new_number"
+          else
+            new_version="$current_day.1"
+          fi
+        else
+          new_version="$current_day.1"
+        fi
+        
+        echo "new_version=$new_version" >> $GITHUB_OUTPUT
+        echo "Generated version: $new_version"
+
+    - name: Update service worker version
+      if: steps.check-changes.outputs.has_changes == 'true'
+      run: |
+        if [ -f "sw.js" ]; then
+          sed -i "1s/.*/this.version = \"${{ steps.version.outputs.new_version }}\";/" sw.js
+          echo "Updated sw.js version to ${{ steps.version.outputs.new_version }}"
+        fi
+
+    - name: Update cache manifest
+      if: steps.check-changes.outputs.has_changes == 'true'
+      run: |
+        if [ -f "generate-cache-manifest.sh" ]; then
+          chmod +x generate-cache-manifest.sh
+          ./generate-cache-manifest.sh "${{ steps.version.outputs.new_version }}"
+          echo "Cache manifest updated successfully"
+        else
+          echo "Warning: generate-cache-manifest.sh not found"
+        fi
+
+    - name: Update related files
+      if: steps.check-changes.outputs.has_changes == 'true'
+      run: |
+        new_version="${{ steps.version.outputs.new_version }}"
+        
+        # Update reg-sw.js files
+        if find . -name "reg-sw.js" -type f | head -1 | grep -q .; then
+          find . -name "reg-sw.js" -type f -exec sed -i "s/const version = '[^']*'/const version = '$new_version'/" {} \;
+          echo "Updated reg-sw.js files"
+        fi
+        
+        # Update sw-monitor.js
+        if [ -f "js/sw-monitor.js" ]; then
+          if grep -q "desiredVersion:" js/sw-monitor.js; then
+            sed -i "s/desiredVersion: '[^']*'/desiredVersion: '$new_version'/" js/sw-monitor.js
+          else
+            sed -i "/swVersion: null,/a\\      desiredVersion: '$new_version'," js/sw-monitor.js
+          fi
+          echo "Updated sw-monitor.js"
+        fi
+
+    - name: Check for changes to commit
+      if: steps.check-changes.outputs.has_changes == 'true'
+      id: git-check
+      run: |
+        if git diff --quiet; then
+          echo "changes=false" >> $GITHUB_OUTPUT
+          echo "No changes to commit"
+        else
+          echo "changes=true" >> $GITHUB_OUTPUT
+          echo "Changes detected:"
+          git diff --name-only
+        fi
+
+    - name: Commit and push changes
+      if: steps.check-changes.outputs.has_changes == 'true' && steps.git-check.outputs.changes == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "🤖 Auto-update cache manifest to ${{ steps.version.outputs.new_version }}"
+        git push
+
+    - name: Create summary
+      if: steps.check-changes.outputs.has_changes == 'true'
+      run: |
+        echo "## Cache Manifest Update Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**New Version:** \`${{ steps.version.outputs.new_version }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f "sw.js" ]; then
+          total_files=$(grep -o '"[^"]*":' sw.js | grep '^"/' | wc -l)
+          critical_files=$(grep -A 3 '"priority": "critical"' sw.js | grep -c '"priority": "critical"')
+          important_files=$(grep -A 3 '"priority": "important"' sw.js | grep -c '"priority": "important"')
+          pagespecific_files=$(grep -A 3 '"priority": "page-specific"' sw.js | grep -c '"priority": "page-specific"')
+          lazy_files=$(grep -A 3 '"priority": "lazy"' sw.js | grep -c '"priority": "lazy"')
+          
+          echo "**Cache Statistics:**" >> $GITHUB_STEP_SUMMARY
+          echo "- 🚀 Critical: $critical_files files" >> $GITHUB_STEP_SUMMARY
+          echo "- ⚡ Important: $important_files files" >> $GITHUB_STEP_SUMMARY
+          echo "- 🎯 Page-specific: $pagespecific_files files" >> $GITHUB_STEP_SUMMARY
+          echo "- 😴 Lazy: $lazy_files files" >> $GITHUB_STEP_SUMMARY
+          echo "- 📝 **Total: $total_files files**" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [ "${{ steps.git-check.outputs.changes }}" = "true" ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Changes committed and pushed successfully" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "ℹ️ No changes needed - cache manifest is up to date" >> $GITHUB_STEP_SUMMARY
+        fi 
