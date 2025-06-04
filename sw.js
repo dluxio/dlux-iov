@@ -635,13 +635,8 @@ function formatBytes(bytes) {
 self.cacheManifest = 
 {
   "version": "2025.06.04.17",
-  "generated": "2025-06-04T20:15:44Z",
+  "generated": "2025-06-04T20:16:47Z",
   "files": {
-    "/css/custom.css": {
-      "checksum": "0935e3634304accec4568858a75c6b92",
-      "size": 329461,
-      "priority": "critical"
-    },
     "/js/vue.esm-browser.js": {
       "checksum": "232af68f6551a87a4732981749dd5265",
       "size": 531704,
@@ -653,8 +648,8 @@ self.cacheManifest =
       "priority": "critical"
     },
     "/sw.js": {
-      "checksum": "1cfb407a89830a6db4b2806ab30d8830",
-      "size": 94888,
+      "checksum": "40abe113dd231178c27223ea27b537dd",
+      "size": 94201,
       "priority": "critical"
     },
     "/about/index.html": {
@@ -721,11 +716,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/build/index.html": {
-      "checksum": "3e16dfd5fdbf5257fa8ea29a884030c9",
-      "size": 7761,
-      "priority": "important"
     },
     "/create/index.html": {
       "checksum": "5a3d0842df9543804d26ccfdeafdb495",
@@ -1842,11 +1832,6 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/aframe-builder/index.html": {
-      "checksum": "03e5a74732c20329e874a40f36526064",
-      "size": 388601,
-      "priority": "page-specific"
-    },
     "/aframe-builder/index2.html": {
       "checksum": "50d15bdba6ab42cde3109e5935abf189",
       "size": 119115,
@@ -2771,11 +2756,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/js/contractvue-old.js": {
-      "checksum": "4a8208d030e33a95bf6257b07395c9b9",
-      "size": 118501,
-      "priority": "lazy"
     },
     "/js/extensionvue-old.js": {
       "checksum": "3d09236bed876fd8b322bf03d6177758",
