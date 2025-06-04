@@ -1,4 +1,4 @@
-this.version = "2025.06.04.26";
+this.version = "2025.06.04.27";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.17",
-  "generated": "2025-06-04T20:37:32Z",
+  "version": "2025.06.04.27",
+  "generated": "2025-06-04T20:39:32Z",
   "files": {
-    "/sw.js": {
-      "checksum": "53bd8d7b3936a30efd6d7eed650277b7",
-      "size": 90540,
-      "priority": "critical"
-    },
     "/about/index.html": {
       "checksum": "e7ffd187fda973511537820e461fdbb4",
       "size": 46683,
@@ -669,11 +664,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/css/codemirror.min.css": {
-      "checksum": "c1da630111dc87f804761ecc75f89eac",
-      "size": 6037,
-      "priority": "important"
     },
     "/css/drag-sort.css": {
       "checksum": "693eee9d441c6e004ed4a7b413962c36",
@@ -1775,11 +1765,6 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/chat/index.html": {
-      "checksum": "319e465189cdb6ccfda4fe045fa68cca",
-      "size": 3707,
-      "priority": "page-specific"
-    },
     "/img/aframe.png": {
       "checksum": "8361db7f31590be699b6ca82a3ba2edd",
       "size": 38148,
@@ -2689,11 +2674,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/js/filesvue-old.js": {
-      "checksum": "4b39d9cd81599840f6b31e61e66efa84",
-      "size": 89644,
-      "priority": "lazy"
     },
     "/js/mde-old.js": {
       "checksum": "67a091a43612269b845cb304e43af640",
