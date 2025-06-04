@@ -1,4 +1,4 @@
-this.version = "2025.06.04.38";
+this.version = "2025.06.04.39";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.38",
-  "generated": "2025-06-04T22:41:50Z",
+  "version": "2025.06.04.39",
+  "generated": "2025-06-04T23:01:03Z",
   "files": {
-    "/img/ar-vr-icon.png": {
-      "checksum": "8779f6ca39128aedffc8884a9b9f121c",
-      "size": 49521,
-      "priority": "important"
-    },
     "/img/ar-vr-icon.svg": {
       "checksum": "250b54554e360185204104ff1295c810",
       "size": 10355,
@@ -1336,7 +1331,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "150959c583a6e93f4006f5a9f7379f35",
+      "checksum": "9293946efcd70eeccd62a58fa8b4090d",
       "size": 36317,
       "priority": "important"
     },
@@ -1406,8 +1401,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-qr.js": {
-      "checksum": "d38fdad187e8c0630fb2c3c3e61fd026",
-      "size": 125027,
+      "checksum": "1ad3b1cfc391a390b45ecee91eeae449",
+      "size": 125125,
       "priority": "important"
     },
     "/js/v3-user.js": {
@@ -1526,7 +1521,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "f0472d8b25c66479585ee369ad5c4806",
+      "checksum": "3ecb11a80f3450c8f90b3095d37976cb",
       "size": 7300,
       "priority": "important"
     },
@@ -1599,11 +1594,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/js/config.js": {
-      "checksum": "7dd498dd101cf4dba8aa8ea7662a8bac",
-      "size": 8066,
-      "priority": "page-specific"
     },
     "/naf-playground/js/convertStateToSceneData.js": {
       "checksum": "9444c580a4a073115902a932394240a8",
