@@ -14,12 +14,10 @@ self.nftscripts = {};
 const scriptPromises = {}; // Store ongoing fetch promises
 
 self.addEventListener("install", function (event) {
-    console.log("SW: Installing with checksum-based smart caching...");
 
     event.waitUntil(
         smartCacheInstall()
             .then(() => {
-                console.log("SW: Smart cache installation completed");
                 // Skip waiting to activate immediately for faster updates
                 return self.skipWaiting();
             })
@@ -47,21 +45,13 @@ async function smartCacheInstall() {
     
     // Check if we have a cache manifest with checksums
     if (!self.cacheManifest || !self.cacheManifest.files) {
-        console.log("SW: No cache manifest found, skipping installation");
         console.error("SW: self.cacheManifest is required for smart caching");
         return;
     }
-    
-    console.log(`SW: Smart caching v${self.cacheManifest.version} with ${Object.keys(self.cacheManifest.files).length} files`);
-    
     // Get previous cache if it exists
     const oldCacheNames = await caches.keys();
     const oldCacheName = oldCacheNames.find(name => name.startsWith('sw-cache-v') && name !== CACHE_NAME);
     const oldCache = oldCacheName ? await caches.open(oldCacheName) : null;
-    
-    let transferredFiles = 0;
-    let downloadedFiles = 0;
-    let totalSize = 0;
     
     // Process files by priority: critical first, then important, then page-specific
     const criticalFiles = Object.entries(self.cacheManifest.files)
@@ -72,7 +62,6 @@ async function smartCacheInstall() {
         .filter(([url, info]) => info.priority === 'page-specific');
     
     // Process critical files first
-    console.log("SW: Processing critical files for fast first paint...");
     const criticalStats = await processCacheFiles(criticalFiles, newCache, oldCache, 'critical');
     
     // Schedule important and page-specific files for background processing
@@ -81,7 +70,6 @@ async function smartCacheInstall() {
             processCacheFiles(importantFiles, newCache, oldCache, 'important'),
             processCacheFiles(pageSpecificFiles, newCache, oldCache, 'page-specific')
         ]).then(([importantStats, pageStats]) => {
-            console.log("SW: Background smart caching completed");
             
             // Calculate total stats
             const totalStats = {
@@ -123,7 +111,6 @@ async function processCacheFiles(fileEntries, newCache, oldCache, priority) {
                         await newCache.put(url, responseToTransfer);
                         transferredCount++;
                         needsDownload = false;
-                        console.log(`SW: ✓ Transferred ${url} (checksum: ${fileInfo.checksum.substring(0, 8)}...)`);
                     }
                 }
             }
@@ -145,7 +132,6 @@ async function processCacheFiles(fileEntries, newCache, oldCache, priority) {
                         });
                         await newCache.put(url, responseToCache);
                         downloadedCount++;
-                        console.log(`SW: ⬇ Downloaded ${url} (${formatBytes(fileInfo.size)})`);
                     }
                 } catch (fetchError) {
                     console.warn(`SW: Failed to cache ${url}:`, fetchError);
@@ -155,8 +141,6 @@ async function processCacheFiles(fileEntries, newCache, oldCache, priority) {
             console.warn(`SW: Error processing ${url}:`, error);
         }
     }
-    
-    console.log(`SW: ${priority} files - transferred: ${transferredCount}, downloaded: ${downloadedCount}`);
     return { transferred: transferredCount, downloaded: downloadedCount };
 }
 
@@ -166,12 +150,10 @@ function scheduleBackgroundCache() {
     
     // Only use fallback caching if no smart cache manifest is available
     if (self.cacheManifest && self.cacheManifest.files) {
-        console.log("SW: Smart cache available, skipping fallback background cache");
         return;
     }
     
     backgroundCacheInProgress = true;
-    console.log("SW: Using fallback background caching (no smart cache manifest)");
 
     // Use setTimeout to avoid blocking the install event
     setTimeout(() => {
@@ -184,7 +166,6 @@ async function cacheImportantResources() {
 
     try {
         const cache = await caches.open(CACHE_NAME);
-        console.log("SW: Background caching important resources...");
 
         // Notify clients that caching has started
         self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
@@ -196,7 +177,6 @@ async function cacheImportantResources() {
             .catch(error => console.error('Failed to notify clients of cache start:', error));
 
         // Fallback caching is no longer needed - all files are managed through cacheManifest
-        console.log("SW: Fallback caching disabled - using smart cache manifest only");
         
         priorityTwoCached = true;
         
@@ -230,7 +210,6 @@ async function cachePageResources(pathname) {
 
     // Get page-specific resources from cacheManifest
     if (!self.cacheManifest || !self.cacheManifest.files) {
-        console.log("SW: No cache manifest available for page-specific caching");
         return;
     }
 
@@ -244,7 +223,6 @@ async function cachePageResources(pathname) {
     let resourcesToCache = pageSpecificFiles;
 
     if (resourcesToCache.length > 0) {
-        console.log(`SW: Proactively caching resources for ${pathname}`);
         try {
             // Check which resources aren't already cached
             const uncachedResources = [];
@@ -266,7 +244,6 @@ async function cachePageResources(pathname) {
                         console.warn('SW: Some page-specific resources failed to cache:', error);
                     }
                 }
-                console.log(`SW: Cached ${uncachedResources.length} page-specific resources`);
             }
         } catch (error) {
             console.warn('SW: Page-specific caching failed:', error);
@@ -367,8 +344,6 @@ async function handleRouting(request) {
     const url = new URL(request.url);
     const pathname = url.pathname;
 
-    console.log('SW: Handling route:', pathname, 'Full URL:', url.href);
-
     // Helper function to try serving a static file, fallback to rewrite
     async function tryStaticOrRewrite(rewriteTarget) {
         // First try to get the exact file from cache
@@ -391,7 +366,6 @@ async function handleRouting(request) {
                 return networkResponse;
             }
         } catch (error) {
-            console.log('File not found, falling back to rewrite:', request.url);
         }
 
         // File doesn't exist, rewrite to target
@@ -421,7 +395,6 @@ async function handleRouting(request) {
 
     // Handle /me* -> rewrite to /user/index.html
     if (pathname.startsWith('/me')) {
-        console.log('SW: Rewriting /me route to /user/index.html');
         const rewriteRequest = new Request('/user/index.html', {
             method: request.method,
             headers: request.headers,
@@ -436,7 +409,6 @@ async function handleRouting(request) {
 
     // Handle /vr/@* -> rewrite to /vr/index.html
     if (pathname.startsWith('/vr/@')) {
-        console.log('SW: Rewriting /vr/@ route to /vr/index.html');
         const rewriteRequest = new Request('/vr/index.html', {
             method: request.method,
             headers: request.headers,
@@ -470,16 +442,13 @@ async function handleRouting(request) {
 // Cache-first strategy implementation
 async function cacheFirstStrategy(request) {
     const url = new URL(request.url);
-    console.log('SW: Cache-first strategy for:', url.pathname);
 
     const cachedResponse = await caches.match(request);
     if (cachedResponse) {
-        console.log('SW: Serving from cache:', url.pathname);
         return cachedResponse;
     }
 
     try {
-        console.log('SW: Fetching from network:', url.pathname);
         const networkResponse = await fetch(request);
 
         if (!networkResponse) {
@@ -499,7 +468,6 @@ async function cacheFirstStrategy(request) {
                     .catch(error => console.error('SW: Cache put failed:', request.url, error));
             });
 
-        console.log('SW: Serving from network and cached:', url.pathname);
         return networkResponse;
     } catch (error) {
         console.error('SW: Network error for:', request.url, error);
@@ -523,20 +491,16 @@ async function cacheFirstStrategy(request) {
 
 self.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'SKIP_WAITING') {
-        console.log('SKIP_WAITING received, activating now...');
         self.skipWaiting()
             .then(() => {
-                console.log('Skip waiting completed, claiming clients...');
                 return self.clients.claim();
             })
             .then(() => {
-                console.log('Clients claimed, notifying all clients...');
                 return self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
             })
             .then(clients => {
                 clients.forEach(client => {
                     client.postMessage({ type: 'SW_UPDATED' });
-                    console.log('Notified client:', client.id);
                 });
             })
             .catch(err => console.error('Skip waiting or claim failed:', err));
@@ -551,7 +515,6 @@ self.addEventListener("activate", function (event) {
                     cacheNames
                         .filter(cacheName => cacheName !== CACHE_NAME)
                         .map(cacheName => {
-                            console.log("Deleting cache: " + cacheName);
                             return caches.delete(cacheName);
                         })
                 );
@@ -564,7 +527,6 @@ self.addEventListener("activate", function (event) {
             .then(clients => {
                 clients.forEach(client => {
                     client.postMessage({ type: 'SW_UPDATED' });
-                    console.log('Notified client:', client.id);
                 });
 
                 // Start background caching of important resources after activation (fallback only)
@@ -620,6 +582,7 @@ function pullScript(id) {
                 throw error;
             });
             return scriptPromises[id];
+    }
 }
 
 // Helper function to format bytes
@@ -635,16 +598,11 @@ function formatBytes(bytes) {
 self.cacheManifest = 
 {
   "version": "2025.06.04.17",
-  "generated": "2025-06-04T20:30:28Z",
+  "generated": "2025-06-04T20:37:32Z",
   "files": {
-    "/js/v3-nav.js": {
-      "checksum": "9ed88bb30efaa4f756d54b4c507b14e2",
-      "size": 172158,
-      "priority": "critical"
-    },
     "/sw.js": {
-      "checksum": "6df04691c773d00dff45490116951d2f",
-      "size": 93580,
+      "checksum": "53bd8d7b3936a30efd6d7eed650277b7",
+      "size": 90540,
       "priority": "critical"
     },
     "/about/index.html": {
@@ -711,11 +669,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/css/codemirror-monokai.min.css": {
-      "checksum": "6cb64c5347235494cdc346527fc0e35d",
-      "size": 1902,
-      "priority": "important"
     },
     "/css/codemirror.min.css": {
       "checksum": "c1da630111dc87f804761ecc75f89eac",
@@ -1822,11 +1775,6 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/chat/gpt.html": {
-      "checksum": "f1a43900d7a03cb4b9780f24fbff9999",
-      "size": 12892,
-      "priority": "page-specific"
-    },
     "/chat/index.html": {
       "checksum": "319e465189cdb6ccfda4fe045fa68cca",
       "size": 3707,
@@ -2741,11 +2689,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/js/filesvue-dd.spec.js": {
-      "checksum": "5185f103ff9f5ade0885455ba92cc4f7",
-      "size": 41067,
-      "priority": "lazy"
     },
     "/js/filesvue-old.js": {
       "checksum": "4b39d9cd81599840f6b31e61e66efa84",
