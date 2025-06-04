@@ -1,4 +1,4 @@
-this.version = "2025.06.04.33";
+this.version = "2025.06.04.34";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,23 +597,13 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.18",
-  "generated": "2025-06-04T21:46:55Z",
+  "version": "2025.06.04.34",
+  "generated": "2025-06-04T21:47:26Z",
   "files": {
-    "/css/v3.css": {
-      "checksum": "7056941e006936405769b10c0162a6f6",
-      "size": 16143,
-      "priority": "critical"
-    },
     "/js/bootstrap.bundle.min.js": {
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/honeyblocks/detail/index.html": {
-      "checksum": "bd30022a2dc617f85ce7cb4b6099475d",
-      "size": 4211,
-      "priority": "important"
     },
     "/honeyblocks/index.html": {
       "checksum": "6449a18ba3e77dc5ffbe93dc1f5ef9aa",
@@ -1654,11 +1644,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/css/style.css": {
-      "checksum": "7597b95ad89083ebdd726b24009e0c5c",
-      "size": 4283,
-      "priority": "page-specific"
     },
     "/naf-playground/css/styles.css": {
       "checksum": "d19be71b5d2619d7bd403bc6f4e5fa39",
