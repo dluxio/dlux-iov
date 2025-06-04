@@ -545,9 +545,8 @@
                 <div v-if="newAccount.keys && Object.keys(newAccount.keys).length > 0" class="mb-4">
                   <div class="alert alert-warning">
                     <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                    <strong>Important:</strong> Your keys have been generated and will be stored securely in dluxPEN.
-                    {{ keyGenMethod === 'wallet' ? 'You can recover these keys using your ' + selectedWallet + '
-                    wallet.' : 'Make sure to backup these keys safely!' }}
+                                         <strong>Important:</strong> Your keys have been generated and will be stored securely in dluxPEN.
+                     {{ keyGenMethod === 'wallet' ? 'You can recover these keys using your ' + selectedWallet + ' wallet.' : 'Make sure to backup these keys safely!' }}
                   </div>
 
                   <!-- Download Backup Button - Highlighted -->
@@ -782,8 +781,7 @@
                                   :class="{'progress-bar-animated': paymentStatus.progress < 100}"
                                   :style="`width: ${paymentStatus.progress || 0}%`"></div>
                               </div>
-                              <div class="text-muted small mt-1">{{ paymentStatus.details || 'Setting up payment
-                                channel...' }}</div>
+                                                             <div class="text-muted small mt-1">{{ paymentStatus.details || 'Setting up payment channel...' }}</div>
                             </div>
 
                             <!-- Payment Instructions -->
@@ -1233,7 +1231,6 @@
             </div>
           </div>
         </div>
-
       </div>
     </main>
     <div>
