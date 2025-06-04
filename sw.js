@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.36",
-  "generated": "2025-06-04T22:25:12Z",
+  "version": "2025.06.04.15",
+  "generated": "2025-06-04T22:34:31Z",
   "files": {
-    "/img/US-UK_Add_to_Apple_Wallet_RGB_101421.svg": {
-      "checksum": "0b5b9bd4b565aca151bf1a4f8341e371",
-      "size": 20339,
-      "priority": "important"
-    },
     "/img/abcd-file-type.svg": {
       "checksum": "07676d4d9bd2a58d122df4061d55ca18",
       "size": 1654,
@@ -1356,7 +1351,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "91199aeec4f36d488d490b829e68fe57",
+      "checksum": "f1217f11d094fe1d6f513e77635d827c",
       "size": 36317,
       "priority": "important"
     },
@@ -1546,7 +1541,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "752d7e3d330265e3a0c0f860a1caa096",
+      "checksum": "13a95ad8229d747b3abbe53f5eabbbfd",
       "size": 7300,
       "priority": "important"
     },
@@ -1619,11 +1614,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/index.html": {
-      "checksum": "223912dc42e4110cf8928ba9ce48dc8b",
-      "size": 30659,
-      "priority": "page-specific"
     },
     "/naf-playground/js/asset-manager.js": {
       "checksum": "51626704ecd0f4f427661b35ac8e7303",
