@@ -4063,8 +4063,7 @@ export default {
                 </div>
               </div>
             </div>
-             <button class="mx-auto bg-card btn btn-danger text-dark mt-2 rounded-pill no-decoration"
-                href="/qr">Create A New Hive Account</button>
+             <a class="mx-auto bg-card btn btn-danger text-dark mt-2 rounded-pill no-decoration" href="/qr" >Create A New Hive Account</a>
           </div>
           <!-- add user-->
           <div>
