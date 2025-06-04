@@ -987,7 +987,7 @@ export default {
       this.HSR = false;
       this.PEN = true;
       localStorage.setItem("signer", "PEN");
-      await this.initializePEN();
+      //await this.initializePEN();
     },
 
     async initializePEN() {
@@ -3986,39 +3986,39 @@ export default {
               <div v-if="PEN" class="mb-2">
               
                 <div class="row">
-                  <!-- Set Password -->
+                  <!-- No Wallet / Set Password -->
                   <div v-if="!hasEncryptedWallet" class="col-4 p-1 mx-auto">
-                    <button class="btn btn-primary btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="setupNewPin()">
+                    <button class="bg-card text-dark btn btn-primary btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="setupNewPin()" style="border: #000 solid 1px;">
                       <i class="fa-solid fa-wallet mb-1"></i>
                       <small>Set Password</small>
                        <span class="badge bg-dark mt-1">* * *</span>
                     </button>
                   </div>
-                  <!-- If password -->
+                  <!-- Has Wallet -->
                   <div class="col-4 p-1" v-if="hasEncryptedWallet">
                     <!-- Manage Keys -->
-                    <button class="btn btn-info btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="openPenManagement()">
+                    <button class="bg-card text-dark btn btn-info btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="openPenManagement()" style="border: #000 solid 1px;">
                       <i class="fa-solid fa-key mb-1"></i>
                       <small>Manage Keys</small>
-                      <span class="badge mt-1" :class="PIN || decrypted.pin ? 'bg-success' : 'bg-warning'">
+                      <span class="badge text-dark mt-1" :class="PIN || decrypted.pin ? 'bg-success' : 'bg-warning'">
                         {{ PIN || decrypted.pin ? 'Decrypted' : 'Encrypted' }}
                       </span>
                     </button>
                   </div>
                   <div class="col-4 p-1" v-if="hasEncryptedWallet">
                     <!-- Unlock Wallet -->
-                    <button v-if="!PIN && !decrypted.pin" class="btn btn-warning btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="requestPinForDecryption()">
+                    <button v-if="!PIN && !decrypted.pin" class="bg-card text-dark btn btn-warning btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="requestPinForDecryption()" style="border: #000 solid 1px;">
                       <i class="fa-solid fa-lock mb-1"></i>
                       <small>Unlock Wallet</small>
                     </button>
                     <!-- Lock Wallet -->
-                    <button v-if="PIN || decrypted.pin" class="btn btn-warning btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="closeWallet()">
+                    <button v-if="PIN || decrypted.pin" class="bg-card text-dark btn btn-warning btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="closeWallet()" style="border: #000 solid 1px;">
                       <i class="fa-solid fa-lock mb-1"></i>
                       <small>Lock Wallet</small>
                     </button>
                   </div>
                   <div class="col-4 p-1" v-if="hasEncryptedWallet">
-                    <button type="button" class="btn btn-danger btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="deleteWallet()">
+                    <button type="button" class="bg-card btn btn-danger text-dark btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="deleteWallet()" style="border: #000 solid 1px;">
                       <i class="fa-solid fa-trash mb-1"></i>
                       <small>Delete</small>
                     </button>
@@ -4032,12 +4032,13 @@ export default {
             </div>
           </div>
           <!-- current user -->
-          <div class="mb-3">
+          <div class="d-flex flex-column mb-3">
             <div>
               <label class="lead mb-1">Current user</label>
-              <div v-if="!user" class="bg-darkest rounded d-flex align-items-center p-2">
+              <div v-if="!user" class="bg-darkest rounded d-flex align-items-center p-2 text-white-50">
                 <img src="/img/no-user.png" alt="" width="50" height="50" class="img-fluid rounded-circle me-2 cover">
-                <span class="flex-grow-1 text-center">NONE SELECTED</span>
+                <span v-if="!recentUsers.length" class="flex-grow-1 text-center">ADD USER BELOW</span>
+                <span v-if="recentUsers.length" class="flex-grow-1 text-center">ADD OR SELECT RECENT USER</span>
               </div>
               <div v-if="user" class="bg-darkest rounded d-flex align-items-center p-2">
                 <img :src="avatar" id="userImage" alt="" width="50" height="50"
@@ -4053,6 +4054,8 @@ export default {
               </div>
               
             </div>
+           <button class="mx-auto bg-card btn btn-danger text-dark mt-2 rounded-pill no-decoration" style="border: #000 dashed 1px;"
+                href="/qr">Create A New Hive Account</button>
             <div class="mt-2" v-if="HAS && haspich > 100">
               <div>
                 <div class="bg-white rounded text-center">
@@ -4094,8 +4097,7 @@ export default {
               </div>
             </div>
             <div class="small text-white-50 text-center mt-1 mb-2">
-              Usernames are stored locally without verification. You must posses the associated private keys to make transactions. <a class="no-decoration text-info" target="_blank"
-                href="https://signup.hive.io/">Get Account</a>
+              Usernames are stored locally without verification. You must posses the associated private keys to make transactions.
             </div>
           </div>
           <!-- recent users -->

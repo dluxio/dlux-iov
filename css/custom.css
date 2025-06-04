@@ -14949,4 +14949,8 @@ body[data-touch=false] .dropdown-extra:hover {
 
 .border-dashed {
   border-style: dashed !important;
+}
+
+.text-hover-info:hover {
+  color: #39cbfb !important;
 }/*# sourceMappingURL=custom.css.map */
