@@ -1,4 +1,4 @@
-this.version = "2025.06.04.35";
+this.version = "2025.06.04.36";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.19",
-  "generated": "2025-06-04T22:24:47Z",
+  "version": "2025.06.04.36",
+  "generated": "2025-06-04T22:25:12Z",
   "files": {
-    "/img/FFmpeg_logo.svg": {
-      "checksum": "d9bd07ebe503cd4927e7d84644793a54",
-      "size": 22917,
-      "priority": "important"
-    },
     "/img/US-UK_Add_to_Apple_Wallet_RGB_101421.svg": {
       "checksum": "0b5b9bd4b565aca151bf1a4f8341e371",
       "size": 20339,
@@ -1624,11 +1619,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/entity-api-test.html": {
-      "checksum": "21c9f77902931790228562ded63c9d4b",
-      "size": 12967,
-      "priority": "page-specific"
     },
     "/naf-playground/index.html": {
       "checksum": "223912dc42e4110cf8928ba9ce48dc8b",
