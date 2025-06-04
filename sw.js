@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.27",
-  "generated": "2025-06-04T20:39:32Z",
+  "version": "2025.06.04.13",
+  "generated": "2025-06-04T20:56:20Z",
   "files": {
-    "/about/index.html": {
-      "checksum": "e7ffd187fda973511537820e461fdbb4",
-      "size": 46683,
-      "priority": "critical"
-    },
     "/css/bootstrap-grid.css": {
       "checksum": "ff62c56c7f9eaa68592857aee5a7c93e",
       "size": 70327,
@@ -664,11 +659,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/css/drag-sort.css": {
-      "checksum": "693eee9d441c6e004ed4a7b413962c36",
-      "size": 1077,
-      "priority": "important"
     },
     "/css/simplemde-bs-dark.css": {
       "checksum": "96865c7891f63beeae48ad1b318b38b3",
@@ -1501,7 +1491,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "49ff3bdc36f09bd81864d8a9bbaef9ce",
+      "checksum": "0c5f6f44158a4336508b2607fd248476",
       "size": 36317,
       "priority": "important"
     },
@@ -1691,7 +1681,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "fb265d445b1a12cb889306f98243da42",
+      "checksum": "ed81df163b8620586c1e5d415f7aafd3",
       "size": 7300,
       "priority": "important"
     },
@@ -1764,11 +1754,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/img/aframe.png": {
-      "checksum": "8361db7f31590be699b6ca82a3ba2edd",
-      "size": 38148,
-      "priority": "page-specific"
     },
     "/img/chatgpt-icon.png": {
       "checksum": "3d4f973524b864115f67d06857692785",
@@ -2674,11 +2659,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/js/mde-old.js": {
-      "checksum": "67a091a43612269b845cb304e43af640",
-      "size": 1038,
-      "priority": "lazy"
     },
     "/js/modalvue-old.js": {
       "checksum": "962fb5270ec2e9a3336b9f68dcdc1be1",

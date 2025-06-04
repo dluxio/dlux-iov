@@ -3985,17 +3985,17 @@ export default {
               <!-- PEN Management Button -->
               <div v-if="PEN" class="mb-2">
               
-                <div class="row">
+                <div class="row row-cols-2 g-2">
                   <!-- No Wallet / Set Password -->
-                  <div v-if="!hasEncryptedWallet" class="col-4 p-1 mx-auto">
+                  <div v-if="!hasEncryptedWallet" class="col">
                     <button class="bg-card text-dark btn btn-primary btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="setupNewPin()" style="border: #000 solid 1px;">
                       <i class="fa-solid fa-wallet mb-1"></i>
                       <small>Set Password</small>
-                       <span class="badge bg-dark mt-1">* * *</span>
+                      <span class="badge bg-dark mt-1">* * *</span>
                     </button>
                   </div>
                   <!-- Has Wallet -->
-                  <div class="col-4 p-1" v-if="hasEncryptedWallet">
+                  <div class="col" v-if="hasEncryptedWallet">
                     <!-- Manage Keys -->
                     <button class="bg-card text-dark btn btn-info btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="openPenManagement()" style="border: #000 solid 1px;">
                       <i class="fa-solid fa-key mb-1"></i>
@@ -4005,7 +4005,7 @@ export default {
                       </span>
                     </button>
                   </div>
-                  <div class="col-4 p-1" v-if="hasEncryptedWallet">
+                  <div class="col" v-if="hasEncryptedWallet">
                     <!-- Unlock Wallet -->
                     <button v-if="!PIN && !decrypted.pin" class="bg-card text-dark btn btn-warning btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="requestPinForDecryption()" style="border: #000 solid 1px;">
                       <i class="fa-solid fa-lock mb-1"></i>
@@ -4017,7 +4017,7 @@ export default {
                       <small>Lock Wallet</small>
                     </button>
                   </div>
-                  <div class="col-4 p-1" v-if="hasEncryptedWallet">
+                  <div class="col" v-if="hasEncryptedWallet">
                     <button type="button" class="bg-card btn btn-danger text-dark btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="deleteWallet()" style="border: #000 solid 1px;">
                       <i class="fa-solid fa-trash mb-1"></i>
                       <small>Delete</small>
