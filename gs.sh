@@ -12,6 +12,44 @@ while getopts "d" opt; do
 done
 shift $((OPTIND - 1))
 
+# OS detection and cross-platform sed function
+detect_os() {
+    case "$(uname -s)" in
+        Darwin*)
+            echo "macos"
+            ;;
+        Linux*)
+            echo "linux"
+            ;;
+        *)
+            echo "unknown"
+            ;;
+    esac
+}
+
+# Cross-platform sed in-place editing
+cross_platform_sed() {
+    local pattern="$1"
+    local file="$2"
+    
+    case "$(detect_os)" in
+        macos)
+            sed -i "" "$pattern" "$file"
+            ;;
+        linux)
+            sed -i "$pattern" "$file"
+            ;;
+        *)
+            echo "Warning: Unknown OS, trying Linux sed syntax"
+            sed -i "$pattern" "$file"
+            ;;
+    esac
+}
+
+# Display detected OS for verification
+detected_os=$(detect_os)
+echo "🖥️  Detected OS: $detected_os"
+
 # Pull the latest changes from the repository
 git pull
 
@@ -38,11 +76,11 @@ if [ -f "$file" ]; then
         if [[ $version_date == $current_day ]]; then
             new_version_letter=$((version_letter + 1))
             new_version="$current_day.$new_version_letter"
-            sed -i "" "1 s/^.*$/this.version = \"$new_version\";/" "$file"
+            cross_platform_sed "1 s/^.*$/this.version = \"$new_version\";/" "$file"
             echo "First line of $file incremented to: $new_version"
         else
             new_version="$current_day.1"
-            sed -i "" "1 s/^.*$/this.version = \"$new_version\";/" "$file"
+            cross_platform_sed "1 s/^.*$/this.version = \"$new_version\";/" "$file"
             echo "First line of $file updated to: $new_version"
         fi
 
@@ -147,7 +185,7 @@ if [ -f "$file" ]; then
                 cp "$file" "${file}.backup"
 
                 for new_file in "${critical_additions[@]}"; do
-                    sed -i "" "/const criticalResources = \[/,/\];/{
+                    cross_platform_sed "/const criticalResources = \[/,/\];/{
                         /\];/{
                             i\\
   \`/$new_file\`,
@@ -156,7 +194,7 @@ if [ -f "$file" ]; then
                 done
 
                 for new_file in "${important_additions[@]}"; do
-                    sed -i "" "/const importantResources = \[/,/\];/{
+                    cross_platform_sed "/const importantResources = \[/,/\];/{
                         /\];/{
                             i\\
   \`/$new_file\`,
@@ -167,7 +205,7 @@ if [ -f "$file" ]; then
                 for addition in "${page_additions[@]}"; do
                     page_group="${addition%%:*}"
                     new_file="${addition#*:}"
-                    sed -i "" "/'\\/$page_group': \\[/,/\]/{ 
+                    cross_platform_sed "/'\\/$page_group': \\[/,/\]/{ 
                         /\]/{
                             i\\
     \`/$new_file\`,
@@ -176,7 +214,7 @@ if [ -f "$file" ]; then
                 done
 
                 for new_file in "${skipped_additions[@]}"; do
-                    sed -i "" "/const skippedResources = \[/,/\];/{
+                    cross_platform_sed "/const skippedResources = \[/,/\];/{
                         /\];/{
                             i\\
   \`/$new_file\`,
@@ -230,16 +268,33 @@ if [ -f "$file" ]; then
             fi
         fi
 
-        # ✅ macOS-compatible in-place editing
-        find . -name "reg-sw.js" -exec sed -i "" "s/const version = '[0-9.]*'/const version = '$new_version'/" {} \;
-        echo "📝 Updated version in reg-sw.js files"
+        # Cross-platform compatible in-place editing
+        echo "📝 Updating versions in related files..."
+        
+        # Update reg-sw.js files
+        if find . -name "reg-sw.js" -type f | head -1 | grep -q .; then
+            while IFS= read -r -d '' reg_file; do
+                cross_platform_sed "s/const version = '[^']*'/const version = '$new_version'/" "$reg_file"
+            done < <(find . -name "reg-sw.js" -type f -print0)
+            echo "   ✅ Updated version in reg-sw.js files to $new_version"
+        else
+            echo "   ⚠️  No reg-sw.js files found"
+        fi
 
+        # Update sw-monitor.js
         sw_monitor_file="./js/sw-monitor.js"
         if [ -f "$sw_monitor_file" ]; then
-            sed -i "" "s/desiredVersion: '[0-9.]*'/desiredVersion: '$new_version'/" "$sw_monitor_file"
-            echo "📝 Updated version in sw-monitor.js to $new_version"
+            # Check if desiredVersion exists, if not add it
+            if grep -q "desiredVersion:" "$sw_monitor_file"; then
+                cross_platform_sed "s/desiredVersion: '[^']*'/desiredVersion: '$new_version'/" "$sw_monitor_file"
+                echo "   ✅ Updated desiredVersion in sw-monitor.js to $new_version"
+            else
+                # Add desiredVersion after swVersion: null,
+                cross_platform_sed "/swVersion: null,/a\\      desiredVersion: '$new_version'," "$sw_monitor_file"
+                echo "   ✅ Added desiredVersion to sw-monitor.js: $new_version"
+            fi
         else
-            echo "⚠️  Warning: sw-monitor.js not found at $sw_monitor_file"
+            echo "   ⚠️  Warning: sw-monitor.js not found at $sw_monitor_file"
         fi
 
     else
