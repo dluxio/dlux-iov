@@ -1,4 +1,4 @@
-this.version = "2025.06.04.32";
+this.version = "2025.06.04.33";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.14",
-  "generated": "2025-06-04T21:38:51Z",
+  "version": "2025.06.04.33",
+  "generated": "2025-06-04T21:39:24Z",
   "files": {
-    "/css/custom-old.css": {
-      "checksum": "d05166f557dbe2ffa4e68d15a849cc95",
-      "size": 7317,
-      "priority": "critical"
-    },
     "/css/customaf.css": {
       "checksum": "77f6758aadb843a30c49b08f154a042b",
       "size": 300474,
@@ -619,11 +614,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/download.js": {
-      "checksum": "b2c3f631bf06a2d865396d699fc3f2cf",
-      "size": 1499,
-      "priority": "important"
     },
     "/honeyblocks/block/index.html": {
       "checksum": "efc02e0ee6711a7818934367c74f2440",
@@ -1675,11 +1665,6 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/naf-playground/aframe/networked-aframe.min.js": {
-      "checksum": "4b25bad9a7b40896916bcb097db405ba",
-      "size": 98119,
-      "priority": "page-specific"
-    },
     "/naf-playground/assets/textures/sky/milkyway.jpg": {
       "checksum": "82c7278828d85ace9036d87c72801e20",
       "size": 124780,
@@ -2539,11 +2524,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/test-server-routines/websocket_monitor.js": {
-      "checksum": "9a0d4cda763d073baca4e5409e2c1646",
-      "size": 23129,
-      "priority": "lazy"
     }
   }
 }
