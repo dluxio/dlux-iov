@@ -655,12 +655,23 @@ createApp({ // vue 3
     detectWallets() {
       this.detectedWallets = [];
       
+      // Enhanced wallet detection with better provider identification
+      console.log('Starting enhanced wallet detection...');
+      console.log('Available providers:', {
+        ethereum: !!window.ethereum,
+        solana: !!window.solana, 
+        enkrypt: !!window.enkrypt,
+        keplr: !!window.keplr,
+        leap: !!window.leap,
+        xfi: !!window.xfi
+      });
+      
       // Check for MetaMask
       if (typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask) {
         this.detectedWallets.push({
           name: 'MetaMask',
           network: 'Ethereum',
-          icon: '/img/wallets/metamask.svg',
+          icon: 'https://docs.metamask.io/img/metamask-fox.svg',
           provider: window.ethereum
         });
       }
@@ -670,8 +681,38 @@ createApp({ // vue 3
         this.detectedWallets.push({
           name: 'Phantom',
           network: 'Solana',
-          icon: '/img/wallets/phantom.svg',
+          icon: 'https://phantom.app/img/phantom-logo.png',
           provider: window.solana
+        });
+      }
+      
+      // Check for Solflare
+      if (window.solflare) {
+        this.detectedWallets.push({
+          name: 'Solflare',
+          network: 'Solana',
+          icon: 'https://solflare.com/img/logo.svg',
+          provider: window.solflare
+        });
+      }
+      
+      // Check for Backpack
+      if (window.backpack) {
+        this.detectedWallets.push({
+          name: 'Backpack',
+          network: 'Solana',
+          icon: 'https://www.backpack.app/img/backpack.svg',
+          provider: window.backpack
+        });
+      }
+      
+      // Check for Glow
+      if (window.glow) {
+        this.detectedWallets.push({
+          name: 'Glow',
+          network: 'Solana', 
+          icon: 'https://glow.app/img/logo.svg',
+          provider: window.glow
         });
       }
       
@@ -680,7 +721,7 @@ createApp({ // vue 3
         this.detectedWallets.push({
           name: 'Coinbase Wallet',
           network: 'Ethereum',
-          icon: '/img/wallets/coinbase.svg',
+          icon: 'https://avatars.githubusercontent.com/u/18060234?s=280&v=4',
           provider: window.ethereum
         });
       }
@@ -690,7 +731,27 @@ createApp({ // vue 3
         this.detectedWallets.push({
           name: 'Trust Wallet',
           network: 'Multi-chain',
-          icon: '/img/wallets/trust.svg',
+          icon: 'https://trustwallet.com/assets/images/media/assets/trust_platform.svg',
+          provider: window.ethereum
+        });
+      }
+      
+      // Check for Brave Wallet
+      if (window.ethereum && window.ethereum.isBraveWallet) {
+        this.detectedWallets.push({
+          name: 'Brave Wallet',
+          network: 'Multi-chain',
+          icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBzdHJva2U9IiNGRjY2MDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=',
+          provider: window.ethereum
+        });
+      }
+      
+      // Check for Rabby Wallet  
+      if (window.ethereum && window.ethereum.isRabby) {
+        this.detectedWallets.push({
+          name: 'Rabby Wallet',
+          network: 'Ethereum',
+          icon: 'https://rabby.io/assets/images/logo-128.png',
           provider: window.ethereum
         });
       }
@@ -700,14 +761,14 @@ createApp({ // vue 3
         this.detectedWallets.push({
           name: 'WalletConnect',
           network: 'Multi-chain',
-          icon: '/img/wallets/walletconnect.svg',
-          provider: null
+          icon: 'https://walletconnect.com/walletconnect-logo.svg',
+          provider: null,
+          isWalletConnect: true
         });
       }
       
       // Check for Enkrypt (multi-chain wallet)
       if (window.enkrypt) {
-        // Enkrypt supports both EVM and Substrate
         const networks = [];
         if (window.enkrypt.providers?.ethereum) {
           networks.push('Ethereum');
@@ -719,24 +780,104 @@ createApp({ // vue 3
         this.detectedWallets.push({
           name: 'Enkrypt',
           network: networks.length > 1 ? 'Multi-chain' : networks[0] || 'Multi-chain',
-          icon: '/img/wallets/enkrypt.svg',
+          icon: 'https://www.enkrypt.com/img/logo.svg',
           provider: window.enkrypt,
           evmProvider: window.enkrypt.providers?.ethereum,
           substrateProvider: window.enkrypt.providers?.polkadot || window.injectedWeb3?.enkrypt
         });
       }
       
-      // Check for Jupiter Wallet Kit (Solana ecosystem)
-      if (window.Jupiter || (window.solana && window.solana.isJupiter)) {
+      // Check for Keplr (Cosmos ecosystem)
+      if (window.keplr) {
         this.detectedWallets.push({
-          name: 'Jupiter Wallet',
-          network: 'Solana',
-          icon: '/img/wallets/jupiter.svg',
-          provider: window.Jupiter || window.solana
+          name: 'Keplr',
+          network: 'Cosmos',
+          icon: 'https://www.keplr.app/img/keplr-logo.svg',
+          provider: window.keplr
         });
       }
       
-      console.log('Detected wallets:', this.detectedWallets);
+      // Check for Leap Wallet (Cosmos)
+      if (window.leap) {
+        this.detectedWallets.push({
+          name: 'Leap Wallet',
+          network: 'Cosmos',
+          icon: 'https://leapwallet.io/img/leap-logo.svg',
+          provider: window.leap
+        });
+      }
+      
+      // Check for XDEFI Wallet
+      if (window.xfi) {
+        this.detectedWallets.push({
+          name: 'XDEFI Wallet',
+          network: 'Multi-chain',
+          icon: 'https://xdefi.io/img/logo.svg',
+          provider: window.xfi
+        });
+      }
+      
+      // Use Jupiter Wallet Kit for enhanced Solana wallet detection if available
+      if (window.UnifiedWalletKit || window.jupiterWalletKit) {
+        try {
+          console.log('Jupiter Wallet Kit detected, attempting enhanced Solana wallet discovery...');
+          this.detectSolanaWalletsWithJupiter();
+        } catch (error) {
+          console.warn('Jupiter Wallet Kit detection failed:', error);
+        }
+      }
+      
+      // Final fallback: check for any additional ethereum providers
+      if (window.ethereum && window.ethereum.providers) {
+        window.ethereum.providers.forEach((provider, index) => {
+          if (!this.detectedWallets.find(w => w.provider === provider)) {
+            let name = 'Unknown Wallet';
+            let icon = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 18v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v13z"></path></svg>';
+            
+            // Try to identify the provider
+            if (provider.isMetaMask) { name = 'MetaMask'; icon = 'https://docs.metamask.io/img/metamask-fox.svg'; }
+            else if (provider.isCoinbaseWallet) { name = 'Coinbase Wallet'; icon = 'https://avatars.githubusercontent.com/u/18060234?s=280&v=4'; }
+            else if (provider.isTrust) { name = 'Trust Wallet'; icon = 'https://trustwallet.com/assets/images/media/assets/trust_platform.svg'; }
+            else if (provider.isBraveWallet) { name = 'Brave Wallet'; icon = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBzdHJva2U9IiNGRjY2MDAiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo='; }
+            else if (provider.isRabby) { name = 'Rabby Wallet'; icon = 'https://rabby.io/assets/images/logo-128.png'; }
+            
+            this.detectedWallets.push({
+              name: name + (index > 0 ? ` (${index + 1})` : ''),
+              network: 'Ethereum',
+              icon: icon,
+              provider: provider
+            });
+          }
+        });
+      }
+      
+      console.log('Final detected wallets:', this.detectedWallets);
+      console.log(`Detected ${this.detectedWallets.length} wallet(s)`);
+      
+      // Log detailed wallet info for debugging
+      this.detectedWallets.forEach((wallet, index) => {
+        console.log(`Wallet ${index + 1}:`, {
+          name: wallet.name,
+          network: wallet.network,
+          hasProvider: !!wallet.provider,
+          providerType: typeof wallet.provider
+        });
+      });
+    },
+    
+    // Enhanced Solana wallet detection using Jupiter Wallet Kit
+    detectSolanaWalletsWithJupiter() {
+      try {
+        // This is a placeholder for Jupiter Wallet Kit integration
+        // The actual implementation would depend on the specific API
+        console.log('Attempting Jupiter Wallet Kit enhanced detection...');
+        
+        // Jupiter Wallet Kit should expose detected wallets
+        // For now, we'll rely on the standard detection above
+        
+      } catch (error) {
+        console.error('Jupiter Wallet Kit detection error:', error);
+      }
     },
     
     selectWallet(walletName) {
@@ -745,6 +886,14 @@ createApp({ // vue 3
       if (this.detectedWallets.length > 0) {
         this.keyGenMethod = 'wallet';
       }
+    },
+    
+    // Retry wallet detection (useful for wallets that load asynchronously)
+    retryWalletDetection() {
+      console.log('Retrying wallet detection...');
+      setTimeout(() => {
+        this.detectWallets();
+      }, 1000);
     },
     
     // Username Validation Methods
@@ -2076,7 +2225,7 @@ createApp({ // vue 3
       
       this.recoveryLoading = true;
       this.recoveryError = null;
-      
+      console.log('Checking account for recovery:', username);
       try {
         const response = await fetch("https://api.hive.blog", {
           method: "POST",
@@ -3135,8 +3284,19 @@ createApp({ // vue 3
     }
     this.getTickers();
     
-    // Initialize onboarding system
+    // Initialize onboarding system with retry logic for async wallet loading
     this.detectWallets();
+    
+    // Retry wallet detection since many wallets load asynchronously
+    setTimeout(() => {
+      console.log('First retry - checking for wallets...');
+      this.detectWallets();
+    }, 2000);
+    
+    setTimeout(() => {
+      console.log('Second retry - checking for wallets...');
+      this.detectWallets();
+    }, 5000);
     
     // Set default key generation method based on wallet availability
     if (this.detectedWallets.length === 0) {

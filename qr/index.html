@@ -31,6 +31,8 @@
   <script src="https://unpkg.com/@hiveio/dhive@latest/dist/dhive.js"></script>
   <!-- Solana Web3.js for Solana transactions -->
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+  <!-- Jupiter Unified Wallet Kit for enhanced wallet detection -->
+  <script src="https://unpkg.com/@jup-ag/wallet-adapter@latest/dist/index.umd.js"></script>
   <script>
     var client = new dhive.Client(["https://hive-api.dlux.io", "https://hive-api.dlux.io", "https://anyx.io", "https://api.openhive.network"]);
   </script>
@@ -246,13 +248,19 @@
                     <label class="form-label">HIVE Username</label>
                     <div class="position-relative">
                       <span class="position-absolute top-50 translate-middle-y ps-3 text-muted">@</span>
-                      <input v-model="recoveryData.username" @keyup.enter="recoveryStep = 2" placeholder="your-username"
+                      <input v-model="recoveryData.username" @keyup.enter="checkAccountForRecovery" placeholder="your-username"
                         class="ps-5 form-control bg-dark border-dark text-light">
                     </div>
                     <small class="text-muted">Enter the username for which you want to recover keys</small>
                   </div>
+                  
+                  <div v-if="recoveryError" class="alert alert-danger mb-3">
+                    <i class="fa-solid fa-exclamation-triangle me-2"></i>{{ recoveryError }}
+                  </div>
+                  
                   <div class="text-end">
-                    <button class="btn btn-warning" @click="recoveryStep = 2" :disabled="!recoveryData.username">
+                    <button class="btn btn-warning" @click="checkAccountForRecovery" :disabled="!recoveryData.username || recoveryLoading">
+                      <span v-if="recoveryLoading" class="spinner-border spinner-border-sm me-2"></span>
                       Next: Select Wallet
                       <i class="fa-solid fa-arrow-right ms-1"></i>
                     </button>
@@ -279,8 +287,20 @@
                   </div>
 
                   <div v-if="detectedWallets.length === 0" class="alert alert-warning">
-                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                    No compatible wallets detected. Please install and unlock your wallet.
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                        No compatible wallets detected. Please install and unlock your wallet.
+                      </div>
+                      <button class="btn btn-outline-warning btn-sm" @click="retryWalletDetection">
+                        <i class="fa-solid fa-refresh me-1"></i>Retry
+                      </button>
+                    </div>
+                    <div class="mt-2">
+                      <small class="text-muted">
+                        Supported: MetaMask, Phantom, Solflare, Backpack, Coinbase Wallet, Trust Wallet, Brave Wallet, Enkrypt, and more
+                      </small>
+                    </div>
                   </div>
 
                   <div class="d-flex justify-content-between">
