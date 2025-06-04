@@ -597,19 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.34",
-  "generated": "2025-06-04T21:47:26Z",
+  "version": "2025.06.04.15",
+  "generated": "2025-06-04T22:10:54Z",
   "files": {
-    "/js/bootstrap.bundle.min.js": {
-      "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
-      "size": 80721,
-      "priority": "critical"
-    },
-    "/honeyblocks/index.html": {
-      "checksum": "6449a18ba3e77dc5ffbe93dc1f5ef9aa",
-      "size": 4471,
-      "priority": "important"
-    },
     "/honeyblocks/list/index.html": {
       "checksum": "716045bd95e766d7ccede8c088089dde",
       "size": 4206,
@@ -1381,7 +1371,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "34f4e36a5c0fced51eb8d7542188538f",
+      "checksum": "a2e5ad8499c5d2eecbbe50aca7b809f7",
       "size": 36317,
       "priority": "important"
     },
@@ -1571,7 +1561,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "bc41eb6d210adeb646a138006ce477dc",
+      "checksum": "e76ee1a0979ea8f93695d15479446350",
       "size": 7300,
       "priority": "important"
     },
@@ -1644,11 +1634,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/css/styles.css": {
-      "checksum": "d19be71b5d2619d7bd403bc6f4e5fa39",
-      "size": 15467,
-      "priority": "page-specific"
     },
     "/naf-playground/css/window-system.css": {
       "checksum": "ff3071e68b24c1bae6368bc3cc76235e",
