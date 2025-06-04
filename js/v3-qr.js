@@ -1179,7 +1179,7 @@ createApp({ // vue 3
       this.addPaymentLog('Connecting to payment monitor...', 'info');
       
       try {
-        const wsUrl = `${location.protocol == 'https:' ? 'wss:' : 'ws:'}//${location.hostname.includes('localhost') ? 'data.dlux.io' : location.hostname}/ws/payment-monitor`
+        const wsUrl = `wss://${location.hostname.includes('localhost') ? 'vue.dlux.io' : location.hostname}/ws/payment-monitor`
         console.log('Connecting to WebSocket:', wsUrl);
         console.log('Current location:', location.href);
         console.log('Detected environment:', { 
