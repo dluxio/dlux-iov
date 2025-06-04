@@ -1,4 +1,4 @@
-this.version = "2025.06.04.29";
+this.version = "2025.06.04.30";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.14",
-  "generated": "2025-06-04T21:06:11Z",
+  "version": "2025.06.04.30",
+  "generated": "2025-06-04T21:06:44Z",
   "files": {
-    "/css/bootstrap-utilities.css": {
-      "checksum": "de92f706ebf333fb981cbb719aa5130d",
-      "size": 101679,
-      "priority": "critical"
-    },
     "/css/bootstrap.css": {
       "checksum": "60def5490c429c25858ae0c72462b38b",
       "size": 271584,
@@ -649,11 +644,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/css/smde.css": {
-      "checksum": "80e8346c6b7648cc3b82c94f279de4d4",
-      "size": 13090,
-      "priority": "important"
     },
     "/css/tagify.css": {
       "checksum": "17293e2a18aea950ca3ac847b1c1f565",
@@ -1735,11 +1725,6 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/js/aframe-extras.min.js": {
-      "checksum": "0a0818f80d22eea6b402187404738a23",
-      "size": 170829,
-      "priority": "page-specific"
-    },
     "/js/aframe-inspector.min.js": {
       "checksum": "90eb74ef16d61ee0ab934e8412e99bf6",
       "size": 437913,
@@ -2629,11 +2614,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/js/onlyhash-old.js": {
-      "checksum": "5fbe0450d3cf05ca50a32db1388d35b7",
-      "size": 209217,
-      "priority": "lazy"
     },
     "/js/postvue-old.js": {
       "checksum": "f2bd9df92455de434430c350ed37641a",
