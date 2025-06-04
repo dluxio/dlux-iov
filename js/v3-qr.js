@@ -236,6 +236,7 @@ createApp({ // vue 3
       },
       recoveredKeys: {},
       showRecoveredKeys: false,
+      recoveryAccountData: null,
     };
   },
   beforeDestroy() {
@@ -1989,14 +1990,76 @@ createApp({ // vue 3
         message: ''
       };
       
-             // Auto-populate message template when username changes  
-       this.$nextTick(() => {
-         this.$watch('recoveryData.username', (newUsername) => {
-           if (newUsername) {
-             this.recoveryData.message = `Generate HIVE keys for account: ${newUsername}`;
-           }
-         });
-       });
+      // Auto-populate message template when username changes  
+      this.$nextTick(() => {
+        this.$watch('recoveryData.username', (newUsername) => {
+          if (newUsername) {
+            this.recoveryData.message = `Generate HIVE keys for account: ${newUsername}`;
+          }
+        });
+      });
+    },
+    
+    // New method to check account existence
+    async checkAccountForRecovery() {
+      const username = this.recoveryData.username ? this.recoveryData.username.toLowerCase().trim() : '';
+      
+      if (!username) {
+        this.recoveryError = 'Please enter a username';
+        return false;
+      }
+      
+      // Basic validation first
+      if (username.length < 3 || username.length > 16) {
+        this.recoveryError = 'Username must be 3-16 characters long';
+        return false;
+      }
+      
+      if (!/^[a-z0-9.-]+$/.test(username)) {
+        this.recoveryError = 'Only lowercase letters, numbers, dots, and hyphens allowed';
+        return false;
+      }
+      
+      this.recoveryLoading = true;
+      this.recoveryError = null;
+      
+      try {
+        const response = await fetch("https://api.hive.blog", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            method: "condenser_api.get_accounts",
+            params: [[username]],
+            id: 1
+          }),
+        });
+        
+        const data = await response.json();
+        
+        if (!data.result || data.result.length === 0) {
+          this.recoveryError = `Account @${username} does not exist on the HIVE blockchain`;
+          return false;
+        }
+        
+        // Store account data for later key comparison
+        this.recoveryAccountData = data.result[0];
+        this.recoveryData.username = username;
+        this.recoveryData.message = `Generate HIVE keys for account: ${username}`;
+        
+        // Move to step 2 for wallet selection
+        this.recoveryStep = 2;
+        return true;
+        
+      } catch (error) {
+        console.error('Account check failed:', error);
+        this.recoveryError = 'Failed to check account: ' + error.message;
+        return false;
+      } finally {
+        this.recoveryLoading = false;
+      }
     },
     
     cancelKeyRecovery() {
@@ -2005,11 +2068,62 @@ createApp({ // vue 3
       this.recoveryError = null;
       this.recoveredKeys = {};
       this.showRecoveredKeys = false;
+      this.recoveryAccountData = null;
       this.recoveryData = {
         username: '',
         selectedWallet: null,
         message: ''
       };
+    },
+    
+    // New method to validate generated keys against blockchain
+    async validateRecoveredKeys(generatedKeys, username) {
+      if (!this.recoveryAccountData) {
+        throw new Error('Account data not available for validation');
+      }
+      
+      const account = this.recoveryAccountData;
+      const roles = ['owner', 'active', 'posting'];
+      
+      // Extract public keys from blockchain account
+      const accountPublicKeys = {
+        owner: account.owner.key_auths.map(auth => auth[0]),
+        active: account.active.key_auths.map(auth => auth[0]),
+        posting: account.posting.key_auths.map(auth => auth[0]),
+        memo: account.memo_key
+      };
+      
+      // Check if any of our generated keys match the account's public keys
+      let matchCount = 0;
+      const matchedRoles = [];
+      
+      for (const role of roles) {
+        const generatedPublicKey = generatedKeys.public[role];
+        const accountKeys = accountPublicKeys[role];
+        
+        if (accountKeys.includes(generatedPublicKey)) {
+          matchCount++;
+          matchedRoles.push(role);
+        }
+      }
+      
+      // Also check memo key
+      if (accountPublicKeys.memo === generatedKeys.public.memo) {
+        matchCount++;
+        matchedRoles.push('memo');
+      }
+      
+      if (matchCount === 0) {
+        throw new Error(`None of the generated keys match the account @${username}. This account was likely created with different keys or a different wallet/seed.`);
+      }
+      
+      if (matchCount < 4) {
+        console.warn(`Only ${matchCount}/4 keys matched for @${username}:`, matchedRoles);
+        throw new Error(`Only ${matchCount} out of 4 keys match the account @${username}. The account may have been created with different keys or partial key updates were made.`);
+      }
+      
+      console.log(`All ${matchCount} keys successfully validated for @${username}`);
+      return true;
     },
     
     async recoverKeys() {
@@ -2050,6 +2164,9 @@ createApp({ // vue 3
         // Generate HIVE keys from signature (same process as original generation)
         const keys = this.deriveHiveKeysFromSignature(signature, username);
         
+        // Validate the generated keys against the blockchain account
+        await this.validateRecoveredKeys(keys, username);
+        
         // Store the recovered keys
         this.recoveredKeys = keys.private;
         
@@ -2068,13 +2185,29 @@ createApp({ // vue 3
         await this.storeRecoveredAccountInPEN(accountData);
         
         console.log('Keys recovered successfully');
+        this.recoveryStep = 3; // Move to success step
         
       } catch (error) {
         console.error('Key recovery failed:', error);
         this.recoveryError = error.message;
+        
+        // If it's a key mismatch error, suggest trying a different wallet
+        if (error.message.includes('None of the generated keys match') || 
+            error.message.includes('keys match the account')) {
+          this.recoveryError += '\n\nTip: Try a different wallet or verify you\'re using the same wallet that was used to originally create this account.';
+        }
       } finally {
         this.recoveryLoading = false;
       }
+    },
+    
+    // New method to try different wallet for recovery
+    tryDifferentWallet() {
+      // Reset to wallet selection step but keep username and account data
+      this.recoveryStep = 2;
+      this.recoveryError = null;
+      this.recoveryData.selectedWallet = null;
+      this.recoveredKeys = {};
     },
     
     async storeRecoveredAccountInPEN(accountData) {
