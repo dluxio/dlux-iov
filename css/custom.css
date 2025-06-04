@@ -13873,11 +13873,6 @@ html {
   border-bottom: 0 !important;
 }
 
-.navbar-nav .nav-item .dropdown-menu {
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-}
-
 /* .navbar-nav .nav-item:hover {
     background: black;
 }
@@ -14776,6 +14771,10 @@ body[data-touch=false] .dropdown-extra:hover {
   .navbar-nav .nav-bell .dropdown-menu,
   .navbar-nav .nav-bell .dropdown-menu.show {
     right: -73px !important;
+  }
+  .navbar-nav .nav-item .dropdown-menu {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
   }
 }
 /* Large screens (≥ 992px) */
