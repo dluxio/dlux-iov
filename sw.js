@@ -1,4 +1,4 @@
-this.version = "2025.06.04.34";
+this.version = "2025.06.04.35";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.15",
-  "generated": "2025-06-04T22:10:54Z",
+  "version": "2025.06.04.35",
+  "generated": "2025-06-04T22:11:29Z",
   "files": {
-    "/honeyblocks/list/index.html": {
-      "checksum": "716045bd95e766d7ccede8c088089dde",
-      "size": 4206,
-      "priority": "important"
-    },
     "/hub/index.html": {
       "checksum": "472240862672e2cd11179c84c53a45b0",
       "size": 16428,
@@ -1634,11 +1629,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/css/window-system.css": {
-      "checksum": "ff3071e68b24c1bae6368bc3cc76235e",
-      "size": 21402,
-      "priority": "page-specific"
     },
     "/naf-playground/debug.js": {
       "checksum": "7deececc1586f528671639e502f6249c",
