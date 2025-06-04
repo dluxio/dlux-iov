@@ -23,6 +23,10 @@ export default {
         </div>
   </div>
   <!-- Footer Elements -->
+  
+  <!-- Page-specific content slot -->
+  <slot></slot>
+  
   <!-- Copyright -->
   <div class="footer-copyright text-center text-white-50 pb-1">Copyright © 2025 dlux.io</div>
   <div class="footer-copyright text-center text-white-50 pb-1"> 
