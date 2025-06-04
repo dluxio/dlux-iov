@@ -4052,10 +4052,7 @@ export default {
                       class="fas fa-power-off fa-fw"></i></a>
                 </div>
               </div>
-              
             </div>
-           <button class="mx-auto bg-card btn btn-danger text-dark mt-2 rounded-pill no-decoration" style="border: #000 dashed 1px;"
-                href="/qr">Create A New Hive Account</button>
             <div class="mt-2" v-if="HAS && haspich > 100">
               <div>
                 <div class="bg-white rounded text-center">
@@ -4066,6 +4063,8 @@ export default {
                 </div>
               </div>
             </div>
+             <button class="mx-auto bg-card btn btn-danger text-dark mt-2 rounded-pill no-decoration"
+                href="/qr">Create A New Hive Account</button>
           </div>
           <!-- add user-->
           <div>
