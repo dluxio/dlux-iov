@@ -705,6 +705,37 @@ createApp({ // vue 3
         });
       }
       
+      // Check for Enkrypt (multi-chain wallet)
+      if (window.enkrypt) {
+        // Enkrypt supports both EVM and Substrate
+        const networks = [];
+        if (window.enkrypt.providers?.ethereum) {
+          networks.push('Ethereum');
+        }
+        if (window.enkrypt.providers?.polkadot || window.injectedWeb3?.enkrypt) {
+          networks.push('Substrate');
+        }
+        
+        this.detectedWallets.push({
+          name: 'Enkrypt',
+          network: networks.length > 1 ? 'Multi-chain' : networks[0] || 'Multi-chain',
+          icon: '/img/wallets/enkrypt.svg',
+          provider: window.enkrypt,
+          evmProvider: window.enkrypt.providers?.ethereum,
+          substrateProvider: window.enkrypt.providers?.polkadot || window.injectedWeb3?.enkrypt
+        });
+      }
+      
+      // Check for Jupiter Wallet Kit (Solana ecosystem)
+      if (window.Jupiter || (window.solana && window.solana.isJupiter)) {
+        this.detectedWallets.push({
+          name: 'Jupiter Wallet',
+          network: 'Solana',
+          icon: '/img/wallets/jupiter.svg',
+          provider: window.Jupiter || window.solana
+        });
+      }
+      
       console.log('Detected wallets:', this.detectedWallets);
     },
     
@@ -890,6 +921,29 @@ createApp({ // vue 3
           const encodedMessage = new TextEncoder().encode(message);
           const signResult = await window.solana.signMessage(encodedMessage, "utf8");
           signature = Array.from(signResult.signature);
+        } else if (wallet.name === 'Jupiter Wallet' && (window.Jupiter || (window.solana && window.solana.isJupiter))) {
+          // Jupiter Wallet (Solana-based)
+          const provider = window.Jupiter || window.solana;
+          await provider.connect();
+          const encodedMessage = new TextEncoder().encode(message);
+          const signResult = await provider.signMessage(encodedMessage, "utf8");
+          signature = Array.from(signResult.signature);
+        } else if (wallet.name === 'Enkrypt') {
+          // Enkrypt can use either EVM or Substrate, prefer EVM for consistency
+          if (wallet.evmProvider) {
+            // Use EVM provider
+            await wallet.evmProvider.request({ method: 'eth_requestAccounts' });
+            const accounts = await wallet.evmProvider.request({ method: 'eth_accounts' });
+            signature = await wallet.evmProvider.request({
+              method: 'personal_sign',
+              params: [message, accounts[0]],
+            });
+          } else if (wallet.substrateProvider) {
+            // Use Substrate provider - this is more complex and may require polkadot.js
+            throw new Error('Substrate key generation via Enkrypt not yet implemented');
+          } else {
+            throw new Error('Enkrypt provider not available');
+          }
         } else if (window.ethereum) {
           // Ethereum-based wallet signature
           await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -2605,7 +2659,9 @@ createApp({ // vue 3
         'Phantom': 'https://phantom.app/img/logo.png',
         'Coinbase Wallet': 'https://avatars.githubusercontent.com/u/18060234?s=280&v=4',
         'Trust Wallet': 'https://trustwallet.com/assets/images/media/assets/trust_platform.svg',
-        'WalletConnect': 'https://walletconnect.org/walletconnect-logo.svg'
+        'WalletConnect': 'https://walletconnect.org/walletconnect-logo.svg',
+        'Enkrypt': '/img/wallets/enkrypt.svg',
+        'Jupiter Wallet': '/img/wallets/jupiter.svg'
       };
       return icons[walletName] || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 18v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v13z"></path></svg>';
     },
@@ -2645,6 +2701,12 @@ createApp({ // vue 3
         if (cryptoType === 'SOL' && this.selectedWallet === 'Phantom' && window.solana) {
           // Solana transaction via Phantom
           await this.sendSolanaTransaction(amount, address, memo);
+        } else if (cryptoType === 'SOL' && this.selectedWallet === 'Jupiter Wallet' && (window.Jupiter || (window.solana && window.solana.isJupiter))) {
+          // Solana transaction via Jupiter Wallet
+          await this.sendSolanaTransactionViaJupiter(amount, address, memo);
+        } else if (['ETH', 'MATIC', 'BNB'].includes(cryptoType) && this.selectedWallet === 'Enkrypt') {
+          // Ethereum-based transaction via Enkrypt
+          await this.sendEthereumTransactionViaEnkrypt(amount, address, cryptoType);
         } else if (['ETH', 'MATIC', 'BNB'].includes(cryptoType) && window.ethereum) {
           // Ethereum-based transaction
           await this.sendEthereumTransaction(amount, address, cryptoType);
@@ -2712,6 +2774,122 @@ createApp({ // vue 3
       }
     },
     
+    async sendSolanaTransactionViaJupiter(amount, address, memo) {
+      try {
+        const provider = window.Jupiter || window.solana;
+        
+        // Connect to Jupiter wallet
+        const response = await provider.connect();
+        console.log('Connected to Jupiter Wallet:', response.publicKey.toString());
+        
+        // Use global solanaWeb3 from CDN
+        const { Connection, Transaction, SystemProgram, PublicKey, TransactionInstruction, LAMPORTS_PER_SOL } = window.solanaWeb3;
+        
+        // Create transaction
+        const connection = new Connection('https://api.mainnet-beta.solana.com');
+        const transaction = new Transaction();
+        
+        // Add transfer instruction
+        const lamports = Math.floor(amount * LAMPORTS_PER_SOL);
+        const transferInstruction = SystemProgram.transfer({
+          fromPubkey: response.publicKey,
+          toPubkey: new PublicKey(address),
+          lamports: lamports
+        });
+        
+        transaction.add(transferInstruction);
+        
+        // Add memo if provided
+        if (memo) {
+          const memoInstruction = new TransactionInstruction({
+            keys: [],
+            programId: new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),
+            data: new TextEncoder().encode(memo)
+          });
+          transaction.add(memoInstruction);
+        }
+        
+        // Get recent blockhash
+        const { blockhash } = await connection.getRecentBlockhash();
+        transaction.recentBlockhash = blockhash;
+        transaction.feePayer = response.publicKey;
+        
+        // Sign and send transaction
+        const signedTransaction = await provider.signTransaction(transaction);
+        const txHash = await connection.sendRawTransaction(signedTransaction.serialize());
+        
+        this.userTxHash = txHash;
+        this.addPaymentLog(`Solana transaction sent via Jupiter: ${txHash}`, 'success');
+        this.markPaymentSent();
+        
+      } catch (error) {
+        throw new Error(`Jupiter Wallet Solana transaction failed: ${error.message}`);
+      }
+    },
+
+    async sendEthereumTransactionViaEnkrypt(amount, address, cryptoType) {
+      try {
+        const wallet = this.detectedWallets.find(w => w.name === 'Enkrypt');
+        if (!wallet || !wallet.evmProvider) {
+          throw new Error('Enkrypt EVM provider not available');
+        }
+        
+        const provider = wallet.evmProvider;
+        
+        // Request account access
+        await provider.request({ method: 'eth_requestAccounts' });
+        const accounts = await provider.request({ method: 'eth_accounts' });
+        
+        if (accounts.length === 0) {
+          throw new Error('No accounts found in Enkrypt wallet');
+        }
+        
+        const fromAddress = accounts[0];
+        
+        // Convert amount to wei (for ETH) or appropriate units
+        const decimals = 18; // ETH, MATIC, BNB all use 18 decimals
+        const value = '0x' + (amount * Math.pow(10, decimals)).toString(16);
+        
+        // Get network info for proper chain
+        const networkIds = {
+          'ETH': '0x1',     // Ethereum Mainnet
+          'MATIC': '0x89',  // Polygon Mainnet  
+          'BNB': '0x38'     // BSC Mainnet
+        };
+        
+        const targetNetwork = networkIds[cryptoType];
+        
+        // Check/switch network if needed
+        try {
+          await provider.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: targetNetwork }]
+          });
+        } catch (switchError) {
+          // Network switch failed, continue anyway
+          console.warn('Enkrypt network switch failed:', switchError);
+        }
+        
+        // Send transaction
+        const txHash = await provider.request({
+          method: 'eth_sendTransaction',
+          params: [{
+            from: fromAddress,
+            to: address,
+            value: value,
+            gas: '0x5208' // 21000 in hex (standard transfer)
+          }]
+        });
+        
+        this.userTxHash = txHash;
+        this.addPaymentLog(`${cryptoType} transaction sent via Enkrypt: ${txHash}`, 'success');
+        this.markPaymentSent();
+        
+      } catch (error) {
+        throw new Error(`Enkrypt ${cryptoType} transaction failed: ${error.message}`);
+      }
+    },
+
     async sendEthereumTransaction(amount, address, cryptoType) {
       try {
         // Request account access
