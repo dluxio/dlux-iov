@@ -1,4 +1,4 @@
-this.version = "2025.06.04.30";
+this.version = "2025.06.04.31";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.14",
-  "generated": "2025-06-04T21:12:25Z",
+  "version": "2025.06.04.31",
+  "generated": "2025-06-04T21:12:54Z",
   "files": {
-    "/css/bootstrap/bootstrap-grid.css": {
-      "checksum": "ff62c56c7f9eaa68592857aee5a7c93e",
-      "size": 70327,
-      "priority": "critical"
-    },
     "/css/bootstrap/bootstrap-reboot.css": {
       "checksum": "a2c742a5d35fafe705ffc2f23f05b9be",
       "size": 11998,
@@ -639,11 +634,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/dApps/turnkey-360-1-5-0.html": {
-      "checksum": "0834f17707c4f2de376b75f5993f2e72",
-      "size": 6884,
-      "priority": "important"
     },
     "/dao/index.html": {
       "checksum": "5c7f3167731d0c5d73f7d758e0690894",
@@ -1715,11 +1705,6 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/js/aframe.min.js": {
-      "checksum": "cf139ab9b75ee8fea3661385b5c50d45",
-      "size": 1277902,
-      "priority": "page-specific"
-    },
     "/js/chatvue.js": {
       "checksum": "42c56d94e0753ac58265d3af75a59f55",
       "size": 6802,
@@ -2599,11 +2584,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/js/uploadvue-old.js": {
-      "checksum": "17fabe784df9bf8d6ccf70ae8ae97de0",
-      "size": 58282,
-      "priority": "lazy"
     },
     "/sw-monitor-test.html": {
       "checksum": "166c0dbc60ffbd1e322172c0947b9875",
