@@ -1,4 +1,4 @@
-this.version = "2025.06.04.19";
+this.version = "2025.06.04.20";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -1157,7 +1157,7 @@ function formatBytes(bytes) {
 self.cacheManifest = 
 {
   "version": "2025.06.04.16",
-  "generated": "2025-06-04T19:13:50Z",
+  "generated": "2025-06-04T19:18:54Z",
   "files": {
     "/index.html": {
       "checksum": "34182fdc1ab540a6efb068ab2fc668e4",
@@ -1255,8 +1255,8 @@ self.cacheManifest =
       "priority": "critical"
     },
     "/js/v3-nav.js": {
-      "checksum": "3151f3edd2aadf7a281760b85fa265d5",
-      "size": 172155,
+      "checksum": "9ed88bb30efaa4f756d54b4c507b14e2",
+      "size": 172158,
       "priority": "critical"
     },
     "/js/bootstrap.bundle.min.js": {
@@ -1275,7 +1275,7 @@ self.cacheManifest =
       "priority": "critical"
     },
     "/js/sw-monitor.js": {
-      "checksum": "417e46017c5562675fcf46e5c7123009",
+      "checksum": "79956e6b5cdeecc1d6dfaf9c6fe868f6",
       "size": 36317,
       "priority": "critical"
     },
@@ -1310,13 +1310,13 @@ self.cacheManifest =
       "priority": "critical"
     },
     "/reg-sw.js": {
-      "checksum": "f70b80e00e553e4e003d9cbc9f334184",
+      "checksum": "5e9b98ffd733d4c41ab64d7069cea2e0",
       "size": 7300,
       "priority": "critical"
     },
     "/sw.js": {
-      "checksum": "9ff8f761aa0b9af85a91c5d185eef706",
-      "size": 83166,
+      "checksum": "000cdc7113210cf00ea593b8d7b42caf",
+      "size": 83165,
       "priority": "critical"
     },
     "/dao/index.html": {
@@ -1525,8 +1525,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/img/dlux-pen.png": {
-      "checksum": "11cd13126cc43ed9d7766e2f678a75d2",
-      "size": 11701,
+      "checksum": "a3fac4235fb060544a58002a480af5fa",
+      "size": 8762,
       "priority": "important"
     },
     "/img/dlux-qr.png": {

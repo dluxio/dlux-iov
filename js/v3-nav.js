@@ -4025,6 +4025,16 @@ export default {
                   </div>
                 </div>
               </div>
+              <div class="mb-2" v-if="HAS && haspich > 100">
+              <div>
+                <div class="bg-white rounded text-center">
+                  <a class="no-decoration" :href="HAS_.uri"><img :src="haspic" :height="haspich + 'px'"
+                      class="img-responsive p-2 mx-3">
+                    <p v-show="haspich > 100" class="text-dark">Tap or scan with PKSA App for {{user}}</p>
+                  </a>
+                </div>
+              </div>
+            </div>
                <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension</span>
               <span v-if="HAS">Hive Auth requires websockets and a PKSA Application</span>
               <span v-if="HSR">Hive Signer generates a link</span>
@@ -4053,16 +4063,7 @@ export default {
                 </div>
               </div>
             </div>
-            <div class="mt-2" v-if="HAS && haspich > 100">
-              <div>
-                <div class="bg-white rounded text-center">
-                  <a class="no-decoration" :href="HAS_.uri"><img :src="haspic" :height="haspich + 'px'"
-                      class="img-responsive p-2 mx-3">
-                    <p v-show="haspich > 100" class="text-dark">Tap or scan with PKSA App for {{user}}</p>
-                  </a>
-                </div>
-              </div>
-            </div>
+
              <a class="mx-auto bg-card btn btn-danger text-dark mt-2 rounded-pill no-decoration" href="/qr" >Create A New Hive Account</a>
           </div>
           <!-- add user-->
