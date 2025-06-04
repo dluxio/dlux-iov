@@ -1146,7 +1146,7 @@ function formatBytes(bytes) {
 self.cacheManifest = 
 {
   "version": "2025.06.04.15",
-  "generated": "2025-06-04T18:47:15Z",
+  "generated": "2025-06-04T18:52:15Z",
   "files": {
     "/index.html": {
       "checksum": "34182fdc1ab540a6efb068ab2fc668e4",
@@ -1304,7 +1304,7 @@ self.cacheManifest =
       "priority": "critical"
     },
     "/sw.js": {
-      "checksum": "ef8fe90482076ad949c35896a2c7899d",
+      "checksum": "156f450dda444fdc8306939aff9d8716",
       "size": 82616,
       "priority": "critical"
     },
