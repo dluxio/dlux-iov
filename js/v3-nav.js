@@ -105,7 +105,8 @@ export default {
       confirmKeyType: '',
       confirmDontAsk: false,
       pendingConfirmResolve: null,
-      pendingConfirmReject: null
+      pendingConfirmReject: null,
+      walletState: Date.now(), // Add this to force reactivity
     };
   },
   components: {
@@ -720,6 +721,7 @@ export default {
         localStorage.setItem("PEN", encrypted);
         sessionStorage.setItem('pen', JSON.stringify(this.decrypted));
         this.PENstatus = "Key stored successfully (pending account)";
+        this.walletState = Date.now();
         return;
       }
 
@@ -820,6 +822,7 @@ export default {
           localStorage.setItem("PEN", encrypted);
           sessionStorage.setItem('pen', JSON.stringify(this.decrypted));
           this.PENstatus = "Key stored successfully";
+          this.walletState = Date.now();
         } else {
           throw new Error("Private key does not match the public key for this account");
         }
@@ -892,6 +895,7 @@ export default {
         const encrypted = await this.encryptWithPBKDF2(this.decrypted, this.PIN);
         localStorage.setItem("PEN", encrypted);
         sessionStorage.setItem('pen', JSON.stringify(this.decrypted));
+        this.walletState = Date.now();
 
         this.PENstatus = `New account @${accountData.username} stored successfully`;
 
@@ -983,7 +987,10 @@ export default {
       this.HSR = false;
       this.PEN = true;
       localStorage.setItem("signer", "PEN");
+      await this.initializePEN();
+    },
 
+    async initializePEN() {
       // Initialize basic decrypted structure if not exists
       if (!this.decrypted) {
         this.decrypted = {
@@ -1122,6 +1129,7 @@ export default {
               this.PENstatus = "PIN created but failed to store new account: " + error.message;
             }
           }
+          this.walletState = Date.now();
         } catch (error) {
           console.error("Failed to save initial PEN data:", error);
           this.pinError = "Failed to save PIN setup: " + error.message;
@@ -1177,6 +1185,7 @@ export default {
           this.pinLoading = false;
         }
       }
+      this.walletState = Date.now();
     },
 
     closePinModal() {
@@ -1315,6 +1324,7 @@ export default {
       } finally {
         this.keyLoading = false;
       }
+      this.walletState = Date.now();
     },
 
     broadcastCJ(obj) {
@@ -2815,6 +2825,7 @@ export default {
 
       this.showPenModal = false;
       this.PENstatus = "dluxPEN wallet deleted";
+      this.walletState = Date.now(); // Update the reactive property
     },
 
     openExportModal(account) {
@@ -3090,6 +3101,8 @@ export default {
         pin: false,
         accounts: {}
       };
+      sessionStorage.removeItem('penPin');
+      this.walletState = Date.now(); // Update wallet state to trigger reactivity
       this.PENstatus = "dluxPEN wallet locked";
 
       // Show feedback
@@ -3209,6 +3222,7 @@ export default {
       } finally {
         this.changePinLoading = false;
       }
+      this.walletState = Date.now();
     },
 
     // Enhanced key management methods
@@ -3276,6 +3290,7 @@ export default {
       } finally {
         this.keyLoading = false;
       }
+      this.walletState = Date.now();
     },
 
     async addNewAccountToWallet() {
@@ -3340,6 +3355,7 @@ export default {
         console.error("Failed to add account:", error);
         alert("Failed to verify account. Please check your connection and try again.");
       }
+      this.walletState = Date.now();
     },
 
     // Transaction confirmation methods
@@ -3504,6 +3520,7 @@ export default {
         console.error("Failed to remove preference:", error);
         this.PENstatus = "Failed to remove preference";
       }
+      this.walletState = Date.now();
     },
   },
   async mounted() {
@@ -3617,6 +3634,44 @@ export default {
     function addDropdownHoverCSS() {
       console.log('[NavVue] Setting data-touch to false');
       document.body.setAttribute("data-touch", "false");
+      const style = document.createElement('style');
+      style.textContent = `
+        .auth-methods-grid {
+          width: 100%;
+          padding: 0.5rem;
+        }
+        .auth-method-btn {
+          width: 100%;
+          height: 50px;
+          background-color: #1a1a1a;
+          border: 2px solid #333;
+          border-radius: 8px;
+          padding: 0.5rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+          cursor: pointer;
+        }
+        .auth-method-btn:hover:not(:disabled) {
+          background-color: #2a2a2a;
+          border-color: #444;
+        }
+        .auth-method-btn.selected {
+          border: 3px solid #007bff;
+          background-color: #2a2a2a;
+        }
+        .auth-method-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        .auth-method-btn img {
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;
+        }
+      `;
+      document.head.appendChild(style);
     }
 
     function removeDropdownHoverCSS() {
@@ -3669,6 +3724,11 @@ export default {
       get() {
         return !!window.hive_keychain;
       },
+    },
+    hasEncryptedWallet() {
+      // Include walletState in the computation to make it reactive
+      this.walletState;
+      return localStorage.getItem("PEN") !== null;
     },
   },
   template: `<div>
@@ -3875,46 +3935,106 @@ export default {
         </div>
         <div class="modal-body">
           <!-- login method selector -->
-          <div class="d-flex flex-column">
-            <div class="row mb-3">
-              <div class="dropdown">
-                <button class="btn btn-secondary w-100 p-0" :class="{'disabled': node}" :disabled="node" role="button"
-                  id="authDropdown" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false">
-                  <button v-if="HKC" class="btn btn-hivekeychain h-100 w-100 dropdown-toggle"><img
-                      src="/img/keychain.png" style="height:50px !important;" class="img-responsive p-2 mx-3"></button>
-                  <button v-if="HAS" class="btn btn-hiveauth h-100 w-100 dropdown-toggle"><img src="/img/hiveauth.svg"
-                      style="height:50px !important;" class="img-responsive p-2 mx-3"></button>
-                  <button v-if="HSR" class="btn btn-hivesigner h-100 w-100 dropdown-toggle"><img
-                      src="/img/hivesigner.svg" style="height:50px !important;"
-                      class="img-responsive p-2 mx-3"></button>
-                  <button v-if="PEN" class="btn btn-pen h-100 w-100 dropdown-toggle"><img src="/img/dlux-pen.png"
-                      style="height:50px !important;" class="img-responsive p-2 mx-3"></button>
-                </button>
-                <!-- login method options -->
-                <ul class="dropdown-menu dropdown-menu-dark text-center bg-black p-2" aria-labelledby="authDropdown">
-                  <li class="p-2"><button class="btn btn-hivekeychain h-100 w-100" @click="useKC()"><img
-                        src="/img/keychain.png" class="img-responsive" style="height:50px !important;"></button></li>
-                  <li class="p-2" v-if="!node"><button class="btn btn-hiveauth h-100 w-100" @click="useHAS()"><img
-                        src="/img/hiveauth.svg" class="img-responsive" style="height:50px !important;"></button></li>
-                  <li class="p-2" v-if="!node"><button class="btn btn-hivesigner h-100 w-100" @click="useHS()"><img
-                        src="/img/hivesigner.svg" class="img-responsive" style="height:50px !important;"></button></li>
-                  <li class="p-2"><button class="btn btn-pen h-100 w-100" @click="usePEN()"><img
-                        src="/img/dlux-pen.png" class="img-responsive" style="height:50px !important;"></button></li>
-                </ul>
+          <div class="d-flex flex-column mb-1">
+          <label class="lead mb-1">Signing Method</label>
+            <div class="row mb-1">
+              <div class="auth-methods-grid">
+                <div class="row g-2">
+                  <div class="col-6">
+                    <button 
+                      class="auth-method-btn" 
+                      :class="{'selected': HKC}"
+                      @click="useKC()"
+                      :disabled="node">
+                      <img src="/img/keychain.png" class="img-responsive" style="height:50px !important;">
+                    </button>
+                  </div>
+                  <div class="col-6">
+                    <button 
+                      class="auth-method-btn" 
+                      :class="{'selected': HAS}"
+                      @click="useHAS()"
+                      :disabled="node">
+                      <img src="/img/hiveauth.svg" class="img-responsive" style="height:50px !important;">
+                    </button>
+                  </div>
+                  <div class="col-6">
+                    <button 
+                      class="auth-method-btn" 
+                      :class="{'selected': HSR}"
+                      @click="useHS()"
+                      :disabled="node">
+                      <img src="/img/hivesigner_white.svg" class="img-responsive" style="height:50px !important;">
+                    </button>
+                  </div>
+                  <div class="col-6">
+                    <button 
+                      class="auth-method-btn" 
+                      :class="{'selected': PEN}"
+                      @click="usePEN()"
+                      :disabled="node">
+                      <img src="/img/dlux-pen.png" class="img-responsive" style="height:50px !important;">
+                    </button>
+                  </div>
+                </div>
               </div>
-              <!-- login method description -->
-              <div class="small text-white-50 text-center mt-2">
-                <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension</span>
-                <span v-if="HAS">Hive Auth requires websockets and a PKSA Application</span>
-                <span v-if="HSR">Hive Signer generates a link</span>
-                <span v-if="PEN">dluxPEN lets you sign transactions with locally stored and encrypted keys</span>
+            </div>
+            <!-- login method description -->
+            <div class="small text-white-50 text-center mb-2">
+             
+              <!-- PEN Management Button -->
+              <div v-if="PEN" class="mb-2">
+              
+                <div class="row">
+                  <!-- Set Password -->
+                  <div v-if="!hasEncryptedWallet" class="col-4 p-1 mx-auto">
+                    <button class="btn btn-primary btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="setupNewPin()">
+                      <i class="fa-solid fa-wallet mb-1"></i>
+                      <small>Set Password</small>
+                       <span class="badge bg-dark mt-1">* * *</span>
+                    </button>
+                  </div>
+                  <!-- If password -->
+                  <div class="col-4 p-1" v-if="hasEncryptedWallet">
+                    <!-- Manage Keys -->
+                    <button class="btn btn-info btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="openPenManagement()">
+                      <i class="fa-solid fa-key mb-1"></i>
+                      <small>Manage Keys</small>
+                      <span class="badge mt-1" :class="PIN || decrypted.pin ? 'bg-success' : 'bg-warning'">
+                        {{ PIN || decrypted.pin ? 'Decrypted' : 'Encrypted' }}
+                      </span>
+                    </button>
+                  </div>
+                  <div class="col-4 p-1" v-if="hasEncryptedWallet">
+                    <!-- Unlock Wallet -->
+                    <button v-if="!PIN && !decrypted.pin" class="btn btn-warning btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="requestPinForDecryption()">
+                      <i class="fa-solid fa-lock mb-1"></i>
+                      <small>Unlock Wallet</small>
+                    </button>
+                    <!-- Lock Wallet -->
+                    <button v-if="PIN || decrypted.pin" class="btn btn-warning btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="closeWallet()">
+                      <i class="fa-solid fa-lock mb-1"></i>
+                      <small>Lock Wallet</small>
+                    </button>
+                  </div>
+                  <div class="col-4 p-1" v-if="hasEncryptedWallet">
+                    <button type="button" class="btn btn-danger btn-sm w-100 h-100 d-flex flex-column align-items-center justify-content-center" @click="deleteWallet()">
+                      <i class="fa-solid fa-trash mb-1"></i>
+                      <small>Delete</small>
+                    </button>
+                  </div>
+                </div>
               </div>
+               <span v-if="HKC">Hive Keychain requires a Firefox or Chrome extension</span>
+              <span v-if="HAS">Hive Auth requires websockets and a PKSA Application</span>
+              <span v-if="HSR">Hive Signer generates a link</span>
+              <span v-if="PEN">dluxPEN lets you sign transactions with locally stored and encrypted keys</span>
             </div>
           </div>
           <!-- current user -->
           <div class="mb-3">
             <div>
-              <label class="form-label">Current user</label>
+              <label class="lead mb-1">Current user</label>
               <div v-if="!user" class="bg-darkest rounded d-flex align-items-center p-2">
                 <img src="/img/no-user.png" alt="" width="50" height="50" class="img-fluid rounded-circle me-2 cover">
                 <span class="flex-grow-1 text-center">NONE SELECTED</span>
@@ -3931,21 +4051,7 @@ export default {
                       class="fas fa-power-off fa-fw"></i></a>
                 </div>
               </div>
-              <!-- PEN Management Button -->
-              <div v-if="PEN" class="mt-2">
-                <button class="btn btn-outline-info btn-sm w-100" @click="openPenManagement()">
-                  <i class="fa-solid fa-key me-2"></i>
-                  Manage dluxPEN Keys
-                  <span class="ms-2 badge" :class="PIN || decrypted.pin ? 'bg-success' : 'bg-warning'">
-                    {{ PIN || decrypted.pin ? 'Decrypted' : 'Encrypted' }}
-                  </span>
-                </button>
-                <!-- Close Wallet Button (only show when decrypted) -->
-                <button v-if="PIN || decrypted.pin" class="btn btn-outline-warning btn-sm w-100 mt-2" @click="closeWallet()">
-                  <i class="fa-solid fa-lock me-2"></i>
-                  Lock Wallet
-                </button>
-              </div>
+              
             </div>
             <div class="mt-2" v-if="HAS && haspich > 100">
               <div>
@@ -3960,7 +4066,7 @@ export default {
           </div>
           <!-- add user-->
           <div>
-            <label class="form-label">Add user</label>
+            <label class="lead mb-1">Add user</label>
             <div class="position-relative has-validation">
               <span class="position-absolute top-50 translate-middle-y ps-2 text-light">
                 <i class="fa-solid fa-at fa-fw"></i>
@@ -3994,7 +4100,7 @@ export default {
           </div>
           <!-- recent users -->
           <div class="mt-1" v-if="recentUsers.length">
-            <label class="form-label">Recent users</label>
+            <label class="lead mb-2">Recent users</label>
             <div class="d-none position-relative has-validation">
               <span class="position-absolute top-50 translate-middle-y ps-2 text-light">
                 <i class="fa-solid fa-at fa-fw"></i>
