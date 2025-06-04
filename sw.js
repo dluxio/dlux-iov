@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.30",
-  "generated": "2025-06-04T21:06:44Z",
+  "version": "2025.06.04.14",
+  "generated": "2025-06-04T21:12:25Z",
   "files": {
-    "/css/bootstrap.css": {
-      "checksum": "60def5490c429c25858ae0c72462b38b",
-      "size": 271584,
-      "priority": "critical"
-    },
     "/css/bootstrap/bootstrap-grid.css": {
       "checksum": "ff62c56c7f9eaa68592857aee5a7c93e",
       "size": 70327,
@@ -644,11 +639,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/css/tagify.css": {
-      "checksum": "17293e2a18aea950ca3ac847b1c1f565",
-      "size": 14455,
-      "priority": "important"
     },
     "/dApps/turnkey-360-1-5-0.html": {
       "checksum": "0834f17707c4f2de376b75f5993f2e72",
@@ -1461,7 +1451,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "0f4e44c1b0451601f5b01644b79400fd",
+      "checksum": "455d7357671c1f26fab308ba58be8d48",
       "size": 36317,
       "priority": "important"
     },
@@ -1651,7 +1641,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "65c53d4912856ee05ead54818700bcb5",
+      "checksum": "85488438d4acf3c3cc83d5d145d4373c",
       "size": 7300,
       "priority": "important"
     },
@@ -1724,11 +1714,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/js/aframe-inspector.min.js": {
-      "checksum": "90eb74ef16d61ee0ab934e8412e99bf6",
-      "size": 437913,
-      "priority": "page-specific"
     },
     "/js/aframe.min.js": {
       "checksum": "cf139ab9b75ee8fea3661385b5c50d45",
@@ -2614,11 +2599,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/js/postvue-old.js": {
-      "checksum": "f2bd9df92455de434430c350ed37641a",
-      "size": 12673,
-      "priority": "lazy"
     },
     "/js/uploadvue-old.js": {
       "checksum": "17fabe784df9bf8d6ccf70ae8ae97de0",
