@@ -1,4 +1,4 @@
-this.version = "2025.06.04.17";
+this.version = "2025.06.04.19";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -538,6 +538,17 @@ self.addEventListener("install", function (event) {
     );
 });
 
+// Helper function to notify all clients
+function notifyClients(message) {
+    self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
+        .then(clients => {
+            clients.forEach(client => {
+                client.postMessage(message);
+            });
+        })
+        .catch(error => console.error('Failed to notify clients:', error));
+}
+
 // Smart cache installation with checksum comparison
 async function smartCacheInstall() {
     const newCache = await caches.open(CACHE_NAME);
@@ -585,6 +596,9 @@ async function smartCacheInstall() {
                 transferred: (criticalStats.transferred || 0) + (importantStats.transferred || 0) + (pageStats.transferred || 0),
                 downloaded: (criticalStats.downloaded || 0) + (importantStats.downloaded || 0) + (pageStats.downloaded || 0)
             };
+            
+            // Mark priority two as cached to prevent old system from running
+            priorityTwoCached = true;
             
             notifyClients({ 
                 type: 'SMART_CACHE_COMPLETE',
@@ -654,10 +668,18 @@ async function processCacheFiles(fileEntries, newCache, oldCache, priority) {
     return { transferred: transferredCount, downloaded: downloadedCount };
 }
 
-// Background caching of important resources
+// Background caching of important resources (fallback for when smart caching is not available)
 function scheduleBackgroundCache() {
-    if (backgroundCacheInProgress) return;
+    if (backgroundCacheInProgress || priorityTwoCached) return;
+    
+    // Only use fallback caching if no smart cache manifest is available
+    if (self.cacheManifest && self.cacheManifest.files) {
+        console.log("SW: Smart cache available, skipping fallback background cache");
+        return;
+    }
+    
     backgroundCacheInProgress = true;
+    console.log("SW: Using fallback background caching (no smart cache manifest)");
 
     // Use setTimeout to avoid blocking the install event
     setTimeout(() => {
@@ -1067,7 +1089,7 @@ self.addEventListener("activate", function (event) {
                     console.log('Notified client:', client.id);
                 });
 
-                // Start background caching of important resources after activation
+                // Start background caching of important resources after activation (fallback only)
                 scheduleBackgroundCache();
             })
             .catch(error => console.error('Activation failed:', error))
@@ -1122,17 +1144,6 @@ function pullScript(id) {
             return scriptPromises[id];
 }
 
-// Helper function to notify all clients
-function notifyClients(message) {
-    self.clients.matchAll({ includeUncontrolled: true, type: 'window' })
-        .then(clients => {
-            clients.forEach(client => {
-                client.postMessage(message);
-            });
-        })
-        .catch(error => console.error('Failed to notify clients:', error));
-}
-
 // Helper function to format bytes (duplicate of existing formatBytes for consistency)
 function formatBytes(bytes) {
     if (bytes === 0) return '0 Bytes';
@@ -1145,8 +1156,8 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.15",
-  "generated": "2025-06-04T18:59:30Z",
+  "version": "2025.06.04.16",
+  "generated": "2025-06-04T19:13:50Z",
   "files": {
     "/index.html": {
       "checksum": "34182fdc1ab540a6efb068ab2fc668e4",
@@ -1264,7 +1275,7 @@ self.cacheManifest =
       "priority": "critical"
     },
     "/js/sw-monitor.js": {
-      "checksum": "3adb336ef15b7f22bd48ca1466a5923e",
+      "checksum": "417e46017c5562675fcf46e5c7123009",
       "size": 36317,
       "priority": "critical"
     },
@@ -1299,13 +1310,13 @@ self.cacheManifest =
       "priority": "critical"
     },
     "/reg-sw.js": {
-      "checksum": "1b9f56e3076eddd6e1cad2f8e7077b01",
+      "checksum": "f70b80e00e553e4e003d9cbc9f334184",
       "size": 7300,
       "priority": "critical"
     },
     "/sw.js": {
-      "checksum": "bc0e8111259ab15c8022c643a97cf88f",
-      "size": 82616,
+      "checksum": "9ff8f761aa0b9af85a91c5d185eef706",
+      "size": 83166,
       "priority": "critical"
     },
     "/dao/index.html": {
