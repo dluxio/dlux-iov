@@ -634,8 +634,8 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.23",
-  "generated": "2025-06-04T19:46:42Z",
+  "version": "2025.06.04.16",
+  "generated": "2025-06-04T19:57:26Z",
   "files": {
     "/index.html": {
       "checksum": "34182fdc1ab540a6efb068ab2fc668e4",
@@ -658,7 +658,7 @@ self.cacheManifest =
       "priority": "critical"
     },
     "/sw.js": {
-      "checksum": "50c0c23e0a48b6fcf3f211e9a33d3b6e",
+      "checksum": "f189cbca20fad1273beaa9eefc2703ff",
       "size": 26276,
       "priority": "critical"
     }
