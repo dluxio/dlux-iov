@@ -942,9 +942,9 @@ createApp({ // vue 3
         return;
       }
       
-      if (!/^[a-z0-9.-]+$/.test(username)) {
+      if (!/^(?=.{3,16}$)[a-z][a-z0-9-]{1,}[a-z0-9](\.[a-z][a-z0-9-]{1,}[a-z0-9])*$/.test(username)) {
         this.usernameStatus = 'invalid';
-        this.usernameError = 'Only lowercase letters, numbers, dots, and hyphens allowed';
+        this.usernameError = 'Only lowercase letters, numbers, dots, and hyphens allowed(plus some rules about dots and hyphens)';
         return;
       }
       
