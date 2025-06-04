@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.35",
-  "generated": "2025-06-04T22:11:29Z",
+  "version": "2025.06.04.19",
+  "generated": "2025-06-04T22:24:47Z",
   "files": {
-    "/hub/index.html": {
-      "checksum": "472240862672e2cd11179c84c53a45b0",
-      "size": 16428,
-      "priority": "important"
-    },
     "/img/FFmpeg_logo.svg": {
       "checksum": "d9bd07ebe503cd4927e7d84644793a54",
       "size": 22917,
@@ -1366,7 +1361,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "a2e5ad8499c5d2eecbbe50aca7b809f7",
+      "checksum": "91199aeec4f36d488d490b829e68fe57",
       "size": 36317,
       "priority": "important"
     },
@@ -1436,8 +1431,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-qr.js": {
-      "checksum": "8330be66c272737161c0ae59989f1d4e",
-      "size": 124733,
+      "checksum": "d38fdad187e8c0630fb2c3c3e61fd026",
+      "size": 125027,
       "priority": "important"
     },
     "/js/v3-user.js": {
@@ -1556,7 +1551,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "e76ee1a0979ea8f93695d15479446350",
+      "checksum": "752d7e3d330265e3a0c0f860a1caa096",
       "size": 7300,
       "priority": "important"
     },
@@ -1629,11 +1624,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/debug.js": {
-      "checksum": "7deececc1586f528671639e502f6249c",
-      "size": 200,
-      "priority": "page-specific"
     },
     "/naf-playground/entity-api-test.html": {
       "checksum": "21c9f77902931790228562ded63c9d4b",

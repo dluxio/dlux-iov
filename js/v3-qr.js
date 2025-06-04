@@ -3173,6 +3173,11 @@ createApp({ // vue 3
         
         // Generate QR data based on crypto type
         switch (cryptoType) {
+          case 'BTC':
+            // memo to hex, Uint16Array for browser
+            const memoHex = memo ? Uint16Array.from(memo).buffer : '';
+            qrData = memo ? `bitcoin:${address}?amount=${amount}&message=${memoHex}` : `bitcoin:${address}?amount=${amount}`;
+            break;
           case 'SOL':
             // Use simple JSON format that most Solana wallets can parse
             qrData = memo ? `solana:${address}?amount=${amount}&memo=${memo}` : `solana:${address}?amount=${amount}`;
@@ -3207,7 +3212,7 @@ createApp({ // vue 3
         // Try multiple ways to find the QR container
         let qrContainer = this.$refs.paymentQR;
         if (!qrContainer) {
-          qrContainer = document.getElementById('paymentQR');
+          qrContainer = document.getElementById('paymentQrCode');
         }
         if (!qrContainer) {
           qrContainer = document.querySelector('[ref="paymentQR"]');
