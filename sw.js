@@ -1,4 +1,4 @@
-this.version = "2025.06.04.27";
+this.version = "2025.06.04.28";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.13",
-  "generated": "2025-06-04T20:56:20Z",
+  "version": "2025.06.04.28",
+  "generated": "2025-06-04T20:56:48Z",
   "files": {
-    "/css/bootstrap-grid.css": {
-      "checksum": "ff62c56c7f9eaa68592857aee5a7c93e",
-      "size": 70327,
-      "priority": "critical"
-    },
     "/css/bootstrap-reboot.css": {
       "checksum": "4092253288fe829ab354cc4a7d73450a",
       "size": 11895,
@@ -659,11 +654,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/css/simplemde-bs-dark.css": {
-      "checksum": "96865c7891f63beeae48ad1b318b38b3",
-      "size": 16247,
-      "priority": "important"
     },
     "/css/smde-comment.css": {
       "checksum": "a2a7d007f4c51ffdba6937b4c79e29f7",
@@ -1755,11 +1745,6 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/img/chatgpt-icon.png": {
-      "checksum": "3d4f973524b864115f67d06857692785",
-      "size": 6221,
-      "priority": "page-specific"
-    },
     "/js/aframe-environment-component.min.js": {
       "checksum": "b24c9108753f2af21987ba83c9674ff1",
       "size": 49209,
@@ -2659,11 +2644,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/js/modalvue-old.js": {
-      "checksum": "962fb5270ec2e9a3336b9f68dcdc1be1",
-      "size": 40031,
-      "priority": "lazy"
     },
     "/js/navue-old.js": {
       "checksum": "22b4cad654ee4fba41856abd5057b0ef",
