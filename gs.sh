@@ -193,9 +193,41 @@ if [ -f "$file" ]; then
                 echo ""
                 echo "   🎉 Service worker updated successfully!"
                 echo "   💾 Backup saved as ${file}.backup"
+                
+                # Generate cache manifest after service worker updates
+                echo ""
+                echo "🔄 Generating cache manifest with checksums..."
+                if [ -f "./generate-cache-manifest.sh" ]; then
+                    chmod +x ./generate-cache-manifest.sh
+                    ./generate-cache-manifest.sh
+                    if [ $? -eq 0 ]; then
+                        echo "✅ Cache manifest generated successfully"
+                    else
+                        echo "❌ Cache manifest generation failed"
+                        echo "   Continuing with deployment..."
+                    fi
+                else
+                    echo "⚠️  generate-cache-manifest.sh not found, skipping cache manifest generation"
+                fi
             fi
         else
             echo "✅ No new cacheable files found - service worker is up to date!"
+            
+            # Still generate cache manifest to catch any file changes
+            echo ""
+            echo "🔄 Checking for file changes and updating cache manifest..."
+            if [ -f "./generate-cache-manifest.sh" ]; then
+                chmod +x ./generate-cache-manifest.sh
+                ./generate-cache-manifest.sh
+                if [ $? -eq 0 ]; then
+                    echo "✅ Cache manifest updated successfully"
+                else
+                    echo "❌ Cache manifest update failed"
+                    echo "   Continuing with deployment..."
+                fi
+            else
+                echo "⚠️  generate-cache-manifest.sh not found, skipping cache manifest generation"
+            fi
         fi
 
         # ✅ macOS-compatible in-place editing

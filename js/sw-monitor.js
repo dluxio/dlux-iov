@@ -21,7 +21,14 @@ export default {
       cacheStats: {
         totalSize: 0,
         resourceCount: 0,
-        lastUpdated: null
+        lastUpdated: null,
+        smartCache: {
+          version: null,
+          transferred: 0,
+          downloaded: 0,
+          efficiency: 0,
+          lastUpdate: null
+        }
       },
 
       // Error states
@@ -423,6 +430,31 @@ export default {
           this.updateCacheStats();
           this.showToast('App updated successfully!', 'success');
           break;
+        case 'SMART_CACHE_COMPLETE':
+          this.swStatus = 'current';
+          this.showUpdateNotification = false;
+          this.updateCacheStats();
+          
+          // Update smart cache statistics
+          if (data && data.stats) {
+            this.cacheStats.smartCache.transferred = data.stats.transferred || 0;
+            this.cacheStats.smartCache.downloaded = data.stats.downloaded || 0;
+            this.cacheStats.smartCache.lastUpdate = new Date().toISOString();
+            
+            const total = this.cacheStats.smartCache.transferred + this.cacheStats.smartCache.downloaded;
+            if (total > 0) {
+              this.cacheStats.smartCache.efficiency = Math.round((this.cacheStats.smartCache.transferred / total) * 100);
+            }
+            
+            console.log('[SW Monitor] Smart cache stats updated:', this.cacheStats.smartCache);
+            this.showToast(
+              `Smart update: ${this.cacheStats.smartCache.transferred} transferred, ${this.cacheStats.smartCache.downloaded} downloaded (${this.cacheStats.smartCache.efficiency}% efficient)`, 
+              'success'
+            );
+          } else {
+            this.showToast('Smart cache update completed!', 'success');
+          }
+          break;
         case 'ERROR':
           this.errors.push(data.message);
           this.swStatus = 'error';
@@ -436,27 +468,52 @@ export default {
           const cacheNames = await caches.keys();
           let totalSize = 0;
           let resourceCount = 0;
+          let smartCacheVersion = null;
 
           for (const name of cacheNames) {
             const cache = await caches.open(name);
             const keys = await cache.keys();
             resourceCount += keys.length;
 
-            // Estimate cache size (rough calculation)
+            // Estimate cache size and check for smart cache info
             for (const request of keys) {
               const response = await cache.match(request);
               if (response) {
                 const blob = await response.blob();
                 totalSize += blob.size;
+                
+                // Check for smart cache metadata
+                const cacheSize = response.headers.get('x-cache-size');
+                if (cacheSize) {
+                  // This is a smart cached file, extract version if available
+                  if (!smartCacheVersion) {
+                    // Try to determine version from service worker
+                    try {
+                      const registration = await navigator.serviceWorker.getRegistration('/');
+                      if (registration && registration.active) {
+                        // Version should be available in the service worker
+                        smartCacheVersion = 'Active';
+                      }
+                    } catch (e) {
+                      console.warn('Could not determine SW version:', e);
+                    }
+                  }
+                }
               }
             }
           }
 
+          // Preserve existing smart cache stats while updating general stats
           this.cacheStats = {
+            ...this.cacheStats,
             totalSize,
             resourceCount,
             lastUpdated: new Date().toISOString()
           };
+          
+          if (smartCacheVersion) {
+            this.cacheStats.smartCache.version = smartCacheVersion;
+          }
         }
       } catch (error) {
         console.error('[SW Monitor] Error updating cache stats:', error);
