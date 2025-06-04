@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@300..700&display=swap"
-      rel="stylesheet">
+    rel="stylesheet">
   <!-- Icons -->
   <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
   <link rel="manifest" href="/manifest.webmanifest">
@@ -37,7 +37,7 @@
   <script src="/reg-sw.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script type="module" src="/js/v3-qr.js"></script>
-  
+
   <!-- Onboarding Styles -->
   <style>
     /* Step Indicator Styles */
@@ -48,12 +48,12 @@
       opacity: 0.5;
       transition: opacity 0.3s ease;
     }
-    
+
     .step-indicator.active,
     .step-indicator.completed {
       opacity: 1;
     }
-    
+
     .step-number {
       width: 40px;
       height: 40px;
@@ -67,21 +67,21 @@
       margin-bottom: 8px;
       transition: background-color 0.3s ease;
     }
-    
+
     .step-indicator.active .step-number {
       background-color: #007bff;
     }
-    
+
     .step-indicator.completed .step-number {
       background-color: #28a745;
     }
-    
+
     .step-label {
       font-size: 0.875rem;
       text-align: center;
       font-weight: 500;
     }
-    
+
     .step-line {
       flex: 1;
       height: 2px;
@@ -91,63 +91,63 @@
       transition: background-color 0.3s ease;
       margin-top: -20px;
     }
-    
+
     .step-line.completed {
       background-color: #28a745;
     }
-    
+
     /* Wallet Card Styles */
     .wallet-card {
       cursor: pointer;
       transition: all 0.3s ease;
       border: 2px solid transparent;
     }
-    
+
     .wallet-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
     }
-    
+
     .wallet-card.border-primary {
       border-color: #007bff !important;
       box-shadow: 0 0 15px rgba(0, 123, 255, 0.4);
     }
-    
+
     .wallet-icon {
       width: 32px;
       height: 32px;
       object-fit: contain;
     }
-    
+
     /* Crypto Icon Styles */
     .crypto-icon {
       width: 24px;
       height: 24px;
       object-fit: contain;
     }
-    
+
     /* Background Classes */
     .bg-darker {
       background-color: #1a1a1a !important;
     }
-    
+
     /* Responsive Adjustments */
     @media (max-width: 768px) {
       .step-indicator {
         font-size: 0.75rem;
       }
-      
+
       .step-number {
         width: 32px;
         height: 32px;
         font-size: 0.875rem;
       }
-      
+
       .step-line {
         margin: 0 8px;
         margin-top: -16px;
       }
-      
+
       .wallet-icon {
         width: 24px;
         height: 24px;
@@ -164,7 +164,7 @@
         @refresh="run($event)" @store-new-account="handleStoreNewAccount($event)" :op="toSign" :lapi="lapi" />
     </div>
     <main role="main" class="mb-auto" style="margin-top: 94px;">
-      
+
       <div v-if="!account" class="d-none">
         <div class="alert alert-fusch d-flex flex-wrap align-items-center" role="alert">
           <span class="my-1">Share your HIVE account</span>
@@ -183,7 +183,8 @@
               <div class="d-flex justify-content-between align-items-center">
                 <div>
                   <i class="fa-solid fa-user-friends me-2"></i>
-                  <strong>Help create account for @{{ requestUsername }}</strong> - You've been invited to help someone join HIVE
+                  <strong>Help create account for @{{ requestUsername }}</strong> - You've been invited to help someone
+                  join HIVE
                 </div>
                 <div class="btn-group">
                   <button class="btn btn-warning btn-sm" @click="startAccountCreation">
@@ -195,7 +196,7 @@
                 </div>
               </div>
             </div>
-            
+
             <!-- Main Action - Create Account -->
             <div v-if="!requestUsername || onboardingStep > 0" class="alert alert-primary mb-3">
               <div class="d-flex justify-content-between align-items-center">
@@ -208,7 +209,7 @@
                 </button>
               </div>
             </div>
-            
+
             <!-- Secondary Action - Key Recovery -->
             <div class="alert alert-info">
               <div class="d-flex justify-content-between align-items-center">
@@ -237,7 +238,7 @@
                 </h5>
               </div>
               <div class="card-body">
-                
+
                 <!-- Step 1: Enter Username -->
                 <div v-if="recoveryStep === 1">
                   <h6 class="mb-3">Step 1: Enter Your Username</h6>
@@ -245,10 +246,7 @@
                     <label class="form-label">HIVE Username</label>
                     <div class="position-relative">
                       <span class="position-absolute top-50 translate-middle-y ps-3 text-muted">@</span>
-                      <input 
-                        v-model="recoveryData.username" 
-                        @keyup.enter="recoveryStep = 2"
-                        placeholder="your-username"
+                      <input v-model="recoveryData.username" @keyup.enter="recoveryStep = 2" placeholder="your-username"
                         class="ps-5 form-control bg-dark border-dark text-light">
                     </div>
                     <small class="text-muted">Enter the username for which you want to recover keys</small>
@@ -265,12 +263,12 @@
                 <div v-if="recoveryStep === 2">
                   <h6 class="mb-3">Step 2: Select Your Wallet</h6>
                   <p class="text-muted mb-3">Choose the same wallet you used to generate your keys originally:</p>
-                  
+
                   <div class="row g-3 mb-4">
                     <div v-for="wallet in detectedWallets" :key="wallet.name" class="col-6 col-md-4">
-                      <div class="card bg-darker border-secondary h-100 wallet-card" 
-                           :class="{'border-warning': recoveryData.selectedWallet === wallet.name}"
-                           @click="recoveryData.selectedWallet = wallet.name">
+                      <div class="card bg-darker border-secondary h-100 wallet-card"
+                        :class="{'border-warning': recoveryData.selectedWallet === wallet.name}"
+                        @click="recoveryData.selectedWallet = wallet.name">
                         <div class="card-body text-center p-3">
                           <img :src="wallet.icon" :alt="wallet.name" class="wallet-icon mb-2">
                           <div class="small fw-bold">{{ wallet.name }}</div>
@@ -299,25 +297,26 @@
                 <!-- Step 3: Key Recovery -->
                 <div v-if="recoveryStep === 3">
                   <h6 class="mb-3">Step 3: Recover Your Keys</h6>
-                  
+
                   <div class="alert alert-warning mb-3">
                     <i class="fa-solid fa-info-circle me-2"></i>
-                    <strong>Important:</strong> You'll need to sign the same message you used when originally generating your keys.
+                    <strong>Important:</strong> You'll need to sign the same message you used when originally generating
+                    your keys.
                   </div>
 
                   <div class="mb-3">
                     <label class="form-label">Recovery Message</label>
-                    <input 
-                      v-model="recoveryData.message" 
-                      class="form-control bg-dark border-dark text-light"
+                    <input v-model="recoveryData.message" class="form-control bg-dark border-dark text-light"
                       :placeholder="`Generate HIVE keys for account: ${recoveryData.username}`">
                     <small class="text-muted">
-                      This should be the exact message you signed originally (usually: "Generate HIVE keys for account: username")
+                      This should be the exact message you signed originally (usually: "Generate HIVE keys for account:
+                      username")
                     </small>
                   </div>
 
                   <div class="mb-4">
-                    <button class="btn btn-warning w-100" @click="recoverKeys" :disabled="recoveryLoading || !recoveryData.message">
+                    <button class="btn btn-warning w-100" @click="recoverKeys"
+                      :disabled="recoveryLoading || !recoveryData.message">
                       <span v-if="recoveryLoading" class="spinner-border spinner-border-sm me-2"></span>
                       <i v-else class="fa-solid fa-key me-2"></i>
                       {{ recoveryLoading ? 'Recovering Keys...' : 'Sign Message & Recover Keys' }}
@@ -330,11 +329,12 @@
                       <i class="fa-solid fa-check me-2"></i>
                       <strong>Keys recovered successfully!</strong> Your keys have been restored in dluxPEN.
                     </div>
-                    
+
                     <div class="card bg-darker border-secondary">
                       <div class="card-header d-flex justify-content-between align-items-center">
                         <h6 class="mb-0">Recovered Keys</h6>
-                        <button class="btn btn-outline-secondary btn-sm" @click="showRecoveredKeys = !showRecoveredKeys">
+                        <button class="btn btn-outline-secondary btn-sm"
+                          @click="showRecoveredKeys = !showRecoveredKeys">
                           <i :class="showRecoveredKeys ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
                           {{ showRecoveredKeys ? 'Hide' : 'Show' }}
                         </button>
@@ -343,11 +343,8 @@
                         <div v-for="(key, type) in recoveredKeys" :key="type" class="mb-3">
                           <label class="form-label text-capitalize">{{ type }} Key</label>
                           <div class="input-group">
-                            <input 
-                              type="text"
-                              :value="key" 
-                              class="form-control bg-dark border-dark text-light font-monospace small"
-                              readonly>
+                            <input type="text" :value="key"
+                              class="form-control bg-dark border-dark text-light font-monospace small" readonly>
                             <button class="btn btn-outline-secondary" @click="copyToClipboard(key)">
                               <i class="fa-solid fa-copy"></i>
                             </button>
@@ -385,7 +382,7 @@
         <!-- New User Onboarding System - Always Available -->
         <div v-if="!recoveryMode && onboardingStep > 0" class="row justify-content-center">
           <div class="col-lg-8 col-xl-6">
-            
+
             <!-- Welcome Header -->
             <div class="text-center mb-4">
               <h1 class="fs-2 mb-2">Welcome to HIVE</h1>
@@ -424,14 +421,9 @@
                     <span class="position-absolute top-50 translate-middle-y ps-3 text-muted">
                       <i class="fa-solid fa-at"></i>
                     </span>
-                    <input 
-                      v-model="newAccount.username" 
-                      @input="checkUsernameAvailability"
-                      @keyup.enter="onboardingStep = 2"
-                      autocapitalize="off" 
-                      placeholder="your-username"
-                      class="ps-5 form-control bg-dark border-dark text-light"
-                      :class="{
+                    <input v-model="newAccount.username" @input="checkUsernameAvailability"
+                      @keyup.enter="onboardingStep = 2" autocapitalize="off" placeholder="your-username"
+                      class="ps-5 form-control bg-dark border-dark text-light" :class="{
                         'border-success': usernameStatus === 'available',
                         'border-danger': usernameStatus === 'taken' || usernameStatus === 'invalid',
                         'border-warning': usernameStatus === 'checking'
@@ -456,9 +448,7 @@
                   </div>
                 </div>
                 <div class="text-end">
-                  <button 
-                    class="btn btn-primary" 
-                    @click="onboardingStep = 2"
+                  <button class="btn btn-primary" @click="onboardingStep = 2"
                     :disabled="usernameStatus !== 'available'">
                     Next: Generate Keys
                     <i class="fa-solid fa-arrow-right ms-1"></i>
@@ -473,15 +463,14 @@
                 <h5 class="mb-0"><i class="fa-solid fa-key me-2"></i>Generate Secure Keys</h5>
               </div>
               <div class="card-body">
-                
+
                 <!-- Wallet Detection -->
                 <div class="mb-4">
                   <h6 class="mb-3">Detected Wallets</h6>
                   <div class="row g-3">
                     <div v-for="wallet in detectedWallets" :key="wallet.name" class="col-6 col-md-4">
-                      <div class="card bg-darker border-secondary h-100 wallet-card" 
-                           :class="{'border-primary': selectedWallet === wallet.name}"
-                           @click="selectWallet(wallet.name)">
+                      <div class="card bg-darker border-secondary h-100 wallet-card"
+                        :class="{'border-primary': selectedWallet === wallet.name}" @click="selectWallet(wallet.name)">
                         <div class="card-body text-center p-3">
                           <img :src="wallet.icon" :alt="wallet.name" class="wallet-icon mb-2">
                           <div class="small fw-bold">{{ wallet.name }}</div>
@@ -502,17 +491,22 @@
                 <div class="mb-4">
                   <h6 class="mb-3">Key Generation Method</h6>
                   <div class="form-check mb-3">
-                    <input class="form-check-input" type="radio" v-model="keyGenMethod" value="wallet" id="method-wallet" :disabled="detectedWallets.length === 0">
+                    <input class="form-check-input" type="radio" v-model="keyGenMethod" value="wallet"
+                      id="method-wallet" :disabled="detectedWallets.length === 0">
                     <label class="form-check-label" for="method-wallet">
-                      <strong>Use Crypto Wallet Signature</strong> <span class="badge bg-success ms-2">Recommended</span>
-                      <div class="small text-muted">Generate keys from your existing wallet signature - more secure and easier to recover</div>
+                      <strong>Use Crypto Wallet Signature</strong> <span
+                        class="badge bg-success ms-2">Recommended</span>
+                      <div class="small text-muted">Generate keys from your existing wallet signature - more secure and
+                        easier to recover</div>
                     </label>
                   </div>
                   <div class="form-check">
-                    <input class="form-check-input" type="radio" v-model="keyGenMethod" value="random" id="method-random">
+                    <input class="form-check-input" type="radio" v-model="keyGenMethod" value="random"
+                      id="method-random">
                     <label class="form-check-label" for="method-random">
                       <strong>Generate Random Keys</strong>
-                      <div class="small text-muted">Create completely new random keys - you'll need to store them securely</div>
+                      <div class="small text-muted">Create completely new random keys - you'll need to store them
+                        securely</div>
                     </label>
                   </div>
                 </div>
@@ -535,17 +529,13 @@
 
                 <!-- Generate Keys Button -->
                 <div class="mb-4">
-                  <button 
-                    class="btn btn-primary w-100" 
-                    @click="generateKeys"
+                  <button class="btn btn-primary w-100" @click="generateKeys"
                     :disabled="keyGenLoading || (!keyGenMethod || (keyGenMethod === 'wallet' && !selectedWallet) || !agreedToPrivacy || !agreedToTerms)">
                     <span v-if="keyGenLoading" class="spinner-border spinner-border-sm me-2"></span>
                     <i v-else class="fa-solid fa-key me-2"></i>
                     {{ keyGenLoading ? 'Generating Keys...' : 'Generate Keys' }}
                   </button>
-                  <button 
-                    v-if="keyGenLoading" 
-                    class="btn btn-outline-secondary w-100 mt-2" 
+                  <button v-if="keyGenLoading" class="btn btn-outline-secondary w-100 mt-2"
                     @click="cancelKeyGeneration">
                     <i class="fa-solid fa-times me-2"></i>Cancel
                   </button>
@@ -556,9 +546,10 @@
                   <div class="alert alert-warning">
                     <i class="fa-solid fa-exclamation-triangle me-2"></i>
                     <strong>Important:</strong> Your keys have been generated and will be stored securely in dluxPEN.
-                    {{ keyGenMethod === 'wallet' ? 'You can recover these keys using your ' + selectedWallet + ' wallet.' : 'Make sure to backup these keys safely!' }}
+                    {{ keyGenMethod === 'wallet' ? 'You can recover these keys using your ' + selectedWallet + '
+                    wallet.' : 'Make sure to backup these keys safely!' }}
                   </div>
-                  
+
                   <!-- Download Backup Button - Highlighted -->
                   <div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
                     <div>
@@ -569,7 +560,7 @@
                       <i class="fa-solid fa-download me-1"></i>Download Backup
                     </button>
                   </div>
-                  
+
                   <div class="card bg-darker border-secondary">
                     <div class="card-header d-flex justify-content-between align-items-center">
                       <h6 class="mb-0">Generated Keys</h6>
@@ -585,11 +576,8 @@
                           <span v-if="type === 'master'" class="badge bg-warning text-dark ms-2">Recovery Seed</span>
                         </label>
                         <div class="input-group">
-                          <input 
-                            :type="showKeys ? 'text' : 'password'"
-                            :value="key" 
-                            class="form-control bg-dark border-dark text-light font-monospace small"
-                            readonly>
+                          <input :type="showKeys ? 'text' : 'password'" :value="key"
+                            class="form-control bg-dark border-dark text-light font-monospace small" readonly>
                           <button class="btn btn-outline-secondary" @click="copyToClipboard(key)">
                             <i class="fa-solid fa-copy"></i>
                           </button>
@@ -607,8 +595,7 @@
                   <button class="btn btn-secondary" @click="goBackToUsernameStep">
                     <i class="fa-solid fa-arrow-left me-1"></i>Back
                   </button>
-                  <button 
-                    class="btn btn-primary" 
+                  <button class="btn btn-primary"
                     @click="onboardingStep = 3; if(requestUsername) paymentMethod = 'request'"
                     :disabled="!newAccount.keys || Object.keys(newAccount.keys).length === 0">
                     Next: Create Account
@@ -629,7 +616,7 @@
                 </h5>
               </div>
               <div class="card-body">
-                
+
                 <!-- Account Summary -->
                 <div class="mb-4">
                   <div class="card bg-darker border-secondary">
@@ -650,12 +637,13 @@
                 <!-- Payment Options -->
                 <div class="mb-4">
                   <h6 class="mb-3">Choose Payment Method</h6>
-                  
+
                   <!-- Crypto Payment -->
                   <div class="card bg-darker border-secondary mb-3">
                     <div class="card-header">
                       <div class="form-check">
-                        <input class="form-check-input" type="radio" v-model="paymentMethod" value="crypto" id="payment-crypto">
+                        <input class="form-check-input" type="radio" v-model="paymentMethod" value="crypto"
+                          id="payment-crypto">
                         <label class="form-check-label fw-bold" for="payment-crypto">
                           Pay with Cryptocurrency
                         </label>
@@ -676,7 +664,8 @@
                           </div>
                         </div>
                         <div v-if="lastPricingUpdate" class="mt-2">
-                          <small class="text-muted">Last updated: {{ new Date(lastPricingUpdate).toLocaleString() }}</small>
+                          <small class="text-muted">Last updated: {{ new Date(lastPricingUpdate).toLocaleString()
+                            }}</small>
                         </div>
                       </div>
 
@@ -709,21 +698,24 @@
                             </tr>
                             <tr v-else v-for="crypto in cryptoPricing" :key="crypto.symbol">
                               <td>
-                                <img :src="crypto.icon" :alt="crypto.name" class="crypto-icon me-2" width="24" height="24">
+                                <img :src="crypto.icon" :alt="crypto.name" class="crypto-icon me-2" width="24"
+                                  height="24">
                                 {{ crypto.name }} ({{ crypto.symbol }})
-                                <span v-if="crypto.fallback" class="badge bg-warning text-dark ms-2 small">Fallback</span>
+                                <span v-if="crypto.fallback"
+                                  class="badge bg-warning text-dark ms-2 small">Fallback</span>
                               </td>
                               <td>{{ crypto.network }}</td>
                               <td>${{ crypto.currentPrice }}</td>
                               <td>
                                 <div class="fw-bold">{{ crypto.totalAmount }} {{ crypto.symbol }}</div>
                                 <small class="text-muted">
-                                  {{ crypto.requiredAmount }} + {{ crypto.transferFee ? crypto.transferFee.toFixed(6) : '0' }} fee
+                                  {{ crypto.requiredAmount }} + {{ crypto.transferFee ? crypto.transferFee.toFixed(6) :
+                                  '0' }} fee
                                 </small>
                               </td>
                               <td>
-                                <button class="btn btn-primary btn-sm" @click="initiateCryptoPayment(crypto)" 
-                                        :disabled="!selectedWallet || pricingLoading || paymentLoading">
+                                <button class="btn btn-primary btn-sm" @click="initiateCryptoPayment(crypto)"
+                                  :disabled="!selectedWallet || pricingLoading || paymentLoading">
                                   <span v-if="paymentLoading">
                                     <i class="fa-solid fa-spinner fa-spin me-1"></i>Processing...
                                   </span>
@@ -754,20 +746,16 @@
                               }"></i>
                               <span class="ms-2">
                                 {{ wsConnectionStatus === 'connected' ? 'Connected to payment monitor' :
-                                   wsConnectionStatus === 'connecting' ? 'Connecting to payment monitor...' :
-                                   'Disconnected from payment monitor' }}
+                                wsConnectionStatus === 'connecting' ? 'Connecting to payment monitor...' :
+                                'Disconnected from payment monitor' }}
                               </span>
                             </div>
                             <div class="btn-group" v-if="wsConnectionStatus === 'disconnected'">
-                              <button 
-                                v-if="wsReconnectAttempts >= wsMaxReconnectAttempts"
-                                class="btn btn-danger btn-sm" 
+                              <button v-if="wsReconnectAttempts >= wsMaxReconnectAttempts" class="btn btn-danger btn-sm"
                                 @click="retryWebSocketConnection()">
                                 <i class="fa-solid fa-refresh me-1"></i>Retry WebSocket
                               </button>
-                              <button 
-                                v-if="!fallbackPollingInterval"
-                                class="btn btn-warning btn-sm" 
+                              <button v-if="!fallbackPollingInterval" class="btn btn-warning btn-sm"
                                 @click="startFallbackPolling()">
                                 <i class="fa-solid fa-clock me-1"></i>Use Polling
                               </button>
@@ -790,11 +778,12 @@
                                 <div class="badge bg-primary">{{ paymentStatus.progress || 0 }}%</div>
                               </div>
                               <div class="progress" style="height: 8px;">
-                                <div class="progress-bar progress-bar-striped" 
-                                     :class="{'progress-bar-animated': paymentStatus.progress < 100}"
-                                     :style="`width: ${paymentStatus.progress || 0}%`"></div>
+                                <div class="progress-bar progress-bar-striped"
+                                  :class="{'progress-bar-animated': paymentStatus.progress < 100}"
+                                  :style="`width: ${paymentStatus.progress || 0}%`"></div>
                               </div>
-                              <div class="text-muted small mt-1">{{ paymentStatus.details || 'Setting up payment channel...' }}</div>
+                              <div class="text-muted small mt-1">{{ paymentStatus.details || 'Setting up payment
+                                channel...' }}</div>
                             </div>
 
                             <!-- Payment Instructions -->
@@ -813,9 +802,10 @@
                               <div class="mb-3">
                                 <label class="small text-muted">Send to Address</label>
                                 <div class="input-group">
-                                  <input type="text" :value="paymentDetails.address" 
-                                         class="form-control bg-dark border-dark text-light font-monospace small" readonly>
-                                  <button class="btn btn-outline-secondary" @click="copyToClipboard(paymentDetails.address)">
+                                  <input type="text" :value="paymentDetails.address"
+                                    class="form-control bg-dark border-dark text-light font-monospace small" readonly>
+                                  <button class="btn btn-outline-secondary"
+                                    @click="copyToClipboard(paymentDetails.address)">
                                     <i class="fa-solid fa-copy"></i>
                                   </button>
                                 </div>
@@ -823,25 +813,29 @@
                               <div v-if="paymentDetails.memo" class="mb-3">
                                 <label class="small text-muted">Include Memo</label>
                                 <div class="input-group">
-                                  <input type="text" :value="paymentDetails.memo" 
-                                         class="form-control bg-dark border-dark text-light font-monospace small" readonly>
-                                  <button class="btn btn-outline-secondary" @click="copyToClipboard(paymentDetails.memo)">
+                                  <input type="text" :value="paymentDetails.memo"
+                                    class="form-control bg-dark border-dark text-light font-monospace small" readonly>
+                                  <button class="btn btn-outline-secondary"
+                                    @click="copyToClipboard(paymentDetails.memo)">
                                     <i class="fa-solid fa-copy"></i>
                                   </button>
                                 </div>
                               </div>
-                              
+
                               <!-- Payment Options -->
                               <div class="row mb-3">
                                 <!-- Wallet Payment Button -->
                                 <div class="col-md-6 mb-2" v-if="selectedWallet">
-                                  <button class="btn btn-primary w-100" @click="payWithWallet" :disabled="walletPaymentLoading">
-                                    <span v-if="walletPaymentLoading" class="spinner-border spinner-border-sm me-2"></span>
-                                    <img v-else :src="getWalletIcon(selectedWallet)" class="me-2" style="width: 20px; height: 20px;">
+                                  <button class="btn btn-primary w-100" @click="payWithWallet"
+                                    :disabled="walletPaymentLoading">
+                                    <span v-if="walletPaymentLoading"
+                                      class="spinner-border spinner-border-sm me-2"></span>
+                                    <img v-else :src="getWalletIcon(selectedWallet)" class="me-2"
+                                      style="width: 20px; height: 20px;">
                                     {{ walletPaymentLoading ? 'Processing...' : `Pay with ${selectedWallet}` }}
                                   </button>
                                 </div>
-                                
+
                                 <!-- QR Code Payment -->
                                 <div class="col-md-6 mb-2">
                                   <button class="btn btn-outline-primary w-100" @click="togglePaymentQR">
@@ -871,7 +865,8 @@
                                         Standard {{ paymentDetails.cryptoType }} payment URI format
                                       </div>
                                       <div class="mt-2">
-                                        <strong>If QR doesn't work:</strong> Copy the address and amount manually from above
+                                        <strong>If QR doesn't work:</strong> Copy the address and amount manually from
+                                        above
                                       </div>
                                     </div>
                                   </div>
@@ -881,12 +876,12 @@
                               <!-- Mark as Sent Button -->
                               <div class="mt-3">
                                 <div class="mb-2">
-                                  <input type="text" v-model="userTxHash" 
-                                         class="form-control bg-dark border-dark text-light" 
-                                         placeholder="Transaction hash (optional but recommended)">
+                                  <input type="text" v-model="userTxHash"
+                                    class="form-control bg-dark border-dark text-light"
+                                    placeholder="Transaction hash (optional but recommended)">
                                 </div>
-                                <button class="btn btn-warning w-100" @click="markPaymentSent()" 
-                                        :disabled="paymentSentMarked">
+                                <button class="btn btn-warning w-100" @click="markPaymentSent()"
+                                  :disabled="paymentSentMarked">
                                   <i class="fa-solid fa-paper-plane me-2"></i>
                                   {{ paymentSentMarked ? '✅ Payment Marked as Sent' : 'I Sent the Payment' }}
                                 </button>
@@ -900,7 +895,7 @@
                                 <span class="fw-bold">{{ formatCountdown(paymentCountdown.timeLeft) }}</span>
                               </div>
                             </div>
-                            
+
                             <!-- Expired Warning -->
                             <div v-if="paymentStatus.code === 'expired'" class="alert alert-danger">
                               <i class="fa-solid fa-clock me-2"></i>
@@ -933,8 +928,8 @@
                           </div>
                           <div class="card-body">
                             <div class="log-container" style="height: 200px; overflow-y: auto;">
-                              <div v-for="(log, index) in paymentLogs" :key="index" 
-                                   class="log-entry border-bottom border-secondary pb-2 mb-2">
+                              <div v-for="(log, index) in paymentLogs" :key="index"
+                                class="log-entry border-bottom border-secondary pb-2 mb-2">
                                 <div class="d-flex justify-content-between">
                                   <small class="text-muted">{{ formatLogTime(log.timestamp) }}</small>
                                   <span v-if="log.type" class="badge" :class="{
@@ -969,7 +964,8 @@
                   <div class="card bg-darker border-secondary mb-3">
                     <div class="card-header">
                       <div class="form-check">
-                        <input class="form-check-input" type="radio" v-model="paymentMethod" value="request" id="payment-request">
+                        <input class="form-check-input" type="radio" v-model="paymentMethod" value="request"
+                          id="payment-request">
                         <label class="form-check-label fw-bold" for="payment-request">
                           Request from HIVE User
                         </label>
@@ -978,26 +974,22 @@
                     <div v-if="paymentMethod === 'request'" class="card-body">
                       <div v-if="requestUsername" class="alert alert-info mb-3">
                         <i class="fa-solid fa-info-circle me-2"></i>
-                        <strong>Pre-filled from invite:</strong> You've been invited to help @{{ requestUsername }} create their account.
+                        <strong>Pre-filled from invite:</strong> You've been invited to help @{{ requestUsername }}
+                        create their account.
                       </div>
                       <p class="text-muted">Send a request to an existing HIVE user to create your account.</p>
                       <div class="mb-3">
                         <label class="form-label">HIVE Username</label>
                         <div class="position-relative">
                           <span class="position-absolute top-50 translate-middle-y ps-3 text-muted">@</span>
-                          <input 
-                            v-model="requestUsername" 
-                            placeholder="friend-username"
+                          <input v-model="requestUsername" placeholder="friend-username"
                             class="ps-5 form-control bg-dark border-dark text-light">
                         </div>
                       </div>
                       <div class="mb-3">
                         <label class="form-label">Message (Optional)</label>
-                        <textarea 
-                          v-model="requestMessage" 
-                          placeholder="Hi! Could you help me create my HIVE account?"
-                          class="form-control bg-dark border-dark text-light"
-                          rows="3"></textarea>
+                        <textarea v-model="requestMessage" placeholder="Hi! Could you help me create my HIVE account?"
+                          class="form-control bg-dark border-dark text-light" rows="3"></textarea>
                       </div>
                       <button class="btn btn-primary" @click="sendAccountRequest" :disabled="!requestUsername">
                         Send Request
@@ -1009,7 +1001,8 @@
                   <div class="card bg-darker border-secondary mb-3" v-if="account">
                     <div class="card-header">
                       <div class="form-check">
-                        <input class="form-check-input" type="radio" v-model="paymentMethod" value="yourself" id="payment-yourself">
+                        <input class="form-check-input" type="radio" v-model="paymentMethod" value="yourself"
+                          id="payment-yourself">
                         <label class="form-check-label fw-bold" for="payment-yourself">
                           Create Account Yourself
                         </label>
@@ -1018,10 +1011,11 @@
                     <div v-if="paymentMethod === 'yourself'" class="card-body">
                       <div class="alert alert-info">
                         <i class="fa-solid fa-info-circle me-2"></i>
-                                                 <strong>You're logged in as @{{ account }}</strong>
-                        <div class="small mt-1">You can create this account directly using your HIVE or Account Creation Tokens</div>
+                        <strong>You're logged in as @{{ account }}</strong>
+                        <div class="small mt-1">You can create this account directly using your HIVE or Account Creation
+                          Tokens</div>
                       </div>
-                      
+
                       <div class="mb-3">
                         <h6>Account to Create</h6>
                         <div class="bg-dark p-3 rounded border">
@@ -1029,12 +1023,12 @@
                           <div class="small text-muted">Keys generated and stored in dluxPEN</div>
                         </div>
                       </div>
-                      
+
                       <button class="btn btn-success w-100" @click="createAccountYourself">
                         <i class="fa-solid fa-user-plus me-2"></i>
                         Create Account Now
                       </button>
-                      
+
                       <div class="small text-muted mt-2">
                         This will use your Account Creation Tokens or HIVE balance to create the account immediately.
                       </div>
@@ -1045,7 +1039,8 @@
                   <div class="card bg-darker border-secondary">
                     <div class="card-header">
                       <div class="form-check">
-                        <input class="form-check-input" type="radio" v-model="paymentMethod" value="manual" id="payment-manual">
+                        <input class="form-check-input" type="radio" v-model="paymentMethod" value="manual"
+                          id="payment-manual">
                         <label class="form-check-label fw-bold" for="payment-manual">
                           Manual Account Creation
                         </label>
@@ -1054,13 +1049,15 @@
                     <div v-if="paymentMethod === 'manual'" class="card-body">
                       <div class="alert alert-warning">
                         <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                        <strong>Note:</strong> Manual creation methods won't preserve your generated username/keys. You'll need to use the keys shown above.
+                        <strong>Note:</strong> Manual creation methods won't preserve your generated username/keys.
+                        You'll need to use the keys shown above.
                       </div>
-                      
+
                       <!-- QR Code for Friend -->
                       <div class="mb-4">
                         <h6>Friend Account Creation (In-Person)</h6>
-                        <p class="text-muted small">Have a friend with Hive Keychain scan this QR code to create your account:</p>
+                        <p class="text-muted small">Have a friend with Hive Keychain scan this QR code to create your
+                          account:</p>
                         <div class="text-center mb-3">
                           <div id="friendQrCode" class="d-inline-block p-3 bg-white rounded"></div>
                         </div>
@@ -1068,7 +1065,7 @@
                           <i class="fa-solid fa-qrcode me-2"></i>Generate QR Code for Friend
                         </button>
                       </div>
-                      
+
                       <!-- External Services -->
                       <div class="mb-4">
                         <h6>Online Signup Services</h6>
@@ -1080,7 +1077,7 @@
                           </a>
                         </div>
                       </div>
-                      
+
                       <!-- Public Keys Export -->
                       <div>
                         <h6>Export Keys for Manual Setup</h6>
@@ -1088,7 +1085,8 @@
                           <i class="fa-solid fa-key me-2"></i>
                           Download Public Keys File
                         </button>
-                        <small class="text-muted d-block mt-1">Use these public keys if creating account manually elsewhere</small>
+                        <small class="text-muted d-block mt-1">Use these public keys if creating account manually
+                          elsewhere</small>
                       </div>
                     </div>
                   </div>
@@ -1128,7 +1126,7 @@
 
           </div>
         </div>
-        
+
         <!-- Help Others Create Accounts - For Logged In Users -->
         <div v-if="account && !recoveryMode && onboardingStep === 0" class="row justify-content-center mb-4">
           <div class="col-lg-8 col-xl-6">
@@ -1164,7 +1162,7 @@
           </a>
         </div>
 
-        
+
         <!-- account creation info widget -->
         <div class="d-flex justify-content-center mb-4">
           <div class="d-flex flex-column bg-blur-darkg rounded p-3 w-100">
@@ -1189,59 +1187,61 @@
             </div>
           </div>
         </div>
-        
+
         <div class="d-none">
           <h1 class="fs-5 mb-2">Pending Account Creation Requests (0)</h1>
-        <!-- account creation request notifications -->
-        <div class="d-flex justify-content-center mb-3">
-          <div class="card w-100">
-            <div class="card-body">
-              @hiveian12345
+          <!-- account creation request notifications -->
+          <div class="d-flex justify-content-center mb-3">
+            <div class="card w-100">
+              <div class="card-body">
+                @hiveian12345
+              </div>
+              <div class="card-footer">
+                <div class="btn-group" style="height: 60px;">
+                  <button
+                    class="btn btn-sm btn-success h-100 text-center">{{formatNumber(hivestats.account_creation_fee,
+                    3, '.', ',')}} <i class="fa-brands fa-hive fa-fw"></i></button>
+                  <button class="btn btn-sm btn-primary h-100 text-center">1 ACT <i
+                      class="fa-solid fa-circle-dot fa-fw"></i></button>
+                  <button class="btn btn-sm btn-secondary h-100 text-center">Forward <i
+                      class="fa-solid fa-circle-arrow-right fa-fw"></i></button>
+                  <button class="btn btn-sm btn-danger h-100 text-center">Deny <i
+                      class="fa-solid fa-ban fa-fw"></i></button>
+                </div>
+              </div>
             </div>
-            <div class="card-footer">
-              <div class="btn-group" style="height: 60px;">
-                <button class="btn btn-sm btn-success h-100 text-center">{{formatNumber(hivestats.account_creation_fee,
-                  3, '.', ',')}} <i class="fa-brands fa-hive fa-fw"></i></button>
-                <button class="btn btn-sm btn-primary h-100 text-center">1 ACT <i
-                    class="fa-solid fa-circle-dot fa-fw"></i></button>
-                <button class="btn btn-sm btn-secondary h-100 text-center">Forward <i
-                    class="fa-solid fa-circle-arrow-right fa-fw"></i></button>
-                <button class="btn btn-sm btn-danger h-100 text-center">Deny <i
-                    class="fa-solid fa-ban fa-fw"></i></button>
+          </div>
+
+          <div class="d-flex justify-content-center mb-3">
+            <div class="card w-100">
+              <div class="card-body">
+                @gohivego
+              </div>
+              <div class="card-footer">
+                <div class="btn-group" style="height: 60px;">
+                  <button
+                    class="btn btn-sm btn-success h-100 text-center">{{formatNumber(hivestats.account_creation_fee,
+                    3, '.', ',')}} <i class="fa-brands fa-hive fa-fw"></i></button>
+                  <button class="btn btn-sm btn-primary h-100 text-center">1 ACT <i
+                      class="fa-solid fa-circle-dot fa-fw"></i></button>
+                  <button class="btn btn-sm btn-secondary h-100 text-center">Forward <i
+                      class="fa-solid fa-circle-arrow-right fa-fw"></i></button>
+                  <button class="btn btn-sm btn-danger h-100 text-center">Deny <i
+                      class="fa-solid fa-ban fa-fw"></i></button>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="d-flex justify-content-center mb-3">
-          <div class="card w-100">
-            <div class="card-body">
-              @gohivego
-            </div>
-            <div class="card-footer">
-              <div class="btn-group" style="height: 60px;">
-                <button class="btn btn-sm btn-success h-100 text-center">{{formatNumber(hivestats.account_creation_fee,
-                  3, '.', ',')}} <i class="fa-brands fa-hive fa-fw"></i></button>
-                <button class="btn btn-sm btn-primary h-100 text-center">1 ACT <i
-                    class="fa-solid fa-circle-dot fa-fw"></i></button>
-                <button class="btn btn-sm btn-secondary h-100 text-center">Forward <i
-                    class="fa-solid fa-circle-arrow-right fa-fw"></i></button>
-                <button class="btn btn-sm btn-danger h-100 text-center">Deny <i
-                    class="fa-solid fa-ban fa-fw"></i></button>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-
-      </div>
-    </div>
     </main>
     <div>
       <foot-vue>
         <!-- Etherscan Attribution -->
         <div class="footer-copyright text-center text-white-50 pb-1">
-          <small>Powered by <a href="https://etherscan.io/" target="_blank" class="text-white-50 text-decoration-none">Etherscan.io APIs</a></small>
+          <small>Powered by <a href="https://etherscan.io/" target="_blank"
+              class="text-white-50 text-decoration-none">Etherscan.io APIs</a></small>
         </div>
       </foot-vue>
     </div>
