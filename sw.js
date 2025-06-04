@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.32",
-  "generated": "2025-06-04T21:32:07Z",
+  "version": "2025.06.04.14",
+  "generated": "2025-06-04T21:38:51Z",
   "files": {
-    "/css/bootstrap/bootstrap.css": {
-      "checksum": "b81428268a775fbf425040349ab96a20",
-      "size": 276580,
-      "priority": "critical"
-    },
     "/css/custom-old.css": {
       "checksum": "d05166f557dbe2ffa4e68d15a849cc95",
       "size": 7317,
@@ -624,11 +619,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/dlux/index.html": {
-      "checksum": "f43512fc91f2d48c9680e05b76168c1e",
-      "size": 7505,
-      "priority": "important"
     },
     "/download.js": {
       "checksum": "b2c3f631bf06a2d865396d699fc3f2cf",
@@ -1421,7 +1411,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "ef1fd7ee54eaf43993e4c1f81e5a608f",
+      "checksum": "12c50fc8a9dc68bffed9173fac63970a",
       "size": 36317,
       "priority": "important"
     },
@@ -1611,7 +1601,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "6498751c45c5ce5d6c8e204c658a4d10",
+      "checksum": "82628ecc51095a9f82f4aa0bcf3ac5ab",
       "size": 7300,
       "priority": "important"
     },
@@ -1684,11 +1674,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/aframe/aframe.min.js": {
-      "checksum": "9cc0b1c7c368abf433695fb93d4e4f9c",
-      "size": 1277800,
-      "priority": "page-specific"
     },
     "/naf-playground/aframe/networked-aframe.min.js": {
       "checksum": "4b25bad9a7b40896916bcb097db405ba",
@@ -2554,11 +2539,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/test-server-routines/onboarding.js": {
-      "checksum": "a81af29fff8fd946e6fbd64c2f301e8e",
-      "size": 174045,
-      "priority": "lazy"
     },
     "/test-server-routines/websocket_monitor.js": {
       "checksum": "9a0d4cda763d073baca4e5409e2c1646",
