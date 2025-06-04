@@ -1,4 +1,4 @@
-this.version = "2025.06.04.22";
+this.version = "2025.06.04.23";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -634,8 +634,8 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.16",
-  "generated": "2025-06-04T19:46:26Z",
+  "version": "2025.06.04.23",
+  "generated": "2025-06-04T19:46:42Z",
   "files": {
     "/index.html": {
       "checksum": "34182fdc1ab540a6efb068ab2fc668e4",
@@ -658,7 +658,7 @@ self.cacheManifest =
       "priority": "critical"
     },
     "/sw.js": {
-      "checksum": "785e9afe2ad374509389e26f6f4a0c24",
+      "checksum": "50c0c23e0a48b6fcf3f211e9a33d3b6e",
       "size": 26276,
       "priority": "critical"
     }
