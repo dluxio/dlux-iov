@@ -1,0 +1,54 @@
+{
+  "version": "2025.06.04.29",
+  "generated": "2025-06-04T20:26:28Z",
+  "files": {
+    "/js/v3-nav.js": {
+      "checksum": "9ed88bb30efaa4f756d54b4c507b14e2",
+      "size": 172158,
+      "priority": "critical"
+    },
+    "/sw.js": {
+      "checksum": "6df04691c773d00dff45490116951d2f",
+      "size": 93580,
+      "priority": "critical"
+    },
+    "/about/index.html": {
+      "checksum": "e7ffd187fda973511537820e461fdbb4",
+      "size": 46683,
+      "priority": "critical"
+    },
+    "/css/bootstrap-grid.css": {
+      "checksum": "ff62c56c7f9eaa68592857aee5a7c93e",
+      "size": 70327,
+      "priority": "critical"
+    },
+    "/css/bootstrap-reboot.css": {
+      "checksum": "4092253288fe829ab354cc4a7d73450a",
+      "size": 11895,
+      "priority": "critical"
+    },
+    "/css/bootstrap-utilities.css": {
+      "checksum": "de92f706ebf333fb981cbb719aa5130d",
+      "size": 101679,
+      "priority": "critical"
+    },
+    "/css/bootstrap.css": {
+      "checksum": "60def5490c429c25858ae0c72462b38b",
+      "size": 271584,
+      "priority": "critical"
+    },
+    "/css/bootstrap/bootstrap-grid.css": {
+      "checksum": "ff62c56c7f9eaa68592857aee5a7c93e",
+      "size": 70327,
+      "priority": "critical"
+    },
+    "/css/bootstrap/bootstrap-reboot.css": {
+      "checksum": "a2c742a5d35fafe705ffc2f23f05b9be",
+      "size": 11998,
+      "priority": "critical"
+    },
+    "/css/bootstrap/bootstrap-utilities.css": {
+      "checksum": "3302f743a95e6cbeace85ca6c02638d4",
+      "size": 104721,
+      "priority": "critical"
+    },

@@ -622,7 +622,7 @@ function pullScript(id) {
             return scriptPromises[id];
 }
 
-// Helper function to format bytes (duplicate of existing formatBytes for consistency)
+// Helper function to format bytes
 function formatBytes(bytes) {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -630,26 +630,21 @@ function formatBytes(bytes) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
-}
+
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
   "version": "2025.06.04.17",
-  "generated": "2025-06-04T20:16:47Z",
+  "generated": "2025-06-04T20:30:28Z",
   "files": {
-    "/js/vue.esm-browser.js": {
-      "checksum": "232af68f6551a87a4732981749dd5265",
-      "size": 531704,
-      "priority": "critical"
-    },
     "/js/v3-nav.js": {
       "checksum": "9ed88bb30efaa4f756d54b4c507b14e2",
       "size": 172158,
       "priority": "critical"
     },
     "/sw.js": {
-      "checksum": "40abe113dd231178c27223ea27b537dd",
-      "size": 94201,
+      "checksum": "6df04691c773d00dff45490116951d2f",
+      "size": 93580,
       "priority": "critical"
     },
     "/about/index.html": {
@@ -716,11 +711,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/create/index.html": {
-      "checksum": "5a3d0842df9543804d26ccfdeafdb495",
-      "size": 11922,
-      "priority": "important"
     },
     "/css/codemirror-monokai.min.css": {
       "checksum": "6cb64c5347235494cdc346527fc0e35d",
@@ -1832,11 +1822,6 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/aframe-builder/index2.html": {
-      "checksum": "50d15bdba6ab42cde3109e5935abf189",
-      "size": 119115,
-      "priority": "page-specific"
-    },
     "/chat/gpt.html": {
       "checksum": "f1a43900d7a03cb4b9780f24fbff9999",
       "size": 12892,
@@ -2756,11 +2741,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/js/extensionvue-old.js": {
-      "checksum": "3d09236bed876fd8b322bf03d6177758",
-      "size": 18405,
-      "priority": "lazy"
     },
     "/js/filesvue-dd.spec.js": {
       "checksum": "5185f103ff9f5ade0885455ba92cc4f7",
