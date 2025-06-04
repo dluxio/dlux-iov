@@ -1,4 +1,4 @@
-this.version = "2025.06.04.16";
+this.version = "2025.06.04.17";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -1146,7 +1146,7 @@ function formatBytes(bytes) {
 self.cacheManifest = 
 {
   "version": "2025.06.04.15",
-  "generated": "2025-06-04T18:59:13Z",
+  "generated": "2025-06-04T18:59:30Z",
   "files": {
     "/index.html": {
       "checksum": "34182fdc1ab540a6efb068ab2fc668e4",
@@ -1264,7 +1264,7 @@ self.cacheManifest =
       "priority": "critical"
     },
     "/js/sw-monitor.js": {
-      "checksum": "4848526a3da5e662d1fc171fafff3876",
+      "checksum": "3adb336ef15b7f22bd48ca1466a5923e",
       "size": 36317,
       "priority": "critical"
     },
@@ -1299,12 +1299,12 @@ self.cacheManifest =
       "priority": "critical"
     },
     "/reg-sw.js": {
-      "checksum": "fa209cfc616661651c8d9ea7c85f20ea",
+      "checksum": "1b9f56e3076eddd6e1cad2f8e7077b01",
       "size": 7300,
       "priority": "critical"
     },
     "/sw.js": {
-      "checksum": "146317864ab2cd88f2dd25183787edd8",
+      "checksum": "bc0e8111259ab15c8022c643a97cf88f",
       "size": 82616,
       "priority": "critical"
     },
