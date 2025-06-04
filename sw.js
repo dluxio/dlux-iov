@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.31",
-  "generated": "2025-06-04T21:12:54Z",
+  "version": "2025.06.04.14",
+  "generated": "2025-06-04T21:31:35Z",
   "files": {
-    "/css/bootstrap/bootstrap-reboot.css": {
-      "checksum": "a2c742a5d35fafe705ffc2f23f05b9be",
-      "size": 11998,
-      "priority": "critical"
-    },
     "/css/bootstrap/bootstrap-utilities.css": {
       "checksum": "3302f743a95e6cbeace85ca6c02638d4",
       "size": 104721,
@@ -634,11 +629,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/dao/index.html": {
-      "checksum": "5c7f3167731d0c5d73f7d758e0690894",
-      "size": 11286,
-      "priority": "important"
     },
     "/dex/index.html": {
       "checksum": "b53fd571440258cb4fe782c26c399019",
@@ -1441,7 +1431,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "455d7357671c1f26fab308ba58be8d48",
+      "checksum": "ef1fd7ee54eaf43993e4c1f81e5a608f",
       "size": 36317,
       "priority": "important"
     },
@@ -1631,7 +1621,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "85488438d4acf3c3cc83d5d145d4373c",
+      "checksum": "6498751c45c5ce5d6c8e204c658a4d10",
       "size": 7300,
       "priority": "important"
     },
@@ -1704,11 +1694,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/js/chatvue.js": {
-      "checksum": "42c56d94e0753ac58265d3af75a59f55",
-      "size": 6802,
-      "priority": "page-specific"
     },
     "/naf-playground/aframe/aframe-inspector.min.js": {
       "checksum": "90eb74ef16d61ee0ab934e8412e99bf6",
@@ -2584,11 +2569,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/sw-monitor-test.html": {
-      "checksum": "166c0dbc60ffbd1e322172c0947b9875",
-      "size": 13060,
-      "priority": "lazy"
     },
     "/test-pbkdf2.html": {
       "checksum": "a71c6f2c38002f9b26ba81b987f6a3c3",

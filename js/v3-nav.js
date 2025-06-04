@@ -3524,46 +3524,6 @@ export default {
     },
   },
   async mounted() {
-    // Add the styles immediately on mount
-    const style = document.createElement('style');
-    style.textContent = `
-      .auth-methods-grid {
-        width: 100%;
-        padding: 0.5rem;
-      }
-      .auth-method-btn {
-        width: 100%;
-        height: 50px;
-        background-color: #1a1a1a;
-        border: 2px solid #333;
-        border-radius: 8px;
-        padding: 0.5rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-        cursor: pointer;
-      }
-      .auth-method-btn:hover:not(:disabled) {
-        background-color: #2a2a2a;
-        border-color: #444;
-      }
-      .auth-method-btn.selected {
-        border: 3px solid #007bff;
-        background-color: #2a2a2a;
-      }
-      .auth-method-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-      .auth-method-btn img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-      }
-    `;
-    document.head.appendChild(style);
-
     console.log('[NavVue] Component mounted. User:', this.user, 'Signer:', localStorage.getItem('signer'));
 
     // Add click handler to prevent nav-bell dropdown from dismissing
