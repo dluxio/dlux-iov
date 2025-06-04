@@ -1,4 +1,4 @@
-this.version = "2025.06.03.21";
+this.version = "2025.06.04.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -256,6 +256,7 @@ const importantResources = [
   `/img/wallets/phantom.svg`,
   `/img/wallets/trust.svg`,
   `/img/wallets/walletconnect.svg`,
+  `/img/hivesigner_white.svg`,
 ];
 
 // PRIORITY 3: Page-specific resource groups (cached on-demand)
