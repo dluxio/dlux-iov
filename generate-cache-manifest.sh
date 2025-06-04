@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Cross-platform cache manifest generator with MD5 checksums
-# Usage: ./generate-cache-manifest.sh
+# Usage: ./generate-cache-manifest.sh [version]
 
 echo "🔧 Generating cache manifest with checksums..."
 
@@ -25,9 +25,14 @@ TEMP_SW="sw-temp.js"
 
 echo "📋 Platform: $(uname -s), MD5 command: $MD5_CMD"
 
-# Get current timestamp for version
-TIMESTAMP=$(date +"%Y.%m.%d.%H")
-echo "🕐 Version: $TIMESTAMP"
+# Get version from argument or generate timestamp
+if [ -n "$1" ]; then
+    TIMESTAMP="$1"
+    echo "🕐 Using provided version: $TIMESTAMP"
+else
+    TIMESTAMP=$(date +"%Y.%m.%d.%H")
+    echo "🕐 Generated version: $TIMESTAMP"
+fi
 
 # Initialize manifest
 cat > "$MANIFEST_FILE" << EOF
@@ -126,8 +131,8 @@ if grep -q "self.cacheManifest =" sw.js; then
     sed '/\/\/ Cache manifest with checksums - auto-generated/,$d' sw.js > "$TEMP_SW"
 else
     echo "   📝 Adding new cache manifest..."
-    # Update version only
-    sed "s/this\.version = \"[^\"]*\"/this.version = \"$TIMESTAMP\"/" sw.js > "$TEMP_SW"
+    # Copy sw.js without changing version (it's already updated by gs.sh)
+    cp sw.js "$TEMP_SW"
 fi
 
 # Add cache manifest data to service worker

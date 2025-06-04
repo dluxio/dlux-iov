@@ -237,7 +237,7 @@ if [ -f "$file" ]; then
                 echo "🔄 Generating cache manifest with checksums..."
                 if [ -f "./generate-cache-manifest.sh" ]; then
                     chmod +x ./generate-cache-manifest.sh
-                    ./generate-cache-manifest.sh
+                    ./generate-cache-manifest.sh "$new_version"
                     if [ $? -eq 0 ]; then
                         echo "✅ Cache manifest generated successfully"
                     else
@@ -256,7 +256,7 @@ if [ -f "$file" ]; then
             echo "🔄 Checking for file changes and updating cache manifest..."
             if [ -f "./generate-cache-manifest.sh" ]; then
                 chmod +x ./generate-cache-manifest.sh
-                ./generate-cache-manifest.sh
+                ./generate-cache-manifest.sh "$new_version"
                 if [ $? -eq 0 ]; then
                     echo "✅ Cache manifest updated successfully"
                 else
