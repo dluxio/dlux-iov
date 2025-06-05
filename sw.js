@@ -1,4 +1,4 @@
-this.version = "2025.06.05.4";
+this.version = "2025.06.05.5";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.05.4",
-  "generated": "2025-06-05T14:05:09Z",
+  "version": "2025.06.05.5",
+  "generated": "2025-06-05T15:54:15Z",
   "files": {
-    "/img/crypto/solana.svg": {
-      "checksum": "e7689ba617436aa6551ec68b4cb1f612",
-      "size": 289,
-      "priority": "important"
-    },
     "/img/css-file-type-svgrepo-com.svg": {
       "checksum": "8d8f50aad42119c8f297e2acdb2cbf8b",
       "size": 2737,
@@ -1151,8 +1146,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/marker.js": {
-      "checksum": "80e8cd54b6023f1542277eb0e20d0824",
-      "size": 4142,
+      "checksum": "c2198bba963f1d95ef8e9787875a0eb7",
+      "size": 4540,
       "priority": "important"
     },
     "/js/mde.js": {
@@ -1306,7 +1301,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "6dd7332899c349edcdbf374617954ae0",
+      "checksum": "61d6e4175c563512da997e7a1b50d93f",
       "size": 36316,
       "priority": "important"
     },
@@ -1496,7 +1491,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "5b308b84e7281caf51b97506ac0093d8",
+      "checksum": "92b0d22bf63860158a8cecba7eb40c3f",
       "size": 7299,
       "priority": "important"
     },
@@ -1569,11 +1564,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/js/engine-ui.js": {
-      "checksum": "3841f9ec688dad33f0923dc2aa4dc605",
-      "size": 7599,
-      "priority": "page-specific"
     },
     "/naf-playground/js/entities.js": {
       "checksum": "0c9c358d978c3e23f3161202342a9b78",
