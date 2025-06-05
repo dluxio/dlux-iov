@@ -179,53 +179,60 @@
                 @refresh="run($event)" :op="toSign" :lapi="lapi" />
         </div>
         <main role="main" class="d-flex flex-column flex-grow-1 padmain-subbar">
+            <!-- Post Type Selection -->
+            <div class="container">
+                <div class="accordion border-white-50 rounded mt-3" id="postTypeAccordion">
+                    <div class="accordion-item bg-img-none bg-dark-1">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#postTypeCollapse" aria-expanded="true" aria-controls="postTypeCollapse">
+                                <i class="fa-solid fa-list fa-fw me-2"></i>Post Type Selection
+                            </button>
+                        </h2>
+                        <div id="postTypeCollapse" class="accordion-collapse collapse show"
+                            data-bs-parent="#postTypeAccordion">
+                            <div class="accordion-body">
+                                <div class="d-flex flex-wrap justify-content-center gap-2">
+                                    <!-- Blog Post -->
+                                    <button class="btn btn-outline-primary" 
+                                        :class="{active: postCustom_json.vrHash == 'blog'}"
+                                        @click="postCustom_json.vrHash = 'blog';types='img,vid'">
+                                        <i class="fa-solid fa-book fa-fw me-2"></i>Blog Post
+                                    </button>
+                                    <!-- Video -->
+                                    <button class="btn btn-outline-primary"
+                                        :class="{active: postCustom_json.vrHash == 'video'}"
+                                        @click="postCustom_json.vrHash = 'video';types='img,vid'">
+                                        <i class="fa-solid fa-film fa-fw me-2"></i>Video
+                                    </button>
+                                    <!-- 360 Image Gallery -->
+                                    <button class="btn btn-outline-primary"
+                                        :class="{active: postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'}"
+                                        @click="postCustom_json.vrHash = 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k';types='ts,img'">
+                                        <i class="fa-solid fa-globe fa-fw me-2"></i>360 Image Gallery
+                                    </button>
+                                    <!-- New dApp -->
+                                    <button class="btn btn-outline-primary"
+                                        :class="{active: postCustom_json.vrHash == 'dapp'}"
+                                        @click="postCustom_json.vrHash = 'dapp';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
+                                        <i class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>New dApp
+                                    </button>
+                                    <!-- ReMix dApp -->
+                                    <button class="btn btn-outline-primary"
+                                        :class="{active: postCustom_json.vrHash == 'remix'}"
+                                        @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
+                                        <i class="fa-solid fa-shuffle fa-fw me-2"></i>ReMix dApp
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="container fixed-top navbar-subbar p-0">
                 <div class="navbar-subbar-container">
                     <div class="navbar-subbar-content">
-                        <!-- post type dropdown -->
-                        <div class="dropdown d-flex me-1">
-                            <a class="ms-auto me-auto btn btn-sm btn-secondary rounded-pill px-2 dropdown-toggle d-flex align-items-center"
-                                role="button" id="postdApp" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span class="me-1">TYPE</span>
-                                <span class="mx-1 d-none d-lg-block"
-                                    v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'"><i
-                                        class="fa-solid fa-globe fa-fw me-1"></i>360
-                                    Image Gallery</span>
-                                <span class="mx-1 d-none d-lg-block" v-if="postCustom_json.vrHash == 'video'"><i
-                                        class="fa-solid fa-film fa-fw me-1"></i>Video</span>
-                                <span class="mx-1 d-none d-lg-block" v-if="postCustom_json.vrHash == 'blog'"><i
-                                        class="fa-solid fa-book fa-fw me-1"></i>Blog</span>
-                                <span class="mx-1" v-if="postCustom_json.vrHash == 'dapp'"><i
-                                        class="fa-solid fa-mobile-screen-button fa-fw me-1"></i>New dApp</span>
-                                <span class="mx-1" v-if="postCustom_json.vrHash == 'remix'"><i
-                                        class="fa-solid fa-shuffle fa-fw me-1"></i>Remix dApp</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="postdApp">
-                                <li><a class="dropdown-item"
-                                        :class="{active: postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'}"
-                                        role="button"
-                                        @click="postCustom_json.vrHash = 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k';types='ts,img'"><i
-                                            class="fa-solid fa-globe fa-fw me-2"></i>360 Image Gallery</a></li>
-                                <li><a class="dropdown-item"
-                                        :class="{active: postCustom_json.vrHash == 'video'}" role="button"
-                                        @click="postCustom_json.vrHash = 'video';types='img,vid'"><i
-                                            class="fa-solid fa-film fa-fw me-2"></i>Video</a></li>
-                                <li><a class="dropdown-item" :class="{active: postCustom_json.vrHash == 'blog'}"
-                                        role="button" @click="postCustom_json.vrHash = 'blog';types='img,vid'"><i
-                                            class="fa-solid fa-book fa-fw me-2"></i>Blog</a></li>
-
-                                <li><a class="dropdown-item"
-                                        :class="{active: postCustom_json.vrHash == 'dapp'}" role="button"
-                                        @click="postCustom_json.vrHash = 'dapp';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'"><i
-                                            class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>New dApp</a>
-                                </li>
-                                <li><a class="dropdown-item"
-                                        :class="{active: postCustom_json.vrHash == 'remix'}" role="button"
-                                        @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'"><i
-                                            class="fa-solid fa-shuffle fa-fw me-2"></i>ReMix dApp</a></li>
-
-                            </ul>
-                        </div>
                         <!-- blog buttons -->
                         <div class="d-flex justify-content-center ms-auto d-none"
                             v-if="postCustom_json.vrHash == 'blog'">
@@ -360,6 +367,25 @@
                                 <p class="mb-2">{{videoMsg}}</p>
                                 <input type="file" @change="transcode"
                                     class="btn btn-secondary p-4 mb-2 border border-3 border-black">
+                                
+                                <!-- Upload Everywhere Component for Video Files -->
+                                <upload-everywhere 
+                                    :account="account"
+                                    :saccountapi="spkapi"
+                                    :mypfp="mypfp"
+                                    :protocol="protocol"
+                                    :stats="spkStats"
+                                    :spkapi="spkapi"
+                                    :external-drop="{ files: videoFilesToUpload, targetPath: null }"
+                                    teleportref="#video-upload-area"
+                                    @tosign="sendIt($event)"
+                                    @done="handleVideoUploadComplete($event)"
+                                    @update:external-drop="videoFilesToUpload = $event.files">
+                                </upload-everywhere>
+                                
+                                <!-- Upload area for teleporting -->
+                                <div id="video-upload-area"></div>
+                                
                                 <div>
                                     <upload-vue v-if="videoUploadContract" :user="spkapi"
                                         :propcontract="videoUploadContract" @tosign="sendIt($event)" type="video"
@@ -526,21 +552,18 @@
                 </div>
             </div>
             <!-- blog -->
-            <div v-if="postCustom_json.vrHash == 'blog'" class="d-flex justify-content-center">
-                <!-- widgets -->
-                <div class=" p-1 d-flex flex-column justify-content-center rounded bg-img-none p-3 mt-3 mb-5"
-                    style="background-color: rgba(61, 61, 61, 0.71); max-width: 1200px;">
-                    <!-- SPK Hosting Widget -->
-                    <div class="accordion  border-white-50 rounded" id="accordionExample">
-                        <div class="accordion-item bg-img-none bg-dark-1">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#ipfsDrive" aria-expanded="true" aria-controls="ipfsDrive">
-                                    <i class="fa-solid fa-hard-drive fa-fw me-2"></i>SPK Network IPFS Drive
-                                </button>
-                            </h2>
-                            <div id="ipfsDrive" class="accordion-collapse collapse show"
-                                data-bs-parent="#accordionExample">
+            <div class="container">
+                <!-- SPK Hosting Widget -->
+                <div class="accordion border-white-50 rounded mt-3" id="accordionExample">
+                    <div class="accordion-item bg-img-none bg-dark-1">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#ipfsDrive" aria-expanded="false" aria-controls="ipfsDrive">
+                                <i class="fa-solid fa-hard-drive fa-fw me-2"></i>SPK Network IPFS Drive
+                            </button>
+                        </h2>
+                        <div id="ipfsDrive" class="accordion-collapse collapse"
+                            data-bs-parent="#accordionExample">
                                 <div class="accordion-body">
                                     <contract-vue v-if="account" :nodeview="false" :account="account" :mypfp="mypfp"
                                         :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
@@ -550,15 +573,14 @@
                             </div>
                         </div>
                     </div>
-                    <div class="mb-3">
-
-                    </div>
-                    <!-- Post Details Widget -->
-                    <div class="">
-                        <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens"
-                            @tosign="sendIt($event)" :file_to_add="fileToAddToPost" />
-                    </div>
                 </div>
+                
+                <!-- Post Details Widget -->
+                <div class="mt-3">
+                    <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens"
+                        @tosign="sendIt($event)" :file_to_add="fileToAddToPost" />
+                </div>
+            </div>
                 <!-- SPK Wallet Modal -->
                 <div class="modal modal-xl fade" id="spkWalletModal" tabindex="-1" aria-labelledby="spkWalletModalLabel"
                     aria-hidden="true">

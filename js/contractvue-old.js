@@ -956,7 +956,7 @@ export default {
             })
         },
         addToPost(cid, contract, loc = 'self') {
-            const string = `${this.newMeta[contract][cid].thumb ? '!' : ''}[${this.newMeta[contract][cid].name}.${this.newMeta[contract][cid].type}](https://ipfs.dlux.io/ipfs/${cid})`
+            const string = `${this.newMeta[contract][cid].thumb ? '!' : ''}[${this.newMeta[contract][cid].name}.${this.newMeta[contract][cid].type}](https://dlux.io/ipfs/${cid})`
             this.postBodyAdder[`${loc == 'self' ? contract : loc}`] = {
                 string,
                 contract: this.contractIDs[contract],

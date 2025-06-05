@@ -4818,7 +4818,24 @@ export default {
                 fileTypeFormatted.includes('ogg') ||
                 fileTypeFormatted.includes('avi') ||
                 fileTypeFormatted.includes('mov') ||
-                fileName.toLowerCase().includes('playlist')) {
+                fileTypeFormatted.includes('mkv') ||
+                fileTypeFormatted.includes('flv') ||
+                fileTypeFormatted.includes('wmv') ||
+                fileTypeFormatted.includes('m4v') ||
+                fileTypeFormatted.includes('3gp') ||
+                fileName.toLowerCase().includes('playlist') ||
+                fileName.toLowerCase().endsWith('.m3u8') ||
+                fileName.toLowerCase().endsWith('.m3u') ||
+                fileName.toLowerCase().endsWith('.mp4') ||
+                fileName.toLowerCase().endsWith('.webm') ||
+                fileName.toLowerCase().endsWith('.ogg') ||
+                fileName.toLowerCase().endsWith('.avi') ||
+                fileName.toLowerCase().endsWith('.mov') ||
+                fileName.toLowerCase().endsWith('.mkv') ||
+                fileName.toLowerCase().endsWith('.flv') ||
+                fileName.toLowerCase().endsWith('.wmv') ||
+                fileName.toLowerCase().endsWith('.m4v') ||
+                fileName.toLowerCase().endsWith('.3gp')) {
                 formattedContent = `<video src="https://ipfs.dlux.io/ipfs/${cid}" controls></video>`;
             }
             // Image files

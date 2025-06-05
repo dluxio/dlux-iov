@@ -24,6 +24,7 @@ import NFTDetail from "/js/nftdetail.js";
 import SPKVue from "/js/spk-wallet.js";
 import Assets from "/js/assets.js"
 import MFI from "/js/mfi-vue.js";
+import UploadEverywhere from "/js/upload-everywhere.js";
 import MCommon from '/js/methods-common.js'
 
 let url = location.href.replace(/\/$/, "");
@@ -1042,7 +1043,9 @@ PORT=3000
       numitems: 0,
       postBens: [],
       serviceWorkerPromises: {},
-      fileToAddToPost: null
+      fileToAddToPost: null,
+      playlistUpdates: {},
+      videoFilesToUpload: []
     };
   },
   components: {
@@ -1070,6 +1073,7 @@ PORT=3000
     "tagify": Tagify,
     "choices-vue": ChoicesVue,
     "mfi-vue": MFI,
+    "upload-everywhere": UploadEverywhere,
   },
   methods: {
     ...MCommon,
@@ -4427,19 +4431,73 @@ function buyNFT(setname, uid, price, type, callback){
       })
       console.timeEnd('exec');
       this.videoMsg = 'Complete transcoding';
+      
+      // Prepare files for upload
+      const videoFiles = [];
+      const playlistUpdates = {};
+      
       ffmpeg.listDir("/").then((files) => {
+        console.log('Available files:', files);
+        
+        // First pass: collect all video segments and prepare them for upload
+        const videoSegmentPromises = [];
+        
         for (const file of files) {
-          console.log(file);
-          if (file.name.includes('.m3u8')) {
-            ffmpeg.readFile(file.name).then((data) => {
-              this.dataURLS.push([file.name, data.buffer, 'application/x-mpegURL'])
-            })
-          } else if (file.name.includes('.ts')) {
-            ffmpeg.readFile(file.name).then((data) => {
-              this.dataURLS.push([file.name, data.buffer, 'video/mp2t'])
-            })
+          if (file.name.includes('.ts')) {
+            videoSegmentPromises.push(
+              ffmpeg.readFile(file.name).then((data) => {
+                const newFileName = file.name.replace('.ts', '_thumb.ts'); // Rename segments to hide them
+                videoFiles.push({
+                  file: new File([data.buffer], newFileName, { type: 'video/mp2t' }),
+                  targetPath: '/video_segments/'
+                });
+                this.dataURLS.push([newFileName, data.buffer, 'video/mp2t']);
+                return { originalName: file.name, newFileName, cid: null }; // CID will be set after upload
+              })
+            );
           }
         }
+        
+        // Wait for all video segments to be processed
+        Promise.all(videoSegmentPromises).then((segmentInfo) => {
+          // Second pass: read and update playlist files
+          for (const file of files) {
+            if (file.name.includes('.m3u8')) {
+              ffmpeg.readFile(file.name).then((data) => {
+                const playlistContent = new TextDecoder().decode(data);
+                let updatedPlaylist = playlistContent;
+                
+                // Replace each .ts file reference with IPFS URL
+                segmentInfo.forEach((segment) => {
+                  // For now, use placeholder. Will be updated after upload with actual CIDs
+                  updatedPlaylist = updatedPlaylist.replace(
+                    new RegExp(segment.originalName, 'g'),
+                    `https://ipfs.dlux.io/ipfs/PLACEHOLDER_${segment.newFileName}`
+                  );
+                });
+                
+                // Store playlist for later CID replacement
+                playlistUpdates[file.name] = {
+                  content: updatedPlaylist,
+                  segmentInfo: segmentInfo
+                };
+                
+                // Add original playlist to dataURLS for now
+                this.dataURLS.push([file.name, data.buffer, 'application/x-mpegURL']);
+              });
+            }
+          }
+          
+          // Store playlist updates for later use
+          this.playlistUpdates = playlistUpdates;
+          
+                     // Upload video files using upload-everywhere component
+           if (videoFiles.length > 0) {
+             this.videoMsg = 'Preparing files for upload...';
+             // Set the video files to be picked up by the upload-everywhere component
+             this.videoFilesToUpload = videoFiles;
+           }
+        });
       })
       //const data = await ffmpeg.readFile("144p_000.ts")
       //console.log(data)
@@ -4464,6 +4522,46 @@ function buyNFT(setname, uid, price, type, callback){
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
+      }
+    },
+    
+    handleVideoUploadComplete(uploadedFiles) {
+      // Map uploaded file names to their CIDs
+      const cidMapping = {};
+      uploadedFiles.forEach(file => {
+        const originalName = file.fileName.replace('_thumb.ts', '.ts');
+        cidMapping[originalName] = file.cid;
+      });
+      
+      // Update playlists with actual CIDs
+      const updatedPlaylists = [];
+      for (const [playlistName, playlistData] of Object.entries(this.playlistUpdates)) {
+        let updatedContent = playlistData.content;
+        
+        // Replace placeholders with actual CIDs
+        playlistData.segmentInfo.forEach((segment) => {
+          const cid = cidMapping[segment.originalName];
+          if (cid) {
+            updatedContent = updatedContent.replace(
+              `https://ipfs.dlux.io/ipfs/PLACEHOLDER_${segment.newFileName}`,
+              `https://ipfs.dlux.io/ipfs/${cid}`
+            );
+          }
+        });
+        
+        // Create a File object for the updated playlist
+        const playlistFile = new File([updatedContent], playlistName, { type: 'application/x-mpegURL' });
+        updatedPlaylists.push({
+          file: playlistFile,
+          targetPath: '/playlists/'
+        });
+      }
+      
+      // Upload the updated playlists
+      if (updatedPlaylists.length > 0) {
+        this.videoMsg = 'Uploading updated playlists...';
+        // Trigger upload for the playlists
+        this.videoFilesToUpload = updatedPlaylists;
       }
     },
     activeIndexUp() {
