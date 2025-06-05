@@ -1,4 +1,4 @@
-this.version = "2025.06.06.1";
+this.version = "2025.06.06.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.06.1",
-  "generated": "2025-06-05T22:00:56Z",
+  "version": "2025.06.06.2",
+  "generated": "2025-06-05T22:17:40Z",
   "files": {
-    "/img/eps-file-type-svgrepo-com.svg": {
-      "checksum": "54e62783e56be35d720e9be50c7732b6",
-      "size": 2114,
-      "priority": "important"
-    },
     "/img/excel-file-type-svgrepo-com.svg": {
       "checksum": "9cae63f953dab1bdbe1f1bd2e78504e2",
       "size": 2197,
@@ -1226,8 +1221,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "a02e018732f700d50ba55f0673ae7049",
-      "size": 36317,
+      "checksum": "de5a89033a530dbe639eb1fd6ad08c1e",
+      "size": 36316,
       "priority": "important"
     },
     "/js/tagify.min.js": {
@@ -1301,8 +1296,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "5ea6b98760e4888faf5ce91f19a79230",
-      "size": 190069,
+      "checksum": "ceefb13101881d2a410647b471062a51",
+      "size": 192309,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1361,8 +1356,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "7210541914b5eff5d090bfede1ff9644",
-      "size": 40538,
+      "checksum": "6096324f4d332ddb6d1896b99cdf8552",
+      "size": 42853,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -1416,8 +1411,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "9ef5ad44f2f24c147f652e91afe068f4",
-      "size": 7300,
+      "checksum": "ed640243d86dd2a706567d9398865265",
+      "size": 7299,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -1489,11 +1484,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/js/sky-manager.js": {
-      "checksum": "0cebed6cf4f7a9d312d3b3465d4f07ff",
-      "size": 37455,
-      "priority": "page-specific"
     },
     "/naf-playground/js/state.js": {
       "checksum": "a642907c751f5cc9bb05a5bf87abedca",
