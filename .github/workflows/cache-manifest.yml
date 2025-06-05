@@ -131,10 +131,16 @@ jobs:
     - name: Commit and push changes
       if: steps.check-changes.outputs.has_changes == 'true' && steps.git-check.outputs.changes == 'true'
       run: |
+        last_commit_message=$(git log -1 --pretty=%B)
+        if [[ $last_commit_message == PreDeploy* ]]; then
+          commit_message="Deploy 🤖 Auto-update cache"
+        else
+          commit_message="🤖 Auto-update cache manifest to ${{ steps.version.outputs.new_version }}"
+        fi
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add .
-        git commit -m "🤖 Auto-update cache manifest to ${{ steps.version.outputs.new_version }}"
+        git commit -m "$commit_message"
         git push
 
     - name: Create summary
