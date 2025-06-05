@@ -1,4 +1,4 @@
-this.version = "2025.06.05.8";
+this.version = "2025.06.05.9";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.05.8",
-  "generated": "2025-06-05T17:26:12Z",
+  "version": "2025.06.05.9",
+  "generated": "2025-06-05T17:38:07Z",
   "files": {
-    "/img/cube.png": {
-      "checksum": "447344b02ceb4a0cbadc4c4f4046e2ff",
-      "size": 12536735,
-      "priority": "important"
-    },
     "/img/dex-vr-comp.jpg": {
       "checksum": "e763f32eddfb928e99597355486c7654",
       "size": 101824,
@@ -1291,7 +1286,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "9716c01552d6de4655a3ac8c98dc3684",
+      "checksum": "4b92b97ab9d85e99343fb723c5a2a189",
       "size": 36316,
       "priority": "important"
     },
@@ -1366,8 +1361,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "6111f865012f830cefd6759585315724",
-      "size": 169032,
+      "checksum": "4454ec13229a58739a37534b029aa004",
+      "size": 170840,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1426,8 +1421,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "db73d31dd703939f38d51baf5c093609",
-      "size": 38295,
+      "checksum": "5a09a9785ec8cd37b7f593219d43b813",
+      "size": 32869,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -1481,7 +1476,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "009a30e9da51c286fcce98b5ee883e1c",
+      "checksum": "62c8512f5412549547231bcadb1213c6",
       "size": 7299,
       "priority": "important"
     },
@@ -1554,11 +1549,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/js/entity-utils.js": {
-      "checksum": "8fdcb0ac89dfeca0d8620d5e500a2d29",
-      "size": 5950,
-      "priority": "page-specific"
     },
     "/naf-playground/js/environment-manager.js": {
       "checksum": "c3a0608cfe91366cd6dfe4ce3a81c320",
