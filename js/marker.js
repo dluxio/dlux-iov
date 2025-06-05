@@ -59,7 +59,7 @@ export default {
       const rawHtml = marked.parse(markdownToParse);
 
       // Comprehensive sanitization to prevent XSS attacks
-      return DOMPurify.sanitize(rawHtml, { 
+      const sanitizedHtml = DOMPurify.sanitize(rawHtml, { 
           // Forbid dangerous tags that can execute scripts or take over layout
           FORBID_TAGS: [
             'script', 'style', 'object', 'embed', 'applet', 'meta', 
@@ -91,14 +91,21 @@ export default {
             'h4', 'h5', 'h6', 'hr', 'i', 'img', 'li', 'ol', 'p', 'pre', 'span', 
             'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'th', 'thead', 'tr', 
             'u', 'ul', 'del', 'ins', 'small', 'mark', 'q', 'cite', 'abbr', 'dfn', 
-            'time', 'address', 'figure', 'figcaption', 'kbd', 'samp', 'var'
+            'time', 'address', 'figure', 'figcaption', 'kbd', 'samp', 'var', 'video'
           ],
           // Keep only safe attributes
           ALLOWED_ATTR: [
             'href', 'title', 'alt', 'src', 'width', 'height', 'class', 'id',
-            'target', 'rel', 'type', 'datetime', 'cite', 'start', 'reversed'
+            'target', 'rel', 'type', 'datetime', 'cite', 'start', 'reversed',
+            'controls', 'autoplay', 'loop', 'muted', 'poster', 'preload'
           ]
       });
+
+      // Center video elements by wrapping them in a div with centering styles
+      return sanitizedHtml.replace(
+        /<video([^>]*)>/g, 
+        '<div style="text-align: center; margin: 1em 0;"><video$1 style="max-width: 100%; height: auto;">'
+      ).replace(/<\/video>/g, '</video></div>');
     },
   },
 };
