@@ -1,4 +1,4 @@
-this.version = "2025.06.05.13";
+this.version = "2025.06.05.14";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.05.13",
-  "generated": "2025-06-05T20:46:07Z",
+  "version": "2025.06.05.14",
+  "generated": "2025-06-05T21:08:40Z",
   "files": {
-    "/img/dlux-logo-icon.png": {
-      "checksum": "71830c29ed9e2c169bc69df28a20c568",
-      "size": 31122,
-      "priority": "important"
-    },
     "/img/dlux-logo.png": {
       "checksum": "5892181763fe2e7f3bf5c59b81191f75",
       "size": 33287,
@@ -1251,7 +1246,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "a7f6d6e494000f17843e0ca7f206f1c0",
+      "checksum": "d0a332578ebb1e5c6744268557d7ed8b",
       "size": 36317,
       "priority": "important"
     },
@@ -1281,8 +1276,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/uploadvue-dd.js": {
-      "checksum": "978a6e897afe24018e764752d8431b09",
-      "size": 83367,
+      "checksum": "3cc5452ac01c4f87664ed2d6b3e4c372",
+      "size": 84135,
       "priority": "important"
     },
     "/js/uploadvue.js": {
@@ -1326,8 +1321,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "1102325712e2048d5e057ba51afe4bec",
-      "size": 179207,
+      "checksum": "9159c61951e6fc65d026129aecab34bd",
+      "size": 180129,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1386,8 +1381,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "dda9e8e17cffc5acb75965be210db140",
-      "size": 35867,
+      "checksum": "ce06845f9f6ccd8974175560466e419c",
+      "size": 37258,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -1441,7 +1436,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "d258a6d42448794a377848d32dbf3c41",
+      "checksum": "d650a0dacfc8e9d7b8392e5f3ddfbc1b",
       "size": 7300,
       "priority": "important"
     },
@@ -1514,11 +1509,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/js/main.js": {
-      "checksum": "47fcbdb23a77e0b134f985c967662009",
-      "size": 645,
-      "priority": "page-specific"
     },
     "/naf-playground/js/monaco.js": {
       "checksum": "2f5eb2b94393d373d9b4376bcdaa815d",
