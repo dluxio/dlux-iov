@@ -203,7 +203,7 @@ export default {
             <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center">
                 <files-vue ref="filesVue" :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" :computed-data="{usedBytes: usedBytes, availableBytes: availableBytes}"
                     @refresh-contracts="refreshContracts" 
-                    @tosign="sendIt($event)" :signedtx="signedtx"></files-vue>
+                    @tosign="sendIt($event)" :signedtx="signedtx" :post-component-available="postpage" @add-to-post="handleAddToPost($event)"></files-vue>
             </div>
         </div>
     </div>
@@ -435,7 +435,7 @@ export default {
             }
         };
     },
-    emits: ['tosign', 'addasset', 'bens', 'done'],
+    emits: ['tosign', 'addasset', 'bens', 'done', 'add-to-post'],
     methods: {
         ...common,
         ...spk,
@@ -1606,6 +1606,10 @@ export default {
             // Set a flag to restore path after refresh
             this.pathToRestore = currentPath;
         },
+        handleAddToPost(fileData) {
+            // Emit the file data to the parent so it can be passed to the post component
+            this.$emit('add-to-post', fileData);
+        },
     },
     watch: {
         'account'(newValue, o) {
@@ -1681,12 +1685,17 @@ export default {
             fetch('https://spktest.dlux.io/api/fileContract/' + id)
                 .then((r) => r.json())
                 .then((res) => {
-                    res.result.extend = "7"
-                    if (res.result) {
+                    if (res.result && typeof res.result === 'object') {
+                        res.result.extend = "7"
                         this.handlePropContracts(res.result)
                         //this.pcontracts.splice(this.contractIDs[id].index, 1, res.result)
                         //this.extendcost[id] = parseInt(res.result.extend / 30 * res.result.r)
+                    } else {
+                        console.log('Contract not found or invalid:', id)
                     }
+                })
+                .catch(err => {
+                    console.error('Error fetching contract:', err)
                 });
         }
         //var i = 0

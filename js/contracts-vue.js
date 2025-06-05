@@ -101,7 +101,7 @@ export default {
       localLinks: {},
       localPostBodyAdder: {},
       state2contracts: [],
-      test: true,
+      isTestMode: true,
       tick: "1",
       toSign: {},
       larynxbehind: 999999,

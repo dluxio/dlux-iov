@@ -201,12 +201,12 @@
                                         class="fa-solid fa-shuffle fa-fw me-1"></i>Remix dApp</span>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black" aria-labelledby="postdApp">
-                                <li style="cursor: not-allowed;"><a class="dropdown-item disabled"
+                                <li><a class="dropdown-item"
                                         :class="{active: postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'}"
                                         role="button"
                                         @click="postCustom_json.vrHash = 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k';types='ts,img'"><i
                                             class="fa-solid fa-globe fa-fw me-2"></i>360 Image Gallery</a></li>
-                                <li style="cursor: not-allowed;"><a class="dropdown-item disabled"
+                                <li><a class="dropdown-item"
                                         :class="{active: postCustom_json.vrHash == 'video'}" role="button"
                                         @click="postCustom_json.vrHash = 'video';types='img,vid'"><i
                                             class="fa-solid fa-film fa-fw me-2"></i>Video</a></li>
@@ -214,12 +214,12 @@
                                         role="button" @click="postCustom_json.vrHash = 'blog';types='img,vid'"><i
                                             class="fa-solid fa-book fa-fw me-2"></i>Blog</a></li>
 
-                                <li style="cursor: not-allowed;"><a class="dropdown-item disabled"
+                                <li><a class="dropdown-item"
                                         :class="{active: postCustom_json.vrHash == 'dapp'}" role="button"
                                         @click="postCustom_json.vrHash = 'dapp';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'"><i
                                             class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>New dApp</a>
                                 </li>
-                                <li style="cursor: not-allowed;"><a class="dropdown-item disabled"
+                                <li><a class="dropdown-item"
                                         :class="{active: postCustom_json.vrHash == 'remix'}" role="button"
                                         @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'"><i
                                             class="fa-solid fa-shuffle fa-fw me-2"></i>ReMix dApp</a></li>
@@ -333,8 +333,7 @@
                 </div>
 
                 <div v-if="spkapi.pubKey != 'NA'">
-                    <!-- install ffmpeg not required atm
-                        <div class="card mx-auto mb-3 mt-5 d-none" style="max-width: 600px;">
+                        <div class="card mx-auto mb-3 mt-5" style="max-width: 600px;">
                             <div class="card-header text-start" style="background-color: #813c73 ;">
                                 <div><i class="fa-solid fa-gears fa-fw me-1"></i>MISSING COMPONENT</div>
                             </div>
@@ -344,10 +343,10 @@
                                 </p>
                                 <button class="btn btn-primary"><i class="fa-solid fa-download fa-fw me-1"></i>Download
                                     FFmpeg</button>
-                                <button class="btn btn-secondary d-none"><i
+                                <button class="btn btn-secondary"><i
                                         class="fa-solid fa-arrow-right fa-fw me-1"></i>Skip</button>
                             </div>
-                        </div> -->
+                        </div>
                     <div>
                         <div class="card my-3">
                             <div class="card-header">
@@ -546,7 +545,7 @@
                                     <contract-vue v-if="account" :nodeview="false" :account="account" :mypfp="mypfp"
                                         :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
                                         :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
-                                        @done="getSapi"></contract-vue>
+                                        @done="getSapi" :postpage="true" @add-to-post="fileToAddToPost = $event"></contract-vue>
                                 </div>
                             </div>
                         </div>
@@ -557,7 +556,7 @@
                     <!-- Post Details Widget -->
                     <div class="">
                         <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens"
-                            @tosign="sendIt($event)" />
+                            @tosign="sendIt($event)" :file_to_add="fileToAddToPost" />
                     </div>
                 </div>
                 <!-- SPK Wallet Modal -->

@@ -109,6 +109,11 @@ export default {
       type: String,
       required: false,
       default: ""
+    },
+    file_to_add: {
+      type: Object,
+      required: false,
+      default: null
     }
   },
   data() {
@@ -402,6 +407,31 @@ export default {
     },
     'postBens'(newValue) {
       this.save()
+    },
+    'file_to_add'(newValue) {
+      if (newValue) {
+        // Add the formatted content to the post body
+        this.postBody += '\n' + newValue.content + '\n';
+        
+        // Update the markdown editor
+        this.insert = newValue.content;
+        
+        // Add the contract ID and CID to the custom JSON assets
+        if (newValue.contractId && newValue.cid) {
+          const existingAsset = this.postCustom_json.assets.find(asset => 
+            asset.contract === newValue.contractId && asset.hash === newValue.cid
+          );
+          
+          if (!existingAsset) {
+            this.postCustom_json.assets.push({
+              contract: newValue.contractId,
+              hash: newValue.cid
+            });
+          }
+        }
+        
+        this.save();
+      }
     },
 
   },

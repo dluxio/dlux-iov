@@ -1041,7 +1041,8 @@ PORT=3000
       contracts: [],
       numitems: 0,
       postBens: [],
-      serviceWorkerPromises: {}
+      serviceWorkerPromises: {},
+      fileToAddToPost: null
     };
   },
   components: {

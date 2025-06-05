@@ -662,20 +662,20 @@ export default {
                     </a>
                 </li>
                 <!-- Folder operations for contracts - only shown if user has a storage node or broca balance -->
-                <li v-if="contextMenu.type === 'folder' && (hasStorage() || account)" class="dropdown-divider"></li>
+                <li v-if="contextMenu.type === 'folder' && (hasStorageNode || account)" class="dropdown-divider"></li>
                 <li v-if="contextMenu.type === 'folder' && account">
                     <a class="dropdown-item py-1" href="#"
                         @click="extendFolderContracts(contextMenu.item); hideContextMenu();">
                         Extend All Contracts in Folder
                     </a>
                 </li>
-                <li v-if="contextMenu.type === 'folder' && hasStorage()">
+                <li v-if="contextMenu.type === 'folder' && hasStorageNode">
                     <a class="dropdown-item py-1" href="#"
                         @click="storeFolderContracts(contextMenu.item, false); hideContextMenu();">
                         Store All Files in Folder
                     </a>
                 </li>
-                <li v-if="contextMenu.type === 'folder' && hasStorage()">
+                <li v-if="contextMenu.type === 'folder' && hasStorageNode">
                     <a class="dropdown-item py-1" href="#"
                         @click="storeFolderContracts(contextMenu.item, true); hideContextMenu();">
                         Remove All Files in Folder from Storage
@@ -696,16 +696,23 @@ export default {
                 </li>
                 <!-- Add Store option for storage node operators who aren't storing this file -->
                 <li
-                    v-if="contextMenu.type === 'file' && hasStorage() && contract[contextMenu.item?.i] && !isStored(contract[contextMenu.item.i])">
+                    v-if="contextMenu.type === 'file' && hasStorageNode && contract[contextMenu.item?.i] && !isStored(contract[contextMenu.item.i])">
                     <a class="dropdown-item py-1" href="#" @click="store(contextMenu.item, false); hideContextMenu();">
                         Store File
                     </a>
                 </li>
                 <!-- Add Remove option for storage node operators who are storing this file -->
                 <li
-                    v-if="contextMenu.type === 'file' && hasStorage() && contract[contextMenu.item?.i] && isStored(contract[contextMenu.item.i])">
+                    v-if="contextMenu.type === 'file' && hasStorageNode && contract[contextMenu.item?.i] && isStored(contract[contextMenu.item.i])">
                     <a class="dropdown-item py-1" href="#" @click="store(contextMenu.item, true); hideContextMenu();">
                         Remove File from Storage
+                    </a>
+                </li>
+                <!-- Add to Post option - only show when postComponentAvailable prop is true -->
+                <li v-if="contextMenu.type === 'file' && postComponentAvailable" class="dropdown-divider"></li>
+                <li v-if="contextMenu.type === 'file' && postComponentAvailable">
+                    <a class="dropdown-item py-1" href="#" @click="addToPost(contextMenu.item); hideContextMenu();">
+                        <i class="fa-solid fa-plus fa-fw me-2"></i>Add to Post
                     </a>
                 </li>
             </ul>
@@ -937,8 +944,11 @@ export default {
                 };
             },
         },
+        postComponentAvailable: {
+            type: Boolean,
+            default: false,
+        },
     },
-    emits: ['tosign'],
     data() {
         return {
             files: {},
@@ -989,7 +999,7 @@ export default {
             pendingChanges: {},
             newMeta: {},
             decoded: false,
-            debounce: null,
+            debounceTime: null,
             dragHoverTimeout: null, // Timeout ID for drag hover navigation
             dragHoverTargetPath: null, // Path of the element being hovered over
             selectedFiles: [], // Array of selected file IDs
@@ -4556,7 +4566,6 @@ export default {
             this.droppedExternalFiles = { files: [] }; // Clear files, no targetPath needed now
         },
         hasStorage() {
-            console.log("Checking storage node status:", this.saccountapi);
             if (this.saccountapi && typeof this.saccountapi.storage === "string" && this.saccountapi.storage) {
                 return this.saccountapi.name;
             } else {
@@ -4565,7 +4574,6 @@ export default {
         },
 
         isStored(contract) {
-            console.log("Checking if contract is stored:", contract, "Account:", this.account);
             if (!contract || !contract.n) return false;
             
             var found = false;
@@ -4575,7 +4583,6 @@ export default {
                     break;
                 }
             }
-            console.log("Is stored result:", found);
             return found;
         },
 
@@ -4791,10 +4798,60 @@ export default {
                 console.log('Drag left component/window, cleared all highlights');
             }
         },
+        addToPost(file) {
+            
+            // Get file metadata
+            const meta = this.newMeta[file.i][file.f];
+            const fileName = meta.name || file.f;
+            const fileType = meta.type || '';
+            const cid = file.f;
+            const contractId = file.i;
+            
+            // Determine how to format the file based on its type
+            let formattedContent = '';
+            const fileTypeFormatted = fileType.toLowerCase();
+            
+            // Video files and playlists
+            if (fileTypeFormatted.includes('video') || 
+                fileTypeFormatted.includes('mp4') || 
+                fileTypeFormatted.includes('webm') || 
+                fileTypeFormatted.includes('ogg') ||
+                fileTypeFormatted.includes('avi') ||
+                fileTypeFormatted.includes('mov') ||
+                fileName.toLowerCase().includes('playlist')) {
+                formattedContent = `<video src="https://ipfs.dlux.io/ipfs/${cid}" controls></video>`;
+            }
+            // Image files
+            else if (fileTypeFormatted.includes('image') || 
+                     fileTypeFormatted.includes('png') || 
+                     fileTypeFormatted.includes('jpg') || 
+                     fileTypeFormatted.includes('jpeg') || 
+                     fileTypeFormatted.includes('gif') || 
+                     fileTypeFormatted.includes('svg') || 
+                     fileTypeFormatted.includes('webp')) {
+                formattedContent = `![${fileName}](https://ipfs.dlux.io/ipfs/${cid})`;
+            }
+            // Everything else as anchor tag
+            else {
+                formattedContent = `[${fileName}](https://ipfs.dlux.io/ipfs/${cid})`;
+            }
+            
+            // Emit the formatted content and contract info to parent
+            this.$emit('add-to-post', {
+                content: formattedContent,
+                contractId: contractId,
+                cid: cid,
+                fileName: fileName,
+                fileType: fileType
+            });
+        },
     },
     computed: {
         hasFiles() {
             return Object.keys(this.files).length > 0;
+        },
+        hasStorageNode() {
+            return this.hasStorage();
         },
         currentFileCount() {
             return this.getFiles(this.selectedUser, this.currentFolderPath).length;
@@ -4905,9 +4962,9 @@ export default {
                     }
                 }
                 if (diff) {
-                    if (this.debounce && new Date().getTime() - this.debounce < 1000) return
-                    this.init()
-                    this.debounce = new Date().getTime()
+                                    if (this.debounceTime && new Date().getTime() - this.debounceTime < 1000) return
+                this.init()
+                this.debounceTime = new Date().getTime()
                 }
             },
             deep: true
