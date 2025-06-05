@@ -70,8 +70,9 @@
             }
         }, {}));
     </script>
-    <script src="/packages/ffmpeg/package/dist/umd/ffmpeg.js"></script>
-    <script src="/packages/util/package/dist/umd/index.js"></script>
+    <!-- FFmpeg WASM -->
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+    <script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
     <script src="https://unpkg.com/rxjs@^7/dist/bundles/rxjs.umd.min.js"></script>
     <script src="https://github.com/videojs/mux.js/releases/latest/download/mux.js"></script>
     <!-- Vue Controller -->
@@ -377,7 +378,7 @@
                                         <strong>FFmpeg Load Failed:</strong> You can still upload pre-transcoded videos or retry loading.
                                     </div>
                                     <button class="btn btn-primary btn-sm ms-2" @click="ffmpegSkipped = false; downloadFFmpeg()">
-                                        <i class="fa-solid fa-retry fa-fw me-1"></i>Retry
+                                        <i class="fa-solid fa-refresh fa-fw me-1"></i>Retry
                                     </button>
                                 </div>
 
