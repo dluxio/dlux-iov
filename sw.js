@@ -1,4 +1,4 @@
-this.version = "2025.06.05.16";
+this.version = "2025.06.05.17";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.05.15",
-  "generated": "2025-06-05T21:13:26Z",
+  "version": "2025.06.05.17",
+  "generated": "2025-06-05T21:29:43Z",
   "files": {
-    "/img/dlux-pen.png": {
-      "checksum": "0b1b6a3a9e66e6d845f394da6aaef046",
-      "size": 14937,
-      "priority": "important"
-    },
     "/img/dlux-qr.png": {
       "checksum": "3b4c09f50cb7f2314a3e5effce05ea58",
       "size": 33251,
@@ -1241,7 +1236,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "7640934508a60b2f2dbba3f02dc44acf",
+      "checksum": "9a95c1faff5cdc3b05bb5ab742bbea30",
       "size": 36317,
       "priority": "important"
     },
@@ -1271,8 +1266,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/uploadvue-dd.js": {
-      "checksum": "3cc5452ac01c4f87664ed2d6b3e4c372",
-      "size": 84135,
+      "checksum": "d895e88ed8601ef3b8761b951c0d7f6c",
+      "size": 84187,
       "priority": "important"
     },
     "/js/uploadvue.js": {
@@ -1316,8 +1311,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "722b62d8777d0b3bf66b9aea23c9069c",
-      "size": 180749,
+      "checksum": "937e7e6a87d1c817ae160d8ddd14d5a7",
+      "size": 183923,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1431,7 +1426,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "2aa984c1eaefdb0292a95a9e6f7f27f1",
+      "checksum": "ae6a20904a18bf6bbc3e050a4203cb23",
       "size": 7300,
       "priority": "important"
     },
@@ -1504,11 +1499,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/js/network-manager.js": {
-      "checksum": "a44c210d1a833a9da4e95c87c22da749",
-      "size": 4917,
-      "priority": "page-specific"
     },
     "/naf-playground/js/network.js": {
       "checksum": "c47bdabff89051bd383584f1125de1e5",
