@@ -780,6 +780,35 @@ td {
   background-color: rgba(255, 193, 7, .7);
 }
 
+.bg-danger-muted {
+  background-color: #941e41;
+}
+
+.bg-white-muted {
+  background-color: #a8a6a6;
+}
+
+.bg-success-muted {
+  background-color: #2d9574;
+}
+
+.bg-primary-muted {
+  background-color: #2e5e88;
+}
+
+.bg-info-muted {
+  background-color: #257a96;
+}
+
+.bg-warning-muted {
+  background-color: #947005;
+}
+
+.bg-window-header {
+  background-color: #37393c;
+  border-bottom: 5px solid #242628;
+}
+
 .mx-05 {
   margin-left: 0.25em !important;
   margin-right: 0.25em !important;
@@ -2575,7 +2604,7 @@ body[data-touch="false"] {
 
   .navbar-nav .nav-bell .dropdown-menu,
   .navbar-nav .nav-bell .dropdown-menu.show {
-    right: -73px !important;
+    right: -72px !important;
   }
 
   .navbar-nav .nav-item .dropdown-menu {

@@ -3890,9 +3890,9 @@ export default {
   <!-- login modal -->
   <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModal" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">User Management</h5>
+      <div class="modal-content text-white">
+        <div class="modal-header py-2 bg-window-header">
+          <h5 class="modal-title hero-subtitle fs-4 text-white-50">User Management</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -4047,13 +4047,13 @@ export default {
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" v-model="consentPrivacy" id="privacyCheck" @change="consentError = false">
                 <label class="form-check-label small" :class="{'text-danger': consentError && !consentPrivacy}" for="privacyCheck">
-                  I agree to the <a href="/about#privacy" target="_blank" class="text-info">Privacy Policy</a>
+                  I agree to the <a href="/about#privacy" target="_blank" class="text-info no-decoration">Privacy Policy</a>
                 </label>
               </div>
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" v-model="consentTerms" id="termsCheck" @change="consentError = false">
                 <label class="form-check-label small" :class="{'text-danger': consentError && !consentTerms}" for="termsCheck">
-                  I agree to the <a href="/about#terms" target="_blank" class="text-info">Terms of Service</a>
+                  I agree to the <a href="/about#terms" target="_blank" class="text-info no-decoration">Terms of Service</a>
                 </label>
               </div>
             </div>
