@@ -1,4 +1,4 @@
-this.version = "2025.06.05.1";
+this.version = "2025.06.05.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.05.1",
-  "generated": "2025-06-05T02:21:24Z",
+  "version": "2025.06.05.2",
+  "generated": "2025-06-05T13:55:21Z",
   "files": {
-    "/img/crypto/bnb.svg": {
-      "checksum": "60ca7a9d786038944537c250266c63dc",
-      "size": 399,
-      "priority": "important"
-    },
     "/img/crypto/ethereum.svg": {
       "checksum": "54b6a875127d0b7c67a45fdd96e2cedc",
       "size": 306,
@@ -1066,7 +1061,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/contracts-vue.js": {
-      "checksum": "e79ed2acef7647ceff28855e823ff962",
+      "checksum": "8cd246f064807795496ef977658cbe9b",
       "size": 109102,
       "priority": "important"
     },
@@ -1321,8 +1316,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "7f1b3f5bfe31852fe39c69f26fd7a894",
-      "size": 36317,
+      "checksum": "6ca21b99630c3cfb61052595384a68b9",
+      "size": 36316,
       "priority": "important"
     },
     "/js/tagify.min.js": {
@@ -1511,8 +1506,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "7d1b2e476fba9cceb08e6fe7f91316fd",
-      "size": 7300,
+      "checksum": "89f5c21d8ddecba5b83a5a6cd6a11e1c",
+      "size": 7299,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -1584,11 +1579,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/js/debug.js": {
-      "checksum": "4a98fcfd7e039eec6d673945bde39f98",
-      "size": 8136,
-      "priority": "page-specific"
     },
     "/naf-playground/js/draggable.js": {
       "checksum": "19e1082c2d754a177fbfe7bba790ae45",
