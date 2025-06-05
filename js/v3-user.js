@@ -1045,7 +1045,10 @@ PORT=3000
       serviceWorkerPromises: {},
       fileToAddToPost: null,
       playlistUpdates: {},
-      videoFilesToUpload: []
+      videoFilesToUpload: [],
+      ffmpegReady: false,
+      ffmpegSkipped: false,
+      ffmpeg: null
     };
   },
   components: {
@@ -4346,37 +4349,57 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     async transcode(event) {
+      if (!this.ffmpegReady && !this.ffmpegSkipped) {
+        this.videoMsg = 'Please load FFmpeg first or skip to upload pre-transcoded files.';
+        return;
+      }
+      
+      if (this.ffmpegSkipped) {
+        // Handle direct file upload without transcoding
+        const file = event.target.files[0];
+        if (file) {
+          this.videoFilesToUpload = [{
+            file: file,
+            targetPath: '/videos/'
+          }];
+          this.videoMsg = 'Video file ready for upload (no transcoding).';
+          this.videosrc = URL.createObjectURL(file);
+        }
+        return;
+      }
+
       this.ffmpeg_page = true
       const { fetchFile } = FFmpegUtil;
-      const { FFmpeg } = FFmpegWASM;
-      let ffmpeg = null;
+      let ffmpeg = this.ffmpeg;
       var qsv = false
       var height = 0
       var width = 0
       var run = 0
       var bitrates = []
       const patt = /\d{3,5}x\d{3,5}/
-      if (ffmpeg === null) {
-        ffmpeg = new FFmpeg();
-        ffmpeg.on("log", ({ message }) => {
-          this.videoMsg = message;
-          if (message.indexOf('h264_qsv') > -1) qsv = true
-          if (!height && patt.test(message)) {
-            const parts = patt.exec(message);
-            console.log(parts)
-            height = parts[0].split('x')[1]
-            width = parts[0].split('x')[0]
-            bitrates = this.getPossibleBitrates(height)
-          }
-          console.log(message);
-        })
-        ffmpeg.on("progress", ({ progress, time }) => {
-          this.videoMsg = `${progress * 100} %, time: ${time / 1000000} s`;
-        });
-        await ffmpeg.load({
-          coreURL: "/packages/core/package/dist/umd/ffmpeg-core.js",
-        });
+      
+      if (!ffmpeg) {
+        this.videoMsg = 'FFmpeg not loaded. Please load FFmpeg first.';
+        return;
       }
+      
+      // Set up event listeners for this transcoding session
+      ffmpeg.on("log", ({ message }) => {
+        this.videoMsg = message;
+        if (message.indexOf('h264_qsv') > -1) qsv = true
+        if (!height && patt.test(message)) {
+          const parts = patt.exec(message);
+          console.log(parts)
+          height = parts[0].split('x')[1]
+          width = parts[0].split('x')[0]
+          bitrates = this.getPossibleBitrates(height)
+        }
+        console.log(message);
+      })
+      ffmpeg.on("progress", ({ progress, time }) => {
+        this.videoMsg = `${Math.round(progress * 100)}%, time: ${Math.round(time / 1000000)}s`;
+      });
+      
       const { name } = event.target.files[0];
       await ffmpeg.writeFile(name, await fetchFile(event.target.files[0]));
       var codec = "libx264"
@@ -4563,6 +4586,40 @@ function buyNFT(setname, uid, price, type, callback){
         // Trigger upload for the playlists
         this.videoFilesToUpload = updatedPlaylists;
       }
+    },
+    
+    async downloadFFmpeg() {
+      this.videoMsg = 'Loading FFmpeg...';
+      try {
+        // Initialize FFmpeg
+        const { FFmpeg } = FFmpegWASM;
+        if (!this.ffmpeg) {
+          this.ffmpeg = new FFmpeg();
+          this.ffmpeg.on("log", ({ message }) => {
+            this.videoMsg = message;
+            console.log(message);
+          });
+          this.ffmpeg.on("progress", ({ progress, time }) => {
+            this.videoMsg = `Loading: ${Math.round(progress * 100)}%`;
+          });
+        }
+        
+        await this.ffmpeg.load({
+          coreURL: "/packages/core/package/dist/umd/ffmpeg-core.js",
+        });
+        
+        this.ffmpegReady = true;
+        this.videoMsg = 'FFmpeg loaded successfully! Ready to transcode videos.';
+      } catch (error) {
+        console.error('FFmpeg loading failed:', error);
+        this.videoMsg = 'Failed to load FFmpeg. You can still upload pre-transcoded videos.';
+        this.ffmpegSkipped = true;
+      }
+    },
+    
+    skipFFmpeg() {
+      this.ffmpegSkipped = true;
+      this.videoMsg = 'FFmpeg skipped. You can upload pre-transcoded video files directly.';
     },
     activeIndexUp() {
       console.log(this.activeIndex, this[this.focusItem.source].length, this.focusItem)
