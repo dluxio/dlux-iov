@@ -1,4 +1,4 @@
-this.version = "2025.06.05.14";
+this.version = "2025.06.05.15";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.05.14",
-  "generated": "2025-06-05T21:08:40Z",
+  "version": "2025.06.05.15",
+  "generated": "2025-06-05T21:13:26Z",
   "files": {
-    "/img/dlux-logo.png": {
-      "checksum": "5892181763fe2e7f3bf5c59b81191f75",
-      "size": 33287,
-      "priority": "important"
-    },
     "/img/dlux-pen.png": {
       "checksum": "0b1b6a3a9e66e6d845f394da6aaef046",
       "size": 14937,
@@ -1246,7 +1241,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "d0a332578ebb1e5c6744268557d7ed8b",
+      "checksum": "7640934508a60b2f2dbba3f02dc44acf",
       "size": 36317,
       "priority": "important"
     },
@@ -1321,8 +1316,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "9159c61951e6fc65d026129aecab34bd",
-      "size": 180129,
+      "checksum": "722b62d8777d0b3bf66b9aea23c9069c",
+      "size": 180749,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1436,7 +1431,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "d650a0dacfc8e9d7b8392e5f3ddfbc1b",
+      "checksum": "2aa984c1eaefdb0292a95a9e6f7f27f1",
       "size": 7300,
       "priority": "important"
     },
@@ -1509,11 +1504,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/js/monaco.js": {
-      "checksum": "2f5eb2b94393d373d9b4376bcdaa815d",
-      "size": 64578,
-      "priority": "page-specific"
     },
     "/naf-playground/js/network-manager.js": {
       "checksum": "a44c210d1a833a9da4e95c87c22da749",
