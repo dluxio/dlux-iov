@@ -654,8 +654,8 @@ export default {
                             const ext = names.length > 1 ? names.pop() : '';
                             const name = names.join('.'); 
                             
-                            // Check if this is a thumb file (ends with _thumb.ts)
-                            const isThumbFile = dict.name.endsWith('_thumb.ts');
+                            // Check if this is a thumb file (ends with _thumb.ts or _thumb.m3u8)
+                            const isThumbFile = dict.name.endsWith('_thumb.ts') || dict.name.endsWith('_thumb.m3u8');
                             
                             this.FileInfo[dict.name].meta = {
                                 name: isThumbFile ? '' : name, // No name for thumb files

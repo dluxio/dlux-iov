@@ -4389,39 +4389,12 @@ function buyNFT(setname, uid, price, type, callback){
         return;
       }
       
-      // Try to set up event listeners (optional for functionality)
+      // Skip event listeners due to compatibility issues
+      // Use default bitrates and progress monitoring instead
       let hasEventListeners = false;
-      try {
-        // Only set up event listeners if FFmpeg is properly loaded
-        if (ffmpeg && typeof ffmpeg.on === 'function') {
-          ffmpeg.on("log", ({ message }) => {
-            this.videoMsg = message;
-            if (message.indexOf('h264_qsv') > -1) qsv = true
-            if (!height && patt.test(message)) {
-              const parts = patt.exec(message);
-              console.log(parts)
-              height = parts[0].split('x')[1]
-              width = parts[0].split('x')[0]
-              bitrates = this.getPossibleBitrates(height)
-            }
-            console.log(message);
-          });
-          
-          ffmpeg.on("progress", ({ progress, time }) => {
-            this.videoMsg = `Transcoding: ${Math.round(progress * 100)}% (${Math.round(time / 1000000)}s elapsed)`;
-          });
-          
-          hasEventListeners = true;
-          console.log('FFmpeg event listeners set up successfully');
-        } else {
-          throw new Error('FFmpeg instance does not support event listeners');
-        }
-      } catch (eventError) {
-        console.warn('Could not set up transcoding event listeners, continuing without them:', eventError);
-        // Continue without event listeners - use default bitrates
-        height = 720; // Default assumption
-        bitrates = this.getPossibleBitrates(height);
-      }
+      height = 720; // Default assumption for common video
+      bitrates = this.getPossibleBitrates(height);
+      console.log('Using default bitrates, event listeners disabled for compatibility');
       
       const { name } = event.target.files[0];
       await ffmpeg.writeFile(name, await fetchFile(event.target.files[0]));
@@ -4467,12 +4440,9 @@ function buyNFT(setname, uid, price, type, callback){
       }
       this.videoMsg = 'Starting video transcoding...';
       
-      // Start progress monitoring if event listeners aren't available
-      let progressInterval;
-      if (!hasEventListeners) {
-        this.videoMsg = 'Transcoding in progress...';
-        progressInterval = this.startTranscodeProgressMonitoring(ffmpeg, bitrates.length);
-      }
+      // Always start progress monitoring since event listeners are disabled
+      this.videoMsg = 'Transcoding in progress...';
+      const progressInterval = this.startTranscodeProgressMonitoring(ffmpeg, bitrates.length);
       
       console.time('exec');
       console.log({ commands })
@@ -4501,10 +4471,13 @@ function buyNFT(setname, uid, price, type, callback){
       ffmpeg.listDir("/").then((files) => {
         console.log('Available files after transcoding:', files);
         
-        // First pass: collect all video segments and prepare them for upload
+        // Separate files by type
         const videoSegmentPromises = [];
-        const playlistPromises = [];
+        const resolutionPlaylistPromises = [];
+        const segmentMapping = new Map(); // Map segment names to their future CIDs
+        const resolutionPlaylists = []; // Store resolution-specific playlists
         
+        // First pass: process video segments
         for (const file of files) {
           if (file.name.includes('.ts')) {
             videoSegmentPromises.push(
@@ -4519,45 +4492,107 @@ function buyNFT(setname, uid, price, type, callback){
                 });
                 this.dataURLS.push([newFileName, data.buffer, 'video/mp2t']);
                 console.log(`Added video segment: ${newFileName} (${data.buffer.byteLength} bytes)`);
-                return { originalName: file.name, newFileName, cid: null }; // CID will be set after upload
-              })
-            );
-          } else if (file.name.includes('.m3u8')) {
-            playlistPromises.push(
-              ffmpeg.readFile(file.name).then((data) => {
-                const playlistContent = new TextDecoder().decode(data);
-                console.log(`M3U8 Playlist Content (${file.name}):`, playlistContent);
                 
-                // Add m3u8 to dataURLS and videoFiles for upload
-                videoFiles.push({
-                  file: new File([data.buffer], file.name, { type: 'application/x-mpegURL' }),
-                  targetPath: '/playlists/'
-                });
-                this.dataURLS.push([file.name, data.buffer, 'application/x-mpegURL']);
-                console.log(`Added M3U8 playlist: ${file.name} (${data.buffer.byteLength} bytes)`);
-                
-                // Store for later CID replacement if needed
-                playlistUpdates[file.name] = {
-                  content: playlistContent,
-                  fileName: file.name
-                };
-                
-                return { fileName: file.name, content: playlistContent };
+                // Store mapping for M3U8 CID replacement
+                segmentMapping.set(file.name, `PLACEHOLDER_${newFileName}`);
+                return { originalName: file.name, newFileName, cid: null };
               })
             );
           }
         }
         
-        // Wait for all files to be processed
-        Promise.all([...videoSegmentPromises, ...playlistPromises]).then((results) => {
+        // Second pass: process resolution-specific M3U8 playlists  
+        for (const file of files) {
+          if (file.name.includes('.m3u8') && file.name.includes('p_index')) {
+            resolutionPlaylistPromises.push(
+              ffmpeg.readFile(file.name).then((data) => {
+                let playlistContent = new TextDecoder().decode(data);
+                console.log(`M3U8 Resolution Playlist Content (${file.name}):`, playlistContent);
+                
+                // Replace segment references with IPFS placeholders
+                segmentMapping.forEach((placeholder, originalName) => {
+                  const segmentPattern = new RegExp(originalName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                  playlistContent = playlistContent.replace(segmentPattern, `https://ipfs.dlux.io/ipfs/${placeholder}`);
+                });
+                
+                console.log(`M3U8 with IPFS placeholders (${file.name}):`, playlistContent);
+                
+                // Mark resolution playlists as thumbs (they're sub-files)
+                const resPlaylistFile = new File([new TextEncoder().encode(playlistContent)], file.name.replace('.m3u8', '_thumb.m3u8'), { 
+                  type: 'application/x-mpegURL' 
+                });
+                
+                videoFiles.push({
+                  file: resPlaylistFile,
+                  targetPath: '/playlists/',
+                  isThumb: true, // Mark resolution playlists as thumbs
+                  isResolutionPlaylist: true
+                });
+                
+                this.dataURLS.push([resPlaylistFile.name, new TextEncoder().encode(playlistContent), 'application/x-mpegURL']);
+                console.log(`Added resolution M3U8 playlist: ${resPlaylistFile.name} (marked as thumb)`);
+                
+                // Store resolution playlist info for master playlist
+                const resolution = file.name.match(/(\d+)p_index/)?.[1] || 'unknown';
+                resolutionPlaylists.push({
+                  fileName: resPlaylistFile.name,
+                  resolution: resolution,
+                  originalName: file.name,
+                  content: playlistContent,
+                  placeholder: `PLACEHOLDER_RES_${resPlaylistFile.name}`
+                });
+                
+                return { fileName: file.name, resolution, content: playlistContent };
+              })
+            );
+          }
+        }
+        
+        // Wait for all segments and resolution playlists to be processed
+        Promise.all([...videoSegmentPromises, ...resolutionPlaylistPromises]).then((results) => {
           console.log('All transcoded files processed:', results);
           
-          // Store playlist updates for later use
-          this.playlistUpdates = playlistUpdates;
+          // Create master M3U8 playlist that references resolution playlists by CID
+          if (resolutionPlaylists.length > 0) {
+            let masterPlaylistContent = '#EXTM3U\n#EXT-X-VERSION:3\n';
+            
+            // Sort playlists by resolution (highest first)
+            resolutionPlaylists.sort((a, b) => parseInt(b.resolution) - parseInt(a.resolution));
+            
+            resolutionPlaylists.forEach(playlist => {
+              const bandwidth = this.calculateBandwidth(playlist.resolution);
+              masterPlaylistContent += `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},RESOLUTION=${this.getResolutionDimensions(playlist.resolution)}\n`;
+              masterPlaylistContent += `https://ipfs.dlux.io/ipfs/${playlist.placeholder}\n`;
+            });
+            
+            console.log('Master M3U8 Playlist Content:', masterPlaylistContent);
+            
+            // Add master playlist to upload
+            const masterPlaylistFile = new File([new TextEncoder().encode(masterPlaylistContent)], 'master.m3u8', { 
+              type: 'application/x-mpegURL' 
+            });
+            
+            videoFiles.push({
+              file: masterPlaylistFile,
+              targetPath: '/playlists/',
+              isMasterPlaylist: true
+            });
+            
+            this.dataURLS.push(['master.m3u8', new TextEncoder().encode(masterPlaylistContent), 'application/x-mpegURL']);
+            console.log('Added master M3U8 playlist: master.m3u8');
+            
+            // Store for CID replacement after upload
+            this.playlistUpdates = {
+              masterPlaylist: {
+                content: masterPlaylistContent,
+                resolutionPlaylists: resolutionPlaylists
+              }
+            };
+          }
           
           // Upload video files using upload-everywhere component
           if (videoFiles.length > 0) {
-            this.videoMsg = `Preparing ${videoFiles.length} files for upload...`;
+            this.videoMsg = `Preparing ${videoFiles.length} files for upload (${resolutionPlaylists.length} resolutions)...`;
             console.log('Video files prepared for upload:', videoFiles);
             // Set the video files to be picked up by the upload-everywhere component
             this.videoFilesToUpload = videoFiles;
@@ -5268,6 +5303,36 @@ function buyNFT(setname, uid, price, type, callback){
     },
     getFFmpegDownloadProgress() {
       return this.ffmpegDownloadProgress || 0;
+    },
+    
+    calculateBandwidth(resolution) {
+      // Estimate bandwidth based on resolution (in bits per second)
+      const bandwidthMap = {
+        '144': 200000,   // 200 Kbps
+        '240': 400000,   // 400 Kbps  
+        '360': 800000,   // 800 Kbps
+        '480': 1500000,  // 1.5 Mbps
+        '720': 3000000,  // 3 Mbps
+        '1080': 6000000, // 6 Mbps
+        '1440': 12000000, // 12 Mbps
+        '2160': 25000000  // 25 Mbps (4K)
+      };
+      return bandwidthMap[resolution] || 1000000; // Default 1 Mbps
+    },
+    
+    getResolutionDimensions(resolution) {
+      // Common 16:9 aspect ratio dimensions
+      const dimensionMap = {
+        '144': '256x144',
+        '240': '426x240', 
+        '360': '640x360',
+        '480': '854x480',
+        '720': '1280x720',
+        '1080': '1920x1080',
+        '1440': '2560x1440',
+        '2160': '3840x2160'
+      };
+      return dimensionMap[resolution] || '1280x720'; // Default 720p
     },
   },
   mounted() {
