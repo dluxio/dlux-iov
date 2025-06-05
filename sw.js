@@ -1,4 +1,4 @@
-this.version = "2025.06.05.10";
+this.version = "2025.06.05.11";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -598,13 +598,8 @@ function formatBytes(bytes) {
 self.cacheManifest = 
 {
   "version": "2025.06.05.11",
-  "generated": "2025-06-05T18:48:43Z",
+  "generated": "2025-06-05T19:12:25Z",
   "files": {
-    "/img/dlux-hive-logo-alpha.svg": {
-      "checksum": "93b0396ce748e2d51e978260bc3267d2",
-      "size": 3416,
-      "priority": "important"
-    },
     "/img/dlux-hive-logo.svg": {
       "checksum": "96518aec91dcdc4cf306b488344f2281",
       "size": 3535,
@@ -1529,11 +1524,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/js/event-handlers.js": {
-      "checksum": "5d4e1a41fad20159855a076c7b41679e",
-      "size": 2443,
-      "priority": "page-specific"
     },
     "/naf-playground/js/initialization-manager.js": {
       "checksum": "71866a050ce65f6d49114ebd610a95f7",
