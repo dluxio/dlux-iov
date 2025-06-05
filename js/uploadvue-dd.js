@@ -654,15 +654,25 @@ export default {
                             const ext = names.length > 1 ? names.pop() : '';
                             const name = names.join('.'); 
                             
+                            // Check if this is a thumb file (ends with _thumb.ts)
+                            const isThumbFile = dict.name.endsWith('_thumb.ts');
+                            
                             this.FileInfo[dict.name].meta = {
-                                name,
-                                ext,
-                                flag: "",
+                                name: isThumbFile ? '' : name, // No name for thumb files
+                                ext: isThumbFile ? '' : ext,   // No type for thumb files  
+                                flag: isThumbFile ? "2" : "",  // Flag 2 for thumb files
                                 labels: "",
                                 thumb: "",
                                 license: "",
                                 fullAppPath: dict.fullAppPath
                             };
+                            
+                            // Mark as thumb file for special handling
+                            if (isThumbFile) {
+                                this.FileInfo[dict.name].is_thumb = true;
+                                this.FileInfo[dict.name].use_thumb = true;
+                                console.log(`Processed thumb file: ${dict.name} with flag 2`);
+                            }
                             console.log(`FileInfo entry created for ${dict.name} with path: ${dict.fullAppPath}`);
 
                             const currentIndex = this.File.findIndex(f => f === ret.opts.originalFile);

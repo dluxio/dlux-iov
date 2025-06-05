@@ -355,18 +355,33 @@
                                     <i class="fa-solid fa-gears fa-fw me-2"></i>
                                     <div class="flex-grow-1">
                                         <strong>FFmpeg Required:</strong> Video transcoding needs FFmpeg to be loaded.
-                                        <div v-if="videoMsg.includes('Loading') || videoMsg.includes('Preparing')" class="small mt-1">
+                                        <div v-if="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')" class="small mt-1">
                                             {{videoMsg}}
+                                            <!-- FFmpeg Download Progress Bar -->
+                                            <div v-if="ffmpegDownloadProgress > 0" class="mt-2">
+                                                <div class="progress" style="height: 8px;">
+                                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                                         role="progressbar" 
+                                                         :style="`width: ${ffmpegDownloadProgress}%`"
+                                                         :aria-valuenow="ffmpegDownloadProgress" 
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="100">
+                                                    </div>
+                                                </div>
+                                                <div class="text-center mt-1 small text-muted">
+                                                    {{ffmpegDownloadProgress}}% - FFmpeg WASM Core (~31MB)
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <button class="btn btn-primary btn-sm ms-2" @click="downloadFFmpeg()" 
-                                        :disabled="videoMsg.includes('Loading') || videoMsg.includes('Preparing')">
+                                        :disabled="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')">
                                         <i class="fa-solid fa-download fa-fw me-1"></i>
-                                        <span v-if="videoMsg.includes('Loading') || videoMsg.includes('Preparing')">Loading...</span>
+                                        <span v-if="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')">Loading...</span>
                                         <span v-else>Load FFmpeg</span>
                                     </button>
                                     <button class="btn btn-secondary btn-sm ms-1" @click="skipFFmpeg()"
-                                        :disabled="videoMsg.includes('Loading') || videoMsg.includes('Preparing')">
+                                        :disabled="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')">
                                         <i class="fa-solid fa-arrow-right fa-fw me-1"></i>Skip
                                     </button>
                                 </div>

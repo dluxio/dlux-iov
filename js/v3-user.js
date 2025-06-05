@@ -1048,7 +1048,8 @@ PORT=3000
       videoFilesToUpload: [],
       ffmpegReady: false,
       ffmpegSkipped: false,
-      ffmpeg: null
+      ffmpeg: null,
+      ffmpegDownloadProgress: 0,
     };
   },
   components: {
@@ -4405,7 +4406,7 @@ function buyNFT(setname, uid, price, type, callback){
         });
         
         ffmpeg.on("progress", ({ progress, time }) => {
-          this.videoMsg = `${Math.round(progress * 100)}%, time: ${Math.round(time / 1000000)}s`;
+          this.videoMsg = `Transcoding: ${Math.round(progress * 100)}% (${Math.round(time / 1000000)}s elapsed)`;
         });
         
         hasEventListeners = true;
@@ -4493,68 +4494,73 @@ function buyNFT(setname, uid, price, type, callback){
       const playlistUpdates = {};
       
       ffmpeg.listDir("/").then((files) => {
-        console.log('Available files:', files);
+        console.log('Available files after transcoding:', files);
         
         // First pass: collect all video segments and prepare them for upload
         const videoSegmentPromises = [];
+        const playlistPromises = [];
         
         for (const file of files) {
           if (file.name.includes('.ts')) {
             videoSegmentPromises.push(
               ffmpeg.readFile(file.name).then((data) => {
-                const newFileName = file.name.replace('.ts', '_thumb.ts'); // Rename segments to hide them
+                // Create thumb file name for segments to hide them
+                const newFileName = file.name.endsWith('_thumb.ts') ? file.name : file.name.replace('.ts', '_thumb.ts');
+                
                 videoFiles.push({
                   file: new File([data.buffer], newFileName, { type: 'video/mp2t' }),
-                  targetPath: '/video_segments/'
+                  targetPath: '/video_segments/',
+                  isThumb: true // Mark as thumb file for special handling
                 });
                 this.dataURLS.push([newFileName, data.buffer, 'video/mp2t']);
+                console.log(`Added video segment: ${newFileName} (${data.buffer.byteLength} bytes)`);
                 return { originalName: file.name, newFileName, cid: null }; // CID will be set after upload
+              })
+            );
+          } else if (file.name.includes('.m3u8')) {
+            playlistPromises.push(
+              ffmpeg.readFile(file.name).then((data) => {
+                const playlistContent = new TextDecoder().decode(data);
+                console.log(`M3U8 Playlist Content (${file.name}):`, playlistContent);
+                
+                // Add m3u8 to dataURLS and videoFiles for upload
+                videoFiles.push({
+                  file: new File([data.buffer], file.name, { type: 'application/x-mpegURL' }),
+                  targetPath: '/playlists/'
+                });
+                this.dataURLS.push([file.name, data.buffer, 'application/x-mpegURL']);
+                console.log(`Added M3U8 playlist: ${file.name} (${data.buffer.byteLength} bytes)`);
+                
+                // Store for later CID replacement if needed
+                playlistUpdates[file.name] = {
+                  content: playlistContent,
+                  fileName: file.name
+                };
+                
+                return { fileName: file.name, content: playlistContent };
               })
             );
           }
         }
         
-        // Wait for all video segments to be processed
-        Promise.all(videoSegmentPromises).then((segmentInfo) => {
-          // Second pass: read and update playlist files
-          for (const file of files) {
-            if (file.name.includes('.m3u8')) {
-              ffmpeg.readFile(file.name).then((data) => {
-                const playlistContent = new TextDecoder().decode(data);
-                let updatedPlaylist = playlistContent;
-                
-                // Replace each .ts file reference with IPFS URL
-                segmentInfo.forEach((segment) => {
-                  // For now, use placeholder. Will be updated after upload with actual CIDs
-                  updatedPlaylist = updatedPlaylist.replace(
-                    new RegExp(segment.originalName, 'g'),
-                    `https://ipfs.dlux.io/ipfs/PLACEHOLDER_${segment.newFileName}`
-                  );
-                });
-                
-                // Store playlist for later CID replacement
-                playlistUpdates[file.name] = {
-                  content: updatedPlaylist,
-                  segmentInfo: segmentInfo
-                };
-                
-                // Add original playlist to dataURLS for now
-                this.dataURLS.push([file.name, data.buffer, 'application/x-mpegURL']);
-              });
-            }
-          }
+        // Wait for all files to be processed
+        Promise.all([...videoSegmentPromises, ...playlistPromises]).then((results) => {
+          console.log('All transcoded files processed:', results);
           
           // Store playlist updates for later use
           this.playlistUpdates = playlistUpdates;
           
-                     // Upload video files using upload-everywhere component
-           if (videoFiles.length > 0) {
-             this.videoMsg = 'Preparing files for upload...';
-             // Set the video files to be picked up by the upload-everywhere component
-             this.videoFilesToUpload = videoFiles;
-           }
+          // Upload video files using upload-everywhere component
+          if (videoFiles.length > 0) {
+            this.videoMsg = `Preparing ${videoFiles.length} files for upload...`;
+            console.log('Video files prepared for upload:', videoFiles);
+            // Set the video files to be picked up by the upload-everywhere component
+            this.videoFilesToUpload = videoFiles;
+          } else {
+            this.videoMsg = 'No transcoded files found. Please try again.';
+          }
         });
-      })
+      });
       //const data = await ffmpeg.readFile("144p_000.ts")
       //console.log(data)
       //this.videosrc = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp2t' }));
@@ -4657,7 +4663,7 @@ function buyNFT(setname, uid, price, type, callback){
           
           this.videoMsg = `Transcoding: ${progressPercent}% (${currentFileCount}/${estimatedTotalFiles} files)${timeRemainingText}${elapsedText}`;
           
-          console.log(`Transcode progress: ${currentFileCount}/${estimatedTotalFiles} files (${progressPercent}%) - Rate: ${progressHistory.length >= 2 ? (progressHistory[progressHistory.length-1].files - progressHistory[0].files) / ((progressHistory[progressHistory.length-1].time - progressHistory[0].time) / 1000) : 0} files/sec`);
+          console.log(`Transcode progress: ${currentFileCount}/${estimatedTotalFiles} files (${progressPercent}%) - Rate: ${progressHistory.length >= 2 ? ((progressHistory[progressHistory.length-1].files - progressHistory[0].files) / ((progressHistory[progressHistory.length-1].time - progressHistory[0].time) / 1000)).toFixed(2) : 0} files/sec`);
           
         } catch (error) {
           console.warn('Error monitoring transcode progress:', error);
@@ -4672,47 +4678,23 @@ function buyNFT(setname, uid, price, type, callback){
     },
 
     handleVideoUploadComplete(uploadedFiles) {
-      // Map uploaded file names to their CIDs
-      const cidMapping = {};
-      uploadedFiles.forEach(file => {
-        const originalName = file.fileName.replace('_thumb.ts', '.ts');
-        cidMapping[originalName] = file.cid;
-      });
+      console.log('Video upload completed:', uploadedFiles);
+      this.videoMsg = 'Video upload completed successfully!';
       
-      // Update playlists with actual CIDs
-      const updatedPlaylists = [];
-      for (const [playlistName, playlistData] of Object.entries(this.playlistUpdates)) {
-        let updatedContent = playlistData.content;
-        
-        // Replace placeholders with actual CIDs
-        playlistData.segmentInfo.forEach((segment) => {
-          const cid = cidMapping[segment.originalName];
-          if (cid) {
-            updatedContent = updatedContent.replace(
-              `https://ipfs.dlux.io/ipfs/PLACEHOLDER_${segment.newFileName}`,
-              `https://ipfs.dlux.io/ipfs/${cid}`
-            );
-          }
-        });
-        
-        // Create a File object for the updated playlist
-        const playlistFile = new File([updatedContent], playlistName, { type: 'application/x-mpegURL' });
-        updatedPlaylists.push({
-          file: playlistFile,
-          targetPath: '/playlists/'
-        });
+      // Handle any post-upload processing here
+      if (this.playlistUpdates && Object.keys(this.playlistUpdates).length > 0) {
+        // Update playlists with actual CIDs if needed
+        console.log('Updating playlists with CIDs:', this.playlistUpdates);
+        // This would be implemented based on how CIDs are returned from upload
       }
       
-      // Upload the updated playlists
-      if (updatedPlaylists.length > 0) {
-        this.videoMsg = 'Uploading updated playlists...';
-        // Trigger upload for the playlists
-        this.videoFilesToUpload = updatedPlaylists;
-      }
+      // Clear the video files array
+      this.videoFilesToUpload = [];
     },
     
     async downloadFFmpeg() {
       this.videoMsg = 'Loading FFmpeg...';
+      this.ffmpegDownloadProgress = 0;
       
       try {
         // Check if FFmpeg is already available globally
@@ -4720,8 +4702,8 @@ function buyNFT(setname, uid, price, type, callback){
           throw new Error('FFmpeg WASM library not available - please refresh the page');
         }
         
-        // Try different initialization strategies
-        await this.initializeFFmpeg();
+        // Try different initialization strategies with progress monitoring
+        await this.initializeFFmpegWithProgress();
         
       } catch (error) {
         console.error('FFmpeg loading failed:', error);
@@ -4729,17 +4711,61 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     
-    async initializeFFmpeg() {
+    async initializeFFmpegWithProgress() {
       const { FFmpeg } = FFmpegWASM;
       
-      // Strategy 1: Try basic initialization without custom URLs
+      // Strategy 1: Try with local core files with detailed progress monitoring
+      try {
+        this.videoMsg = 'Downloading FFmpeg core (~31MB)...';
+        this.ffmpegDownloadProgress = 10;
+        
+        this.ffmpeg = new FFmpeg();
+        
+        // Set up progress monitoring for FFmpeg loading
+        this.ffmpeg.on('log', ({ message }) => {
+          if (message.includes('Loading')) {
+            this.videoMsg = `Loading FFmpeg: ${message}`;
+            this.ffmpegDownloadProgress = Math.min(this.ffmpegDownloadProgress + 5, 80);
+          }
+        });
+        
+        // Monitor the load process with timeout and progress updates
+        const loadPromise = this.ffmpeg.load({
+          coreURL: "/packages/core/package/dist/umd/ffmpeg-core.js"
+        });
+        
+        // Update progress while loading
+        const progressInterval = setInterval(() => {
+          if (this.ffmpegDownloadProgress < 80) {
+            this.ffmpegDownloadProgress += 2;
+            this.videoMsg = `Downloading FFmpeg: ${this.ffmpegDownloadProgress}%`;
+          }
+        }, 200);
+        
+        await loadPromise;
+        clearInterval(progressInterval);
+        
+        this.ffmpegDownloadProgress = 100;
+        this.ffmpegReady = true;
+        this.videoMsg = 'FFmpeg loaded successfully! Ready to transcode videos.';
+        console.log('FFmpeg initialized with local core files');
+        return;
+        
+      } catch (localError) {
+        console.warn('Local file FFmpeg initialization failed:', localError);
+      }
+      
+      // Strategy 2: Try basic initialization without custom URLs
       try {
         this.videoMsg = 'Initializing FFmpeg (basic mode)...';
+        this.ffmpegDownloadProgress = 50;
+        
         this.ffmpeg = new FFmpeg();
         
         // Load without specifying URLs - let FFmpeg handle defaults
         await this.ffmpeg.load();
         
+        this.ffmpegDownloadProgress = 100;
         this.ffmpegReady = true;
         this.videoMsg = 'FFmpeg loaded successfully! Ready to transcode videos.';
         console.log('FFmpeg initialized successfully with default configuration');
@@ -4749,27 +4775,10 @@ function buyNFT(setname, uid, price, type, callback){
         console.warn('Basic FFmpeg initialization failed:', basicError);
       }
       
-      // Strategy 2: Try with local core files
-      try {
-        this.videoMsg = 'Initializing FFmpeg (local files)...';
-        this.ffmpeg = new FFmpeg();
-        
-        await this.ffmpeg.load({
-          coreURL: "/packages/core/package/dist/umd/ffmpeg-core.js"
-        });
-        
-        this.ffmpegReady = true;
-        this.videoMsg = 'FFmpeg loaded successfully with local files!';
-        console.log('FFmpeg initialized with local core files');
-        return;
-        
-      } catch (localError) {
-        console.warn('Local file FFmpeg initialization failed:', localError);
-      }
-      
       // Strategy 3: Skip FFmpeg and allow direct video uploads
       this.videoMsg = 'FFmpeg initialization failed. You can still upload pre-processed video files.';
       this.ffmpegSkipped = true;
+      this.ffmpegDownloadProgress = 0;
       console.log('FFmpeg skipped - direct video upload mode enabled');
     },
     
@@ -5239,6 +5248,9 @@ function buyNFT(setname, uid, price, type, callback){
         RETURN_DOM: false,
         RETURN_TRUSTED_TYPE: false
       });
+    },
+    getFFmpegDownloadProgress() {
+      return this.ffmpegDownloadProgress || 0;
     },
   },
   mounted() {
