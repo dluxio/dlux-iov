@@ -400,10 +400,23 @@
                                         </div>
                                     </div>
                                     
-                                    <!-- Status Message -->
+                                    <!-- Status Message with Progress Bar -->
                                     <div v-if="videoMsg && videoMsg !== 'Drop a video file to transcode'" class="mt-2">
                                         <div class="alert alert-info">
                                             <i class="fa-solid fa-info-circle fa-fw me-1"></i>{{videoMsg}}
+                                            
+                                            <!-- Progress Bar for Transcoding -->
+                                            <div v-if="videoMsg.includes('Transcoding:') && videoMsg.includes('%')" class="mt-2">
+                                                <div class="progress" style="height: 8px;">
+                                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                                         role="progressbar" 
+                                                         :style="`width: ${extractProgressPercent(videoMsg)}%`"
+                                                         :aria-valuenow="extractProgressPercent(videoMsg)" 
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="100">
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     

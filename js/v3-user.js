@@ -4460,13 +4460,25 @@ function buyNFT(setname, uid, price, type, callback){
         commands.push('-vf', `scale=-1:${parseInt(bitrates[i].split('x')[1])}`)
       }
       this.videoMsg = 'Starting video transcoding...';
+      
+      // Start progress monitoring if event listeners aren't available
+      let progressInterval;
       if (!hasEventListeners) {
-        this.videoMsg = 'Transcoding in progress (this may take a few minutes)...';
+        this.videoMsg = 'Transcoding in progress...';
+        progressInterval = this.startTranscodeProgressMonitoring(ffmpeg, bitrates.length);
       }
       
       console.time('exec');
       console.log({ commands })
-      await ffmpeg.exec(commands)
+      
+      try {
+        await ffmpeg.exec(commands);
+      } finally {
+        // Clean up progress monitoring
+        if (progressInterval) {
+          clearInterval(progressInterval);
+        }
+      }
       fetch(`https://spk-ipfs.3speak.tv/upload-contract?user=${this.account}`).then(r => r.json()).then((data) => {
         setTimeout(() => {
           this.showUpload = true
@@ -4474,7 +4486,7 @@ function buyNFT(setname, uid, price, type, callback){
         }, 1000)
       })
       console.timeEnd('exec');
-      this.videoMsg = 'Complete transcoding';
+      this.videoMsg = 'Transcoding complete! Preparing files for upload...';
       
       // Prepare files for upload
       const videoFiles = [];
@@ -4569,6 +4581,96 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     
+    startTranscodeProgressMonitoring(ffmpeg, numResolutions) {
+      const startTime = Date.now();
+      let lastFileCount = 0;
+      let lastUpdateTime = startTime;
+      let estimatedTotalFiles = numResolutions * 12; // Estimate: ~10 segments per resolution + 2 playlists
+      let progressHistory = [];
+      
+      const updateProgress = async () => {
+        try {
+          const files = await ffmpeg.listDir("/");
+          const outputFiles = files.filter(f => 
+            f.name.includes('.ts') || f.name.includes('.m3u8')
+          );
+          
+          const currentFileCount = outputFiles.length;
+          const currentTime = Date.now();
+          
+          // Calculate progress percentage
+          let progressPercent = Math.min(Math.round((currentFileCount / estimatedTotalFiles) * 100), 95);
+          
+          // Track progress rate for better time estimation
+          if (currentFileCount > lastFileCount) {
+            const timeDelta = (currentTime - lastUpdateTime) / 1000;
+            const filesDelta = currentFileCount - lastFileCount;
+            progressHistory.push({ time: currentTime, files: currentFileCount });
+            
+            // Keep only last 5 measurements for rolling average
+            if (progressHistory.length > 5) {
+              progressHistory.shift();
+            }
+            
+            lastFileCount = currentFileCount;
+            lastUpdateTime = currentTime;
+          }
+          
+          // Calculate estimated time remaining using recent progress rate
+          let estimatedSecondsRemaining = 0;
+          if (progressHistory.length >= 2) {
+            const oldest = progressHistory[0];
+            const newest = progressHistory[progressHistory.length - 1];
+            const timeSpan = (newest.time - oldest.time) / 1000;
+            const filesSpan = newest.files - oldest.files;
+            
+            if (filesSpan > 0 && timeSpan > 0) {
+              const filesPerSecond = filesSpan / timeSpan;
+              const remainingFiles = estimatedTotalFiles - currentFileCount;
+              estimatedSecondsRemaining = remainingFiles / filesPerSecond;
+              
+              // Refine total estimate if we have good data
+              if (currentFileCount > 5 && progressPercent > 20) {
+                const newEstimate = Math.round(currentFileCount / (progressPercent / 100));
+                if (newEstimate > estimatedTotalFiles) {
+                  estimatedTotalFiles = Math.min(newEstimate, estimatedTotalFiles * 1.5); // Don't grow too aggressively
+                  progressPercent = Math.min(Math.round((currentFileCount / estimatedTotalFiles) * 100), 95);
+                }
+              }
+            }
+          }
+          
+          // Format time remaining
+          let timeRemainingText = '';
+          if (estimatedSecondsRemaining > 0) {
+            if (estimatedSecondsRemaining > 60) {
+              const minutes = Math.round(estimatedSecondsRemaining / 60);
+              timeRemainingText = ` - ~${minutes}m remaining`;
+            } else {
+              timeRemainingText = ` - ~${Math.round(estimatedSecondsRemaining)}s remaining`;
+            }
+          }
+          
+          // Update message with enhanced progress info
+          const elapsedMinutes = Math.round((currentTime - startTime) / 60000);
+          const elapsedText = elapsedMinutes > 0 ? ` (${elapsedMinutes}m elapsed)` : '';
+          
+          this.videoMsg = `Transcoding: ${progressPercent}% (${currentFileCount}/${estimatedTotalFiles} files)${timeRemainingText}${elapsedText}`;
+          
+          console.log(`Transcode progress: ${currentFileCount}/${estimatedTotalFiles} files (${progressPercent}%) - Rate: ${progressHistory.length >= 2 ? (progressHistory[progressHistory.length-1].files - progressHistory[0].files) / ((progressHistory[progressHistory.length-1].time - progressHistory[0].time) / 1000) : 0} files/sec`);
+          
+        } catch (error) {
+          console.warn('Error monitoring transcode progress:', error);
+        }
+      };
+      
+      // Initial update
+      updateProgress();
+      
+      // Update every 1.5 seconds for more responsive feedback
+      return setInterval(updateProgress, 1500);
+    },
+
     handleVideoUploadComplete(uploadedFiles) {
       // Map uploaded file names to their CIDs
       const cidMapping = {};
@@ -4683,6 +4785,11 @@ function buyNFT(setname, uid, price, type, callback){
     skipFFmpeg() {
       this.ffmpegSkipped = true;
       this.videoMsg = 'FFmpeg skipped. You can upload pre-transcoded video files directly.';
+    },
+    
+    extractProgressPercent(message) {
+      const match = message.match(/(\d+)%/);
+      return match ? parseInt(match[1]) : 0;
     },
     
     async bypassServiceWorkerForFFmpeg() {
