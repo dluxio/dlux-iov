@@ -900,6 +900,7 @@ export default {
                     channels: {},
                     name: "",
                     spk_power: 0,
+                    pow_broca: 0,
                 };
             },
         },
@@ -4620,9 +4621,9 @@ export default {
         
         broca_calc(last = '0,0') {
             const last_calc = this.Base64toNumber(last.split(',')[1]);
-            const accured = parseInt((parseFloat(this.sstats?.broca_refill || 0) * (this.saccountapi.head_block - last_calc)) / (this.saccountapi.spk_power * 1000));
+            const accured = parseInt((parseFloat(this.sstats?.broca_refill || 0) * (this.saccountapi.head_block - last_calc)) / (this.saccountapi.pow_broca * 1000));
             var total = parseInt(last.split(',')[0]) + accured;
-            if (total > (this.saccountapi.spk_power * 1000)) total = (this.saccountapi.spk_power * 1000);
+            if (total > (this.saccountapi.pow_broca * 1000)) total = (this.saccountapi.pow_broca * 1000);
             return total;
         },
 
