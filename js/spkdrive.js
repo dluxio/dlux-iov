@@ -175,7 +175,7 @@ export default {
                         <h2 class="fw-light mt-1">No files found</h2>
                         <p class="lead mb-1" v-if="nodeview && title == 'stored'">The TROLE API service can take up to
                             10 minutes to update data</p>
-                        <p class="lead mb-1" v-if="!nodeview || title == 'new'" v-show="saccountapi.spk_power">
+                        <p class="lead mb-1" v-if="!nodeview || title == 'new'" v-show="saccountapi.pow_broca">
                             Click
                             <a class="btn btn-sm btn-dark border-info text-info no-decoration small"
                                 style="font-size: 0.6em; width: 72px;" role="button" data-bs-toggle="modal"
@@ -1008,7 +1008,7 @@ export default {
                     this.saccountapi.spk += this.reward_spk();
                     if (!this.saccountapi.granted.t) this.saccountapi.granted.t = 0;
                     if (!this.saccountapi.granting.t) this.saccountapi.granting.t = 0;
-                    this.availableBytes = data.spk_power * 1000 * 1024 * 6
+                    this.availableBytes = data.pow_broca * 1000 * 1024 * 6
                     this.spkval =
                         (data.balance +
                             data.gov +
