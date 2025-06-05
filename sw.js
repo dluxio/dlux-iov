@@ -1,4 +1,4 @@
-this.version = "2025.06.06.3";
+this.version = "2025.06.06.4";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.06.3",
-  "generated": "2025-06-05T22:37:25Z",
+  "version": "2025.06.06.4",
+  "generated": "2025-06-05T23:03:36Z",
   "files": {
-    "/img/favicon.ico": {
-      "checksum": "04f7baccd67b245727b07e7b30543234",
-      "size": 3418,
-      "priority": "important"
-    },
     "/img/gallery-vr-comp.jpg": {
       "checksum": "df3fae44de67c8af269891561242f6d5",
       "size": 178796,
@@ -1216,7 +1211,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "1c9b48be04ad2740fa9cba525dc54802",
+      "checksum": "9dd546d902cffcaa79b039ae5729ef61",
       "size": 36316,
       "priority": "important"
     },
@@ -1291,8 +1286,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "0d4f0827910dd524eb3441a7a140c60d",
-      "size": 192996,
+      "checksum": "db1d488a64cb411bf3027dd1128eaac1",
+      "size": 197448,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1351,13 +1346,13 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "6096324f4d332ddb6d1896b99cdf8552",
-      "size": 42853,
+      "checksum": "36df9c6dcccfd6edc6b92446c3cc594a",
+      "size": 43096,
       "priority": "important"
     },
     "/new/token/index.html": {
-      "checksum": "708cc079c59c737b57994a060249d4e6",
-      "size": 45175,
+      "checksum": "cef1ab1b9fea2a91c627f9570738c5de",
+      "size": 45310,
       "priority": "important"
     },
     "/nfts/create/index.html": {
@@ -1406,7 +1401,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "5cc3d4e4d135572543ee8a8e1077aaf6",
+      "checksum": "61cc65ef8636f83a666394072dfd34a3",
       "size": 7299,
       "priority": "important"
     },
@@ -1431,8 +1426,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/user/index.html": {
-      "checksum": "2d49a7060c9f4f4b3534b8f4eadb7933",
-      "size": 300946,
+      "checksum": "7832b7e321488e5d4071d14e297952ce",
+      "size": 301087,
       "priority": "important"
     },
     "/vid/stills/blue_dust.jpg": {
@@ -1479,11 +1474,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/js/systems/avatar-system.js": {
-      "checksum": "967780e84b123c15244d099e634ebfa3",
-      "size": 2236,
-      "priority": "page-specific"
     },
     "/naf-playground/js/ui.js": {
       "checksum": "728816b63e1206b98763b4bc56cc6b56",
