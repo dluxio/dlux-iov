@@ -4589,37 +4589,146 @@ function buyNFT(setname, uid, price, type, callback){
     },
     
     async downloadFFmpeg() {
-      this.videoMsg = 'Loading FFmpeg...';
+      this.videoMsg = 'Preparing FFmpeg...';
+      let swBypassAttempted = false;
+      
       try {
-        // Initialize FFmpeg
-        const { FFmpeg } = FFmpegWASM;
-        if (!this.ffmpeg) {
-          this.ffmpeg = new FFmpeg();
-          this.ffmpeg.on("log", ({ message }) => {
-            this.videoMsg = message;
-            console.log(message);
-          });
-          this.ffmpeg.on("progress", ({ progress, time }) => {
-            this.videoMsg = `Loading: ${Math.round(progress * 100)}%`;
-          });
+        // Check if FFmpeg is already available globally
+        if (typeof FFmpegWASM === 'undefined') {
+          throw new Error('FFmpeg WASM library not available');
         }
         
-        await this.ffmpeg.load({
-          coreURL: "/packages/core/package/dist/umd/ffmpeg-core.js",
-        });
+        const { FFmpeg } = FFmpegWASM;
         
-        this.ffmpegReady = true;
-        this.videoMsg = 'FFmpeg loaded successfully! Ready to transcode videos.';
+        // Try loading FFmpeg directly first
+        await this.attemptFFmpegLoad(FFmpeg);
+        
       } catch (error) {
-        console.error('FFmpeg loading failed:', error);
-        this.videoMsg = 'Failed to load FFmpeg. You can still upload pre-transcoded videos.';
-        this.ffmpegSkipped = true;
+        console.warn('Initial FFmpeg load failed:', error);
+        
+        // If initial load fails, try bypassing service worker
+        if (!swBypassAttempted && error.message.includes('network')) {
+          try {
+            swBypassAttempted = true;
+            this.videoMsg = 'Bypassing service worker...';
+            await this.bypassServiceWorkerForFFmpeg();
+            
+            // Wait a moment for SW to fully unregister
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Try loading FFmpeg again
+            const { FFmpeg } = FFmpegWASM;
+            await this.attemptFFmpegLoad(FFmpeg);
+            
+            // Re-register service worker after successful load
+            await this.reregisterServiceWorker();
+            
+          } catch (retryError) {
+            console.error('FFmpeg loading failed even after SW bypass:', retryError);
+            this.handleFFmpegLoadError(retryError);
+          }
+        } else {
+          this.handleFFmpegLoadError(error);
+        }
       }
+    },
+    
+    async attemptFFmpegLoad(FFmpeg) {
+      // Create new FFmpeg instance
+      this.ffmpeg = new FFmpeg();
+      
+      // Set up event listeners before loading
+      this.ffmpeg.on("log", ({ message }) => {
+        console.log('FFmpeg log:', message);
+        if (message.includes('error') || message.includes('Error')) {
+          console.error('FFmpeg error:', message);
+        }
+      });
+      
+      this.ffmpeg.on("progress", ({ progress, time }) => {
+        const percent = Math.round(progress * 100);
+        this.videoMsg = `Loading FFmpeg: ${percent}%`;
+        console.log(`FFmpeg loading progress: ${percent}%`);
+      });
+      
+      // Try to load FFmpeg with different configurations
+      const coreURLs = [
+        "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js",
+        "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js",
+        "/packages/core/package/dist/umd/ffmpeg-core.js"
+      ];
+      
+      let loaded = false;
+      for (const coreURL of coreURLs) {
+        try {
+          console.log(`Trying to load FFmpeg from: ${coreURL}`);
+          this.videoMsg = `Loading FFmpeg from ${coreURL.includes('unpkg') ? 'unpkg CDN' : coreURL.includes('jsdelivr') ? 'jsDelivr CDN' : 'local'}...`;
+          
+          await this.ffmpeg.load({
+            coreURL: coreURL,
+            wasmURL: coreURL.replace('ffmpeg-core.js', 'ffmpeg-core.wasm'),
+            workerURL: coreURL.replace('ffmpeg-core.js', 'ffmpeg-core.worker.js')
+          });
+          
+          loaded = true;
+          console.log('FFmpeg loaded successfully from:', coreURL);
+          break;
+        } catch (err) {
+          console.warn(`Failed to load FFmpeg from ${coreURL}:`, err);
+          continue;
+        }
+      }
+      
+      if (!loaded) {
+        throw new Error('Failed to load FFmpeg from all sources');
+      }
+      
+      this.ffmpegReady = true;
+      this.videoMsg = 'FFmpeg loaded successfully! Ready to transcode videos.';
+      console.log('FFmpeg is ready for transcoding');
+    },
+    
+    handleFFmpegLoadError(error) {
+      console.error('FFmpeg loading failed:', error);
+      this.videoMsg = 'Failed to load FFmpeg. You can still upload pre-transcoded videos.';
+      this.ffmpegSkipped = true;
+      this.ffmpeg = null;
     },
     
     skipFFmpeg() {
       this.ffmpegSkipped = true;
       this.videoMsg = 'FFmpeg skipped. You can upload pre-transcoded video files directly.';
+    },
+    
+    async bypassServiceWorkerForFFmpeg() {
+      // Temporarily unregister service worker for FFmpeg loading
+      if ('serviceWorker' in navigator) {
+        try {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          const swPromises = registrations.map(registration => {
+            console.log('Temporarily unregistering SW for FFmpeg loading');
+            return registration.unregister();
+          });
+          await Promise.all(swPromises);
+          return true;
+        } catch (error) {
+          console.warn('Could not unregister service worker:', error);
+          return false;
+        }
+      }
+      return false;
+    },
+    
+    async reregisterServiceWorker() {
+      // Re-register service worker after FFmpeg loading
+      if ('serviceWorker' in navigator) {
+        try {
+          console.log('Re-registering service worker');
+          await navigator.serviceWorker.register('/sw.js?v=2025.06.05.9');
+        } catch (error) {
+          console.warn('Could not re-register service worker:', error);
+        }
+      }
     },
     activeIndexUp() {
       console.log(this.activeIndex, this[this.focusItem.source].length, this.focusItem)
@@ -5048,9 +5157,16 @@ function buyNFT(setname, uid, price, type, callback){
         // recieve messages
         navigator.serviceWorker.addEventListener('message', event => {
           try {
-            this.serviceWorkerPromises[`${event.data.script}:${event.data.uid}`].resolve(event.data);
-            delete this.serviceWorkerPromises[`${event.data.script}:${event.data.uid}`]
-          } catch (e) { console.log(e) }
+            const promiseKey = `${event.data.script}:${event.data.uid}`;
+            if (this.serviceWorkerPromises[promiseKey] && this.serviceWorkerPromises[promiseKey].resolve) {
+              this.serviceWorkerPromises[promiseKey].resolve(event.data);
+              delete this.serviceWorkerPromises[promiseKey];
+            } else {
+              console.warn('No promise found for service worker message:', promiseKey);
+            }
+          } catch (e) { 
+            console.error('Service worker message handling error:', e);
+          }
         });
         navigator.serviceWorker.startMessages();
       } else {

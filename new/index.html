@@ -350,16 +350,34 @@
                         <div id="videoTranscode" class="accordion-collapse collapse show" data-bs-parent="#videoAccordion">
                             <div class="accordion-body">
                                 <!-- FFmpeg Status -->
-                                <div v-if="!ffmpegReady" class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                                <div v-if="!ffmpegReady && !ffmpegSkipped" class="alert alert-info d-flex align-items-center mb-3" role="alert">
                                     <i class="fa-solid fa-gears fa-fw me-2"></i>
                                     <div class="flex-grow-1">
                                         <strong>FFmpeg Required:</strong> Video transcoding needs FFmpeg to be loaded.
+                                        <div v-if="videoMsg.includes('Loading') || videoMsg.includes('Preparing')" class="small mt-1">
+                                            {{videoMsg}}
+                                        </div>
                                     </div>
-                                    <button class="btn btn-primary btn-sm ms-2" @click="downloadFFmpeg()">
-                                        <i class="fa-solid fa-download fa-fw me-1"></i>Load FFmpeg
+                                    <button class="btn btn-primary btn-sm ms-2" @click="downloadFFmpeg()" 
+                                        :disabled="videoMsg.includes('Loading') || videoMsg.includes('Preparing')">
+                                        <i class="fa-solid fa-download fa-fw me-1"></i>
+                                        <span v-if="videoMsg.includes('Loading') || videoMsg.includes('Preparing')">Loading...</span>
+                                        <span v-else>Load FFmpeg</span>
                                     </button>
-                                    <button class="btn btn-secondary btn-sm ms-1" @click="skipFFmpeg()">
+                                    <button class="btn btn-secondary btn-sm ms-1" @click="skipFFmpeg()"
+                                        :disabled="videoMsg.includes('Loading') || videoMsg.includes('Preparing')">
                                         <i class="fa-solid fa-arrow-right fa-fw me-1"></i>Skip
+                                    </button>
+                                </div>
+                                
+                                <!-- FFmpeg Error/Retry -->
+                                <div v-if="ffmpegSkipped && videoMsg.includes('Failed')" class="alert alert-warning d-flex align-items-center mb-3" role="alert">
+                                    <i class="fa-solid fa-exclamation-triangle fa-fw me-2"></i>
+                                    <div class="flex-grow-1">
+                                        <strong>FFmpeg Load Failed:</strong> You can still upload pre-transcoded videos or retry loading.
+                                    </div>
+                                    <button class="btn btn-primary btn-sm ms-2" @click="ffmpegSkipped = false; downloadFFmpeg()">
+                                        <i class="fa-solid fa-retry fa-fw me-1"></i>Retry
                                     </button>
                                 </div>
 
