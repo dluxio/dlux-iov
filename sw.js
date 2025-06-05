@@ -1,4 +1,4 @@
-this.version = "2025.06.04.39";
+this.version = "2025.06.05.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.04.19",
-  "generated": "2025-06-05T02:21:01Z",
+  "version": "2025.06.05.1",
+  "generated": "2025-06-05T02:21:24Z",
   "files": {
-    "/img/avi-file-type-svgrepo-com.svg": {
-      "checksum": "35d1d30fbe77b4fcadfcfd049d03682f",
-      "size": 1452,
-      "priority": "important"
-    },
     "/img/crypto/bnb.svg": {
       "checksum": "60ca7a9d786038944537c250266c63dc",
       "size": 399,
@@ -1589,11 +1584,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/js/core.js": {
-      "checksum": "9030645f5dd8e3cf2967e581c30ded13",
-      "size": 4016,
-      "priority": "page-specific"
     },
     "/naf-playground/js/debug.js": {
       "checksum": "4a98fcfd7e039eec6d673945bde39f98",
