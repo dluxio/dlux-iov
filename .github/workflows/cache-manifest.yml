@@ -28,7 +28,9 @@ jobs:
       with:
         fetch-depth: 0
         token: ${{ secrets.GITHUB_TOKEN }}
-
+    - name: Pull latest changes
+      run: |
+        git pull --rebase origin main
     - name: Check for cacheable file changes
       id: check-changes
       run: |
