@@ -1,4 +1,4 @@
-this.version = "2025.06.05.18";
+this.version = "2025.06.06.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.05.18",
-  "generated": "2025-06-05T21:45:34Z",
+  "version": "2025.06.06.1",
+  "generated": "2025-06-05T22:00:56Z",
   "files": {
-    "/img/dluxdefault.png": {
-      "checksum": "362c4095d2752a5d25e5448326f99088",
-      "size": 159810,
-      "priority": "important"
-    },
     "/img/eps-file-type-svgrepo-com.svg": {
       "checksum": "54e62783e56be35d720e9be50c7732b6",
       "size": 2114,
@@ -1231,7 +1226,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "fc4ccd185a210c94e13bb3e147c2a484",
+      "checksum": "a02e018732f700d50ba55f0673ae7049",
       "size": 36317,
       "priority": "important"
     },
@@ -1306,8 +1301,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "ae89f870960a6ea585df6b88903c275f",
-      "size": 186410,
+      "checksum": "5ea6b98760e4888faf5ce91f19a79230",
+      "size": 190069,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1366,8 +1361,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "ce06845f9f6ccd8974175560466e419c",
-      "size": 37258,
+      "checksum": "7210541914b5eff5d090bfede1ff9644",
+      "size": 40538,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -1421,7 +1416,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "a1591be3a47e18f69ddfac6eb7d197c1",
+      "checksum": "9ef5ad44f2f24c147f652e91afe068f4",
       "size": 7300,
       "priority": "important"
     },
@@ -1494,11 +1489,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/js/scene-loader.js": {
-      "checksum": "8896d79d20479a74f4cc1a438ca097bd",
-      "size": 41693,
-      "priority": "page-specific"
     },
     "/naf-playground/js/sky-manager.js": {
       "checksum": "0cebed6cf4f7a9d312d3b3465d4f07ff",
