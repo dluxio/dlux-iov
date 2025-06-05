@@ -187,13 +187,13 @@ export default {
                 </div>
                 <div class="d-flex flex-column card-body px-2 py-1">
                     <div class="mb-1 fw-light text-center " style="font-size: 1.1rem !important;">
-                        {{formatNumber(saccountapi.spk_power/1000,'3','.',',')}} BROCA Power</div>
+                        {{formatNumber(saccountapi.pow_broca/1000,'3','.',',')}} BROCA Power</div>
                     <div class="progress mb-1 is-danger" role="progressbar" aria-label="Basic example"
                         aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
                         <div class="progress-bar"
-                            :style="{'width':  saccountapi.spk_power ? (broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100 + '%' : '0%' }">
+                            :style="{'width':  saccountapi.pow_broca ? (broca_calc(saccountapi.broca)/(saccountapi.pow_broca*1000))*100 + '%' : '0%' }">
                             {{
-                            formatNumber((broca_calc(saccountapi.broca)/(saccountapi.spk_power*1000))*100,'2','.',',')
+                            formatNumber((broca_calc(saccountapi.broca)/(saccountapi.pow_broca*1000))*100,'2','.',',')
                             }}%</div>
                     </div>
                     <a href="#" data-bs-toggle="modal" data-bs-target="#buyTokenModal"
@@ -1508,7 +1508,7 @@ export default {
       return total;
     },
     availableBytes() {
-      return this.saccountapi?.spk_power ? this.saccountapi.spk_power * 1000 * 1024 * 6 : 0;
+      return this.saccountapi?.pow_broca ? this.saccountapi.pow_broca * 1000 * 1024 * 6 : 0;
     }
   }
 } 
