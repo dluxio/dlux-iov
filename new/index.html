@@ -404,10 +404,14 @@
                                 <div v-if="ffmpegReady || ffmpegSkipped">
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <h6><i class="fa-solid fa-upload fa-fw me-1"></i>Upload Video</h6>
+                                            <h6><i class="fa-solid fa-video fa-fw me-1"></i>Transcode a Video</h6>
+                                            <p class="small text-muted mb-2">
+                                                Transcoding creates multiple quality versions of your video, giving users the best 
+                                                experience based on their bandwidth while enabling seamless seeking and smooth playback.
+                                            </p>
                                             <input type="file" @change="transcode" accept="video/*"
                                                 class="form-control mb-2">
-                                            <small class="text-muted">Select a video file to transcode and upload</small>
+                                            <small class="text-muted">Select a video file to transcode into multiple resolutions</small>
                                         </div>
                                         <div class="col-md-6" v-if="videosrc">
                                             <h6><i class="fa-solid fa-play fa-fw me-1"></i>Preview</h6>
@@ -432,10 +436,33 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            
+                                            <!-- Progress Bar for Hashing -->
+                                            <div v-if="videoMsg.includes('Hashing') && hashingProgress.total > 0" class="mt-2">
+                                                <div class="progress" style="height: 8px;">
+                                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" 
+                                                         role="progressbar" 
+                                                         :style="`width: ${hashingProgress.percentage}%`"
+                                                         :aria-valuenow="hashingProgress.percentage" 
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="100">
+                                                    </div>
+                                                </div>
+                                                <small class="text-muted">{{hashingProgress.currentFile}}</small>
+                                            </div>
                                         </div>
                                     </div>
                                     
                                     <!-- Upload Everywhere Component for Video Files -->
+                                    <div class="alert alert-info bg-dark-1 border-info">
+                                        <h6 class="mb-1">
+                                            <i class="fa-solid fa-upload fa-fw me-1"></i>Upload Files
+                                        </h6>
+                                        <p class="mb-0 small">
+                                            Drop or click to upload transcoded video files, M3U8 playlists, and any other content. 
+                                            You can also drop your original video file here for direct upload without transcoding.
+                                        </p>
+                                    </div>
                                     <upload-everywhere 
                                         :account="account"
                                         :saccountapi="spkapi"

@@ -1050,6 +1050,12 @@ PORT=3000
       ffmpegSkipped: false,
       ffmpeg: null,
               ffmpegDownloadProgress: 0,
+        hashingProgress: {
+          current: 0,
+          total: 0,
+          percentage: 0,
+          currentFile: ''
+        },
         transcodePreview: {
           available: false,
           resolutions: [],
@@ -4446,9 +4452,10 @@ function buyNFT(setname, uid, price, type, callback){
       }
       this.videoMsg = 'Starting video transcoding...';
       
-      // Start internal progress monitoring
-      this.videoMsg = 'Transcoding in progress...';
-      const progressInterval = this.startInternalProgressMonitor(bitrates.length);
+              // Reset hashing progress and start internal progress monitoring
+        this.resetHashingProgress();
+        this.videoMsg = 'Transcoding in progress...';
+        const progressInterval = this.startInternalProgressMonitor(bitrates.length);
       
       console.time('exec');
       console.log({ commands })
@@ -4483,11 +4490,22 @@ function buyNFT(setname, uid, price, type, callback){
         const segmentMapping = new Map(); // Map segment names to their actual hashes
         const resolutionPlaylists = []; // Store resolution-specific playlists
         
+        // Initialize hashing progress tracking
+        const segmentFiles = files.filter(file => file.name.includes('.ts'));
+        const playlistFiles = files.filter(file => file.name.includes('.m3u8') && file.name.includes('p_index'));
+        this.hashingProgress.total = segmentFiles.length + playlistFiles.length;
+        this.hashingProgress.current = 0;
+        this.hashingProgress.percentage = 0;
+        
         // First pass: process video segments and hash them
         for (const file of files) {
           if (file.name.includes('.ts')) {
             videoSegmentPromises.push(
               ffmpeg.readFile(file.name).then(async (data) => {
+                // Update hashing progress
+                this.hashingProgress.currentFile = file.name;
+                this.videoMsg = `Hashing video segments: ${this.hashingProgress.current + 1}/${this.hashingProgress.total} - ${file.name}`;
+                
                 // Create thumb file name for segments to hide them
                 const newFileName = file.name.endsWith('_thumb.ts') ? file.name : file.name.replace('.ts', '_thumb.ts');
                 
@@ -4495,6 +4513,11 @@ function buyNFT(setname, uid, price, type, callback){
                 const contentBuffer = buffer.Buffer(data.buffer);
                 const hashResult = await this.hashOf(contentBuffer, {});
                 const segmentHash = hashResult.hash;
+                
+                // Update progress after hashing
+                this.hashingProgress.current++;
+                this.hashingProgress.percentage = Math.round((this.hashingProgress.current / this.hashingProgress.total) * 100);
+                this.videoMsg = `Hashing segments: ${this.hashingProgress.current}/${this.hashingProgress.total} (${this.hashingProgress.percentage}%)`;
                 
                 videoFiles.push({
                   file: new File([data.buffer], newFileName, { type: 'video/mp2t' }),
@@ -4587,9 +4610,19 @@ function buyNFT(setname, uid, price, type, callback){
             
             // Hash each resolution playlist content
             const hashPromises = resolutionPlaylists.map(async (playlist) => {
+              // Update hashing progress for playlists
+              this.hashingProgress.currentFile = playlist.fileName;
+              this.videoMsg = `Hashing playlists: ${this.hashingProgress.current + 1}/${this.hashingProgress.total} - ${playlist.fileName}`;
+              
               const contentBuffer = buffer.Buffer(new TextEncoder().encode(playlist.content));
               const hashResult = await this.hashOf(contentBuffer, {});
               playlist.actualHash = hashResult.hash;
+              
+              // Update progress after hashing playlist
+              this.hashingProgress.current++;
+              this.hashingProgress.percentage = Math.round((this.hashingProgress.current / this.hashingProgress.total) * 100);
+              this.videoMsg = `Hashing complete: ${this.hashingProgress.current}/${this.hashingProgress.total} (${this.hashingProgress.percentage}%)`;
+              
               console.log(`Hashed ${playlist.fileName}: ${hashResult.hash}`);
               return playlist;
             });
@@ -4840,8 +4873,9 @@ function buyNFT(setname, uid, price, type, callback){
       // Clear the video files array
       this.videoFilesToUpload = [];
       
-      // Clear preview after upload completion
+      // Clear preview and reset progress after upload completion
       this.clearTranscodePreview();
+      this.resetHashingProgress();
     },
     
     async downloadFFmpeg() {
@@ -5478,7 +5512,7 @@ function buyNFT(setname, uid, price, type, callback){
       this.setPreviewVideoSrc();
     },
     
-    clearTranscodePreview() {
+            clearTranscodePreview() {
       if (this.transcodePreview.videoSrc) {
         URL.revokeObjectURL(this.transcodePreview.videoSrc);
         this.transcodePreview.videoSrc = null;
@@ -5486,6 +5520,13 @@ function buyNFT(setname, uid, price, type, callback){
       this.transcodePreview.available = false;
       this.transcodePreview.resolutions = [];
       this.transcodePreview.selectedResolution = null;
+    },
+    
+    resetHashingProgress() {
+      this.hashingProgress.current = 0;
+      this.hashingProgress.total = 0;
+      this.hashingProgress.percentage = 0;
+      this.hashingProgress.currentFile = '';
     },
   },
   mounted() {
