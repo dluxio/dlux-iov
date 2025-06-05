@@ -4392,25 +4392,30 @@ function buyNFT(setname, uid, price, type, callback){
       // Try to set up event listeners (optional for functionality)
       let hasEventListeners = false;
       try {
-        ffmpeg.on("log", ({ message }) => {
-          this.videoMsg = message;
-          if (message.indexOf('h264_qsv') > -1) qsv = true
-          if (!height && patt.test(message)) {
-            const parts = patt.exec(message);
-            console.log(parts)
-            height = parts[0].split('x')[1]
-            width = parts[0].split('x')[0]
-            bitrates = this.getPossibleBitrates(height)
-          }
-          console.log(message);
-        });
-        
-        ffmpeg.on("progress", ({ progress, time }) => {
-          this.videoMsg = `Transcoding: ${Math.round(progress * 100)}% (${Math.round(time / 1000000)}s elapsed)`;
-        });
-        
-        hasEventListeners = true;
-        console.log('FFmpeg event listeners set up successfully');
+        // Only set up event listeners if FFmpeg is properly loaded
+        if (ffmpeg && typeof ffmpeg.on === 'function') {
+          ffmpeg.on("log", ({ message }) => {
+            this.videoMsg = message;
+            if (message.indexOf('h264_qsv') > -1) qsv = true
+            if (!height && patt.test(message)) {
+              const parts = patt.exec(message);
+              console.log(parts)
+              height = parts[0].split('x')[1]
+              width = parts[0].split('x')[0]
+              bitrates = this.getPossibleBitrates(height)
+            }
+            console.log(message);
+          });
+          
+          ffmpeg.on("progress", ({ progress, time }) => {
+            this.videoMsg = `Transcoding: ${Math.round(progress * 100)}% (${Math.round(time / 1000000)}s elapsed)`;
+          });
+          
+          hasEventListeners = true;
+          console.log('FFmpeg event listeners set up successfully');
+        } else {
+          throw new Error('FFmpeg instance does not support event listeners');
+        }
       } catch (eventError) {
         console.warn('Could not set up transcoding event listeners, continuing without them:', eventError);
         // Continue without event listeners - use default bitrates
@@ -4698,8 +4703,13 @@ function buyNFT(setname, uid, price, type, callback){
       
       try {
         // Check if FFmpeg is already available globally
-        if (typeof FFmpegWASM === 'undefined') {
-          throw new Error('FFmpeg WASM library not available - please refresh the page');
+        if (typeof FFmpegWASM === 'undefined' || typeof FFmpegUtil === 'undefined') {
+          throw new Error('FFmpeg WASM library not available - please refresh the page and ensure all scripts are loaded');
+        }
+        
+        // Reset any previous instance
+        if (this.ffmpeg) {
+          this.ffmpeg = null;
         }
         
         // Try different initialization strategies with progress monitoring
@@ -4714,57 +4724,29 @@ function buyNFT(setname, uid, price, type, callback){
     async initializeFFmpegWithProgress() {
       const { FFmpeg } = FFmpegWASM;
       
-      // Strategy 1: Try with local core files with detailed progress monitoring
+      // Strategy 1: Try basic initialization first (most reliable)
       try {
-        this.videoMsg = 'Downloading FFmpeg core (~31MB)...';
-        this.ffmpegDownloadProgress = 10;
+        this.videoMsg = 'Initializing FFmpeg...';
+        this.ffmpegDownloadProgress = 20;
         
         this.ffmpeg = new FFmpeg();
         
-        // Set up progress monitoring for FFmpeg loading
-        this.ffmpeg.on('log', ({ message }) => {
-          if (message.includes('Loading')) {
-            this.videoMsg = `Loading FFmpeg: ${message}`;
-            this.ffmpegDownloadProgress = Math.min(this.ffmpegDownloadProgress + 5, 80);
-          }
-        });
-        
-        // Monitor the load process with timeout and progress updates
-        const loadPromise = this.ffmpeg.load({
-          coreURL: "/packages/core/package/dist/umd/ffmpeg-core.js"
-        });
-        
-        // Update progress while loading
+        // Update progress while loading (simulated for user feedback)
         const progressInterval = setInterval(() => {
           if (this.ffmpegDownloadProgress < 80) {
-            this.ffmpegDownloadProgress += 2;
-            this.videoMsg = `Downloading FFmpeg: ${this.ffmpegDownloadProgress}%`;
+            this.ffmpegDownloadProgress += 3;
+            this.videoMsg = `Loading FFmpeg: ${this.ffmpegDownloadProgress}%`;
           }
-        }, 200);
+        }, 300);
         
-        await loadPromise;
-        clearInterval(progressInterval);
-        
-        this.ffmpegDownloadProgress = 100;
-        this.ffmpegReady = true;
-        this.videoMsg = 'FFmpeg loaded successfully! Ready to transcode videos.';
-        console.log('FFmpeg initialized with local core files');
-        return;
-        
-      } catch (localError) {
-        console.warn('Local file FFmpeg initialization failed:', localError);
-      }
-      
-      // Strategy 2: Try basic initialization without custom URLs
-      try {
-        this.videoMsg = 'Initializing FFmpeg (basic mode)...';
-        this.ffmpegDownloadProgress = 50;
-        
-        this.ffmpeg = new FFmpeg();
-        
-        // Load without specifying URLs - let FFmpeg handle defaults
-        await this.ffmpeg.load();
-        
+        try {
+          // Load without specifying URLs - let FFmpeg handle defaults
+          await this.ffmpeg.load();
+          clearInterval(progressInterval);
+        } catch (loadError) {
+          clearInterval(progressInterval);
+          throw loadError;
+        }
         this.ffmpegDownloadProgress = 100;
         this.ffmpegReady = true;
         this.videoMsg = 'FFmpeg loaded successfully! Ready to transcode videos.';
@@ -4773,6 +4755,41 @@ function buyNFT(setname, uid, price, type, callback){
         
       } catch (basicError) {
         console.warn('Basic FFmpeg initialization failed:', basicError);
+        this.ffmpegDownloadProgress = 0;
+      }
+      
+      // Strategy 2: Try with local core files if available
+      try {
+        this.videoMsg = 'Trying local FFmpeg files...';
+        this.ffmpegDownloadProgress = 30;
+        
+        this.ffmpeg = new FFmpeg();
+        
+        const progressInterval = setInterval(() => {
+          if (this.ffmpegDownloadProgress < 90) {
+            this.ffmpegDownloadProgress += 4;
+            this.videoMsg = `Loading FFmpeg core: ${this.ffmpegDownloadProgress}%`;
+          }
+        }, 400);
+        
+        try {
+          await this.ffmpeg.load({
+            coreURL: "/packages/core/package/dist/umd/ffmpeg-core.js"
+          });
+          clearInterval(progressInterval);
+        } catch (loadError) {
+          clearInterval(progressInterval);
+          throw loadError;
+        }
+        this.ffmpegDownloadProgress = 100;
+        this.ffmpegReady = true;
+        this.videoMsg = 'FFmpeg loaded successfully with local files!';
+        console.log('FFmpeg initialized with local core files');
+        return;
+        
+      } catch (localError) {
+        console.warn('Local file FFmpeg initialization failed:', localError);
+        this.ffmpegDownloadProgress = 0;
       }
       
       // Strategy 3: Skip FFmpeg and allow direct video uploads
