@@ -1049,7 +1049,13 @@ PORT=3000
       ffmpegReady: false,
       ffmpegSkipped: false,
       ffmpeg: null,
-      ffmpegDownloadProgress: 0,
+              ffmpegDownloadProgress: 0,
+        transcodePreview: {
+          available: false,
+          resolutions: [],
+          selectedResolution: null,
+          videoSrc: null
+        },
     };
   },
   components: {
@@ -4440,9 +4446,9 @@ function buyNFT(setname, uid, price, type, callback){
       }
       this.videoMsg = 'Starting video transcoding...';
       
-      // Always start progress monitoring since event listeners are disabled
+      // Start internal progress monitoring
       this.videoMsg = 'Transcoding in progress...';
-      const progressInterval = this.startTranscodeProgressMonitoring(ffmpeg, bitrates.length);
+      const progressInterval = this.startInternalProgressMonitor(bitrates.length);
       
       console.time('exec');
       console.log({ commands })
@@ -4468,7 +4474,7 @@ function buyNFT(setname, uid, price, type, callback){
       const videoFiles = [];
       const playlistUpdates = {};
       
-      ffmpeg.listDir("/").then((files) => {
+      ffmpeg.listDir("/").then(async (files) => {
         console.log('Available files after transcoding:', files);
         
         // Separate files by type
@@ -4506,56 +4512,73 @@ function buyNFT(setname, uid, price, type, callback){
           }
         }
         
-        // Second pass: process resolution-specific M3U8 playlists (wait for segments to be hashed first)
-        Promise.all(videoSegmentPromises).then(() => {
+        // Second pass: process resolution-specific M3U8 playlists (after segments are hashed)
+        const processPlaylists = async () => {
+          // Wait for all segments to be processed first
+          await Promise.all(videoSegmentPromises);
+          
           for (const file of files) {
             if (file.name.includes('.m3u8') && file.name.includes('p_index')) {
-              resolutionPlaylistPromises.push(
-                ffmpeg.readFile(file.name).then((data) => {
-                  let playlistContent = new TextDecoder().decode(data);
-                  console.log(`M3U8 Resolution Playlist Content (${file.name}):`, playlistContent);
-                  
-                  // Replace segment references with actual IPFS hashes
-                  segmentMapping.forEach((actualHash, originalName) => {
-                    const segmentPattern = new RegExp(originalName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-                    playlistContent = playlistContent.replace(segmentPattern, `https://ipfs.dlux.io/ipfs/${actualHash}`);
-                  });
-                  
-                  console.log(`M3U8 with IPFS hashes (${file.name}):`, playlistContent);
-                  
-                  // Mark resolution playlists as thumbs (they're sub-files)
-                  const resPlaylistFile = new File([new TextEncoder().encode(playlistContent)], file.name.replace('.m3u8', '_thumb.m3u8'), { 
-                    type: 'application/x-mpegURL' 
-                  });
-                  
-                  videoFiles.push({
-                    file: resPlaylistFile,
-                    targetPath: '/playlists/',
-                    isThumb: true, // Mark resolution playlists as thumbs
-                    isResolutionPlaylist: true
-                  });
-                  
-                  this.dataURLS.push([resPlaylistFile.name, new TextEncoder().encode(playlistContent), 'application/x-mpegURL']);
-                  console.log(`Added resolution M3U8 playlist: ${resPlaylistFile.name} (marked as thumb)`);
-                  
-                  // Store resolution playlist info for master playlist
-                  const resolution = file.name.match(/(\d+)p_index/)?.[1] || 'unknown';
-                  resolutionPlaylists.push({
-                    fileName: resPlaylistFile.name,
-                    resolution: resolution,
-                    originalName: file.name,
-                    content: playlistContent
-                  });
-                  
-                  return { fileName: file.name, resolution, content: playlistContent };
-                })
-              );
+              const data = await ffmpeg.readFile(file.name);
+              let playlistContent = new TextDecoder().decode(data);
+              console.log(`M3U8 Resolution Playlist Content (${file.name}):`, playlistContent);
+              
+              // Replace segment references with actual IPFS hashes
+              segmentMapping.forEach((actualHash, originalName) => {
+                const segmentPattern = new RegExp(originalName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                playlistContent = playlistContent.replace(segmentPattern, `https://ipfs.dlux.io/ipfs/${actualHash}`);
+              });
+              
+              console.log(`M3U8 with IPFS hashes (${file.name}):`, playlistContent);
+              
+              // Mark resolution playlists as thumbs (they're sub-files)
+              const resPlaylistFile = new File([new TextEncoder().encode(playlistContent)], file.name.replace('.m3u8', '_thumb.m3u8'), { 
+                type: 'application/x-mpegURL' 
+              });
+              
+              videoFiles.push({
+                file: resPlaylistFile,
+                targetPath: '/playlists/',
+                isThumb: true, // Mark resolution playlists as thumbs
+                isResolutionPlaylist: true
+              });
+              
+              this.dataURLS.push([resPlaylistFile.name, new TextEncoder().encode(playlistContent), 'application/x-mpegURL']);
+              console.log(`Added resolution M3U8 playlist: ${resPlaylistFile.name} (marked as thumb)`);
+              
+              // Store resolution playlist info for master playlist
+              const resolution = file.name.match(/(\d+)p_index/)?.[1] || 'unknown';
+              resolutionPlaylists.push({
+                fileName: resPlaylistFile.name,
+                resolution: resolution,
+                originalName: file.name,
+                content: playlistContent,
+                originalContent: new TextDecoder().decode(data) // Keep original for preview
+              });
             }
           }
-        });
+          
+          // Set up preview after playlists are processed
+          if (resolutionPlaylists.length > 0) {
+            this.transcodePreview.available = true;
+            this.transcodePreview.resolutions = resolutionPlaylists.map(playlist => ({
+              resolution: playlist.resolution,
+              fileName: playlist.fileName,
+              originalContent: playlist.originalContent
+            })).sort((a, b) => parseInt(b.resolution) - parseInt(a.resolution));
+            
+            // Default to highest resolution
+            this.transcodePreview.selectedResolution = this.transcodePreview.resolutions[0];
+            this.setPreviewVideoSrc();
+            
+            console.log('Preview available with resolutions:', this.transcodePreview.resolutions.map(r => r.resolution));
+          }
+        };
         
-        // Wait for all segments and resolution playlists to be processed
-        Promise.all([...videoSegmentPromises, ...resolutionPlaylistPromises]).then(async (results) => {
+        // Wait for all segments to be processed, then process everything
+        Promise.all(videoSegmentPromises).then(async (results) => {
+          // Process playlists after segments are done
+          await processPlaylists();
           console.log('All transcoded files processed:', results);
           
           // Hash all the resolution playlists and create master playlist
@@ -4650,6 +4673,47 @@ function buyNFT(setname, uid, price, type, callback){
         a.click();
         window.URL.revokeObjectURL(url);
       }
+    },
+    
+    startInternalProgressMonitor(numResolutions) {
+      const startTime = Date.now();
+      let currentProgress = 0;
+      const estimatedDuration = numResolutions * 30000; // Estimate 30 seconds per resolution
+      
+      const updateProgress = () => {
+        const elapsed = Date.now() - startTime;
+        const progressPercent = Math.min(Math.round((elapsed / estimatedDuration) * 100), 95);
+        
+        if (progressPercent > currentProgress) {
+          currentProgress = progressPercent;
+          const elapsedSeconds = Math.round(elapsed / 1000);
+          const remainingSeconds = Math.round((estimatedDuration - elapsed) / 1000);
+          
+          let timeText = '';
+          if (remainingSeconds > 0) {
+            if (remainingSeconds > 60) {
+              timeText = ` - ~${Math.round(remainingSeconds / 60)}m remaining`;
+            } else {
+              timeText = ` - ~${remainingSeconds}s remaining`;
+            }
+          }
+          
+          this.videoMsg = `Transcoding: ${currentProgress}% (${elapsedSeconds}s elapsed)${timeText}`;
+          console.log(`Internal transcode progress: ${currentProgress}% (${elapsedSeconds}s elapsed)`);
+        }
+      };
+      
+      // Update every 2 seconds
+      const progressInterval = setInterval(updateProgress, 2000);
+      
+      // Stop monitoring after estimated duration + buffer
+      setTimeout(() => {
+        clearInterval(progressInterval);
+        this.videoMsg = 'Transcoding complete! Processing files...';
+        console.log('Internal progress monitoring stopped');
+      }, estimatedDuration + 10000);
+      
+      return progressInterval;
     },
     
     startTranscodeProgressMonitoring(ffmpeg, numResolutions) {
@@ -4775,6 +4839,9 @@ function buyNFT(setname, uid, price, type, callback){
       
       // Clear the video files array
       this.videoFilesToUpload = [];
+      
+      // Clear preview after upload completion
+      this.clearTranscodePreview();
     },
     
     async downloadFFmpeg() {
@@ -5390,6 +5457,35 @@ function buyNFT(setname, uid, price, type, callback){
           reject(e)
         }
       })
+    },
+    
+    setPreviewVideoSrc() {
+      if (this.transcodePreview.selectedResolution) {
+        const content = this.transcodePreview.selectedResolution.originalContent;
+        const blob = new Blob([content], { type: 'application/x-mpegURL' });
+        
+        // Revoke previous URL to prevent memory leaks
+        if (this.transcodePreview.videoSrc) {
+          URL.revokeObjectURL(this.transcodePreview.videoSrc);
+        }
+        
+        this.transcodePreview.videoSrc = URL.createObjectURL(blob);
+        console.log(`Preview video src set for ${this.transcodePreview.selectedResolution.resolution}p`);
+      }
+    },
+    
+    onPreviewResolutionChange() {
+      this.setPreviewVideoSrc();
+    },
+    
+    clearTranscodePreview() {
+      if (this.transcodePreview.videoSrc) {
+        URL.revokeObjectURL(this.transcodePreview.videoSrc);
+        this.transcodePreview.videoSrc = null;
+      }
+      this.transcodePreview.available = false;
+      this.transcodePreview.resolutions = [];
+      this.transcodePreview.selectedResolution = null;
     },
   },
   mounted() {
