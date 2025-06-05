@@ -1562,8 +1562,7 @@ export default {
     },
     PENsignOnly(op) {
       return new Promise(async (res, rej) => {
-        if (typeof op[1] == "string") op[1] = JSON.parse(op[1]);
-        console.log(op);
+        console.log("PENsignOnly called with:", op);
 
         // Check if PIN is set up
         if (!this.PIN) {
@@ -1620,19 +1619,17 @@ export default {
         }
 
         try {
-          const tx = new hiveTx.Transaction();
-          await tx.create(op[0]); // Create transaction for the user
-
-          // Add the operations to the transaction
-          tx.operations = op[1];
-
-          console.log("Transaction before signing:", tx.transaction);
+          // Sign the buffer like HKC does - op[1] should be the buffer string to sign
+          const bufferToSign = `${op[0]}:${op[1]}`;
+          console.log("Signing buffer:", bufferToSign);
+          
           const privateKey = hiveTx.PrivateKey.from(key);
-          tx.sign(privateKey);
-          if (!tx.signedTransaction) rej('Failed to Sign')
-          res(tx.signedTransaction)
+          const signature = privateKey.sign(Buffer.from(bufferToSign, 'utf-8'));
+          
+          // Return just the signature like HKC does
+          res(signature.toString());
         } catch (error) {
-          console.error("Failed to sign transaction:", error);
+          console.error("Failed to sign buffer:", error);
           rej(error);
         }
       });
