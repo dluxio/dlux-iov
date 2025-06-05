@@ -602,8 +602,6 @@ export default {
           throw new Error("Invalid encrypted package format");
         }
 
-        console.log("Decrypting version:", packagedData.version || "1.0");
-
         // Handle different versions
         if (packagedData.version === "3.0") {
           // Use simplified CryptoJS approach for v3.0
@@ -613,18 +611,16 @@ export default {
             iterations: packagedData.iterations
           });
 
-          console.log("Decryption key generated for v3.0");
-
           // Decrypt using the derived key as string
           const decrypted = CryptoJS.AES.decrypt(packagedData.encrypted, key.toString());
           const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
 
           if (!decryptedString) {
-            throw new Error("Failed to decrypt - incorrect password or corrupted data");
+            throw new Error("Incorrect password");
           }
 
           return JSON.parse(decryptedString);
-        } else if (packagedData.version === "2.0") {
+        } else {
           // Use CryptoJS PBKDF2 directly for v2.0
           const salt = CryptoJS.enc.Hex.parse(packagedData.salt);
           const key = CryptoJS.PBKDF2(password, salt, {
@@ -633,50 +629,21 @@ export default {
             hasher: CryptoJS.algo.SHA256
           });
 
-          console.log("Decryption key generated:", {
-            keySize: key.sigBytes,
-            saltSize: salt.sigBytes,
-            iterations: packagedData.iterations
-          });
-
           // Decrypt using default settings
           const decrypted = CryptoJS.AES.decrypt(packagedData.encrypted, key);
           const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
 
           if (!decryptedString) {
-            throw new Error("Failed to decrypt - incorrect password or corrupted data");
-          }
-
-          return JSON.parse(decryptedString);
-        } else {
-          // Fallback to Web Crypto API method for v1.0
-          const salt = this.hexToUint8Array(packagedData.salt);
-          const derivedKey = await this.deriveKey(password, salt, packagedData.iterations);
-          const keyHex = this.uint8ArrayToHex(derivedKey);
-          const key = CryptoJS.enc.Hex.parse(keyHex);
-
-          // Parse IV if present (for v1.0 format)
-          let decryptOptions = {
-            mode: CryptoJS.mode.CBC,
-            padding: CryptoJS.pad.Pkcs7
-          };
-
-          if (packagedData.iv) {
-            decryptOptions.iv = CryptoJS.enc.Hex.parse(packagedData.iv);
-          }
-
-          const decrypted = CryptoJS.AES.decrypt(packagedData.encrypted, key, decryptOptions);
-          const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
-
-          if (!decryptedString) {
-            throw new Error("Failed to decrypt - incorrect password or corrupted data");
+            throw new Error("Incorrect password");
           }
 
           return JSON.parse(decryptedString);
         }
       } catch (error) {
-        console.error("Decryption failed:", error);
-        throw new Error("Failed to decrypt data - check password");
+        if (error.message === "Incorrect password") {
+          throw error;
+        }
+        throw new Error("Failed to decrypt data");
       }
     },
 
@@ -925,38 +892,54 @@ export default {
         // Try new hardened decryption first
         try {
           const decrypted = await this.decryptWithPBKDF2(PEN, this.PIN);
+          if (!decrypted || !decrypted.accounts) {
+            throw new Error("Invalid decrypted data structure");
+          }
           this.decrypted = decrypted;
           sessionStorage.setItem('pen', JSON.stringify(decrypted));
-          console.log("Successfully decrypted with PBKDF2");
           return;
         } catch (pbkdf2Error) {
-          console.log("PBKDF2 decryption failed, trying legacy method:", pbkdf2Error.message);
+          if (pbkdf2Error.message === "Incorrect password") {
+            throw pbkdf2Error;
+          }
+          console.log("PBKDF2 decryption failed, trying legacy method");
         }
 
         // Fallback to legacy decryption for backward compatibility
         try {
           const decrypted = CryptoJS.AES.decrypt(PEN, this.PIN);
           const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
-          if (decryptedString) {
-            this.decrypted = JSON.parse(decryptedString);
-            sessionStorage.setItem('pen', decryptedString);
-            console.log("Successfully decrypted with legacy method");
-
-            // Upgrade to new encryption format
-            console.log("Upgrading to PBKDF2 encryption...");
-            const upgraded = await this.encryptWithPBKDF2(this.decrypted, this.PIN);
-            localStorage.setItem("PEN", upgraded);
-            console.log("Encryption upgraded successfully");
-          } else {
-            throw new Error("Legacy decryption failed");
+          if (!decryptedString) {
+            throw new Error("Incorrect password");
           }
+          
+          const parsedData = JSON.parse(decryptedString);
+          if (!parsedData || !parsedData.accounts) {
+            throw new Error("Invalid decrypted data structure");
+          }
+          
+          this.decrypted = parsedData;
+          sessionStorage.setItem('pen', decryptedString);
+
+          // Upgrade to new encryption format
+          const upgraded = await this.encryptWithPBKDF2(this.decrypted, this.PIN);
+          localStorage.setItem("PEN", upgraded);
         } catch (legacyError) {
-          console.error("Both PBKDF2 and legacy decryption failed:", legacyError);
-          throw new Error("Failed to decrypt PEN data");
+          if (legacyError.message === "Incorrect password") {
+            throw legacyError;
+          }
+          throw new Error("Failed to decrypt data");
         }
       } catch (error) {
-        console.error("Failed to decrypt PEN:", error);
-        this.PENstatus = "Failed to decrypt - check PIN";
+        // Reset decrypted state
+        this.decrypted = {
+          pin: false,
+          accounts: {}
+        };
+        sessionStorage.removeItem('pen');
+        sessionStorage.removeItem('penPin');
+        this.PIN = "";
+        throw error;
       }
     },
     useHAS() {
@@ -1179,8 +1162,9 @@ export default {
             }, 100);
           }
         } catch (error) {
-          this.pinError = "Invalid PIN or corrupted data: " + error.message;
-          console.error("Failed to decrypt PEN data:", error);
+          this.pinError = error.message === "Incorrect password" ? 
+            "Incorrect PIN. Please try again." : 
+            "Failed to decrypt wallet. Please try again.";
         } finally {
           this.pinLoading = false;
         }
@@ -3807,7 +3791,7 @@ export default {
           </li>
           <li class="subnav-extra-middle">
             <a class="dropdown-extra" role="button" href="#/" data-bs-toggle="modal"
-              data-bs-target="#loginModal" aria-controls="loginModal">Switch User</a>
+              data-bs-target="#loginModal" aria-controls="loginModal">Users & Keys</a>
           </li>
           <li class="subnav-extra-bottom">
             <a class="dropdown-extra" role="button" href="#/" @click="logout()">Logout</a>

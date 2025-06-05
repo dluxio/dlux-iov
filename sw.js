@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.05.10",
-  "generated": "2025-06-05T17:47:50Z",
+  "version": "2025.06.05.11",
+  "generated": "2025-06-05T18:48:43Z",
   "files": {
-    "/img/dlux-hive-logo-alpha-font_color.svg": {
-      "checksum": "d5cba5e8acda2fd786ec0b8af4580666",
-      "size": 3441,
-      "priority": "important"
-    },
     "/img/dlux-hive-logo-alpha.svg": {
       "checksum": "93b0396ce748e2d51e978260bc3267d2",
       "size": 3416,
@@ -1271,8 +1266,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "0994beec25e5a6a57453f9b2ed146588",
-      "size": 36316,
+      "checksum": "df6255633237546e5ec05898e0dfeb1a",
+      "size": 36317,
       "priority": "important"
     },
     "/js/tagify.min.js": {
@@ -1346,8 +1341,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "960c21e4671ccf97ecf386db3c9b80a1",
-      "size": 175121,
+      "checksum": "5b5d478e898fe61b57cc70d73ff9ae04",
+      "size": 175586,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1406,8 +1401,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "a7b8d2b2e0152eb2154cad843c38ca41",
-      "size": 34451,
+      "checksum": "084fb5e549b959fe6947130227d04615",
+      "size": 34509,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -1461,8 +1456,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "e58eba939ac235f479473bf0ba08294b",
-      "size": 7299,
+      "checksum": "81bdf645c03618530f454833bb5a5960",
+      "size": 7300,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -1534,11 +1529,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/js/error-handlers.js": {
-      "checksum": "ae08e7135f7a634b3a95bd9ab596576d",
-      "size": 2555,
-      "priority": "page-specific"
     },
     "/naf-playground/js/event-handlers.js": {
       "checksum": "5d4e1a41fad20159855a076c7b41679e",
