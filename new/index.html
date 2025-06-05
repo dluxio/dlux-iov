@@ -75,6 +75,8 @@
     <script src="/packages/util/package/dist/umd/index.js"></script>
     <script src="https://unpkg.com/rxjs@^7/dist/bundles/rxjs.umd.min.js"></script>
     <script src="https://github.com/videojs/mux.js/releases/latest/download/mux.js"></script>
+    <!-- HLS.js for M3U8 video playback support in Chrome/Firefox -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <!-- Vue Controller -->
     <script type="module" src="/js/v3-user.js"></script>
     <style>
@@ -509,7 +511,8 @@
                                                            :src="transcodePreview.videoSrc" 
                                                            controls 
                                                            class="w-100" 
-                                                           style="max-height: 300px;">
+                                                           style="max-height: 300px;"
+                                                           @loadstart="setupHLSPlayer($event.target)">
                                                         Your browser does not support the video tag.
                                                     </video>
                                                 </div>

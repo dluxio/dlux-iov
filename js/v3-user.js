@@ -1062,6 +1062,7 @@ PORT=3000
           selectedResolution: null,
           videoSrc: null
         },
+        videoObserver: null,
     };
   },
   components: {
@@ -5537,6 +5538,120 @@ function buyNFT(setname, uid, price, type, callback){
       this.hashingProgress.percentage = 0;
       this.hashingProgress.currentFile = '';
     },
+    
+    setupHLSPlayer(videoElement) {
+      // Universal HLS.js setup for M3U8 video playback
+      if (!videoElement || !videoElement.src) return;
+      
+      const videoSrc = videoElement.src;
+      console.log('Setting up HLS for video:', videoSrc);
+      
+      // Check if the source is an M3U8 file
+      if (videoSrc.includes('.m3u8') || videoSrc.includes('application/x-mpegURL')) {
+        // Check if HLS.js is available
+        if (typeof Hls !== 'undefined') {
+          if (Hls.isSupported()) {
+            // Destroy existing HLS instance if attached to this video
+            if (videoElement.hlsInstance) {
+              videoElement.hlsInstance.destroy();
+            }
+            
+            // Create new HLS instance
+            const hls = new Hls({
+              debug: false,
+              enableWorker: true,
+              lowLatencyMode: false
+            });
+            
+            // Store instance on video element for cleanup
+            videoElement.hlsInstance = hls;
+            
+            // Load the M3U8 source
+            hls.loadSource(videoSrc);
+            hls.attachMedia(videoElement);
+            
+            // Handle events
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+              console.log('HLS manifest parsed successfully');
+            });
+            
+            hls.on(Hls.Events.ERROR, (event, data) => {
+              console.warn('HLS error:', data);
+              if (data.fatal) {
+                switch (data.type) {
+                  case Hls.ErrorTypes.NETWORK_ERROR:
+                    console.log('Network error, trying to recover...');
+                    hls.startLoad();
+                    break;
+                  case Hls.ErrorTypes.MEDIA_ERROR:
+                    console.log('Media error, trying to recover...');
+                    hls.recoverMediaError();
+                    break;
+                  default:
+                    console.log('Fatal error, destroying HLS instance');
+                    hls.destroy();
+                    break;
+                }
+              }
+            });
+            
+            console.log('HLS.js player setup complete for:', videoSrc);
+          } else {
+            console.log('HLS.js not supported, using native playback');
+          }
+        } else {
+          console.warn('HLS.js library not loaded');
+        }
+      } else {
+        console.log('Not an M3U8 file, using native video playback');
+      }
+    },
+    
+    observeVideoElements() {
+      // Set up MutationObserver to watch for new video elements
+      if (this.videoObserver) {
+        this.videoObserver.disconnect();
+      }
+      
+      this.videoObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          // Check for added nodes
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              // Check if the added node is a video element
+              if (node.tagName === 'VIDEO') {
+                this.setupHLSPlayer(node);
+              }
+              // Check for video elements within added nodes
+              const videos = node.querySelectorAll ? node.querySelectorAll('video') : [];
+              videos.forEach((video) => {
+                this.setupHLSPlayer(video);
+              });
+            }
+          });
+          
+          // Check for attribute changes on existing video elements
+          if (mutation.type === 'attributes' && 
+              mutation.target.tagName === 'VIDEO' && 
+              mutation.attributeName === 'src') {
+            this.setupHLSPlayer(mutation.target);
+          }
+        });
+      });
+      
+      // Start observing
+      this.videoObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['src']
+      });
+      
+      // Setup existing video elements
+      document.querySelectorAll('video').forEach((video) => {
+        this.setupHLSPlayer(video);
+      });
+    },
   },
   mounted() {
     // Check for active service worker
@@ -5624,10 +5739,25 @@ function buyNFT(setname, uid, price, type, callback){
     this.getFeedPrice();
     this.getProtocol();
     this.rcCosts();
+    
+    // Start observing for video elements to setup HLS
+    this.observeVideoElements();
   },
   beforeDestroy() {
     this.observer.disconnect();
     window.removeEventListener("scroll", this.handleScroll);
+    
+    // Clean up video observer and HLS instances
+    if (this.videoObserver) {
+      this.videoObserver.disconnect();
+    }
+    
+    // Clean up any HLS instances
+    document.querySelectorAll('video').forEach((video) => {
+      if (video.hlsInstance) {
+        video.hlsInstance.destroy();
+      }
+    });
   },
   unmounted() {
     //window.removeEventListener('scroll', this.boundScrollHandler); // Use the same bound reference - Temporarily disabled
