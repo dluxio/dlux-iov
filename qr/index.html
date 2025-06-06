@@ -165,21 +165,13 @@
       <nav-vue ref="navComponent" @login="account = $event" @logout="account = '';removeUser()" @ack="removeOp($event)"
         @refresh="run($event)" @store-new-account="handleStoreNewAccount($event)" :op="toSign" :lapi="lapi" />
     </div>
-    <main role="main" class="mb-auto" style="margin-top: 94px;">
+    <main role="main" class="d-flex flex-grow-1 flex-column" style="margin-top: 94px;">
 
-      <div v-if="!account" class="d-none">
-        <div class="alert alert-fusch d-flex flex-wrap align-items-center" role="alert">
-          <span class="my-1">Share your HIVE account</span>
-          <span class="ms-auto">
-            <button class="btn btn-fusch me-1 my-1" type="button" data-bs-toggle="offcanvas"
-              data-bs-target="#offcanvasUsers" aria-controls="offcanvasUsers">Login</button>
-          </span>
-        </div>
-      </div>
-      <div class="container-fluid px-3">
+      <!-- Account Balances + Creation and Key Recovery Options -->
+      <div class="m-auto container-fluid" v-if="onboardingStep === 0">
         <!-- Account Creation and Key Recovery Options - Always Available -->
-        <div v-if="account || onboardingStep === 0" class="row justify-content-center mb-4">
-          <div class="col-lg-8 col-xl-6">
+        <div class="row justify-content-center mb-4">
+          <div v-if="!recoveryMode" class="col-lg-8 col-xl-6">
             <!-- Follow Parameter Alert -->
             <div v-if="requestUsername && onboardingStep === 0" class="alert alert-warning mb-3">
               <div class="d-flex justify-content-between align-items-center">
@@ -200,212 +192,312 @@
             </div>
 
             <!-- Main Action - Create Account -->
-            <div v-if="!requestUsername || onboardingStep > 0" class="alert alert-primary mb-3">
+            <div v-if="!account && onboardingStep === 0" class="alert alert-primary mb-3">
               <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <i class="fa-solid fa-user-plus me-2"></i>
-                  <strong>Create a new HIVE account</strong> - Join the decentralized social media revolution
+                <!-- alert row -->
+                <div class="d-flex flex-grow-1 align-items-center gap-3">
+                  <!-- alert icon -->
+                  <div
+                    class="card d-flex align-items-center justify-content-center rounded-circle fs-2 text-dark-1-muted"
+                    style="min-width: 120px; min-height: 120px;">
+                    <i class="fa-solid fa-user-plus"></i>
+                  </div>
+                  <div class="d-flex flex-grow-1 justy flex-column">
+                    <!-- alert title -->
+                    <h5 class="hero-subtitle fs-4 mb-1 text-center">Create a new HIVE account</h5>
+                    <p class="text-center">Join the decentralized social media revolution</p>
+                    <button class="mx-auto btn btn-primary rounded-pill px-2" @click="startAccountCreation">
+                      Get Started<i class="fa-solid fa-arrow-right ms-2"></i>
+                    </button>
+                  </div>
                 </div>
-                <button class="btn btn-primary btn-sm" @click="startAccountCreation">
-                  <i class="fa-solid fa-arrow-right me-1"></i>Get Started
-                </button>
+
               </div>
             </div>
 
             <!-- Secondary Action - Key Recovery -->
-            <div class="alert alert-info">
+            <div v-if="!account && onboardingStep === 0" class="alert alert-info">
               <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <i class="fa-solid fa-key me-2"></i>
-                  <strong>Already have keys?</strong> Recover your HIVE account keys generated with a crypto wallet
+                <div class="d-flex flex-grow-1 align-items-center gap-3">
+                  <!-- alert icon -->
+                  <div
+                    class="card d-flex align-items-center justify-content-center rounded-circle fs-2 text-dark-1-muted"
+                    style="min-width: 120px; min-height: 120px;">
+                    <i class="fa-solid fa-key"></i>
+                  </div>
+                  <div class="d-flex flex-grow-1 justy flex-column">
+                    <!-- alert title -->
+                    <h5 class="hero-subtitle fs-4 mb-1 text-center">Already have keys?</h5>
+                    <p class="text-center">Recover your HIVE account keys generated with a crypto wallet</p>
+                    <button class="btn mx-auto btn-info rounded-pill px-2" @click="startKeyRecovery">
+                      Key Recovery<i class="fa-solid fa-arrow-right ms-2"></i>
+                    </button>
+                  </div>
+
                 </div>
-                <button class="btn btn-info btn-sm" @click="startKeyRecovery">
-                  <i class="fa-solid fa-undo me-1"></i>Key Recovery
-                </button>
+              </div>
+            </div>
+
+
+            <!-- account QR and info widget -->
+            <div v-if="account && onboardingStep === 0" class="d-flex justify-content-center mb-4">
+              <!-- Contact Card QR Code and Account Creation Info Widget -->
+              <div class="container-fluid m-auto" v-if="account && onboardingStep === 0">
+                <div class="d-flex justify-content-center">
+                  <!-- contact card qr code -->
+                  <a v-bind:href="'/@' + account" class="card w-100 mb-3 no-decoration">
+                    <div>
+                      <div class="card-img-top d-flex justify-content-center mt-3 w-100" ref="qrcode"></div>
+                      <div class="card-title text-center mt-2">
+                        <div>Scan this QR code to join HIVE with @{{account}}</div>
+                      </div>
+                      <!-- add to apple wallet -->
+                      <div class="d-none">
+                        <img src="/img/US-UK_Add_to_Apple_Wallet_RGB_101421.svg" class="my-2">
+                      </div>
+                    </div>
+                  </a>
+                </div>
+                <!-- balance info widget -->
+                <div class="d-flex flex-column bg-blur-darkg rounded p-3 w-100">
+                  <div class="text-start mb-3">
+                    <div>HIVE Balance: {{formatNumber(accountinfo.balance, 3, '.', ',')}}<i
+                        class="fa-brands fa-hive fa-fw ms-1"></i></div>
+                    <div
+                      v-bind:class="{'text-success': (formatNumber(accountinfo.balance, 3)-formatNumber(hivestats.account_creation_fee, 3)) >= 0, 'text-danger': (formatNumber(accountinfo.balance, 3)-formatNumber(hivestats.account_creation_fee, 3)) < 0}">
+                      Account Creation Price:
+                      {{formatNumber(hivestats.account_creation_fee, 3, '.', ',')}}<i
+                        class="fa-brands fa-hive fa-fw ms-1"></i></div>
+                    <div
+                      v-bind:class="{'text-success': accountinfo.pending_claimed_accounts > 0, 'text-danger': accountinfo.pending_claimed_accounts <= 0}">
+                      Account Creation Tokens:
+                      {{accountinfo.pending_claimed_accounts}}<i class="fa-solid fa-circle-dot fa-fw ms-1"></i></div>
+                  </div>
+                  <div class="row">
+                    <div class="col-4">
+                      <button class="w-100 btn btn-primary rounded-pill px-2" @click="startAccountCreation">
+                        <i class="fa-solid fa-user-plus fa-fw me-2"></i>Create Account
+                      </button>
+                    </div>
+                    <div class="col-4">
+                      <button class="w-100 btn btn-secondary rounded-pill px-2" @click="startKeyRecovery">
+                        <i class="fa-solid fa-key fa-fw me-2"></i> Key Recovery
+                      </button>
+                    </div>
+                    <div class="col-4">
+                      <button class="w-100 btn btn-info rounded-pill px-2" @click="claimACT">
+                        <i class="fa-solid fa-circle-dot fa-fw me-2"></i>Claim ACT</button>
+                    </div>
+                  </div>
+                  <div class="mt-2 text-end">
+                    <small>Claiming ACTs requires ≈{{ claimActHpNeeded }} HIVE Power</small>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Key Recovery Mode -->
-        <div v-if="recoveryMode" class="row justify-content-center">
-          <div class="col-lg-8 col-xl-6">
-            <div class="card bg-dark border-warning">
-              <div class="card-header">
-                <h5 class="mb-0">
-                  <i class="fa-solid fa-key me-2"></i>Key Recovery
-                  <button class="btn btn-outline-secondary btn-sm float-end" @click="cancelKeyRecovery">
-                    <i class="fa-solid fa-times"></i>
+          <!-- Key Recovery Mode -->
+          <div v-if="recoveryMode" class="row justify-content-center">
+            <div class="col-lg-8 col-xl-6">
+              <div class="card bg-dark border-primary">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0 hero-subtitle fs-3">
+                    <i class="fa-solid fa-key me-2 text-white-50"></i>Key Recovery
+                  </h5>
+                  <button class="btn bg-card btn-danger btn-sm" @click="cancelKeyRecovery"
+                    style="width: 40px; height: 40px; border-radius: 50%;">
+                    <i class="fa-solid fa-times fa-fw"></i>
                   </button>
-                </h5>
-              </div>
-              <div class="card-body">
-
-                <!-- Step 1: Enter Username -->
-                <div v-if="recoveryStep === 1">
-                  <h6 class="mb-3">Step 1: Enter Your Username</h6>
-                  <div class="mb-3">
-                    <label class="form-label">HIVE Username</label>
-                    <div class="position-relative">
-                      <span class="position-absolute top-50 translate-middle-y ps-3 text-muted">@</span>
-                      <input v-model="recoveryData.username" @keyup.enter="checkAccountForRecovery" placeholder="your-username"
-                        class="ps-5 form-control bg-dark border-dark text-light">
-                    </div>
-                    <small class="text-muted">Enter the username for which you want to recover keys</small>
-                  </div>
-                  
-                  <div v-if="recoveryError" class="alert alert-danger mb-3">
-                    <i class="fa-solid fa-exclamation-triangle me-2"></i>{{ recoveryError }}
-                  </div>
-                  
-                  <div class="text-end">
-                    <button class="btn btn-warning" @click="checkAccountForRecovery" :disabled="!recoveryData.username || recoveryLoading">
-                      <span v-if="recoveryLoading" class="spinner-border spinner-border-sm me-2"></span>
-                      Next: Select Wallet
-                      <i class="fa-solid fa-arrow-right ms-1"></i>
-                    </button>
-                  </div>
                 </div>
+                <div class="card-body">
 
-                <!-- Step 2: Select Wallet -->
-                <div v-if="recoveryStep === 2">
-                  <h6 class="mb-3">Step 2: Select Your Wallet</h6>
-                  <p class="text-muted mb-3">Choose the same wallet you used to generate your keys originally:</p>
-
-                  <div class="row g-3 mb-4">
-                    <div v-for="wallet in detectedWallets" :key="wallet.name" class="col-6 col-md-4">
-                      <div class="card bg-darker border-secondary h-100 wallet-card"
-                        :class="{'border-warning': recoveryData.selectedWallet === wallet.name}"
-                        @click="recoveryData.selectedWallet = wallet.name">
-                        <div class="card-body text-center p-3">
-                          <img :src="wallet.icon" :alt="wallet.name" class="wallet-icon mb-2">
-                          <div class="small fw-bold">{{ wallet.name }}</div>
-                          <div class="text-muted small">{{ wallet.network }}</div>
-                        </div>
+                  <!-- Step 1: Enter Username -->
+                  <div v-if="recoveryStep === 1">
+                    <h6 class="mb-3">Step 1: Enter Your Username</h6>
+                    <div class="mb-3">
+                      <label class="form-label">HIVE Username</label>
+                      <div class="position-relative">
+                        <span class="position-absolute top-50 translate-middle-y ps-3 text-muted">@</span>
+                        <input v-model="recoveryData.username" @keyup.enter="checkAccountForRecovery"
+                          placeholder="your-username" class="ps-5 form-control bg-dark border-dark text-light">
                       </div>
+                      <small class="text-muted">Enter the username for which you want to recover keys</small>
                     </div>
-                  </div>
 
-                  <div v-if="detectedWallets.length === 0" class="alert alert-warning">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div>
-                        <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                        No compatible wallets detected. Please install and unlock your wallet.
-                      </div>
-                      <button class="btn btn-outline-warning btn-sm" @click="retryWalletDetection">
-                        <i class="fa-solid fa-refresh me-1"></i>Retry
+                    <div v-if="recoveryError" class="alert alert-danger mb-3">
+                      <i class="fa-solid fa-exclamation-triangle me-2"></i>{{ recoveryError }}
+                    </div>
+
+                    <div class="text-end">
+                      <button class="btn btn-primary rounded-pill px-2" @click="checkAccountForRecovery"
+                        :disabled="!recoveryData.username || recoveryLoading">
+                        <span v-if="recoveryLoading" class="spinner-border spinner-border-sm me-2"></span>
+                        Next: Select Wallet
+                        <i class="fa-solid fa-arrow-right ms-1"></i>
                       </button>
                     </div>
-                    <div class="mt-2">
-                      <small class="text-muted">
-                        Supported: MetaMask, Phantom, Solflare, Backpack, Coinbase Wallet, Trust Wallet, Brave Wallet, Enkrypt, and more
-                      </small>
-                    </div>
                   </div>
 
-                  <div class="d-flex justify-content-between">
-                    <button class="btn btn-secondary" @click="recoveryStep = 1">
-                      <i class="fa-solid fa-arrow-left me-1"></i>Back
-                    </button>
-                    <button class="btn btn-warning" @click="recoveryStep = 3" :disabled="!recoveryData.selectedWallet">
-                      Next: Recover Keys
-                      <i class="fa-solid fa-arrow-right ms-1"></i>
-                    </button>
-                  </div>
-                </div>
+                  <!-- Step 2: Select Wallet -->
+                  <div v-if="recoveryStep === 2">
+                    <h6 class="mb-3">Step 2: Select Your Wallet</h6>
+                    <p class="text-muted mb-3">Choose the same wallet you used to generate your keys originally:</p>
 
-                <!-- Step 3: Key Recovery -->
-                <div v-if="recoveryStep === 3">
-                  <h6 class="mb-3">Step 3: Recover Your Keys</h6>
-
-                  <div class="alert alert-warning mb-3">
-                    <i class="fa-solid fa-info-circle me-2"></i>
-                    <strong>Important:</strong> You'll need to sign the same message you used when originally generating
-                    your keys.
-                  </div>
-
-                  <div class="mb-3">
-                    <label class="form-label">Recovery Message</label>
-                    <input v-model="recoveryData.message" class="form-control bg-dark border-dark text-light"
-                      :placeholder="`Generate HIVE keys for account: ${recoveryData.username}`">
-                    <small class="text-muted">
-                      This should be the exact message you signed originally (usually: "Generate HIVE keys for account:
-                      username")
-                    </small>
-                  </div>
-
-                  <div class="mb-4">
-                    <button class="btn btn-warning w-100" @click="recoverKeys"
-                      :disabled="recoveryLoading || !recoveryData.message">
-                      <span v-if="recoveryLoading" class="spinner-border spinner-border-sm me-2"></span>
-                      <i v-else class="fa-solid fa-key me-2"></i>
-                      {{ recoveryLoading ? 'Recovering Keys...' : 'Sign Message & Recover Keys' }}
-                    </button>
-                  </div>
-
-                  <!-- Recovered Keys Display -->
-                  <div v-if="recoveredKeys && Object.keys(recoveredKeys).length > 0" class="mb-4">
-                    <div class="alert alert-success">
-                      <i class="fa-solid fa-check me-2"></i>
-                      <strong>Keys recovered successfully!</strong> Your keys have been restored in dluxPEN.
-                    </div>
-
-                    <div class="card bg-darker border-secondary">
-                      <div class="card-header d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">Recovered Keys</h6>
-                        <button class="btn btn-outline-secondary btn-sm"
-                          @click="showRecoveredKeys = !showRecoveredKeys">
-                          <i :class="showRecoveredKeys ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
-                          {{ showRecoveredKeys ? 'Hide' : 'Show' }}
-                        </button>
-                      </div>
-                      <div class="card-body" v-if="showRecoveredKeys">
-                        <div v-for="(key, type) in recoveredKeys" :key="type" class="mb-3">
-                          <label class="form-label text-capitalize">{{ type }} Key</label>
-                          <div class="input-group">
-                            <input type="text" :value="key"
-                              class="form-control bg-dark border-dark text-light font-monospace small" readonly>
-                            <button class="btn btn-outline-secondary" @click="copyToClipboard(key)">
-                              <i class="fa-solid fa-copy"></i>
-                            </button>
+                    <div class="row g-3 mb-4">
+                      <div v-for="wallet in detectedWallets" :key="wallet.name" class="col-6 col-md-4">
+                        <div class="card bg-darker border-secondary h-100 wallet-card"
+                          :class="{'border-warning': recoveryData.selectedWallet === wallet.name}"
+                          @click="recoveryData.selectedWallet = wallet.name">
+                          <div class="card-body text-center p-3">
+                            <img :src="wallet.icon" :alt="wallet.name" class="wallet-icon mb-2">
+                            <div class="small fw-bold">{{ wallet.name }}</div>
+                            <div class="text-muted small">{{ wallet.network }}</div>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <div class="mt-3">
-                      <button class="btn btn-primary w-100" @click="completeKeyRecovery">
-                        <i class="fa-solid fa-check me-2"></i>Complete Recovery
+                    <div v-if="detectedWallets.length === 0" class="alert alert-warning">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                          No compatible wallets detected. Please install and unlock your wallet.
+                        </div>
+                        <button class="btn btn-outline-warning btn-sm" @click="retryWalletDetection">
+                          <i class="fa-solid fa-refresh me-1"></i>Retry
+                        </button>
+                      </div>
+                      <div class="mt-2">
+                        <small class="text-muted">
+                          Supported: MetaMask, Phantom, Solflare, Backpack, Coinbase Wallet, Trust Wallet, Brave Wallet,
+                          Enkrypt, and more
+                        </small>
+                      </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                      <button class="btn btn-secondary rounded-pill px-2" @click="recoveryStep = 1">
+                        <i class="fa-solid fa-arrow-left me-1"></i>Back
+                      </button>
+                      <button class="btn btn-primary rounded-pill px-2" @click="recoveryStep = 3"
+                        :disabled="!recoveryData.selectedWallet">
+                        Next: Recover Keys
+                        <i class="fa-solid fa-arrow-right ms-1"></i>
                       </button>
                     </div>
                   </div>
 
-                  <div v-if="recoveryError" class="alert alert-danger">
-                    <i class="fa-solid fa-exclamation-triangle me-2"></i>{{ recoveryError }}
-                  </div>
+                  <!-- Step 3: Key Recovery -->
+                  <div v-if="recoveryStep === 3">
+                    <h6 class="mb-3">Step 3: Recover Your Keys</h6>
 
-                  <div class="d-flex justify-content-between">
-                    <button class="btn btn-secondary" @click="recoveryStep = 2" :disabled="recoveryLoading">
-                      <i class="fa-solid fa-arrow-left me-1"></i>Back
-                    </button>
-                    <button class="btn btn-outline-secondary" @click="cancelKeyRecovery" :disabled="recoveryLoading">
-                      Cancel Recovery
-                    </button>
+                    <div class="alert alert-warning mb-3">
+                      <i class="fa-solid fa-info-circle me-2"></i>
+                      <strong>Important:</strong> You'll need to sign the same message you used when originally
+                      generating
+                      your keys.
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Recovery Message</label>
+                      <input v-model="recoveryData.message" class="form-control bg-dark border-dark text-light"
+                        :placeholder="`Generate HIVE keys for account: ${recoveryData.username}`">
+                      <small class="text-muted">
+                        This should be the exact message you signed originally (usually: "Generate HIVE keys for
+                        account:
+                        username")
+                      </small>
+                    </div>
+
+                    <div class="d-flex justify-content-center mb-4">
+                      <button class="btn btn-primary rounded-pill px-2 mx-auto" @click="recoverKeys"
+                        :disabled="recoveryLoading || !recoveryData.message">
+                        <span v-if="recoveryLoading" class="spinner-border spinner-border-sm me-2"></span>
+                        <i v-else class="fa-solid fa-key me-2"></i>
+                        {{ recoveryLoading ? 'Recovering Keys...' : 'Sign Message & Recover Keys' }}
+                      </button>
+                    </div>
+
+                    <!-- Recovered Keys Display -->
+                    <div v-if="recoveredKeys && Object.keys(recoveredKeys).length > 0" class="mb-4">
+                      <div class="alert alert-success">
+                        <i class="fa-solid fa-check me-2"></i>
+                        <strong>Keys recovered successfully!</strong> Your keys have been restored in dluxPEN.
+                      </div>
+
+                      <div class="card bg-darker border-secondary">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                          <h6 class="mb-0">Recovered Keys</h6>
+                          <button class="btn btn-outline-secondary btn-sm"
+                            @click="showRecoveredKeys = !showRecoveredKeys">
+                            <i :class="showRecoveredKeys ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                            {{ showRecoveredKeys ? 'Hide' : 'Show' }}
+                          </button>
+                        </div>
+                        <div class="card-body" v-if="showRecoveredKeys">
+                          <div v-for="(key, type) in recoveredKeys" :key="type" class="mb-3">
+                            <label class="form-label text-capitalize">{{ type }} Key</label>
+                            <div class="input-group">
+                              <input type="text" :value="key"
+                                class="form-control bg-dark border-dark text-light font-monospace small" readonly>
+                              <button class="btn btn-dark" @click="copyToClipboard(key)">
+                                <i class="fa-solid fa-copy"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="mt-3">
+                        <button class="btn btn-primary w-100" @click="completeKeyRecovery">
+                          <i class="fa-solid fa-check me-2"></i>Complete Recovery
+                        </button>
+                      </div>
+                    </div>
+
+                    <div v-if="recoveryError" class="alert alert-danger mb-3">
+                      <i class="fa-solid fa-exclamation-triangle me-2"></i>{{ recoveryError }}
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                      <button class="btn btn-secondary rounded-pill px-2" @click="recoveryStep = 2"
+                        :disabled="recoveryLoading">
+                        <i class="fa-solid fa-arrow-left me-1"></i>Back
+                      </button>
+                    </div>
+
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
+
+
+
         </div>
 
-        <!-- New User Onboarding System - Always Available -->
-        <div v-if="!recoveryMode && onboardingStep > 0" class="row justify-content-center">
+
+      </div>
+
+      <!-- New User Onboarding System  -->
+      <div class="container-fluid" v-if="!recoveryMode && onboardingStep > 0">
+        <!-- cancel account creation -->
+        <div class="row justify-content-center" v-if="onboardingStep > 0">
+          <div class="col-lg-8 col-xl-6 text-start my-3">
+            <button class="btn btn-outline-secondary rounded-pill px-2" @click="cancelAccountCreation">
+              Cancel Account Creation
+              <i class="fa-solid fa-xmark fa-fw ms-1"></i>
+            </button>
+          </div>
+
+        </div>
+        <div class="row justify-content-center mb-5">
           <div class="col-lg-8 col-xl-6">
 
             <!-- Welcome Header -->
             <div class="text-center mb-4">
-              <h1 class="fs-2 mb-2">Welcome to HIVE</h1>
+              <h1 class="hero-subtitle fs-2 mb-2">Welcome to HIVE</h1>
               <p class="text-muted">Create your new account in just a few steps</p>
             </div>
 
@@ -444,10 +536,10 @@
                     <input v-model="newAccount.username" @input="checkUsernameAvailability"
                       @keyup.enter="onboardingStep = 2" autocapitalize="off" placeholder="your-username"
                       class="ps-5 form-control bg-dark border-dark text-light" :class="{
-                        'border-success': usernameStatus === 'available',
-                        'border-danger': usernameStatus === 'taken' || usernameStatus === 'invalid',
-                        'border-warning': usernameStatus === 'checking'
-                      }">
+                      'border-success': usernameStatus === 'available',
+                      'border-danger': usernameStatus === 'taken' || usernameStatus === 'invalid',
+                      'border-warning': usernameStatus === 'checking'
+                    }">
                   </div>
                   <div class="mt-2">
                     <small v-if="usernameStatus === 'checking'" class="text-warning">
@@ -468,7 +560,7 @@
                   </div>
                 </div>
                 <div class="text-end">
-                  <button class="btn btn-primary" @click="onboardingStep = 2"
+                  <button class="btn btn-primary rounded-pill px-2" @click="onboardingStep = 2"
                     :disabled="usernameStatus !== 'available'">
                     Next: Generate Keys
                     <i class="fa-solid fa-arrow-right ms-1"></i>
@@ -516,7 +608,8 @@
                     <label class="form-check-label" for="method-wallet">
                       <strong>Use Crypto Wallet Signature</strong> <span
                         class="badge bg-success ms-2">Recommended</span>
-                      <div class="small text-muted">Generate keys from your existing wallet signature - more secure and
+                      <div class="small text-muted">Generate keys from your existing wallet signature - more secure
+                        and
                         easier to recover</div>
                     </label>
                   </div>
@@ -536,20 +629,20 @@
                   <div class="form-check mb-2">
                     <input class="form-check-input" type="checkbox" v-model="agreedToPrivacy" id="privacyCheck">
                     <label class="form-check-label" for="privacyCheck">
-                      I agree to the <a href="/about#privacy" target="_blank" class="text-info">Privacy Policy</a>
+                      I agree to the <a href="/about#privacy" target="_blank" class="text-info no-decoration">Privacy Policy</a>
                     </label>
                   </div>
                   <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" v-model="agreedToTerms" id="termsCheck">
                     <label class="form-check-label" for="termsCheck">
-                      I agree to the <a href="/about#terms" target="_blank" class="text-info">Terms of Service</a>
+                      I agree to the <a href="/about#terms" target="_blank" class="text-info no-decoration">Terms of Service</a>
                     </label>
                   </div>
                 </div>
 
                 <!-- Generate Keys Button -->
                 <div class="mb-4">
-                  <button class="btn btn-primary w-100" @click="generateKeys"
+                  <button class="btn btn-primary btn-lg w-100" @click="generateKeys"
                     :disabled="keyGenLoading || (!keyGenMethod || (keyGenMethod === 'wallet' && !selectedWallet) || !agreedToPrivacy || !agreedToTerms)">
                     <span v-if="keyGenLoading" class="spinner-border spinner-border-sm me-2"></span>
                     <i v-else class="fa-solid fa-key me-2"></i>
@@ -564,9 +657,9 @@
                 <!-- Generated Keys Display -->
                 <div v-if="newAccount.keys && Object.keys(newAccount.keys).length > 0" class="mb-4">
                   <div class="alert alert-warning">
-                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
-                                         <strong>Important:</strong> Your keys have been generated and will be stored securely in dluxPEN.
-                     {{ keyGenMethod === 'wallet' ? 'You can recover these keys using your ' + selectedWallet + ' wallet.' : 'Make sure to backup these keys safely!' }}
+                    <i class="fa-solid fa-exclamation-triangle me-2" aria-hidden="true"></i>
+                    <strong>Important:</strong> Your keys have been generated and will be stored securely in dluxPEN.
+                    {{ getKeyRecoveryMessage() }}
                   </div>
 
                   <!-- Download Backup Button - Highlighted -->
@@ -611,10 +704,10 @@
 
                 <!-- Navigation -->
                 <div class="d-flex justify-content-between">
-                  <button class="btn btn-secondary" @click="goBackToUsernameStep">
+                  <button class="btn btn-secondary rounded-pill px-2" @click="goBackToUsernameStep">
                     <i class="fa-solid fa-arrow-left me-1"></i>Back
                   </button>
-                  <button class="btn btn-primary"
+                  <button class="btn btn-primary rounded-pill px-2"
                     @click="onboardingStep = 3; if(requestUsername) paymentMethod = 'request'"
                     :disabled="!newAccount.keys || Object.keys(newAccount.keys).length === 0">
                     Next: Create Account
@@ -728,7 +821,8 @@
                               <td>
                                 <div class="fw-bold">{{ crypto.totalAmount }} {{ crypto.symbol }}</div>
                                 <small class="text-muted">
-                                  {{ crypto.requiredAmount }} + {{ crypto.transferFee ? crypto.transferFee.toFixed(6) :
+                                  {{ crypto.requiredAmount }} + {{ crypto.transferFee ? crypto.transferFee.toFixed(6)
+                                  :
                                   '0' }} fee
                                 </small>
                               </td>
@@ -752,17 +846,17 @@
                       <div v-if="paymentDetails" class="mt-3">
                         <!-- WebSocket Connection Status -->
                         <div class="alert mb-3" :class="{
-                          'alert-success': wsConnectionStatus === 'connected',
-                          'alert-warning': wsConnectionStatus === 'connecting',
-                          'alert-danger': wsConnectionStatus === 'disconnected'
-                        }">
+                        'alert-success': wsConnectionStatus === 'connected',
+                        'alert-warning': wsConnectionStatus === 'connecting',
+                        'alert-danger': wsConnectionStatus === 'disconnected'
+                      }">
                           <div class="d-flex align-items-center justify-content-between">
                             <div class="d-flex align-items-center">
                               <i :class="{
-                                'fa-solid fa-wifi text-success': wsConnectionStatus === 'connected',
-                                'fa-solid fa-spinner fa-spin text-warning': wsConnectionStatus === 'connecting',
-                                'fa-solid fa-wifi text-danger': wsConnectionStatus === 'disconnected'
-                              }"></i>
+                              'fa-solid fa-wifi text-success': wsConnectionStatus === 'connected',
+                              'fa-solid fa-spinner fa-spin text-warning': wsConnectionStatus === 'connecting',
+                              'fa-solid fa-wifi text-danger': wsConnectionStatus === 'disconnected'
+                            }"></i>
                               <span class="ms-2">
                                 {{ wsConnectionStatus === 'connected' ? 'Connected to payment monitor' :
                                 wsConnectionStatus === 'connecting' ? 'Connecting to payment monitor...' :
@@ -801,7 +895,7 @@
                                   :class="{'progress-bar-animated': paymentStatus.progress < 100}"
                                   :style="`width: ${paymentStatus.progress || 0}%`"></div>
                               </div>
-                                                             <div class="text-muted small mt-1">{{ paymentStatus.details || 'Setting up payment channel...' }}</div>
+                              <div class="text-muted small mt-1">{{ getPaymentStatusDetails() }}</div>
                             </div>
 
                             <!-- Payment Instructions -->
@@ -951,11 +1045,11 @@
                                 <div class="d-flex justify-content-between">
                                   <small class="text-muted">{{ formatLogTime(log.timestamp) }}</small>
                                   <span v-if="log.type" class="badge" :class="{
-                                    'bg-info': log.type === 'info',
-                                    'bg-success': log.type === 'success', 
-                                    'bg-warning': log.type === 'warning',
-                                    'bg-danger': log.type === 'error'
-                                  }">{{ log.type }}</span>
+                                  'bg-info': log.type === 'info',
+                                  'bg-success': log.type === 'success', 
+                                  'bg-warning': log.type === 'warning',
+                                  'bg-danger': log.type === 'error'
+                                }">{{ log.type }}</span>
                                 </div>
                                 <div class="mt-1">{{ log.message }}</div>
                               </div>
@@ -1030,7 +1124,8 @@
                       <div class="alert alert-info">
                         <i class="fa-solid fa-info-circle me-2"></i>
                         <strong>You're logged in as @{{ account }}</strong>
-                        <div class="small mt-1">You can create this account directly using your HIVE or Account Creation
+                        <div class="small mt-1">You can create this account directly using your HIVE or Account
+                          Creation
                           Tokens</div>
                       </div>
 
@@ -1144,114 +1239,8 @@
 
           </div>
         </div>
-
-        <!-- Help Others Create Accounts - For Logged In Users -->
-        <div v-if="account && !recoveryMode && onboardingStep === 0" class="row justify-content-center mb-4">
-          <div class="col-lg-8 col-xl-6">
-            <div class="alert alert-success">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <i class="fa-solid fa-user-plus me-2"></i>
-                  <strong>Help someone create a HIVE account!</strong> You can use this tool to help friends join HIVE
-                </div>
-                <button class="btn btn-success btn-sm" @click="startAccountCreation">
-                  <i class="fa-solid fa-arrow-up me-1"></i>Start Creating
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
-      <div class="container mt-3" v-if="account && onboardingStep === 0">
-        <div class="d-flex justify-content-center">
-          <!-- contact card qr code -->
-          <a v-bind:href="'/@' + account" class="card w-100 mb-3 no-decoration">
-            <div>
-              <div class="card-img-top d-flex justify-content-center mt-3 w-100" ref="qrcode"></div>
-              <div class="card-title text-center mt-2">
-                <div>Scan this QR code to join HIVE with @{{account}}</div>
-              </div>
-              <!-- add to apple wallet -->
-              <div class="d-none">
-                <img src="/img/US-UK_Add_to_Apple_Wallet_RGB_101421.svg" class="my-2">
-              </div>
-            </div>
-          </a>
-        </div>
-
-
-        <!-- account creation info widget -->
-        <div class="d-flex justify-content-center mb-4">
-          <div class="d-flex flex-column bg-blur-darkg rounded p-3 w-100">
-            <div class="text-start mb-3">
-              <div>HIVE Balance: {{formatNumber(accountinfo.balance, 3, '.', ',')}}<i
-                  class="fa-brands fa-hive fa-fw ms-1"></i></div>
-              <div
-                v-bind:class="{'text-success': (formatNumber(accountinfo.balance, 3)-formatNumber(hivestats.account_creation_fee, 3)) >= 0, 'text-danger': (formatNumber(accountinfo.balance, 3)-formatNumber(hivestats.account_creation_fee, 3)) < 0}">
-                Account Creation Price:
-                {{formatNumber(hivestats.account_creation_fee, 3, '.', ',')}}<i
-                  class="fa-brands fa-hive fa-fw ms-1"></i></div>
-              <div
-                v-bind:class="{'text-success': accountinfo.pending_claimed_accounts > 0, 'text-danger': accountinfo.pending_claimed_accounts <= 0}">
-                Account Creation Tokens:
-                {{accountinfo.pending_claimed_accounts}}<i class="fa-solid fa-circle-dot fa-fw ms-1"></i></div>
-            </div>
-            <div class="d-flex">
-              <button class="btn btn-outline-info ms-auto" @click="claimACT">Claim ACT</button>
-            </div>
-            <div class="mt-2 text-end">
-              <small>Claiming ACTs requires ≈{{ claimActHpNeeded }} HIVE Power</small>
-            </div>
-          </div>
-        </div>
-
-        <div class="d-none">
-          <h1 class="fs-5 mb-2">Pending Account Creation Requests (0)</h1>
-          <!-- account creation request notifications -->
-          <div class="d-flex justify-content-center mb-3">
-            <div class="card w-100">
-              <div class="card-body">
-                @hiveian12345
-              </div>
-              <div class="card-footer">
-                <div class="btn-group" style="height: 60px;">
-                  <button
-                    class="btn btn-sm btn-success h-100 text-center">{{formatNumber(hivestats.account_creation_fee,
-                    3, '.', ',')}} <i class="fa-brands fa-hive fa-fw"></i></button>
-                  <button class="btn btn-sm btn-primary h-100 text-center">1 ACT <i
-                      class="fa-solid fa-circle-dot fa-fw"></i></button>
-                  <button class="btn btn-sm btn-secondary h-100 text-center">Forward <i
-                      class="fa-solid fa-circle-arrow-right fa-fw"></i></button>
-                  <button class="btn btn-sm btn-danger h-100 text-center">Deny <i
-                      class="fa-solid fa-ban fa-fw"></i></button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="d-flex justify-content-center mb-3">
-            <div class="card w-100">
-              <div class="card-body">
-                @gohivego
-              </div>
-              <div class="card-footer">
-                <div class="btn-group" style="height: 60px;">
-                  <button
-                    class="btn btn-sm btn-success h-100 text-center">{{formatNumber(hivestats.account_creation_fee,
-                    3, '.', ',')}} <i class="fa-brands fa-hive fa-fw"></i></button>
-                  <button class="btn btn-sm btn-primary h-100 text-center">1 ACT <i
-                      class="fa-solid fa-circle-dot fa-fw"></i></button>
-                  <button class="btn btn-sm btn-secondary h-100 text-center">Forward <i
-                      class="fa-solid fa-circle-arrow-right fa-fw"></i></button>
-                  <button class="btn btn-sm btn-danger h-100 text-center">Deny <i
-                      class="fa-solid fa-ban fa-fw"></i></button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </main>
     <div>
       <foot-vue>

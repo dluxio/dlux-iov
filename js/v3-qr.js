@@ -674,7 +674,7 @@ createApp({ // vue 3
         this.detectedWallets.push({
           name: 'MetaMask',
           network: 'Ethereum',
-          icon: 'https://docs.metamask.io/img/metamask-fox.svg',
+          icon: '/img/wallets/metamask-logo.svg',
           provider: window.ethereum
         });
       }
@@ -684,7 +684,7 @@ createApp({ // vue 3
         this.detectedWallets.push({
           name: 'Phantom',
           network: 'Solana',
-          icon: 'https://phantom.app/img/phantom-logo.png',
+          icon: '/img/wallets/phantom-logo.svg',
           provider: window.solana
         });
       }
@@ -724,7 +724,7 @@ createApp({ // vue 3
         this.detectedWallets.push({
           name: 'Coinbase Wallet',
           network: 'Ethereum',
-          icon: 'https://avatars.githubusercontent.com/u/18060234?s=280&v=4',
+          icon: '/img/wallets/coinbase-logo.png',
           provider: window.ethereum
         });
       }
@@ -3360,6 +3360,19 @@ createApp({ // vue 3
       }
       
       console.log('=== End Debug ===');
+    },
+    cancelAccountCreation() {
+      // Reset onboarding state back to step 0
+      this.resetOnboardingState();
+    },
+    getKeyRecoveryMessage() {
+      return this.keyGenMethod === 'wallet' 
+        ? `You can recover these keys using your ${this.selectedWallet} wallet.`
+        : 'Make sure to backup these keys safely!';
+    },
+
+    getPaymentStatusDetails() {
+      return this.paymentStatus.details || 'Setting up payment channel...';
     },
   },
       mounted() {

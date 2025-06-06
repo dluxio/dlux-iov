@@ -4053,10 +4053,9 @@ export default {
                 @keyup="searchRecents()" class="ps-4 form-control bg-dark border-dark text-info">
             </div>
           </div>
-          <div class="d-flex hover justify-content-between align-items-center py-3 border-light-50 border-top"
+          <div @click="setUser(name);toggleAccountMenu()" class="d-flex hover justify-content-between align-items-center py-3 border-light-50 border-top"
             v-if="!filterUsers" v-for="name in recentUsers">
-            <div class="flex-fill text-center"><a class="text-info" role="button"
-                @click="setUser(name);toggleAccountMenu()">@{{name}}</a></div>
+            <div class="flex-fill text-center"><a class="text-info" role="button">@{{name}}</a></div>
             <div class="flex-shrink me-2 d-none"><i class="fa-solid fa-feather-pointed fa-fw"></i></div>
             <div class="flex-shrink me-2"><a class="text-danger ms-auto" role="button" @click="deleteRecentUser(name)"
                 alt="Remove username"><i class="fa-solid fa-trash-can"></i></a></div>
@@ -4086,9 +4085,17 @@ export default {
         </div>
         <div class="modal-body">
           <div v-if="isCreatingPin">
-            <p class="small text-white-50 mb-3">
-              Create a secure PIN to encrypt your private keys. This PIN will be required each time you want to use dluxPEN.
-            </p>
+            <div class="border border-dark rounded bg-light-3 py-2 text-dark mb-3">
+              <div class="text-center p-2 bg-dark rounded mx-3 mb-3">
+                <img src="/img/dlux-pen.png" class="img-fluid">
+              </div>
+              <ul class="">
+                <li>Create a secure PIN to encrypt your private keys (any password at least 4 characters)</li>
+                <li>This PIN will be required each time you want to use dluxPEN to sign transactions</li>
+                <li>New accounts you create will have their keys added to dluxPEN automatically</li>
+                <li>Keys can be exported from dluxPEN at any time for backup or use with other wallets</li>
+              </ul>
+            </div>
             <div class="mb-3">
               <label class="form-label">New PIN (minimum 4 characters)</label>
               <input type="password" v-model="newPin" class="form-control bg-dark border-dark text-light" 

@@ -805,8 +805,8 @@ td {
 }
 
 .bg-window-header {
-  background-color: #37393c;
-  border-bottom: 5px solid #242628;
+  //background-color: #37393c;
+  border-bottom: 2px solid #242628;
 }
 
 .mx-05 {
@@ -1499,7 +1499,7 @@ ul.scroll {
 
 .hover:hover {
   background-color: rgba(0, 0, 0, 0.1);
-  border: #033efd;
+  cursor: pointer;
 }
 
 .hover-text-primary:hover {
@@ -2271,6 +2271,11 @@ html {
 
 .text-dark-1 {
   color: $dark-1;
+}
+
+.text-dark-1-muted{
+  color: $dark-1;
+  opacity: 0.7;
 }
 
 .text-dark-muted {

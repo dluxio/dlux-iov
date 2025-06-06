@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.06.8",
-  "generated": "2025-06-06T00:47:44Z",
+  "version": "2025.06.05.17",
+  "generated": "2025-06-06T00:52:30Z",
   "files": {
-    "/img/hivesigner.svg": {
-      "checksum": "6958efa0d0564cbf5d2209361551a9d4",
-      "size": 11798,
-      "priority": "important"
-    },
     "/img/hivesigner_white.svg": {
       "checksum": "504a9fab6111a49d6cdbb73804c4aa15",
       "size": 6318,
@@ -1191,7 +1186,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "374bc4b83a0583727620328e01a835b4",
+      "checksum": "1e9a4db44597273ae61384db001f8f6a",
       "size": 36316,
       "priority": "important"
     },
@@ -1261,8 +1256,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-qr.js": {
-      "checksum": "1ad3b1cfc391a390b45ecee91eeae449",
-      "size": 125125,
+      "checksum": "f1dc48535e9f796e5cd1e5ddffa29b23",
+      "size": 125521,
       "priority": "important"
     },
     "/js/v3-user.js": {
@@ -1376,12 +1371,12 @@ self.cacheManifest =
       "priority": "important"
     },
     "/qr/index.html": {
-      "checksum": "ee428b14e41425e7bedcce431cd57dd7",
-      "size": 65822,
+      "checksum": "05d7d9f6b75eeab608211b2371f0f247",
+      "size": 65644,
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "09800f7a4a2e1ff1b7c3f3126caea249",
+      "checksum": "d3987edc5a03a0c0c3b2a2ce7951885d",
       "size": 7299,
       "priority": "important"
     },
@@ -1454,11 +1449,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/base/browser/ui/codicons/codicon/codicon.ttf": {
-      "checksum": "cb7f0a51c106a33fb4abab8c454373d8",
-      "size": 80340,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/base/worker/workerMain.js": {
       "checksum": "b56d63807a3d5b23cb061ce224156c8c",
