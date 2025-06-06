@@ -1493,17 +1493,23 @@ createApp({
             })
             .then(data => {
               console.log('IPFS Loader success:', ipfsUrl, 'Size:', data.byteLength);
-              callbacks.onSuccess({ 
-                url: ipfsUrl, 
-                data: data 
-              });
+              
+              // HLS.js expects a specific response format
+              const response = {
+                url: ipfsUrl,
+                data: data,
+                code: 200,
+                text: 'OK'
+              };
+              
+              callbacks.onSuccess(response, { url: ipfsUrl }, context);
             })
             .catch(err => {
               console.error('IPFS Loader error:', err, 'URL:', ipfsUrl);
               callbacks.onError({ 
                 code: err.code || 'NETWORK_ERROR', 
                 text: err.message || 'Failed to load IPFS content'
-              });
+              }, context);
             });
         }
         
@@ -1519,15 +1525,37 @@ createApp({
       return IpfsLoader;
     },
 
-    setupHLSPlayer(videoElement) {
+    async setupHLSPlayer(videoElement) {
       // Universal HLS.js setup for M3U8 video playback
       if (!videoElement || !videoElement.src) return;
       
-      const videoSrc = videoElement.src;
+      let videoSrc = videoElement.src;
       console.log('Setting up HLS for video:', videoSrc);
       
+      // Smart IPFS video detection - check if it's an IPFS file without extension
+      if (/\/ipfs\/Qm[a-zA-Z0-9]+$/.test(videoSrc) && !videoSrc.includes('.')) {
+        console.log('Detected IPFS file without extension, checking size...');
+        try {
+          const response = await fetch(videoSrc, { method: 'HEAD' });
+          const contentLength = response.headers.get('content-length');
+          if (contentLength) {
+            const sizeInKB = parseInt(contentLength) / 1024;
+            console.log(`IPFS file size: ${sizeInKB} KB`);
+            
+            // If file is in kilobyte range (likely a playlist), treat as M3U8
+            if (sizeInKB < 100) { // Playlists are typically small
+              videoSrc = videoSrc + '?filename=master.m3u8';
+              videoElement.src = videoSrc; // Update the video element src
+              console.log('Treating as M3U8 playlist:', videoSrc);
+            }
+          }
+        } catch (err) {
+          console.log('Could not determine IPFS file size, proceeding with original URL');
+        }
+      }
+      
       // Check if the source is an M3U8 file
-      if (videoSrc.includes('.m3u8') || videoSrc.includes('application/x-mpegURL')) {
+      if (videoSrc.includes('.m3u8') || videoSrc.includes('application/x-mpegURL') || videoSrc.includes('filename=master.m3u8')) {
         // Check if HLS.js is available
         if (typeof Hls !== 'undefined') {
           if (Hls.isSupported()) {
