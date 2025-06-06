@@ -1,4 +1,4 @@
-this.version = "2025.06.06.18";
+this.version = "2025.06.06.19";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.06.18",
-  "generated": "2025-06-06T03:57:19Z",
+  "version": "2025.06.06.19",
+  "generated": "2025-06-06T04:00:36Z",
   "files": {
-    "/img/meta/create.png": {
-      "checksum": "a744ac5d0b197c99c7ce329f63cd990b",
-      "size": 506236,
-      "priority": "important"
-    },
     "/img/meta/dao.png": {
       "checksum": "392f062627adf5c61eb191ffa6a8e0c3",
       "size": 369057,
@@ -1136,7 +1131,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "e103001d585947a38cb50ee32924ef9e",
+      "checksum": "a3a570332a01c2a83bdf755ec61b69bc",
       "size": 36317,
       "priority": "important"
     },
@@ -1211,8 +1206,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "9acfed4093609f2bb350bf25f8a82188",
-      "size": 211545,
+      "checksum": "55250a67b755b02114462641bfdcb1bb",
+      "size": 212582,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1326,7 +1321,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "3245fb5ec8f43497071993ce148259fe",
+      "checksum": "53fcf4c590a9572beb8fc65991c1f913",
       "size": 7300,
       "priority": "important"
     },
@@ -1399,11 +1394,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/csharp/csharp.js": {
-      "checksum": "cf499fdad78353da0b922b0c8568cbb2",
-      "size": 5351,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/csp/csp.js": {
       "checksum": "76fda2a33b044b0b10594f6bc24b3b43",
