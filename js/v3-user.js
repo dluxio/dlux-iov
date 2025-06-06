@@ -5548,7 +5548,7 @@ function buyNFT(setname, uid, price, type, callback){
         
         load(context, config, callbacks) {
           const url = context.url;
-          console.log('IPFS Loader loading:', url);
+          console.log('IPFS Loader loading:', url, 'Context:', context);
           
           // Convert IPFS URLs to proper gateway URLs with filename hints
           let ipfsUrl = url;
@@ -5574,10 +5574,16 @@ function buyNFT(setname, uid, price, type, callback){
               if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
               }
-              return response.arrayBuffer();
+              
+              // For manifests, return text; for segments, return arrayBuffer
+              if (url.includes('.m3u8') || context.type === 'manifest') {
+                return response.text();
+              } else {
+                return response.arrayBuffer();
+              }
             })
             .then(data => {
-              console.log('IPFS Loader success:', ipfsUrl, 'Size:', data.byteLength);
+              console.log('IPFS Loader success:', ipfsUrl, 'Size:', typeof data === 'string' ? data.length : data.byteLength);
               
               // HLS.js expects a specific response format
               const response = {
@@ -5618,6 +5624,10 @@ function buyNFT(setname, uid, price, type, callback){
       console.log('Setting up HLS for video:', videoSrc);
       
       // Smart IPFS video detection - check if it's an IPFS file without extension
+      console.log('Checking IPFS detection for:', videoSrc);
+      console.log('Regex test:', /\/ipfs\/Qm[a-zA-Z0-9]+$/.test(videoSrc));
+      console.log('Contains dot:', videoSrc.includes('.'));
+      
       if (/\/ipfs\/Qm[a-zA-Z0-9]+$/.test(videoSrc) && !videoSrc.includes('.')) {
         console.log('Detected IPFS file without extension, checking size...');
         try {

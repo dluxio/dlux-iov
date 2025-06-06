@@ -928,7 +928,7 @@ export default {
                     <!-- Video Preview -->
                     <div v-else-if="previewModal.file && isVideoFile(previewModal.file.type)" 
                          class="text-center p-3">
-                        <video :src="previewModal.file.url" 
+                        <video :src="getFileUrlWithType(previewModal.file)" 
                                controls 
                                class="w-100 rounded"
                                style="max-height: 70vh;"
@@ -4864,6 +4864,21 @@ export default {
             this.previewModal.show = false;
             this.previewModal.file = null;
         },
+
+        getFileUrlWithType(file) {
+            if (!file) return '';
+            
+            let url = file.url;
+            
+            // For IPFS URLs, add filename parameter for proper MIME type detection
+            if (url.includes('ipfs.dlux.io/ipfs/') && file.name && file.type) {
+                const cid = url.split('/ipfs/')[1].split('?')[0];
+                const filename = `${file.name}.${file.type}`;
+                url = `https://ipfs.dlux.io/ipfs/${cid}?filename=${filename}`;
+            }
+            
+            return url;
+        },
         
         isImageFile(type) {
             return type && (type.includes('image') || 
@@ -4929,10 +4944,16 @@ export default {
                             if (!response.ok) {
                                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                             }
-                            return response.arrayBuffer();
+                            
+                            // For manifests, return text; for segments, return arrayBuffer
+                            if (url.includes('.m3u8') || context.type === 'manifest') {
+                                return response.text();
+                            } else {
+                                return response.arrayBuffer();
+                            }
                         })
                         .then(data => {
-                            console.log('IPFS Loader success:', ipfsUrl, 'Size:', data.byteLength);
+                            console.log('IPFS Loader success:', ipfsUrl, 'Size:', typeof data === 'string' ? data.length : data.byteLength);
                             
                             // HLS.js expects a specific response format
                             const response = {

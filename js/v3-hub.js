@@ -1495,15 +1495,21 @@ createApp({
           
           console.log('IPFS Loader fetching:', ipfsUrl);
           
-          fetch(ipfsUrl)
+                      fetch(ipfsUrl)
             .then(response => {
               if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
               }
-              return response.arrayBuffer();
+              
+              // For manifests, return text; for segments, return arrayBuffer
+              if (url.includes('.m3u8') || context.type === 'manifest') {
+                return response.text();
+              } else {
+                return response.arrayBuffer();
+              }
             })
             .then(data => {
-              console.log('IPFS Loader success:', ipfsUrl, 'Size:', data.byteLength);
+              console.log('IPFS Loader success:', ipfsUrl, 'Size:', typeof data === 'string' ? data.length : data.byteLength);
               
               // HLS.js expects a specific response format
               const response = {
