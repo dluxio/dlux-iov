@@ -1,4 +1,4 @@
-this.version = "2025.06.06.23";
+this.version = "2025.06.06.24";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.06.23",
-  "generated": "2025-06-06T05:32:46Z",
+  "version": "2025.06.06.24",
+  "generated": "2025-06-06T06:13:34Z",
   "files": {
-    "/img/meta/storage1.png": {
-      "checksum": "cb96e8a07b06496384d31e9a30015f9a",
-      "size": 434519,
-      "priority": "important"
-    },
     "/img/metaverse-vr-comp.jpg": {
       "checksum": "82c7278828d85ace9036d87c72801e20",
       "size": 124780,
@@ -1111,7 +1106,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "5894a7027ddb3c8e98796e6f85da3813",
+      "checksum": "a8d93e6fbaab475c68bf154640b0a5bb",
       "size": 36317,
       "priority": "important"
     },
@@ -1166,8 +1161,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-hub.js": {
-      "checksum": "62054027675ed863b878309ffc74d35a",
-      "size": 59979,
+      "checksum": "9aa5f31599487769cf533106edc64184",
+      "size": 73737,
       "priority": "important"
     },
     "/js/v3-index.js": {
@@ -1301,7 +1296,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "f4474058f8cb95e66996151374d3a73a",
+      "checksum": "84bf22bd9fae0dbc35253bc075e0cf78",
       "size": 7300,
       "priority": "important"
     },
@@ -1374,11 +1369,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/dockerfile/dockerfile.js": {
-      "checksum": "b5c785d2bfcdf77920f75f2586899a11",
-      "size": 2704,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/ecl/ecl.js": {
       "checksum": "1965d86914bfbb2b793414e7eaffbbdb",
