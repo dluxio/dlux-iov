@@ -1,4 +1,4 @@
-this.version = "2025.06.06.20";
+this.version = "2025.06.06.21";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.06.20",
-  "generated": "2025-06-06T04:06:30Z",
+  "version": "2025.06.06.21",
+  "generated": "2025-06-06T04:48:28Z",
   "files": {
-    "/img/meta/index.png": {
-      "checksum": "cdfd8f211499d38909f21de002319d0b",
-      "size": 584134,
-      "priority": "important"
-    },
     "/img/meta/mint.png": {
       "checksum": "b307d0794d165eb0f52f5c642c56c647",
       "size": 642272,
@@ -1126,7 +1121,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "ab2b7f22ec0e664f48065bb8c1e12703",
+      "checksum": "53bce41de2f644ce8cc14be37d2de204",
       "size": 36317,
       "priority": "important"
     },
@@ -1201,8 +1196,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "f3812f400c4a9d527c03ce2af2cec196",
-      "size": 209617,
+      "checksum": "3af9fba4bc4c17ebe7454bbb3faf1c15",
+      "size": 209817,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1316,7 +1311,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "f9fd3edd38069dd20909299ee365c3f0",
+      "checksum": "75a360d409c0b6a6cdfab664372a9897",
       "size": 7300,
       "priority": "important"
     },
@@ -1389,11 +1384,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/css/css.js": {
-      "checksum": "b2fd45e97b30ceda399df4308236204e",
-      "size": 5331,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/cypher/cypher.js": {
       "checksum": "7c2e2ef3b4e6f2c6d44cbf812690e7ef",
