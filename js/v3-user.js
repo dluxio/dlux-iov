@@ -5585,19 +5585,19 @@ function buyNFT(setname, uid, price, type, callback){
             .then(data => {
               console.log('IPFS Loader success:', ipfsUrl, 'Size:', typeof data === 'string' ? data.length : data.byteLength);
               
-              // HLS.js expects a specific response format with stats object
-              const stats = {
-                trequest: performance.now(),
-                tfirst: performance.now(), 
-                tload: performance.now(),
-                mtime: new Date(),
-                retry: 0,
-                bw: data.length || data.byteLength,
-                size: data.length || data.byteLength,
-                url: ipfsUrl
+              // HLS.js expects exact response format matching XHR loader
+              const response = {
+                url: ipfsUrl,
+                data: data
               };
               
-              callbacks.onSuccess({ data: data, url: ipfsUrl }, stats, context);
+              const stats = {
+                loading: { start: performance.now(), first: performance.now(), end: performance.now() },
+                parsing: { start: performance.now(), end: performance.now() },
+                buffering: { start: performance.now(), first: performance.now(), end: performance.now() }
+              };
+              
+              callbacks.onSuccess(response, stats, context);
             })
             .catch(err => {
               console.error('IPFS Loader error:', err, 'URL:', ipfsUrl);
