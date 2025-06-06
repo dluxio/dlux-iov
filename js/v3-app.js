@@ -1459,9 +1459,24 @@ createApp({
       class IpfsLoader {
         constructor(config) {
           this.config = config;
+          this.stats = null;
+          this.context = null;
+          this.callbacks = null;
+          this.requestController = null;
         }
         
         load(context, config, callbacks) {
+          this.context = context;
+          this.callbacks = callbacks;
+          this.stats = {
+            trequest: performance.now(),
+            tfirst: 0,
+            tload: 0,
+            mtime: 0,
+            loaded: 0,
+            total: 0
+          };
+          
           const url = context.url;
           console.log('IPFS Loader loading:', url);
           
@@ -1484,11 +1499,17 @@ createApp({
           
           console.log('IPFS Loader fetching:', ipfsUrl);
           
-                      fetch(ipfsUrl)
+          // Create AbortController for request cancellation
+          this.requestController = new AbortController();
+          
+          fetch(ipfsUrl, { signal: this.requestController.signal })
             .then(response => {
               if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
               }
+              
+              this.stats.tfirst = Math.max(performance.now(), this.stats.trequest);
+              this.stats.total = parseInt(response.headers.get('content-length') || '0');
               
               // For manifests and level playlists, return text; for segments, return arrayBuffer
               if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level' || context.responseType === 'text') {
@@ -1498,7 +1519,10 @@ createApp({
               }
             })
             .then(data => {
-              console.log('IPFS Loader success:', ipfsUrl, 'Size:', typeof data === 'string' ? data.length : data.byteLength);
+              this.stats.tload = Math.max(this.stats.tfirst, performance.now());
+              this.stats.loaded = typeof data === 'string' ? data.length : data.byteLength;
+              
+              console.log('IPFS Loader success:', ipfsUrl, 'Size:', this.stats.loaded);
               
               // HLS.js expects exact response format matching XHR loader
               const response = {
@@ -1506,15 +1530,14 @@ createApp({
                 data: data
               };
               
-              const stats = {
-                loading: { start: performance.now(), first: performance.now(), end: performance.now() },
-                parsing: { start: performance.now(), end: performance.now() },
-                buffering: { start: performance.now(), first: performance.now(), end: performance.now() }
-              };
-              
-              callbacks.onSuccess(response, stats, context);
+              // Pass proper stats object that HLS.js expects
+              callbacks.onSuccess(response, this.stats, context);
             })
             .catch(err => {
+              if (err.name === 'AbortError') {
+                console.log('IPFS Loader request was aborted');
+                return;
+              }
               console.error('IPFS Loader error:', err, 'URL:', ipfsUrl);
               callbacks.onError({ 
                 code: err.code || 'NETWORK_ERROR', 
@@ -1525,10 +1548,18 @@ createApp({
         
         abort() {
           console.log('IPFS Loader: abort called');
+          if (this.requestController) {
+            this.requestController.abort();
+            this.requestController = null;
+          }
         }
         
         destroy() {
           console.log('IPFS Loader: destroy called');
+          this.abort();
+          this.stats = null;
+          this.context = null;
+          this.callbacks = null;
         }
       }
       
