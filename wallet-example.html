@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DLUX Wallet Example - Subdomain Integration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .status {
+            background: #333;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success { background: #2d5a2d; }
+        .error { background: #5a2d2d; }
+        .warning { background: #5a5a2d; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #666; cursor: not-allowed; }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 3px;
+        }
+        pre {
+            background: #222;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔗 DLUX Wallet Integration Example</h1>
+    <p>This example demonstrates how to use the DLUX Wallet on subdomains to communicate with the main DLUX domains.</p>
+
+    <!-- Wallet Status -->
+    <div id="status" class="status">
+        <h3>📊 Wallet Status</h3>
+        <div id="statusContent">Initializing...</div>
+    </div>
+
+    <!-- Current User -->
+    <div id="userSection" class="status">
+        <h3>👤 Current User</h3>
+        <div id="currentUser">Unknown</div>
+        <button onclick="getCurrentUser()">Refresh User Info</button>
+    </div>
+
+    <!-- Navigation Requests -->
+    <div class="status">
+        <h3>🧭 Navigation Requests</h3>
+        <p>Request navigation to a user profile or post (requires user confirmation):</p>
+        <input type="text" id="navPath" placeholder="/@username or /@username/permlink" value="/@disregardfiat">
+        <button onclick="requestNavigation()">Request Navigation</button>
+        <div id="navResult"></div>
+    </div>
+
+    <!-- Transaction Signing -->
+    <div class="status">
+        <h3>✍️ Transaction Signing</h3>
+        <p>Sign a Hive transaction (requires user confirmation):</p>
+        
+        <h4>Quick Vote Example:</h4>
+        <input type="text" id="voteAuthor" placeholder="Author" value="disregardfiat">
+        <input type="text" id="votePermlink" placeholder="Permlink" value="dlux-monthly-update-november-2024">
+        <input type="number" id="voteWeight" placeholder="Weight (0-10000)" value="10000" min="0" max="10000">
+        <button onclick="signVoteTransaction()">Sign Vote Transaction</button>
+        
+        <h4>Custom Transaction:</h4>
+        <textarea id="customTx" rows="6" placeholder="Enter custom transaction JSON">
+[
+  "username",
+  [
+    [
+      "vote",
+      {
+        "voter": "username",
+        "author": "disregardfiat",
+        "permlink": "dlux-monthly-update-november-2024",
+        "weight": 10000
+      }
+    ]
+  ],
+  "posting"
+]</textarea>
+        <button onclick="signCustomTransaction()">Sign Custom Transaction</button>
+        <div id="txResult"></div>
+    </div>
+
+    <!-- Sign Only (No Broadcast) -->
+    <div class="status">
+        <h3>✍️ Sign Only (No Broadcast)</h3>
+        <p>Sign a transaction without broadcasting to blockchain (requires user confirmation):</p>
+        
+        <h4>Quick Vote (Sign Only):</h4>
+        <input type="text" id="signOnlyAuthor" placeholder="Author" value="disregardfiat">
+        <input type="text" id="signOnlyPermlink" placeholder="Permlink" value="dlux-monthly-update-november-2024">
+        <input type="number" id="signOnlyWeight" placeholder="Weight (0-10000)" value="10000" min="0" max="10000">
+        <button onclick="signOnlyVoteTransaction()">Sign Vote (No Broadcast)</button>
+        
+        <h4>Custom Sign Only:</h4>
+        <textarea id="signOnlyTx" rows="6" placeholder="Enter transaction to sign (no broadcast)">
+[
+  "username",
+  [
+    [
+      "vote",
+      {
+        "voter": "username",
+        "author": "disregardfiat",
+        "permlink": "dlux-monthly-update-november-2024",
+        "weight": 10000
+      }
+    ]
+  ],
+  "posting"
+]</textarea>
+        <button onclick="signOnlyCustomTransaction()">Sign Only Custom Transaction</button>
+        <div id="signOnlyResult"></div>
+    </div>
+
+    <!-- Challenge Signing -->
+    <div class="status">
+        <h3>🔐 Challenge Signing</h3>
+        <p>Sign a challenge/buffer (requires user confirmation):</p>
+        <input type="text" id="challenge" placeholder="Challenge string" value="test-challenge-123">
+        <select id="keyType">
+            <option value="posting">Posting</option>
+            <option value="active">Active</option>
+            <option value="memo">Memo</option>
+        </select>
+        <button onclick="signChallenge()">Sign Challenge</button>
+        <div id="challengeResult"></div>
+    </div>
+
+    <!-- Device Connection -->
+    <div class="status">
+        <h3>📱 Device Connection</h3>
+        <p>Connect devices for cross-device signing (perfect for VR headsets!):</p>
+        
+        <div id="deviceStatus" class="status">
+            <h4>Device Status</h4>
+            <div id="deviceStatusContent">Not connected</div>
+            <button onclick="checkDeviceStatus()">Refresh Status</button>
+            <button id="disconnectBtn" onclick="disconnectDevice()" disabled>Disconnect</button>
+        </div>
+
+        <h4>Create Pairing Code (Signing Device):</h4>
+        <p>Generate a 6-digit code for another device to connect to this wallet</p>
+        <button onclick="createPairingCode()">Create Pairing Code</button>
+        <div id="pairingResult"></div>
+
+        <h4>Connect to Device (Requesting Device):</h4>
+        <p>Connect to another device using a 6-digit pairing code</p>
+        <input type="text" id="pairCodeInput" placeholder="Enter 6-digit code" maxlength="6" style="margin-right: 10px;">
+        <button onclick="connectToDevice()">Connect to Device</button>
+        <div id="deviceConnectionResult"></div>
+
+        <h4>Remote Transaction Signing:</h4>
+        <p>Send transaction to connected device for signing</p>
+        <input type="text" id="remoteAuthor" placeholder="Author" value="disregardfiat">
+        <input type="text" id="remotePermlink" placeholder="Permlink" value="dlux-monthly-update-november-2024">
+        <input type="number" id="remoteWeight" placeholder="Weight (0-10000)" value="5000" min="0" max="10000">
+        <label><input type="checkbox" id="remoteBroadcast" checked> Broadcast transaction</label><br>
+        <button id="remoteSignBtn" onclick="sendRemoteSignRequest()" disabled>Send Remote Sign Request</button>
+        <div id="remoteSignResult"></div>
+
+        <h4>Remote Challenge Signing:</h4>
+        <p>Send challenge to connected device for signing</p>
+        <input type="text" id="remoteChallengeInput" placeholder="Challenge string" value="remote-test-123">
+        <select id="remoteKeyType">
+            <option value="posting">Posting</option>
+            <option value="active">Active</option>
+            <option value="memo">Memo</option>
+        </select>
+        <button id="remoteChallengeBtn" onclick="sendRemoteChallengeRequest()" disabled>Send Remote Challenge Request</button>
+        <div id="remoteChallengeResult"></div>
+    </div>
+
+    <!-- Event Log -->
+    <div class="status">
+        <h3>📝 Event Log</h3>
+        <button onclick="clearLog()">Clear Log</button>
+        <pre id="eventLog"></pre>
+    </div>
+
+    <!-- Load DLUX Wallet Script -->
+    <script src="/js/dlux-wallet.js"></script>
+    
+    <script>
+        // Global variables
+        let wallet = null;
+        let eventLog = [];
+
+        // Utility functions
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
+            eventLog.push(logEntry);
+            updateEventLog();
+            console.log(logEntry);
+        }
+
+        function updateEventLog() {
+            document.getElementById('eventLog').textContent = eventLog.slice(-20).join('\n');
+        }
+
+        function clearLog() {
+            eventLog = [];
+            updateEventLog();
+        }
+
+        function updateStatus() {
+            if (!wallet) {
+                document.getElementById('statusContent').innerHTML = '❌ Wallet not initialized';
+                return;
+            }
+
+            const status = wallet.getStatus();
+            document.getElementById('statusContent').innerHTML = `
+                <strong>Ready:</strong> ${status.ready ? '✅' : '❌'}<br>
+                <strong>Master Domain:</strong> ${status.master || 'None'}<br>
+                <strong>Current User:</strong> ${status.user || 'None'}<br>
+                <strong>Pending Messages:</strong> ${status.pendingMessages}
+            `;
+
+            document.getElementById('currentUser').textContent = status.user || 'No user logged in';
+            
+            // Update device status
+            updateDeviceStatus();
+        }
+
+        function updateDeviceStatus() {
+            if (!wallet) {
+                return;
+            }
+
+            const deviceStatus = wallet.getDeviceStatus();
+            const deviceStatusDiv = document.getElementById('deviceStatusContent');
+            
+            if (deviceStatus.isConnected) {
+                deviceStatusDiv.innerHTML = `
+                    <span class="success">✅ Connected as ${deviceStatus.role}</span><br>
+                    <strong>Session:</strong> ${deviceStatus.sessionId ? deviceStatus.sessionId.substring(0, 8) + '...' : 'None'}<br>
+                    ${deviceStatus.pairCode ? `<strong>Pair Code:</strong> ${deviceStatus.pairCode}` : ''}
+                `;
+                document.getElementById('disconnectBtn').disabled = false;
+                document.getElementById('remoteSignBtn').disabled = deviceStatus.role !== 'requester';
+                document.getElementById('remoteChallengeBtn').disabled = deviceStatus.role !== 'requester';
+            } else {
+                deviceStatusDiv.innerHTML = '<span class="warning">❌ Not connected</span>';
+                document.getElementById('disconnectBtn').disabled = true;
+                document.getElementById('remoteSignBtn').disabled = true;
+                document.getElementById('remoteChallengeBtn').disabled = true;
+            }
+        }
+
+        // Wallet API functions
+        async function getCurrentUser() {
+            try {
+                const user = await wallet.getCurrentUser();
+                log(`Current user: ${user || 'None'}`);
+                updateStatus();
+            } catch (error) {
+                log(`Failed to get user: ${error.message}`, 'error');
+            }
+        }
+
+        async function requestNavigation() {
+            const path = document.getElementById('navPath').value;
+            const resultDiv = document.getElementById('navResult');
+            
+            try {
+                log(`Requesting navigation to: ${path}`);
+                const result = await wallet.requestNavigation(path);
+                resultDiv.innerHTML = `<span class="success">✅ Navigation request successful</span>`;
+                log(`Navigation successful: ${result}`);
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Navigation failed: ${error.message}</span>`;
+                log(`Navigation failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function signVoteTransaction() {
+            const author = document.getElementById('voteAuthor').value;
+            const permlink = document.getElementById('votePermlink').value;
+            const weight = parseInt(document.getElementById('voteWeight').value);
+            const resultDiv = document.getElementById('txResult');
+
+            if (!wallet.currentUser) {
+                resultDiv.innerHTML = `<span class="error">❌ No user logged in</span>`;
+                return;
+            }
+
+            const transaction = [
+                wallet.currentUser,
+                [
+                    [
+                        "vote",
+                        {
+                            voter: wallet.currentUser,
+                            author: author,
+                            permlink: permlink,
+                            weight: weight
+                        }
+                    ]
+                ],
+                "posting"
+            ];
+
+            try {
+                log(`Signing vote transaction for ${author}/${permlink}`);
+                const result = await wallet.signTransaction(transaction);
+                resultDiv.innerHTML = `<span class="success">✅ Transaction signed successfully</span>`;
+                log(`Transaction result: ${JSON.stringify(result)}`);
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Transaction failed: ${error.message}</span>`;
+                log(`Transaction failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function signCustomTransaction() {
+            const txJson = document.getElementById('customTx').value;
+            const resultDiv = document.getElementById('txResult');
+
+            try {
+                const transaction = JSON.parse(txJson);
+                log(`Signing custom transaction`);
+                const result = await wallet.signTransaction(transaction);
+                resultDiv.innerHTML = `<span class="success">✅ Custom transaction signed successfully</span>`;
+                log(`Transaction result: ${JSON.stringify(result)}`);
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Custom transaction failed: ${error.message}</span>`;
+                log(`Custom transaction failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function signOnlyVoteTransaction() {
+            const author = document.getElementById('signOnlyAuthor').value;
+            const permlink = document.getElementById('signOnlyPermlink').value;
+            const weight = parseInt(document.getElementById('signOnlyWeight').value);
+            const resultDiv = document.getElementById('signOnlyResult');
+
+            if (!wallet.currentUser) {
+                resultDiv.innerHTML = `<span class="error">❌ No user logged in</span>`;
+                return;
+            }
+
+            const transaction = [
+                wallet.currentUser,
+                [
+                    [
+                        "vote",
+                        {
+                            voter: wallet.currentUser,
+                            author: author,
+                            permlink: permlink,
+                            weight: weight
+                        }
+                    ]
+                ],
+                "posting"
+            ];
+
+            try {
+                log(`Signing vote transaction (no broadcast) for ${author}/${permlink}`);
+                const result = await wallet.signOnly(transaction);
+                resultDiv.innerHTML = `<span class="success">✅ Transaction signed (not broadcasted)</span>`;
+                log(`Sign-only result: ${JSON.stringify(result)}`);
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Sign-only failed: ${error.message}</span>`;
+                log(`Sign-only failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function signOnlyCustomTransaction() {
+            const txJson = document.getElementById('signOnlyTx').value;
+            const resultDiv = document.getElementById('signOnlyResult');
+
+            try {
+                const transaction = JSON.parse(txJson);
+                log(`Signing custom transaction (no broadcast)`);
+                const result = await wallet.signOnly(transaction);
+                resultDiv.innerHTML = `<span class="success">✅ Custom transaction signed (not broadcasted)</span>`;
+                log(`Sign-only result: ${JSON.stringify(result)}`);
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Sign-only failed: ${error.message}</span>`;
+                log(`Sign-only failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function signChallenge() {
+            const challenge = document.getElementById('challenge').value;
+            const keyType = document.getElementById('keyType').value;
+            const resultDiv = document.getElementById('challengeResult');
+
+            try {
+                log(`Signing challenge with ${keyType} key`);
+                const signature = await wallet.signChallenge(challenge, keyType);
+                resultDiv.innerHTML = `<span class="success">✅ Challenge signed: ${signature.substring(0, 20)}...</span>`;
+                log(`Challenge signature: ${signature}`);
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Challenge signing failed: ${error.message}</span>`;
+                log(`Challenge signing failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Device connection functions
+        async function createPairingCode() {
+            const resultDiv = document.getElementById('pairingResult');
+            
+            try {
+                log('Creating device pairing code...');
+                const pairCode = await wallet.requestDevicePairing();
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ Pairing code created: <strong style="font-size: 24px; color: #4CAF50;">${pairCode}</strong><br>
+                        <small>Share this code with the device you want to connect. Code expires in 5 minutes.</small>
+                    </div>
+                `;
+                log(`Pairing code created: ${pairCode}`);
+                updateDeviceStatus();
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Failed to create pairing code: ${error.message}</span>`;
+                log(`Pairing code creation failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function connectToDevice() {
+            const pairCode = document.getElementById('pairCodeInput').value.trim().toUpperCase();
+            const resultDiv = document.getElementById('deviceConnectionResult');
+            
+            if (!pairCode || pairCode.length !== 6) {
+                resultDiv.innerHTML = `<span class="error">❌ Please enter a valid 6-character pairing code</span>`;
+                return;
+            }
+
+            try {
+                log(`Connecting to device with code: ${pairCode}`);
+                const success = await wallet.connectToDevice(pairCode);
+                if (success) {
+                    resultDiv.innerHTML = `<span class="success">✅ Successfully connected to device!</span>`;
+                    log(`Connected to device successfully`);
+                    updateDeviceStatus();
+                    document.getElementById('pairCodeInput').value = '';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Connection failed: ${error.message}</span>`;
+                log(`Device connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function disconnectDevice() {
+            try {
+                log('Disconnecting from device...');
+                await wallet.disconnectDevice();
+                log('Disconnected from device');
+                updateDeviceStatus();
+                
+                // Clear results
+                document.getElementById('pairingResult').innerHTML = '';
+                document.getElementById('deviceConnectionResult').innerHTML = '';
+                document.getElementById('remoteSignResult').innerHTML = '';
+                document.getElementById('remoteChallengeResult').innerHTML = '';
+            } catch (error) {
+                log(`Device disconnection error: ${error.message}`, 'error');
+            }
+        }
+
+        function checkDeviceStatus() {
+            updateDeviceStatus();
+            log('Device status refreshed');
+        }
+
+        async function sendRemoteSignRequest() {
+            const author = document.getElementById('remoteAuthor').value;
+            const permlink = document.getElementById('remotePermlink').value;
+            const weight = parseInt(document.getElementById('remoteWeight').value);
+            const broadcast = document.getElementById('remoteBroadcast').checked;
+            const resultDiv = document.getElementById('remoteSignResult');
+
+            if (!wallet.currentUser) {
+                resultDiv.innerHTML = `<span class="error">❌ No user logged in</span>`;
+                return;
+            }
+
+            const transaction = [
+                wallet.currentUser,
+                [
+                    [
+                        "vote",
+                        {
+                            voter: wallet.currentUser,
+                            author: author,
+                            permlink: permlink,
+                            weight: weight
+                        }
+                    ]
+                ],
+                "posting"
+            ];
+
+            try {
+                log(`Sending remote sign request (broadcast: ${broadcast})`);
+                resultDiv.innerHTML = `<span class="warning">⏳ Waiting for remote device to sign...</span>`;
+                
+                const result = await wallet.requestRemoteSign(transaction, { broadcast });
+                
+                if (result.signed) {
+                    resultDiv.innerHTML = `<span class="success">✅ Transaction ${broadcast ? 'signed and broadcasted' : 'signed'} remotely!</span>`;
+                    log(`Remote signing successful: ${JSON.stringify(result)}`);
+                } else {
+                    resultDiv.innerHTML = `<span class="error">❌ Remote signing failed or was cancelled</span>`;
+                    log(`Remote signing failed`);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Remote signing failed: ${error.message}</span>`;
+                log(`Remote signing failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function sendRemoteChallengeRequest() {
+            const challenge = document.getElementById('remoteChallengeInput').value;
+            const keyType = document.getElementById('remoteKeyType').value;
+            const resultDiv = document.getElementById('remoteChallengeResult');
+
+            try {
+                log(`Sending remote challenge sign request with ${keyType} key`);
+                resultDiv.innerHTML = `<span class="warning">⏳ Waiting for remote device to sign challenge...</span>`;
+                
+                const signature = await wallet.requestRemoteSignChallenge(challenge, keyType);
+                
+                if (signature) {
+                    resultDiv.innerHTML = `<span class="success">✅ Challenge signed remotely: ${signature.substring(0, 20)}...</span>`;
+                    log(`Remote challenge signing successful: ${signature}`);
+                } else {
+                    resultDiv.innerHTML = `<span class="error">❌ Remote challenge signing failed or was cancelled</span>`;
+                    log(`Remote challenge signing failed`);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Remote challenge signing failed: ${error.message}</span>`;
+                log(`Remote challenge signing failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize when wallet is ready
+        window.addEventListener('dlux-wallet-ready', (event) => {
+            wallet = window.dluxWallet;
+            log(`Wallet ready! Master: ${event.detail.master}, User: ${event.detail.user || 'None'}`);
+            updateStatus();
+        });
+
+        window.addEventListener('dlux-wallet-error', (event) => {
+            log(`Wallet error: ${event.detail.message}`, 'error');
+            updateStatus();
+        });
+
+        window.addEventListener('dlux-wallet-userChanged', (event) => {
+            log(`User changed: ${event.detail.user || 'None'}`);
+            updateStatus();
+        });
+
+        window.addEventListener('dlux-wallet-logout', () => {
+            log('User logged out');
+            updateStatus();
+        });
+
+        window.addEventListener('dlux-wallet-secure-window-opened', (event) => {
+            log('Secure wallet window opened - please complete your login there');
+            updateStatus();
+        });
+
+        // Device connection event listeners
+        window.addEventListener('dlux-wallet-device-pairing-created', (event) => {
+            log(`Device pairing created: ${event.detail.pairCode}, expires in ${event.detail.expiresIn}s`);
+            updateDeviceStatus();
+        });
+
+        window.addEventListener('dlux-wallet-device-connected', (event) => {
+            log(`Device connected! Session: ${event.detail.sessionId}`);
+            updateDeviceStatus();
+        });
+
+        window.addEventListener('dlux-wallet-device-disconnected', () => {
+            log('Device disconnected');
+            updateDeviceStatus();
+        });
+
+        window.addEventListener('dlux-wallet-device-request-received', (event) => {
+            log(`Device request received: ${event.detail.request.type}`);
+            // The parent domain will handle showing confirmation dialog
+        });
+
+        // Check if wallet is already ready
+        if (window.dluxWallet && window.dluxWallet.isWalletReady()) {
+            wallet = window.dluxWallet;
+            log('Wallet was already ready');
+            updateStatus();
+        }
+
+        // Initial status update
+        setTimeout(updateStatus, 1000);
+    </script>
+</body>
+</html> 

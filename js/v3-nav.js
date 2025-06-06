@@ -12,6 +12,8 @@ export default {
       userPinFeedback: "",
       passwordField: "",
       level: "posting",
+      // Wallet messaging
+      walletMessageListeners: new Map(),
       decrypted: {
         pin: false,
         accounts: {
@@ -450,6 +452,659 @@ export default {
     ...Mcommon,
     toggleChat() {
       this.chatVisible = !this.chatVisible;
+    },
+
+    // Wallet messaging methods
+    initWalletMessaging() {
+      console.log('[NavVue] Initializing wallet messaging...');
+      window.addEventListener('message', this.handleWalletMessage.bind(this));
+    },
+
+    handleWalletMessage(event) {
+      // Validate message structure
+      const message = event.data;
+      if (!message || message.source !== 'dlux-wallet') {
+        return;
+      }
+
+      console.log('[NavVue] Received wallet message:', message);
+
+      // Validate origin - only allow subdomain origins
+      const origin = new URL(event.origin);
+      const validSubdomains = [
+        /^[\w-]+\.ipfs\.dlux\.io$/,
+        /^[\w-]+\.dlux\.io$/,
+        /^[\w-]+\.test\.dlux\.io$/
+      ];
+
+      const isValidSubdomain = validSubdomains.some(pattern => pattern.test(origin.hostname));
+      if (!isValidSubdomain) {
+        console.log('[NavVue] Ignoring message from unauthorized origin:', event.origin);
+        return;
+      }
+
+      // Handle different message types
+      switch (message.type) {
+        case 'get-user':
+          this.handleGetUserRequest(message, event.source, event.origin);
+          break;
+        case 'request-navigation':
+          this.handleNavigationRequest(message, event.source, event.origin);
+          break;
+        case 'sign-transaction':
+          this.handleSignTransactionRequest(message, event.source, event.origin);
+          break;
+        case 'sign-only':
+          this.handleSignOnlyRequest(message, event.source, event.origin);
+          break;
+        case 'sign-challenge':
+          this.handleSignChallengeRequest(message, event.source, event.origin);
+          break;
+        case 'request-device-pairing':
+          this.handleDevicePairingRequest(message, event.source, event.origin);
+          break;
+        case 'connect-to-device':
+          this.handleDeviceConnectionRequest(message, event.source, event.origin);
+          break;
+        case 'disconnect-device':
+          this.handleDeviceDisconnectionRequest(message, event.source, event.origin);
+          break;
+        case 'request-remote-sign':
+          this.handleRemoteSignRequest(message, event.source, event.origin);
+          break;
+        case 'request-remote-sign-challenge':
+          this.handleRemoteSignChallengeRequest(message, event.source, event.origin);
+          break;
+        case 'poll-device-requests':
+          this.handleDeviceRequestsPolling(message, event.source, event.origin);
+          break;
+        case 'respond-to-device-request':
+          this.handleDeviceRequestResponse(message, event.source, event.origin);
+          break;
+        default:
+          console.log('[NavVue] Unknown wallet message type:', message.type);
+      }
+    },
+
+    sendWalletResponse(messageId, data, error, targetWindow, targetOrigin) {
+      const response = {
+        id: messageId,
+        source: 'dlux-nav',
+        timestamp: Date.now(),
+        data: error ? null : data,
+        error: error || null
+      };
+
+      try {
+        targetWindow.postMessage(response, targetOrigin);
+        console.log('[NavVue] Sent wallet response:', response);
+      } catch (err) {
+        console.error('[NavVue] Failed to send wallet response:', err);
+      }
+    },
+
+    // Handle get user request (unrestricted)
+    handleGetUserRequest(message, sourceWindow, sourceOrigin) {
+      console.log('[NavVue] Handling get-user request from:', sourceOrigin);
+      
+      const userData = {
+        user: this.user || null,
+        isLoggedIn: !!this.user,
+        signerType: this.getActiveSignerType()
+      };
+
+      this.sendWalletResponse(message.id, userData, null, sourceWindow, sourceOrigin);
+    },
+
+    // Handle navigation request (requires confirmation)
+    async handleNavigationRequest(message, sourceWindow, sourceOrigin) {
+      console.log('[NavVue] Handling navigation request from:', sourceOrigin, message.data);
+      
+      try {
+        const { path } = message.data;
+        
+        if (!path) {
+          throw new Error('Navigation path is required');
+        }
+
+        // Validate path format
+        if (!path.match(/^\/@[a-zA-Z0-9.-]{3,16}(\/[\w-]+)?$/)) {
+          throw new Error('Invalid navigation path format');
+        }
+
+        // Show confirmation dialog
+        const confirmed = await this.showNavigationConfirmation(path, sourceOrigin);
+        
+        if (confirmed) {
+          // Perform navigation
+          const fullUrl = `${window.location.origin}${path}`;
+          window.location.href = fullUrl;
+          
+          this.sendWalletResponse(message.id, { success: true }, null, sourceWindow, sourceOrigin);
+        } else {
+          throw new Error('Navigation cancelled by user');
+        }
+      } catch (error) {
+        console.error('[NavVue] Navigation request failed:', error);
+        this.sendWalletResponse(message.id, null, error.message, sourceWindow, sourceOrigin);
+      }
+    },
+
+    // Handle transaction signing request (requires confirmation)
+    async handleSignTransactionRequest(message, sourceWindow, sourceOrigin) {
+      console.log('[NavVue] Handling sign-transaction request from:', sourceOrigin, message.data);
+      
+      try {
+        const { transaction } = message.data;
+        
+        if (!transaction || !Array.isArray(transaction)) {
+          throw new Error('Invalid transaction format');
+        }
+
+        if (!this.user) {
+          throw new Error('No user logged in');
+        }
+
+        // Show confirmation dialog
+        const confirmed = await this.showTransactionConfirmation(transaction, sourceOrigin);
+        
+        if (confirmed) {
+          // Sign the transaction using existing signing method
+          const result = await this.sign(transaction);
+          this.sendWalletResponse(message.id, { result, success: true }, null, sourceWindow, sourceOrigin);
+        } else {
+          throw new Error('Transaction cancelled by user');
+        }
+      } catch (error) {
+        console.error('[NavVue] Transaction signing failed:', error);
+        this.sendWalletResponse(message.id, null, error.message, sourceWindow, sourceOrigin);
+      }
+    },
+
+    // Handle sign-only request (requires confirmation)
+    async handleSignOnlyRequest(message, sourceWindow, sourceOrigin) {
+      console.log('[NavVue] Handling sign-only request from:', sourceOrigin, message.data);
+      
+      try {
+        const { transaction } = message.data;
+        
+        if (!transaction || !Array.isArray(transaction)) {
+          throw new Error('Invalid transaction format');
+        }
+
+        if (!this.user) {
+          throw new Error('No user logged in');
+        }
+
+        // Show confirmation dialog
+        const confirmed = await this.showSignOnlyConfirmation(transaction, sourceOrigin);
+        
+        if (confirmed) {
+          // Sign the transaction without broadcasting using existing signing method
+          const result = await this.signOnly(transaction);
+          this.sendWalletResponse(message.id, { result, success: true }, null, sourceWindow, sourceOrigin);
+        } else {
+          throw new Error('Sign-only operation cancelled by user');
+        }
+      } catch (error) {
+        console.error('[NavVue] Sign-only failed:', error);
+        this.sendWalletResponse(message.id, null, error.message, sourceWindow, sourceOrigin);
+      }
+    },
+
+    // Handle challenge signing request (requires confirmation)
+    async handleSignChallengeRequest(message, sourceWindow, sourceOrigin) {
+      console.log('[NavVue] Handling sign-challenge request from:', sourceOrigin, message.data);
+      
+      try {
+        const { challenge, keyType, username } = message.data;
+        
+        if (!challenge) {
+          throw new Error('Challenge is required');
+        }
+
+        if (!this.user) {
+          throw new Error('No user logged in');
+        }
+
+        if (username && username !== this.user) {
+          throw new Error('Username mismatch');
+        }
+
+        // Show confirmation dialog
+        const confirmed = await this.showChallengeConfirmation(challenge, keyType || 'posting', sourceOrigin);
+        
+        if (confirmed) {
+          // Sign the challenge using existing signing method
+          const op = [this.user, challenge, keyType || 'posting'];
+          const signature = await this.signOnly(op);
+          
+          this.sendWalletResponse(message.id, { signature }, null, sourceWindow, sourceOrigin);
+        } else {
+          throw new Error('Challenge signing cancelled by user');
+        }
+      } catch (error) {
+        console.error('[NavVue] Challenge signing failed:', error);
+        this.sendWalletResponse(message.id, null, error.message, sourceWindow, sourceOrigin);
+      }
+    },
+
+    // Confirmation dialogs
+    showNavigationConfirmation(path, sourceOrigin) {
+      return new Promise((resolve) => {
+        const domain = new URL(sourceOrigin).hostname;
+        const confirmed = confirm(
+          `${domain} wants to navigate to:\n${path}\n\nDo you want to allow this navigation?`
+        );
+        resolve(confirmed);
+      });
+    },
+
+    showTransactionConfirmation(transaction, sourceOrigin) {
+      return new Promise((resolve) => {
+        const domain = new URL(sourceOrigin).hostname;
+        const opCount = transaction[1] ? transaction[1].length : 0;
+        const confirmed = confirm(
+          `${domain} wants to sign a Hive transaction with ${opCount} operation(s).\n\nDo you want to allow this transaction signing?`
+        );
+        resolve(confirmed);
+      });
+    },
+
+    showSignOnlyConfirmation(transaction, sourceOrigin) {
+      return new Promise((resolve) => {
+        const domain = new URL(sourceOrigin).hostname;
+        const opCount = transaction[1] ? transaction[1].length : 0;
+        const confirmed = confirm(
+          `${domain} wants to sign a Hive transaction with ${opCount} operation(s) WITHOUT broadcasting it to the blockchain.\n\nThis will create a signed transaction that can be broadcast later.\n\nDo you want to allow this signing?`
+        );
+        resolve(confirmed);
+      });
+    },
+
+    showChallengeConfirmation(challenge, keyType, sourceOrigin) {
+      return new Promise((resolve) => {
+        const domain = new URL(sourceOrigin).hostname;
+        const confirmed = confirm(
+          `${domain} wants to sign a challenge with your ${keyType} key.\n\nChallenge: ${challenge.substring(0, 50)}${challenge.length > 50 ? '...' : ''}\n\nDo you want to allow this signing?`
+        );
+        resolve(confirmed);
+      });
+    },
+
+    getActiveSignerType() {
+      if (this.HAS) return 'HAS';
+      if (this.HKC) return 'HKC';
+      if (this.PEN) return 'PEN';
+      if (this.HSR) return 'HSR';
+      return 'none';
+    },
+
+    // Broadcast user changes to connected wallets
+    broadcastUserChange() {
+      // This would be called when user logs in/out
+      const message = {
+        type: 'user-changed',
+        source: 'dlux-nav',
+        data: { user: this.user },
+        timestamp: Date.now()
+      };
+
+      // Send to all connected wallet sources (if we track them)
+      // For now, we'll just log this
+      console.log('[NavVue] Broadcasting user change:', message);
+    },
+
+    // Device pairing methods
+    async handleDevicePairingRequest(message, sourceWindow, sourceOrigin) {
+      console.log('[NavVue] Handling device pairing request from:', sourceOrigin);
+      
+      try {
+        if (!this.user) {
+          throw new Error('No user logged in');
+        }
+
+        // Create signed challenge for authentication
+        const challenge = Math.floor(Date.now() / 1000).toString();
+        const signature = await this.signChallenge(challenge, 'posting');
+        
+        // Call backend API to create pairing code
+        const response = await fetch('https://data.dlux.io/api/device/pair', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-account': this.user,
+            'x-challenge': challenge,
+            'x-pubkey': this.getPublicKey('posting'),
+            'x-signature': signature
+          }
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to create pairing code');
+        }
+
+        const result = await response.json();
+        this.sendWalletResponse(message.id, result, null, sourceWindow, sourceOrigin);
+        
+      } catch (error) {
+        console.error('[NavVue] Device pairing failed:', error);
+        this.sendWalletResponse(message.id, null, error.message, sourceWindow, sourceOrigin);
+      }
+    },
+
+    async handleDeviceConnectionRequest(message, sourceWindow, sourceOrigin) {
+      console.log('[NavVue] Handling device connection request from:', sourceOrigin, message.data);
+      
+      try {
+        const { pairCode } = message.data;
+        
+        if (!pairCode) {
+          throw new Error('Pairing code is required');
+        }
+
+        // Call backend API to connect to device
+        const response = await fetch('https://data.dlux.io/api/device/connect', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ pairCode })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to connect to device');
+        }
+
+        const result = await response.json();
+        this.sendWalletResponse(message.id, result, null, sourceWindow, sourceOrigin);
+        
+      } catch (error) {
+        console.error('[NavVue] Device connection failed:', error);
+        this.sendWalletResponse(message.id, null, error.message, sourceWindow, sourceOrigin);
+      }
+    },
+
+    async handleDeviceDisconnectionRequest(message, sourceWindow, sourceOrigin) {
+      console.log('[NavVue] Handling device disconnection request from:', sourceOrigin);
+      
+      try {
+        const { sessionId } = message.data;
+        
+        if (sessionId) {
+          // Call backend API to disconnect device
+          const response = await fetch('https://data.dlux.io/api/device/disconnect', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ sessionId })
+          });
+          
+          // Don't throw on disconnect errors, just log them
+          if (!response.ok) {
+            console.log('Disconnect API error (non-fatal):', await response.text());
+          }
+        }
+
+        this.sendWalletResponse(message.id, { success: true }, null, sourceWindow, sourceOrigin);
+        
+      } catch (error) {
+        console.error('[NavVue] Device disconnection error:', error);
+        this.sendWalletResponse(message.id, { success: true }, null, sourceWindow, sourceOrigin);
+      }
+    },
+
+    async handleRemoteSignRequest(message, sourceWindow, sourceOrigin) {
+      console.log('[NavVue] Handling remote sign request from:', sourceOrigin, message.data);
+      
+      try {
+        const { sessionId, transaction, broadcast, timeout } = message.data;
+        
+        if (!sessionId || !transaction) {
+          throw new Error('Session ID and transaction are required');
+        }
+
+        // Call backend API to send request to signing device
+        const response = await fetch('https://data.dlux.io/api/device/request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            sessionId,
+            type: 'sign-transaction',
+            data: { transaction, broadcast },
+            timeout: timeout || 60000
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to send remote sign request');
+        }
+
+        const result = await response.json();
+        this.sendWalletResponse(message.id, result, null, sourceWindow, sourceOrigin);
+        
+      } catch (error) {
+        console.error('[NavVue] Remote sign request failed:', error);
+        this.sendWalletResponse(message.id, null, error.message, sourceWindow, sourceOrigin);
+      }
+    },
+
+    async handleRemoteSignChallengeRequest(message, sourceWindow, sourceOrigin) {
+      console.log('[NavVue] Handling remote sign challenge request from:', sourceOrigin, message.data);
+      
+      try {
+        const { sessionId, challenge, keyType, timeout } = message.data;
+        
+        if (!sessionId || !challenge) {
+          throw new Error('Session ID and challenge are required');
+        }
+
+        // Call backend API to send request to signing device
+        const response = await fetch('https://data.dlux.io/api/device/request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            sessionId,
+            type: 'sign-challenge',
+            data: { challenge, keyType },
+            timeout: timeout || 60000
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to send remote challenge request');
+        }
+
+        const result = await response.json();
+        this.sendWalletResponse(message.id, result, null, sourceWindow, sourceOrigin);
+        
+      } catch (error) {
+        console.error('[NavVue] Remote sign challenge request failed:', error);
+        this.sendWalletResponse(message.id, null, error.message, sourceWindow, sourceOrigin);
+      }
+    },
+
+    async handleDeviceRequestsPolling(message, sourceWindow, sourceOrigin) {
+      console.log('[NavVue] Handling device requests polling from:', sourceOrigin);
+      
+      try {
+        const { sessionId } = message.data;
+        
+        if (!sessionId) {
+          throw new Error('Session ID is required');
+        }
+
+        // Call backend API to get pending requests
+        const response = await fetch(`https://data.dlux.io/api/device/requests?sessionId=${sessionId}`);
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to poll device requests');
+        }
+
+        const result = await response.json();
+        
+        // If there are requests, show confirmation dialogs
+        if (result.requests && result.requests.length > 0) {
+          for (const request of result.requests) {
+            await this.handleIncomingDeviceRequest(request, sessionId);
+          }
+        }
+
+        this.sendWalletResponse(message.id, result, null, sourceWindow, sourceOrigin);
+        
+      } catch (error) {
+        console.error('[NavVue] Device requests polling failed:', error);
+        this.sendWalletResponse(message.id, null, error.message, sourceWindow, sourceOrigin);
+      }
+    },
+
+    async handleDeviceRequestResponse(message, sourceWindow, sourceOrigin) {
+      console.log('[NavVue] Handling device request response from:', sourceOrigin);
+      
+      try {
+        const { sessionId, requestId, response, error } = message.data;
+        
+        // Call backend API to send response
+        const apiResponse = await fetch('https://data.dlux.io/api/device/respond', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            sessionId,
+            requestId,
+            response,
+            error
+          })
+        });
+
+        if (!apiResponse.ok) {
+          const apiError = await apiResponse.json();
+          throw new Error(apiError.error || 'Failed to send device response');
+        }
+
+        const result = await apiResponse.json();
+        this.sendWalletResponse(message.id, result, null, sourceWindow, sourceOrigin);
+        
+      } catch (error) {
+        console.error('[NavVue] Device request response failed:', error);
+        this.sendWalletResponse(message.id, null, error.message, sourceWindow, sourceOrigin);
+      }
+    },
+
+    async handleIncomingDeviceRequest(request, sessionId) {
+      console.log('[NavVue] Handling incoming device request:', request);
+      
+      try {
+        let confirmed = false;
+        let result = null;
+        
+        if (request.type === 'sign-transaction') {
+          const { transaction, broadcast } = request.data;
+          confirmed = await this.showRemoteTransactionConfirmation(transaction, broadcast, request.deviceInfo);
+          
+          if (confirmed) {
+            if (broadcast) {
+              result = await this.sign(transaction);
+            } else {
+              result = await this.signOnly(transaction);
+            }
+          }
+        } else if (request.type === 'sign-challenge') {
+          const { challenge, keyType } = request.data;
+          confirmed = await this.showRemoteChallengeConfirmation(challenge, keyType, request.deviceInfo);
+          
+          if (confirmed) {
+            const op = [this.user, challenge, keyType || 'posting'];
+            result = await this.signOnly(op);
+          }
+        }
+
+        // Send response back to backend
+        await fetch('https://data.dlux.io/api/device/respond', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            sessionId,
+            requestId: request.id,
+            response: confirmed ? result : null,
+            error: confirmed ? null : 'User cancelled request'
+          })
+        });
+
+      } catch (error) {
+        console.error('[NavVue] Failed to handle device request:', error);
+        
+        // Send error response
+        try {
+          await fetch('https://data.dlux.io/api/device/respond', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              sessionId,
+              requestId: request.id,
+              response: null,
+              error: error.message
+            })
+          });
+        } catch (responseError) {
+          console.error('[NavVue] Failed to send error response:', responseError);
+        }
+      }
+    },
+
+    showRemoteTransactionConfirmation(transaction, broadcast, deviceInfo) {
+      return new Promise((resolve) => {
+        const opCount = transaction[1] ? transaction[1].length : 0;
+        const action = broadcast ? 'sign and broadcast' : 'sign (no broadcast)';
+        const deviceName = deviceInfo?.deviceName || 'Unknown device';
+        
+        const confirmed = confirm(
+          `Device "${deviceName}" wants to ${action} a Hive transaction with ${opCount} operation(s).\n\nDo you want to allow this remote transaction?`
+        );
+        resolve(confirmed);
+      });
+    },
+
+    showRemoteChallengeConfirmation(challenge, keyType, deviceInfo) {
+      return new Promise((resolve) => {
+        const deviceName = deviceInfo?.deviceName || 'Unknown device';
+        
+        const confirmed = confirm(
+          `Device "${deviceName}" wants to sign a challenge with your ${keyType} key.\n\nChallenge: ${challenge.substring(0, 50)}${challenge.length > 50 ? '...' : ''}\n\nDo you want to allow this remote signing?`
+        );
+        resolve(confirmed);
+      });
+    },
+
+    async signChallenge(challenge, keyType) {
+      // Create a simple challenge signing operation
+      const op = [this.user, challenge, keyType];
+      return await this.signOnly(op);
+    },
+
+    getPublicKey(keyType) {
+      // This would need to be implemented to return the actual public key
+      // For now, return a placeholder that would be replaced with actual implementation
+      if (this.PEN && this.decrypted.accounts[this.user]) {
+        // In a real implementation, you'd derive the public key from the private key
+        return 'STM' + '1'.repeat(50); // Placeholder
+      }
+      return null;
     },
     // Benchmark PBKDF2 to find iteration count for target duration
     async benchmarkPBKDF2(targetDurationMs = 2000) {
@@ -2452,6 +3107,9 @@ export default {
       };
       this.user = "";
       this.$emit("logout", "");
+      
+      // Broadcast user change to connected wallets
+      this.broadcastUserChange();
     },
     setUser(id) {
       const isAddingNewUser = !id && this.userField;
@@ -2481,6 +3139,9 @@ export default {
 
       localStorage.setItem("user", this.user);
       this.$emit("login", this.user);
+      
+      // Broadcast user change to connected wallets
+      this.broadcastUserChange();
 
       // Handle PEN setup for new user - only if wallet isn't already decrypted
       if (this.PEN && this.user) {
@@ -3506,6 +4167,9 @@ export default {
   },
   async mounted() {
     console.log('[NavVue] Component mounted. User:', this.user, 'Signer:', localStorage.getItem('signer'));
+
+    // Initialize wallet messaging for subdomain communication
+    this.initWalletMessaging();
 
     // Add click handler to prevent nav-bell dropdown from dismissing
     const navBellDropdown = document.querySelector('.nav-bell .dropdown-menu');
