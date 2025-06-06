@@ -24,7 +24,7 @@ export default {
 <a :href="'/@' + post.author" class="no-decoration">
 <span class="d-flex align-items-center">
 <h5 class="m-0 text-white-50">{{ post.author }}</h5>
-<span class="ms-1 badge small text-white-50" :class="{'rep-danger': post.rep < 25, 'rep-warning': post.rep >= 25 && post.rep < 50, 'rep-success': post.rep >= 50}">{{ post.rep }}</span></span></a>
+<span class="ms-1 badge small text-white-50" :class="{'rep-danger': replyRep < 25, 'rep-warning': replyRep >= 25 && replyRep < 50, 'rep-success': replyRep >= 50}">{{ replyRep }}</span></span></a>
 <span class="ms-1 text-muted">•</span>
 <vue-ratings v-if="post.rating" class="d-flex" :stars="post.rating"/>
 <span class="ms-1 small text-muted" style="font-weight: 400">{{ timeSince(post.created) }}</span>
@@ -71,11 +71,50 @@ export default {
       makeReply: false,
       makeVote: false,
       warn: false,
+      replyRep: "...",
+      replyAuthorInfo: null,
     };
   },
   emits: ['vote', 'reply'],
   methods: {
     ...MCommon,
+    async getReplyAuthorReputation() {
+      if (this.post.author && !this.replyAuthorInfo) {
+        try {
+          const response = await fetch("https://hive-api.dlux.io", {
+            body: JSON.stringify({
+              "jsonrpc": "2.0", 
+              "method": "condenser_api.get_accounts", 
+              "params": [[this.post.author]], 
+              "id": 1
+            }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+            method: "POST",
+          });
+          const data = await response.json();
+          if (data.result && data.result.length > 0) {
+            this.replyAuthorInfo = data.result[0];
+            this.updateReplyReputation();
+          }
+        } catch (error) {
+          console.error('Error fetching reply author reputation:', error);
+          if (this.post.author_reputation) {
+            this.replyRep = this.post.author_reputation
+          }
+        }
+      }
+    },
+    updateReplyReputation() {
+      if (this.post.author_reputation) {
+        this.replyRep = this.post.author_reputation
+      } else if (this.replyAuthorInfo && this.replyAuthorInfo.reputation) {
+        this.replyRep = this.replyAuthorInfo.reputation
+      } else if (this.post.rep && this.post.rep !== "...") {
+        this.replyRep = this.post.rep;
+      }
+    },
     pending(event) {
       this.mde = event
     },
@@ -119,7 +158,7 @@ export default {
       }
       this.$emit('reply', deets)
     },
-    formatNumber(t, n, r, e) { // number, decimals, decimal separator, thousands separator
+    formatNumber(t, n, r, e) {
       if (typeof t != "number") {
         const parts = t ? t.split(" ") : []
         var maybe = 0
@@ -151,8 +190,8 @@ export default {
       return parseFloat(a) > parseFloat(b);
     },
     hideLowRep() {
-      if (this.post.rep != '...') {
-        if (parseFloat(this.post.rep) < 25) {
+      if (this.replyRep !== '...') {
+        if (parseFloat(this.replyRep) < 25) {
           this.view = false;
           this.warn = true;
         }
@@ -167,18 +206,20 @@ export default {
   watch: {
     post: {
       handler() {
-        this.post.rep = this.readRep(this.post.author_reputation)
-        this.hideLowRep()
+        this.updateReplyReputation();
+        this.hideLowRep();
         try {
           if (this.post?.replies?.length != 0) this.first_replier_permlink = this.post.replies[0].permlink
         } catch (e) { }
       },
-      deep: true
+      deep: true,
+      immediate: true
     }
   },
   mounted() {
-    this.post.rep = this.readRep(this.post.author_reputation)
-    this.hideLowRep()
+    this.updateReplyReputation();
+    this.getReplyAuthorReputation();
+    this.hideLowRep();
   },
 };
 

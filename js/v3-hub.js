@@ -271,19 +271,19 @@ createApp({
         bitMask: 0,
         entry: "new",
         search: {
-          a: 10,
+          a: 20,
           o: 0,
           e: false,
           p: false,
         },
         new: {
-          a: 10, //amount
+          a: 20, //amount
           o: 0, //offset
           e: false, //end
           p: false, //pending - One pending request
         },
         trending: {
-          a: 10,
+          a: 20,
           o: 0,
           e: false,
           p: false,
@@ -291,7 +291,7 @@ createApp({
           start_permlink: '',
         },
         promoted: {
-          a: 10,
+          a: 20,
           o: 0,
           e: false,
           p: false,
@@ -299,7 +299,7 @@ createApp({
           start_permlink: '',
         },
         following: {
-          a: 10,
+          a: 20,
           o: 0,
           e: false,
           p: false,
@@ -307,7 +307,7 @@ createApp({
           start_permlink: '',
         },
         communities: {
-          a: 10,
+          a: 20,
           o: 0,
           e: false,
           p: false,
@@ -1213,14 +1213,13 @@ createApp({
           case 'promoted':
             method = 'bridge.get_ranked_posts';
             params = [{
-              sort: 'promoted',
+              sort: 'created',
               tag: '',
               observer: this.account || '',
               limit: this.postSelect[this.postSelect.entry].a,
               start_author: this.postSelect[this.postSelect.entry].start_author || '',
               start_permlink: this.postSelect[this.postSelect.entry].start_permlink || ''
             }];
-            console.log('Fetching promoted posts with params:', params);
             break;
           case 'following':
             if (!this.account) {
@@ -1315,9 +1314,12 @@ createApp({
                                  // Process vote data
                  if (post.active_votes && post.active_votes.length > 0) {
                    for (var j = 0; j < post.active_votes.length; j++) {
-                     if (post.active_votes[j].percent > 0)
+                     if (post.active_votes[j].percent > 0) {
                        this.posturls[key].upVotes++;
-                     else this.posturls[key].downVotes++;
+                     } else if (post.active_votes[j].percent < 0) {
+                       this.posturls[key].downVotes++;
+                     }
+                     // Skip percent === 0 (neutral/no vote)
                      
                      if (post.active_votes[j].voter === this.account) {
                        this.posturls[key].slider = post.active_votes[j].percent;
@@ -1336,10 +1338,22 @@ createApp({
                    if (typeof post.json_metadata === 'string') {
                      this.posturls[key].json_metadata = JSON.parse(post.json_metadata);
                    }
-                   this.posturls[key].pic = this.picFind(this.posturls[key].json_metadata);
+                   // Use different image finding logic for blog posts vs DLUX posts
+                   if (this.posturls[key].type === 'Blog') {
+                     this.posturls[key].pic = this.blogPicFind(this.posturls[key].json_metadata, post.body);
+                   } else {
+                     this.posturls[key].pic = this.picFind(this.posturls[key].json_metadata);
+                   }
                  } catch (e) {
                    console.log(key, "no JSON?");
                    this.posturls[key].json_metadata = {};
+                 }
+                 
+                 // Set reputation from post data for all posts (DLUX and Blog)
+                 if (post.author_reputation) {
+                   this.posturls[key].rep = post.author_reputation
+                 } else if (this.authors[post.author] && this.authors[post.author].reputation) {
+                   this.posturls[key].rep = this.authors[post.author].reputation
                  }
               }
               
@@ -1349,7 +1363,9 @@ createApp({
             
             this.selectPosts();
             authors = [...new Set(authors)];
-            this.getHiveAuthors(authors);
+            if (authors.length > 0) {
+              this.getHiveAuthors(authors);
+            }
           })
           .catch(error => {
             console.error('Error fetching Hive posts:', error);
@@ -1399,9 +1415,13 @@ createApp({
                 i < this.posturls[key].active_votes.length;
                 i++
               ) {
-                if (this.posturls[key].active_votes[i].percent > 0)
+                if (this.posturls[key].active_votes[i].percent > 0) {
                   this.posturls[key].upVotes++;
-                else this.posturls[key].downVotes++;
+                } else if (this.posturls[key].active_votes[i].percent < 0) {
+                  this.posturls[key].downVotes++;
+                }
+                // Skip percent === 0 (neutral/no vote)
+                
                 if (this.posturls[key].active_votes[i].voter == this.account) {
                   this.posturls[key].slider = this.posturls[key].active_votes[i].percent
                   this.posturls[key].hasVoted = true
@@ -1455,8 +1475,15 @@ createApp({
               if (contracts) {
                 this.getContracts(key)
               }
-              this.posturls[key].rep = "...";
-              this.rep(key);
+              // Set reputation using same logic as blog posts
+              if (this.posturls[key].author_reputation) {
+                this.posturls[key].rep = this.posturls[key].author_reputation;
+              } else if (this.authors[this.posturls[key].author] && this.authors[this.posturls[key].author].reputation) {
+                this.posturls[key].rep = this.authors[this.posturls[key].author].reputation;
+              } else {
+                this.posturls[key].rep = "...";
+                this.rep(key);
+              }
               if (this.posturls[key].slider < 0) {
                 this.posturls[key].slider =
                   this.posturls[key].slider * -1;
@@ -1604,26 +1631,54 @@ createApp({
         return "/img/dlux-logo-icon.png";
       }
     },
-    readRep(rep2) {
-      function log10(str) {
-        const leadingDigits = parseInt(str.substring(0, 4));
-        const log = Math.log(leadingDigits) / Math.LN10 + 0.00000001;
-        const n = str.length - 1;
-        return n + (log - parseInt(log));
+    blogPicFind(json, body) {
+      // For blog posts, search JSON metadata first, then post body
+      console.log('DEBUG: blogPicFind called with json:', json);
+      console.log('DEBUG: body length:', body?.length, 'body preview:', body?.substr(0, 100));
+      
+      var arr;
+      try {
+        arr = json.image[0];
+      } catch (e) { }
+      
+      // Check JSON metadata first
+      if (typeof json.image == "string") {
+        console.log('DEBUG: Found string image in json.image:', json.image);
+        return json.image;
+      } else if (typeof arr == "string") {
+        console.log('DEBUG: Found string image in json.image[0]:', arr);
+        return arr;
       }
-      if (rep2 == null) return rep2;
-      let rep = String(rep2);
-      const neg = rep.charAt(0) === "-";
-      rep = neg ? rep.substring(1) : rep;
-
-      let out = log10(rep);
-      if (isNaN(out)) out = 0;
-      out = Math.max(out - 9, 0); // @ -9, $0.50 earned is approx magnitude 1
-      out = (neg ? -1 : 1) * out;
-      out = out * 9 + 25; // 9 points per magnitude. center at 25
-      // base-line 0 to darken and < 0 to auto hide (grep rephide)
-      out = parseInt(out);
-      return out;
+      
+      // Search post body for markdown images ![alt](url)
+      try {
+        const imageMatches = body.match(/!\[.*?\]\((.*?)\)/);
+        if (imageMatches && imageMatches[1]) {
+          let imageUrl = imageMatches[1].trim();
+          console.log('DEBUG: Found markdown image:', imageUrl);
+          // Handle relative URLs
+          if (imageUrl.startsWith('http')) {
+            return imageUrl;
+          }
+        }
+      } catch (e) {
+        console.log('DEBUG: Error in markdown search:', e);
+      }
+      
+      // Search for any http/https URLs in the body as fallback
+      try {
+        const urlMatches = body.match(/https?:\/\/[^\s)]+\.(jpg|jpeg|png|gif|webp|svg)/gi);
+        if (urlMatches && urlMatches[0]) {
+          console.log('DEBUG: Found fallback image URL:', urlMatches[0]);
+          return urlMatches[0];
+        }
+      } catch (e) {
+        console.log('DEBUG: Error in fallback search:', e);
+      }
+      
+      // No image found
+      console.log('DEBUG: No image found for blog post');
+      return null;
     },
     getQuotes() {
       fetch( // Use constant COINGECKO_API
@@ -1717,9 +1772,7 @@ createApp({
           500
         );
       } else {
-        this.posturls[a].rep = this.readRep(
-          this.authors[this.posturls[a].author].reputation
-        );
+        this.posturls[a].rep = this.authors[this.posturls[a].author].reputation
       }
     },
     getTokenUser(user) {
@@ -1788,13 +1841,18 @@ createApp({
     },
     getHiveAuthors(users) {
       var q = "";
+      var newUsers = [];
       for (var i = 0; i < users.length; i++) {
-        if (!this.authors[users[i]]) q += `"${users[i]}",`;
+        if (!this.authors[users[i]]) {
+          q += `"${users[i]}",`;
+          newUsers.push(users[i]);
+        }
       }
       if (q.length > 0) {
         q = q.substring(0, q.length - 1);
+        console.log('Fetching author data for:', newUsers);
         fetch(HIVE_API, { // Use constant HIVE_API
-          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[[${q}]], "id":1}`,
+          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[${JSON.stringify(newUsers)}], "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
@@ -1802,11 +1860,22 @@ createApp({
         })
           .then((response) => response.json())
           .then((data) => {
+            console.log('Received author data for accounts without post reputation:', data.result?.length || 0, 'authors');
+            
             for (var i = 0; i < data.result.length; i++) {
               this.authors[data.result[i].name] = data.result[i];
+              console.log('Added author:', data.result[i].name, 'reputation:', data.result[i].reputation);
             }
+            
+            // Update reputation for newly loaded authors
+            this.updateReputationForPosts(data.result);
           })
           .catch(error => console.error('Error fetching Hive authors:', error)); // Add catch
+      } else {
+        console.log('All authors already cached, updating reputation for existing authors');
+        // Even if all authors are cached, make sure reputation is updated
+        const existingAuthors = users.map(username => this.authors[username]).filter(Boolean);
+        this.updateReputationForPosts(existingAuthors);
       }
     },
     
@@ -2078,6 +2147,29 @@ createApp({
         this.setupHLSPlayer(video);
       });
     },
+    updateReputationForPosts(authors) {
+      // Update reputation for posts when new author data becomes available
+      console.log('updateReputationForPosts called with', authors.length, 'authors');
+      for (const author of authors) {
+        if (author && author.reputation) {
+          let updatedCount = 0;
+          // Find all posts by this author and update their reputation
+          for (const postKey in this.posturls) {
+            if (this.posturls[postKey].author === author.name && this.posturls[postKey].rep === "...") {
+              // Try to use author_reputation from post first, then fall back to author reputation
+              const post = this.posturls[postKey];
+              if (post.author_reputation) {
+                post.rep = post.author_reputation
+              } else {
+                post.rep = author.reputation
+              }
+              updatedCount++;
+            }
+          }
+          console.log(`Updated reputation for ${author.name}: ${updatedCount} posts, reputation: ${author.reputation}`);
+        }
+      }
+    },
   },
   mounted() {
     // Initialize with hub tab as default
@@ -2144,14 +2236,25 @@ createApp({
     authors: {
       handler(newAuthors, oldAuthors) {
         // Update reputation for posts when author data becomes available
+        console.log('Authors watcher triggered, checking for reputation updates');
         for (const authorName in newAuthors) {
           if (newAuthors[authorName] && (!oldAuthors || !oldAuthors[authorName])) {
             // New author data available, update reputation for their posts
+            console.log(`New author data available for ${authorName}, updating posts`);
+            let updatedCount = 0;
             for (const postKey in this.posturls) {
               if (this.posturls[postKey].author === authorName && this.posturls[postKey].rep === "...") {
-                this.posturls[postKey].rep = this.readRep(newAuthors[authorName].reputation);
+                // Try to use author_reputation from post first, then fall back to author reputation
+                const post = this.posturls[postKey];
+                if (post.author_reputation) {
+                  post.rep = post.author_reputation
+                } else {
+                  post.rep = newAuthors[authorName].reputation
+                }
+                updatedCount++;
               }
             }
+            console.log(`Watcher updated ${updatedCount} posts for ${authorName}`);
           }
         }
       },

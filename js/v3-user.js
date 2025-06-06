@@ -3623,9 +3623,7 @@ function buyNFT(setname, uid, price, type, callback){
           500
         );
       } else {
-        this.posturls[a].rep = this.readRep(
-          this.authors[this.posturls[a].author].reputation
-        );
+        this.posturls[a].rep = this.authors[this.posturls[a].author].reputation
       }
     },
     addBens(obj) {

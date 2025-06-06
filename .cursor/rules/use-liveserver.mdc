@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+You are encouraged to use the liveserver for this project running at localhost:5508. There is no need to attempt to bring the server online, or manage it at all.
