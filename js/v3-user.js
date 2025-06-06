@@ -5570,8 +5570,14 @@ function buyNFT(setname, uid, price, type, callback){
             }
           };
           
+          console.log('🔥 === IPFS LOADER.LOAD() CALLED ===');
           const url = context.url;
-          console.log('IPFS Loader loading:', url, 'Context:', context);
+          console.log('🌐 URL:', url);
+          console.log('⚙️  Context:', context);
+          console.log('🔧 Config:', config);
+          console.log('📞 Callbacks:', callbacks);
+          console.log('🆔 Callbacks has onSuccess?', typeof callbacks.onSuccess);
+          console.log('🆔 Callbacks has onError?', typeof callbacks.onError);
           
           // Convert IPFS URLs to proper gateway URLs with filename hints
           let ipfsUrl = url;
@@ -5611,15 +5617,24 @@ function buyNFT(setname, uid, price, type, callback){
           // Create AbortController for request cancellation
           this.requestController = new AbortController();
           
-          fetch(ipfsUrl, { signal: this.requestController.signal })
+          console.log('🚀 STARTING FETCH REQUEST FOR:', ipfsUrl);
+          console.log('🔧 Fetch options:', { signal: this.requestController.signal });
+          
+          const fetchPromise = fetch(ipfsUrl, { signal: this.requestController.signal });
+          console.log('📡 Fetch promise created:', fetchPromise);
+          
+          fetchPromise
             .then(response => {
+              console.log('✅ FETCH RESPONSE RECEIVED:', response);
+              console.log('📊 Response status:', response.status, response.statusText);
+              console.log('📋 Response headers:');
+              for (const [key, value] of response.headers) {
+                console.log(`   ${key}: ${value}`);
+              }
+              
               if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
               }
-              
-              console.log('Response status:', response.status);
-              console.log('Response content-type:', response.headers.get('content-type'));
-              console.log('Response content-length:', response.headers.get('content-length'));
               
               this.stats.loading.first = Math.max(performance.now(), this.stats.loading.start);
               this.stats.parsing.start = this.stats.loading.first;
@@ -5628,19 +5643,26 @@ function buyNFT(setname, uid, price, type, callback){
               this.currentResponse = response;
               
               // For manifests and level playlists, return text; for segments, return arrayBuffer
+              let dataPromise;
               if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level' || context.responseType === 'text') {
-                return response.text();
+                console.log('📄 Processing as TEXT response');
+                dataPromise = response.text();
               } else {
-                return response.arrayBuffer();
+                console.log('🔢 Processing as ARRAYBUFFER response');
+                dataPromise = response.arrayBuffer();
               }
+              console.log('🔄 Data promise created:', dataPromise);
+              return dataPromise;
             })
             .then(data => {
+              console.log('🎉 DATA RECEIVED:', typeof data, data instanceof ArrayBuffer ? 'ArrayBuffer' : 'Not ArrayBuffer');
+              
               this.stats.loading.end = Math.max(this.stats.loading.first, performance.now());
               this.stats.parsing.end = this.stats.loading.end;
               const dataSize = typeof data === 'string' ? data.length : data.byteLength;
               
               // Detailed logging for debugging
-              console.log('IPFS Loader success:', ipfsUrl, 'Size:', dataSize);
+              console.log('🎯 IPFS Loader success:', ipfsUrl, 'Size:', dataSize);
               console.log('Data type:', typeof data);
               console.log('Is ArrayBuffer?', data instanceof ArrayBuffer);
               console.log('Is Uint8Array?', data instanceof Uint8Array);
@@ -5666,14 +5688,21 @@ function buyNFT(setname, uid, price, type, callback){
               };
               
               // Pass proper stats object that HLS.js expects
+              console.log('🚀 CALLING HLS.js onSuccess callback with:', responseObj);
               callbacks.onSuccess(responseObj, this.stats, context);
+              console.log('✅ HLS.js onSuccess callback completed');
             })
             .catch(err => {
+              console.log('❌ FETCH ERROR CAUGHT:', err);
+              console.log('Error name:', err.name);
+              console.log('Error message:', err.message);
+              console.log('Error stack:', err.stack);
+              
               if (err.name === 'AbortError') {
-                console.log('IPFS Loader request was aborted');
+                console.log('🛑 IPFS Loader request was aborted');
                 return;
               }
-              console.error('IPFS Loader error:', err, 'URL:', ipfsUrl);
+              console.error('💥 IPFS Loader error:', err, 'URL:', ipfsUrl);
               callbacks.onError({ 
                 code: err.code || 'NETWORK_ERROR', 
                 text: err.message || 'Failed to load IPFS content'
