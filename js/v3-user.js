@@ -5539,6 +5539,71 @@ function buyNFT(setname, uid, price, type, callback){
       this.hashingProgress.currentFile = '';
     },
     
+    createIpfsLoader() {
+      // Custom IPFS loader for HLS.js to properly handle IPFS URLs
+      class IpfsLoader {
+        constructor(config) {
+          this.config = config;
+        }
+        
+        load(context, config, callbacks) {
+          const url = context.url;
+          console.log('IPFS Loader loading:', url);
+          
+          // Convert IPFS URLs to proper gateway URLs with filename hints
+          let ipfsUrl = url;
+          if (url.includes('ipfs.dlux.io/ipfs/')) {
+            const cid = url.split('/ipfs/')[1].split('?')[0];
+            
+            // Determine file extension and filename based on URL or context
+            let filename = 'file';
+            if (url.includes('.m3u8') || context.type === 'manifest') {
+              filename = 'playlist.m3u8';
+            } else if (url.includes('.ts') || context.type === 'segment') {
+              filename = 'segment.ts';
+            }
+            
+            // Construct proper IPFS gateway URL with filename for MIME type detection
+            ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}?filename=${filename}`;
+          }
+          
+          console.log('IPFS Loader fetching:', ipfsUrl);
+          
+          fetch(ipfsUrl)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              }
+              return response.arrayBuffer();
+            })
+            .then(data => {
+              console.log('IPFS Loader success:', ipfsUrl, 'Size:', data.byteLength);
+              callbacks.onSuccess({ 
+                url: ipfsUrl, 
+                data: data 
+              });
+            })
+            .catch(err => {
+              console.error('IPFS Loader error:', err, 'URL:', ipfsUrl);
+              callbacks.onError({ 
+                code: err.code || 'NETWORK_ERROR', 
+                text: err.message || 'Failed to load IPFS content'
+              });
+            });
+        }
+        
+        abort() {
+          console.log('IPFS Loader: abort called');
+        }
+        
+        destroy() {
+          console.log('IPFS Loader: destroy called');
+        }
+      }
+      
+      return IpfsLoader;
+    },
+
     setupHLSPlayer(videoElement) {
       // Universal HLS.js setup for M3U8 video playback
       if (!videoElement || !videoElement.src) return;
@@ -5556,11 +5621,15 @@ function buyNFT(setname, uid, price, type, callback){
               videoElement.hlsInstance.destroy();
             }
             
-            // Create new HLS instance
+            // Create custom IPFS loader for better IPFS URL handling
+            const IpfsLoader = this.createIpfsLoader();
+            
+            // Create new HLS instance with custom IPFS loader
             const hls = new Hls({
               debug: false,
               enableWorker: true,
-              lowLatencyMode: false
+              lowLatencyMode: false,
+              loader: IpfsLoader
             });
             
             // Store instance on video element for cleanup
@@ -5595,7 +5664,7 @@ function buyNFT(setname, uid, price, type, callback){
               }
             });
             
-            console.log('HLS.js player setup complete for:', videoSrc);
+            console.log('HLS.js player with IPFS loader setup complete for:', videoSrc);
           } else {
             console.log('HLS.js not supported, using native playback');
           }

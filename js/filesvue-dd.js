@@ -893,6 +893,101 @@ export default {
             </div>
         </div>
     </Teleport>
+
+    <!-- File Preview Modal -->
+    <teleport to="body">
+        <div v-if="previewModal.show" 
+             class="modal-overlay d-flex justify-content-center align-items-center"
+             @click.self="closeFilePreview"
+             style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.8); z-index: 1055; overflow-y: auto; padding: 20px;">
+            
+            <div class="modal-content bg-dark text-white rounded shadow-lg" 
+                 style="max-width: 90vw; max-height: 90vh; overflow: hidden;">
+                
+                <!-- Modal Header -->
+                <div class="modal-header border-bottom border-secondary p-3">
+                    <h5 class="modal-title mb-0">
+                        <i class="fa-solid fa-eye me-2"></i>
+                        {{ previewModal.file?.name || 'File Preview' }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @click="closeFilePreview"></button>
+                </div>
+                
+                <!-- Modal Body -->
+                <div class="modal-body p-0" style="max-height: calc(90vh - 120px); overflow: auto;">
+                    
+                    <!-- Image Preview -->
+                    <div v-if="previewModal.file && isImageFile(previewModal.file.type)" 
+                         class="text-center p-3">
+                        <img :src="previewModal.file.url" 
+                             :alt="previewModal.file.name"
+                             class="img-fluid rounded"
+                             style="max-width: 100%; max-height: 70vh; object-fit: contain;">
+                    </div>
+                    
+                    <!-- Video Preview -->
+                    <div v-else-if="previewModal.file && isVideoFile(previewModal.file.type)" 
+                         class="text-center p-3">
+                        <video :src="previewModal.file.url" 
+                               controls 
+                               class="w-100 rounded"
+                               style="max-height: 70vh;"
+                               @loadstart="setupHLSPlayer($event.target)">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    
+                    <!-- Audio Preview -->
+                    <div v-else-if="previewModal.file && isAudioFile(previewModal.file.type)" 
+                         class="text-center p-4">
+                        <div class="mb-3">
+                            <i class="fa-solid fa-music fa-3x text-primary"></i>
+                        </div>
+                        <audio :src="previewModal.file.url" 
+                               controls 
+                               class="w-100">
+                            Your browser does not support the audio tag.
+                        </audio>
+                    </div>
+                    
+                    <!-- Default/Download Preview -->
+                    <div v-else class="text-center p-5">
+                        <div class="mb-4">
+                            <i class="fa-solid fa-file fa-4x text-secondary"></i>
+                        </div>
+                        <h6 class="text-muted mb-3">Preview not available for this file type</h6>
+                        <p class="text-muted small mb-4">
+                            File Type: {{ previewModal.file?.type || 'Unknown' }}<br>
+                            Size: {{ previewModal.file?.size || 'Unknown' }}
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Modal Footer -->
+                <div class="modal-footer border-top border-secondary p-3">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <div class="text-muted small">
+                            <strong>CID:</strong> {{ previewModal.file?.cid }}
+                        </div>
+                        <div>
+                            <button type="button" 
+                                    class="btn btn-outline-light btn-sm me-2"
+                                    @click="window.open(previewModal.file?.url, '_blank')">
+                                <i class="fa-solid fa-external-link-alt me-1"></i>
+                                Open in New Tab
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-primary btn-sm"
+                                    @click="downloadFile({f: previewModal.file?.cid, i: Object.keys(newMeta).find(id => newMeta[id][previewModal.file?.cid])})">
+                                <i class="fa-solid fa-download me-1"></i>
+                                Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </teleport>
 </div>`,
     props: {
         signedtx: Array,
@@ -1074,6 +1169,10 @@ export default {
             extensionAmount: 100,
             extensionWithPower: false,
             brocaBalance: 0,
+            previewModal: {
+                show: false,
+                file: null
+            },
         };
     },
     emits: ["tosign", "addassets", 'update:externalDrop', 'update-contract'], // Ensure 'tosign', 'update:externalDrop', and 'update-contract' are included here
@@ -4726,11 +4825,8 @@ export default {
             const isEncrypted = this.flagsDecode(this.newMeta[file.i][file.f].flags, 1).length > 0;
             
             if (!isEncrypted) {
-                // Show dialog to ask if they want to load the file in browser
-                const cid = file.f;
-                if (confirm(`Do you want to open this file in the browser?\nURL: https://ipfs.dlux.io/ipfs/${cid}`)) {
-                    window.open(`https://ipfs.dlux.io/ipfs/${cid}`, '_blank');
-                }
+                // Show preview modal instead of opening in new tab
+                this.showFilePreview(file);
             } else if (this.contract[file.i]?.encryption?.key) {
                 // If it's encrypted but we have the key, offer to download decrypted
                 if (confirm('This file is encrypted. Do you want to download the decrypted file?')) {
@@ -4741,6 +4837,197 @@ export default {
                 if (confirm('This file is encrypted. Do you want to attempt to decrypt it?')) {
                     this.decode(file.i);
                 }
+            }
+        },
+        
+        showFilePreview(file) {
+            const meta = this.newMeta[file.i][file.f];
+            const fileType = meta.type?.toLowerCase() || '';
+            const fileName = meta.name || file.f;
+            const cid = file.f;
+            const ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}`;
+            
+            this.previewModal = {
+                show: true,
+                file: {
+                    name: fileName,
+                    type: fileType,
+                    cid: cid,
+                    url: ipfsUrl,
+                    size: this.fancyBytes(file.s),
+                    meta: meta
+                }
+            };
+        },
+        
+        closeFilePreview() {
+            this.previewModal.show = false;
+            this.previewModal.file = null;
+        },
+        
+        isImageFile(type) {
+            return type && (type.includes('image') || 
+                           type.includes('jpg') || 
+                           type.includes('jpeg') || 
+                           type.includes('png') || 
+                           type.includes('gif') || 
+                           type.includes('webp') || 
+                           type.includes('svg'));
+        },
+        
+        isVideoFile(type) {
+            return type && (type.includes('video') || 
+                           type.includes('mp4') || 
+                           type.includes('webm') || 
+                           type.includes('ogg') || 
+                           type.includes('m3u8') ||
+                           type.includes('avi') || 
+                           type.includes('mov') || 
+                           type.includes('mkv'));
+        },
+        
+        isAudioFile(type) {
+            return type && (type.includes('audio') || 
+                           type.includes('mp3') || 
+                           type.includes('wav') || 
+                           type.includes('ogg') || 
+                           type.includes('flac'));
+        },
+        
+        createIpfsLoader() {
+            // Custom IPFS loader for HLS.js to properly handle IPFS URLs
+            class IpfsLoader {
+                constructor(config) {
+                    this.config = config;
+                }
+                
+                load(context, config, callbacks) {
+                    const url = context.url;
+                    console.log('IPFS Loader loading:', url);
+                    
+                    // Convert IPFS URLs to proper gateway URLs with filename hints
+                    let ipfsUrl = url;
+                    if (url.includes('ipfs.dlux.io/ipfs/')) {
+                        const cid = url.split('/ipfs/')[1].split('?')[0];
+                        
+                        // Determine file extension and filename based on URL or context
+                        let filename = 'file';
+                        if (url.includes('.m3u8') || context.type === 'manifest') {
+                            filename = 'playlist.m3u8';
+                        } else if (url.includes('.ts') || context.type === 'segment') {
+                            filename = 'segment.ts';
+                        }
+                        
+                        // Construct proper IPFS gateway URL with filename for MIME type detection
+                        ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}?filename=${filename}`;
+                    }
+                    
+                    console.log('IPFS Loader fetching:', ipfsUrl);
+                    
+                    fetch(ipfsUrl)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                            }
+                            return response.arrayBuffer();
+                        })
+                        .then(data => {
+                            console.log('IPFS Loader success:', ipfsUrl, 'Size:', data.byteLength);
+                            callbacks.onSuccess({ 
+                                url: ipfsUrl, 
+                                data: data 
+                            });
+                        })
+                        .catch(err => {
+                            console.error('IPFS Loader error:', err, 'URL:', ipfsUrl);
+                            callbacks.onError({ 
+                                code: err.code || 'NETWORK_ERROR', 
+                                text: err.message || 'Failed to load IPFS content'
+                            });
+                        });
+                }
+                
+                abort() {
+                    console.log('IPFS Loader: abort called');
+                }
+                
+                destroy() {
+                    console.log('IPFS Loader: destroy called');
+                }
+            }
+            
+            return IpfsLoader;
+        },
+
+        setupHLSPlayer(videoElement) {
+            // Universal HLS.js setup for M3U8 video playback
+            if (!videoElement || !videoElement.src) return;
+            
+            const videoSrc = videoElement.src;
+            console.log('Setting up HLS for video:', videoSrc);
+            
+            // Check if the source is an M3U8 file
+            if (videoSrc.includes('.m3u8') || videoSrc.includes('application/x-mpegURL')) {
+                // Check if HLS.js is available
+                if (typeof Hls !== 'undefined') {
+                    if (Hls.isSupported()) {
+                        // Destroy existing HLS instance if attached to this video
+                        if (videoElement.hlsInstance) {
+                            videoElement.hlsInstance.destroy();
+                        }
+                        
+                        // Create custom IPFS loader for better IPFS URL handling
+                        const IpfsLoader = this.createIpfsLoader();
+                        
+                        // Create new HLS instance with custom IPFS loader
+                        const hls = new Hls({
+                            debug: false,
+                            enableWorker: true,
+                            lowLatencyMode: false,
+                            loader: IpfsLoader
+                        });
+                        
+                        // Store instance on video element for cleanup
+                        videoElement.hlsInstance = hls;
+                        
+                        // Load the M3U8 source
+                        hls.loadSource(videoSrc);
+                        hls.attachMedia(videoElement);
+                        
+                        // Handle events
+                        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                            console.log('HLS manifest parsed successfully');
+                        });
+                        
+                        hls.on(Hls.Events.ERROR, (event, data) => {
+                            console.warn('HLS error:', data);
+                            if (data.fatal) {
+                                switch (data.type) {
+                                    case Hls.ErrorTypes.NETWORK_ERROR:
+                                        console.log('Network error, trying to recover...');
+                                        hls.startLoad();
+                                        break;
+                                    case Hls.ErrorTypes.MEDIA_ERROR:
+                                        console.log('Media error, trying to recover...');
+                                        hls.recoverMediaError();
+                                        break;
+                                    default:
+                                        console.log('Fatal error, destroying HLS instance');
+                                        hls.destroy();
+                                        break;
+                                }
+                            }
+                        });
+                        
+                        console.log('HLS.js player with IPFS loader setup complete for:', videoSrc);
+                    } else {
+                        console.log('HLS.js not supported, using native playback');
+                    }
+                } else {
+                    console.warn('HLS.js library not loaded');
+                }
+            } else {
+                console.log('Not an M3U8 file, using native video playback');
             }
         },
         sendIt(payload) {
@@ -4836,7 +5123,7 @@ export default {
                 fileName.toLowerCase().endsWith('.wmv') ||
                 fileName.toLowerCase().endsWith('.m4v') ||
                 fileName.toLowerCase().endsWith('.3gp')) {
-                formattedContent = `<video src="https://ipfs.dlux.io/ipfs/${cid}" controls></video>`;
+                formattedContent = `<video src="https://${location.hostname != 'localhost' ? location.hostname : 'dlux.io'}/ipfs/${cid}" controls></video>`;
             }
             // Image files
             else if (fileTypeFormatted.includes('image') || 
@@ -4846,11 +5133,11 @@ export default {
                      fileTypeFormatted.includes('gif') || 
                      fileTypeFormatted.includes('svg') || 
                      fileTypeFormatted.includes('webp')) {
-                formattedContent = `![${fileName}](https://ipfs.dlux.io/ipfs/${cid})`;
+                formattedContent = `![${fileName}](https://${location.hostname != 'localhost' ? location.hostname : 'dlux.io'}/ipfs/${cid})`;
             }
             // Everything else as anchor tag
             else {
-                formattedContent = `[${fileName}](https://ipfs.dlux.io/ipfs/${cid})`;
+                formattedContent = `[${fileName}](https://${location.hostname != 'localhost' ? location.hostname : 'dlux.io'}/ipfs/${cid})`;
             }
             
             // Emit the formatted content and contract info to parent
