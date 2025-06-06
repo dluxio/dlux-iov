@@ -1,4 +1,4 @@
-this.version = "2025.06.06.16";
+this.version = "2025.06.06.17";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.06.16",
-  "generated": "2025-06-06T03:33:28Z",
+  "version": "2025.06.06.17",
+  "generated": "2025-06-06T03:46:57Z",
   "files": {
-    "/img/logo_hiveprojects.png": {
-      "checksum": "c05534ff50e1bd4e17ebcb23322386cc",
-      "size": 79573,
-      "priority": "important"
-    },
     "/img/meta/about.png": {
       "checksum": "0e0c6bc95c6e5039795b73e0b7409294",
       "size": 485764,
@@ -1146,7 +1141,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "775823e4fba290fde645a9d66cea16df",
+      "checksum": "359a8faa27000520395ec6cdca769575",
       "size": 36317,
       "priority": "important"
     },
@@ -1221,8 +1216,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "0552410ed9a8c57dd678e99049a9847a",
-      "size": 209249,
+      "checksum": "283dbf24f45584a9ca75faf8519a2beb",
+      "size": 210821,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1336,7 +1331,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "0637624ec4f98e4f0840eb5e7d1ff0a0",
+      "checksum": "79c7e899e0a69752eb13f542a7d7a286",
       "size": 7300,
       "priority": "important"
     },
@@ -1409,11 +1404,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/coffee/coffee.js": {
-      "checksum": "ee43b06a88944314a46e45244f3c99d6",
-      "size": 4417,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/cpp/cpp.js": {
       "checksum": "6f3f1a6ac757a431a43447cbd50dd358",
