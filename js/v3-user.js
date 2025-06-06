@@ -5585,15 +5585,19 @@ function buyNFT(setname, uid, price, type, callback){
             .then(data => {
               console.log('IPFS Loader success:', ipfsUrl, 'Size:', typeof data === 'string' ? data.length : data.byteLength);
               
-              // HLS.js expects a specific response format
-              const response = {
-                url: ipfsUrl,
-                data: data,
-                code: 200,
-                text: 'OK'
+              // HLS.js expects a specific response format with stats object
+              const stats = {
+                trequest: performance.now(),
+                tfirst: performance.now(), 
+                tload: performance.now(),
+                mtime: new Date(),
+                retry: 0,
+                bw: data.length || data.byteLength,
+                size: data.length || data.byteLength,
+                url: ipfsUrl
               };
               
-              callbacks.onSuccess(response, { url: ipfsUrl }, context);
+              callbacks.onSuccess({ data: data, url: ipfsUrl }, stats, context);
             })
             .catch(err => {
               console.error('IPFS Loader error:', err, 'URL:', ipfsUrl);
@@ -5624,14 +5628,16 @@ function buyNFT(setname, uid, price, type, callback){
       console.log('Setting up HLS for video:', videoSrc);
       
       // Smart IPFS video detection - check if it's an IPFS file without extension
-      console.log('Checking IPFS detection for:', videoSrc);
-      console.log('Regex test:', /\/ipfs\/Qm[a-zA-Z0-9]+$/.test(videoSrc));
-      console.log('Contains dot:', videoSrc.includes('.'));
+      // Need to check before any query parameters are added
+      const cleanUrl = videoSrc.split('?')[0]; // Remove any existing query parameters
+      console.log('Checking IPFS detection for clean URL:', cleanUrl);
+      console.log('Regex test:', /\/ipfs\/Qm[a-zA-Z0-9]+$/.test(cleanUrl));
+      console.log('Contains dot:', cleanUrl.includes('.'));
       
-      if (/\/ipfs\/Qm[a-zA-Z0-9]+$/.test(videoSrc) && !videoSrc.includes('.')) {
+      if (/\/ipfs\/Qm[a-zA-Z0-9]+$/.test(cleanUrl) && !cleanUrl.includes('.')) {
         console.log('Detected IPFS file without extension, checking size...');
         try {
-          const response = await fetch(videoSrc, { method: 'HEAD' });
+          const response = await fetch(cleanUrl, { method: 'HEAD' });
           const contentLength = response.headers.get('content-length');
           if (contentLength) {
             const sizeInKB = parseInt(contentLength) / 1024;
@@ -5639,7 +5645,7 @@ function buyNFT(setname, uid, price, type, callback){
             
             // If file is in kilobyte range (likely a playlist), treat as M3U8
             if (sizeInKB < 100) { // Playlists are typically small
-              videoSrc = videoSrc + '?filename=master.m3u8';
+              videoSrc = cleanUrl + '?filename=master.m3u8';
               videoElement.src = videoSrc; // Update the video element src
               console.log('Treating as M3U8 playlist:', videoSrc);
             }
