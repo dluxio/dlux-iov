@@ -1497,9 +1497,16 @@ createApp({
           let filename = 'file';
           if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level') {
             filename = 'playlist.m3u8';
+            if (context.type === 'level' && url.includes('/ipfs/Qm') && !url.includes('.')) {
+              console.log('Detected bare IPFS hash as level playlist:', url);
+            }
           } else if (url.includes('.ts') || context.type === 'segment' || context.responseType === 'arraybuffer' || context.frag) {
             // If it's requesting arraybuffer or has frag property, it's likely a video segment
             filename = 'segment.ts';
+          } else if (url.includes('/ipfs/Qm') && context.responseType === 'text') {
+            // Handle any other bare IPFS hash that expects text (likely a playlist)
+            filename = 'playlist.m3u8';
+            console.log('Detected bare IPFS hash expecting text as playlist:', url);
           }
             
             // Construct proper IPFS gateway URL with filename for MIME type detection
