@@ -1,4 +1,4 @@
-this.version = "2025.06.06.25";
+this.version = "2025.06.06.26";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.06.25",
-  "generated": "2025-06-06T17:32:41Z",
+  "version": "2025.06.06.26",
+  "generated": "2025-06-06T21:21:08Z",
   "files": {
-    "/img/mov-file-type-svgrepo-com.svg": {
-      "checksum": "0af98e452f25a7739bb978a7ed02051b",
-      "size": 1745,
-      "priority": "important"
-    },
     "/img/mp3-file-type-svgrepo-com.svg": {
       "checksum": "1004873c11cc066741da417bfe78b80f",
       "size": 2165,
@@ -773,11 +768,6 @@ self.cacheManifest =
     "/img/zip-file-type-svgrepo-com.svg": {
       "checksum": "e79c3c0ded94605b92bc4bf522615b9b",
       "size": 1581,
-      "priority": "important"
-    },
-    "/index-v2.html": {
-      "checksum": "c23d138a8c7ff00951fd29814edafa19",
-      "size": 14668,
       "priority": "important"
     },
     "/js/appvue.js": {
@@ -1101,7 +1091,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "c4d39f4f5d9bd3109423358a7c268193",
+      "checksum": "3b0218366bddf9402a45fad92042003a",
       "size": 36317,
       "priority": "important"
     },
@@ -1291,7 +1281,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "2e8c932e140040ebb8a4c9a87e91d53e",
+      "checksum": "1a60b023b1a21dceffc77c70ff54cae7",
       "size": 7300,
       "priority": "important"
     },
@@ -1364,11 +1354,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/elixir/elixir.js": {
-      "checksum": "d692c71c942192ec653670dd8fe078d2",
-      "size": 11084,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/flow9/flow9.js": {
       "checksum": "e9643ed67826ec3d9a20d64f282b5ad9",
