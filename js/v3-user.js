@@ -5592,6 +5592,14 @@ function buyNFT(setname, uid, price, type, callback){
           }
           
           console.log('IPFS Loader fetching:', ipfsUrl);
+          console.log('Expected responseType:', context.responseType);
+          console.log('Filename hint:', filename);
+          console.log('Context details:', {
+            type: context.type,
+            frag: !!context.frag,
+            level: context.level,
+            id: context.id
+          });
           
           // Create AbortController for request cancellation
           this.requestController = new AbortController();
@@ -5602,8 +5610,15 @@ function buyNFT(setname, uid, price, type, callback){
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
               }
               
+              console.log('Response status:', response.status);
+              console.log('Response content-type:', response.headers.get('content-type'));
+              console.log('Response content-length:', response.headers.get('content-length'));
+              
               this.stats.loading.first = Math.max(performance.now(), this.stats.loading.start);
               this.stats.parsing.start = this.stats.loading.first;
+              
+              // Store response reference for later logging
+              this.currentResponse = response;
               
               // For manifests and level playlists, return text; for segments, return arrayBuffer
               if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level' || context.responseType === 'text') {
@@ -5617,16 +5632,34 @@ function buyNFT(setname, uid, price, type, callback){
               this.stats.parsing.end = this.stats.loading.end;
               const dataSize = typeof data === 'string' ? data.length : data.byteLength;
               
+              // Detailed logging for debugging
               console.log('IPFS Loader success:', ipfsUrl, 'Size:', dataSize);
+              console.log('Data type:', typeof data);
+              console.log('Is ArrayBuffer?', data instanceof ArrayBuffer);
+              console.log('Is Uint8Array?', data instanceof Uint8Array);
+              console.log('Constructor:', data.constructor.name);
+              console.log('Context responseType:', context.responseType);
+              console.log('Response headers:', this.currentResponse.headers ? Array.from(this.currentResponse.headers.entries()) : 'No headers');
+              
+              // Check first few bytes for segments
+              if (filename === 'segment.ts' && data instanceof ArrayBuffer) {
+                const firstBytes = new Uint8Array(data.slice(0, 16));
+                console.log('First 16 bytes as hex:', Array.from(firstBytes).map(b => b.toString(16).padStart(2, '0')).join(' '));
+                console.log('First 16 bytes as decimal:', Array.from(firstBytes));
+                
+                // Check for MPEG-TS sync byte (0x47)
+                const hasSyncByte = firstBytes[0] === 0x47;
+                console.log('Has MPEG-TS sync byte (0x47)?', hasSyncByte);
+              }
               
               // HLS.js expects exact response format matching XHR loader
-              const response = {
+              const responseObj = {
                 url: ipfsUrl,
                 data: data
               };
               
               // Pass proper stats object that HLS.js expects
-              callbacks.onSuccess(response, this.stats, context);
+              callbacks.onSuccess(responseObj, this.stats, context);
             })
             .catch(err => {
               if (err.name === 'AbortError') {
@@ -5706,16 +5739,27 @@ function buyNFT(setname, uid, price, type, callback){
               videoElement.hlsInstance.destroy();
             }
             
-            // Create custom IPFS loader for better IPFS URL handling
-            const IpfsLoader = this.createIpfsLoader();
-            
-            // Create new HLS instance with custom IPFS loader
-            const hls = new Hls({
+            // Try alternative approaches for IPFS
+            let hlsConfig = {
               debug: false,
               enableWorker: true,
-              lowLatencyMode: false,
-              loader: IpfsLoader
-            });
+              lowLatencyMode: false
+            };
+            
+            // Check if this is an IPFS URL
+            const isIpfs = videoSrc.includes('ipfs.dlux.io/ipfs/');
+            
+            if (isIpfs) {
+              console.log('IPFS detected, trying custom loader first...');
+              // Create custom IPFS loader for better IPFS URL handling
+              const IpfsLoader = this.createIpfsLoader();
+              hlsConfig.loader = IpfsLoader;
+            } else {
+              console.log('Non-IPFS URL, using default HLS loader');
+            }
+            
+            // Create new HLS instance
+            const hls = new Hls(hlsConfig);
             
             // Store instance on video element for cleanup
             videoElement.hlsInstance = hls;
@@ -5732,11 +5776,55 @@ function buyNFT(setname, uid, price, type, callback){
             // Track error counts to prevent infinite loops
             let errorCount = 0;
             const maxErrors = 3;
+            let hasTriedFallback = false;
             
             hls.on(Hls.Events.ERROR, (event, data) => {
               console.warn('HLS error:', data);
               
               errorCount++;
+              
+              // If IPFS custom loader is failing and we haven't tried fallback
+              if (isIpfs && !hasTriedFallback && errorCount >= 2 && data.details === 'fragParsingError') {
+                console.log('🔄 IPFS custom loader failing, trying fallback approach...');
+                hasTriedFallback = true;
+                
+                // Destroy current instance
+                hls.destroy();
+                
+                // Try with default loader and modified URLs
+                console.log('Attempting fallback: Convert IPFS URLs to gateway URLs without custom loader');
+                const fallbackHls = new Hls({
+                  debug: false,
+                  enableWorker: true,
+                  lowLatencyMode: false
+                  // No custom loader - use default
+                });
+                
+                // Replace the stored HLS instance
+                videoElement.hlsInstance = fallbackHls;
+                
+                // Try loading with a different IPFS gateway approach
+                let fallbackSrc = videoSrc;
+                if (videoSrc.includes('?filename=master.m3u8')) {
+                  // Try without the filename parameter
+                  fallbackSrc = videoSrc.split('?')[0];
+                  console.log('Fallback URL (no filename):', fallbackSrc);
+                }
+                
+                fallbackHls.loadSource(fallbackSrc);
+                fallbackHls.attachMedia(videoElement);
+                
+                fallbackHls.on(Hls.Events.ERROR, (event, data) => {
+                  console.warn('Fallback HLS error:', data);
+                  if (data.fatal) {
+                    console.log('❌ Fallback also failed, IPFS content may not be valid HLS');
+                    fallbackHls.destroy();
+                  }
+                });
+                
+                return;
+              }
+              
               if (errorCount > maxErrors) {
                 console.log('Too many errors, destroying HLS instance');
                 hls.destroy();
