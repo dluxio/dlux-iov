@@ -1504,13 +1504,14 @@ createApp({
           if (url.includes('ipfs.dlux.io/ipfs/')) {
             const cid = url.split('/ipfs/')[1].split('?')[0];
             
-            // Determine file extension and filename based on URL or context
-            let filename = 'file';
-            if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level') {
-              filename = 'playlist.m3u8';
-            } else if (url.includes('.ts') || context.type === 'segment') {
-              filename = 'segment.ts';
-            }
+                      // Determine file extension and filename based on URL or context
+          let filename = 'file';
+          if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level') {
+            filename = 'playlist.m3u8';
+          } else if (url.includes('.ts') || context.type === 'segment' || context.responseType === 'arraybuffer' || context.frag) {
+            // If it's requesting arraybuffer or has frag property, it's likely a video segment
+            filename = 'segment.ts';
+          }
             
             // Construct proper IPFS gateway URL with filename for MIME type detection
             ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}?filename=${filename}`;

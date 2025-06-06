@@ -5578,13 +5578,14 @@ function buyNFT(setname, uid, price, type, callback){
           if (url.includes('ipfs.dlux.io/ipfs/')) {
             const cid = url.split('/ipfs/')[1].split('?')[0];
             
-            // Determine file extension and filename based on URL or context
-            let filename = 'file';
-            if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level') {
-              filename = 'playlist.m3u8';
-            } else if (url.includes('.ts') || context.type === 'segment') {
-              filename = 'segment.ts';
-            }
+                      // Determine file extension and filename based on URL or context
+          let filename = 'file';
+          if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level') {
+            filename = 'playlist.m3u8';
+          } else if (url.includes('.ts') || context.type === 'segment' || context.responseType === 'arraybuffer' || context.frag) {
+            // If it's requesting arraybuffer or has frag property, it's likely a video segment
+            filename = 'segment.ts';
+          }
             
             // Construct proper IPFS gateway URL with filename for MIME type detection
             ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}?filename=${filename}`;
@@ -5728,8 +5729,20 @@ function buyNFT(setname, uid, price, type, callback){
               console.log('HLS manifest parsed successfully');
             });
             
+            // Track error counts to prevent infinite loops
+            let errorCount = 0;
+            const maxErrors = 3;
+            
             hls.on(Hls.Events.ERROR, (event, data) => {
               console.warn('HLS error:', data);
+              
+              errorCount++;
+              if (errorCount > maxErrors) {
+                console.log('Too many errors, destroying HLS instance');
+                hls.destroy();
+                return;
+              }
+              
               if (data.fatal) {
                 switch (data.type) {
                   case Hls.ErrorTypes.NETWORK_ERROR:
@@ -5744,6 +5757,12 @@ function buyNFT(setname, uid, price, type, callback){
                     console.log('Fatal error, destroying HLS instance');
                     hls.destroy();
                     break;
+                }
+              } else if (data.details === 'fragParsingError') {
+                // Handle non-fatal parsing errors more gracefully
+                console.log('Fragment parsing error, segment may not contain valid media data');
+                if (errorCount >= 2) {
+                  console.log('Multiple parsing errors, may be invalid IPFS content for HLS playback');
                 }
               }
             });

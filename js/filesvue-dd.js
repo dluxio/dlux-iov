@@ -4952,7 +4952,8 @@ export default {
                         let filename = 'file';
                         if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level') {
                             filename = 'playlist.m3u8';
-                        } else if (url.includes('.ts') || context.type === 'segment') {
+                        } else if (url.includes('.ts') || context.type === 'segment' || context.responseType === 'arraybuffer' || context.frag) {
+                            // If it's requesting arraybuffer or has frag property, it's likely a video segment
                             filename = 'segment.ts';
                         }
                         
