@@ -259,6 +259,12 @@ createApp({
       trending: [],
       promoted: [],
       search: [],
+      following: [],
+      communities: [],
+      currentTab: 'hub',
+      selectedCommunity: '',
+      availableCommunities: [],
+      loadingCommunities: false,
       postSelect: {
         sort: "time",
         searchTerm: "",
@@ -281,12 +287,32 @@ createApp({
           o: 0,
           e: false,
           p: false,
+          start_author: '',
+          start_permlink: '',
         },
         promoted: {
           a: 10,
           o: 0,
           e: false,
           p: false,
+          start_author: '',
+          start_permlink: '',
+        },
+        following: {
+          a: 10,
+          o: 0,
+          e: false,
+          p: false,
+          start_author: '',
+          start_permlink: '',
+        },
+        communities: {
+          a: 10,
+          o: 0,
+          e: false,
+          p: false,
+          start_author: '',
+          start_permlink: '',
         },
         sortDir: "desc",
         types: {
@@ -519,7 +545,11 @@ createApp({
         if (
           scrollPosition >= scrollHeight - window.innerHeight
         ) {
-          this.getPosts();
+          if (this.currentTab === 'hub') {
+            this.getPosts();
+          } else {
+            this.getHivePosts();
+          }
         }
       }
     },
@@ -952,6 +982,153 @@ createApp({
       if (Container.querySelector("input:invalid")) this[validKey] = false;
       else this[validKey] = true;
     },
+    switchTab(tab) {
+      this.currentTab = tab;
+      this.displayPosts = [];
+      
+      if (tab === 'hub') {
+        // Reset pagination for hub (new posts)
+        this.postSelect.new.o = 0;
+        this.postSelect.new.e = false;
+        this.postSelect.new.p = false;
+        this['new'] = [];
+        this.postSelect.entry = 'new';
+        this.getPosts();
+      } else {
+        // Reset pagination for the new tab
+        if (this.postSelect[tab]) {
+          this.postSelect[tab].o = 0;
+          this.postSelect[tab].e = false;
+          this.postSelect[tab].p = false;
+          this.postSelect[tab].start_author = '';
+          this.postSelect[tab].start_permlink = '';
+        }
+        
+        this[tab] = [];
+        this.postSelect.entry = tab;
+        
+        if (tab === 'communities') {
+          // Load communities list when switching to communities tab
+          this.getAvailableCommunities();
+          if (!this.selectedCommunity) {
+            // Don't fetch posts if no community is selected
+            return;
+          }
+        }
+        this.getHivePosts();
+      }
+    },
+    getAvailableCommunities() {
+      if (this.loadingCommunities) return;
+      
+      this.loadingCommunities = true;
+      
+      fetch(this.hapi, {
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "bridge.list_communities",
+          params: {
+            last: "",
+            limit: 100,
+            query: "",
+            sort: "rank",
+            observer: this.account || ""
+          },
+          id: 1
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      })
+        .then((r) => r.json())
+        .then((res) => {
+          this.loadingCommunities = false;
+          if (res.result && res.result.length > 0) {
+            this.availableCommunities = res.result.map(community => ({
+              id: community.name,
+              name: community.title,
+              description: community.about || 'Community',
+              subscribers: community.subscribers || 0,
+              rank: community.rank || 0
+            }));
+          } else {
+            // Fallback to hardcoded communities if API fails
+            this.availableCommunities = [
+              { id: 'hive-153850', name: 'Splinterlands', description: 'Digital trading card game' },
+              { id: 'hive-125125', name: 'Ecency', description: 'Decentralized social media community' },
+              { id: 'hive-174578', name: 'Photography Lovers', description: 'Share your photography passion' },
+              { id: 'hive-148441', name: 'GEMS', description: 'Generalist community for original content' },
+              { id: 'hive-194913', name: 'Gaming', description: 'Gaming community' },
+              { id: 'hive-167922', name: 'LeoFinance', description: 'Finance and crypto community' },
+              { id: 'hive-196708', name: 'Hive Learners', description: 'Learning and education community' },
+              { id: 'hive-120078', name: 'World of Xpilar', description: 'Art and digital creativity' }
+            ];
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching communities list:', error);
+          this.loadingCommunities = false;
+          // Fallback to hardcoded communities
+          this.availableCommunities = [
+            { id: 'hive-153850', name: 'Splinterlands', description: 'Digital trading card game' },
+            { id: 'hive-125125', name: 'Ecency', description: 'Decentralized social media community' },
+            { id: 'hive-174578', name: 'Photography Lovers', description: 'Share your photography passion' },
+            { id: 'hive-148441', name: 'GEMS', description: 'Generalist community for original content' },
+            { id: 'hive-194913', name: 'Gaming', description: 'Gaming community' },
+            { id: 'hive-167922', name: 'LeoFinance', description: 'Finance and crypto community' },
+            { id: 'hive-196708', name: 'Hive Learners', description: 'Learning and education community' },
+            { id: 'hive-120078', name: 'World of Xpilar', description: 'Art and digital creativity' }
+          ];
+        });
+    },
+    getCommunityInfo(communityId) {
+      // Optional: Get community information using bridge.get_community
+      fetch(this.hapi, {
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "bridge.get_community",
+          params: {
+            name: communityId,
+            observer: this.account || ""
+          },
+          id: 1
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      })
+        .then((r) => r.json())
+        .then((res) => {
+          if (res.result) {
+            console.log('Community info for', communityId, res.result);
+            // You could store this info and display it in the UI
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching community info:', error);
+        });
+    },
+    sendIt(op) {
+      this.toSign = op;
+    },
+    onCommunityChange() {
+      if (this.currentTab === 'communities' && this.selectedCommunity) {
+        // Reset pagination for communities
+        this.postSelect.communities.start_author = '';
+        this.postSelect.communities.start_permlink = '';
+        this.postSelect.communities.e = false;
+        this.postSelect.communities.p = false;
+        this.communities = [];
+        this.displayPosts = [];
+        
+        // Optionally get community info (for future use)
+        this.getCommunityInfo(this.selectedCommunity);
+        
+        this.getHivePosts();
+      }
+    },
     getPosts() {
       var bitMask = 0;
       for (var type in this.postSelect.types) {
@@ -1009,6 +1186,174 @@ createApp({
           .catch(error => { // Add catch
             console.error('Error fetching posts:', error);
             this.postSelect[this.postSelect.entry].p = false; // Reset pending flag on error
+          });
+      }
+    },
+    getHivePosts() {
+      if (
+        !this.postSelect[this.postSelect.entry].e &&
+        !this.postSelect[this.postSelect.entry].p
+      ) {
+        this.postSelect[this.postSelect.entry].p = true;
+        
+        let method, params;
+        
+        switch (this.currentTab) {
+          case 'trending':
+            method = 'bridge.get_ranked_posts';
+            params = [{
+              sort: 'trending',
+              tag: '',
+              observer: this.account || '',
+              limit: this.postSelect[this.postSelect.entry].a,
+              start_author: this.postSelect[this.postSelect.entry].start_author || '',
+              start_permlink: this.postSelect[this.postSelect.entry].start_permlink || ''
+            }];
+            break;
+          case 'promoted':
+            method = 'bridge.get_ranked_posts';
+            params = [{
+              sort: 'promoted',
+              tag: '',
+              observer: this.account || '',
+              limit: this.postSelect[this.postSelect.entry].a,
+              start_author: this.postSelect[this.postSelect.entry].start_author || '',
+              start_permlink: this.postSelect[this.postSelect.entry].start_permlink || ''
+            }];
+            console.log('Fetching promoted posts with params:', params);
+            break;
+          case 'following':
+            if (!this.account) {
+              this.postSelect[this.postSelect.entry].p = false;
+              return;
+            }
+            method = 'bridge.get_account_posts';
+            params = [{
+              sort: 'feed',
+              account: this.account,
+              observer: this.account,
+              limit: this.postSelect[this.postSelect.entry].a,
+              start_author: this.postSelect[this.postSelect.entry].start_author || '',
+              start_permlink: this.postSelect[this.postSelect.entry].start_permlink || ''
+            }];
+            break;
+          case 'communities':
+            if (!this.selectedCommunity) {
+              this.postSelect[this.postSelect.entry].p = false;
+              return;
+            }
+            method = 'bridge.get_ranked_posts';
+            params = [{
+              sort: 'created',
+              tag: this.selectedCommunity,
+              observer: this.account || '',
+              limit: this.postSelect[this.postSelect.entry].a,
+              start_author: this.postSelect[this.postSelect.entry].start_author || '',
+              start_permlink: this.postSelect[this.postSelect.entry].start_permlink || ''
+            }];
+            break;
+          default:
+            this.postSelect[this.postSelect.entry].p = false;
+            return;
+        }
+
+        fetch(this.hapi, {
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            method: method,
+            params: params,
+            id: 1
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+        })
+          .then((r) => r.json())
+          .then((res) => {
+            this.postSelect[this.postSelect.entry].p = false;
+            
+            if (!res.result || res.result.length === 0) {
+              this.postSelect[this.postSelect.entry].e = true;
+              return;
+            }
+            
+            var authors = [];
+            
+            if (res.result.length < this.postSelect[this.postSelect.entry].a) {
+              this.postSelect[this.postSelect.entry].e = true;
+            }
+            
+                         // Set pagination parameters for next call
+             if (res.result.length > 0) {
+               const lastPost = res.result[res.result.length - 1];
+               this.postSelect[this.postSelect.entry].start_author = lastPost.author;
+               this.postSelect[this.postSelect.entry].start_permlink = lastPost.permlink;
+             }
+            
+            for (var i = 0; i < res.result.length; i++) {
+              const post = res.result[i];
+              const key = `/@${post.author}/${post.permlink}`;
+              
+              if (!this.posturls[key]) {
+                                 this.posturls[key] = {
+                   ...post,
+                   slider: 10000,
+                   flag: false,
+                   upVotes: 0,
+                   downVotes: 0,
+                   edit: false,
+                   hasVoted: false,
+                   contract: {},
+                   type: 'Blog',
+                   url: `/blog${key}`,
+                   ago: this.timeSince(post.created),
+                   preview: this.removeMD(post.body).substr(0, 250),
+                   rep: "..."
+                 };
+                
+                                 // Process vote data
+                 if (post.active_votes && post.active_votes.length > 0) {
+                   for (var j = 0; j < post.active_votes.length; j++) {
+                     if (post.active_votes[j].percent > 0)
+                       this.posturls[key].upVotes++;
+                     else this.posturls[key].downVotes++;
+                     
+                     if (post.active_votes[j].voter === this.account) {
+                       this.posturls[key].slider = post.active_votes[j].percent;
+                       this.posturls[key].hasVoted = true;
+                     }
+                   }
+                 }
+                
+                if (this.posturls[key].slider < 0) {
+                  this.posturls[key].slider = this.posturls[key].slider * -1;
+                  this.posturls[key].flag = true;
+                }
+                
+                                 // Process JSON metadata
+                 try {
+                   if (typeof post.json_metadata === 'string') {
+                     this.posturls[key].json_metadata = JSON.parse(post.json_metadata);
+                   }
+                   this.posturls[key].pic = this.picFind(this.posturls[key].json_metadata);
+                 } catch (e) {
+                   console.log(key, "no JSON?");
+                   this.posturls[key].json_metadata = {};
+                 }
+              }
+              
+              this[this.postSelect.entry].push(key);
+              authors.push(post.author);
+            }
+            
+            this.selectPosts();
+            authors = [...new Set(authors)];
+            this.getHiveAuthors(authors);
+          })
+          .catch(error => {
+            console.error('Error fetching Hive posts:', error);
+            this.postSelect[this.postSelect.entry].p = false;
           });
       }
     },
@@ -1735,6 +2080,10 @@ createApp({
     },
   },
   mounted() {
+    // Initialize with hub tab as default
+    this.currentTab = 'hub';
+    this.postSelect.entry = 'new';
+    
     if (location.pathname.split("/@")[1]) {
       this.pageAccount = location.pathname.split("/@")[1]
       if (this.pageAccount.indexOf('/') > -1) {
@@ -1758,6 +2107,9 @@ createApp({
     this.getProtocol();
     this.getRewardFund();
     this.getFeedPrice();
+    
+    // Pre-load communities list
+    this.getAvailableCommunities();
     
     // Start observing for video elements to setup HLS
     this.observeVideoElements();
@@ -1788,6 +2140,22 @@ createApp({
         this.postSelect[this.postSelect.entry].o = 0
         this.postSelect[this.postSelect.entry].e = false;
       }
+    },
+    authors: {
+      handler(newAuthors, oldAuthors) {
+        // Update reputation for posts when author data becomes available
+        for (const authorName in newAuthors) {
+          if (newAuthors[authorName] && (!oldAuthors || !oldAuthors[authorName])) {
+            // New author data available, update reputation for their posts
+            for (const postKey in this.posturls) {
+              if (this.posturls[postKey].author === authorName && this.posturls[postKey].rep === "...") {
+                this.posturls[postKey].rep = this.readRep(newAuthors[authorName].reputation);
+              }
+            }
+          }
+        }
+      },
+      deep: true
     }
   },
   computed: {

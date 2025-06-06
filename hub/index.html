@@ -70,7 +70,44 @@
             <!-- banner menu -->
             <div class="container-fluid navbar-subbanner-container">
                 <div class="container navbar-subbanner-content p-0 rounded">
-                    <div class="pt-3 pb-1">
+                    <!-- Hub Tabs Navigation -->
+                    <div class="pt-4 pb-2">
+                        <ul class="nav nav-tabs justify-content-center" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{'active': currentTab === 'hub'}" 
+                                   @click="switchTab('hub')" href="#" role="tab">
+                                    <i class="fa-solid fa-vr-cardboard me-2"></i>HUB
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{'active': currentTab === 'trending'}" 
+                                   @click="switchTab('trending')" href="#" role="tab">
+                                    <i class="fa-solid fa-fire me-2"></i>TRENDING
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{'active': currentTab === 'promoted'}" 
+                                   @click="switchTab('promoted')" href="#" role="tab">
+                                    <i class="fa-solid fa-star me-2"></i>PROMOTED
+                                </a>
+                            </li>
+                            <li class="nav-item" v-if="account">
+                                <a class="nav-link" :class="{'active': currentTab === 'following'}" 
+                                   @click="switchTab('following')" href="#" role="tab">
+                                    <i class="fa-solid fa-users me-2"></i>FOLLOWING
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" :class="{'active': currentTab === 'communities'}" 
+                                   @click="switchTab('communities')" href="#" role="tab">
+                                    <i class="fa-solid fa-users-gear me-2"></i>COMMUNITIES
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- HUB Tab Content -->
+                    <div v-show="currentTab === 'hub'" class="pt-3 pb-1">
                         <div
                             class="d-flex justify-content-between align-items-baseline flex-wrap pt-1 pb-1 mb-2 mx-2 border border-light-50 border-bottom border-start-0 border-end-0 border-top-0">
                             <h3 class="hero-subtitle mb-0">HUB</h3>
@@ -145,6 +182,53 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- TRENDING Tab Content -->
+                    <div v-show="currentTab === 'trending'" class="pt-3 pb-1">
+                        <div class="d-flex justify-content-between align-items-baseline flex-wrap pt-1 pb-1 mb-2 mx-2 border border-light-50 border-bottom border-start-0 border-end-0 border-top-0">
+                            <h3 class="hero-subtitle mb-0">TRENDING</h3>
+                            <h5 class="hero-lead mb-0">Popular posts on Hive</h5>
+                        </div>
+                    </div>
+                    
+                    <!-- PROMOTED Tab Content -->
+                    <div v-show="currentTab === 'promoted'" class="pt-3 pb-1">
+                        <div class="d-flex justify-content-between align-items-baseline flex-wrap pt-1 pb-1 mb-2 mx-2 border border-light-50 border-bottom border-start-0 border-end-0 border-top-0">
+                            <h3 class="hero-subtitle mb-0">PROMOTED</h3>
+                            <h5 class="hero-lead mb-0">Promoted posts on Hive</h5>
+                        </div>
+                    </div>
+                    
+                    <!-- FOLLOWING Tab Content -->
+                    <div v-show="currentTab === 'following'" v-if="account" class="pt-3 pb-1">
+                        <div class="d-flex justify-content-between align-items-baseline flex-wrap pt-1 pb-1 mb-2 mx-2 border border-light-50 border-bottom border-start-0 border-end-0 border-top-0">
+                            <h3 class="hero-subtitle mb-0">FOLLOWING</h3>
+                            <h5 class="hero-lead mb-0">Posts from accounts you follow</h5>
+                        </div>
+                    </div>
+                    
+                    <!-- COMMUNITIES Tab Content -->
+                    <div v-show="currentTab === 'communities'" class="pt-3 pb-1">
+                        <div class="d-flex justify-content-between align-items-baseline flex-wrap pt-1 pb-1 mb-2 mx-2 border border-light-50 border-bottom border-start-0 border-end-0 border-top-0">
+                            <h3 class="hero-subtitle mb-0">COMMUNITIES</h3>
+                            <h5 class="hero-lead mb-0">Posts from Hive communities</h5>
+                        </div>
+                        <div class="mx-1">
+                            <div class="d-flex flex-wrap align-items-center">
+                                <!-- community selector -->
+                                <div class="mx-1 mb-1">
+                                    <select class="form-select bg-dark text-white border-light" v-model="selectedCommunity" @change="onCommunityChange()" style="color: white !important;" :disabled="loadingCommunities">
+                                        <option value="" style="color: white; background-color: #333;">
+                                            {{ loadingCommunities ? 'Loading communities...' : 'Select Community...' }}
+                                        </option>
+                                        <option v-for="community in availableCommunities" :key="community.id" :value="community.id" style="color: white; background-color: #333;">
+                                            {{ community.name }} - {{ community.description }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- <div class=" container-fluid mx-0 px-0">
@@ -175,7 +259,7 @@
             </div> -->
 
             <!--main view-->
-            <div class="container-fluid d-flex flex-grow-1 my-3 align-items-center justify-content-center"
+            <div class="container-fluid d-flex flex-grow-1 mt-4 mb-3 align-items-center justify-content-center"
                 v-if="displayPosts.length == 0">
                 <div class="card" style="max-width: 600px;">
                     <div class="card-body text-center">
@@ -186,7 +270,7 @@
                     </div>
                 </div>
             </div>
-            <div class="container-fluid flex-grow-1 pt-3" v-if="displayPosts.length != 0">
+            <div class="container-fluid flex-grow-1 pt-4" v-if="displayPosts.length != 0">
                 <div class="row">
                     <div class="col-sm-6 col-lg-4 mb-3" v-for="post in displayPosts" :key="post.url">
                         <card-vue :post="post" :account="account" :has_ipfs="spkapi.storage?.length ? true : false"
