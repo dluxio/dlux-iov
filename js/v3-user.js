@@ -5581,24 +5581,25 @@ function buyNFT(setname, uid, price, type, callback){
           
           // Convert IPFS URLs to proper gateway URLs with filename hints
           let ipfsUrl = url;
+          let filename = 'file'; // Default filename
+          
           if (url.includes('ipfs.dlux.io/ipfs/')) {
             const cid = url.split('/ipfs/')[1].split('?')[0];
             
-                      // Determine file extension and filename based on URL or context
-          let filename = 'file';
-          if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level') {
-            filename = 'playlist.m3u8';
-            if (context.type === 'level' && url.includes('/ipfs/Qm') && !url.includes('.')) {
-              console.log('Detected bare IPFS hash as level playlist:', url);
+            // Determine file extension and filename based on URL or context
+            if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level') {
+              filename = 'playlist.m3u8';
+              if (context.type === 'level' && url.includes('/ipfs/Qm') && !url.includes('.')) {
+                console.log('Detected bare IPFS hash as level playlist:', url);
+              }
+            } else if (url.includes('.ts') || context.type === 'segment' || context.responseType === 'arraybuffer' || context.frag) {
+              // If it's requesting arraybuffer or has frag property, it's likely a video segment
+              filename = 'segment.ts';
+            } else if (url.includes('/ipfs/Qm') && context.responseType === 'text') {
+              // Handle any other bare IPFS hash that expects text (likely a playlist)
+              filename = 'playlist.m3u8';
+              console.log('Detected bare IPFS hash expecting text as playlist:', url);
             }
-          } else if (url.includes('.ts') || context.type === 'segment' || context.responseType === 'arraybuffer' || context.frag) {
-            // If it's requesting arraybuffer or has frag property, it's likely a video segment
-            filename = 'segment.ts';
-          } else if (url.includes('/ipfs/Qm') && context.responseType === 'text') {
-            // Handle any other bare IPFS hash that expects text (likely a playlist)
-            filename = 'playlist.m3u8';
-            console.log('Detected bare IPFS hash expecting text as playlist:', url);
-          }
             
             // Construct proper IPFS gateway URL with filename for MIME type detection
             ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}?filename=${filename}`;
@@ -5607,6 +5608,7 @@ function buyNFT(setname, uid, price, type, callback){
           console.log('IPFS Loader fetching:', ipfsUrl);
           console.log('Expected responseType:', context.responseType);
           console.log('Filename hint:', filename);
+          console.log('Is filename defined?', typeof filename !== 'undefined');
           console.log('Context details:', {
             type: context.type,
             frag: !!context.frag,
@@ -5615,14 +5617,28 @@ function buyNFT(setname, uid, price, type, callback){
           });
           
           // Create AbortController for request cancellation
-          this.requestController = new AbortController();
+          console.log('🔧 About to create AbortController...');
+          try {
+            this.requestController = new AbortController();
+            console.log('✅ AbortController created successfully:', this.requestController);
+          } catch (err) {
+            console.error('❌ Failed to create AbortController:', err);
+          }
           
           console.log('🚀 STARTING FETCH REQUEST FOR:', ipfsUrl);
           console.log('🔧 Fetch options:', { signal: this.requestController.signal });
           
-          const fetchPromise = fetch(ipfsUrl, { signal: this.requestController.signal });
-          console.log('📡 Fetch promise created:', fetchPromise);
+          console.log('🌍 About to call fetch...');
+          let fetchPromise;
+          try {
+            fetchPromise = fetch(ipfsUrl, { signal: this.requestController.signal });
+            console.log('📡 Fetch promise created successfully:', fetchPromise);
+          } catch (err) {
+            console.error('❌ Failed to create fetch promise:', err);
+            throw err;
+          }
           
+          console.log('🔄 About to attach .then() handlers...');
           fetchPromise
             .then(response => {
               console.log('✅ FETCH RESPONSE RECEIVED:', response);
