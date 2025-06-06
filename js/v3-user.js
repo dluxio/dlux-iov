@@ -1271,13 +1271,6 @@ PORT=3000
               this.File[i].name == event.currentTarget.File.name
               && this.File[i].size == event.currentTarget.File.size
             ) {
-              // Hash.of(fileContent).then((hash) => {
-
-              //   const dict = {hash, index:i, size: event.currentTarget.File.size, name: event.currentTarget.File.name, path:e.target.id, progress: '..........'}
-              //   this.FileInfo[dict.name] = dict
-              //   const file = this.File[i];
-              //   this.File.splice(i, 1, file);
-              // });
               Hash.of(fileContent).then(async (hash) => {
                 var current_contract = "Not found"
                 current_contract = { result } = await fetch(`https://spktest.dlux.io/api/file/${hash}`)
@@ -1288,15 +1281,14 @@ PORT=3000
                   alert("File already uploaded")
                 }
               })
+              break
             }
-          };
-          reader.readAsBinaryString(e.target.files[i]);
-          var File = e.target.files[i];
-          File.progress = '..........';
-          // File.hash = "";
-          // File.md5 = ""
-          this.File.push(File);
-        }
+          }
+        };
+        reader.readAsBinaryString(e.target.files[i]);
+        var File = e.target.files[i];
+        File.progress = '..........';
+        this.File.push(File);
       }
     },
     hiveApiCall(method, params) {
@@ -1358,9 +1350,6 @@ PORT=3000
         };
         reader.readAsBinaryString(e.dataTransfer.files[i]);
         var File = e.dataTransfer.files[i];
-        // File.pin = true;
-        // File.hash = "";
-        // File.md5 = ""
         this.File.push(File);
       }
     },
@@ -1674,9 +1663,6 @@ PORT=3000
       }
       return `linear-gradient(${r})`;
     },
-    // update: _.debounce(function(e) {
-    //         this.postBody = e.target.value;
-    //       }, 300),
     breakIt(it, reset) {
       if (reset) {
         this.SL = [];
@@ -4415,6 +4401,8 @@ function buyNFT(setname, uid, price, type, callback){
       var commands = [
         // input filename
         "-i", name,
+        // pixel format for compatibility
+        "-pix_fmt", "yuv420p",
         // 10 second segments
         "-segment_time", "10",
         // max muxing queue size
@@ -4422,6 +4410,10 @@ function buyNFT(setname, uid, price, type, callback){
         // hls settings
         '-hls_time', "5",
         '-hls_list_size', "0",
+        // Start segment numbering at 0
+        "-start_number", "0",
+        // Add flags for independent segments
+        "-hls_flags", "independent_segments",
         // profile
         '-profile:v', 'main',
         // audio codec and bitrate
@@ -4554,10 +4546,10 @@ function buyNFT(setname, uid, price, type, callback){
               let playlistContent = new TextDecoder().decode(data);
               console.log(`M3U8 Resolution Playlist Content (${file.name}):`, playlistContent);
               
-              // Replace segment references with actual IPFS hashes
+              // Replace segment references with actual IPFS hashes and add filename hints
               segmentMapping.forEach((actualHash, originalName) => {
                 const segmentPattern = new RegExp(originalName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-                playlistContent = playlistContent.replace(segmentPattern, `https://ipfs.dlux.io/ipfs/${actualHash}`);
+                playlistContent = playlistContent.replace(segmentPattern, `https://ipfs.dlux.io/ipfs/${actualHash}?filename=${originalName}`);
               });
               
               console.log(`M3U8 with IPFS hashes (${file.name}):`, playlistContent);
@@ -4626,69 +4618,50 @@ function buyNFT(setname, uid, price, type, callback){
               
               const contentBuffer = buffer.Buffer(new TextEncoder().encode(playlist.content));
               const hashResult = await this.hashOf(contentBuffer, {});
-              playlist.actualHash = hashResult.hash;
+              playlist.hash = hashResult.hash;
               
               // Update progress after hashing playlist
               this.hashingProgress.current++;
               this.hashingProgress.percentage = Math.round((this.hashingProgress.current / this.hashingProgress.total) * 100);
-              this.videoMsg = `Hashing complete: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)} (${this.hashingProgress.percentage}%)`;
+              this.videoMsg = `Hashing playlists: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)} (${this.hashingProgress.percentage}%)`;
               
-              console.log(`Hashed ${playlist.fileName}: ${hashResult.hash}`);
               return playlist;
             });
             
+            // Wait for all resolution playlists to be hashed
             const hashedPlaylists = await Promise.all(hashPromises);
-            
-            // Create master M3U8 playlist with actual hashes
+
+            // Construct master M3U8 playlist
             let masterPlaylistContent = '#EXTM3U\n#EXT-X-VERSION:3\n';
-            
-            // Sort playlists by resolution (highest first)
-            hashedPlaylists.sort((a, b) => parseInt(b.resolution) - parseInt(a.resolution));
-            
-            hashedPlaylists.forEach(playlist => {
-              const bandwidth = this.calculateBandwidth(playlist.resolution);
-              masterPlaylistContent += `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},RESOLUTION=${this.getResolutionDimensions(playlist.resolution)}\n`;
-              masterPlaylistContent += `https://ipfs.dlux.io/ipfs/${playlist.actualHash}\n`;
+            hashedPlaylists.sort((a, b) => parseInt(b.resolution) - parseInt(a.resolution)).forEach(p => {
+              const bandwidth = this.calculateBandwidth(p.resolution);
+              const dimensions = this.getResolutionDimensions(p.resolution);
+              masterPlaylistContent += `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},RESOLUTION=${dimensions.width}x${dimensions.height}\n`;
+              masterPlaylistContent += `https://ipfs.dlux.io/ipfs/${p.hash}?filename=${p.fileName}\n`;
             });
             
-            console.log('Master M3U8 Playlist Content:', masterPlaylistContent);
+            console.log('Master M3U8 Playlist:', masterPlaylistContent);
             
-            // Use original video file name for master playlist
-            const originalFileName = name.split('.')[0]; // Remove extension
-            const masterFileName = `${originalFileName}.m3u8`;
-            
-            // Add master playlist to upload
-            const masterPlaylistFile = new File([new TextEncoder().encode(masterPlaylistContent)], masterFileName, { 
-              type: 'application/x-mpegURL' 
+            // Prepare master playlist for upload
+            const masterPlaylistFile = new File([new TextEncoder().encode(masterPlaylistContent)], 'master_playlist.m3u8', {
+              type: 'application/x-mpegURL'
             });
-            
+
+            // Add master playlist to the final upload list
             videoFiles.push({
               file: masterPlaylistFile,
               targetPath: '/Videos',
+              isThumb: false, // This is the main entry point
               isMasterPlaylist: true
             });
-            
-            this.dataURLS.push([masterFileName, new TextEncoder().encode(masterPlaylistContent), 'application/x-mpegURL']);
-            console.log(`Added master M3U8 playlist: ${masterFileName}`);
-            
-            // Store for reference
-            this.playlistUpdates = {
-              masterPlaylist: {
-                content: masterPlaylistContent,
-                fileName: masterFileName,
-                resolutionPlaylists: hashedPlaylists
-              }
-            };
-          }
-          
-          // Upload video files using upload-everywhere component
-          if (videoFiles.length > 0) {
-            this.videoMsg = `Preparing ${videoFiles.length} files for upload (${resolutionPlaylists.length} resolutions)...`;
-            console.log('Video files prepared for upload:', videoFiles);
-            // Set the video files to be picked up by the upload-everywhere component
+            this.dataURLS.push(['master_playlist.m3u8', new TextEncoder().encode(masterPlaylistContent), 'application/x-mpegURL']);
+
+            console.log('Final video files to upload:', videoFiles.map(f => f.file.name));
             this.videoFilesToUpload = videoFiles;
+            this.videoMsg = 'All files are ready for upload!';
+            
           } else {
-            this.videoMsg = 'No transcoded files found. Please try again.';
+            this.videoMsg = 'No resolution playlists were generated. Please check the transcoding process.';
           }
         });
       });
@@ -5627,7 +5600,9 @@ function buyNFT(setname, uid, price, type, callback){
           // Set response type based on context
           if (context.responseType === 'arraybuffer' || filename === 'segment.ts') {
             xhr.responseType = 'arraybuffer';
-            console.log('📦 Set XHR responseType to arraybuffer');
+            // Force the Content-Type header to ensure correct data handling
+            xhr.overrideMimeType('video/mp2t');
+            console.log('📦 Set XHR responseType to arraybuffer and overrideMimeType to video/mp2t');
           } else {
             xhr.responseType = 'text';
             console.log('📄 Set XHR responseType to text');
@@ -5653,25 +5628,54 @@ function buyNFT(setname, uid, price, type, callback){
               console.log('🎯 XHR Success:', ipfsUrl, 'Size:', dataSize);
               console.log('📋 Data type:', typeof data);
               console.log('📋 Data constructor:', data ? data.constructor.name : 'null');
-              
-              // Check first few bytes for segments
+
+              // Deep MPEG-TS validation for segments
               if (filename === 'segment.ts' && data instanceof ArrayBuffer) {
-                const firstBytes = new Uint8Array(data.slice(0, 16));
-                console.log('First 16 bytes as hex:', Array.from(firstBytes).map(b => b.toString(16).padStart(2, '0')).join(' '));
-                console.log('Has MPEG-TS sync byte (0x47)?', firstBytes[0] === 0x47);
+                const bytes = new Uint8Array(data);
+                console.log('🔍 DEEP MPEG-TS ANALYSIS:');
+                console.log('   Total size:', bytes.length);
+                console.log('   First 32 bytes:', Array.from(bytes.slice(0, 32)).map(b => b.toString(16).padStart(2, '0')).join(' '));
+                
+                // Check for MPEG-TS packet structure (188-byte packets)
+                let validPackets = 0;
+                let syncBytes = 0;
+                for (let i = 0; i < Math.min(bytes.length, 1880); i += 188) {
+                  if (bytes[i] === 0x47) {
+                    syncBytes++;
+                    validPackets++;
+                  }
+                }
+                console.log('   MPEG-TS packets found:', validPackets);
+                console.log('   Sync bytes at 188-byte intervals:', syncBytes);
+                console.log('   Looks like valid MPEG-TS?', syncBytes >= 5);
+                
+                // Check for common MPEG-TS PIDs
+                const pids = new Set();
+                for (let i = 0; i < Math.min(bytes.length, 1880); i += 188) {
+                  if (bytes[i] === 0x47) {
+                    const pid = ((bytes[i + 1] & 0x1F) << 8) | bytes[i + 2];
+                    pids.add(pid);
+                  }
+                }
+                console.log('   PIDs found:', Array.from(pids).slice(0, 10));
               }
               
-              // Create response object in HLS.js expected format
-              const responseObj = {
-                url: ipfsUrl,
+              const response = {
                 data: data,
-                code: xhr.status,
-                text: xhr.statusText
+                url: xhr.responseURL || ipfsUrl
               };
               
-              console.log('🚀 CALLING HLS.js onSuccess with XHR data');
-              callbacks.onSuccess(responseObj, this.stats, context);
-              console.log('✅ HLS.js onSuccess callback completed');
+              const networkDetails = {
+                treq: this.stats.loading.start,
+                tfirst: this.stats.loading.first, 
+                tload: this.stats.loading.end,
+                mtime: new Date().getTime(),
+                loaded: dataSize,
+                total: dataSize,
+                url: xhr.responseURL || context.url
+              };
+              
+              callbacks.onSuccess(response, this.stats, context, networkDetails);
             } else {
               console.error('❌ XHR Error - Status:', xhr.status, xhr.statusText);
               callbacks.onError({
@@ -5759,38 +5763,33 @@ function buyNFT(setname, uid, price, type, callback){
         // Check if HLS.js is available
         if (typeof Hls !== 'undefined') {
           if (Hls.isSupported()) {
-            // Destroy existing HLS instance if attached to this video
-            if (videoElement.hlsInstance) {
-              videoElement.hlsInstance.destroy();
+            console.log('IPFS detected, trying custom loader first...', src);
+
+            const hls = new Hls({
+              fLoader: this.createIpfsLoader(),
+              forceKeyFrameOnDiscontinuity: false, // More lenient with initial timestamps
+              maxBufferHole: 1.5, // Allow jumping over larger gaps between segments
+              debug: true // Forcefully enable verbose debugging
+            });
+
+            // Bind event listeners for detailed logging
+            hls.on(Hls.Events.ERROR, (event, data) => {
+              console.error('HLS error:', data);
+              if (data.details === 'fragParsingError') {
+                console.error('Fragment parsing error, segment may not contain valid media data');
+              }
+            });
+
+            // Attach all HLS events for deep debugging
+            for (const event in Hls.Events) {
+              if (HLS.Events.hasOwnProperty(event)) {
+                hls.on(Hls.Events[event], (eventName, data) => {
+                  console.log(`HLS Event: ${eventName}`, data || '');
+                });
+              }
             }
             
-            // Try alternative approaches for IPFS
-            let hlsConfig = {
-              debug: false,
-              enableWorker: true,
-              lowLatencyMode: false
-            };
-            
-            // Check if this is an IPFS URL
-            const isIpfs = videoSrc.includes('ipfs.dlux.io/ipfs/');
-            
-            if (isIpfs) {
-              console.log('IPFS detected, trying custom loader first...');
-              // Create custom IPFS loader for better IPFS URL handling
-              const IpfsLoader = this.createIpfsLoader();
-              hlsConfig.loader = IpfsLoader;
-            } else {
-              console.log('Non-IPFS URL, using default HLS loader');
-            }
-            
-            // Create new HLS instance
-            const hls = new Hls(hlsConfig);
-            
-            // Store instance on video element for cleanup
-            videoElement.hlsInstance = hls;
-            
-            // Load the M3U8 source
-            hls.loadSource(videoSrc);
+            hls.loadSource(src);
             hls.attachMedia(videoElement);
             
             // Handle events
