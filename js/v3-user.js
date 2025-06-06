@@ -5601,8 +5601,17 @@ function buyNFT(setname, uid, price, type, callback){
               console.log('Detected bare IPFS hash expecting text as playlist:', url);
             }
             
-            // Construct proper IPFS gateway URL with filename for MIME type detection
-            ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}?filename=${filename}`;
+            // Try multiple approaches for proper MIME type
+            if (filename === 'segment.ts') {
+              // For video segments, try different gateway approaches
+              console.log('🔄 Trying video segment with multiple gateway approaches...');
+              // First try with .ts extension directly in path
+              ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}.ts`;
+              console.log('📎 Trying direct .ts extension:', ipfsUrl);
+            } else {
+              // For playlists, use filename parameter
+              ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}?filename=${filename}`;
+            }
           }
           
           console.log('IPFS Loader fetching:', ipfsUrl);
@@ -5698,10 +5707,21 @@ function buyNFT(setname, uid, price, type, callback){
               }
               
               // HLS.js expects exact response format matching XHR loader
+              // The standard format should include the actual Response object, not just data
               const responseObj = {
                 url: ipfsUrl,
-                data: data
+                data: data,
+                code: this.currentResponse.status,
+                text: this.currentResponse.statusText
               };
+              
+              console.log('📋 Creating HLS response object with format:', {
+                url: responseObj.url,
+                dataType: typeof responseObj.data,
+                dataSize: data instanceof ArrayBuffer ? data.byteLength : data.length,
+                code: responseObj.code,
+                text: responseObj.text
+              });
               
               // Pass proper stats object that HLS.js expects
               console.log('🚀 CALLING HLS.js onSuccess callback with:', responseObj);
