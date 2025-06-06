@@ -4924,12 +4924,20 @@ export default {
                     this.context = context;
                     this.callbacks = callbacks;
                     this.stats = {
-                        trequest: performance.now(),
-                        tfirst: 0,
-                        tload: 0,
-                        mtime: 0,
-                        loaded: 0,
-                        total: 0
+                        loading: {
+                            start: performance.now(),
+                            first: 0,
+                            end: 0
+                        },
+                        parsing: {
+                            start: 0,
+                            end: 0
+                        },
+                        buffering: {
+                            start: 0,
+                            first: 0,
+                            end: 0
+                        }
                     };
                     
                     const url = context.url;
@@ -4963,8 +4971,8 @@ export default {
                                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                             }
                             
-                            this.stats.tfirst = Math.max(performance.now(), this.stats.trequest);
-                            this.stats.total = parseInt(response.headers.get('content-length') || '0');
+                            this.stats.loading.first = Math.max(performance.now(), this.stats.loading.start);
+                            this.stats.parsing.start = this.stats.loading.first;
                             
                             // For manifests and level playlists, return text; for segments, return arrayBuffer
                             if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level' || context.responseType === 'text') {
@@ -4974,10 +4982,11 @@ export default {
                             }
                         })
                         .then(data => {
-                            this.stats.tload = Math.max(this.stats.tfirst, performance.now());
-                            this.stats.loaded = typeof data === 'string' ? data.length : data.byteLength;
+                            this.stats.loading.end = Math.max(this.stats.loading.first, performance.now());
+                            this.stats.parsing.end = this.stats.loading.end;
+                            const dataSize = typeof data === 'string' ? data.length : data.byteLength;
                             
-                            console.log('IPFS Loader success:', ipfsUrl, 'Size:', this.stats.loaded);
+                            console.log('IPFS Loader success:', ipfsUrl, 'Size:', dataSize);
                             
                             // HLS.js expects exact response format matching XHR loader
                             const response = {
