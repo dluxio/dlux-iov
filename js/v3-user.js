@@ -4461,12 +4461,22 @@ function buyNFT(setname, uid, price, type, callback){
           clearInterval(progressInterval);
         }
       }
-      fetch(`https://spk-ipfs.3speak.tv/upload-contract?user=${this.account}`).then(r => r.json()).then((data) => {
-        setTimeout(() => {
-          this.showUpload = true
-          this.getSPKUser()
-        }, 1000)
-      })
+      
+      // Non-blocking contract fetch - don't let this interrupt transcoding
+      fetch(`https://spk-ipfs.3speak.tv/upload-contract?user=${this.account}`)
+        .then(r => r.json())
+        .then((data) => {
+          setTimeout(() => {
+            this.showUpload = true
+            this.getSPKUser()
+          }, 1000)
+        })
+        .catch(err => {
+          console.warn('Contract fetch failed, but continuing with transcoding:', err);
+          // Set showUpload anyway so user can continue
+          this.showUpload = true;
+        });
+      
       console.timeEnd('exec');
       this.videoMsg = 'Transcoding complete! Preparing files for upload...';
       
