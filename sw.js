@@ -1,4 +1,4 @@
-this.version = "2025.06.06.17";
+this.version = "2025.06.06.18";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.06.17",
-  "generated": "2025-06-06T03:46:57Z",
+  "version": "2025.06.06.18",
+  "generated": "2025-06-06T03:57:19Z",
   "files": {
-    "/img/meta/about.png": {
-      "checksum": "0e0c6bc95c6e5039795b73e0b7409294",
-      "size": 485764,
-      "priority": "important"
-    },
     "/img/meta/create.png": {
       "checksum": "a744ac5d0b197c99c7ce329f63cd990b",
       "size": 506236,
@@ -1141,7 +1136,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "359a8faa27000520395ec6cdca769575",
+      "checksum": "e103001d585947a38cb50ee32924ef9e",
       "size": 36317,
       "priority": "important"
     },
@@ -1216,8 +1211,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "283dbf24f45584a9ca75faf8519a2beb",
-      "size": 210821,
+      "checksum": "9acfed4093609f2bb350bf25f8a82188",
+      "size": 211545,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1331,7 +1326,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "79c7e899e0a69752eb13f542a7d7a286",
+      "checksum": "3245fb5ec8f43497071993ce148259fe",
       "size": 7300,
       "priority": "important"
     },
@@ -1404,11 +1399,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/cpp/cpp.js": {
-      "checksum": "6f3f1a6ac757a431a43447cbd50dd358",
-      "size": 6121,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/csharp/csharp.js": {
       "checksum": "cf499fdad78353da0b922b0c8568cbb2",
