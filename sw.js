@@ -1,4 +1,4 @@
-this.version = "2025.06.06.19";
+this.version = "2025.06.06.20";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.06.19",
-  "generated": "2025-06-06T04:00:36Z",
+  "version": "2025.06.06.20",
+  "generated": "2025-06-06T04:06:30Z",
   "files": {
-    "/img/meta/dao.png": {
-      "checksum": "392f062627adf5c61eb191ffa6a8e0c3",
-      "size": 369057,
-      "priority": "important"
-    },
     "/img/meta/index.png": {
       "checksum": "cdfd8f211499d38909f21de002319d0b",
       "size": 584134,
@@ -1131,7 +1126,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "a3a570332a01c2a83bdf755ec61b69bc",
+      "checksum": "ab2b7f22ec0e664f48065bb8c1e12703",
       "size": 36317,
       "priority": "important"
     },
@@ -1206,8 +1201,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "55250a67b755b02114462641bfdcb1bb",
-      "size": 212582,
+      "checksum": "f3812f400c4a9d527c03ce2af2cec196",
+      "size": 209617,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1321,7 +1316,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "53fcf4c590a9572beb8fc65991c1f913",
+      "checksum": "f9fd3edd38069dd20909299ee365c3f0",
       "size": 7300,
       "priority": "important"
     },
@@ -1394,11 +1389,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/csp/csp.js": {
-      "checksum": "76fda2a33b044b0b10594f6bc24b3b43",
-      "size": 2240,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/css/css.js": {
       "checksum": "b2fd45e97b30ceda399df4308236204e",
