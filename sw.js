@@ -1,4 +1,4 @@
-this.version = "2025.06.06.8";
+this.version = "2025.06.06.9";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.05.17",
-  "generated": "2025-06-06T00:52:30Z",
+  "version": "2025.06.06.9",
+  "generated": "2025-06-06T00:52:47Z",
   "files": {
-    "/img/hivesigner_white.svg": {
-      "checksum": "504a9fab6111a49d6cdbb73804c4aa15",
-      "size": 6318,
-      "priority": "important"
-    },
     "/img/html-file-type-svgrepo-com.svg": {
       "checksum": "5ab38fd87ea73dbf6ffed1d024b7d35c",
       "size": 1555,
@@ -1449,11 +1444,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/base/worker/workerMain.js": {
-      "checksum": "b56d63807a3d5b23cb061ce224156c8c",
-      "size": 376515,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/abap/abap.js": {
       "checksum": "36b035c2c53fa2cb6d7a8a244f0c97c1",
