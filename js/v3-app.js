@@ -1472,7 +1472,7 @@ createApp({
             
             // Determine file extension and filename based on URL or context
             let filename = 'file';
-            if (url.includes('.m3u8') || context.type === 'manifest') {
+            if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level') {
               filename = 'playlist.m3u8';
             } else if (url.includes('.ts') || context.type === 'segment') {
               filename = 'segment.ts';
@@ -1490,8 +1490,8 @@ createApp({
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
               }
               
-              // For manifests, return text; for segments, return arrayBuffer
-              if (url.includes('.m3u8') || context.type === 'manifest') {
+              // For manifests and level playlists, return text; for segments, return arrayBuffer
+              if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level' || context.responseType === 'text') {
                 return response.text();
               } else {
                 return response.arrayBuffer();
