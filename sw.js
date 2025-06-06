@@ -1,4 +1,4 @@
-this.version = "2025.06.06.21";
+this.version = "2025.06.06.22";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.06.21",
-  "generated": "2025-06-06T04:48:28Z",
+  "version": "2025.06.06.22",
+  "generated": "2025-06-06T05:08:02Z",
   "files": {
-    "/img/meta/mint.png": {
-      "checksum": "b307d0794d165eb0f52f5c642c56c647",
-      "size": 642272,
-      "priority": "important"
-    },
     "/img/meta/node.png": {
       "checksum": "10b441a2c9e9e728e7055fae9065769d",
       "size": 750851,
@@ -1121,7 +1116,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "53bce41de2f644ce8cc14be37d2de204",
+      "checksum": "30a279b1b9b7297e7a0dba2b7f958ebf",
       "size": 36317,
       "priority": "important"
     },
@@ -1196,8 +1191,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "3af9fba4bc4c17ebe7454bbb3faf1c15",
-      "size": 209817,
+      "checksum": "676a2eb1c55541bb52cb0318f15ce9da",
+      "size": 205095,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1311,7 +1306,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "75a360d409c0b6a6cdfab664372a9897",
+      "checksum": "f6cfa930540e03432c3cbfea38ffdd24",
       "size": 7300,
       "priority": "important"
     },
@@ -1384,11 +1379,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/cypher/cypher.js": {
-      "checksum": "7c2e2ef3b4e6f2c6d44cbf812690e7ef",
-      "size": 4212,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/dart/dart.js": {
       "checksum": "38967df16d830aacc5894c0b112b6592",
