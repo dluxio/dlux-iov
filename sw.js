@@ -1,4 +1,4 @@
-this.version = "2025.06.06.22";
+this.version = "2025.06.06.23";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.06.22",
-  "generated": "2025-06-06T05:08:02Z",
+  "version": "2025.06.06.23",
+  "generated": "2025-06-06T05:32:46Z",
   "files": {
-    "/img/meta/node.png": {
-      "checksum": "10b441a2c9e9e728e7055fae9065769d",
-      "size": 750851,
-      "priority": "important"
-    },
     "/img/meta/storage1.png": {
       "checksum": "cb96e8a07b06496384d31e9a30015f9a",
       "size": 434519,
@@ -1116,7 +1111,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "30a279b1b9b7297e7a0dba2b7f958ebf",
+      "checksum": "5894a7027ddb3c8e98796e6f85da3813",
       "size": 36317,
       "priority": "important"
     },
@@ -1191,8 +1186,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "676a2eb1c55541bb52cb0318f15ce9da",
-      "size": 205095,
+      "checksum": "1ed325d7c95a52b6c4c676cb6cbc5d01",
+      "size": 205427,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1306,7 +1301,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "f6cfa930540e03432c3cbfea38ffdd24",
+      "checksum": "f4474058f8cb95e66996151374d3a73a",
       "size": 7300,
       "priority": "important"
     },
@@ -1379,11 +1374,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/dart/dart.js": {
-      "checksum": "38967df16d830aacc5894c0b112b6592",
-      "size": 5073,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/dockerfile/dockerfile.js": {
       "checksum": "b5c785d2bfcdf77920f75f2586899a11",
