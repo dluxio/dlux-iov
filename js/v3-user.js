@@ -5723,182 +5723,91 @@ function buyNFT(setname, uid, price, type, callback){
       return IpfsLoader;
     },
 
-    async setupHLSPlayer(videoElement) {
-      // Universal HLS.js setup for M3U8 video playback
-      if (!videoElement || !videoElement.src) return;
-      
-      let videoSrc = videoElement.src;
-      console.log('Setting up HLS for video:', videoSrc);
-      
-      // Smart IPFS video detection - check if it's an IPFS file without extension
-      // Need to check before any query parameters are added
-      const cleanUrl = videoSrc.split('?')[0]; // Remove any existing query parameters
-      console.log('Checking IPFS detection for clean URL:', cleanUrl);
-      console.log('Regex test:', /\/ipfs\/Qm[a-zA-Z0-9]+$/.test(cleanUrl));
-      console.log('Contains dot:', cleanUrl.includes('.'));
-      
-      if (/\/ipfs\/Qm[a-zA-Z0-9]+$/.test(cleanUrl) && !cleanUrl.includes('.')) {
-        console.log('Detected IPFS file without extension, checking size...');
-        try {
-          const response = await fetch(cleanUrl, { method: 'HEAD' });
-          const contentLength = response.headers.get('content-length');
-          if (contentLength) {
-            const sizeInKB = parseInt(contentLength) / 1024;
-            console.log(`IPFS file size: ${sizeInKB} KB`);
-            
-            // If file is in kilobyte range (likely a playlist), treat as M3U8
-            if (sizeInKB < 100) { // Playlists are typically small
-              videoSrc = cleanUrl + '?filename=master.m3u8';
-              videoElement.src = videoSrc; // Update the video element src
-              console.log('Treating as M3U8 playlist:', videoSrc);
-            }
-          }
-        } catch (err) {
-          console.log('Could not determine IPFS file size, proceeding with original URL');
+    createPreviewLoader() {
+      const self = this;
+      class PreviewLoader {
+        constructor(config) {
+          this.config = config;
         }
-      }
-      
-      // Check if the source is an M3U8 file
-      if (videoSrc.includes('.m3u8') || videoSrc.includes('application/x-mpegURL') || videoSrc.includes('filename=master.m3u8')) {
-        // Check if HLS.js is available
-        if (typeof Hls !== 'undefined') {
-          if (Hls.isSupported()) {
-            console.log('IPFS detected, trying custom loader first...', src);
 
-            const hls = new Hls({
-              fLoader: this.createIpfsLoader(),
-              forceKeyFrameOnDiscontinuity: false, // More lenient with initial timestamps
-              maxBufferHole: 1.5, // Allow jumping over larger gaps between segments
-              debug: true // Forcefully enable verbose debugging
-            });
+        load(context, config, callbacks) {
+          const segmentName = context.url.split('/').pop().split('?')[0];
+          console.log(`PreviewLoader trying to load: ${segmentName}`);
+          
+          const segmentData = self.dataURLS.find(d => d[0].startsWith(segmentName.replace('.ts', '')));
 
-            // Bind event listeners for detailed logging
-            hls.on(Hls.Events.ERROR, (event, data) => {
-              console.error('HLS error:', data);
-              if (data.details === 'fragParsingError') {
-                console.error('Fragment parsing error, segment may not contain valid media data');
-              }
-            });
-
-            // Attach all HLS events for deep debugging
-            for (const event in Hls.Events) {
-              if (HLS.Events.hasOwnProperty(event)) {
-                hls.on(Hls.Events[event], (eventName, data) => {
-                  console.log(`HLS Event: ${eventName}`, data || '');
-                });
-              }
-            }
-            
-            hls.loadSource(src);
-            hls.attachMedia(videoElement);
-            
-            // Handle events
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-              console.log('HLS manifest parsed successfully');
-            });
-            
-            // Track error counts to prevent infinite loops
-            let errorCount = 0;
-            const maxErrors = 3;
-            let hasTriedFallback = false;
-            
-            hls.on(Hls.Events.ERROR, (event, data) => {
-              console.warn('HLS error:', data);
-              
-              errorCount++;
-              
-              // If IPFS custom loader is failing and we haven't tried fallback
-              if (isIpfs && !hasTriedFallback && errorCount >= 2 && data.details === 'fragParsingError') {
-                console.log('🔄 IPFS custom loader failing, trying fallback approach...');
-                hasTriedFallback = true;
-                
-                // Destroy current instance
-                hls.destroy();
-                
-                // Try with default loader and modified URLs
-                console.log('Attempting fallback: Convert IPFS URLs to gateway URLs without custom loader');
-                const fallbackHls = new Hls({
-                  debug: false,
-                  enableWorker: true,
-                  lowLatencyMode: false
-                  // No custom loader - use default
-                });
-                
-                // Replace the stored HLS instance
-                videoElement.hlsInstance = fallbackHls;
-                
-                // Try loading with a different IPFS gateway approach
-                let fallbackSrc = videoSrc;
-                if (videoSrc.includes('?filename=master.m3u8')) {
-                  // Try without the filename parameter
-                  fallbackSrc = videoSrc.split('?')[0];
-                  console.log('Fallback URL (no filename):', fallbackSrc);
-                }
-                
-                fallbackHls.loadSource(fallbackSrc);
-                fallbackHls.attachMedia(videoElement);
-                
-                fallbackHls.on(Hls.Events.ERROR, (event, data) => {
-                  console.warn('Fallback HLS error:', data);
-                  if (data.fatal) {
-                    console.log('❌ Fallback also failed, IPFS content may not be valid HLS');
-                    fallbackHls.destroy();
-                  }
-                });
-                
-                return;
-              }
-              
-              if (errorCount > maxErrors) {
-                console.log('Too many errors, destroying HLS instance');
-                hls.destroy();
-                return;
-              }
-              
-              if (data.fatal) {
-                switch (data.type) {
-                  case Hls.ErrorTypes.NETWORK_ERROR:
-                    console.log('Network error, trying to recover...');
-                    hls.startLoad();
-                    break;
-                  case Hls.ErrorTypes.MEDIA_ERROR:
-                    console.log('Media error, trying to recover...');
-                    hls.recoverMediaError();
-                    break;
-                  default:
-                    console.log('Fatal error, destroying HLS instance');
-                    hls.destroy();
-                    break;
-                }
-              } else if (data.details === 'fragParsingError') {
-                // Handle non-fatal parsing errors more gracefully
-                console.log('Fragment parsing error, segment may not contain valid media data');
-                if (errorCount >= 2) {
-                  console.log('Multiple parsing errors, may be invalid IPFS content for HLS playback');
-                }
-              }
-            });
-            
-            console.log('HLS.js player with IPFS loader setup complete for:', videoSrc);
+          if (segmentData) {
+            console.log(`PreviewLoader found segment: ${segmentName}`);
+            const buffer = segmentData[1];
+            const response = { data: buffer, url: context.url };
+            const stats = { tload: performance.now(), loaded: buffer.byteLength, total: buffer.byteLength };
+            callbacks.onSuccess(response, stats, context, {});
           } else {
-            console.log('HLS.js not supported, using native playback');
+            console.error(`PreviewLoader could not find segment: ${segmentName}`);
+            callbacks.onError({ code: 404, text: `Segment not found: ${segmentName}` }, context);
           }
-        } else {
-          console.warn('HLS.js library not loaded');
         }
-      } else {
-        console.log('Not an M3U8 file, using native video playback');
+
+        abort() {}
+        destroy() {}
       }
+      return PreviewLoader;
     },
-    
-    observeVideoElements() {
-      // Set up MutationObserver to watch for new video elements
-      if (this.videoObserver) {
-        this.videoObserver.disconnect();
+
+    async setupHLSPlayer(videoElement) {
+      const src = videoElement.src;
+      console.log(`Setting up HLS for video: ${src}`);
+      if (!src) return;
+
+      if (videoElement.hls) {
+        videoElement.hls.destroy();
+      }
+
+      if (!Hls.isSupported()) {
+        console.log('HLS.js is not supported, or this is a native playback scenario (e.g., Safari).');
+        return;
       }
       
-      this.videoObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
+      const isPreview = src.startsWith('blob:');
+      const isIpfs = src.includes('ipfs.dlux.io/ipfs/');
+
+      if (!isPreview && !isIpfs) {
+          console.log('Not a compatible HLS source for custom loader, using native playback.');
+          return;
+      }
+
+      const hlsConfig = {
+        forceKeyFrameOnDiscontinuity: false,
+        maxBufferHole: 1.5,
+        debug: true,
+      };
+
+      if (isPreview) {
+        console.log('Preview mode detected, using PreviewLoader.');
+        hlsConfig.fLoader = this.createPreviewLoader();
+      } else { // isIpfs
+        console.log('IPFS URL detected, using IpfsLoader.');
+        hlsConfig.fLoader = this.createIpfsLoader();
+      }
+
+      const hls = new Hls(hlsConfig);
+      videoElement.hls = hls;
+
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        console.error('HLS error:', data);
+        if (data.details === 'fragParsingError') {
+          console.error('Fragment parsing error, segment may not contain valid media data');
+        }
+      });
+      
+      hls.loadSource(src);
+      hls.attachMedia(videoElement);
+      console.log('HLS.js player setup complete for:', src);
+    },
+
+    observeVideoElements() {
+      const videoObserver = new MutationObserver((mutationsList, observer) => {
+        mutationsList.forEach((mutation) => {
           // Check for added nodes
           mutation.addedNodes.forEach((node) => {
             if (node.nodeType === Node.ELEMENT_NODE) {
@@ -5924,7 +5833,7 @@ function buyNFT(setname, uid, price, type, callback){
       });
       
       // Start observing
-      this.videoObserver.observe(document.body, {
+      videoObserver.observe(document.body, {
         childList: true,
         subtree: true,
         attributes: true,
