@@ -5601,17 +5601,8 @@ function buyNFT(setname, uid, price, type, callback){
               console.log('Detected bare IPFS hash expecting text as playlist:', url);
             }
             
-            // Try multiple approaches for proper MIME type
-            if (filename === 'segment.ts') {
-              // For video segments, try different gateway approaches
-              console.log('🔄 Trying video segment with multiple gateway approaches...');
-              // First try with .ts extension directly in path
-              ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}.ts`;
-              console.log('📎 Trying direct .ts extension:', ipfsUrl);
-            } else {
-              // For playlists, use filename parameter
-              ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}?filename=${filename}`;
-            }
+            // Construct proper IPFS gateway URL with filename for MIME type detection
+            ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}?filename=${filename}`;
           }
           
           console.log('IPFS Loader fetching:', ipfsUrl);
@@ -5625,132 +5616,94 @@ function buyNFT(setname, uid, price, type, callback){
             id: context.id
           });
           
-          // Create AbortController for request cancellation
-          console.log('🔧 About to create AbortController...');
-          try {
-            this.requestController = new AbortController();
-            console.log('✅ AbortController created successfully:', this.requestController);
-          } catch (err) {
-            console.error('❌ Failed to create AbortController:', err);
+          console.log('🚀 STARTING XHR REQUEST FOR:', ipfsUrl);
+          
+          // Use XMLHttpRequest for better binary data handling
+          const xhr = new XMLHttpRequest();
+          this.currentXHR = xhr;
+          
+          xhr.open('GET', ipfsUrl, true);
+          
+          // Set response type based on context
+          if (context.responseType === 'arraybuffer' || filename === 'segment.ts') {
+            xhr.responseType = 'arraybuffer';
+            console.log('📦 Set XHR responseType to arraybuffer');
+          } else {
+            xhr.responseType = 'text';
+            console.log('📄 Set XHR responseType to text');
           }
           
-          console.log('🚀 STARTING FETCH REQUEST FOR:', ipfsUrl);
-          console.log('🔧 Fetch options:', { signal: this.requestController.signal });
-          
-          console.log('🌍 About to call fetch...');
-          let fetchPromise;
-          try {
-            fetchPromise = fetch(ipfsUrl, { signal: this.requestController.signal });
-            console.log('📡 Fetch promise created successfully:', fetchPromise);
-          } catch (err) {
-            console.error('❌ Failed to create fetch promise:', err);
-            throw err;
-          }
-          
-          console.log('🔄 About to attach .then() handlers...');
-          fetchPromise
-            .then(response => {
-              console.log('✅ FETCH RESPONSE RECEIVED:', response);
-              console.log('📊 Response status:', response.status, response.statusText);
-              console.log('📋 Response headers:');
-              for (const [key, value] of response.headers) {
-                console.log(`   ${key}: ${value}`);
-              }
-              
-              if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-              }
-              
+          // Set up event handlers
+          xhr.onload = () => {
+            console.log('✅ XHR LOAD EVENT - Status:', xhr.status, xhr.statusText);
+            console.log('📊 XHR Response details:');
+            console.log('   responseType:', xhr.responseType);
+            console.log('   response type check:', typeof xhr.response);
+            console.log('   response instanceof ArrayBuffer:', xhr.response instanceof ArrayBuffer);
+            
+            if (xhr.status >= 200 && xhr.status < 300) {
               this.stats.loading.first = Math.max(performance.now(), this.stats.loading.start);
-              this.stats.parsing.start = this.stats.loading.first;
-              
-              // Store response reference for later logging
-              this.currentResponse = response;
-              
-              // For manifests and level playlists, return text; for segments, return arrayBuffer
-              let dataPromise;
-              if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level' || context.responseType === 'text') {
-                console.log('📄 Processing as TEXT response');
-                dataPromise = response.text();
-              } else {
-                console.log('🔢 Processing as ARRAYBUFFER response');
-                dataPromise = response.arrayBuffer();
-              }
-              console.log('🔄 Data promise created:', dataPromise);
-              return dataPromise;
-            })
-            .then(data => {
-              console.log('🎉 DATA RECEIVED:', typeof data, data instanceof ArrayBuffer ? 'ArrayBuffer' : 'Not ArrayBuffer');
-              
               this.stats.loading.end = Math.max(this.stats.loading.first, performance.now());
+              this.stats.parsing.start = this.stats.loading.first;
               this.stats.parsing.end = this.stats.loading.end;
-              const dataSize = typeof data === 'string' ? data.length : data.byteLength;
               
-              // Detailed logging for debugging
-              console.log('🎯 IPFS Loader success:', ipfsUrl, 'Size:', dataSize);
-              console.log('Data type:', typeof data);
-              console.log('Is ArrayBuffer?', data instanceof ArrayBuffer);
-              console.log('Is Uint8Array?', data instanceof Uint8Array);
-              console.log('Constructor:', data.constructor.name);
-              console.log('Context responseType:', context.responseType);
-              console.log('Response headers:', this.currentResponse.headers ? Array.from(this.currentResponse.headers.entries()) : 'No headers');
+              const data = xhr.response;
+              const dataSize = data instanceof ArrayBuffer ? data.byteLength : (data ? data.length : 0);
+              
+              console.log('🎯 XHR Success:', ipfsUrl, 'Size:', dataSize);
+              console.log('📋 Data type:', typeof data);
+              console.log('📋 Data constructor:', data ? data.constructor.name : 'null');
               
               // Check first few bytes for segments
               if (filename === 'segment.ts' && data instanceof ArrayBuffer) {
                 const firstBytes = new Uint8Array(data.slice(0, 16));
                 console.log('First 16 bytes as hex:', Array.from(firstBytes).map(b => b.toString(16).padStart(2, '0')).join(' '));
-                console.log('First 16 bytes as decimal:', Array.from(firstBytes));
-                
-                // Check for MPEG-TS sync byte (0x47)
-                const hasSyncByte = firstBytes[0] === 0x47;
-                console.log('Has MPEG-TS sync byte (0x47)?', hasSyncByte);
+                console.log('Has MPEG-TS sync byte (0x47)?', firstBytes[0] === 0x47);
               }
               
-              // HLS.js expects exact response format matching XHR loader
-              // The standard format should include the actual Response object, not just data
+              // Create response object in HLS.js expected format
               const responseObj = {
                 url: ipfsUrl,
                 data: data,
-                code: this.currentResponse.status,
-                text: this.currentResponse.statusText
+                code: xhr.status,
+                text: xhr.statusText
               };
               
-              console.log('📋 Creating HLS response object with format:', {
-                url: responseObj.url,
-                dataType: typeof responseObj.data,
-                dataSize: data instanceof ArrayBuffer ? data.byteLength : data.length,
-                code: responseObj.code,
-                text: responseObj.text
-              });
-              
-              // Pass proper stats object that HLS.js expects
-              console.log('🚀 CALLING HLS.js onSuccess callback with:', responseObj);
+              console.log('🚀 CALLING HLS.js onSuccess with XHR data');
               callbacks.onSuccess(responseObj, this.stats, context);
               console.log('✅ HLS.js onSuccess callback completed');
-            })
-            .catch(err => {
-              console.log('❌ FETCH ERROR CAUGHT:', err);
-              console.log('Error name:', err.name);
-              console.log('Error message:', err.message);
-              console.log('Error stack:', err.stack);
-              
-              if (err.name === 'AbortError') {
-                console.log('🛑 IPFS Loader request was aborted');
-                return;
-              }
-              console.error('💥 IPFS Loader error:', err, 'URL:', ipfsUrl);
-              callbacks.onError({ 
-                code: err.code || 'NETWORK_ERROR', 
-                text: err.message || 'Failed to load IPFS content'
+            } else {
+              console.error('❌ XHR Error - Status:', xhr.status, xhr.statusText);
+              callbacks.onError({
+                code: xhr.status,
+                text: xhr.statusText || 'XHR request failed'
               }, context);
-            });
+            }
+          };
+          
+          xhr.onerror = () => {
+            console.error('💥 XHR Network Error');
+            callbacks.onError({
+              code: 'NETWORK_ERROR',
+              text: 'XHR network error occurred'
+            }, context);
+          };
+          
+          xhr.onabort = () => {
+            console.log('🛑 XHR Request Aborted');
+          };
+          
+          console.log('📡 Starting XHR request...');
+          xhr.send();
+          
+
         }
         
         abort() {
           console.log('IPFS Loader: abort called');
-          if (this.requestController) {
-            this.requestController.abort();
-            this.requestController = null;
+          if (this.currentXHR) {
+            this.currentXHR.abort();
+            this.currentXHR = null;
           }
         }
         
