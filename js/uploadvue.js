@@ -949,9 +949,14 @@ export default {
         }
       }
       this.contract.files = body
-      this.signText(this.user.name + ':' + header + ':' + body).then(res => {
+      // Build challenge as: account:contract:files - this is what the server will reconstruct for verification
+      const challenge = `${this.user.name}:${header}:${body}`;
+      this.signText(challenge).then(res => {
         this.meta = meta
-        this.contract.fosig = res.split(":")[3]
+        // The response format from signHeaders is: challenge:signature
+        // Extract just the signature part (everything after the last colon)
+        const lastColonIndex = res.lastIndexOf(':');
+        this.contract.fosig = lastColonIndex !== -1 ? res.substring(lastColonIndex + 1) : res;
         this.upload(cids, this.contract, folderListString)
         this.ready = false
       })
@@ -1406,6 +1411,7 @@ export default {
   },
   mounted() {
     this.contract = this.propcontract;
+    this.contract.t = this.user.name;
     this.selectContract(this.contract.i, this.contract.b)
     this.encryption.key = CryptoJS.lib.WordArray.random(32).toString(CryptoJS.enc.Hex);
     this.encryption.accounts[this.user.name] = {

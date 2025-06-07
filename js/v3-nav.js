@@ -2377,12 +2377,23 @@ export default {
         .then((r) => {
           console.log("signHeaders Return", r);
           if (r) {
-            localStorage.setItem(`${this.user}:auth`, `${obj.challenge}:${r.signature}`);
-            obj.callbacks[0](`${obj.challenge}:${r}`, console.log("callback?"));
+            // Handle both old string format and new object format
+            let signature;
+            if (typeof r === 'string') {
+              signature = r;
+            } else if (r && r.signature) {
+              signature = r.signature;
+            } else {
+              throw new Error("Invalid signature format");
+            }
+            
+            localStorage.setItem(`${this.user}:auth`, `${obj.challenge}:${signature}`);
+            obj.callbacks[0](`${obj.challenge}:${signature}`);
           }
         })
         .catch((e) => {
           console.log(e);
+          obj.callbacks[1](e);
         });
     },
     broadcastVote(obj) {
