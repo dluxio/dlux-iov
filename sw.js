@@ -1,4 +1,4 @@
-this.version = "2025.06.07.6";
+this.version = "2025.06.07.7";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.07.6",
-  "generated": "2025-06-07T16:20:18Z",
+  "version": "2025.06.07.7",
+  "generated": "2025-06-07T16:32:44Z",
   "files": {
-    "/img/peakd_logo.svg": {
-      "checksum": "50081d3c4169086a323b14127ecd344f",
-      "size": 552,
-      "priority": "important"
-    },
     "/img/png-file-type-svgrepo-com.svg": {
       "checksum": "ba847b53eba1f7e7be13000fc4c5ea27",
       "size": 1921,
@@ -1071,7 +1066,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "d7562260e39cb63f75e2bb8a8d09d72a",
+      "checksum": "2e242c752b64ea6239a60f4af0670051",
       "size": 36316,
       "priority": "important"
     },
@@ -1146,8 +1141,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "d42a4cc2838166f3029f741383179ce0",
-      "size": 193014,
+      "checksum": "dd5c5f1c2233cffdbd9f1fe52e2faa46",
+      "size": 194452,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1261,7 +1256,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "78e7a3bd5b2d51314c5d2c8cfe259169",
+      "checksum": "f05b0a8f1c9d0053691f5357bca91c0b",
       "size": 7299,
       "priority": "important"
     },
@@ -1334,11 +1329,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/graphql/graphql.js": {
-      "checksum": "f441189b06ba23ed43103b8cee0318bd",
-      "size": 3089,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/handlebars/handlebars.js": {
       "checksum": "918993dcd9d96eb28e0dd1afe7b07cd7",
