@@ -1316,7 +1316,7 @@ createApp({ // vue 3
           cryptoType: crypto.symbol,
           amountFormatted: data.payment.amountFormatted,
           address: data.payment.address,
-          memo: data.payment.memo,
+          memo: data.payment.memo || null, // Handle optional memo
           expiresAt: new Date(data.payment.expiresAt),
           instructions: data.payment.instructions || []
         };
@@ -1364,7 +1364,7 @@ createApp({ // vue 3
           cryptoType: data.channel.cryptoType,
           amountFormatted: data.channel.amountFormatted,
           address: data.channel.address,
-          memo: data.channel.memo,
+          memo: data.channel.memo || null, // Handle optional memo
           expiresAt: new Date(data.channel.expiresAt),
           instructions: data.channel.instructions || []
         };
@@ -2796,7 +2796,7 @@ createApp({ // vue 3
           cryptoType: data.channel.cryptoType,
           amountFormatted: data.channel.amountFormatted,
           address: data.channel.address,
-          memo: data.channel.memo,
+          memo: data.channel.memo || null, // Handle optional memo
           expiresAt: new Date(data.channel.expiresAt),
           instructions: data.channel.instructions || []
         };
@@ -2885,7 +2885,7 @@ createApp({ // vue 3
         const amount = parseFloat(this.paymentDetails.amountFormatted.split(' ')[0]);
         const cryptoType = this.paymentDetails.cryptoType;
         const address = this.paymentDetails.address;
-        const memo = this.paymentDetails.memo;
+        const memo = this.paymentDetails.memo || ''; // Handle optional memo
         
         this.addPaymentLog(`Initiating ${cryptoType} payment via ${this.selectedWallet}...`, 'info');
         
@@ -2937,8 +2937,8 @@ createApp({ // vue 3
         
         transaction.add(transferInstruction);
         
-        // Add memo if provided
-        if (memo) {
+        // Add memo if provided (optional)
+        if (memo && memo.trim()) {
           const memoInstruction = new TransactionInstruction({
             keys: [],
             programId: new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),
@@ -2990,8 +2990,8 @@ createApp({ // vue 3
         
         transaction.add(transferInstruction);
         
-        // Add memo if provided
-        if (memo) {
+        // Add memo if provided (optional)
+        if (memo && memo.trim()) {
           const memoInstruction = new TransactionInstruction({
             keys: [],
             programId: new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'),
@@ -3167,7 +3167,7 @@ createApp({ // vue 3
         const amount = parseFloat(this.paymentDetails.amountFormatted.split(' ')[0]);
         const cryptoType = this.paymentDetails.cryptoType;
         const address = this.paymentDetails.address;
-        const memo = this.paymentDetails.memo || '';
+        const memo = this.paymentDetails.memo || ''; // Handle optional memo
         
         let qrData = '';
         
@@ -3175,12 +3175,12 @@ createApp({ // vue 3
         switch (cryptoType) {
           case 'BTC':
             // memo to hex, Uint16Array for browser
-            const memoHex = memo ? Uint16Array.from(memo).buffer : '';
-            qrData = memo ? `bitcoin:${address}?amount=${amount}&message=${memoHex}` : `bitcoin:${address}?amount=${amount}`;
+            const memoHex = memo && memo.trim() ? Uint16Array.from(memo).buffer : '';
+            qrData = memo && memo.trim() ? `bitcoin:${address}?amount=${amount}&message=${memoHex}` : `bitcoin:${address}?amount=${amount}`;
             break;
           case 'SOL':
             // Use simple JSON format that most Solana wallets can parse
-            qrData = memo ? `solana:${address}?amount=${amount}&memo=${memo}` : `solana:${address}?amount=${amount}`;
+            qrData = memo && memo.trim() ? `solana:${address}?amount=${amount}&memo=${memo}` : `solana:${address}?amount=${amount}`;
             break;
             
           case 'ETH':
@@ -3274,7 +3274,7 @@ createApp({ // vue 3
               cryptoType: data.channel.cryptoType,
               amountFormatted: data.channel.amountFormatted,
               address: data.channel.address,
-              memo: data.channel.memo,
+              memo: data.channel.memo || null, // Handle optional memo
               expiresAt: new Date(data.channel.expiresAt),
               instructions: data.channel.instructions || []
             };

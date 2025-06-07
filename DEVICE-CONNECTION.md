@@ -259,6 +259,14 @@ x-pubkey: [public_key]
 x-signature: [signature]
 ```
 
+**Body**:
+```json
+{
+    "deviceName": "Chrome on Windows",
+    "username": "signer_username"
+}
+```
+
 **Response**:
 ```json
 {
@@ -276,7 +284,8 @@ Connect to a device using a pairing code.
 **Body**:
 ```json
 {
-    "pairCode": "A3X9K2"
+    "pairCode": "A3X9K2",
+    "deviceName": "Chrome on Windows"
 }
 ```
 
@@ -480,11 +489,96 @@ console.log('Wallet Status:', dluxWallet.getStatus());
 console.log('Device Status:', dluxWallet.getDeviceStatus());
 ```
 
+## WebSocket Communication
+
+The system uses WebSocket for real-time communication with fallback to polling. The following WebSocket message types are supported:
+
+### Client to Server Messages
+
+**`device_subscribe`**: Subscribe to device session events
+```json
+{
+    "type": "device_subscribe",
+    "sessionId": "session_uuid",
+    "userType": "signer" // or "requester"
+}
+```
+
+**`device_signing_response`**: Send response to a signing request
+```json
+{
+    "type": "device_signing_response",
+    "sessionId": "session_uuid",
+    "requestId": "request_uuid",
+    "response": {...},
+    "error": null,
+    "timestamp": "2025-01-01T00:00:00.000Z"
+}
+```
+
+### Server to Client Messages
+
+**`device_signing_request`**: Incoming signing request (to signer)
+```json
+{
+    "type": "device_signing_request",
+    "sessionId": "session_uuid",
+    "requestId": "request_uuid",
+    "requestType": "sign-transaction",
+    "data": {...},
+    "deviceInfo": {...},
+    "timestamp": "2025-01-01T00:00:00.000Z"
+}
+```
+
+**`device_connected`**: Device successfully connected
+```json
+{
+    "type": "device_connected",
+    "signerInfo": {
+        "username": "signer_username",
+        "deviceName": "Chrome on Windows"
+    }
+}
+```
+
+**`device_disconnected`**: Device disconnected
+
+**`device_request_timeout`**: Signing request timed out
+```json
+{
+    "type": "device_request_timeout",
+    "sessionId": "session_uuid",
+    "requestId": "request_uuid",
+    "message": "Signing request timed out"
+}
+```
+
+**`device_delivery_failed`**: Message delivery failed
+```json
+{
+    "type": "device_delivery_failed",
+    "originalMessage": {...},
+    "reason": "Maximum retry attempts exceeded"
+}
+```
+
+**`device_session_expired`**: Session has expired
+
+**`device_session_status`**: Session status update
+```json
+{
+    "type": "device_session_status",
+    "status": {
+        "connected": false
+    }
+}
+```
+
 ## Future Enhancements
 
 Planned improvements to the device connection system:
 
-- WebSocket support for real-time communication
 - Multi-device support (connect multiple requesting devices)
 - Device management interface (see all connected devices)
 - Enhanced security with device fingerprinting

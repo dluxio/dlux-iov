@@ -106,6 +106,7 @@ export default {
       challengeExpiry: 0,
       deviceConnectionTimeout: 60, // Default 1 hour in minutes
       deviceSessionExpiry: 0,
+      processedRequestIds: new Set(), // Track processed requests to avoid duplicates
       showRemoteSigningModal: false,
       remoteSigningRequest: null,
       showTimeoutModal: false,
@@ -1032,6 +1033,22 @@ export default {
     async handleIncomingDeviceRequest(request, sessionId) {
       console.log('[NavVue] Handling incoming device request:', request);
       
+      // Check for duplicate requests
+      if (this.processedRequestIds.has(request.id)) {
+        console.log('[NavVue] Duplicate request ignored:', request.id);
+        return;
+      }
+      
+      // Mark request as processed
+      this.processedRequestIds.add(request.id);
+      
+      // Clean old processed IDs (keep last 100)
+      if (this.processedRequestIds.size > 100) {
+        const idsArray = Array.from(this.processedRequestIds);
+        const toRemove = idsArray.slice(0, idsArray.length - 100);
+        toRemove.forEach(id => this.processedRequestIds.delete(id));
+      }
+      
       try {
         let confirmed = false;
         let result = null;
@@ -1073,11 +1090,12 @@ export default {
       if (this.deviceWebSocket && this.deviceWSConnected) {
         try {
           this.deviceWebSocket.send(JSON.stringify({
-            type: 'device_response',
+            type: 'device_signing_response',
             sessionId: sessionId,
             requestId: requestId,
             response: response,
-            error: error
+            error: error,
+            timestamp: new Date().toISOString()
           }));
           console.log('[NavVue] Sent device response via WebSocket');
         } catch (wsError) {
@@ -1142,6 +1160,31 @@ export default {
         };
         
         this.showRemoteSigningModal = true;
+        
+        // Show the Bootstrap modal programmatically
+        this.$nextTick(() => {
+          const modalEl = document.getElementById('remoteSigningModal');
+          if (modalEl) {
+            try {
+              if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                const modal = new bootstrap.Modal(modalEl, { backdrop: 'static' });
+                modal.show();
+                console.log('Remote signing modal shown via Bootstrap');
+              } else {
+                console.warn('Bootstrap not available, using fallback');
+                modalEl.style.display = 'block';
+                modalEl.classList.add('show');
+                document.body.classList.add('modal-open');
+              }
+            } catch (error) {
+              console.error('Failed to show modal:', error);
+              // Fallback
+              modalEl.style.display = 'block';
+              modalEl.classList.add('show');
+              document.body.classList.add('modal-open');
+            }
+          }
+        });
       });
     },
 
@@ -1159,6 +1202,31 @@ export default {
         };
         
         this.showRemoteSigningModal = true;
+        
+        // Show the Bootstrap modal programmatically
+        this.$nextTick(() => {
+          const modalEl = document.getElementById('remoteSigningModal');
+          if (modalEl) {
+            try {
+              if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                const modal = new bootstrap.Modal(modalEl, { backdrop: 'static' });
+                modal.show();
+                console.log('Remote signing modal shown via Bootstrap');
+              } else {
+                console.warn('Bootstrap not available, using fallback');
+                modalEl.style.display = 'block';
+                modalEl.classList.add('show');
+                document.body.classList.add('modal-open');
+              }
+            } catch (error) {
+              console.error('Failed to show modal:', error);
+              // Fallback
+              modalEl.style.display = 'block';
+              modalEl.classList.add('show');
+              document.body.classList.add('modal-open');
+            }
+          }
+        });
       });
     },
 
@@ -1182,6 +1250,54 @@ export default {
     closeRemoteSigningModal() {
       this.showRemoteSigningModal = false;
       this.remoteSigningRequest = null;
+      
+      // Hide the Bootstrap modal
+      const modalEl = document.getElementById('remoteSigningModal');
+      if (modalEl) {
+        try {
+          if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) {
+              modal.hide();
+            } else {
+              // Modal wasn't created with Bootstrap, use fallback
+              modalEl.style.display = 'none';
+              modalEl.classList.remove('show');
+              document.body.classList.remove('modal-open');
+            }
+          } else {
+            // Bootstrap not available, use fallback
+            modalEl.style.display = 'none';
+            modalEl.classList.remove('show');
+            document.body.classList.remove('modal-open');
+          }
+
+          // Force cleanup of backdrops
+          setTimeout(() => {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+          }, 50);
+
+        } catch (error) {
+          console.error('Failed to hide modal:', error);
+          // Fallback
+          modalEl.style.display = 'none';
+          modalEl.classList.remove('show');
+          document.body.classList.remove('modal-open');
+          
+          // Force cleanup on error too
+          setTimeout(() => {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+          }, 50);
+        }
+      }
     },
 
     // Handle request timeout
@@ -1192,6 +1308,31 @@ export default {
         deviceInfo: data.deviceInfo || { username: data.username }
       };
       this.showTimeoutModal = true;
+      
+      // Show the Bootstrap modal programmatically
+      this.$nextTick(() => {
+        const modalEl = document.getElementById('timeoutModal');
+        if (modalEl) {
+          try {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+              const modal = new bootstrap.Modal(modalEl, { backdrop: 'static' });
+              modal.show();
+              console.log('Timeout modal shown via Bootstrap');
+            } else {
+              console.warn('Bootstrap not available for timeout modal, using fallback');
+              modalEl.style.display = 'block';
+              modalEl.classList.add('show');
+              document.body.classList.add('modal-open');
+            }
+          } catch (error) {
+            console.error('Failed to show timeout modal:', error);
+            // Fallback
+            modalEl.style.display = 'block';
+            modalEl.classList.add('show');
+            document.body.classList.add('modal-open');
+          }
+        }
+      });
     },
 
     // Handle timeout modal actions
@@ -1216,6 +1357,54 @@ export default {
     closeTimeoutModal() {
       this.showTimeoutModal = false;
       this.timeoutRequest = null;
+      
+      // Hide the Bootstrap modal
+      const modalEl = document.getElementById('timeoutModal');
+      if (modalEl) {
+        try {
+          if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) {
+              modal.hide();
+            } else {
+              // Modal wasn't created with Bootstrap, use fallback
+              modalEl.style.display = 'none';
+              modalEl.classList.remove('show');
+              document.body.classList.remove('modal-open');
+            }
+          } else {
+            // Bootstrap not available, use fallback
+            modalEl.style.display = 'none';
+            modalEl.classList.remove('show');
+            document.body.classList.remove('modal-open');
+          }
+
+          // Force cleanup of backdrops
+          setTimeout(() => {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+          }, 50);
+
+        } catch (error) {
+          console.error('Failed to hide timeout modal:', error);
+          // Fallback
+          modalEl.style.display = 'none';
+          modalEl.classList.remove('show');
+          document.body.classList.remove('modal-open');
+          
+          // Force cleanup on error too
+          setTimeout(() => {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+          }, 50);
+        }
+      }
     },
 
     async signChallenge(challenge, keyType) {
@@ -3527,6 +3716,48 @@ export default {
       this.showPenModal = true;
     },
 
+    // Device detection helper
+    getDeviceName() {
+      const userAgent = navigator.userAgent;
+      const platform = navigator.platform;
+      
+      // Detect browser
+      let browser = 'Unknown Browser';
+      if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
+        browser = 'Chrome';
+      } else if (userAgent.includes('Firefox')) {
+        browser = 'Firefox';
+      } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
+        browser = 'Safari';
+      } else if (userAgent.includes('Edg')) {
+        browser = 'Edge';
+      } else if (userAgent.includes('Opera') || userAgent.includes('OPR')) {
+        browser = 'Opera';
+      }
+      
+      // Detect device type
+      let deviceType = 'Desktop';
+      if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)) {
+        if (/iPad/i.test(userAgent)) {
+          deviceType = 'iPad';
+        } else if (/iPhone|iPod/i.test(userAgent)) {
+          deviceType = 'iPhone';
+        } else if (/Android/i.test(userAgent)) {
+          deviceType = 'Android';
+        } else {
+          deviceType = 'Mobile';
+        }
+      } else if (platform.includes('Mac')) {
+        deviceType = 'Mac';
+      } else if (platform.includes('Win')) {
+        deviceType = 'Windows';
+      } else if (platform.includes('Linux')) {
+        deviceType = 'Linux';
+      }
+      
+      return `${browser} on ${deviceType}`;
+    },
+
     // Device Connection Methods
     async createDevicePairing() {
       if (!this.user) {
@@ -3551,7 +3782,11 @@ export default {
             'x-challenge': challenge,
             'x-pubkey': pubKey,
             'x-signature': signature
-          }
+          },
+          body: JSON.stringify({
+            deviceName: this.getDeviceName(),
+            username: this.user
+          })
         });
 
         if (!response.ok) {
@@ -3740,9 +3975,13 @@ export default {
           
         case 'device_connected':
           console.log('Device connected via WebSocket:', data.signerInfo);
-          if (this.deviceConnection.role === 'requester') {
+          // Only update connection status if we're waiting for a connection
+          if (this.deviceConnection.isConnected && this.deviceConnection.role === 'requester') {
             this.deviceConnection.connectedDevice = data.signerInfo;
             this.saveDeviceConnection();
+          } else if (this.deviceConnection.role === 'signer') {
+            // For signer devices, wait for actual authentication before marking as fully connected
+            console.log('Signer device received connection, waiting for auth...');
           }
           break;
           
@@ -3790,6 +4029,16 @@ export default {
           if (data.status.connected === false) {
             this.resetDeviceConnection();
           }
+          break;
+          
+        case 'device_delivery_failed':
+          console.log('Device delivery failed:', data.reason);
+          // Handle delivery failure - maybe show a notification
+          break;
+          
+        case 'device_signing_response':
+          console.log('Device signing response received via WebSocket:', data);
+          // Response handled by polling mechanism or direct response handlers
           break;
           
         default:
@@ -3889,6 +4138,7 @@ export default {
       this.deviceConnectCode = "";
       this.deviceConnectError = "";
       this.deviceSessionExpiry = 0;
+      this.processedRequestIds.clear(); // Clear processed request IDs
       
       // Clear cached challenge
       this.clearCachedChallenge();
@@ -5489,7 +5739,7 @@ export default {
             <div class="bg-darker rounded p-3 mt-3" v-if="user">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <label class="lead mb-0">
-                  <i class="fa-solid fa-mobile-screen me-2"></i>Connect Devices
+                  <i class="fa-solid fa-mobile-screen me-2"></i>Connect a Device
                 </label>
                 <span v-if="deviceConnection.isConnected" class="badge bg-success">Connected</span>
               </div>
@@ -5501,7 +5751,7 @@ export default {
                 </div>
                 <div v-if="deviceConnection.pairCode" class="mb-2">
                   <div class="display-6 fw-bold text-primary">{{ deviceConnection.pairCode }}</div>
-                  <small class="text-white-50">Share this code with other devices</small>
+                  <small class="text-white-50">Share this code with other devices → Input this code on the other device</small>
                 </div>
                 <div v-if="deviceConnection.connectedDevice" class="mb-2">
                   <small class="text-white-50">Connected to: {{ deviceConnection.connectedDevice.username || 'Remote device' }}</small>
@@ -5513,13 +5763,22 @@ export default {
 
               <!-- Not Connected -->
               <div v-if="!deviceConnection.isConnected">
-                <!-- Show 6-digit code if user is signed in -->
+                <!-- Share Wallet with Timeout Options -->
                 <div class="text-center mb-3">
-                  <button type="button" class="btn btn-primary btn-sm me-2" @click="createDevicePairing()" :disabled="devicePairingLoading">
-                    <span v-if="devicePairingLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
-                    <i v-else class="fa-solid fa-share me-1"></i>Share Wallet
-                  </button>
-                  <small class="text-white-50 d-block mt-1">Generate code for other devices</small>
+                  <div class="d-flex align-items-center justify-content-center mb-2">
+                    <select v-model="deviceConnectionTimeout" class="form-select form-select-sm bg-dark border-dark text-light me-2" style="width: auto;">
+                      <option value="5">5 minutes</option>
+                      <option value="30">30 minutes</option>
+                      <option value="60">1 hour</option>
+                      <option value="360">6 hours</option>
+                      <option value="1440">24 hours</option>
+                    </select>
+                    <button type="button" class="btn btn-primary btn-sm" @click="createDevicePairing()" :disabled="devicePairingLoading">
+                      <span v-if="devicePairingLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                      <i v-else class="fa-solid fa-share me-1"></i>Share Wallet
+                    </button>
+                  </div>
+                  <small class="text-white-50 d-block">Generate code for other devices</small>
                 </div>
 
                 <div class="text-center border-top border-secondary pt-3">
@@ -6051,168 +6310,172 @@ export default {
     </div>
   </div>
 
-  <!-- Remote Signing Modal -->
-  <div class="modal fade" id="remoteSigningModal" tabindex="-1" aria-labelledby="remoteSigningModalLabel" aria-hidden="true" v-show="showRemoteSigningModal" data-bs-backdrop="static">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <div class="modal-header bg-warning text-dark">
-          <h5 class="modal-title" id="remoteSigningModalLabel">
-            <i class="fa-solid fa-wifi me-2"></i>Remote Signing Request
-          </h5>
-          <button type="button" class="btn-close btn-close-dark" @click="handleRemoteSigningCancel()" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="alert alert-info">
-            <i class="fa-solid fa-info-circle me-2"></i>
-            <strong>Remote Device:</strong> {{ remoteSigningRequest?.deviceName || 'Unknown device' }}
+  <!-- Remote Signing Modal (Teleported to body) -->
+  <teleport to="body">
+    <div class="modal fade" id="remoteSigningModal" tabindex="-1" aria-labelledby="remoteSigningModalLabel" aria-hidden="true" v-show="showRemoteSigningModal" data-bs-backdrop="static">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-warning text-dark">
+            <h5 class="modal-title" id="remoteSigningModalLabel">
+              <i class="fa-solid fa-wifi me-2"></i>Remote Signing Request
+            </h5>
+            <button type="button" class="btn-close btn-close-dark" @click="handleRemoteSigningCancel()" aria-label="Close"></button>
           </div>
-          
-          <div v-if="remoteSigningRequest?.type === 'transaction'">
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label class="form-label small text-white-50">Account</label>
-                <div class="d-flex align-items-center">
-                  <img :src="'https://images.hive.blog/u/' + remoteSigningRequest.account + '/avatar'" 
-                       class="rounded-circle me-2" width="32" height="32">
-                  <strong>@{{ remoteSigningRequest.account }}</strong>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small text-white-50">Key Type</label>
-                <div>
-                  <span class="badge bg-info text-capitalize">{{ remoteSigningRequest.keyType }}</span>
-                </div>
-              </div>
+          <div class="modal-body">
+            <div class="alert alert-info">
+              <i class="fa-solid fa-info-circle me-2"></i>
+              <strong>Remote Device:</strong> {{ remoteSigningRequest?.deviceName || 'Unknown device' }}
             </div>
             
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label class="form-label small text-white-50">Action</label>
-                <div>
-                  <span class="badge" :class="remoteSigningRequest.broadcast ? 'bg-success' : 'bg-warning text-dark'">
-                    {{ remoteSigningRequest.action }}
-                  </span>
+            <div v-if="remoteSigningRequest?.type === 'transaction'">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label small text-white-50">Account</label>
+                  <div class="d-flex align-items-center">
+                    <img :src="'https://images.hive.blog/u/' + remoteSigningRequest.account + '/avatar'" 
+                         class="rounded-circle me-2" width="32" height="32">
+                    <strong>@{{ remoteSigningRequest.account }}</strong>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small text-white-50">Key Type</label>
+                  <div>
+                    <span class="badge bg-info text-capitalize">{{ remoteSigningRequest.keyType }}</span>
+                  </div>
                 </div>
               </div>
-              <div class="col-md-6">
-                <label class="form-label small text-white-50">Operations</label>
-                <div>
-                  <span class="badge bg-primary">{{ remoteSigningRequest.opCount }} operation(s)</span>
+              
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label small text-white-50">Action</label>
+                  <div>
+                    <span class="badge" :class="remoteSigningRequest.broadcast ? 'bg-success' : 'bg-warning text-dark'">
+                      {{ remoteSigningRequest.action }}
+                    </span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small text-white-50">Operations</label>
+                  <div>
+                    <span class="badge bg-primary">{{ remoteSigningRequest.opCount }} operation(s)</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div class="mb-3">
-              <label class="form-label small text-white-50">Transaction Details</label>
-              <div class="card bg-dark border-secondary">
-                <div class="card-body p-3">
-                  <div v-for="(operation, index) in remoteSigningRequest.operations" :key="index" class="mb-2 last:mb-0">
-                    <div class="d-flex align-items-start">
-                      <span class="badge bg-primary me-2 mt-1">{{ index + 1 }}</span>
-                      <div class="flex-grow-1">
-                        <div class="fw-bold text-info">{{ operation[0] }}</div>
-                        <div class="small text-white-50">
-                          <pre class="mb-0 small">{{ JSON.stringify(operation[1], null, 2) }}</pre>
+              
+              <div class="mb-3">
+                <label class="form-label small text-white-50">Transaction Details</label>
+                <div class="card bg-dark border-secondary">
+                  <div class="card-body p-3">
+                    <div v-for="(operation, index) in remoteSigningRequest.operations" :key="index" class="mb-2 last:mb-0">
+                      <div class="d-flex align-items-start">
+                        <span class="badge bg-primary me-2 mt-1">{{ index + 1 }}</span>
+                        <div class="flex-grow-1">
+                          <div class="fw-bold text-info">{{ operation[0] }}</div>
+                          <div class="small text-white-50">
+                            <pre class="mb-0 small">{{ JSON.stringify(operation[1], null, 2) }}</pre>
+                          </div>
                         </div>
                       </div>
+                      <hr v-if="index < remoteSigningRequest.operations.length - 1" class="my-2">
                     </div>
-                    <hr v-if="index < remoteSigningRequest.operations.length - 1" class="my-2">
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          
-          <div v-if="remoteSigningRequest?.type === 'challenge'">
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label class="form-label small text-white-50">Key Type</label>
-                <div>
-                  <span class="badge bg-info text-capitalize">{{ remoteSigningRequest.keyType }}</span>
+            
+            <div v-if="remoteSigningRequest?.type === 'challenge'">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label class="form-label small text-white-50">Key Type</label>
+                  <div>
+                    <span class="badge bg-info text-capitalize">{{ remoteSigningRequest.keyType }}</span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small text-white-50">Challenge Length</label>
+                  <div>
+                    <span class="badge bg-secondary">{{ remoteSigningRequest.challenge?.length || 0 }} characters</span>
+                  </div>
                 </div>
               </div>
-              <div class="col-md-6">
-                <label class="form-label small text-white-50">Challenge Length</label>
-                <div>
-                  <span class="badge bg-secondary">{{ remoteSigningRequest.challenge?.length || 0 }} characters</span>
+              
+              <div class="mb-3">
+                <label class="form-label small text-white-50">Challenge Data</label>
+                <div class="card bg-dark border-secondary">
+                  <div class="card-body p-3">
+                    <code class="text-warning">{{ remoteSigningRequest.challenge }}</code>
+                  </div>
                 </div>
               </div>
             </div>
             
-            <div class="mb-3">
-              <label class="form-label small text-white-50">Challenge Data</label>
-              <div class="card bg-dark border-secondary">
-                <div class="card-body p-3">
-                  <code class="text-warning">{{ remoteSigningRequest.challenge }}</code>
-                </div>
-              </div>
+            <div class="alert alert-warning">
+              <i class="fa-solid fa-exclamation-triangle me-2"></i>
+              <strong>Security Notice:</strong> This request is coming from a remote device. 
+              Please verify the details carefully before proceeding.
             </div>
           </div>
-          
-          <div class="alert alert-warning">
-            <i class="fa-solid fa-exclamation-triangle me-2"></i>
-            <strong>Security Notice:</strong> This request is coming from a remote device. 
-            Please verify the details carefully before proceeding.
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="handleRemoteSigningCancel()">
+              <i class="fa-solid fa-times me-1"></i>Deny
+            </button>
+            <button type="button" class="btn btn-warning text-dark" @click="handleRemoteSigningConfirm()">
+              <i class="fa-solid fa-check me-1"></i>Approve & Sign
+            </button>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" @click="handleRemoteSigningCancel()">
-            <i class="fa-solid fa-times me-1"></i>Deny
-          </button>
-          <button type="button" class="btn btn-warning text-dark" @click="handleRemoteSigningConfirm()">
-            <i class="fa-solid fa-check me-1"></i>Approve & Sign
-          </button>
         </div>
       </div>
     </div>
-  </div>
+  </teleport>
 
-  <!-- Timeout Modal -->
-  <div class="modal fade" id="timeoutModal" tabindex="-1" aria-labelledby="timeoutModalLabel" aria-hidden="true" v-show="showTimeoutModal" data-bs-backdrop="static">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-danger">
-          <h5 class="modal-title" id="timeoutModalLabel">
-            <i class="fa-solid fa-clock me-2"></i>Request Timeout
-          </h5>
-          <button type="button" class="btn-close btn-close-white" @click="handleTimeoutDismiss()" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="alert alert-warning">
-            <i class="fa-solid fa-exclamation-triangle me-2"></i>
-            The remote device did not respond to the signing request in time.
+  <!-- Timeout Modal (Teleported to body) -->
+  <teleport to="body">
+    <div class="modal fade" id="timeoutModal" tabindex="-1" aria-labelledby="timeoutModalLabel" aria-hidden="true" v-show="showTimeoutModal" data-bs-backdrop="static">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-danger">
+            <h5 class="modal-title" id="timeoutModalLabel">
+              <i class="fa-solid fa-clock me-2"></i>Request Timeout
+            </h5>
+            <button type="button" class="btn-close btn-close-white" @click="handleTimeoutDismiss()" aria-label="Close"></button>
           </div>
-          
-          <div v-if="timeoutRequest">
-            <div class="mb-3">
-              <label class="form-label small text-white-50">Device</label>
-              <div>{{ timeoutRequest.deviceInfo?.deviceName || timeoutRequest.deviceInfo?.username || 'Unknown device' }}</div>
+          <div class="modal-body">
+            <div class="alert alert-warning">
+              <i class="fa-solid fa-exclamation-triangle me-2"></i>
+              The remote device did not respond to the signing request in time.
             </div>
             
-            <div class="mb-3">
-              <label class="form-label small text-white-50">Request ID</label>
-              <div><code class="small">{{ timeoutRequest.requestId }}</code></div>
+            <div v-if="timeoutRequest">
+              <div class="mb-3">
+                <label class="form-label small text-white-50">Device</label>
+                <div>{{ timeoutRequest.deviceInfo?.deviceName || timeoutRequest.deviceInfo?.username || 'Unknown device' }}</div>
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label small text-white-50">Request ID</label>
+                <div><code class="small">{{ timeoutRequest.requestId }}</code></div>
+              </div>
             </div>
+            
+            <p class="small text-white-50">
+              The device may be disconnected or experiencing connection issues. 
+              You can try to resend the request or reconnect to the device.
+            </p>
           </div>
-          
-          <p class="small text-white-50">
-            The device may be disconnected or experiencing connection issues. 
-            You can try to resend the request or reconnect to the device.
-          </p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" @click="handleTimeoutDismiss()">
-            <i class="fa-solid fa-times me-1"></i>Dismiss
-          </button>
-          <button type="button" class="btn btn-warning" @click="handleTimeoutReconnect()">
-            <i class="fa-solid fa-arrows-rotate me-1"></i>Reconnect
-          </button>
-          <button type="button" class="btn btn-primary d-none" @click="handleTimeoutResend()">
-            <i class="fa-solid fa-paper-plane me-1"></i>Resend
-          </button>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="handleTimeoutDismiss()">
+              <i class="fa-solid fa-times me-1"></i>Dismiss
+            </button>
+            <button type="button" class="btn btn-warning" @click="handleTimeoutReconnect()">
+              <i class="fa-solid fa-arrows-rotate me-1"></i>Reconnect
+            </button>
+            <button type="button" class="btn btn-primary d-none" @click="handleTimeoutResend()">
+              <i class="fa-solid fa-paper-plane me-1"></i>Resend
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </teleport>
 </div>`,
 };
