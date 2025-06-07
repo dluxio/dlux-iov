@@ -1,4 +1,4 @@
-this.version = "2025.06.08.3";
+this.version = "2025.06.08.4";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.08.3",
-  "generated": "2025-06-07T23:43:19Z",
+  "version": "2025.06.08.4",
+  "generated": "2025-06-07T23:55:35Z",
   "files": {
-    "/img/tokens/dlux_icon.png": {
-      "checksum": "5892181763fe2e7f3bf5c59b81191f75",
-      "size": 33287,
-      "priority": "important"
-    },
     "/img/tokens/duat_icon.png": {
       "checksum": "eed179af8a36b2d8be72a721dada0f84",
       "size": 114195,
@@ -1006,7 +1001,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "db2db83e45d375c23a6303610124b3ca",
+      "checksum": "77adf742dbed08dc6c65b4d19b896c45",
       "size": 36316,
       "priority": "important"
     },
@@ -1081,8 +1076,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "22ae6adbab8acaa83966e95238fdf917",
-      "size": 199803,
+      "checksum": "6c0b5392526d703954ed7aa2ea0e9ebe",
+      "size": 200401,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1196,7 +1191,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "b0d7d313586f76a315daec5cf5a72ad2",
+      "checksum": "b35deff9bdcdbc36a435990cde40a8a8",
       "size": 7299,
       "priority": "important"
     },
@@ -1269,11 +1264,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/m3/m3.js": {
-      "checksum": "c34c934e8f69865c733a040288167bca",
-      "size": 3636,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/markdown/markdown.js": {
       "checksum": "e19ba42ced633c14b87715c3bdf66316",
