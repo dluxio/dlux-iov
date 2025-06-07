@@ -1,4 +1,4 @@
-this.version = "2025.06.08.2";
+this.version = "2025.06.08.3";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.08.2",
-  "generated": "2025-06-07T23:27:50Z",
+  "version": "2025.06.08.3",
+  "generated": "2025-06-07T23:43:19Z",
   "files": {
-    "/img/tokens/broca_logomark.png": {
-      "checksum": "fcd5ae3ad20ec9cfcee5764ad4f26e9f",
-      "size": 28971,
-      "priority": "important"
-    },
     "/img/tokens/dlux_icon.png": {
       "checksum": "5892181763fe2e7f3bf5c59b81191f75",
       "size": 33287,
@@ -1011,7 +1006,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "3a90133f171fd6cf6b3b7eaef850221e",
+      "checksum": "db2db83e45d375c23a6303610124b3ca",
       "size": 36316,
       "priority": "important"
     },
@@ -1086,8 +1081,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "605219ff94814326791cd671c1eb5bf4",
-      "size": 199237,
+      "checksum": "22ae6adbab8acaa83966e95238fdf917",
+      "size": 199803,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1201,7 +1196,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "a96256fb76e4f82d8c087360eac5822a",
+      "checksum": "b0d7d313586f76a315daec5cf5a72ad2",
       "size": 7299,
       "priority": "important"
     },
@@ -1274,11 +1269,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/lua/lua.js": {
-      "checksum": "f84ef485240448f04f47ae177e7c66f7",
-      "size": 2944,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/m3/m3.js": {
       "checksum": "c34c934e8f69865c733a040288167bca",
