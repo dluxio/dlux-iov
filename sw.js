@@ -1,4 +1,4 @@
-this.version = "2025.06.07.12";
+this.version = "2025.06.07.13";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.07.12",
-  "generated": "2025-06-07T17:21:22Z",
+  "version": "2025.06.07.13",
+  "generated": "2025-06-07T17:30:38Z",
   "files": {
-    "/img/rar-file-type-svgrepo-com.svg": {
-      "checksum": "f02c8bfdfde0a153430b1f22ba611b5f",
-      "size": 1835,
-      "priority": "important"
-    },
     "/img/spk192.png": {
       "checksum": "411500d1b3e3b31bf0b90c5b8126c634",
       "size": 10149,
@@ -1041,7 +1036,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "b07a0e3c8b7edda644b468373c843183",
+      "checksum": "47bde37ac5affe736f5d8c963ef34fe8",
       "size": 36317,
       "priority": "important"
     },
@@ -1076,8 +1071,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/uploadvue.js": {
-      "checksum": "e95e174434ff6be6ae995bd026b3dcec",
-      "size": 62485,
+      "checksum": "f2b5d9e00ac45f4b7e970aa3fa20fdb3",
+      "size": 62507,
       "priority": "important"
     },
     "/js/uuidv.js": {
@@ -1231,7 +1226,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "f99c09c0815c47ee0d318b0f9a9e79ee",
+      "checksum": "cdb1c9a5052628d5e3c070d4e3ee4a59",
       "size": 7300,
       "priority": "important"
     },
@@ -1304,11 +1299,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/javascript/javascript.js": {
-      "checksum": "8f2950e482448ab0487d9a1ebd309eef",
-      "size": 7137,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/julia/julia.js": {
       "checksum": "2fe40e357b8f2fe02d7ac1164166457e",
