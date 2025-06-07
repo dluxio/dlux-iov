@@ -929,10 +929,10 @@ export default {
                     <div v-else-if="previewModal.file && isVideoFile(previewModal.file.type)" 
                          class="text-center p-3">
                         <video :src="getFileUrlWithType(previewModal.file)" 
+                               :type="previewModal.file?.type?.includes('m3u8') || previewModal.file?.name?.endsWith('.m3u8') ? 'application/x-mpegURL' : undefined"
                                controls 
                                class="w-100 rounded"
-                               style="max-height: 70vh;"
-                               @loadstart="setupHLSPlayer($event.target)">
+                               style="max-height: 70vh;">
                             Your browser does not support the video tag.
                         </video>
                     </div>
@@ -1019,7 +1019,7 @@ export default {
         },
         computedData: {
             type: Object,
-            default: function() {
+            default: function () {
                 return {
                     usedBytes: 0,
                     availableBytes: 0,
@@ -1032,7 +1032,7 @@ export default {
         },
         sstats: {
             type: Object,
-            default: function() {
+            default: function () {
                 return {
                     head_block: 0,
                     broca_refill: "0",
@@ -1354,7 +1354,7 @@ export default {
                 } else {
                     alert(`Folder "${folderName}" is already pending creation.`);
                 }
-            } else if (folderName && (this.selectedUser !== this.account)){
+            } else if (folderName && (this.selectedUser !== this.account)) {
                 alert("Cannot create folders for other users.");
             }
         },
@@ -1606,7 +1606,7 @@ export default {
         },
         navigateTo(path) {
             this.currentFolderPath = path;
-            
+
             // Update URL hash to reflect the current folder path
             const newHash = path ? `#drive/${path}` : '#drive';
             history.replaceState(null, null, newHash);
@@ -3344,7 +3344,7 @@ export default {
 
             // Check for external files first
             if (event.dataTransfer.items && event.dataTransfer.items.length > 0) {
-                if(targetPath == 'Trash'){
+                if (targetPath == 'Trash') {
                     console.log('Dropped on trash')
                     return
                 }
@@ -3448,7 +3448,7 @@ export default {
         handleDragEnterBreadcrumb(event, path) {
             event.preventDefault(); // Still needed for dnd
             // event.stopPropagation(); // Not strictly needed here if dragover handles highlight exclusively
-            
+
             // Highlight is now handled by dragOverBreadcrumb
             // Original hover-to-navigate logic
             clearTimeout(this.dragHoverTimeout);
@@ -3487,7 +3487,7 @@ export default {
                     }
                 }
             }
-            
+
             // If we are truly leaving the bounds of the element that had the hover timeout
             if (isLeavingHoverTarget && (!relatedTarget || !currentTarget.contains(relatedTarget))) {
                 clearTimeout(this.dragHoverTimeout);
@@ -3507,7 +3507,7 @@ export default {
                 this.handleFileDoubleClick(event, file);
                 return;
             }
-            
+
             // Multi-select with Alt/Ctrl key (existing code)
             if (event.altKey || event.ctrlKey) {
                 if (this.isFileSelected(file)) {
@@ -4674,7 +4674,7 @@ export default {
 
         isStored(contract) {
             if (!contract || !contract.n) return false;
-            
+
             var found = false;
             for (var i in contract.n) {
                 if (contract.n[i] === this.account) {
@@ -4689,14 +4689,14 @@ export default {
             // Check broca balance first
             const brocaBalance = this.broca_calc(this.broca);
             if (amount > brocaBalance) return;
-            
+
             const toSign = {
                 type: "cja",
                 cj: {
-                  broca: amount,
-                  id: contract.i,
-                  file_owner: contract.t,
-                  power: this.extensionWithPower ? 1 : 0,
+                    broca: amount,
+                    id: contract.i,
+                    file_owner: contract.t,
+                    power: this.extensionWithPower ? 1 : 0,
                 },
                 id: `spkccT_extend`,
                 msg: `Extending ${contract.i}...`,
@@ -4710,11 +4710,11 @@ export default {
         store(contract, remove = false) {
             // Check if user has a storage node
             if (!this.hasStorage()) return;
-            
+
             const toSign = {
                 type: "cja",
                 cj: {
-                  items: [contract.i]
+                    items: [contract.i]
                 },
                 id: `spkccT_${!remove ? 'store' : 'remove'}`,
                 msg: `${!remove ? 'Storing' : 'Removing'} ${contract.i}...`,
@@ -4724,7 +4724,7 @@ export default {
             };
             this.$emit('tosign', toSign);
         },
-        
+
         broca_calc(last = '0,0') {
             const last_calc = this.Base64toNumber(last.split(',')[1]);
             const accured = parseInt((parseFloat(this.sstats?.broca_refill || 0) * (this.saccountapi.head_block - last_calc)) / (this.saccountapi.pow_broca * 1000));
@@ -4739,27 +4739,27 @@ export default {
             const filesInFolder = this.filesArray.filter(file => {
                 return this.newMeta[file.i][file.f].folderPath === folderPath;
             });
-            
+
             if (filesInFolder.length === 0) {
                 alert('No files found in this folder.');
                 return;
             }
-            
+
             // Ask for confirmation
             if (!confirm(`Extend ${filesInFolder.length} contract(s) in folder "${folderPath}"?`)) {
                 return;
             }
-            
+
             // Calculate total broca needed (100 per contract)
             const brocaPerContract = 100;
             const totalBrocaNeeded = filesInFolder.length * brocaPerContract;
             const brocaBalance = this.broca_calc(this.broca);
-            
+
             if (totalBrocaNeeded > brocaBalance) {
                 alert(`Not enough broca balance. Need ${totalBrocaNeeded}, have ${brocaBalance}.`);
                 return;
             }
-            
+
             // Process each file
             const uniqueContracts = new Set();
             filesInFolder.forEach(file => {
@@ -4772,41 +4772,41 @@ export default {
                 }
             });
         },
-        
+
         storeFolderContracts(folder, remove = false) {
             // Get all files in the folder
             const folderPath = folder.path;
             const filesInFolder = this.filesArray.filter(file => {
                 return this.newMeta[file.i][file.f].folderPath === folderPath;
             });
-            
+
             if (filesInFolder.length === 0) {
                 alert('No files found in this folder.');
                 return;
             }
-            
+
             // Verify the user has a storage node
             if (!this.hasStorage()) {
                 alert('You do not have a registered storage node.');
                 return;
             }
-            
+
             // Ask for confirmation
             if (!confirm(`${remove ? 'Remove' : 'Store'} ${filesInFolder.length} contract(s) in folder "${folderPath}"?`)) {
                 return;
             }
-            
+
             // Process each file, but only store each contract once
             const uniqueContracts = new Set();
             filesInFolder.forEach(file => {
                 if (!uniqueContracts.has(file.i)) {
                     uniqueContracts.add(file.i);
-                    
+
                     // Check if we're storing or removing based on current status
-                    const shouldProcess = remove ? 
-                        this.isStored(this.contract[file.i]) : 
+                    const shouldProcess = remove ?
+                        this.isStored(this.contract[file.i]) :
                         !this.isStored(this.contract[file.i]);
-                    
+
                     if (shouldProcess) {
                         this.store({
                             i: file.i,
@@ -4820,10 +4820,10 @@ export default {
         handleFileDoubleClick(event, file) {
             // Prevent default behavior
             event.preventDefault();
-            
+
             // Check if file is encrypted
             const isEncrypted = this.flagsDecode(this.newMeta[file.i][file.f].flags, 1).length > 0;
-            
+
             if (!isEncrypted) {
                 // Show preview modal instead of opening in new tab
                 this.showFilePreview(file);
@@ -4839,14 +4839,14 @@ export default {
                 }
             }
         },
-        
+
         showFilePreview(file) {
             const meta = this.newMeta[file.i][file.f];
             const fileType = meta.type?.toLowerCase() || '';
             const fileName = meta.name || file.f;
             const cid = file.f;
             const ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}`;
-            
+
             this.previewModal = {
                 show: true,
                 file: {
@@ -4859,7 +4859,7 @@ export default {
                 }
             };
         },
-        
+
         closeFilePreview() {
             this.previewModal.show = false;
             this.previewModal.file = null;
@@ -4867,270 +4867,49 @@ export default {
 
         getFileUrlWithType(file) {
             if (!file) return '';
-            
+
             let url = file.url;
-            
+
             // For IPFS URLs, add filename parameter for proper MIME type detection
             if (url.includes('ipfs.dlux.io/ipfs/') && file.name && file.type) {
                 const cid = url.split('/ipfs/')[1].split('?')[0];
                 const filename = `${file.name}.${file.type}`;
                 url = `https://ipfs.dlux.io/ipfs/${cid}?filename=${filename}`;
             }
-            
+
             return url;
         },
-        
+
         isImageFile(type) {
-            return type && (type.includes('image') || 
-                           type.includes('jpg') || 
-                           type.includes('jpeg') || 
-                           type.includes('png') || 
-                           type.includes('gif') || 
-                           type.includes('webp') || 
-                           type.includes('svg'));
-        },
-        
-        isVideoFile(type) {
-            return type && (type.includes('video') || 
-                           type.includes('mp4') || 
-                           type.includes('webm') || 
-                           type.includes('ogg') || 
-                           type.includes('m3u8') ||
-                           type.includes('avi') || 
-                           type.includes('mov') || 
-                           type.includes('mkv'));
-        },
-        
-        isAudioFile(type) {
-            return type && (type.includes('audio') || 
-                           type.includes('mp3') || 
-                           type.includes('wav') || 
-                           type.includes('ogg') || 
-                           type.includes('flac'));
-        },
-        
-                createIpfsLoader() {
-            // Custom IPFS loader for HLS.js to properly handle IPFS URLs
-            class IpfsLoader {
-                constructor(config) {
-                    this.config = config;
-                    this.stats = null;
-                    this.context = null;
-                    this.callbacks = null;
-                    this.requestController = null;
-                }
-                
-                load(context, config, callbacks) {
-                    this.context = context;
-                    this.callbacks = callbacks;
-                    this.stats = {
-                        loading: {
-                            start: performance.now(),
-                            first: 0,
-                            end: 0
-                        },
-                        parsing: {
-                            start: 0,
-                            end: 0
-                        },
-                        buffering: {
-                            start: 0,
-                            first: 0,
-                            end: 0
-                        }
-                    };
-                    
-                    const url = context.url;
-                    console.log('IPFS Loader loading:', url);
-                    
-                    // Convert IPFS URLs to proper gateway URLs with filename hints
-                    let ipfsUrl = url;
-                    if (url.includes('ipfs.dlux.io/ipfs/')) {
-                        const cid = url.split('/ipfs/')[1].split('?')[0];
-                        
-                        // Determine file extension and filename based on URL or context
-                        let filename = 'file';
-                        if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level') {
-                            filename = 'playlist.m3u8';
-                            if (context.type === 'level' && url.includes('/ipfs/Qm') && !url.includes('.')) {
-                                console.log('Detected bare IPFS hash as level playlist:', url);
-                            }
-                        } else if (url.includes('.ts') || context.type === 'segment' || context.responseType === 'arraybuffer' || context.frag) {
-                            // If it's requesting arraybuffer or has frag property, it's likely a video segment
-                            filename = 'segment.ts';
-                        } else if (url.includes('/ipfs/Qm') && context.responseType === 'text') {
-                            // Handle any other bare IPFS hash that expects text (likely a playlist)
-                            filename = 'playlist.m3u8';
-                            console.log('Detected bare IPFS hash expecting text as playlist:', url);
-                        }
-                        
-                        // Construct proper IPFS gateway URL with filename for MIME type detection
-                        ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}?filename=${filename}`;
-                    }
-                    
-                    console.log('IPFS Loader fetching:', ipfsUrl);
-                    
-                    // Create AbortController for request cancellation
-                    this.requestController = new AbortController();
-                    
-                    fetch(ipfsUrl, { signal: this.requestController.signal })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                            }
-                            
-                            this.stats.loading.first = Math.max(performance.now(), this.stats.loading.start);
-                            this.stats.parsing.start = this.stats.loading.first;
-                            
-                            // For manifests and level playlists, return text; for segments, return arrayBuffer
-                            if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level' || context.responseType === 'text') {
-                                return response.text();
-                            } else {
-                                return response.arrayBuffer();
-                            }
-                        })
-                        .then(data => {
-                            this.stats.loading.end = Math.max(this.stats.loading.first, performance.now());
-                            this.stats.parsing.end = this.stats.loading.end;
-                            const dataSize = typeof data === 'string' ? data.length : data.byteLength;
-                            
-                            console.log('IPFS Loader success:', ipfsUrl, 'Size:', dataSize);
-                            
-                            // HLS.js expects exact response format matching XHR loader
-                            const response = {
-                                url: ipfsUrl,
-                                data: data
-                            };
-                            
-                            // Pass proper stats object that HLS.js expects
-                            callbacks.onSuccess(response, this.stats, context);
-                        })
-                        .catch(err => {
-                            if (err.name === 'AbortError') {
-                                console.log('IPFS Loader request was aborted');
-                                return;
-                            }
-                            console.error('IPFS Loader error:', err, 'URL:', ipfsUrl);
-                            callbacks.onError({ 
-                                code: err.code || 'NETWORK_ERROR', 
-                                text: err.message || 'Failed to load IPFS content'
-                            }, context);
-                        });
-                }
-                
-                abort() {
-                    console.log('IPFS Loader: abort called');
-                    if (this.requestController) {
-                        this.requestController.abort();
-                        this.requestController = null;
-                    }
-                }
-                
-                destroy() {
-                    console.log('IPFS Loader: destroy called');
-                    this.abort();
-                    this.stats = null;
-                    this.context = null;
-                    this.callbacks = null;
-                }
-            }
-            
-            return IpfsLoader;
+            return type && (type.includes('image') ||
+                type.includes('jpg') ||
+                type.includes('jpeg') ||
+                type.includes('png') ||
+                type.includes('gif') ||
+                type.includes('webp') ||
+                type.includes('svg'));
         },
 
-        async setupHLSPlayer(videoElement) {
-            // Universal HLS.js setup for M3U8 video playback
-            if (!videoElement || !videoElement.src) return;
-            
-            let videoSrc = videoElement.src;
-            console.log('Setting up HLS for video:', videoSrc);
-            
-            // Smart IPFS video detection - check if it's an IPFS file without extension
-            if (/\/ipfs\/Qm[a-zA-Z0-9]+$/.test(videoSrc) && !videoSrc.includes('.')) {
-                console.log('Detected IPFS file without extension, checking size...');
-                try {
-                    const response = await fetch(videoSrc, { method: 'HEAD' });
-                    const contentLength = response.headers.get('content-length');
-                    if (contentLength) {
-                        const sizeInKB = parseInt(contentLength) / 1024;
-                        console.log(`IPFS file size: ${sizeInKB} KB`);
-                        
-                        // If file is in kilobyte range (likely a playlist), treat as M3U8
-                        if (sizeInKB < 100) { // Playlists are typically small
-                            videoSrc = videoSrc + '?filename=master.m3u8';
-                            videoElement.src = videoSrc; // Update the video element src
-                            console.log('Treating as M3U8 playlist:', videoSrc);
-                        }
-                    }
-                } catch (err) {
-                    console.log('Could not determine IPFS file size, proceeding with original URL');
-                }
-            }
-            
-            // Check if the source is an M3U8 file
-            if (videoSrc.includes('.m3u8') || videoSrc.includes('application/x-mpegURL') || videoSrc.includes('filename=master.m3u8')) {
-                // Check if HLS.js is available
-                if (typeof Hls !== 'undefined') {
-                    if (Hls.isSupported()) {
-                        // Destroy existing HLS instance if attached to this video
-                        if (videoElement.hlsInstance) {
-                            videoElement.hlsInstance.destroy();
-                        }
-                        
-                        // Create custom IPFS loader for better IPFS URL handling
-                        const IpfsLoader = this.createIpfsLoader();
-                        
-                        // Create new HLS instance with custom IPFS loader
-                        const hls = new Hls({
-                            debug: false,
-                            enableWorker: true,
-                            lowLatencyMode: false,
-                            loader: IpfsLoader
-                        });
-                        
-                        // Store instance on video element for cleanup
-                        videoElement.hlsInstance = hls;
-                        
-                        // Load the M3U8 source
-                        hls.loadSource(videoSrc);
-                        hls.attachMedia(videoElement);
-                        
-                        // Handle events
-                        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                            console.log('HLS manifest parsed successfully');
-                        });
-                        
-                        hls.on(Hls.Events.ERROR, (event, data) => {
-                            console.warn('HLS error:', data);
-                            if (data.fatal) {
-                                switch (data.type) {
-                                    case Hls.ErrorTypes.NETWORK_ERROR:
-                                        console.log('Network error, trying to recover...');
-                                        hls.startLoad();
-                                        break;
-                                    case Hls.ErrorTypes.MEDIA_ERROR:
-                                        console.log('Media error, trying to recover...');
-                                        hls.recoverMediaError();
-                                        break;
-                                    default:
-                                        console.log('Fatal error, destroying HLS instance');
-                                        hls.destroy();
-                                        break;
-                                }
-                            }
-                        });
-                        
-                        console.log('HLS.js player with IPFS loader setup complete for:', videoSrc);
-                    } else {
-                        console.log('HLS.js not supported, using native playback');
-                    }
-                } else {
-                    console.warn('HLS.js library not loaded');
-                }
-            } else {
-                console.log('Not an M3U8 file, using native video playback');
-            }
+        isVideoFile(type) {
+            return type && (type.includes('video') ||
+                type.includes('mp4') ||
+                type.includes('webm') ||
+                type.includes('ogg') ||
+                type.includes('m3u8') ||
+                type.includes('avi') ||
+                type.includes('mov') ||
+                type.includes('mkv'));
         },
+
+        isAudioFile(type) {
+            return type && (type.includes('audio') ||
+                type.includes('mp3') ||
+                type.includes('wav') ||
+                type.includes('ogg') ||
+                type.includes('flac'));
+        },
+
+
         sendIt(payload) {
             this.$emit('tosign', payload);
         },
@@ -5149,13 +4928,13 @@ export default {
         openExtensionDialog(file) {
             this.extensionFile = file;
             this.brocaBalance = this.broca_calc(this.saccountapi.broca);
-            
+
             // Calculate cost based on contract details
             const contractDetails = this.contract[file.i];
             if (contractDetails) {
                 // r is the daily rate, calculate default based on 7 days
                 const defaultCost = Math.min(
-                    parseInt((parseInt(7) / 30) * parseInt(contractDetails.r || 100)), 
+                    parseInt((parseInt(7) / 30) * parseInt(contractDetails.r || 100)),
                     this.brocaBalance
                 );
                 this.extensionAmount = Math.max(defaultCost, 1); // Ensure minimum of 1
@@ -5164,7 +4943,7 @@ export default {
                 this.extensionAmount = 100;
                 this.extensionDays = 7;
             }
-            
+
             this.showExtensionDialog = true;
         },
         handleGlobalDragEnd() {
@@ -5175,7 +4954,7 @@ export default {
         clearAllDragHighlights() {
             this.$refs.container?.querySelectorAll('.drag-over-active').forEach(el => el.classList.remove('drag-over-active'));
             const filesDiv = this.$refs.container?.querySelector('.files');
-            if(filesDiv?.classList.contains('drag-over-active')) {
+            if (filesDiv?.classList.contains('drag-over-active')) {
                 filesDiv.classList.remove('drag-over-active');
             }
         },
@@ -5187,22 +4966,22 @@ export default {
             }
         },
         addToPost(file) {
-            
+
             // Get file metadata
             const meta = this.newMeta[file.i][file.f];
             const fileName = meta.name || file.f;
             const fileType = meta.type || '';
             const cid = file.f;
             const contractId = file.i;
-            
+
             // Determine how to format the file based on its type
             let formattedContent = '';
             const fileTypeFormatted = fileType.toLowerCase();
-            
+
             // Video files and playlists
-            if (fileTypeFormatted.includes('video') || 
-                fileTypeFormatted.includes('mp4') || 
-                fileTypeFormatted.includes('webm') || 
+            if (fileTypeFormatted.includes('video') ||
+                fileTypeFormatted.includes('mp4') ||
+                fileTypeFormatted.includes('webm') ||
                 fileTypeFormatted.includes('ogg') ||
                 fileTypeFormatted.includes('avi') ||
                 fileTypeFormatted.includes('mov') ||
@@ -5224,23 +5003,26 @@ export default {
                 fileName.toLowerCase().endsWith('.wmv') ||
                 fileName.toLowerCase().endsWith('.m4v') ||
                 fileName.toLowerCase().endsWith('.3gp')) {
-                formattedContent = `<video src="https://${location.hostname != 'localhost' ? location.hostname : 'dlux.io'}/ipfs/${cid}" controls></video>`;
+                // Set proper type attribute for M3U8 playlists
+                const typeAttr = (fileTypeFormatted.includes('m3u8') || fileName.toLowerCase().endsWith('.m3u8')) 
+                    ? ' type="application/x-mpegURL"' : '';
+                formattedContent = `<video src="https://${location.hostname != 'localhost' ? location.hostname : 'dlux.io'}/ipfs/${cid}"${typeAttr} controls></video>`;
             }
             // Image files
-            else if (fileTypeFormatted.includes('image') || 
-                     fileTypeFormatted.includes('png') || 
-                     fileTypeFormatted.includes('jpg') || 
-                     fileTypeFormatted.includes('jpeg') || 
-                     fileTypeFormatted.includes('gif') || 
-                     fileTypeFormatted.includes('svg') || 
-                     fileTypeFormatted.includes('webp')) {
+            else if (fileTypeFormatted.includes('image') ||
+                fileTypeFormatted.includes('png') ||
+                fileTypeFormatted.includes('jpg') ||
+                fileTypeFormatted.includes('jpeg') ||
+                fileTypeFormatted.includes('gif') ||
+                fileTypeFormatted.includes('svg') ||
+                fileTypeFormatted.includes('webp')) {
                 formattedContent = `![${fileName}](https://${location.hostname != 'localhost' ? location.hostname : 'dlux.io'}/ipfs/${cid})`;
             }
             // Everything else as anchor tag
             else {
                 formattedContent = `[${fileName}](https://${location.hostname != 'localhost' ? location.hostname : 'dlux.io'}/ipfs/${cid})`;
             }
-            
+
             // Emit the formatted content and contract info to parent
             this.$emit('add-to-post', {
                 content: formattedContent,
@@ -5367,9 +5149,9 @@ export default {
                     }
                 }
                 if (diff) {
-                                    if (this.debounceTime && new Date().getTime() - this.debounceTime < 1000) return
-                this.init()
-                this.debounceTime = new Date().getTime()
+                    if (this.debounceTime && new Date().getTime() - this.debounceTime < 1000) return
+                    this.init()
+                    this.debounceTime = new Date().getTime()
                 }
             },
             deep: true
@@ -5419,7 +5201,7 @@ export default {
                 if (this.extensionFile && this.contract[this.extensionFile.i]) {
                     const contractDetails = this.contract[this.extensionFile.i];
                     const cost = Math.min(
-                        parseInt((parseInt(newValue) / 30) * parseInt(contractDetails.r || 100)), 
+                        parseInt((parseInt(newValue) / 30) * parseInt(contractDetails.r || 100)),
                         this.brocaBalance
                     );
                     this.extensionAmount = Math.max(cost, 1); // Ensure minimum of 1
@@ -5436,6 +5218,9 @@ export default {
         // Existing mounted code
         this.init()
 
+        // Start observing for video elements to setup HLS
+        this.videoObserver = this.initIpfsVideoSupport();
+
         // Add window mouseup handler for selection box (emergency escape)
         window.addEventListener('mouseup', (e) => {
             if (this.selectionBox.active) {
@@ -5450,6 +5235,12 @@ export default {
         }
     },
     beforeUnmount() {
+        // Clean up video observer and HLS instances
+        if (this.videoObserver) {
+            this.videoObserver.disconnect();
+            window._dluxVideoObserver = null;
+        }
+        
         // Clean up event listeners
         window.removeEventListener('mouseup', this.endSelectionBox);
         document.documentElement.removeEventListener('dragend', this.handleGlobalDragEnd);

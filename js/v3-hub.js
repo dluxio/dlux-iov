@@ -15,6 +15,7 @@ import ExtensionVue from "/js/extensionvue.js";
 import UploadVue from "/js/uploadvue.js";
 import PostVue from "/js/postvue.js";
 import DetailVue from "/js/detailvue.js";
+import MCommon from '/js/methods-common.js';
 
 const HIVE_API = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
 const LARYNX_API = "https://spkinstant.hivehoneycomb.com";
@@ -440,6 +441,7 @@ createApp({
     "detail-vue": DetailVue,
   },
   methods: {
+    ...MCommon,
     reply(deets) {
       console.log('getReply:', deets)
       if (!deets.json_metadata) deets.json_metadata = JSON.stringify({})
@@ -985,7 +987,7 @@ createApp({
     switchTab(tab) {
       this.currentTab = tab;
       this.displayPosts = [];
-      
+
       if (tab === 'hub') {
         // Reset pagination for hub (new posts)
         this.postSelect.new.o = 0;
@@ -1003,10 +1005,10 @@ createApp({
           this.postSelect[tab].start_author = '';
           this.postSelect[tab].start_permlink = '';
         }
-        
+
         this[tab] = [];
         this.postSelect.entry = tab;
-        
+
         if (tab === 'communities') {
           // Load communities list when switching to communities tab
           this.getAvailableCommunities();
@@ -1020,9 +1022,9 @@ createApp({
     },
     getAvailableCommunities() {
       if (this.loadingCommunities) return;
-      
+
       this.loadingCommunities = true;
-      
+
       fetch(this.hapi, {
         body: JSON.stringify({
           jsonrpc: "2.0",
@@ -1122,10 +1124,10 @@ createApp({
         this.postSelect.communities.p = false;
         this.communities = [];
         this.displayPosts = [];
-        
+
         // Optionally get community info (for future use)
         this.getCommunityInfo(this.selectedCommunity);
-        
+
         this.getHivePosts();
       }
     },
@@ -1195,9 +1197,9 @@ createApp({
         !this.postSelect[this.postSelect.entry].p
       ) {
         this.postSelect[this.postSelect.entry].p = true;
-        
+
         let method, params;
-        
+
         switch (this.currentTab) {
           case 'trending':
             method = 'bridge.get_ranked_posts';
@@ -1271,96 +1273,96 @@ createApp({
           .then((r) => r.json())
           .then((res) => {
             this.postSelect[this.postSelect.entry].p = false;
-            
+
             if (!res.result || res.result.length === 0) {
               this.postSelect[this.postSelect.entry].e = true;
               return;
             }
-            
+
             var authors = [];
-            
+
             if (res.result.length < this.postSelect[this.postSelect.entry].a) {
               this.postSelect[this.postSelect.entry].e = true;
             }
-            
-                         // Set pagination parameters for next call
-             if (res.result.length > 0) {
-               const lastPost = res.result[res.result.length - 1];
-               this.postSelect[this.postSelect.entry].start_author = lastPost.author;
-               this.postSelect[this.postSelect.entry].start_permlink = lastPost.permlink;
-             }
-            
+
+            // Set pagination parameters for next call
+            if (res.result.length > 0) {
+              const lastPost = res.result[res.result.length - 1];
+              this.postSelect[this.postSelect.entry].start_author = lastPost.author;
+              this.postSelect[this.postSelect.entry].start_permlink = lastPost.permlink;
+            }
+
             for (var i = 0; i < res.result.length; i++) {
               const post = res.result[i];
               const key = `/@${post.author}/${post.permlink}`;
-              
+
               if (!this.posturls[key]) {
-                                 this.posturls[key] = {
-                   ...post,
-                   slider: 10000,
-                   flag: false,
-                   upVotes: 0,
-                   downVotes: 0,
-                   edit: false,
-                   hasVoted: false,
-                   contract: {},
-                   type: 'Blog',
-                   url: `/blog${key}`,
-                   ago: this.timeSince(post.created),
-                   preview: this.removeMD(post.body).substr(0, 250),
-                   rep: "..."
-                 };
-                
-                                 // Process vote data
-                 if (post.active_votes && post.active_votes.length > 0) {
-                   for (var j = 0; j < post.active_votes.length; j++) {
-                     if (post.active_votes[j].percent > 0) {
-                       this.posturls[key].upVotes++;
-                     } else if (post.active_votes[j].percent < 0) {
-                       this.posturls[key].downVotes++;
-                     }
-                     // Skip percent === 0 (neutral/no vote)
-                     
-                     if (post.active_votes[j].voter === this.account) {
-                       this.posturls[key].slider = post.active_votes[j].percent;
-                       this.posturls[key].hasVoted = true;
-                     }
-                   }
-                 }
-                
+                this.posturls[key] = {
+                  ...post,
+                  slider: 10000,
+                  flag: false,
+                  upVotes: 0,
+                  downVotes: 0,
+                  edit: false,
+                  hasVoted: false,
+                  contract: {},
+                  type: 'Blog',
+                  url: `/blog${key}`,
+                  ago: this.timeSince(post.created),
+                  preview: this.removeMD(post.body).substr(0, 250),
+                  rep: "..."
+                };
+
+                // Process vote data
+                if (post.active_votes && post.active_votes.length > 0) {
+                  for (var j = 0; j < post.active_votes.length; j++) {
+                    if (post.active_votes[j].percent > 0) {
+                      this.posturls[key].upVotes++;
+                    } else if (post.active_votes[j].percent < 0) {
+                      this.posturls[key].downVotes++;
+                    }
+                    // Skip percent === 0 (neutral/no vote)
+
+                    if (post.active_votes[j].voter === this.account) {
+                      this.posturls[key].slider = post.active_votes[j].percent;
+                      this.posturls[key].hasVoted = true;
+                    }
+                  }
+                }
+
                 if (this.posturls[key].slider < 0) {
                   this.posturls[key].slider = this.posturls[key].slider * -1;
                   this.posturls[key].flag = true;
                 }
-                
-                                 // Process JSON metadata
-                 try {
-                   if (typeof post.json_metadata === 'string') {
-                     this.posturls[key].json_metadata = JSON.parse(post.json_metadata);
-                   }
-                   // Use different image finding logic for blog posts vs DLUX posts
-                   if (this.posturls[key].type === 'Blog') {
-                     this.posturls[key].pic = this.blogPicFind(this.posturls[key].json_metadata, post.body);
-                   } else {
-                     this.posturls[key].pic = this.picFind(this.posturls[key].json_metadata);
-                   }
-                 } catch (e) {
-                   console.log(key, "no JSON?");
-                   this.posturls[key].json_metadata = {};
-                 }
-                 
-                 // Set reputation from post data for all posts (DLUX and Blog)
-                 if (post.author_reputation) {
-                   this.posturls[key].rep = post.author_reputation
-                 } else if (this.authors[post.author] && this.authors[post.author].reputation) {
-                   this.posturls[key].rep = this.authors[post.author].reputation
-                 }
+
+                // Process JSON metadata
+                try {
+                  if (typeof post.json_metadata === 'string') {
+                    this.posturls[key].json_metadata = JSON.parse(post.json_metadata);
+                  }
+                  // Use different image finding logic for blog posts vs DLUX posts
+                  if (this.posturls[key].type === 'Blog') {
+                    this.posturls[key].pic = this.blogPicFind(this.posturls[key].json_metadata, post.body);
+                  } else {
+                    this.posturls[key].pic = this.picFind(this.posturls[key].json_metadata);
+                  }
+                } catch (e) {
+                  console.log(key, "no JSON?");
+                  this.posturls[key].json_metadata = {};
+                }
+
+                // Set reputation from post data for all posts (DLUX and Blog)
+                if (post.author_reputation) {
+                  this.posturls[key].rep = post.author_reputation
+                } else if (this.authors[post.author] && this.authors[post.author].reputation) {
+                  this.posturls[key].rep = this.authors[post.author].reputation
+                }
               }
-              
+
               this[this.postSelect.entry].push(key);
               authors.push(post.author);
             }
-            
+
             this.selectPosts();
             authors = [...new Set(authors)];
             if (authors.length > 0) {
@@ -1421,7 +1423,7 @@ createApp({
                   this.posturls[key].downVotes++;
                 }
                 // Skip percent === 0 (neutral/no vote)
-                
+
                 if (this.posturls[key].active_votes[i].voter == this.account) {
                   this.posturls[key].slider = this.posturls[key].active_votes[i].percent
                   this.posturls[key].hasVoted = true
@@ -1635,12 +1637,12 @@ createApp({
       // For blog posts, search JSON metadata first, then post body
       console.log('DEBUG: blogPicFind called with json:', json);
       console.log('DEBUG: body length:', body?.length, 'body preview:', body?.substr(0, 100));
-      
+
       var arr;
       try {
         arr = json.image[0];
       } catch (e) { }
-      
+
       // Check JSON metadata first
       if (typeof json.image == "string") {
         console.log('DEBUG: Found string image in json.image:', json.image);
@@ -1649,7 +1651,7 @@ createApp({
         console.log('DEBUG: Found string image in json.image[0]:', arr);
         return arr;
       }
-      
+
       // Search post body for markdown images ![alt](url)
       try {
         const imageMatches = body.match(/!\[.*?\]\((.*?)\)/);
@@ -1664,7 +1666,7 @@ createApp({
       } catch (e) {
         console.log('DEBUG: Error in markdown search:', e);
       }
-      
+
       // Search for any http/https URLs in the body as fallback
       try {
         const urlMatches = body.match(/https?:\/\/[^\s)]+\.(jpg|jpeg|png|gif|webp|svg)/gi);
@@ -1675,7 +1677,7 @@ createApp({
       } catch (e) {
         console.log('DEBUG: Error in fallback search:', e);
       }
-      
+
       // No image found
       console.log('DEBUG: No image found for blog post');
       return null;
@@ -1861,12 +1863,12 @@ createApp({
           .then((response) => response.json())
           .then((data) => {
             console.log('Received author data for accounts without post reputation:', data.result?.length || 0, 'authors');
-            
+
             for (var i = 0; i < data.result.length; i++) {
               this.authors[data.result[i].name] = data.result[i];
               console.log('Added author:', data.result[i].name, 'reputation:', data.result[i].reputation);
             }
-            
+
             // Update reputation for newly loaded authors
             this.updateReputationForPosts(data.result);
           })
@@ -1878,304 +1880,12 @@ createApp({
         this.updateReputationForPosts(existingAuthors);
       }
     },
-    
-    createIpfsLoader() {
-      // Custom IPFS loader for HLS.js to properly handle IPFS URLs
-      class IpfsLoader {
-        constructor(config) {
-          this.config = config;
-          this.stats = null;
-          this.context = null;
-          this.callbacks = null;
-          this.requestController = null;
-        }
-        
-        load(context, config, callbacks) {
-          this.context = context;
-          this.callbacks = callbacks;
-          this.stats = {
-            loading: {
-              start: performance.now(),
-              first: 0,
-              end: 0
-            },
-            parsing: {
-              start: 0,
-              end: 0
-            },
-            buffering: {
-              start: 0,
-              first: 0,
-              end: 0
-            }
-          };
-          
-          const url = context.url;
-          console.log('IPFS Loader loading:', url);
-          
-          // Convert IPFS URLs to proper gateway URLs with filename hints
-          let ipfsUrl = url;
-          if (url.includes('ipfs.dlux.io/ipfs/')) {
-            const cid = url.split('/ipfs/')[1].split('?')[0];
-            
-                      // Determine file extension and filename based on URL or context
-          let filename = 'file';
-          if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level') {
-            filename = 'playlist.m3u8';
-            if (context.type === 'level' && url.includes('/ipfs/Qm') && !url.includes('.')) {
-              console.log('Detected bare IPFS hash as level playlist:', url);
-            }
-          } else if (url.includes('.ts') || context.type === 'segment' || context.responseType === 'arraybuffer' || context.frag) {
-            // If it's requesting arraybuffer or has frag property, it's likely a video segment
-            filename = 'segment.ts';
-          } else if (url.includes('/ipfs/Qm') && context.responseType === 'text') {
-            // Handle any other bare IPFS hash that expects text (likely a playlist)
-            filename = 'playlist.m3u8';
-            console.log('Detected bare IPFS hash expecting text as playlist:', url);
-          }
-            
-            // Construct proper IPFS gateway URL with filename for MIME type detection
-            ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}?filename=${filename}`;
-          }
-          
-          console.log('IPFS Loader fetching:', ipfsUrl);
-          
-          // Create AbortController for request cancellation
-          this.requestController = new AbortController();
-          
-          fetch(ipfsUrl, { signal: this.requestController.signal })
-            .then(response => {
-              if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-              }
-              
-              this.stats.loading.first = Math.max(performance.now(), this.stats.loading.start);
-              this.stats.parsing.start = this.stats.loading.first;
-              
-              // For manifests and level playlists, return text; for segments, return arrayBuffer
-              if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level' || context.responseType === 'text') {
-                return response.text();
-              } else {
-                return response.arrayBuffer();
-              }
-            })
-            .then(data => {
-              this.stats.loading.end = Math.max(this.stats.loading.first, performance.now());
-              this.stats.parsing.end = this.stats.loading.end;
-              const dataSize = typeof data === 'string' ? data.length : data.byteLength;
-              
-              console.log('IPFS Loader success:', ipfsUrl, 'Size:', dataSize);
-              
-              // HLS.js expects exact response format matching XHR loader
-              const response = {
-                url: ipfsUrl,
-                data: data
-              };
-              
-              // Pass proper stats object that HLS.js expects
-              callbacks.onSuccess(response, this.stats, context);
-            })
-            .catch(err => {
-              if (err.name === 'AbortError') {
-                console.log('IPFS Loader request was aborted');
-                return;
-              }
-              console.error('IPFS Loader error:', err, 'URL:', ipfsUrl);
-              callbacks.onError({ 
-                code: err.code || 'NETWORK_ERROR', 
-                text: err.message || 'Failed to load IPFS content'
-              }, context);
-            });
-        }
-        
-        abort() {
-          console.log('IPFS Loader: abort called');
-          if (this.requestController) {
-            this.requestController.abort();
-            this.requestController = null;
-          }
-        }
-        
-        destroy() {
-          console.log('IPFS Loader: destroy called');
-          this.abort();
-          this.stats = null;
-          this.context = null;
-          this.callbacks = null;
-        }
-      }
-      
-      return IpfsLoader;
-    },
-
-    async setupHLSPlayer(videoElement) {
-      // Universal HLS.js setup for M3U8 video playback
-      if (!videoElement || !videoElement.src) return;
-      
-      let videoSrc = videoElement.src;
-      console.log('Setting up HLS for video:', videoSrc);
-      
-      // Smart IPFS video detection - check if it's an IPFS file without extension
-      if (/\/ipfs\/Qm[a-zA-Z0-9]+$/.test(videoSrc) && !videoSrc.includes('.')) {
-        console.log('Detected IPFS file without extension, checking size...');
-        try {
-          const response = await fetch(videoSrc, { method: 'HEAD' });
-          const contentLength = response.headers.get('content-length');
-          if (contentLength) {
-            const sizeInKB = parseInt(contentLength) / 1024;
-            console.log(`IPFS file size: ${sizeInKB} KB`);
-            
-            // If file is in kilobyte range (likely a playlist), treat as M3U8
-            if (sizeInKB < 100) { // Playlists are typically small
-              videoSrc = videoSrc + '?filename=master.m3u8';
-              videoElement.src = videoSrc; // Update the video element src
-              console.log('Treating as M3U8 playlist:', videoSrc);
-            }
-          }
-        } catch (err) {
-          console.log('Could not determine IPFS file size, proceeding with original URL');
-        }
-      }
-      
-      // Check if the source is an M3U8 file
-      if (videoSrc.includes('.m3u8') || videoSrc.includes('application/x-mpegURL') || videoSrc.includes('filename=master.m3u8')) {
-        // Check if HLS.js is available
-        if (typeof Hls !== 'undefined') {
-          if (Hls.isSupported()) {
-            // Destroy existing HLS instance if attached to this video
-            if (videoElement.hlsInstance) {
-              videoElement.hlsInstance.destroy();
-            }
-            
-            // Create custom IPFS loader for better IPFS URL handling
-            const IpfsLoader = this.createIpfsLoader();
-            
-            // Create new HLS instance with custom IPFS loader
-            const hls = new Hls({
-              debug: false,
-              enableWorker: true,
-              lowLatencyMode: false,
-              loader: IpfsLoader
-            });
-            
-            // Store instance on video element for cleanup
-            videoElement.hlsInstance = hls;
-            
-            // Load the M3U8 source
-            hls.loadSource(videoSrc);
-            hls.attachMedia(videoElement);
-            
-            // Handle events
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-              console.log('HLS manifest parsed successfully');
-            });
-            
-            hls.on(Hls.Events.ERROR, (event, data) => {
-              console.warn('HLS error:', data);
-              if (data.fatal) {
-                switch (data.type) {
-                  case Hls.ErrorTypes.NETWORK_ERROR:
-                    console.log('Network error, trying to recover...');
-                    hls.startLoad();
-                    break;
-                  case Hls.ErrorTypes.MEDIA_ERROR:
-                    console.log('Media error, trying to recover...');
-                    hls.recoverMediaError();
-                    break;
-                  default:
-                    console.log('Fatal error, destroying HLS instance');
-                    hls.destroy();
-                    break;
-                }
-              }
-            });
-            
-            console.log('HLS.js player with IPFS loader setup complete for:', videoSrc);
-          } else {
-            console.log('HLS.js not supported, using native playback');
-          }
-        } else {
-          console.warn('HLS.js library not loaded');
-        }
-      } else {
-        console.log('Not an M3U8 file, using native video playback');
-      }
-    },
-    
-    observeVideoElements() {
-      // Set up MutationObserver to watch for new video elements
-      if (this.videoObserver) {
-        this.videoObserver.disconnect();
-      }
-      
-      this.videoObserver = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          // Check for added nodes
-          mutation.addedNodes.forEach((node) => {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              // Check if the added node is a video element
-              if (node.tagName === 'VIDEO') {
-                this.setupHLSPlayer(node);
-              }
-              // Check for video elements within added nodes
-              const videos = node.querySelectorAll ? node.querySelectorAll('video') : [];
-              videos.forEach((video) => {
-                this.setupHLSPlayer(video);
-              });
-            }
-          });
-          
-          // Check for attribute changes on existing video elements
-          if (mutation.type === 'attributes' && 
-              mutation.target.tagName === 'VIDEO' && 
-              mutation.attributeName === 'src') {
-            this.setupHLSPlayer(mutation.target);
-          }
-        });
-      });
-      
-      // Start observing
-      this.videoObserver.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['src']
-      });
-      
-      // Setup existing video elements
-      document.querySelectorAll('video').forEach((video) => {
-        this.setupHLSPlayer(video);
-      });
-    },
-    updateReputationForPosts(authors) {
-      // Update reputation for posts when new author data becomes available
-      console.log('updateReputationForPosts called with', authors.length, 'authors');
-      for (const author of authors) {
-        if (author && author.reputation) {
-          let updatedCount = 0;
-          // Find all posts by this author and update their reputation
-          for (const postKey in this.posturls) {
-            if (this.posturls[postKey].author === author.name && this.posturls[postKey].rep === "...") {
-              // Try to use author_reputation from post first, then fall back to author reputation
-              const post = this.posturls[postKey];
-              if (post.author_reputation) {
-                post.rep = post.author_reputation
-              } else {
-                post.rep = author.reputation
-              }
-              updatedCount++;
-            }
-          }
-          console.log(`Updated reputation for ${author.name}: ${updatedCount} posts, reputation: ${author.reputation}`);
-        }
-      }
-    },
   },
   mounted() {
     // Initialize with hub tab as default
     this.currentTab = 'hub';
     this.postSelect.entry = 'new';
-    
+
     if (location.pathname.split("/@")[1]) {
       this.pageAccount = location.pathname.split("/@")[1]
       if (this.pageAccount.indexOf('/') > -1) {
@@ -2199,23 +1909,24 @@ createApp({
     this.getProtocol();
     this.getRewardFund();
     this.getFeedPrice();
-    
+
     // Pre-load communities list
     this.getAvailableCommunities();
-    
+
     // Start observing for video elements to setup HLS
-    this.observeVideoElements();
+    this.videoObserver = this.initIpfsVideoSupport();
   },
   unmounted() {
     if (this.boundScrollHandler) { // Check if handler exists before removing
       document.body.removeEventListener('scroll', this.boundScrollHandler); // Use bound handler
     }
-    
+
     // Clean up video observer and HLS instances
     if (this.videoObserver) {
       this.videoObserver.disconnect();
+      window._dluxVideoObserver = null;
     }
-    
+
     // Clean up any HLS instances
     document.querySelectorAll('video').forEach((video) => {
       if (video.hlsInstance) {

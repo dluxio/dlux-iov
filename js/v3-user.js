@@ -5519,340 +5519,6 @@ function buyNFT(setname, uid, price, type, callback){
       this.hashingProgress.percentage = 0;
       this.hashingProgress.currentFile = '';
     },
-    
-    createIpfsLoader() {
-      // Custom IPFS loader for HLS.js to properly handle IPFS URLs
-      class IpfsLoader {
-        constructor(config) {
-          this.config = config;
-          this.stats = null;
-          this.context = null;
-          this.callbacks = null;
-          this.requestController = null;
-        }
-        
-        load(context, config, callbacks) {
-          this.context = context;
-          this.callbacks = callbacks;
-          this.stats = {
-            loading: {
-              start: performance.now(),
-              first: 0,
-              end: 0
-            },
-            parsing: {
-              start: 0,
-              end: 0
-            },
-            buffering: {
-              start: 0,
-              first: 0,
-              end: 0
-            }
-          };
-          
-          console.log('🔥 === IPFS LOADER.LOAD() CALLED ===');
-          const url = context.url;
-          console.log('🌐 URL:', url);
-          console.log('⚙️  Context:', context);
-          console.log('🔧 Config:', config);
-          console.log('📞 Callbacks:', callbacks);
-          console.log('🆔 Callbacks has onSuccess?', typeof callbacks.onSuccess);
-          console.log('🆔 Callbacks has onError?', typeof callbacks.onError);
-          
-          // Convert IPFS URLs to proper gateway URLs with filename hints
-          let ipfsUrl = url;
-          let filename = 'file'; // Default filename
-          
-          if (url.includes('ipfs.dlux.io/ipfs/')) {
-            const cid = url.split('/ipfs/')[1].split('?')[0];
-            
-            // Determine file extension and filename based on URL or context
-            if (url.includes('.m3u8') || context.type === 'manifest' || context.type === 'level') {
-              filename = 'playlist.m3u8';
-              if (context.type === 'level' && url.includes('/ipfs/Qm') && !url.includes('.')) {
-                console.log('Detected bare IPFS hash as level playlist:', url);
-              }
-            } else if (url.includes('.ts') || context.type === 'segment' || context.responseType === 'arraybuffer' || context.frag) {
-              // If it's requesting arraybuffer or has frag property, it's likely a video segment
-              filename = 'segment.ts';
-            } else if (url.includes('/ipfs/Qm') && context.responseType === 'text') {
-              // Handle any other bare IPFS hash that expects text (likely a playlist)
-              filename = 'playlist.m3u8';
-              console.log('Detected bare IPFS hash expecting text as playlist:', url);
-            }
-            
-            // Construct proper IPFS gateway URL with filename for MIME type detection
-            ipfsUrl = `https://ipfs.dlux.io/ipfs/${cid}?filename=${filename}`;
-          }
-          
-          console.log('IPFS Loader fetching:', ipfsUrl);
-          console.log('Expected responseType:', context.responseType);
-          console.log('Filename hint:', filename);
-          console.log('Is filename defined?', typeof filename !== 'undefined');
-          console.log('Context details:', {
-            type: context.type,
-            frag: !!context.frag,
-            level: context.level,
-            id: context.id
-          });
-          
-          console.log('🚀 STARTING XHR REQUEST FOR:', ipfsUrl);
-          
-          // Use XMLHttpRequest for better binary data handling
-          const xhr = new XMLHttpRequest();
-          this.currentXHR = xhr;
-          
-          xhr.open('GET', ipfsUrl, true);
-          
-          // Set response type based on context
-          if (context.responseType === 'arraybuffer' || filename === 'segment.ts') {
-            xhr.responseType = 'arraybuffer';
-            // Force the Content-Type header to ensure correct data handling
-            xhr.overrideMimeType('video/mp2t');
-            console.log('📦 Set XHR responseType to arraybuffer and overrideMimeType to video/mp2t');
-          } else {
-            xhr.responseType = 'text';
-            console.log('📄 Set XHR responseType to text');
-          }
-          
-          // Set up event handlers
-          xhr.onload = () => {
-            console.log('✅ XHR LOAD EVENT - Status:', xhr.status, xhr.statusText);
-            console.log('📊 XHR Response details:');
-            console.log('   responseType:', xhr.responseType);
-            console.log('   response type check:', typeof xhr.response);
-            console.log('   response instanceof ArrayBuffer:', xhr.response instanceof ArrayBuffer);
-            
-            if (xhr.status >= 200 && xhr.status < 300) {
-              this.stats.loading.first = Math.max(performance.now(), this.stats.loading.start);
-              this.stats.loading.end = Math.max(this.stats.loading.first, performance.now());
-              this.stats.parsing.start = this.stats.loading.first;
-              this.stats.parsing.end = this.stats.loading.end;
-              
-              const data = xhr.response;
-              const dataSize = data instanceof ArrayBuffer ? data.byteLength : (data ? data.length : 0);
-              
-              console.log('🎯 XHR Success:', ipfsUrl, 'Size:', dataSize);
-              console.log('📋 Data type:', typeof data);
-              console.log('📋 Data constructor:', data ? data.constructor.name : 'null');
-
-              // Deep MPEG-TS validation for segments
-              if (filename === 'segment.ts' && data instanceof ArrayBuffer) {
-                const bytes = new Uint8Array(data);
-                console.log('🔍 DEEP MPEG-TS ANALYSIS:');
-                console.log('   Total size:', bytes.length);
-                console.log('   First 32 bytes:', Array.from(bytes.slice(0, 32)).map(b => b.toString(16).padStart(2, '0')).join(' '));
-                
-                // Check for MPEG-TS packet structure (188-byte packets)
-                let validPackets = 0;
-                let syncBytes = 0;
-                for (let i = 0; i < Math.min(bytes.length, 1880); i += 188) {
-                  if (bytes[i] === 0x47) {
-                    syncBytes++;
-                    validPackets++;
-                  }
-                }
-                console.log('   MPEG-TS packets found:', validPackets);
-                console.log('   Sync bytes at 188-byte intervals:', syncBytes);
-                console.log('   Looks like valid MPEG-TS?', syncBytes >= 5);
-                
-                // Check for common MPEG-TS PIDs
-                const pids = new Set();
-                for (let i = 0; i < Math.min(bytes.length, 1880); i += 188) {
-                  if (bytes[i] === 0x47) {
-                    const pid = ((bytes[i + 1] & 0x1F) << 8) | bytes[i + 2];
-                    pids.add(pid);
-                  }
-                }
-                console.log('   PIDs found:', Array.from(pids).slice(0, 10));
-              }
-              
-              const response = {
-                data: data,
-                url: xhr.responseURL || ipfsUrl
-              };
-              
-              const networkDetails = {
-                treq: this.stats.loading.start,
-                tfirst: this.stats.loading.first, 
-                tload: this.stats.loading.end,
-                mtime: new Date().getTime(),
-                loaded: dataSize,
-                total: dataSize,
-                url: xhr.responseURL || context.url
-              };
-              
-              callbacks.onSuccess(response, this.stats, context, networkDetails);
-            } else {
-              console.error('❌ XHR Error - Status:', xhr.status, xhr.statusText);
-              callbacks.onError({
-                code: xhr.status,
-                text: xhr.statusText || 'XHR request failed'
-              }, context);
-            }
-          };
-          
-          xhr.onerror = () => {
-            console.error('💥 XHR Network Error');
-            callbacks.onError({
-              code: 'NETWORK_ERROR',
-              text: 'XHR network error occurred'
-            }, context);
-          };
-          
-          xhr.onabort = () => {
-            console.log('🛑 XHR Request Aborted');
-          };
-          
-          console.log('📡 Starting XHR request...');
-          xhr.send();
-          
-
-        }
-        
-        abort() {
-          console.log('IPFS Loader: abort called');
-          if (this.currentXHR) {
-            this.currentXHR.abort();
-            this.currentXHR = null;
-          }
-        }
-        
-        destroy() {
-          console.log('IPFS Loader: destroy called');
-          this.abort();
-          this.stats = null;
-          this.context = null;
-          this.callbacks = null;
-        }
-      }
-      
-      return IpfsLoader;
-    },
-
-    createPreviewLoader() {
-      const self = this;
-      class PreviewLoader {
-        constructor(config) {
-          this.config = config;
-        }
-
-        load(context, config, callbacks) {
-          const segmentName = context.url.split('/').pop().split('?')[0];
-          console.log(`PreviewLoader trying to load: ${segmentName}`);
-          
-          const segmentData = self.dataURLS.find(d => d[0].startsWith(segmentName.replace('.ts', '')));
-
-          if (segmentData) {
-            console.log(`PreviewLoader found segment: ${segmentName}`);
-            const buffer = segmentData[1];
-            const response = { data: buffer, url: context.url };
-            const stats = { tload: performance.now(), loaded: buffer.byteLength, total: buffer.byteLength };
-            callbacks.onSuccess(response, stats, context, {});
-          } else {
-            console.error(`PreviewLoader could not find segment: ${segmentName}`);
-            callbacks.onError({ code: 404, text: `Segment not found: ${segmentName}` }, context);
-          }
-        }
-
-        abort() {}
-        destroy() {}
-      }
-      return PreviewLoader;
-    },
-
-    async setupHLSPlayer(videoElement) {
-      const src = videoElement.src;
-      console.log(`Setting up HLS for video: ${src}`);
-      if (!src) return;
-
-      if (videoElement.hls) {
-        videoElement.hls.destroy();
-      }
-
-      if (!Hls.isSupported()) {
-        console.log('HLS.js is not supported, or this is a native playback scenario (e.g., Safari).');
-        return;
-      }
-      
-      const isPreview = src.startsWith('blob:');
-      const isIpfs = src.includes('ipfs.dlux.io/ipfs/');
-
-      if (!isPreview && !isIpfs) {
-          console.log('Not a compatible HLS source for custom loader, using native playback.');
-          return;
-      }
-
-      const hlsConfig = {
-        forceKeyFrameOnDiscontinuity: false,
-        maxBufferHole: 1.5,
-        debug: true,
-      };
-
-      if (isPreview) {
-        console.log('Preview mode detected, using PreviewLoader.');
-        hlsConfig.fLoader = this.createPreviewLoader();
-      } else { // isIpfs
-        console.log('IPFS URL detected, using IpfsLoader.');
-        hlsConfig.fLoader = this.createIpfsLoader();
-      }
-
-      const hls = new Hls(hlsConfig);
-      videoElement.hls = hls;
-
-      hls.on(Hls.Events.ERROR, (event, data) => {
-        console.error('HLS error:', data);
-        if (data.details === 'fragParsingError') {
-          console.error('Fragment parsing error, segment may not contain valid media data');
-        }
-      });
-      
-      hls.loadSource(src);
-      hls.attachMedia(videoElement);
-      console.log('HLS.js player setup complete for:', src);
-    },
-
-    observeVideoElements() {
-      const videoObserver = new MutationObserver((mutationsList, observer) => {
-        mutationsList.forEach((mutation) => {
-          // Check for added nodes
-          mutation.addedNodes.forEach((node) => {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              // Check if the added node is a video element
-              if (node.tagName === 'VIDEO') {
-                this.setupHLSPlayer(node);
-              }
-              // Check for video elements within added nodes
-              const videos = node.querySelectorAll ? node.querySelectorAll('video') : [];
-              videos.forEach((video) => {
-                this.setupHLSPlayer(video);
-              });
-            }
-          });
-          
-          // Check for attribute changes on existing video elements
-          if (mutation.type === 'attributes' && 
-              mutation.target.tagName === 'VIDEO' && 
-              mutation.attributeName === 'src') {
-            this.setupHLSPlayer(mutation.target);
-          }
-        });
-      });
-      
-      // Start observing
-      videoObserver.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['src']
-      });
-      
-      // Setup existing video elements
-      document.querySelectorAll('video').forEach((video) => {
-        this.setupHLSPlayer(video);
-      });
-    },
   },
   mounted() {
     // Check for active service worker
@@ -5942,7 +5608,7 @@ function buyNFT(setname, uid, price, type, callback){
     this.rcCosts();
     
     // Start observing for video elements to setup HLS
-    this.observeVideoElements();
+    this.videoObserver = this.initIpfsVideoSupport();
   },
   beforeDestroy() {
     this.observer.disconnect();
@@ -5951,6 +5617,7 @@ function buyNFT(setname, uid, price, type, callback){
     // Clean up video observer and HLS instances
     if (this.videoObserver) {
       this.videoObserver.disconnect();
+      window._dluxVideoObserver = null;
     }
     
     // Clean up any HLS instances
@@ -5966,6 +5633,19 @@ function buyNFT(setname, uid, price, type, callback){
 
     // Remove the actual handler from the body element
     document.body.removeEventListener('scroll', this.boundScrollHandler);
+    
+    // Clean up video observer and HLS instances
+    if (this.videoObserver) {
+      this.videoObserver.disconnect();
+      window._dluxVideoObserver = null;
+    }
+    
+    // Clean up any HLS instances
+    document.querySelectorAll('video').forEach((video) => {
+      if (video.hlsInstance) {
+        video.hlsInstance.destroy();
+      }
+    });
   },
   watch: {
     postSelect(a, b) {

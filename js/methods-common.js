@@ -598,4 +598,340 @@ export default {
     }
     return num;
   },
+  // IPFS Video Loading Support
+  // These methods provide HLS.js integration for loading M3U8 playlists and video segments from IPFS
+  // Usage: Call initIpfsVideoSupport() in your Vue component's mounted() lifecycle
+  // or use the standalone js/ipfs-video-init.js for non-Vue pages
+  createIpfsLoader(gatewayUrl = 'https://ipfs.dlux.io') {
+    class IpfsLoader {
+      constructor(config) {
+        this.config = config;
+        this.stats = null;
+        this.context = null;
+        this.callbacks = null;
+        this.requestController = null;
+        this.gatewayUrl = gatewayUrl;
+      }
+
+      load(context, config, callbacks) {
+        // HLS.js can pass callbacks as second OR third parameter
+        if (typeof config === 'function') {
+          callbacks = config;
+          config = {};
+        }
+        
+        this.context = context;
+        this.callbacks = callbacks;
+        
+        console.log('IPFS Loader load called with:', {
+          context: context,
+          callbacks: typeof callbacks,
+          hasOnSuccess: !!(callbacks && callbacks.onSuccess),
+          hasOnError: !!(callbacks && callbacks.onError)
+        });
+        this.stats = {
+          loading: { start: performance.now(), first: 0, end: 0 },
+          parsing: { start: 0, end: 0 },
+          buffering: { start: 0, first: 0, end: 0 }
+        };
+
+        const url = context.url;
+        console.log('IPFS Loader loading:', url);
+
+        let ipfsUrl = url;
+        if (url.startsWith(`${this.gatewayUrl}/ipfs/`)) {
+          const cid = url.split('/ipfs/')[1].split('?')[0];
+          let filename = 'file';
+
+          if (context.type === 'manifest' || context.type === 'level' || url.includes('.m3u8')) {
+            filename = 'playlist.m3u8';
+          } else if (context.type === 'segment' || context.responseType === 'arraybuffer' || context.frag) {
+            filename = 'segment.ts';
+          }
+
+          ipfsUrl = `${this.gatewayUrl}/ipfs/${cid}?filename=${filename}`;
+        }
+
+        console.log('IPFS Loader fetching:', ipfsUrl);
+
+        this.requestController = new AbortController();
+        const headers = {};
+        if (context.type === 'manifest' || context.type === 'level') {
+          headers['Accept'] = 'application/x-mpegURL';
+        } else if (context.type === 'segment') {
+          headers['Accept'] = 'video/MP2T';
+        }
+
+        fetch(ipfsUrl, { signal: this.requestController.signal, headers })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const contentType = response.headers.get('content-type') || '';
+            if (context.type === 'manifest' || context.type === 'level') {
+              if (!contentType.includes('application/x-mpegURL') && 
+                  !contentType.includes('audio/x-mpegurl') && 
+                  !contentType.includes('text/')) {
+                console.warn('Unexpected content type for playlist:', contentType);
+              }
+            } else if (context.type === 'segment') {
+              if (!contentType.includes('video/MP2T') && !contentType.includes('application/octet-stream')) {
+                console.warn('Unexpected content type for segment:', contentType);
+              }
+            }
+
+            this.stats.loading.first = Math.max(performance.now(), this.stats.loading.start);
+            this.stats.parsing.start = this.stats.loading.first;
+
+            return (context.type === 'manifest' || context.type === 'level' || url.includes('.m3u8'))
+              ? response.text()
+              : response.arrayBuffer();
+          })
+          .then(data => {
+            this.stats.loading.end = Math.max(this.stats.loading.first, performance.now());
+            this.stats.parsing.end = this.stats.loading.end;
+
+            console.log('IPFS Loader data received:', typeof data, 'Context:', context.type);
+            
+            // HLS.js expects the response to match the original URL format
+            const response = { 
+              url: context.url,  // Use original URL, not gateway URL
+              data: data 
+            };
+            
+            if (callbacks) {
+              if (typeof callbacks.onSuccess === 'function') {
+                console.log('✅ Calling HLS.js onSuccess callback');
+                callbacks.onSuccess(response, this.stats, context);
+              } else if (typeof callbacks === 'function') {
+                // Some HLS.js versions might pass callback directly
+                console.log('✅ Calling HLS.js callback directly');
+                callbacks(null, response, this.stats, context);
+              } else {
+                console.warn('❌ No valid onSuccess callback found. Callbacks:', Object.keys(callbacks || {}));
+              }
+            } else {
+              console.warn('❌ No callbacks object provided at all');
+            }
+          })
+          .catch(err => {
+            if (err.name === 'AbortError') return;
+            console.error('IPFS Loader error:', err, 'URL:', ipfsUrl);
+            if (callbacks) {
+              const error = { code: err.code || 'NETWORK_ERROR', text: err.message || 'Failed to load IPFS content' };
+              if (typeof callbacks.onError === 'function') {
+                callbacks.onError(error, context);
+              } else if (typeof callbacks === 'function') {
+                // Some HLS.js versions might pass callback directly - error as first param
+                callbacks(error, null, this.stats, context);
+              } else {
+                console.warn('❌ No valid onError callback found');
+              }
+            }
+          });
+      }
+
+      abort() {
+        if (this.requestController) {
+          this.requestController.abort();
+          this.requestController = null;
+        }
+      }
+
+      destroy() {
+        this.abort();
+        this.stats = null;
+        this.context = null;
+        this.callbacks = null;
+      }
+    }
+
+    return IpfsLoader;
+  },
+
+    setupHLSPlayer(videoElement, gatewayUrl = 'https://ipfs.dlux.io') {
+    if (!videoElement || !videoElement.src) return;
+
+    const videoSrc = videoElement.src;
+    const videoType = videoElement.type;
+    console.log('Setting up player for video:', videoSrc, 'Type:', videoType);
+
+    // Skip blob URLs - these are likely already processed by HLS.js
+    if (videoSrc.startsWith('blob:')) {
+      console.log('Skipping blob URL, likely already processed by HLS');
+      return;
+    }
+
+    // Skip if HLS instance already exists for this element
+    if (videoElement.hlsInstance) {
+      console.log('HLS instance already exists for this video element');
+      return;
+    }
+
+    // Skip if already processed (mark with a flag)
+    if (videoElement.dataset.hlsProcessed) {
+      console.log('Video element already processed for HLS');
+      return;
+    }
+
+    // Check if this is an M3U8 playlist by URL extension or explicit type
+    const isM3U8 = videoType === 'application/x-mpegURL' || 
+                   videoType === 'audio/x-mpegurl' ||
+                   videoSrc.endsWith('.m3u8') ||
+                   videoSrc.includes('.m3u8?') ||
+                   videoSrc.includes('filename=') && videoSrc.includes('.m3u8');
+
+    if (isM3U8) {
+      if (typeof Hls === 'undefined') {
+        console.warn('HLS.js library not loaded');
+        return;
+      }
+  
+      if (!Hls.isSupported()) {
+        console.log('HLS.js not supported, using native playback');
+        return;
+      }
+  
+            if (videoElement.hlsInstance) {
+        videoElement.hlsInstance.destroy();
+      }
+
+      // Mark as processed to prevent duplicate setup
+      videoElement.dataset.hlsProcessed = 'true';
+
+      const IpfsLoader = this.createIpfsLoader(gatewayUrl);
+      const hls = new Hls({
+        debug: false,
+        enableWorker: true,
+        lowLatencyMode: false,
+        loader: IpfsLoader
+      });
+
+            videoElement.hlsInstance = hls;
+      
+      console.log('HLS.js: Loading source:', videoSrc);
+      hls.loadSource(videoSrc);
+      
+      console.log('HLS.js: Attaching media to video element');
+      hls.attachMedia(videoElement);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        console.log('✅ HLS manifest parsed successfully');
+      });
+
+      hls.on(Hls.Events.MANIFEST_LOADING, () => {
+        console.log('📡 HLS manifest loading started');
+      });
+
+      hls.on(Hls.Events.MANIFEST_LOADED, (event, data) => {
+        console.log('📥 HLS manifest loaded:', data);
+      });
+
+      hls.on(Hls.Events.LEVEL_LOADED, (event, data) => {
+        console.log('📦 HLS level loaded:', data.level);
+      });
+
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        console.error('❌ HLS error:', data);
+        if (data.fatal) {
+          console.error('💀 Fatal HLS error:', data.type, data.details);
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              console.log('🔄 Attempting to recover from network error');
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              console.log('🔄 Attempting to recover from media error');
+              hls.recoverMediaError();
+              break;
+            default:
+              console.log('💥 Destroying HLS instance due to unrecoverable error');
+              hls.destroy();
+              videoElement.dataset.hlsProcessed = 'false';
+              break;
+          }
+        }
+      });
+    } else {
+      console.log('Not an M3U8 playlist, using native video playback');
+      // Mark as processed to prevent repeated checks
+      videoElement.dataset.hlsProcessed = 'true';
+    }
+  },
+
+  observeVideoElements(gatewayUrl = 'https://ipfs.dlux.io') {
+    // Keep track of processed videos to prevent duplicates
+    const processedVideos = new WeakSet();
+    
+    const processVideo = (video) => {
+      if (processedVideos.has(video)) {
+        return; // Already processed this exact video element
+      }
+      processedVideos.add(video);
+      
+      // Set proper type attribute for M3U8 videos before processing
+      if (video.src && !video.type) {
+        const isM3U8 = video.src.endsWith('.m3u8') || 
+                       video.src.includes('.m3u8?') ||
+                       (video.src.includes('filename=') && video.src.includes('.m3u8'));
+        if (isM3U8) {
+          video.type = 'application/x-mpegURL';
+        }
+      }
+      
+      setTimeout(() => this.setupHLSPlayer(video, gatewayUrl), 10);
+    };
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.tagName === 'VIDEO') {
+              processVideo(node);
+            }
+            const videos = node.querySelectorAll ? node.querySelectorAll('video') : [];
+            videos.forEach(video => processVideo(video));
+          }
+        });
+
+        if (mutation.type === 'attributes' &&
+            mutation.target.tagName === 'VIDEO' &&
+            mutation.attributeName === 'src') {
+          processVideo(mutation.target);
+        }
+      });
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['src']
+    });
+
+    // Setup existing video elements
+    document.querySelectorAll('video').forEach(video => processVideo(video));
+
+    return observer;
+  },
+
+  initIpfsVideoSupport(gatewayUrl = 'https://ipfs.dlux.io') {
+    // Initialize IPFS video support for the current page
+    if (typeof Hls === 'undefined') {
+      console.warn('HLS.js library not loaded. Please include: <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>');
+      return null;
+    }
+
+    // Prevent multiple observers on the same page
+    if (window._dluxVideoObserver) {
+      console.log('Video observer already exists, skipping initialization');
+      return window._dluxVideoObserver;
+    }
+
+    // Start observing for video elements
+    const observer = this.observeVideoElements(gatewayUrl);
+    window._dluxVideoObserver = observer;
+    return observer;
+  },
 };

@@ -3,4 +3,6 @@ description:
 globs: 
 alwaysApply: true
 ---
-You are encouraged to use the liveserver for this project running at localhost:5508. There is no need to attempt to bring the server online, or manage it at all.
+This project has an active live server at port 5508. There is no need to attempt to manage the server.
+
+Use methods-common for any code that you suspect will be in more than one location, and if you find code in more than one location consolidate it appropriately.

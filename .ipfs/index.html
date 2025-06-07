@@ -37,7 +37,7 @@
             permlink = varval('permlink', vararr),
             hiveKey = `${author}/${permlink}`,
             dots = match(author,'.'),
-            authorizedDNS01 = dots.length ? dots.join('') + author.replaceAll('.', '-') : author
+            authorizedDNS01 = dots.length ? dots.join('') + author.replaceAll('.', '--') : author
             if(dns01 != authorizedDNS01){
                 goAhead = false
                 alert(`This dApp failed it's signature check.\nYou are likely following a malicious link:\nAuthor: ${dns01} != subdomain: ${authorizedDNS01}\n Please report`)
