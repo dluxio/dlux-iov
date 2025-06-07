@@ -81,8 +81,35 @@ export default {
       showPenModal: false,
       showPenKeys: {},
       penManagementMode: 'overview', // 'overview', 'decrypt', 'manage'
-      penDecryptPassword: '',
-      penDecryptError: '',
+      penDecryptPassword: "",
+      penDecryptError: "",
+      
+      // Device Connection
+      deviceConnection: {
+        isConnected: false,
+        role: null, // 'signer' or 'requester'
+        sessionId: null,
+        pairCode: null,
+        connectedDevice: null
+      },
+      devicePairingCode: "",
+      devicePairingError: "",
+      devicePairingLoading: false,
+      deviceConnectCode: "",
+      deviceConnectError: "",
+      deviceConnectLoading: false,
+      devicePollingInterval: null,
+      devicePairingTimeout: null,
+      deviceWebSocket: null,
+      deviceWSConnected: false,
+      cachedChallenge: null,
+      challengeExpiry: 0,
+      deviceConnectionTimeout: 60, // Default 1 hour in minutes
+      deviceSessionExpiry: 0,
+      showRemoteSigningModal: false,
+      remoteSigningRequest: null,
+      showTimeoutModal: false,
+      timeoutRequest: null,
       showExportModal: false,
       exportAccount: '',
       exportKeys: [],
@@ -766,7 +793,7 @@ export default {
 
         // Create signed challenge for authentication
         const challenge = Math.floor(Date.now() / 1000).toString();
-        const signature = await this.signChallenge(challenge, 'posting');
+        const { signature, pubKey } = await this.signChallenge(challenge, 'posting');
         
         // Call backend API to create pairing code
         const response = await fetch('https://data.dlux.io/api/device/pair', {
@@ -775,7 +802,7 @@ export default {
             'Content-Type': 'application/json',
             'x-account': this.user,
             'x-challenge': challenge,
-            'x-pubkey': this.getPublicKey('posting'),
+            'x-pubkey': pubKey,
             'x-signature': signature
           }
         });
@@ -1030,65 +1057,165 @@ export default {
           }
         }
 
-        // Send response back to backend
-        await fetch('https://data.dlux.io/api/device/respond', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            sessionId,
-            requestId: request.id,
-            response: confirmed ? result : null,
-            error: confirmed ? null : 'User cancelled request'
-          })
-        });
+        // Send response back via WebSocket
+        this.sendDeviceResponse(sessionId, request.id, confirmed ? result : null, confirmed ? null : 'User cancelled request');
 
       } catch (error) {
         console.error('[NavVue] Failed to handle device request:', error);
         
-        // Send error response
+        // Send error response via WebSocket
+        this.sendDeviceResponse(sessionId, request.id, null, error.message);
+      }
+    },
+
+    // Send response via WebSocket
+    sendDeviceResponse(sessionId, requestId, response, error) {
+      if (this.deviceWebSocket && this.deviceWSConnected) {
         try {
-          await fetch('https://data.dlux.io/api/device/respond', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              sessionId,
-              requestId: request.id,
-              response: null,
-              error: error.message
-            })
-          });
-        } catch (responseError) {
-          console.error('[NavVue] Failed to send error response:', responseError);
+          this.deviceWebSocket.send(JSON.stringify({
+            type: 'device_response',
+            sessionId: sessionId,
+            requestId: requestId,
+            response: response,
+            error: error
+          }));
+          console.log('[NavVue] Sent device response via WebSocket');
+        } catch (wsError) {
+          console.error('[NavVue] Failed to send WebSocket response:', wsError);
+          // Fallback to API if WebSocket fails
+          this.sendDeviceResponseAPI(sessionId, requestId, response, error);
         }
+      } else {
+        // Fallback to API if WebSocket not available
+        this.sendDeviceResponseAPI(sessionId, requestId, response, error);
+      }
+    },
+
+    // Fallback API response method
+    async sendDeviceResponseAPI(sessionId, requestId, response, error) {
+      try {
+        const { challenge, signature, pubKey, account } = await this.getCachedChallenge();
+        
+        await fetch('https://data.dlux.io/api/device/respond', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-account': account,
+            'x-challenge': challenge,
+            'x-pubkey': pubKey,
+            'x-signature': signature
+          },
+          body: JSON.stringify({
+            sessionId,
+            requestId,
+            response,
+            error
+          })
+        });
+        console.log('[NavVue] Sent device response via API fallback');
+      } catch (apiError) {
+        console.error('[NavVue] Failed to send API response:', apiError);
       }
     },
 
     showRemoteTransactionConfirmation(transaction, broadcast, deviceInfo) {
       return new Promise((resolve) => {
-        const opCount = transaction[1] ? transaction[1].length : 0;
+        // Extract transaction details for better display
+        const account = transaction[0];
+        const operations = transaction[1] || [];
+        const keyType = transaction[2] || 'posting';
+        const opCount = operations.length;
         const action = broadcast ? 'sign and broadcast' : 'sign (no broadcast)';
-        const deviceName = deviceInfo?.deviceName || 'Unknown device';
+        const deviceName = deviceInfo?.deviceName || deviceInfo?.username || 'Unknown device';
         
-        const confirmed = confirm(
-          `Device "${deviceName}" wants to ${action} a Hive transaction with ${opCount} operation(s).\n\nDo you want to allow this remote transaction?`
-        );
-        resolve(confirmed);
+        // Store request details and resolve function
+        this.remoteSigningRequest = {
+          type: 'transaction',
+          account,
+          operations,
+          keyType,
+          action,
+          broadcast,
+          deviceName,
+          opCount,
+          resolve
+        };
+        
+        this.showRemoteSigningModal = true;
       });
     },
 
     showRemoteChallengeConfirmation(challenge, keyType, deviceInfo) {
       return new Promise((resolve) => {
-        const deviceName = deviceInfo?.deviceName || 'Unknown device';
+        const deviceName = deviceInfo?.deviceName || deviceInfo?.username || 'Unknown device';
         
-        const confirmed = confirm(
-          `Device "${deviceName}" wants to sign a challenge with your ${keyType} key.\n\nChallenge: ${challenge.substring(0, 50)}${challenge.length > 50 ? '...' : ''}\n\nDo you want to allow this remote signing?`
-        );
-        resolve(confirmed);
+        // Store request details and resolve function
+        this.remoteSigningRequest = {
+          type: 'challenge',
+          challenge,
+          keyType: keyType || 'posting',
+          deviceName,
+          resolve
+        };
+        
+        this.showRemoteSigningModal = true;
       });
+    },
+
+    // Handle remote signing modal confirmation
+    handleRemoteSigningConfirm() {
+      if (this.remoteSigningRequest && this.remoteSigningRequest.resolve) {
+        this.remoteSigningRequest.resolve(true);
+      }
+      this.closeRemoteSigningModal();
+    },
+
+    // Handle remote signing modal cancellation
+    handleRemoteSigningCancel() {
+      if (this.remoteSigningRequest && this.remoteSigningRequest.resolve) {
+        this.remoteSigningRequest.resolve(false);
+      }
+      this.closeRemoteSigningModal();
+    },
+
+    // Close remote signing modal
+    closeRemoteSigningModal() {
+      this.showRemoteSigningModal = false;
+      this.remoteSigningRequest = null;
+    },
+
+    // Handle request timeout
+    handleRequestTimeout(requestId, data) {
+      this.timeoutRequest = {
+        requestId,
+        data,
+        deviceInfo: data.deviceInfo || { username: data.username }
+      };
+      this.showTimeoutModal = true;
+    },
+
+    // Handle timeout modal actions
+    handleTimeoutResend() {
+      // Resend the request if possible
+      console.log('Resending request:', this.timeoutRequest.requestId);
+      this.closeTimeoutModal();
+      // TODO: Implement resend logic
+    },
+
+    handleTimeoutReconnect() {
+      // Attempt to reconnect
+      console.log('Attempting to reconnect...');
+      this.disconnectDevice();
+      this.closeTimeoutModal();
+    },
+
+    handleTimeoutDismiss() {
+      this.closeTimeoutModal();
+    },
+
+    closeTimeoutModal() {
+      this.showTimeoutModal = false;
+      this.timeoutRequest = null;
     },
 
     async signChallenge(challenge, keyType) {
@@ -1097,15 +1224,6 @@ export default {
       return await this.signOnly(op);
     },
 
-    getPublicKey(keyType) {
-      // This would need to be implemented to return the actual public key
-      // For now, return a placeholder that would be replaced with actual implementation
-      if (this.PEN && this.decrypted.accounts[this.user]) {
-        // In a real implementation, you'd derive the public key from the private key
-        return 'STM' + '1'.repeat(50); // Placeholder
-      }
-      return null;
-    },
     // Benchmark PBKDF2 to find iteration count for target duration
     async benchmarkPBKDF2(targetDurationMs = 2000) {
       const testPassword = "benchmark-test-password";
@@ -2070,7 +2188,7 @@ export default {
         .then((r) => {
           console.log("signHeaders Return", r);
           if (r) {
-            localStorage.setItem(`${this.user}:auth`, `${obj.challenge}:${r}`);
+            localStorage.setItem(`${this.user}:auth`, `${obj.challenge}:${r.signature}`);
             obj.callbacks[0](`${obj.challenge}:${r}`, console.log("callback?"));
           }
         })
@@ -2130,7 +2248,21 @@ export default {
         });
     },
     sign(op) {
-      return new Promise((resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
+        // Check if we have a connected device for remote signing
+        if (this.deviceConnection && this.deviceConnection.isConnected && this.deviceConnection.role === 'requester') {
+          try {
+            console.log("Remote device signing", op);
+            const result = await this.requestRemoteSign(op);
+            resolve(result);
+            return;
+          } catch (error) {
+            console.error("Remote signing failed, falling back to local:", error);
+            // Fall through to local signing methods
+          }
+        }
+
+        // Local signing methods
         if (this.HKC) {
           console.log("HKCsign", op);
           this.HKCsign(op)
@@ -2153,21 +2285,35 @@ export default {
       });
     },
     signOnly(op) {
-      return new Promise((resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
+        // Check if we have a connected device for remote signing
+        if (this.deviceConnection && this.deviceConnection.isConnected && this.deviceConnection.role === 'requester') {
+          try {
+            console.log("Remote device signOnly", op);
+            const result = await this.requestRemoteSignChallenge(`${op[0]}:${op[1]}`, op[2]);
+            resolve({signature: result, pubKey: null}); // Remote device handles pubKey
+            return;
+          } catch (error) {
+            console.error("Remote signOnly failed, falling back to local:", error);
+            // Fall through to local signing methods
+          }
+        }
+
+        // Local signing methods
         if (this.HKC) {
           console.log("HKCsignOnly");
           this.HKCsignOnly(op)
-            .then((r) => resolve(r))
+            .then((r) => {console.log("HKCsignOnly", r); resolve(r)})
             .catch((e) => reject(e));
         } else if (this.PEN) {
           console.log({ op });
           this.PENsignOnly(op)
-            .then((r) => resolve(r))
+            .then((r) => {console.log("PENsignOnly", r); resolve(r)})
             .catch((e) => reject(e));
         } else if (this.HAS) {
           console.log({ op });
           this.HASsignOnly(op)
-            .then((r) => resolve(r))
+            .then((r) => {console.log("HASsignOnly", r); resolve(r)})
             .catch((e) => reject(e));
         } else {
           alert("This feature is not supported with Hive Signer");
@@ -2181,6 +2327,7 @@ export default {
         const now = new Date().getTime();
         if (now > this.HAS_.expire) {
           alert(`Hive Auth Session expired. Please login again.`);
+          rej(new Error('HAS session expired'));
           return;
         }
         const sign_data = {
@@ -2199,6 +2346,10 @@ export default {
         };
         this.HAS_.ws.send(JSON.stringify(payload));
         alert("Review and Sign on your PKSA App");
+        
+        // TODO: Implement proper HAS response handling to return {signature, pubKey}
+        // For now, reject with not implemented error
+        rej(new Error('HAS signOnly not fully implemented'));
       });
     },
     HKCsignOnly(op) {
@@ -2210,7 +2361,7 @@ export default {
           op[2],
           (sig) => {
             if (sig.error) rej(sig);
-            else res(sig.result);
+            else res({signature: sig.result, pubKey: sig.publicKey});
           }
         );
       });
@@ -2252,8 +2403,12 @@ export default {
         }
 
         // Get key from decrypted storage
-        var key = this.decrypted.accounts[this.user][op[2]];
-        if (!key || key.trim() === "") {
+        var privateKeyStr = this.decrypted.accounts[this.user][op[2]];
+        if (typeof privateKeyStr === 'object' && privateKeyStr.private) {
+          privateKeyStr = privateKeyStr.private;
+        }
+        
+        if (!privateKeyStr || privateKeyStr.trim() === "") {
           // Show modal to get the key and store the pending operation
           this.PENstatus = `Please enter your private ${op[2]} key`;
           this.pendingOperation = {
@@ -2267,7 +2422,7 @@ export default {
         }
 
         // Validate the key format
-        if (!key.startsWith('5') || key.length < 50) {
+        if (!privateKeyStr.startsWith('5') || privateKeyStr.length < 50) {
           this.PENstatus = `Invalid ${op[2]} key format`;
           rej(new Error(`Invalid private key format for ${op[2]}`));
           return;
@@ -2278,11 +2433,14 @@ export default {
           const bufferToSign = `${op[0]}:${op[1]}`;
           console.log("Signing buffer:", bufferToSign);
           
-          const privateKey = hiveTx.PrivateKey.from(key);
+          const privateKey = hiveTx.PrivateKey.from(privateKeyStr);
           const signature = privateKey.sign(Buffer.from(bufferToSign, 'utf-8'));
           
-          // Return just the signature like HKC does
-          res(signature.toString());
+          // Get public key from private key
+          const publicKey = privateKey.createPublic();
+          
+          // Return both signature and pubKey like HKC does
+          res({signature: signature.toString(), pubKey: publicKey.toString()});
         } catch (error) {
           console.error("Failed to sign buffer:", error);
           rej(error);
@@ -2889,24 +3047,37 @@ export default {
       return this.HAS || this.HKC || this.PEN || this.decrypted.pin;
     },
 
-    // Get public key for authentication
-    getPublicKey() {
-      if (this.HAS && this.HAS_.auth_key) {
-        return this.HAS_.auth_key;
-      } else if (this.HKC) {
-        // For Keychain, we need to extract the public key
-        // This is simplified - in practice you'd need the actual public key
-        return localStorage.getItem(`${this.user}_posting_key_public`);
-      } else if (this.PEN && this.decrypted.accounts[this.user]) {
-        // For PEN, extract from decrypted accounts
-        const account = this.decrypted.accounts[this.user];
-        return account.posting ? account.posting.public : null;
+
+    // Helper method to store encrypted data (for PEN public key caching)
+    storeDecryptedData() {
+      if (this.PIN && this.decrypted) {
+        try {
+          const encrypted = CryptoJS.AES.encrypt(
+            JSON.stringify(this.decrypted),
+            this.PIN
+          ).toString();
+          localStorage.setItem("PEN", encrypted);
+        } catch (error) {
+          console.warn('Error storing encrypted data:', error);
+        }
       }
-      return null;
     },
 
     // Sign challenge for authentication
-    async signChallenge(challenge) {
+    async signChallenge(challenge, keyType = 'posting') {
+      // Check if we have a connected device for remote signing
+      if (this.deviceConnection && this.deviceConnection.isConnected && this.deviceConnection.role === 'requester') {
+        try {
+          console.log("Remote device signChallenge", challenge, keyType);
+          const signature = await this.requestRemoteSignChallenge(challenge, keyType);
+          return {signature, pubKey: null}; // Remote device handles pubKey
+        } catch (error) {
+          console.error("Remote challenge signing failed, falling back to local:", error);
+          // Fall through to local signing methods
+        }
+      }
+
+      // Local signing methods
       if (this.HAS) {
         return await this.HASsignChallenge(challenge);
       } else if (this.HKC) {
@@ -2936,7 +3107,7 @@ export default {
             'Posting',
             (result) => {
               if (result.success) {
-                resolve(result.result);
+                resolve({signature: result.result, pubKey: result.publicKey});
               } else {
                 reject(new Error(result.message || 'Keychain signing failed'));
               }
@@ -2956,9 +3127,16 @@ export default {
 
       try {
         const hiveTx = await import('hive-tx');
-        const privateKey = this.decrypted.accounts[this.user].posting.private;
-        const signature = hiveTx.sign(challenge, privateKey);
-        return signature;
+        let privateKeyStr = this.decrypted.accounts[this.user].posting;
+        if (typeof privateKeyStr === 'object' && privateKeyStr.private) {
+          privateKeyStr = privateKeyStr.private;
+        }
+        
+        const privateKey = hiveTx.PrivateKey.from(privateKeyStr);
+        const signature = privateKey.sign(Buffer.from(challenge, 'utf-8'));
+        const publicKey = privateKey.createPublic();
+        
+        return {signature: signature.toString(), pubKey: publicKey.toString()};
       } catch (error) {
         throw new Error('PEN signing failed: ' + error.message);
       }
@@ -3074,8 +3252,7 @@ export default {
     async ignoreNotification(notificationId) {
       try {
         const challenge = Math.floor(Date.now() / 1000);
-        const signature = await this.signChallenge(challenge.toString());
-        const pubKey = this.getPublicKey();
+        const { signature, pubKey } = await this.signChallenge(challenge.toString());
         const response = await fetch(`https://data.dlux.io/api/onboarding/notifications/${notificationId}/ignore`, {
           method: 'POST',
           headers: {
@@ -3106,6 +3283,10 @@ export default {
         accounts: {}
       };
       this.user = "";
+      
+      // Reset device connection on logout
+      this.disconnectDevice();
+      
       this.$emit("logout", "");
       
       // Broadcast user change to connected wallets
@@ -3139,6 +3320,9 @@ export default {
 
       localStorage.setItem("user", this.user);
       this.$emit("login", this.user);
+      
+      // Restore device connection for this user
+      this.restoreDeviceConnection();
       
       // Broadcast user change to connected wallets
       this.broadcastUserChange();
@@ -3341,6 +3525,627 @@ export default {
         this.penManagementMode = 'overview';
       }
       this.showPenModal = true;
+    },
+
+    // Device Connection Methods
+    async createDevicePairing() {
+      if (!this.user) {
+        this.devicePairingError = "Please log in first";
+        return;
+      }
+
+      this.devicePairingLoading = true;
+      this.devicePairingError = "";
+      
+      try {
+        // Create signed challenge for authentication
+        const challenge = Math.floor(Date.now() / 1000).toString();
+        const { signature, pubKey } = await this.signChallenge(challenge);
+        
+        // Call backend API to create pairing code
+        const response = await fetch('https://data.dlux.io/api/device/pair', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-account': this.user,
+            'x-challenge': challenge,
+            'x-pubkey': pubKey,
+            'x-signature': signature
+          }
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to create pairing code');
+        }
+
+        const result = await response.json();
+        this.devicePairingCode = result.pairCode;
+        this.deviceConnection.sessionId = result.sessionId;
+        this.deviceConnection.role = 'signer';
+        this.deviceConnection.isConnected = true;
+        this.deviceConnection.pairCode = result.pairCode;
+        
+        // Set session expiry based on configured timeout
+        this.deviceSessionExpiry = Date.now() + (this.deviceConnectionTimeout * 60 * 1000);
+        
+        // Save connection state
+        this.saveDeviceConnection();
+        
+        // Connect WebSocket for real-time communication (with polling fallback)
+        this.connectDeviceWebSocket();
+        
+        // Set timeout to clear pairing code after 60 seconds if no connection
+        this.devicePairingTimeout = setTimeout(() => {
+          if (this.deviceConnection.role === 'signer' && !this.deviceConnection.connectedDevice) {
+            console.log('Device pairing timeout - no requester connected');
+            this.clearDevicePairingCode();
+          }
+        }, 60000); // 60 seconds
+        
+      } catch (error) {
+        console.error('[NavVue] Device pairing failed:', error);
+        this.devicePairingError = error.message;
+      } finally {
+        this.devicePairingLoading = false;
+      }
+    },
+
+    async connectToDevice() {
+      if (!this.deviceConnectCode || this.deviceConnectCode.length !== 6) {
+        this.deviceConnectError = "Please enter a valid 6-character pairing code";
+        return;
+      }
+
+      this.deviceConnectLoading = true;
+      this.deviceConnectError = "";
+      
+      try {
+        // Call backend API to connect to device
+        const response = await fetch('https://data.dlux.io/api/device/connect', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ pairCode: this.deviceConnectCode.toUpperCase() })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to connect to device');
+        }
+
+        const result = await response.json();
+        this.deviceConnection.sessionId = result.sessionId;
+        this.deviceConnection.role = 'requester';
+        this.deviceConnection.isConnected = true;
+        this.deviceConnection.connectedDevice = result.signerInfo;
+        this.deviceConnectCode = "";
+        
+        // Set session expiry based on configured timeout
+        this.deviceSessionExpiry = Date.now() + (this.deviceConnectionTimeout * 60 * 1000);
+        
+        // Save connection state
+        this.saveDeviceConnection();
+        
+        // Connect WebSocket for real-time communication (with polling fallback)
+        this.connectDeviceWebSocket();
+        
+        console.log('Successfully connected to device:', result.signerInfo);
+        
+      } catch (error) {
+        console.error('[NavVue] Device connection failed:', error);
+        this.deviceConnectError = error.message;
+      } finally {
+        this.deviceConnectLoading = false;
+      }
+    },
+
+    async disconnectDevice() {
+      if (!this.deviceConnection.isConnected) {
+        return;
+      }
+
+      try {
+        if (this.deviceConnection.sessionId) {
+          await fetch('https://data.dlux.io/api/device/disconnect', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ sessionId: this.deviceConnection.sessionId })
+          });
+        }
+      } catch (error) {
+        console.log('Disconnect error (non-fatal):', error);
+      } finally {
+        this.stopDevicePolling();
+        this.disconnectDeviceWebSocket();
+        this.resetDeviceConnection();
+      }
+    },
+
+    // Connect to WebSocket for real-time device communication
+    connectDeviceWebSocket() {
+      if (this.deviceWebSocket || !this.deviceConnection.isConnected) {
+        return;
+      }
+
+      // Check if session has expired
+      if (this.isDeviceSessionExpired()) {
+        console.log('Device session expired, cannot connect WebSocket');
+        this.resetDeviceConnection();
+        return;
+      }
+
+      try {
+        this.deviceWebSocket = new WebSocket('wss://data.dlux.io/ws/payment-monitor');
+        
+        this.deviceWebSocket.onopen = () => {
+          console.log('[NavVue] Device WebSocket connected');
+          this.deviceWSConnected = true;
+          
+          // Subscribe to device session events
+          this.deviceWebSocket.send(JSON.stringify({
+            type: 'device_subscribe',
+            sessionId: this.deviceConnection.sessionId,
+            userType: this.deviceConnection.role // 'signer' or 'requester'
+          }));
+          
+          // Stop polling since WebSocket is active
+          this.stopDevicePolling();
+        };
+        
+        this.deviceWebSocket.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            this.handleDeviceWebSocketMessage(data);
+          } catch (error) {
+            console.error('[NavVue] WebSocket message parse error:', error);
+          }
+        };
+        
+        this.deviceWebSocket.onclose = () => {
+          console.log('[NavVue] Device WebSocket disconnected');
+          this.deviceWSConnected = false;
+          this.deviceWebSocket = null;
+          
+          // Fallback to polling if we're still connected
+          if (this.deviceConnection.isConnected) {
+            console.log('[NavVue] Falling back to polling');
+            this.startDevicePolling();
+          }
+        };
+        
+        this.deviceWebSocket.onerror = (error) => {
+          console.error('[NavVue] Device WebSocket error:', error);
+          this.deviceWSConnected = false;
+        };
+        
+      } catch (error) {
+        console.error('[NavVue] Failed to connect WebSocket:', error);
+        // Fallback to polling
+        this.startDevicePolling();
+      }
+    },
+
+    // Handle WebSocket messages
+    handleDeviceWebSocketMessage(data) {
+      console.log('[NavVue] WebSocket message:', data);
+      
+      switch (data.type) {
+        case 'device_pairing_created':
+          console.log('Pairing code created via WebSocket:', data.pairCode);
+          break;
+          
+        case 'device_connected':
+          console.log('Device connected via WebSocket:', data.signerInfo);
+          if (this.deviceConnection.role === 'requester') {
+            this.deviceConnection.connectedDevice = data.signerInfo;
+            this.saveDeviceConnection();
+          }
+          break;
+          
+                 case 'device_signing_request':
+           console.log('New signing request via WebSocket:', data);
+           if (this.deviceConnection.role === 'signer') {
+             // Construct proper request object with all needed fields
+             const request = {
+               id: data.requestId,
+               type: data.requestType,
+               data: data.requestData,
+               deviceInfo: data.deviceInfo || { username: data.username }
+             };
+             this.handleIncomingDeviceRequest(request, this.deviceConnection.sessionId);
+           }
+           break;
+          
+        case 'device_signing_response':
+          console.log('Signing response via WebSocket:', data.response);
+          // This will be handled by the polling for remote result method
+          break;
+          
+        case 'device_disconnected':
+          console.log('Device disconnected via WebSocket');
+          this.resetDeviceConnection();
+          break;
+          
+        case 'device_session_expired':
+          console.log('Device session expired via WebSocket');
+          this.resetDeviceConnection();
+          break;
+          
+        case 'device_request_timeout':
+          console.log('Device request timeout via WebSocket:', data.requestId);
+          this.handleRequestTimeout(data.requestId, data);
+          break;
+          
+        case 'connected':
+          console.log('WebSocket connection confirmed:', data.message);
+          break;
+          
+        case 'device_session_status':
+          console.log('Device session status:', data.status);
+          // Update connection status if needed
+          if (data.status.connected === false) {
+            this.resetDeviceConnection();
+          }
+          break;
+          
+        default:
+          console.log('Unknown WebSocket message type:', data.type);
+      }
+    },
+
+    // Disconnect WebSocket
+    disconnectDeviceWebSocket() {
+      if (this.deviceWebSocket) {
+        this.deviceWebSocket.close();
+        this.deviceWebSocket = null;
+        this.deviceWSConnected = false;
+      }
+    },
+
+    startDevicePolling() {
+      // Don't start polling if WebSocket is connected
+      if (this.deviceWSConnected || this.devicePollingInterval) {
+        return;
+      }
+
+      console.log('[NavVue] Starting device polling as fallback');
+      this.devicePollingInterval = setInterval(async () => {
+        try {
+          await this.pollForDeviceRequests();
+        } catch (error) {
+          console.error('[NavVue] Device polling error:', error);
+        }
+      }, 6000); // Poll every 6 seconds (reduced from 2 seconds)
+    },
+
+    stopDevicePolling() {
+      if (this.devicePollingInterval) {
+        clearInterval(this.devicePollingInterval);
+        this.devicePollingInterval = null;
+      }
+    },
+
+    async pollForDeviceRequests() {
+      if (!this.deviceConnection.isConnected || this.deviceConnection.role !== 'signer') {
+        return;
+      }
+
+      // Check if session has expired
+      if (this.isDeviceSessionExpired()) {
+        console.log('Device session expired during polling');
+        this.resetDeviceConnection();
+        return;
+      }
+
+      try {
+        // Use cached challenge for authentication
+        const { challenge, signature, pubKey, account } = await this.getCachedChallenge();
+        
+        const response = await fetch(`https://data.dlux.io/api/device/requests?sessionId=${this.deviceConnection.sessionId}`, {
+          headers: {
+            'x-account': account,
+            'x-challenge': challenge,
+            'x-pubkey': pubKey,
+            'x-signature': signature
+          }
+        });
+
+        if (!response.ok) {
+          return; // Fail silently for polling
+        }
+
+        const result = await response.json();
+        
+        if (result.requests && result.requests.length > 0) {
+          for (const request of result.requests) {
+            await this.handleIncomingDeviceRequest(request, this.deviceConnection.sessionId);
+          }
+        }
+      } catch (error) {
+        console.error('[NavVue] Device polling failed:', error);
+      }
+    },
+
+    resetDeviceConnection() {
+      // Clear timeout if exists
+      if (this.devicePairingTimeout) {
+        clearTimeout(this.devicePairingTimeout);
+        this.devicePairingTimeout = null;
+      }
+      
+      this.deviceConnection = {
+        isConnected: false,
+        role: null,
+        sessionId: null,
+        pairCode: null,
+        connectedDevice: null
+      };
+      this.devicePairingCode = "";
+      this.devicePairingError = "";
+      this.deviceConnectCode = "";
+      this.deviceConnectError = "";
+      this.deviceSessionExpiry = 0;
+      
+      // Clear cached challenge
+      this.clearCachedChallenge();
+      
+      // Clear from localStorage
+      localStorage.removeItem('deviceConnection');
+    },
+
+    // Save device connection to localStorage
+    saveDeviceConnection() {
+      if (this.deviceConnection.isConnected) {
+        localStorage.setItem('deviceConnection', JSON.stringify({
+          ...this.deviceConnection,
+          user: this.user, // Associate with current user
+          timestamp: Date.now(),
+          sessionExpiry: this.deviceSessionExpiry,
+          connectionTimeout: this.deviceConnectionTimeout
+        }));
+      }
+    },
+
+    // Get or create cached challenge for authentication
+    async getCachedChallenge() {
+      const now = Date.now();
+      
+      // If challenge is still valid (expires after 5 minutes), reuse it
+      if (this.cachedChallenge && this.challengeExpiry > now) {
+        return this.cachedChallenge;
+      }
+      
+      // Create new challenge
+      const challenge = Math.floor(Date.now() / 1000).toString();
+      const { signature, pubKey } = await this.signChallenge(challenge);
+      
+      this.cachedChallenge = {
+        challenge,
+        signature,
+        pubKey,
+        account: this.user
+      };
+      
+      // Cache for 24 hours
+      this.challengeExpiry = now + (24 * 60 * 60 * 1000);
+      
+      return this.cachedChallenge;
+    },
+
+    // Clear cached challenge
+    clearCachedChallenge() {
+      this.cachedChallenge = null;
+      this.challengeExpiry = 0;
+    },
+
+    // Restore device connection from localStorage
+    restoreDeviceConnection() {
+      try {
+        const saved = localStorage.getItem('deviceConnection');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          
+          // Only restore if it's for the current user and session hasn't expired
+          const now = Date.now();
+          const sessionValid = !parsed.sessionExpiry || now < parsed.sessionExpiry;
+          
+          if (parsed.user === this.user && sessionValid) {
+            
+            this.deviceConnection = {
+              isConnected: parsed.isConnected,
+              role: parsed.role,
+              sessionId: parsed.sessionId,
+              pairCode: parsed.pairCode,
+              connectedDevice: parsed.connectedDevice
+            };
+            
+            // Restore session settings
+            this.deviceSessionExpiry = parsed.sessionExpiry || 0;
+            this.deviceConnectionTimeout = parsed.connectionTimeout || 60;
+            
+            // If we're a signer device, restart WebSocket connection
+            if (this.deviceConnection.isConnected && this.deviceConnection.role === 'signer') {
+              this.connectDeviceWebSocket();
+              console.log('Restored device connection as signer, reconnecting WebSocket');
+            }
+            
+            return true;
+          } else {
+            // Clear expired/invalid connection
+            localStorage.removeItem('deviceConnection');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to restore device connection:', error);
+        localStorage.removeItem('deviceConnection');
+      }
+      return false;
+    },
+
+    clearDevicePairingCode() {
+      // Clear the pairing code but keep connection if established
+      this.devicePairingCode = "";
+      this.deviceConnection.pairCode = null;
+      
+      // Clear timeout
+      if (this.devicePairingTimeout) {
+        clearTimeout(this.devicePairingTimeout);
+        this.devicePairingTimeout = null;
+      }
+      
+      // Only reset if we're a signer that never got a connection OR if session has expired
+      const now = Date.now();
+      const sessionExpired = this.deviceSessionExpiry && now > this.deviceSessionExpiry;
+      
+      if (sessionExpired) {
+        console.log('Device session expired, disconnecting');
+        this.resetDeviceConnection();
+      } else if (!this.deviceConnection.connectedDevice && this.deviceConnection.role === 'signer') {
+        console.log('Clearing pairing code due to timeout - no requester connected');
+        // Don't reset completely, just clear the pairing code
+        // Keep the signer session active for potential future connections
+      }
+    },
+
+    // Set device connection timeout based on use case
+    setDeviceConnectionTimeout(minutes) {
+      this.deviceConnectionTimeout = minutes;
+      
+      // Update session expiry if we have an active connection
+      if (this.deviceConnection.isConnected) {
+        this.deviceSessionExpiry = Date.now() + (minutes * 60 * 1000);
+        this.saveDeviceConnection();
+        console.log(`Device session timeout set to ${minutes} minutes`);
+      }
+    },
+
+    // Get recommended timeout options
+    getTimeoutOptions() {
+      return [
+        { label: 'Public/Shared Device (15 min)', value: 15 },
+        { label: 'Standard Session (1 hour)', value: 60 },
+        { label: 'Extended Session (4 hours)', value: 240 },
+        { label: 'All Day Session (24 hours)', value: 1440 }
+      ];
+    },
+
+    // Check if device session is expired
+    isDeviceSessionExpired() {
+      return this.deviceSessionExpiry && Date.now() > this.deviceSessionExpiry;
+    },
+
+    // Remote signing methods for device connections
+    async requestRemoteSign(transaction, options = {}) {
+      if (!this.deviceConnection.isConnected || this.deviceConnection.role !== 'requester') {
+        throw new Error('Not connected as requesting device');
+      }
+
+      try {
+        const response = await fetch('https://data.dlux.io/api/device/request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            sessionId: this.deviceConnection.sessionId,
+            type: 'sign-transaction',
+            data: { 
+              transaction: transaction,
+              broadcast: options.broadcast !== false 
+            },
+            timeout: options.timeout || 60000
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to send remote sign request');
+        }
+
+        const result = await response.json();
+        
+        // Poll for the result
+        return await this.pollForRemoteResult(result.requestId, options.timeout || 60000);
+      } catch (error) {
+        console.error('[NavVue] Remote sign request failed:', error);
+        throw error;
+      }
+    },
+
+    async requestRemoteSignChallenge(challenge, keyType = 'posting', options = {}) {
+      if (!this.deviceConnection.isConnected || this.deviceConnection.role !== 'requester') {
+        throw new Error('Not connected as requesting device');
+      }
+
+      try {
+        const response = await fetch('https://data.dlux.io/api/device/request', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            sessionId: this.deviceConnection.sessionId,
+            type: 'sign-challenge',
+            data: { challenge, keyType },
+            timeout: options.timeout || 60000
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Failed to send remote challenge request');
+        }
+
+        const result = await response.json();
+        
+        // Poll for the result
+        const remoteResult = await this.pollForRemoteResult(result.requestId, options.timeout || 60000);
+        return remoteResult.signature;
+      } catch (error) {
+        console.error('[NavVue] Remote sign challenge request failed:', error);
+        throw error;
+      }
+    },
+
+    async pollForRemoteResult(requestId, timeout = 60000) {
+      const startTime = Date.now();
+      const pollInterval = 1000; // Poll every second
+
+      return new Promise((resolve, reject) => {
+        const poll = async () => {
+          try {
+            if (Date.now() - startTime > timeout) {
+              reject(new Error('Remote signing timeout'));
+              return;
+            }
+
+            const response = await fetch(`https://data.dlux.io/api/device/result/${requestId}`);
+            
+            if (response.ok) {
+              const result = await response.json();
+              if (result.completed) {
+                if (result.error) {
+                  reject(new Error(result.error));
+                } else {
+                  resolve(result.data);
+                }
+                return;
+              }
+            }
+
+            // Continue polling
+            setTimeout(poll, pollInterval);
+          } catch (error) {
+            reject(error);
+          }
+        };
+
+        poll();
+      });
     },
 
     async handlePenDecrypt() {
@@ -4207,6 +5012,11 @@ export default {
     });
     this.getUser();
     this.getRecentUsers();
+    
+    // Restore device connection if available
+    if (this.user) {
+      this.restoreDeviceConnection();
+    }
     const ops = localStorage.getItem("pending");
     this.ops = ops ? JSON.parse(ops) : [];
     this.cleanOps();
@@ -4317,6 +5127,10 @@ export default {
     if (this._cleanup) {
       this._cleanup();
     }
+    
+    // Cleanup device connections
+    this.stopDevicePolling();
+    this.disconnectDeviceWebSocket();
   },
   computed: {
     avatar: {
@@ -4671,6 +5485,74 @@ export default {
               </div>
             </div>
 
+            <!-- Device Connection Section -->
+            <div class="bg-darker rounded p-3 mt-3" v-if="user">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="lead mb-0">
+                  <i class="fa-solid fa-mobile-screen me-2"></i>Connect Devices
+                </label>
+                <span v-if="deviceConnection.isConnected" class="badge bg-success">Connected</span>
+              </div>
+              
+              <!-- Connected Status -->
+              <div v-if="deviceConnection.isConnected" class="text-center">
+                <div class="text-success mb-2">
+                  <i class="fa-solid fa-circle-check me-2"></i>{{ deviceConnection.role === 'signer' ? 'Sharing wallet' : 'Using remote wallet' }}
+                </div>
+                <div v-if="deviceConnection.pairCode" class="mb-2">
+                  <div class="display-6 fw-bold text-primary">{{ deviceConnection.pairCode }}</div>
+                  <small class="text-white-50">Share this code with other devices</small>
+                </div>
+                <div v-if="deviceConnection.connectedDevice" class="mb-2">
+                  <small class="text-white-50">Connected to: {{ deviceConnection.connectedDevice.username || 'Remote device' }}</small>
+                </div>
+                <button type="button" class="btn btn-outline-danger btn-sm" @click="disconnectDevice()">
+                  <i class="fa-solid fa-unlink me-1"></i>Disconnect
+                </button>
+              </div>
+
+              <!-- Not Connected -->
+              <div v-if="!deviceConnection.isConnected">
+                <!-- Show 6-digit code if user is signed in -->
+                <div class="text-center mb-3">
+                  <button type="button" class="btn btn-primary btn-sm me-2" @click="createDevicePairing()" :disabled="devicePairingLoading">
+                    <span v-if="devicePairingLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    <i v-else class="fa-solid fa-share me-1"></i>Share Wallet
+                  </button>
+                  <small class="text-white-50 d-block mt-1">Generate code for other devices</small>
+                </div>
+
+                <div class="text-center border-top border-secondary pt-3">
+                  <div class="row g-2">
+                    <div class="col">
+                      <input type="text" 
+                             v-model="deviceConnectCode" 
+                             class="form-control form-control-sm bg-dark border-dark text-light text-center" 
+                             placeholder="Enter 6-digit code" 
+                             maxlength="6" 
+                             style="letter-spacing: 0.2em; font-weight: bold;"
+                             @input="deviceConnectCode = deviceConnectCode.replace(/[^A-Z0-9]/gi, '').toUpperCase()">
+                    </div>
+                    <div class="col-auto">
+                      <button type="button" class="btn btn-info btn-sm" @click="connectToDevice()" :disabled="deviceConnectLoading || !deviceConnectCode">
+                        <span v-if="deviceConnectLoading" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                        <i v-else class="fa-solid fa-link me-1"></i>Connect
+                      </button>
+                    </div>
+                  </div>
+                  <small class="text-white-50 d-block mt-1">Connect to remote wallet</small>
+                </div>
+
+                <!-- Error Messages -->
+                <div v-if="devicePairingError" class="alert alert-danger alert-sm mt-2 mb-0 small">
+                  {{ devicePairingError }}
+                </div>
+                <div v-if="deviceConnectError" class="alert alert-danger alert-sm mt-2 mb-0 small">
+                  {{ deviceConnectError }}
+                </div>
+              </div>
+            </div>
+
              <a class="mx-auto bg-card btn btn-danger text-dark mt-2 rounded-pill no-decoration" href="/qr" >Create A New Hive Account</a>
           </div>
           <!-- add user-->
@@ -4899,6 +5781,8 @@ export default {
                  </button>
                </div>
             </div>
+
+
             
             <!-- Add Account Button -->
             <div class="text-center mb-4">
@@ -5161,6 +6045,170 @@ export default {
           </button>
           <button type="button" class="btn btn-primary" @click="handleTransactionConfirm()">
             <i class="fa-solid fa-check me-1"></i>Confirm & Sign
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Remote Signing Modal -->
+  <div class="modal fade" id="remoteSigningModal" tabindex="-1" aria-labelledby="remoteSigningModalLabel" aria-hidden="true" v-show="showRemoteSigningModal" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title" id="remoteSigningModalLabel">
+            <i class="fa-solid fa-wifi me-2"></i>Remote Signing Request
+          </h5>
+          <button type="button" class="btn-close btn-close-dark" @click="handleRemoteSigningCancel()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-info">
+            <i class="fa-solid fa-info-circle me-2"></i>
+            <strong>Remote Device:</strong> {{ remoteSigningRequest?.deviceName || 'Unknown device' }}
+          </div>
+          
+          <div v-if="remoteSigningRequest?.type === 'transaction'">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label small text-white-50">Account</label>
+                <div class="d-flex align-items-center">
+                  <img :src="'https://images.hive.blog/u/' + remoteSigningRequest.account + '/avatar'" 
+                       class="rounded-circle me-2" width="32" height="32">
+                  <strong>@{{ remoteSigningRequest.account }}</strong>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small text-white-50">Key Type</label>
+                <div>
+                  <span class="badge bg-info text-capitalize">{{ remoteSigningRequest.keyType }}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label small text-white-50">Action</label>
+                <div>
+                  <span class="badge" :class="remoteSigningRequest.broadcast ? 'bg-success' : 'bg-warning text-dark'">
+                    {{ remoteSigningRequest.action }}
+                  </span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small text-white-50">Operations</label>
+                <div>
+                  <span class="badge bg-primary">{{ remoteSigningRequest.opCount }} operation(s)</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label small text-white-50">Transaction Details</label>
+              <div class="card bg-dark border-secondary">
+                <div class="card-body p-3">
+                  <div v-for="(operation, index) in remoteSigningRequest.operations" :key="index" class="mb-2 last:mb-0">
+                    <div class="d-flex align-items-start">
+                      <span class="badge bg-primary me-2 mt-1">{{ index + 1 }}</span>
+                      <div class="flex-grow-1">
+                        <div class="fw-bold text-info">{{ operation[0] }}</div>
+                        <div class="small text-white-50">
+                          <pre class="mb-0 small">{{ JSON.stringify(operation[1], null, 2) }}</pre>
+                        </div>
+                      </div>
+                    </div>
+                    <hr v-if="index < remoteSigningRequest.operations.length - 1" class="my-2">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div v-if="remoteSigningRequest?.type === 'challenge'">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label small text-white-50">Key Type</label>
+                <div>
+                  <span class="badge bg-info text-capitalize">{{ remoteSigningRequest.keyType }}</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small text-white-50">Challenge Length</label>
+                <div>
+                  <span class="badge bg-secondary">{{ remoteSigningRequest.challenge?.length || 0 }} characters</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label small text-white-50">Challenge Data</label>
+              <div class="card bg-dark border-secondary">
+                <div class="card-body p-3">
+                  <code class="text-warning">{{ remoteSigningRequest.challenge }}</code>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="alert alert-warning">
+            <i class="fa-solid fa-exclamation-triangle me-2"></i>
+            <strong>Security Notice:</strong> This request is coming from a remote device. 
+            Please verify the details carefully before proceeding.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" @click="handleRemoteSigningCancel()">
+            <i class="fa-solid fa-times me-1"></i>Deny
+          </button>
+          <button type="button" class="btn btn-warning text-dark" @click="handleRemoteSigningConfirm()">
+            <i class="fa-solid fa-check me-1"></i>Approve & Sign
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeout Modal -->
+  <div class="modal fade" id="timeoutModal" tabindex="-1" aria-labelledby="timeoutModalLabel" aria-hidden="true" v-show="showTimeoutModal" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-danger">
+          <h5 class="modal-title" id="timeoutModalLabel">
+            <i class="fa-solid fa-clock me-2"></i>Request Timeout
+          </h5>
+          <button type="button" class="btn-close btn-close-white" @click="handleTimeoutDismiss()" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-warning">
+            <i class="fa-solid fa-exclamation-triangle me-2"></i>
+            The remote device did not respond to the signing request in time.
+          </div>
+          
+          <div v-if="timeoutRequest">
+            <div class="mb-3">
+              <label class="form-label small text-white-50">Device</label>
+              <div>{{ timeoutRequest.deviceInfo?.deviceName || timeoutRequest.deviceInfo?.username || 'Unknown device' }}</div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label small text-white-50">Request ID</label>
+              <div><code class="small">{{ timeoutRequest.requestId }}</code></div>
+            </div>
+          </div>
+          
+          <p class="small text-white-50">
+            The device may be disconnected or experiencing connection issues. 
+            You can try to resend the request or reconnect to the device.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" @click="handleTimeoutDismiss()">
+            <i class="fa-solid fa-times me-1"></i>Dismiss
+          </button>
+          <button type="button" class="btn btn-warning" @click="handleTimeoutReconnect()">
+            <i class="fa-solid fa-arrows-rotate me-1"></i>Reconnect
+          </button>
+          <button type="button" class="btn btn-primary d-none" @click="handleTimeoutResend()">
+            <i class="fa-solid fa-paper-plane me-1"></i>Resend
           </button>
         </div>
       </div>
