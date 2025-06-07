@@ -1,4 +1,4 @@
-this.version = "2025.06.07.11";
+this.version = "2025.06.07.12";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.07.11",
-  "generated": "2025-06-07T17:11:39Z",
+  "version": "2025.06.07.12",
+  "generated": "2025-06-07T17:21:22Z",
   "files": {
-    "/img/ragnarok_sealed.png": {
-      "checksum": "a7558e86491320184e56d6a8f909d695",
-      "size": 74886,
-      "priority": "important"
-    },
     "/img/rar-file-type-svgrepo-com.svg": {
       "checksum": "f02c8bfdfde0a153430b1f22ba611b5f",
       "size": 1835,
@@ -1046,7 +1041,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "e5f304c5794ce9d89d58da589c6661dd",
+      "checksum": "b07a0e3c8b7edda644b468373c843183",
       "size": 36317,
       "priority": "important"
     },
@@ -1121,8 +1116,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "d6048457b86920c9e95ff2e4d6f42732",
-      "size": 196722,
+      "checksum": "f88621583b24ed48058c72cb7156d46a",
+      "size": 196380,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1236,7 +1231,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "6fecf5d52ae667f1d4e16ea6da982610",
+      "checksum": "f99c09c0815c47ee0d318b0f9a9e79ee",
       "size": 7300,
       "priority": "important"
     },
@@ -1309,11 +1304,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/java/java.js": {
-      "checksum": "4458f51c0a0084ac4d53ccaca469472b",
-      "size": 4044,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/javascript/javascript.js": {
       "checksum": "8f2950e482448ab0487d9a1ebd309eef",
