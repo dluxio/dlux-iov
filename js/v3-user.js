@@ -4440,21 +4440,48 @@ function buyNFT(setname, uid, price, type, callback){
         console.log('Limited to 3 resolutions to reduce memory usage:', bitrates);
       }
       console.log('Video analysis complete, starting transcoding...');
-            // Process resolutions sequentially to avoid memory issues with FFmpeg.wasm
-      this.videoMsg = 'Starting multi-resolution transcoding...';
+            // Use single FFmpeg command approach for better memory efficiency
+      this.videoMsg = 'Building optimized transcoding command...';
       
       // Reset hashing progress and start internal progress monitoring
       this.resetHashingProgress();
       const progressInterval = this.startInternalProgressMonitor(bitrates.length);
       
-      const successful = [];
-      const failed = [];
+      // Build command based on your working structure
+      var commands = [
+        // input filename
+        "-i", name,
+        // pixel format for compatibility
+        "-pix_fmt", "yuv420p",
+        // 10 second segments
+        "-segment_time", "10",
+        // max muxing queue size
+        '-max_muxing_queue_size', '1024',
+        // hls settings
+        '-hls_time', "5",
+        '-hls_list_size', "0",
+        // profile
+        '-profile:v', 'main',
+        // audio codec and bitrate
+        "-acodec", "aac", "-b:a", "256k"
+      ];
+      
+      // Add codec-specific options
+      if (qsv) {
+        codec = "h264_qsv";
+        commands.push('-preset', 'slow', '-look_ahead', '1', '-global_quality', '36', "-c:v", codec);
+      } else {
+        commands.push('-crf', '26', '-preset', 'fast', "-c:v", codec);
+      }
+      
+      // Build complex filter for multiple resolutions in single pass
+      let filterComplex = '';
+      let outputMaps = [];
       
       for (var i = 0; i < bitrates.length; i++) {
         const resHeight = parseInt(bitrates[i].split('x')[1]);
-        this.videoMsg = `Transcoding ${resHeight}p (${i + 1}/${bitrates.length})...`;
         
-        // Calculate target dimensions maintaining aspect ratio
+        // Calculate proper scale filter for portrait/landscape
         let scaleFilter;
         if (isPortrait) {
           // For portrait videos, scale by width and let height adjust
@@ -4467,77 +4494,42 @@ function buyNFT(setname, uid, price, type, callback){
           console.log(`🖥️ Landscape scaling: ${resHeight}p (target height)`);
         }
         
-        let resCommands = [
-          "-i", name,
-          "-pix_fmt", "yuv420p",
-          "-max_muxing_queue_size", "1024",
-          "-profile:v", "main",
-          "-start_number", "0",
-          "-vf", scaleFilter,
-          "-c:a", "aac", "-b:a", "256k"
-        ];
+        // Add to filter complex
+        filterComplex += `[0:v]${scaleFilter}[v${i}];`;
         
-        // Add codec-specific options
-        if (qsv) {
-          resCommands.push("-c:v", "h264_qsv", "-preset", "slow", "-look_ahead", "1", "-global_quality", "36");
-        } else {
-          resCommands.push("-c:v", "libx264", "-crf", "26", "-preset", "fast");
-        }
-        
-        // Add HLS-specific options
-        resCommands.push(
-          "-f", "hls",
-          "-hls_time", "5",
-          "-hls_list_size", "0",
-          "-hls_segment_filename", `${resHeight}p_%03d.ts`,
-          "-hls_flags", "independent_segments",
-          `${resHeight}p_index.m3u8`
+        // Add output mapping for this resolution
+        outputMaps.push(
+          `-map`, `[v${i}]`, `-map`, `0:a`,
+          "-f", "segment", 
+          `-segment_format`, 'mpegts',
+          "-segment_list_type", "m3u8", 
+          "-segment_list", `${resHeight}p_index.m3u8`,
+          `${resHeight}p_%03d.ts`
         );
-        
-        console.log(`Starting ${resHeight}p transcoding...`);
-        const resStartTime = Date.now();
-        
-        try {
-          await ffmpeg.exec(resCommands);
-          const resEndTime = Date.now();
-          const resTime = Math.round((resEndTime - resStartTime) / 1000);
-          console.log(`✅ ${resHeight}p transcoding complete in ${resTime}s`);
-          successful.push(resHeight);
-          
-          // Update progress message
-          this.videoMsg = `✅ ${resHeight}p complete (${successful.length}/${bitrates.length}) - ${resTime}s`;
-        } catch (err) {
-          console.error(`❌ ${resHeight}p transcoding failed:`, err);
-          failed.push({ height: resHeight, error: err.message || 'Unknown error' });
-          
-          // Update progress message with failure info
-          this.videoMsg = `❌ ${resHeight}p failed (${successful.length}/${bitrates.length} successful)`;
-          
-          // If this is a memory error, try to continue with fewer resolutions
-          if (err.message && err.message.includes('memory')) {
-            console.warn(`🧠 Memory issue detected, skipping remaining resolutions to preserve what we have`);
-            this.videoMsg = `🧠 Memory limit reached, stopping with ${successful.length} resolutions`;
-            break;
-          }
-        }
-        
-        // Small delay between resolutions to help with memory management
-        if (i < bitrates.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-          this.videoMsg = `Preparing ${bitrates[i + 1].split('x')[1]}p transcoding...`;
-        }
       }
       
-      if (successful.length === 0) {
-        console.error('❌ All transcoding failed');
-        this.videoMsg = 'All transcoding failed. Please try again with a smaller video file.';
+      // Remove trailing semicolon
+      filterComplex = filterComplex.slice(0, -1);
+      
+      // Add complex filter and outputs to command
+      commands.push('-filter_complex', filterComplex);
+      commands.push(...outputMaps);
+      
+      console.log('📋 Final FFmpeg command:', commands);
+      this.videoMsg = 'Starting single-pass multi-resolution transcoding...';
+      
+      console.time('exec');
+      
+      try {
+        await ffmpeg.exec(commands);
+        console.timeEnd('exec');
+        console.log('✅ All resolutions transcoded successfully in single pass!');
+        this.videoMsg = `🎉 All ${bitrates.length} resolutions transcoded successfully! (${bitrates.map(b => parseInt(b.split('x')[1]) + 'p').join(', ')})`;
+      } catch (err) {
+        console.timeEnd('exec');
+        console.error('❌ Multi-resolution transcoding failed:', err);
+        this.videoMsg = 'Transcoding failed. Please try again with a smaller video file.';
         return;
-      } else if (failed.length > 0) {
-        console.warn(`⚠️ Some resolutions failed (${failed.length}/${bitrates.length}):`, failed);
-        this.videoMsg = `✅ Transcoding completed: ${successful.length}/${bitrates.length} resolutions successful (${successful.map(h => h + 'p').join(', ')})`;
-      } else {
-        console.log('✅ All resolutions transcoded successfully:', successful);
-        this.videoMsg = `🎉 All ${successful.length} resolutions transcoded successfully! (${successful.map(h => h + 'p').join(', ')})`;
       }
       
       console.time('exec');
