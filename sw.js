@@ -1,4 +1,4 @@
-this.version = "2025.06.07.16";
+this.version = "2025.06.08.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.07.16",
-  "generated": "2025-06-07T20:32:30Z",
+  "version": "2025.06.08.1",
+  "generated": "2025-06-07T23:18:31Z",
   "files": {
-    "/img/sting_white.svg": {
-      "checksum": "b3fb2506f7d51b38fe814243567109cc",
-      "size": 2374,
-      "priority": "important"
-    },
     "/img/tokens/broca_icon.png": {
       "checksum": "87aac077c4cfdf4bd02cbbbef8a4c3ba",
       "size": 33591,
@@ -831,8 +826,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/filesvue-dd.js": {
-      "checksum": "23f8989d1093455129851ec4909295ec",
-      "size": 268000,
+      "checksum": "a8ddcde9872f9889965a4e3e03ec2d48",
+      "size": 268745,
       "priority": "important"
     },
     "/js/filesvue.js": {
@@ -1021,7 +1016,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "7ae2669bac02fa267ea306005ecb7bc0",
+      "checksum": "790c03f1e1e18aa374f3325b02212669",
       "size": 36317,
       "priority": "important"
     },
@@ -1096,8 +1091,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "f88621583b24ed48058c72cb7156d46a",
-      "size": 196380,
+      "checksum": "aaac139a06976d62dfa988338a1d04da",
+      "size": 198216,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1211,7 +1206,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "117dcb316d8b134da75fbfd98240ee6e",
+      "checksum": "eec53dd02d33d6278e24760655051aad",
       "size": 7300,
       "priority": "important"
     },
@@ -1284,11 +1279,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/lexon/lexon.js": {
-      "checksum": "84e5717bbd776f7141b79675d92a115d",
-      "size": 3262,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/liquid/liquid.js": {
       "checksum": "f187c384efa66db9ef56dc7abb1862c2",
