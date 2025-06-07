@@ -4474,10 +4474,7 @@ function buyNFT(setname, uid, price, type, callback){
         commands.push('-crf', '26', '-preset', 'fast', "-c:v", codec);
       }
       
-      // Build complex filter for multiple resolutions in single pass
-      let filterComplex = '';
-      let outputMaps = [];
-      
+      // Add multiple resolution outputs using your original working approach
       for (var i = 0; i < bitrates.length; i++) {
         const resHeight = parseInt(bitrates[i].split('x')[1]);
         
@@ -4494,26 +4491,17 @@ function buyNFT(setname, uid, price, type, callback){
           console.log(`🖥️ Landscape scaling: ${resHeight}p (target height)`);
         }
         
-        // Add to filter complex
-        filterComplex += `[0:v]${scaleFilter}[v${i}];`;
-        
-        // Add output mapping for this resolution
-        outputMaps.push(
-          `-map`, `[v${i}]`, `-map`, `0:a`,
+        // Add segment output for this resolution (using your working format)
+        commands.push(
           "-f", "segment", 
+          `${resHeight}p_%03d.ts`, 
           `-segment_format`, 'mpegts',
+          // m3u8 playlist
           "-segment_list_type", "m3u8", 
-          "-segment_list", `${resHeight}p_index.m3u8`,
-          `${resHeight}p_%03d.ts`
+          "-segment_list", `${resHeight}p_index.m3u8`
         );
+        commands.push('-vf', scaleFilter);
       }
-      
-      // Remove trailing semicolon
-      filterComplex = filterComplex.slice(0, -1);
-      
-      // Add complex filter and outputs to command
-      commands.push('-filter_complex', filterComplex);
-      commands.push(...outputMaps);
       
       console.log('📋 Final FFmpeg command:', commands);
       this.videoMsg = 'Starting single-pass multi-resolution transcoding...';
