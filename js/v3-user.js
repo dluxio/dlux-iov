@@ -4445,7 +4445,8 @@ function buyNFT(setname, uid, price, type, callback){
       
       // Reset hashing progress and start internal progress monitoring
       this.resetHashingProgress();
-      const progressInterval = this.startInternalProgressMonitor(bitrates.length);
+      // Disabled independent progress monitor - causes confusion
+      // const progressInterval = this.startInternalProgressMonitor(bitrates.length);
       
       // Use separate FFmpeg executions for each resolution to ensure all playlists are generated
       this.videoMsg = 'Starting multi-resolution transcoding...';
@@ -4497,8 +4498,9 @@ function buyNFT(setname, uid, price, type, callback){
         // Add scale filter
         commands.push('-vf', scaleFilter);
         
-        // Add HLS output for this resolution (more reliable than segment)
+        // Add output parameters  
         commands.push(
+          "-f", "hls",
           "-hls_segment_filename", `${resHeight}p_%03d.ts`,
           `${resHeight}p_index.m3u8`
         );
@@ -4509,33 +4511,55 @@ function buyNFT(setname, uid, price, type, callback){
           console.time(`exec-${resHeight}p`);
           console.log(`🎬 Starting ${resHeight}p transcoding...`);
           
-          // Set up progress monitoring for this specific resolution
-          const startTime = Date.now();
-          let lastFileCount = 0;
+          // Enable FFmpeg logging to see what's going wrong
+          await ffmpeg.exec(['-loglevel', 'error']);
           
-          // Monitor progress during execution
-          const progressMonitor = setInterval(async () => {
-            try {
-              const files = await ffmpeg.listDir("/");
-              const currentSegments = files.filter(f => f.name.startsWith(`${resHeight}p_`) && f.name.endsWith('.ts'));
-              const currentPlaylist = files.filter(f => f.name === `${resHeight}p_index.m3u8`);
-              
-              if (currentSegments.length > lastFileCount) {
-                console.log(`📊 ${resHeight}p progress: ${currentSegments.length} segments, playlist: ${currentPlaylist.length > 0}`);
-                lastFileCount = currentSegments.length;
-              }
-            } catch (e) {
-              // Ignore errors during progress monitoring
-            }
-          }, 2000);
+          // Check if input file exists first
+          const inputFiles = await ffmpeg.listDir("/");
+          const inputExists = inputFiles.some(f => f.name === name);
+          console.log(`📁 Input file "${name}" exists: ${inputExists}`);
+          if (!inputExists) {
+            console.error(`❌ Input file "${name}" not found in virtual filesystem`);
+            console.log('Available files:', inputFiles.map(f => f.name));
+            this.videoMsg = `Input file not found. Please try uploading again.`;
+            return;
+          }
           
+          // Start with a very simple test command to see if basic transcoding works
+          const testCommand = [
+            "-i", name,
+            "-t", "10", // Only process first 10 seconds for testing
+            "-c:v", "libx264", 
+            "-preset", "ultrafast", // Fastest preset
+            "-crf", "30", // Higher CRF for speed
+            "-c:a", "aac",
+            "-vf", scaleFilter,
+            "-f", "mp4",
+            `test_${resHeight}p.mp4`
+          ];
+          
+          console.log(`🧪 Testing basic transcoding for ${resHeight}p:`, testCommand);
+          await ffmpeg.exec(testCommand);
+          
+          // Check if test file was created
+          const testFiles = await ffmpeg.listDir("/");
+          const testFileExists = testFiles.some(f => f.name === `test_${resHeight}p.mp4`);
+          console.log(`🧪 Test file created: ${testFileExists}`);
+          
+          if (!testFileExists) {
+            console.error(`❌ Basic transcoding test failed for ${resHeight}p`);
+            this.videoMsg = `Transcoding test failed. The video format may not be supported.`;
+            return;
+          }
+          
+          // If test worked, try the actual HLS command
+          console.log(`✅ Test passed, running actual HLS command for ${resHeight}p`);
           await ffmpeg.exec(commands);
-          clearInterval(progressMonitor);
           
           console.timeEnd(`exec-${resHeight}p`);
           
           // Wait a moment for filesystem to settle
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 500));
           
           // Verify that the playlist was created
           const files = await ffmpeg.listDir("/");
@@ -4544,42 +4568,40 @@ function buyNFT(setname, uid, price, type, callback){
           
           console.log(`📊 ${resHeight}p verification: playlist=${playlistExists}, segments=${segmentFiles.length}`);
           
-          if (!playlistExists && segmentFiles.length === 0) {
-            console.warn(`⚠️ ${resHeight}p transcoding failed - no output files. Trying alternative approach...`);
+          if (!playlistExists) {
+            console.warn(`⚠️ ${resHeight}p HLS failed, trying simpler approach...`);
             
-            // Use segment format instead of HLS
-            const altCommands = [
+            // Try the most basic segment approach
+            const simpleCommands = [
               "-i", name,
+              "-c:v", "libx264", "-preset", "fast",
+              "-c:a", "aac",
               "-vf", scaleFilter,
-              "-c:v", "libx264", "-preset", "fast", "-crf", "26",
-              "-c:a", "aac", "-b:a", "256k",
-              "-f", "segment",
-              "-segment_time", "5",
-              "-segment_list", `${resHeight}p_index.m3u8`,
-              "-segment_list_type", "m3u8",
-              `${resHeight}p_%03d.ts`
+              "-t", "60", // Limit to 60 seconds to avoid memory issues
+              "-hls_time", "10",
+              "-hls_list_size", "0",
+              `${resHeight}p_index.m3u8`
             ];
-            console.log(`🔄 Alternative command for ${resHeight}p:`, altCommands);
-            await ffmpeg.exec(altCommands);
+            console.log(`🔄 Simple retry for ${resHeight}p:`, simpleCommands);
+            await ffmpeg.exec(simpleCommands);
             
-            // Wait and verify alternative approach
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Check again
             const retryFiles = await ffmpeg.listDir("/");
             const retryPlaylistExists = retryFiles.some(f => f.name === `${resHeight}p_index.m3u8`);
-            const retrySegmentFiles = retryFiles.filter(f => f.name.startsWith(`${resHeight}p_`) && f.name.endsWith('.ts'));
-            console.log(`📊 ${resHeight}p alternative result: playlist=${retryPlaylistExists}, segments=${retrySegmentFiles.length}`);
+            console.log(`📊 ${resHeight}p simple retry result: playlist=${retryPlaylistExists}`);
             
-            if (!retryPlaylistExists && retrySegmentFiles.length === 0) {
-              console.error(`❌ ${resHeight}p transcoding completely failed`);
-              this.videoMsg = `Transcoding failed at ${resHeight}p. Please try again.`;
+            if (!retryPlaylistExists) {
+              console.error(`❌ All approaches failed for ${resHeight}p`);
+              this.videoMsg = `Transcoding failed at ${resHeight}p. Please try with a shorter video.`;
               return;
             }
           }
           
           console.log(`✅ ${resHeight}p transcoding completed successfully!`);
         } catch (err) {
-          console.error(`❌ ${resHeight}p transcoding failed:`, err);
-          this.videoMsg = `Transcoding failed at ${resHeight}p. Please try again with a smaller video file.`;
+          console.error(`❌ ${resHeight}p transcoding failed with error:`, err);
+          console.error('Error details:', err.message, err.stack);
+          this.videoMsg = `Transcoding failed at ${resHeight}p: ${err.message}`;
           return;
         }
              }
@@ -4607,10 +4629,7 @@ function buyNFT(setname, uid, price, type, callback){
        console.log('✅ All resolutions transcoded and verified successfully!');
        this.videoMsg = `🎉 All ${bitrates.length} resolutions transcoded successfully! (${bitrates.map(b => parseInt(b.split('x')[1]) + 'p').join(', ')})`;
        
-       // Clean up progress monitoring after transcoding completes
-       if (progressInterval) {
-         clearInterval(progressInterval);
-       }
+       // Progress monitoring cleanup no longer needed
       this.videoMsg = 'Transcoding complete! Preparing files for upload...';
       
       // Non-blocking contract fetch - don't let this interrupt transcoding
