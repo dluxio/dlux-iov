@@ -4395,70 +4395,87 @@ function buyNFT(setname, uid, price, type, callback){
       
       const { name } = event.target.files[0];
       await ffmpeg.writeFile(name, await fetchFile(event.target.files[0]));
-      var codec = "libx264"
-      var commands = [
-        // input filename
-        "-i", name,
-        // pixel format for compatibility
-        "-pix_fmt", "yuv420p",
-        // 10 second segments
-        "-segment_time", "10",
-        // max muxing queue size
-        '-max_muxing_queue_size', '1024',
-        // hls settings
-        '-hls_time', "5",
-        '-hls_list_size', "0",
-        // Start segment numbering at 0
-        "-start_number", "0",
-        // Add flags for independent segments
-        "-hls_flags", "independent_segments",
-        // profile
-        '-profile:v', 'main',
-        // audio codec and bitrate
-        "-acodec", "aac", "-b:a", "256k",
-        // write to files by index
-        //"-f", "segment", "output%03d.mp4", 
-        //`-segment_format`, 'mpegts',
-        // m3u8 playlist
-        //"-segment_list_type", "m3u8", "-segment_list", "index.m3u8"
-      ]
-      await ffmpeg.exec([
-        "-encoders"]
-      )
-      await ffmpeg.exec([
-        "-i", name]
-      )
-      // add options based on availible encoders
-      if (qsv) {
-        codec = "h264_qsv"
-        commands.push('-preset', 'slow', '-look_ahead', '1', '-global_quality', '36', "-c", codec)
-      } else {
-        commands.push('-crf', '26', '-preset', 'fast', "-c", codec)
-      }
-      for (var i = 0; i < bitrates.length; i++) {
-        commands.push("-f", "segment", `${bitrates[i].split('x')[1]}p_%03d.ts`, `-segment_format`, 'mpegts',
-          // m3u8 playlist
-          "-segment_list_type", "m3u8", "-segment_list", `${bitrates[i].split('x')[1]}p_index.m3u8`)
-        commands.push('-vf', `scale=-1:${parseInt(bitrates[i].split('x')[1])}`)
-      }
-      this.videoMsg = 'Starting video transcoding...';
+      var codec = "libx264";
       
-              // Reset hashing progress and start internal progress monitoring
-        this.resetHashingProgress();
-        this.videoMsg = 'Transcoding in progress...';
-        const progressInterval = this.startInternalProgressMonitor(bitrates.length);
+      await ffmpeg.exec(["-encoders"]);
+      await ffmpeg.exec(["-i", name]);
+      // Since FFmpeg.wasm doesn't handle complex multi-output well, we'll process each resolution separately
+      // This ensures compatibility and proper HLS segment generation
+      
+      this.videoMsg = 'Starting multi-resolution transcoding...';
+      const resolutionPromises = [];
+      
+      for (var i = 0; i < bitrates.length; i++) {
+        const height = parseInt(bitrates[i].split('x')[1]);
+        let resCommands = [
+          "-i", name,
+          "-pix_fmt", "yuv420p",
+          "-max_muxing_queue_size", "1024",
+          "-profile:v", "main",
+          "-start_number", "0",
+          "-vf", `scale=-1:${height}`,
+          "-c:a", "aac", "-b:a", "256k"
+        ];
+        
+        // Add codec-specific options
+        if (qsv) {
+          resCommands.push("-c:v", "h264_qsv", "-preset", "slow", "-look_ahead", "1", "-global_quality", "36");
+        } else {
+          resCommands.push("-c:v", "libx264", "-crf", "26", "-preset", "fast");
+        }
+        
+        // Add HLS-specific options
+        resCommands.push(
+          "-f", "hls",
+          "-hls_time", "5",
+          "-hls_list_size", "0",
+          "-hls_segment_filename", `${height}p_%03d.ts`,
+          "-hls_flags", "independent_segments",
+          `${height}p_index.m3u8`
+        );
+        
+        console.log(`Starting ${height}p transcoding...`);
+        resolutionPromises.push(
+          ffmpeg.exec(resCommands).then(() => {
+            console.log(`✅ ${height}p transcoding complete`);
+            return height;
+          }).catch(err => {
+            console.error(`❌ ${height}p transcoding failed:`, err);
+            throw err;
+          })
+        );
+      }
+      
+             // Wait for all resolutions to complete (use allSettled to handle partial failures)
+       const resolutionResults = await Promise.allSettled(resolutionPromises);
+       const successful = resolutionResults.filter(r => r.status === 'fulfilled').map(r => r.value);
+       const failed = resolutionResults.filter(r => r.status === 'rejected');
+       
+       if (successful.length === 0) {
+         console.error('❌ All transcoding failed');
+         this.videoMsg = 'All transcoding failed. Please try again.';
+         return;
+       } else if (failed.length > 0) {
+         console.warn(`⚠️ Some resolutions failed (${failed.length}/${bitrates.length}):`, failed.map(f => f.reason));
+         this.videoMsg = `Transcoding completed with ${successful.length}/${bitrates.length} resolutions (${failed.length} failed)`;
+       } else {
+         console.log('✅ All resolutions transcoded successfully:', successful);
+         this.videoMsg = 'All resolutions transcoded successfully!';
+       }
+      // Reset hashing progress and start internal progress monitoring
+      this.resetHashingProgress();
+      this.videoMsg = 'Transcoding in progress...';
+      const progressInterval = this.startInternalProgressMonitor(bitrates.length);
       
       console.time('exec');
-      console.log({ commands })
       
-      try {
-        await ffmpeg.exec(commands);
-      } finally {
-        // Clean up progress monitoring
-        if (progressInterval) {
-          clearInterval(progressInterval);
-        }
+      // Clean up progress monitoring after transcoding completes
+      if (progressInterval) {
+        clearInterval(progressInterval);
       }
+      
+      console.timeEnd('exec');
+      this.videoMsg = 'Transcoding complete! Preparing files for upload...';
       
       // Non-blocking contract fetch - don't let this interrupt transcoding
       fetch(`https://spk-ipfs.3speak.tv/upload-contract?user=${this.account}`)
@@ -4475,15 +4492,19 @@ function buyNFT(setname, uid, price, type, callback){
           this.showUpload = true;
         });
       
-      console.timeEnd('exec');
-      this.videoMsg = 'Transcoding complete! Preparing files for upload...';
-      
       // Prepare files for upload
       const videoFiles = [];
       const playlistUpdates = {};
       
       ffmpeg.listDir("/").then(async (files) => {
         console.log('Available files after transcoding:', files);
+        
+        // Debug: Show file breakdown
+        const tsFiles = files.filter(f => f.name.endsWith('.ts'));
+        const m3u8Files = files.filter(f => f.name.endsWith('.m3u8'));
+        console.log(`📊 Transcoding results: ${tsFiles.length} segment files, ${m3u8Files.length} playlist files`);
+        console.log('🎬 Segment files:', tsFiles.map(f => f.name).sort());
+        console.log('📋 Playlist files:', m3u8Files.map(f => f.name).sort());
         
         // Update progress to show file processing phase
         this.videoMsg = 'Processing transcoded files...';
