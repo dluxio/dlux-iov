@@ -4391,6 +4391,12 @@ function buyNFT(setname, uid, price, type, callback){
       let hasEventListeners = false;
       height = 720; // Default assumption for common video
       bitrates = this.getPossibleBitrates(height);
+      
+      // Limit resolutions to reduce memory pressure in FFmpeg.wasm
+      if (bitrates.length > 3) {
+        bitrates = bitrates.slice(0, 3); // Keep only top 3 resolutions
+        console.log('Limited to 3 resolutions to reduce memory usage:', bitrates);
+      }
       console.log('Using default bitrates, event listeners disabled for compatibility');
       
       const { name } = event.target.files[0];
@@ -4399,21 +4405,22 @@ function buyNFT(setname, uid, price, type, callback){
       
       await ffmpeg.exec(["-encoders"]);
       await ffmpeg.exec(["-i", name]);
-      // Since FFmpeg.wasm doesn't handle complex multi-output well, we'll process each resolution separately
-      // This ensures compatibility and proper HLS segment generation
-      
+            // Process resolutions sequentially to avoid memory issues with FFmpeg.wasm
       this.videoMsg = 'Starting multi-resolution transcoding...';
-      const resolutionPromises = [];
+      const successful = [];
+      const failed = [];
       
       for (var i = 0; i < bitrates.length; i++) {
-        const height = parseInt(bitrates[i].split('x')[1]);
+        const resHeight = parseInt(bitrates[i].split('x')[1]);
+        this.videoMsg = `Transcoding ${resHeight}p (${i + 1}/${bitrates.length})...`;
+        
         let resCommands = [
           "-i", name,
           "-pix_fmt", "yuv420p",
           "-max_muxing_queue_size", "1024",
           "-profile:v", "main",
           "-start_number", "0",
-          "-vf", `scale=-1:${height}`,
+          "-vf", `scale=-1:${resHeight}`,
           "-c:a", "aac", "-b:a", "256k"
         ];
         
@@ -4429,39 +4436,45 @@ function buyNFT(setname, uid, price, type, callback){
           "-f", "hls",
           "-hls_time", "5",
           "-hls_list_size", "0",
-          "-hls_segment_filename", `${height}p_%03d.ts`,
+          "-hls_segment_filename", `${resHeight}p_%03d.ts`,
           "-hls_flags", "independent_segments",
-          `${height}p_index.m3u8`
+          `${resHeight}p_index.m3u8`
         );
         
-        console.log(`Starting ${height}p transcoding...`);
-        resolutionPromises.push(
-          ffmpeg.exec(resCommands).then(() => {
-            console.log(`✅ ${height}p transcoding complete`);
-            return height;
-          }).catch(err => {
-            console.error(`❌ ${height}p transcoding failed:`, err);
-            throw err;
-          })
-        );
+        console.log(`Starting ${resHeight}p transcoding...`);
+        
+        try {
+          await ffmpeg.exec(resCommands);
+          console.log(`✅ ${resHeight}p transcoding complete`);
+          successful.push(resHeight);
+        } catch (err) {
+          console.error(`❌ ${resHeight}p transcoding failed:`, err);
+          failed.push({ height: resHeight, error: err.message || 'Unknown error' });
+          
+          // If this is a memory error, try to continue with fewer resolutions
+          if (err.message && err.message.includes('memory')) {
+            console.warn(`🧠 Memory issue detected, skipping remaining resolutions to preserve what we have`);
+            break;
+          }
+        }
+        
+        // Small delay between resolutions to help with memory management
+        if (i < bitrates.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
       }
       
-             // Wait for all resolutions to complete (use allSettled to handle partial failures)
-       const resolutionResults = await Promise.allSettled(resolutionPromises);
-       const successful = resolutionResults.filter(r => r.status === 'fulfilled').map(r => r.value);
-       const failed = resolutionResults.filter(r => r.status === 'rejected');
-       
-       if (successful.length === 0) {
-         console.error('❌ All transcoding failed');
-         this.videoMsg = 'All transcoding failed. Please try again.';
-         return;
-       } else if (failed.length > 0) {
-         console.warn(`⚠️ Some resolutions failed (${failed.length}/${bitrates.length}):`, failed.map(f => f.reason));
-         this.videoMsg = `Transcoding completed with ${successful.length}/${bitrates.length} resolutions (${failed.length} failed)`;
-       } else {
-         console.log('✅ All resolutions transcoded successfully:', successful);
-         this.videoMsg = 'All resolutions transcoded successfully!';
-       }
+      if (successful.length === 0) {
+        console.error('❌ All transcoding failed');
+        this.videoMsg = 'All transcoding failed. Please try again with a smaller video file.';
+        return;
+      } else if (failed.length > 0) {
+        console.warn(`⚠️ Some resolutions failed (${failed.length}/${bitrates.length}):`, failed);
+        this.videoMsg = `Transcoding completed with ${successful.length}/${bitrates.length} resolutions`;
+      } else {
+        console.log('✅ All resolutions transcoded successfully:', successful);
+        this.videoMsg = 'All resolutions transcoded successfully!';
+      }
       // Reset hashing progress and start internal progress monitoring
       this.resetHashingProgress();
       this.videoMsg = 'Transcoding in progress...';
