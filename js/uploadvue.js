@@ -951,14 +951,22 @@ export default {
       this.contract.files = body
       // Build challenge as: account:contract:files - this is what the server will reconstruct for verification
       const challenge = `${this.user.name}:${header}:${body}`;
+      console.log("Challenge being signed:", challenge);
       this.signText(challenge).then(res => {
+        console.log("SignText response:", res);
         this.meta = meta
         // The response format from signHeaders is: challenge:signature
         // Extract just the signature part (everything after the last colon)
         const lastColonIndex = res.lastIndexOf(':');
-        this.contract.fosig = lastColonIndex !== -1 ? res.substring(lastColonIndex + 1) : res;
+        const extractedSignature = lastColonIndex !== -1 ? res.substring(lastColonIndex + 1) : res;
+        console.log("Extracted signature:", extractedSignature);
+        this.contract.fosig = extractedSignature;
+        console.log("About to call upload with contract:", this.contract);
         this.upload(cids, this.contract, folderListString)
         this.ready = false
+      }).catch(err => {
+        console.error("SignText failed:", err);
+        alert("Signing failed: " + err.message);
       })
     },
     signText(challenge) {
@@ -1023,6 +1031,8 @@ export default {
       
       const fileMetaEntries = [];
 
+      // Get path index mapping from folder structure
+      const { pathToIndexMap } = this.makePaths();
       console.log("Path to index map in upload:", pathToIndexMap);
 
       for (var name in this.FileInfo) {
@@ -1058,10 +1068,10 @@ export default {
         const folderPath = lastSlash > -1 ? fullAppPath.substring(0, lastSlash) : '';
         
         // Look up the folder index in pathToIndexMap
-        const pathIndex = pathToIndexMap[folderPath] || '0';
+        const pathIndex = pathToIndexMap[folderPath] || '1';
         
         // Format extension with path suffix: ext.pathIndex
-        // But only add the pathIndex if it's not the root (0)
+        // But only add the pathIndex if it's not the root (1)
         const extWithPath = sanitizedExt + (pathIndex !== '1' ? '.' + pathIndex : '');
         
         console.log(`File: ${fileInfo.name}, Path: ${folderPath}, Index: ${pathIndex}, Formatted extension: ${extWithPath}`);
@@ -1215,18 +1225,20 @@ export default {
       };
       const uploadFile = (file, options, cid) => {
         console.log('Uploading', cid, options, file)
+        const headers = {
+          'Content-Type': 'application/json',
+          'X-Sig': options.contract.fosig,
+          'X-Account': options.contract.t,
+          'X-Contract': options.contract.i,
+          'X-Cid': cid,
+          'X-Files': options.contract.files,
+          'X-Meta': options.meta,
+          'X-Chain': 'HIVE'
+        };
+        console.log('Upload headers being sent:', headers);
         return fetch(ENDPOINTS.UPLOAD_REQUEST, {
           method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Sig': options.contract.fosig,
-            'X-Account': options.contract.t,
-            'X-Contract': options.contract.i,
-            'X-Cid': cid,
-            'X-Files': options.contract.files,
-            'X-Meta': options.meta,
-            'X-Chain': 'HIVE'
-          }
+          headers
         })
           .then(res => res.json())
           .then(res => {

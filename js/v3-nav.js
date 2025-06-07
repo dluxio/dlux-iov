@@ -12,6 +12,10 @@ export default {
       userPinFeedback: "",
       passwordField: "",
       level: "posting",
+      pendingSignRequests: new Map(), // Collect signing requests by challenge
+      signTimeouts: new Map(), // Track timeouts for each challenge
+      pendingBroadcastRequests: new Map(), // Collect broadcast requests by operation
+      broadcastTimeouts: new Map(), // Track timeouts for each operation
       // Wallet messaging
       walletMessageListeners: new Map(),
       decrypted: {
@@ -174,6 +178,9 @@ export default {
             if (existingModal) {
               existingModal.dispose();
             }
+
+            // Set high z-index to appear above other modals
+            modalElement.style.zIndex = '2060';
 
             const modal = new bootstrap.Modal(modalElement, {
               backdrop: 'static',
@@ -478,6 +485,25 @@ export default {
   },
   methods: {
     ...Mcommon,
+    
+    // Helper method for better modal backdrop cleanup
+    cleanupModalBackdrops(preserveCount = 0) {
+      setTimeout(() => {
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        // Remove excess backdrops, keeping only the specified count
+        for (let i = backdrops.length - 1; i >= preserveCount; i--) {
+          backdrops[i].remove();
+        }
+        
+        // If no modals should remain, clean up body classes
+        if (preserveCount === 0) {
+          document.body.classList.remove('modal-open');
+          document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
+        }
+      }, 50);
+    },
+    
     toggleChat() {
       this.chatVisible = !this.chatVisible;
     },
@@ -2372,10 +2398,41 @@ export default {
         });
     },
     signHeaders(obj) {
-      var op = [this.user, obj.challenge, obj.key || "posting"];
+      const challenge = obj.challenge;
+      
+      // Check if we already have pending requests for this challenge
+      if (this.pendingSignRequests.has(challenge)) {
+        this.pendingSignRequests.get(challenge).push(obj);
+        return;
+      }
+      
+      // Create new pending request collection
+      this.pendingSignRequests.set(challenge, [obj]);
+      
+      // Set timeout to execute all requests for this challenge after 250ms
+      const timeoutId = setTimeout(() => {
+        this.executePendingSignRequests(challenge);
+      }, 250);
+      
+      this.signTimeouts.set(challenge, timeoutId);
+    },
+    
+    executePendingSignRequests(challenge) {
+      const requests = this.pendingSignRequests.get(challenge);
+      if (!requests || requests.length === 0) return;
+      
+      // Clear the timeout and pending requests
+      clearTimeout(this.signTimeouts.get(challenge));
+      this.signTimeouts.delete(challenge);
+      this.pendingSignRequests.delete(challenge);
+      
+      // Take the first request as the template
+      const firstRequest = requests[0];
+      var op = [this.user, firstRequest.challenge, firstRequest.key || "posting"];
+      console.log("Signing request:", op);
+      
       this.signOnly(op)
         .then((r) => {
-          console.log("signHeaders Return", r);
           if (r) {
             // Handle both old string format and new object format
             let signature;
@@ -2387,15 +2444,88 @@ export default {
               throw new Error("Invalid signature format");
             }
             
-            localStorage.setItem(`${this.user}:auth`, `${obj.challenge}:${signature}`);
-            obj.callbacks[0](`${obj.challenge}:${signature}`);
+            const result = `${firstRequest.challenge}:${signature}`;
+            console.log("Sign result:", result);
+            localStorage.setItem(`${this.user}:auth`, result);
+            
+            // Call all callbacks with the same result
+            requests.forEach(request => {
+              request.callbacks[0](result);
+            });
+          } else {
+            requests.forEach(request => {
+              request.callbacks[1](new Error("No result from signOnly"));
+            });
           }
         })
         .catch((e) => {
-          console.log(e);
-          obj.callbacks[1](e);
+          console.error("Sign error:", e);
+          // Call all error callbacks
+          requests.forEach(request => {
+            request.callbacks[1](e);
+          });
         });
     },
+    
+    broadcastTransaction(op, statusObj = null) {
+      console.log("Broadcast request:", op);
+      
+      // Create a key for this transaction based on operations
+      const opKey = JSON.stringify(op[1]);
+      
+      // Check if we already have pending requests for this operation
+      if (this.pendingBroadcastRequests.has(opKey)) {
+        console.log("Adding to existing pending broadcast request");
+        this.pendingBroadcastRequests.get(opKey).push({op, statusObj});
+        return;
+      }
+      
+      // Create new pending request collection
+      console.log("Creating new pending broadcast request");
+      this.pendingBroadcastRequests.set(opKey, [{op, statusObj}]);
+      
+      // Set timeout to execute all requests for this operation after 250ms
+      const timeoutId = setTimeout(() => {
+        this.executePendingBroadcastRequests(opKey);
+      }, 250);
+      
+      this.broadcastTimeouts.set(opKey, timeoutId);
+    },
+    
+    executePendingBroadcastRequests(opKey) {
+      console.log("Executing pending broadcast requests for operation");
+      const requests = this.pendingBroadcastRequests.get(opKey);
+      if (!requests || requests.length === 0) return;
+      
+      // Clear the timeout and pending requests
+      clearTimeout(this.broadcastTimeouts.get(opKey));
+      this.broadcastTimeouts.delete(opKey);
+      this.pendingBroadcastRequests.delete(opKey);
+      
+      // Take the first request as the template
+      const firstRequest = requests[0];
+      
+      this.sign(firstRequest.op)
+        .then((r) => {
+          console.log("Broadcast result:", r);
+          // Call status finder for all requests with the same result
+          requests.forEach(request => {
+            if (request.statusObj) {
+              this.statusFinder(r, request.statusObj);
+            }
+          });
+        })
+        .catch((e) => {
+          console.error("Broadcast error:", e);
+          // Handle errors for all requests
+          requests.forEach(request => {
+            if (request.statusObj) {
+              // Could add error handling here if needed
+            }
+          });
+        });
+    },
+    
     broadcastVote(obj) {
       var op = [
         this.user,
@@ -2412,13 +2542,7 @@ export default {
         ],
         "posting",
       ];
-      this.sign(op)
-        .then((r) => {
-          this.statusFinder(r, obj);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+      this.broadcastTransaction(op, obj);
     },
     broadcastComment(obj) {
       var op = [
@@ -2439,13 +2563,7 @@ export default {
         ],
         "active",
       ];
-      this.sign(op)
-        .then((r) => {
-          this.statusFinder(r, obj);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+      this.broadcastTransaction(op, obj);
     },
     sign(op) {
       return new Promise(async (resolve, reject) => {
@@ -2464,21 +2582,17 @@ export default {
 
         // Local signing methods
         if (this.HKC) {
-          console.log("HKCsign", op);
           this.HKCsign(op)
             .then((r) => resolve(r))
             .catch((e) => reject(e));
         } else if (this.HAS) {
-          console.log(op);
           this.HASsign(op);
           reject("No TXID");
         } else if (this.PEN) {
-          console.log(op);
           this.PENsign(op)
             .then((r) => resolve(r))
             .catch((e) => reject(e));
         } else {
-          console.log("HSR");
           this.HSRsign(op);
           reject("No TXID");
         }
@@ -2501,23 +2615,19 @@ export default {
 
         // Local signing methods
         if (this.HKC) {
-          console.log("HKCsignOnly");
           this.HKCsignOnly(op)
-            .then((r) => {console.log("HKCsignOnly", r); resolve(r)})
+            .then((r) => resolve(r))
             .catch((e) => reject(e));
         } else if (this.PEN) {
-          console.log({ op });
           this.PENsignOnly(op)
-            .then((r) => {console.log("PENsignOnly", r); resolve(r)})
+            .then((r) => resolve(r))
             .catch((e) => reject(e));
         } else if (this.HAS) {
-          console.log({ op });
           this.HASsignOnly(op)
-            .then((r) => {console.log("HASsignOnly", r); resolve(r)})
+            .then((r) => resolve(r))
             .catch((e) => reject(e));
         } else {
           alert("This feature is not supported with Hive Signer");
-          //this.HSRsignOnly(op);
           reject("Not Supported");
         }
       });
@@ -2554,22 +2664,27 @@ export default {
     },
     HKCsignOnly(op) {
       return new Promise((res, rej) => {
-        console.log(op);
+        console.log("HKC signing:", op[1]);
+        
         window.hive_keychain.requestSignBuffer(
           op[0],
           `${op[1]}`,
           op[2],
           (sig) => {
-            if (sig.error) rej(sig);
-            else res({signature: sig.result, pubKey: sig.publicKey});
+            if (sig.error) {
+              console.error("HKC error:", sig.error);
+              rej(sig);
+            } else {
+              console.log("HKC result:", {signature: sig.result, pubKey: sig.publicKey});
+              res({signature: sig.result, pubKey: sig.publicKey});
+            }
           }
         );
       });
     },
     PENsignOnly(op) {
       return new Promise(async (res, rej) => {
-        console.log("PENsignOnly called with:", op);
-
+        
         // Check if PIN is set up
         if (!this.PIN) {
           console.log("PENsignOnly: No PIN found. PIN value:", this.PIN, "Session PIN:", sessionStorage.getItem('penPin'));
@@ -2629,20 +2744,24 @@ export default {
         }
 
         try {
-          // Sign the buffer like HKC does - op[1] should be the buffer string to sign
-          const bufferToSign = `${op[1]}`;
-          console.log("Signing buffer:", bufferToSign);
+          console.log("PEN signing:", op[1]);
           
           const privateKey = hiveTx.PrivateKey.from(privateKeyStr);
-          const signature = privateKey.sign(Buffer.from(bufferToSign, 'utf-8'));
-          
-          // Get public key from private key
+          const messageHash = CryptoJS.SHA256(op[1]).toString();
+          const hashBuffer = buffer.Buffer.from(messageHash, 'hex');
+          const signature = privateKey.sign(hashBuffer);
           const publicKey = privateKey.createPublic();
           
-          // Return both signature and pubKey like HKC does
-          res({signature: signature.toString(), pubKey: publicKey.toString()});
+          // Convert signature to hex format with recovery - match HKC format
+          const recoveryByte = signature.recovery + (signature.compressed ? 4 : 0) + 27;
+          const recoveryByteHex = recoveryByte.toString(16).padStart(2, '0');
+          const signatureDataHex = this.uint8ArrayToHex(signature.data);
+          const signatureString = recoveryByteHex + signatureDataHex;
+          
+          console.log("PEN result:", {signature: signatureString, pubKey: publicKey.toString()});
+          res({signature: signatureString, pubKey: publicKey.toString()});
         } catch (error) {
-          console.error("Failed to sign buffer:", error);
+          console.error("PEN signing failed:", error);
           rej(error);
         }
       });

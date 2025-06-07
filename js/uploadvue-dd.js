@@ -373,9 +373,7 @@ export default {
                         ]"
                         :disabled="(!reallyReady || !filesReady || thumbnailsGenerating > 0)" 
                         @click="signNUpload()">
-                        <i class="fa-solid" 
-                           :class="[thumbnailsGenerating > 0 ? 'fa-spinner fa-spin' : 'fa-file-signature']"
-                           class="fa-fw me-2"></i>
+                        <i :class="['fa-solid', 'fa-fw', 'me-2', thumbnailsGenerating > 0 ? 'fa-spinner fa-spin' : 'fa-file-signature']"></i>
                         <span v-if="thumbnailsGenerating > 0">Generating Thumbnails...</span>
                         <span v-else>Sign and Upload</span>
                     </button>
@@ -1363,8 +1361,12 @@ export default {
       this.contract.files = body
       
       this.signText(this.user.name + ':' + header + body).then(res => {
+        console.log("signText response:", res);
         this.meta = meta
-        this.contract.fosig = res.split(":")[3]
+        // Extract signature from challenge:signature format
+        const lastColonIndex = res.lastIndexOf(':');
+        this.contract.fosig = lastColonIndex !== -1 ? res.substring(lastColonIndex + 1) : res;
+        console.log("Extracted signature:", this.contract.fosig);
         this.upload(cids, this.contract, folderListString, pathToIndexMap)
         this.ready = false
       })
