@@ -1,4 +1,4 @@
-this.version = "2025.06.06.26";
+this.version = "2025.06.07.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.06.26",
-  "generated": "2025-06-06T21:21:08Z",
+  "version": "2025.06.07.1",
+  "generated": "2025-06-07T00:06:33Z",
   "files": {
-    "/img/mp3-file-type-svgrepo-com.svg": {
-      "checksum": "1004873c11cc066741da417bfe78b80f",
-      "size": 2165,
-      "priority": "important"
-    },
     "/img/no-user.png": {
       "checksum": "83327a11fc84f8c65194617bc80b88cf",
       "size": 12395,
@@ -1091,7 +1086,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "3b0218366bddf9402a45fad92042003a",
+      "checksum": "01fe2049b1ec24e074b17f81e5e62147",
       "size": 36317,
       "priority": "important"
     },
@@ -1281,7 +1276,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "1a60b023b1a21dceffc77c70ff54cae7",
+      "checksum": "d4c7750e8799c6d8b4e24bc50d6eef3d",
       "size": 7300,
       "priority": "important"
     },
@@ -1354,11 +1349,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/flow9/flow9.js": {
-      "checksum": "e9643ed67826ec3d9a20d64f282b5ad9",
-      "size": 2635,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/freemarker2/freemarker2.js": {
       "checksum": "2772f4aba5601734b07dfd600a7ce23a",
