@@ -1,4 +1,4 @@
-this.version = "2025.06.07.13";
+this.version = "2025.06.07.14";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.07.13",
-  "generated": "2025-06-07T17:30:38Z",
+  "version": "2025.06.07.14",
+  "generated": "2025-06-07T17:32:08Z",
   "files": {
-    "/img/spk192.png": {
-      "checksum": "411500d1b3e3b31bf0b90c5b8126c634",
-      "size": 10149,
-      "priority": "important"
-    },
     "/img/spk512.png": {
       "checksum": "98a452727661d34f119ddf6a3fd920a8",
       "size": 21939,
@@ -1021,8 +1016,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/spkvue.js": {
-      "checksum": "b21c553f444728009496df8b2ee57770",
-      "size": 92238,
+      "checksum": "383f1b410ce7ceb6210f7b4227e8f894",
+      "size": 92248,
       "priority": "important"
     },
     "/js/standard-modal.js": {
@@ -1036,7 +1031,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "47bde37ac5affe736f5d8c963ef34fe8",
+      "checksum": "d55517f8f29cf54b124cd3b89ca069d1",
       "size": 36317,
       "priority": "important"
     },
@@ -1066,8 +1061,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/uploadvue-dd.js": {
-      "checksum": "57ee41869fb0a1dd77e4c97cd4f8dbca",
-      "size": 84183,
+      "checksum": "81475721e7a2adf30115f06bad446b79",
+      "size": 84226,
       "priority": "important"
     },
     "/js/uploadvue.js": {
@@ -1226,7 +1221,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "cdb1c9a5052628d5e3c070d4e3ee4a59",
+      "checksum": "f3cde4228524934909420bb234f5b66c",
       "size": 7300,
       "priority": "important"
     },
@@ -1299,11 +1294,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/julia/julia.js": {
-      "checksum": "2fe40e357b8f2fe02d7ac1164166457e",
-      "size": 8052,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/kotlin/kotlin.js": {
       "checksum": "29b986d5bcd6489356dc6ae20169d520",
