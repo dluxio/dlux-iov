@@ -2111,18 +2111,63 @@ createApp({ // vue 3
     
     async loginNewAccount() {
       try {
+        // Set up the new account in nav user management
+        console.log('Setting up new account:', this.newAccount.username);
+        
+        // Set the account as current user
+        localStorage.setItem('user', this.newAccount.username);
+        this.account = this.newAccount.username;
+        
+        // Set dluxPEN as the signing method
+        localStorage.setItem('authmethod', 'PEN');
+        
+        // Add to recent users list
+        this.$refs.navComponent.addRecentUser(this.newAccount.username);
+        
+        // Initialize PEN with the stored keys (they should already be in dluxPEN from account creation)
+        await this.$refs.navComponent.usePEN();
+        
+        // Broadcast user change to other components
+        this.$refs.navComponent.broadcastUserChange();
+        
+        // Set up the user in nav
+        this.$refs.navComponent.setUser(this.newAccount.username);
+        
         // Emit login event with new account
         this.$emit('login', this.newAccount.username);
         
-        // Reset onboarding state
-        this.resetOnboardingState();
+        console.log('New account setup complete:', this.newAccount.username);
         
       } catch (error) {
-        console.error('Failed to login to new account:', error);
-        alert('Failed to login: ' + error.message);
-      }
+        console.error('Failed to set up new account:', error);
+        alert('Account created successfully but there was an issue setting up the login. Please refresh the page and log in manually.');
+            }
     },
-    
+
+    goFollowFriend() {
+      // First set up the account login
+      this.loginNewAccount().then(() => {
+        // Then navigate to the friend's page
+        window.location.href = `/@${this.requestUsername}`;
+      }).catch((error) => {
+        console.error('Failed to set up login before following friend:', error);
+        // Still navigate even if login setup fails
+        window.location.href = `/@${this.requestUsername}`;
+      });
+    },
+
+    goToMyAccount() {
+      // First set up the account login
+      this.loginNewAccount().then(() => {
+        // Then navigate to their own profile
+        window.location.href = '/me';
+      }).catch((error) => {
+        console.error('Failed to set up login before going to account page:', error);
+        // Still navigate even if login setup fails
+        window.location.href = '/me';
+      });
+    },
+
     startAccountCreation() {
       this.onboardingStep = 1;
       this.recoveryMode = false;
@@ -3179,8 +3224,12 @@ createApp({ // vue 3
             qrData = memo && memo.trim() ? `bitcoin:${address}?amount=${amount}&message=${memoHex}` : `bitcoin:${address}?amount=${amount}`;
             break;
           case 'SOL':
-            // Use simple JSON format that most Solana wallets can parse
-            qrData = memo && memo.trim() ? `solana:${address}?amount=${amount}&memo=${memo}` : `solana:${address}?amount=${amount}`;
+            // Use Solana Pay format that most Solana wallets support
+            if (memo && memo.trim()) {
+              qrData = `solana:${address}?amount=${amount}&reference=${encodeURIComponent(memo)}`;
+            } else {
+              qrData = `solana:${address}?amount=${amount}`;
+            }
             break;
             
           case 'ETH':
@@ -3364,6 +3413,34 @@ createApp({ // vue 3
     cancelAccountCreation() {
       // Reset onboarding state back to step 0
       this.resetOnboardingState();
+    },
+
+    cancelCryptoPayment() {
+      // Clear payment details and return to crypto selection
+      this.paymentDetails = null;
+      this.paymentChannelId = null;
+      this.paymentStatus = {
+        code: 'initializing',
+        message: '⚡ Initializing...',
+        details: 'Setting up payment channel...',
+        progress: 0
+      };
+      this.paymentLogs = [];
+      this.paymentSentMarked = false;
+      this.showPaymentQR = false;
+      
+      // Stop any active monitoring
+      this.stopFallbackPolling();
+      if (this.ws) {
+        this.ws.close();
+        this.ws = null;
+      }
+      this.wsConnectionStatus = 'disconnected';
+      
+      // Clear URL parameters
+      this.clearUrlChannelId();
+      
+      this.addPaymentLog('Payment cancelled - returning to selection', 'warning');
     },
     getKeyRecoveryMessage() {
       return this.keyGenMethod === 'wallet' 
