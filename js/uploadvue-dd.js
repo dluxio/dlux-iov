@@ -1362,7 +1362,7 @@ export default {
       }
       this.contract.files = body
       
-      this.signText(header + body).then(res => {
+      this.signText(this.user.name + ':' + header + body).then(res => {
         this.meta = meta
         this.contract.fosig = res.split(":")[3]
         this.upload(cids, this.contract, folderListString, pathToIndexMap)
@@ -1374,7 +1374,7 @@ export default {
       else this.files[file] = id
     },
     uploadAndTrack(name, contract) {
-      this.signText().then((headers) => {
+      this.signText(this.user.name + ':').then((headers) => {
         let uploader = null;
         const setFileElement = (file) => {
           // create file element here

@@ -1650,7 +1650,7 @@ createApp({
       else this.files[file] = id
     },
     uploadAndTrack(name, contract) {
-      this.signText().then((headers) => {
+      this.signText(name + ':').then((headers) => {
         let uploader = null;
         const setFileElement = (file) => {
           // create file element here
