@@ -1,4 +1,4 @@
-this.version = "2025.06.07.9";
+this.version = "2025.06.07.10";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.07.9",
-  "generated": "2025-06-07T17:00:41Z",
+  "version": "2025.06.07.10",
+  "generated": "2025-06-07T17:02:44Z",
   "files": {
-    "/img/psd-file-type-svgrepo-com.svg": {
-      "checksum": "752cee1bb240f2679af2f068930fa2cf",
-      "size": 2242,
-      "priority": "important"
-    },
     "/img/ragnarok.png": {
       "checksum": "5934b1a258fdf602cd78b1c35f276b8d",
       "size": 133078,
@@ -1056,7 +1051,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "911465805d5f544ac79483db7b494608",
+      "checksum": "7dac6772f293bd8c26a29932821558aa",
       "size": 36316,
       "priority": "important"
     },
@@ -1131,8 +1126,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "f17e14feb32b7315cd6f14c0e58df52a",
-      "size": 194894,
+      "checksum": "a8aa7e57955ed7301dcaca704da91f22",
+      "size": 197728,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1246,7 +1241,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "b966b2481bfe7be0b6e9347fa021b2d0",
+      "checksum": "79077615a928f78ee66748c7ddf29a7e",
       "size": 7299,
       "priority": "important"
     },
@@ -1319,11 +1314,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/html/html.js": {
-      "checksum": "c29141ad1c095b7e14e1a37fd4570191",
-      "size": 6055,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/ini/ini.js": {
       "checksum": "13b7f142b621006b63c6061711be4ec1",
