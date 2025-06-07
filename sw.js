@@ -1,4 +1,4 @@
-this.version = "2025.06.07.10";
+this.version = "2025.06.07.11";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.07.10",
-  "generated": "2025-06-07T17:02:44Z",
+  "version": "2025.06.07.11",
+  "generated": "2025-06-07T17:11:39Z",
   "files": {
-    "/img/ragnarok.png": {
-      "checksum": "5934b1a258fdf602cd78b1c35f276b8d",
-      "size": 133078,
-      "priority": "important"
-    },
     "/img/ragnarok_sealed.png": {
       "checksum": "a7558e86491320184e56d6a8f909d695",
       "size": 74886,
@@ -1051,8 +1046,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "7dac6772f293bd8c26a29932821558aa",
-      "size": 36316,
+      "checksum": "e5f304c5794ce9d89d58da589c6661dd",
+      "size": 36317,
       "priority": "important"
     },
     "/js/tagify.min.js": {
@@ -1126,8 +1121,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "a8aa7e57955ed7301dcaca704da91f22",
-      "size": 197728,
+      "checksum": "d6048457b86920c9e95ff2e4d6f42732",
+      "size": 196722,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1241,8 +1236,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "79077615a928f78ee66748c7ddf29a7e",
-      "size": 7299,
+      "checksum": "6fecf5d52ae667f1d4e16ea6da982610",
+      "size": 7300,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -1314,11 +1309,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/ini/ini.js": {
-      "checksum": "13b7f142b621006b63c6061711be4ec1",
-      "size": 1922,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/java/java.js": {
       "checksum": "4458f51c0a0084ac4d53ccaca469472b",
