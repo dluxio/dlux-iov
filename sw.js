@@ -1,4 +1,4 @@
-this.version = "2025.06.07.2";
+this.version = "2025.06.07.3";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.07.1",
-  "generated": "2025-06-07T00:06:33Z",
+  "version": "2025.06.07.3",
+  "generated": "2025-06-07T06:18:23Z",
   "files": {
-    "/img/no-user.png": {
-      "checksum": "83327a11fc84f8c65194617bc80b88cf",
-      "size": 12395,
-      "priority": "important"
-    },
     "/img/other-file-type-svgrepo-com.svg": {
       "checksum": "93ff030887252d38b07c16d97ff6cb2a",
       "size": 1627,
@@ -1086,8 +1081,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "01fe2049b1ec24e074b17f81e5e62147",
-      "size": 36317,
+      "checksum": "3d917cb084ae5b828262aa9be11a533e",
+      "size": 36316,
       "priority": "important"
     },
     "/js/tagify.min.js": {
@@ -1156,8 +1151,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-qr.js": {
-      "checksum": "f1dc48535e9f796e5cd1e5ddffa29b23",
-      "size": 125521,
+      "checksum": "2533066d55354cc7531f9d23fc7483d9",
+      "size": 125800,
       "priority": "important"
     },
     "/js/v3-user.js": {
@@ -1271,13 +1266,13 @@ self.cacheManifest =
       "priority": "important"
     },
     "/qr/index.html": {
-      "checksum": "05d7d9f6b75eeab608211b2371f0f247",
-      "size": 65644,
+      "checksum": "cb596e6f90641345f56c3a089327db11",
+      "size": 65776,
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "d4c7750e8799c6d8b4e24bc50d6eef3d",
-      "size": 7300,
+      "checksum": "4ad8f9acdfb6349ae09d02296f512970",
+      "size": 7299,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -1349,11 +1344,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/freemarker2/freemarker2.js": {
-      "checksum": "2772f4aba5601734b07dfd600a7ce23a",
-      "size": 17149,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/fsharp/fsharp.js": {
       "checksum": "4a10f3fbf8c213d1b471e7b162ff6180",
