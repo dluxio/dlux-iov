@@ -4547,7 +4547,57 @@ function buyNFT(setname, uid, price, type, callback){
              }
        
        console.timeEnd('transcode-all');
-       console.log('✅ All resolutions transcoded successfully!');
+       this.videoMsg = 'Verifying all transcoded files are complete...';
+       
+       // Wait for all files to be properly written and validate completion
+       let attempts = 0;
+       const maxAttempts = 10;
+       let allFilesReady = false;
+       
+       while (!allFilesReady && attempts < maxAttempts) {
+         attempts++;
+         console.log(`📊 Validation attempt ${attempts}/${maxAttempts}`);
+         
+         // Wait a bit for filesystem to settle
+         await new Promise(resolve => setTimeout(resolve, 500));
+         
+         const files = await ffmpeg.listDir("/");
+         const tsFiles = files.filter(f => f.name.endsWith('.ts'));
+         const playlistFiles = files.filter(f => f.name.endsWith('.m3u8') && f.name.includes('p_index'));
+         
+         console.log(`📊 Found ${tsFiles.length} segments, ${playlistFiles.length} playlists (expected ${bitrates.length} playlists)`);
+         
+         // Check if we have the expected number of playlist files (one per resolution)
+         const expectedPlaylists = bitrates.length;
+         if (playlistFiles.length >= expectedPlaylists && tsFiles.length > 0) {
+           // Verify each resolution has its playlist
+           const missingPlaylists = [];
+           for (const bitrate of bitrates) {
+             const resHeight = parseInt(bitrate.split('x')[1]);
+             const hasPlaylist = playlistFiles.some(f => f.name === `${resHeight}p_index.m3u8`);
+             if (!hasPlaylist) {
+               missingPlaylists.push(`${resHeight}p`);
+             }
+           }
+           
+           if (missingPlaylists.length === 0) {
+             allFilesReady = true;
+             console.log('✅ All required files found and verified!');
+           } else {
+             console.log(`⚠️ Missing playlists: ${missingPlaylists.join(', ')}`);
+           }
+         } else {
+           console.log(`⚠️ Incomplete: ${playlistFiles.length}/${expectedPlaylists} playlists, ${tsFiles.length} segments`);
+         }
+       }
+       
+       if (!allFilesReady) {
+         console.error('❌ Transcoding validation failed - not all files are ready');
+         this.videoMsg = 'Transcoding incomplete - some files are missing. Please try again.';
+         return;
+       }
+       
+       console.log('✅ All resolutions transcoded and verified successfully!');
        this.videoMsg = `🎉 All ${bitrates.length} resolutions transcoded successfully! (${bitrates.map(b => parseInt(b.split('x')[1]) + 'p').join(', ')})`;
        
        // Clean up progress monitoring after transcoding completes
@@ -4575,148 +4625,135 @@ function buyNFT(setname, uid, price, type, callback){
       const videoFiles = [];
       const playlistUpdates = {};
       
-      ffmpeg.listDir("/").then(async (files) => {
-        console.log('Available files after transcoding:', files);
-        
-        // Debug: Show file breakdown
-        const tsFiles = files.filter(f => f.name.endsWith('.ts'));
-        const m3u8Files = files.filter(f => f.name.endsWith('.m3u8'));
-        console.log(`📊 Transcoding results: ${tsFiles.length} segment files, ${m3u8Files.length} playlist files`);
-        console.log('🎬 Segment files:', tsFiles.map(f => f.name).sort());
-        console.log('📋 Playlist files:', m3u8Files.map(f => f.name).sort());
-        
-        // Update progress to show file processing phase
-        this.videoMsg = 'Processing transcoded files...';
-        
-        // Separate files by type
-        const videoSegmentPromises = [];
-        const resolutionPlaylistPromises = [];
-        const segmentMapping = new Map(); // Map segment names to their actual hashes
-        const resolutionPlaylists = []; // Store resolution-specific playlists
-        
-        // Initialize file reading + hashing progress tracking
-        const segmentFiles = files.filter(file => file.name.includes('.ts'));
-        const playlistFiles = files.filter(file => file.name.includes('.m3u8') && file.name.includes('p_index'));
-        this.hashingProgress.total = (segmentFiles.length + playlistFiles.length) * 2; // *2 for read + hash
-        this.hashingProgress.current = 0;
-        this.hashingProgress.percentage = 0;
-        
-        let processedFiles = 0;
-        
-        // First pass: process video segments and hash them
-        for (const file of files) {
-          if (file.name.includes('.ts')) {
-            videoSegmentPromises.push(
-              ffmpeg.readFile(file.name).then(async (data) => {
-                // Update progress after file reading
-                this.hashingProgress.current++;
-                this.hashingProgress.currentFile = file.name;
-                this.hashingProgress.percentage = Math.round((this.hashingProgress.current / this.hashingProgress.total) * 100);
-                this.videoMsg = `Reading files: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)} - ${file.name}`;
-                
-                // Create thumb file name for segments to hide them
-                const newFileName = file.name.endsWith('_thumb.ts') ? file.name : file.name.replace('.ts', '_thumb.ts');
-                
-                // Hash the segment content
-                const contentBuffer = buffer.Buffer(data.buffer);
-                const hashResult = await this.hashOf(contentBuffer, {});
-                const segmentHash = hashResult.hash;
-                
-                // Update progress after hashing
-                this.hashingProgress.current++;
-                this.hashingProgress.percentage = Math.round((this.hashingProgress.current / this.hashingProgress.total) * 100);
-                this.videoMsg = `Hashing segments: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)} (${this.hashingProgress.percentage}%)`;
-                
-                videoFiles.push({
-                  file: new File([data.buffer], newFileName, { type: 'video/mp2t' }),
-                  targetPath: '/Videos',
-                  isThumb: true // Mark as thumb file for special handling
-                });
-                this.dataURLS.push([newFileName, data.buffer, 'video/mp2t']);
-                console.log(`Added video segment: ${newFileName} (${data.buffer.byteLength} bytes) - Hash: ${segmentHash}`);
-                
-                // Store mapping for M3U8 CID replacement with actual hash
-                segmentMapping.set(file.name, segmentHash);
-                return { originalName: file.name, newFileName, segmentHash };
-              })
-            );
-          }
+            // Get the final validated file list
+      const files = await ffmpeg.listDir("/");
+      console.log('Available files after transcoding:', files);
+      
+      // Debug: Show file breakdown
+      const tsFiles = files.filter(f => f.name.endsWith('.ts'));
+      const m3u8Files = files.filter(f => f.name.endsWith('.m3u8'));
+      console.log(`📊 Transcoding results: ${tsFiles.length} segment files, ${m3u8Files.length} playlist files`);
+      console.log('🎬 Segment files:', tsFiles.map(f => f.name).sort());
+      console.log('📋 Playlist files:', m3u8Files.map(f => f.name).sort());
+      
+      // Update progress to show file processing phase
+      this.videoMsg = 'Processing transcoded files...';
+      
+      // Now process the files in sequence to avoid race conditions
+      await this.processVideoFilesSequentially(files, videoFiles);
+    },
+    
+    async processVideoFilesSequentially(files, videoFiles) {
+      const segmentMapping = new Map(); // Map segment names to their actual hashes
+      const resolutionPlaylists = []; // Store resolution-specific playlists
+      
+      // Initialize file reading + hashing progress tracking
+      const segmentFiles = files.filter(file => file.name.includes('.ts'));
+      const playlistFiles = files.filter(file => file.name.includes('.m3u8') && file.name.includes('p_index'));
+      this.hashingProgress.total = (segmentFiles.length + playlistFiles.length) * 2; // *2 for read + hash
+      this.hashingProgress.current = 0;
+      this.hashingProgress.percentage = 0;
+      
+      // First pass: process video segments and hash them (sequentially)
+      for (const file of files) {
+        if (file.name.includes('.ts')) {
+          const data = await ffmpeg.readFile(file.name);
+          
+          // Update progress after file reading
+          this.hashingProgress.current++;
+          this.hashingProgress.currentFile = file.name;
+          this.hashingProgress.percentage = Math.round((this.hashingProgress.current / this.hashingProgress.total) * 100);
+          this.videoMsg = `Reading files: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)} - ${file.name}`;
+          
+          // Create thumb file name for segments to hide them
+          const newFileName = file.name.endsWith('_thumb.ts') ? file.name : file.name.replace('.ts', '_thumb.ts');
+          
+          // Hash the segment content
+          const contentBuffer = buffer.Buffer(data.buffer);
+          const hashResult = await this.hashOf(contentBuffer, {});
+          const segmentHash = hashResult.hash;
+          
+          // Update progress after hashing
+          this.hashingProgress.current++;
+          this.hashingProgress.percentage = Math.round((this.hashingProgress.current / this.hashingProgress.total) * 100);
+          this.videoMsg = `Hashing segments: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)} (${this.hashingProgress.percentage}%)`;
+          
+          videoFiles.push({
+            file: new File([data.buffer], newFileName, { type: 'video/mp2t' }),
+            targetPath: '/Videos',
+            isThumb: true // Mark as thumb file for special handling
+          });
+          this.dataURLS.push([newFileName, data.buffer, 'video/mp2t']);
+          console.log(`Added video segment: ${newFileName} (${data.buffer.byteLength} bytes) - Hash: ${segmentHash}`);
+          
+          // Store mapping for M3U8 CID replacement with actual hash
+          segmentMapping.set(file.name, segmentHash);
         }
+      }
+      
+      // Second pass: process resolution-specific M3U8 playlists  
+      for (const file of files) {
+        if (file.name.includes('.m3u8') && file.name.includes('p_index')) {
+          const data = await ffmpeg.readFile(file.name);
+          let playlistContent = new TextDecoder().decode(data);
+          console.log(`M3U8 Resolution Playlist Content (${file.name}):`, playlistContent);
+          
+          // Replace segment references with actual IPFS hashes and add filename hints
+          segmentMapping.forEach((actualHash, originalName) => {
+            const segmentPattern = new RegExp(originalName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+            playlistContent = playlistContent.replace(segmentPattern, `https://ipfs.dlux.io/ipfs/${actualHash}?filename=${originalName}`);
+          });
+          
+          console.log(`M3U8 with IPFS hashes (${file.name}):`, playlistContent);
+          
+          // Mark resolution playlists as thumbs (they're sub-files)
+          const resPlaylistFile = new File([new TextEncoder().encode(playlistContent)], file.name.replace('.m3u8', '_thumb.m3u8'), { 
+            type: 'application/x-mpegURL' 
+          });
+          
+          videoFiles.push({
+            file: resPlaylistFile,
+            targetPath: '/Videos',
+            isThumb: true, // Mark resolution playlists as thumbs
+            isResolutionPlaylist: true
+          });
+          
+          this.dataURLS.push([resPlaylistFile.name, new TextEncoder().encode(playlistContent), 'application/x-mpegURL']);
+          console.log(`Added resolution M3U8 playlist: ${resPlaylistFile.name} (marked as thumb)`);
+          
+          // Store resolution playlist info for master playlist
+          const resolution = file.name.match(/(\d+)p_index/)?.[1] || 'unknown';
+          resolutionPlaylists.push({
+            fileName: resPlaylistFile.name,
+            resolution: resolution,
+            originalName: file.name,
+            content: playlistContent,
+            originalContent: new TextDecoder().decode(data) // Keep original for preview
+          });
+        }
+      }
+      
+      // Set up preview after playlists are processed
+      if (resolutionPlaylists.length > 0) {
+        this.transcodePreview.available = true;
+        this.transcodePreview.resolutions = resolutionPlaylists.map(playlist => ({
+          resolution: playlist.resolution,
+          fileName: playlist.fileName,
+          originalContent: playlist.originalContent
+        })).sort((a, b) => parseInt(b.resolution) - parseInt(a.resolution));
         
-        // Second pass: process resolution-specific M3U8 playlists (after segments are hashed)
-        const processPlaylists = async () => {
-          // Wait for all segments to be processed first
-          await Promise.all(videoSegmentPromises);
-          
-          for (const file of files) {
-            if (file.name.includes('.m3u8') && file.name.includes('p_index')) {
-              const data = await ffmpeg.readFile(file.name);
-              let playlistContent = new TextDecoder().decode(data);
-              console.log(`M3U8 Resolution Playlist Content (${file.name}):`, playlistContent);
-              
-              // Replace segment references with actual IPFS hashes and add filename hints
-              segmentMapping.forEach((actualHash, originalName) => {
-                const segmentPattern = new RegExp(originalName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-                playlistContent = playlistContent.replace(segmentPattern, `https://ipfs.dlux.io/ipfs/${actualHash}?filename=${originalName}`);
-              });
-              
-              console.log(`M3U8 with IPFS hashes (${file.name}):`, playlistContent);
-              
-              // Mark resolution playlists as thumbs (they're sub-files)
-              const resPlaylistFile = new File([new TextEncoder().encode(playlistContent)], file.name.replace('.m3u8', '_thumb.m3u8'), { 
-                type: 'application/x-mpegURL' 
-              });
-              
-              videoFiles.push({
-                file: resPlaylistFile,
-                targetPath: '/Videos',
-                isThumb: true, // Mark resolution playlists as thumbs
-                isResolutionPlaylist: true
-              });
-              
-              this.dataURLS.push([resPlaylistFile.name, new TextEncoder().encode(playlistContent), 'application/x-mpegURL']);
-              console.log(`Added resolution M3U8 playlist: ${resPlaylistFile.name} (marked as thumb)`);
-              
-              // Store resolution playlist info for master playlist
-              const resolution = file.name.match(/(\d+)p_index/)?.[1] || 'unknown';
-              resolutionPlaylists.push({
-                fileName: resPlaylistFile.name,
-                resolution: resolution,
-                originalName: file.name,
-                content: playlistContent,
-                originalContent: new TextDecoder().decode(data) // Keep original for preview
-              });
-            }
-          }
-          
-          // Set up preview after playlists are processed
-          if (resolutionPlaylists.length > 0) {
-            this.transcodePreview.available = true;
-            this.transcodePreview.resolutions = resolutionPlaylists.map(playlist => ({
-              resolution: playlist.resolution,
-              fileName: playlist.fileName,
-              originalContent: playlist.originalContent
-            })).sort((a, b) => parseInt(b.resolution) - parseInt(a.resolution));
-            
-            // Default to highest resolution
-            this.transcodePreview.selectedResolution = this.transcodePreview.resolutions[0];
-            this.setPreviewVideoSrc();
-            
-            console.log('Preview available with resolutions:', this.transcodePreview.resolutions.map(r => r.resolution));
-          }
-        };
+        // Default to highest resolution
+        this.transcodePreview.selectedResolution = this.transcodePreview.resolutions[0];
+        this.setPreviewVideoSrc();
         
-        // Wait for all segments to be processed, then process everything
-        Promise.all(videoSegmentPromises).then(async (results) => {
-          // Process playlists after segments are done
-          await processPlaylists();
-          console.log('All transcoded files processed:', results);
-          
-          // Hash all the resolution playlists and create master playlist
-          if (resolutionPlaylists.length > 0) {
-            console.log('Hashing resolution playlists...');
-            
-            // Hash each resolution playlist content
+        console.log('Preview available with resolutions:', this.transcodePreview.resolutions.map(r => r.resolution));
+      }
+      
+      // Hash all the resolution playlists and create master playlist
+      if (resolutionPlaylists.length > 0) {
+        console.log('Hashing resolution playlists...');
+        
+        // Hash each resolution playlist content
             const hashPromises = resolutionPlaylists.map(async (playlist) => {
               // Update progress for playlist processing (reading was already done)
               this.hashingProgress.current++;
@@ -4764,18 +4801,13 @@ function buyNFT(setname, uid, price, type, callback){
             });
             this.dataURLS.push(['master_playlist.m3u8', new TextEncoder().encode(masterPlaylistContent), 'application/x-mpegURL']);
 
-            console.log('Final video files to upload:', videoFiles.map(f => f.file.name));
-            this.videoFilesToUpload = videoFiles;
-            this.videoMsg = 'All files are ready for upload!';
-            
-          } else {
-            this.videoMsg = 'No resolution playlists were generated. Please check the transcoding process.';
-          }
-        });
-      });
-      //const data = await ffmpeg.readFile("144p_000.ts")
-      //console.log(data)
-      //this.videosrc = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp2t' }));
+        console.log('Final video files to upload:', videoFiles.map(f => f.file.name));
+        this.videoFilesToUpload = videoFiles;
+        this.videoMsg = 'All files are ready for upload!';
+        
+      } else {
+        this.videoMsg = 'No resolution playlists were generated. Please check the transcoding process.';
+      }
     },
     downloadBlob(name, buf, mimeString) {
 
