@@ -4386,27 +4386,67 @@ function buyNFT(setname, uid, price, type, callback){
         return;
       }
       
-      // Skip event listeners due to compatibility issues
-      // Use default bitrates and progress monitoring instead
-      let hasEventListeners = false;
-      height = 720; // Default assumption for common video
-      bitrates = this.getPossibleBitrates(height);
+      const { name } = event.target.files[0];
+      await ffmpeg.writeFile(name, await fetchFile(event.target.files[0]));
+      var codec = "libx264";
+      
+      await ffmpeg.exec(["-encoders"]);
+      
+      // Get video dimensions to properly handle mobile/portrait videos
+      this.videoMsg = 'Analyzing video dimensions...';
+      try {
+        await ffmpeg.exec(["-i", name]);
+      } catch (e) {
+        // FFmpeg outputs info to stderr, so we expect an "error" here
+        // The dimensions info is still captured
+      }
+      
+      // Try to extract dimensions from FFmpeg output or use video element
+      let videoWidth = width || 1280;
+      let videoHeight = height || 720;
+      
+      // Create a temporary video element to get actual dimensions
+      const tempVideo = document.createElement('video');
+      tempVideo.src = URL.createObjectURL(event.target.files[0]);
+      
+      await new Promise((resolve) => {
+        tempVideo.onloadedmetadata = () => {
+          videoWidth = tempVideo.videoWidth;
+          videoHeight = tempVideo.videoHeight;
+          console.log(`📹 Detected video dimensions: ${videoWidth}x${videoHeight}`);
+          URL.revokeObjectURL(tempVideo.src);
+          resolve();
+        };
+        tempVideo.onerror = () => {
+          console.warn('Could not detect video dimensions, using defaults');
+          URL.revokeObjectURL(tempVideo.src);
+          resolve();
+        };
+      });
+      
+      // Use the larger dimension as reference for resolution ladder
+      const maxDimension = Math.max(videoWidth, videoHeight);
+      console.log(`📐 Using max dimension ${maxDimension} for resolution ladder`);
+      
+      bitrates = this.getPossibleBitrates(maxDimension);
+      
+      // For portrait videos, we need to adjust the scale filter
+      const isPortrait = videoHeight > videoWidth;
+      console.log(`📱 Video orientation: ${isPortrait ? 'Portrait' : 'Landscape'}`);
       
       // Limit resolutions to reduce memory pressure in FFmpeg.wasm
       if (bitrates.length > 3) {
         bitrates = bitrates.slice(0, 3); // Keep only top 3 resolutions
         console.log('Limited to 3 resolutions to reduce memory usage:', bitrates);
       }
-      console.log('Using default bitrates, event listeners disabled for compatibility');
-      
-      const { name } = event.target.files[0];
-      await ffmpeg.writeFile(name, await fetchFile(event.target.files[0]));
-      var codec = "libx264";
-      
-      await ffmpeg.exec(["-encoders"]);
-      await ffmpeg.exec(["-i", name]);
+      console.log('Video analysis complete, starting transcoding...');
             // Process resolutions sequentially to avoid memory issues with FFmpeg.wasm
       this.videoMsg = 'Starting multi-resolution transcoding...';
+      
+      // Reset hashing progress and start internal progress monitoring
+      this.resetHashingProgress();
+      const progressInterval = this.startInternalProgressMonitor(bitrates.length);
+      
       const successful = [];
       const failed = [];
       
@@ -4414,13 +4454,26 @@ function buyNFT(setname, uid, price, type, callback){
         const resHeight = parseInt(bitrates[i].split('x')[1]);
         this.videoMsg = `Transcoding ${resHeight}p (${i + 1}/${bitrates.length})...`;
         
+        // Calculate target dimensions maintaining aspect ratio
+        let scaleFilter;
+        if (isPortrait) {
+          // For portrait videos, scale by width and let height adjust
+          const targetWidth = Math.round(resHeight * (videoWidth / videoHeight));
+          scaleFilter = `scale=${targetWidth}:-1`;
+          console.log(`📱 Portrait scaling: ${targetWidth}x${resHeight} (target height)`);
+        } else {
+          // For landscape videos, scale by height and let width adjust  
+          scaleFilter = `scale=-1:${resHeight}`;
+          console.log(`🖥️ Landscape scaling: ${resHeight}p (target height)`);
+        }
+        
         let resCommands = [
           "-i", name,
           "-pix_fmt", "yuv420p",
           "-max_muxing_queue_size", "1024",
           "-profile:v", "main",
           "-start_number", "0",
-          "-vf", `scale=-1:${resHeight}`,
+          "-vf", scaleFilter,
           "-c:a", "aac", "-b:a", "256k"
         ];
         
@@ -4442,18 +4495,28 @@ function buyNFT(setname, uid, price, type, callback){
         );
         
         console.log(`Starting ${resHeight}p transcoding...`);
+        const resStartTime = Date.now();
         
         try {
           await ffmpeg.exec(resCommands);
-          console.log(`✅ ${resHeight}p transcoding complete`);
+          const resEndTime = Date.now();
+          const resTime = Math.round((resEndTime - resStartTime) / 1000);
+          console.log(`✅ ${resHeight}p transcoding complete in ${resTime}s`);
           successful.push(resHeight);
+          
+          // Update progress message
+          this.videoMsg = `✅ ${resHeight}p complete (${successful.length}/${bitrates.length}) - ${resTime}s`;
         } catch (err) {
           console.error(`❌ ${resHeight}p transcoding failed:`, err);
           failed.push({ height: resHeight, error: err.message || 'Unknown error' });
           
+          // Update progress message with failure info
+          this.videoMsg = `❌ ${resHeight}p failed (${successful.length}/${bitrates.length} successful)`;
+          
           // If this is a memory error, try to continue with fewer resolutions
           if (err.message && err.message.includes('memory')) {
             console.warn(`🧠 Memory issue detected, skipping remaining resolutions to preserve what we have`);
+            this.videoMsg = `🧠 Memory limit reached, stopping with ${successful.length} resolutions`;
             break;
           }
         }
@@ -4461,6 +4524,7 @@ function buyNFT(setname, uid, price, type, callback){
         // Small delay between resolutions to help with memory management
         if (i < bitrates.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 500));
+          this.videoMsg = `Preparing ${bitrates[i + 1].split('x')[1]}p transcoding...`;
         }
       }
       
@@ -4470,15 +4534,11 @@ function buyNFT(setname, uid, price, type, callback){
         return;
       } else if (failed.length > 0) {
         console.warn(`⚠️ Some resolutions failed (${failed.length}/${bitrates.length}):`, failed);
-        this.videoMsg = `Transcoding completed with ${successful.length}/${bitrates.length} resolutions`;
+        this.videoMsg = `✅ Transcoding completed: ${successful.length}/${bitrates.length} resolutions successful (${successful.map(h => h + 'p').join(', ')})`;
       } else {
         console.log('✅ All resolutions transcoded successfully:', successful);
-        this.videoMsg = 'All resolutions transcoded successfully!';
+        this.videoMsg = `🎉 All ${successful.length} resolutions transcoded successfully! (${successful.map(h => h + 'p').join(', ')})`;
       }
-      // Reset hashing progress and start internal progress monitoring
-      this.resetHashingProgress();
-      this.videoMsg = 'Transcoding in progress...';
-      const progressInterval = this.startInternalProgressMonitor(bitrates.length);
       
       console.time('exec');
       
