@@ -1,4 +1,4 @@
-this.version = "2025.06.08.1";
+this.version = "2025.06.08.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.08.1",
-  "generated": "2025-06-07T23:18:31Z",
+  "version": "2025.06.08.2",
+  "generated": "2025-06-07T23:27:50Z",
   "files": {
-    "/img/tokens/broca_icon.png": {
-      "checksum": "87aac077c4cfdf4bd02cbbbef8a4c3ba",
-      "size": 33591,
-      "priority": "important"
-    },
     "/img/tokens/broca_logomark.png": {
       "checksum": "fcd5ae3ad20ec9cfcee5764ad4f26e9f",
       "size": 28971,
@@ -1016,8 +1011,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "790c03f1e1e18aa374f3325b02212669",
-      "size": 36317,
+      "checksum": "3a90133f171fd6cf6b3b7eaef850221e",
+      "size": 36316,
       "priority": "important"
     },
     "/js/tagify.min.js": {
@@ -1091,8 +1086,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "aaac139a06976d62dfa988338a1d04da",
-      "size": 198216,
+      "checksum": "605219ff94814326791cd671c1eb5bf4",
+      "size": 199237,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1206,8 +1201,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "eec53dd02d33d6278e24760655051aad",
-      "size": 7300,
+      "checksum": "a96256fb76e4f82d8c087360eac5822a",
+      "size": 7299,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -1279,11 +1274,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/liquid/liquid.js": {
-      "checksum": "f187c384efa66db9ef56dc7abb1862c2",
-      "size": 5005,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/lua/lua.js": {
       "checksum": "f84ef485240448f04f47ae177e7c66f7",
