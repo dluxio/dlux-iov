@@ -2521,7 +2521,7 @@ export default {
         }
         const sign_data = {
           key_type: op[2],
-          challenge: `${op[0]}:${op[1]}`,
+          challenge: `${op[1]}`,
         };
         const data = CryptoJS.AES.encrypt(
           JSON.stringify(sign_data),
@@ -2546,7 +2546,7 @@ export default {
         console.log(op);
         window.hive_keychain.requestSignBuffer(
           op[0],
-          `${op[0]}:${op[1]}`,
+          `${op[1]}`,
           op[2],
           (sig) => {
             if (sig.error) rej(sig);
@@ -2619,7 +2619,7 @@ export default {
 
         try {
           // Sign the buffer like HKC does - op[1] should be the buffer string to sign
-          const bufferToSign = `${op[0]}:${op[1]}`;
+          const bufferToSign = `${op[1]}`;
           console.log("Signing buffer:", bufferToSign);
           
           const privateKey = hiveTx.PrivateKey.from(privateKeyStr);

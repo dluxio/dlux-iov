@@ -949,7 +949,7 @@ export default {
         }
       }
       this.contract.files = body
-      this.signText(header + body).then(res => {
+      this.signText(this.account + ':' + header + ':' + body).then(res => {
         this.meta = meta
         this.contract.fosig = res.split(":")[3]
         this.upload(cids, this.contract, folderListString)

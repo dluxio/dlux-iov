@@ -1411,7 +1411,7 @@ createApp({
         cids.push(this.FileInfo[names[i]].hash)
       }
       this.contract.files = body
-      this.signText(header + body).then(res => {
+      this.signText(this.account + ':' + header + body).then(res => {
         console.log({ res })
         this.contract.fosig = res.split(":")[3]
         this.upload(cids, this.contract)
