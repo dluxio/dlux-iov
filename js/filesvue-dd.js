@@ -932,7 +932,8 @@ export default {
                                :type="previewModal.file?.type?.includes('m3u8') || previewModal.file?.name?.endsWith('.m3u8') ? 'application/x-mpegURL' : undefined"
                                controls 
                                class="w-100 rounded"
-                               style="max-height: 70vh;">
+                               style="max-height: 70vh;"
+                               @loadstart="setupHLSPlayer($event.target)">
                             Your browser does not support the video tag.
                         </video>
                     </div>
@@ -4907,6 +4908,25 @@ export default {
                 type.includes('wav') ||
                 type.includes('ogg') ||
                 type.includes('flac'));
+        },
+
+        setupHLSPlayer(videoElement) {
+            // Delegate to the common method for HLS setup
+            if (common.setupHLSPlayer) {
+                return common.setupHLSPlayer(videoElement);
+            } else {
+                console.warn('HLS setup method not available');
+            }
+        },
+
+        initIpfsVideoSupport() {
+            // Delegate to the common method for video support initialization
+            if (common.initIpfsVideoSupport) {
+                return common.initIpfsVideoSupport();
+            } else {
+                console.warn('IPFS video support method not available');
+                return null;
+            }
         },
 
 

@@ -4447,36 +4447,14 @@ function buyNFT(setname, uid, price, type, callback){
       this.resetHashingProgress();
       const progressInterval = this.startInternalProgressMonitor(bitrates.length);
       
-      // Build command based on your working structure
-      var commands = [
-        // input filename
-        "-i", name,
-        // pixel format for compatibility
-        "-pix_fmt", "yuv420p",
-        // 10 second segments
-        "-segment_time", "10",
-        // max muxing queue size
-        '-max_muxing_queue_size', '1024',
-        // hls settings
-        '-hls_time', "5",
-        '-hls_list_size', "0",
-        // profile
-        '-profile:v', 'main',
-        // audio codec and bitrate
-        "-acodec", "aac", "-b:a", "256k"
-      ];
+      // Use separate FFmpeg executions for each resolution to ensure all playlists are generated
+      this.videoMsg = 'Starting multi-resolution transcoding...';
+      console.time('transcode-all');
       
-      // Add codec-specific options
-      if (qsv) {
-        codec = "h264_qsv";
-        commands.push('-preset', 'slow', '-look_ahead', '1', '-global_quality', '36', "-c:v", codec);
-      } else {
-        commands.push('-crf', '26', '-preset', 'fast', "-c:v", codec);
-      }
-      
-      // Add multiple resolution outputs using your original working approach
+      // Process each resolution separately to avoid FFmpeg command conflicts
       for (var i = 0; i < bitrates.length; i++) {
         const resHeight = parseInt(bitrates[i].split('x')[1]);
+        this.videoMsg = `Transcoding ${resHeight}p... (${i + 1}/${bitrates.length})`;
         
         // Calculate proper scale filter for portrait/landscape
         let scaleFilter;
@@ -4491,43 +4469,91 @@ function buyNFT(setname, uid, price, type, callback){
           console.log(`🖥️ Landscape scaling: ${resHeight}p (target height)`);
         }
         
-        // Add segment output for this resolution (using your working format)
-        commands.push(
-          "-f", "segment", 
-          `${resHeight}p_%03d.ts`, 
-          `-segment_format`, 'mpegts',
-          // m3u8 playlist
-          "-segment_list_type", "m3u8", 
-          "-segment_list", `${resHeight}p_index.m3u8`
-        );
+        // Build command for this specific resolution
+        var commands = [
+          // input filename
+          "-i", name,
+          // pixel format for compatibility
+          "-pix_fmt", "yuv420p",
+          // max muxing queue size
+          '-max_muxing_queue_size', '1024',
+          // hls settings
+          '-hls_time', "5",
+          '-hls_list_size', "0",
+          // profile
+          '-profile:v', 'main',
+          // audio codec and bitrate
+          "-acodec", "aac", "-b:a", "256k"
+        ];
+        
+        // Add codec-specific options
+        if (qsv) {
+          codec = "h264_qsv";
+          commands.push('-preset', 'slow', '-look_ahead', '1', '-global_quality', '36', "-c:v", codec);
+        } else {
+          commands.push('-crf', '26', '-preset', 'fast', "-c:v", codec);
+        }
+        
+        // Add scale filter
         commands.push('-vf', scaleFilter);
-      }
-      
-      console.log('📋 Final FFmpeg command:', commands);
-      this.videoMsg = 'Starting single-pass multi-resolution transcoding...';
-      
-      console.time('exec');
-      
-      try {
-        await ffmpeg.exec(commands);
-        console.timeEnd('exec');
-        console.log('✅ All resolutions transcoded successfully in single pass!');
-        this.videoMsg = `🎉 All ${bitrates.length} resolutions transcoded successfully! (${bitrates.map(b => parseInt(b.split('x')[1]) + 'p').join(', ')})`;
-      } catch (err) {
-        console.timeEnd('exec');
-        console.error('❌ Multi-resolution transcoding failed:', err);
-        this.videoMsg = 'Transcoding failed. Please try again with a smaller video file.';
-        return;
-      }
-      
-      console.time('exec');
-      
-      // Clean up progress monitoring after transcoding completes
-      if (progressInterval) {
-        clearInterval(progressInterval);
-      }
-      
-      console.timeEnd('exec');
+        
+        // Add HLS output for this resolution (more reliable than segment)
+        commands.push(
+          "-hls_segment_filename", `${resHeight}p_%03d.ts`,
+          `${resHeight}p_index.m3u8`
+        );
+        
+        console.log(`📋 FFmpeg command for ${resHeight}p:`, commands);
+        
+        try {
+          console.time(`exec-${resHeight}p`);
+          await ffmpeg.exec(commands);
+          console.timeEnd(`exec-${resHeight}p`);
+          console.log(`✅ ${resHeight}p transcoding completed successfully!`);
+          
+          // Verify that the playlist was created
+          const files = await ffmpeg.listDir("/");
+          const playlistExists = files.some(f => f.name === `${resHeight}p_index.m3u8`);
+          const segmentFiles = files.filter(f => f.name.startsWith(`${resHeight}p_`) && f.name.endsWith('.ts'));
+          
+          console.log(`📊 ${resHeight}p verification: playlist=${playlistExists}, segments=${segmentFiles.length}`);
+          
+          if (!playlistExists) {
+            console.warn(`⚠️ ${resHeight}p playlist not generated, attempting retry with different parameters`);
+            // Retry with simpler command
+            const retryCommands = [
+              "-i", name,
+              "-vf", scaleFilter,
+              "-c:v", "libx264", "-preset", "fast", "-crf", "26",
+              "-c:a", "aac", "-b:a", "256k",
+              "-hls_time", "5",
+              "-hls_list_size", "0",
+              "-hls_segment_filename", `${resHeight}p_%03d.ts`,
+              `${resHeight}p_index.m3u8`
+            ];
+            console.log(`🔄 Retry command for ${resHeight}p:`, retryCommands);
+            await ffmpeg.exec(retryCommands);
+            
+            // Verify retry
+            const retryFiles = await ffmpeg.listDir("/");
+            const retryPlaylistExists = retryFiles.some(f => f.name === `${resHeight}p_index.m3u8`);
+            console.log(`📊 ${resHeight}p retry result: playlist=${retryPlaylistExists}`);
+          }
+        } catch (err) {
+          console.error(`❌ ${resHeight}p transcoding failed:`, err);
+          this.videoMsg = `Transcoding failed at ${resHeight}p. Please try again with a smaller video file.`;
+          return;
+        }
+             }
+       
+       console.timeEnd('transcode-all');
+       console.log('✅ All resolutions transcoded successfully!');
+       this.videoMsg = `🎉 All ${bitrates.length} resolutions transcoded successfully! (${bitrates.map(b => parseInt(b.split('x')[1]) + 'p').join(', ')})`;
+       
+       // Clean up progress monitoring after transcoding completes
+       if (progressInterval) {
+         clearInterval(progressInterval);
+       }
       this.videoMsg = 'Transcoding complete! Preparing files for upload...';
       
       // Non-blocking contract fetch - don't let this interrupt transcoding
@@ -5534,16 +5560,16 @@ function buyNFT(setname, uid, price, type, callback){
     getResolutionDimensions(resolution) {
       // Common 16:9 aspect ratio dimensions
       const dimensionMap = {
-        '144': '256x144',
-        '240': '426x240', 
-        '360': '640x360',
-        '480': '854x480',
-        '720': '1280x720',
-        '1080': '1920x1080',
-        '1440': '2560x1440',
-        '2160': '3840x2160'
+        '144': { width: 256, height: 144 },
+        '240': { width: 426, height: 240 }, 
+        '360': { width: 640, height: 360 },
+        '480': { width: 854, height: 480 },
+        '720': { width: 1280, height: 720 },
+        '1080': { width: 1920, height: 1080 },
+        '1440': { width: 2560, height: 1440 },
+        '2160': { width: 3840, height: 2160 }
       };
-      return dimensionMap[resolution] || '1280x720'; // Default 720p
+      return dimensionMap[resolution] || { width: 1280, height: 720 }; // Default 720p
     },
     
     hashOf(buf, opts = {}) {
