@@ -1,4 +1,4 @@
-this.version = "2025.06.07.14";
+this.version = "2025.06.07.15";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.07.14",
-  "generated": "2025-06-07T17:32:08Z",
+  "version": "2025.06.07.15",
+  "generated": "2025-06-07T17:52:29Z",
   "files": {
-    "/img/spk512.png": {
-      "checksum": "98a452727661d34f119ddf6a3fd920a8",
-      "size": 21939,
-      "priority": "important"
-    },
     "/img/spknetwork.png": {
       "checksum": "4d91f7a0ed50ac7b0d27cbd52794078a",
       "size": 51410,
@@ -1031,7 +1026,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "d55517f8f29cf54b124cd3b89ca069d1",
+      "checksum": "36355057a4483fe8f50e148191366f0d",
       "size": 36317,
       "priority": "important"
     },
@@ -1066,8 +1061,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/uploadvue.js": {
-      "checksum": "f2b5d9e00ac45f4b7e970aa3fa20fdb3",
-      "size": 62507,
+      "checksum": "17169400b7f9b13a332037dcb6ba6209",
+      "size": 62936,
       "priority": "important"
     },
     "/js/uuidv.js": {
@@ -1221,7 +1216,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "f3cde4228524934909420bb234f5b66c",
+      "checksum": "e72ee7a0fcf9f7865f48b8ecb10d91f4",
       "size": 7300,
       "priority": "important"
     },
@@ -1294,11 +1289,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/kotlin/kotlin.js": {
-      "checksum": "29b986d5bcd6489356dc6ae20169d520",
-      "size": 4266,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/less/less.js": {
       "checksum": "2db6c4c8ee82c86eabb71fecc3019a90",
