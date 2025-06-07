@@ -1,4 +1,4 @@
-this.version = "2025.06.07.8";
+this.version = "2025.06.07.9";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.07.8",
-  "generated": "2025-06-07T16:39:22Z",
+  "version": "2025.06.07.9",
+  "generated": "2025-06-07T17:00:41Z",
   "files": {
-    "/img/ppt-file-type-svgrepo-com.svg": {
-      "checksum": "8487976bee6f78adc7caee5b71479743",
-      "size": 2103,
-      "priority": "important"
-    },
     "/img/psd-file-type-svgrepo-com.svg": {
       "checksum": "752cee1bb240f2679af2f068930fa2cf",
       "size": 2242,
@@ -1046,8 +1041,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/spkvue.js": {
-      "checksum": "8ebc9f52c72c60026294606944ce1f55",
-      "size": 92217,
+      "checksum": "b21c553f444728009496df8b2ee57770",
+      "size": 92238,
       "priority": "important"
     },
     "/js/standard-modal.js": {
@@ -1061,7 +1056,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "1ad083ff359ea956c3e36276d07bf1b7",
+      "checksum": "911465805d5f544ac79483db7b494608",
       "size": 36316,
       "priority": "important"
     },
@@ -1096,8 +1091,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/uploadvue.js": {
-      "checksum": "e78a280e8fb9a82dc8d5cc6c555c211e",
-      "size": 62458,
+      "checksum": "e95e174434ff6be6ae995bd026b3dcec",
+      "size": 62485,
       "priority": "important"
     },
     "/js/uuidv.js": {
@@ -1251,7 +1246,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "65d908bc7290dadfb117a691ad5b91c6",
+      "checksum": "b966b2481bfe7be0b6e9347fa021b2d0",
       "size": 7299,
       "priority": "important"
     },
@@ -1324,11 +1319,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/hcl/hcl.js": {
-      "checksum": "9e3a84aafa0b4344e9d2828acfb11805",
-      "size": 4411,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/html/html.js": {
       "checksum": "c29141ad1c095b7e14e1a37fd4570191",
