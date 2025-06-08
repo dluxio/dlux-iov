@@ -639,7 +639,12 @@ export default {
         console.log('IPFS Loader loading:', url);
 
         let ipfsUrl = url;
-        if (url.startsWith(`${this.gatewayUrl}/ipfs/`)) {
+        
+        // Handle blob URLs for preview mode
+        if (url.startsWith('blob:')) {
+          console.log('IPFS Loader handling blob URL for preview:', url);
+          ipfsUrl = url; // Use blob URL directly
+        } else if (url.startsWith(`${this.gatewayUrl}/ipfs/`)) {
           const cid = url.split('/ipfs/')[1].split('?')[0];
           let filename = 'file';
 
@@ -757,10 +762,11 @@ export default {
     const videoType = videoElement.type;
     console.log('Setting up player for video:', videoSrc, 'Type:', videoType);
 
-    // Skip blob URLs - these are likely already processed by HLS.js
+    // Handle blob URLs for preview (they contain M3U8 playlists)
     if (videoSrc.startsWith('blob:')) {
-      console.log('Skipping blob URL, likely already processed by HLS');
-      return;
+      console.log('Processing blob URL for HLS preview:', videoSrc);
+      // Allow blob URLs to be processed by HLS if they're M3U8 playlists
+      // Don't skip them - they might be transcoded preview playlists
     }
 
     // Skip if HLS instance already exists for this element
@@ -874,7 +880,8 @@ export default {
       if (video.src && !video.type) {
         const isM3U8 = video.src.endsWith('.m3u8') || 
                        video.src.includes('.m3u8?') ||
-                       (video.src.includes('filename=') && video.src.includes('.m3u8'));
+                       (video.src.includes('filename=') && video.src.includes('.m3u8')) ||
+                       video.src.startsWith('blob:'); // Assume blob URLs are M3U8 for preview
         if (isM3U8) {
           video.type = 'application/x-mpegURL';
         }
