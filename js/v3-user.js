@@ -8,6 +8,10 @@ import ModalVue from "/js/modal-manager.js";
 import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
 import MDE from "/js/mde.js";
+import CollaborativeDocs from "/js/collaborative-docs.js";
+import CollaborativePostEditor from "/js/collaborative-post-editor.js";
+import SimpleFieldEditor from "/js/simple-field-editor.js";
+import JsonEditor from "/js/json-editor.js";
 import ChoicesVue from '/js/choices-vue.js';
 import Replies from "/js/replies.js";
 import CardVue from "/js/cardvue.js";
@@ -1064,6 +1068,13 @@ PORT=3000
           segmentBlobs: []
         },
         videoObserver: null,
+        // Collaborative editing
+        collaborativeDocument: null,
+        collaborativeDocumentData: {},
+        collaborationAuthHeaders: {},
+        isCollaborativeMode: false,
+        collaborativePermission: null,
+        canPostFromCollaboration: false,
     };
   },
   components: {
@@ -1077,6 +1088,10 @@ PORT=3000
     "vue-markdown": Marker,
     "vue-ratings": Ratings,
     "mde": MDE,
+    "collaborative-docs": CollaborativeDocs,
+    "collaborative-post-editor": CollaborativePostEditor,
+    "simple-field-editor": SimpleFieldEditor,
+    "json-editor": JsonEditor,
     "replies": Replies,
     "card-vue": CardVue,
     "contract-vue": ContractVue,
@@ -5994,6 +6009,233 @@ function buyNFT(setname, uid, price, type, callback){
       this.hashingProgress.percentage = 0;
       this.hashingProgress.currentFile = '';
     },
+    
+          // Collaborative editing methods
+      async generateCollaborationAuthHeaders(forceRefresh = false) {
+        console.log('generateCollaborationAuthHeaders called for:', this.account, 'forceRefresh:', forceRefresh);
+        
+        if (!this.account) {
+          console.warn('No account available for collaboration auth');
+          return {};
+        }
+
+        // Check session storage first (user-specific key)
+        if (!forceRefresh) {
+          const cachedHeaders = sessionStorage.getItem(`collaborationAuthHeaders_${this.account}`);
+          if (cachedHeaders) {
+            console.log('Found cached headers for:', this.account);
+            const headers = JSON.parse(cachedHeaders);
+            const cachedChallenge = parseInt(headers['x-challenge']);
+            const now = Math.floor(Date.now() / 1000);
+            
+            // If headers are valid (less than 23 hours old), reuse them
+            if (cachedChallenge && (now - cachedChallenge) < (23 * 60 * 60)) {
+              console.log('Using valid cached headers for:', this.account);
+              this.collaborationAuthHeaders = headers;
+              return headers;
+            } else {
+              console.log('Cached headers expired for:', this.account);
+            }
+          } else {
+            console.log('No cached headers found for:', this.account);
+          }
+        }
+
+        console.log('Creating new collaboration auth operation for:', this.account);
+
+        return new Promise((resolve, reject) => {
+          // Use the v3-nav op system for consistency
+          const op = {
+            type: "collaboration_auth",
+            txid: `collaboration_auth_${Date.now()}`,
+            msg: "Generating collaboration authentication headers",
+            status: "Initializing authentication...",
+            time: new Date().getTime(),
+            delay: 250,
+            title: "Collaboration Authentication",
+            // Add callbacks for success and error
+            onSuccess: (headers) => {
+              console.log('Collaboration auth success callback received:', headers);
+              this.collaborationAuthHeaders = headers;
+              resolve(headers);
+            },
+            onError: (error) => {
+              console.log('Collaboration auth error callback received:', error);
+              reject(error);
+            }
+          };
+
+          console.log('Setting toSign for collaboration auth:', op);
+          // Trigger the operation by setting toSign (this will be picked up by v3-nav)
+          this.toSign = op;
+        });
+      },
+    
+    async openCollaborativeDocument(documentPath) {
+      console.log('🚀 Opening collaborative document:', documentPath);
+      this.collaborativeDocument = documentPath;
+      this.isCollaborativeMode = true;
+      
+      // Generate auth headers if not available
+      if (!this.collaborationAuthHeaders || !this.collaborationAuthHeaders['x-account']) {
+        console.log('🔐 Generating auth headers for collaboration...');
+        await this.generateCollaborationAuthHeaders();
+      }
+      
+      console.log('✅ Collaborative mode activated:', {
+        document: this.collaborativeDocument,
+        isCollaborativeMode: this.isCollaborativeMode,
+        hasAuthHeaders: !!this.collaborationAuthHeaders['x-account']
+      });
+      
+      // Scroll to post section or expand it
+      const postAccordion = document.querySelector('#postDetails');
+      if (postAccordion && postAccordion.classList.contains('collapse')) {
+        const bsCollapse = new bootstrap.Collapse(postAccordion, { show: true });
+      }
+    },
+    
+    async ensureCollaborationAuth() {
+      // This method ensures auth headers are available for collaborative features
+      console.log('Ensuring collaboration auth headers for account:', this.account);
+      
+      if (!this.account) {
+        console.warn('No account available for collaboration');
+        return {};
+      }
+      
+      try {
+        const headers = await this.generateCollaborationAuthHeaders();
+        console.log('Collaboration auth headers ready:', !!headers['x-account']);
+        
+        // Update the reactive data property
+        this.collaborationAuthHeaders = headers;
+        
+        return headers;
+      } catch (error) {
+        console.error('Failed to ensure collaboration auth:', error);
+        // Clear any invalid headers
+        this.collaborationAuthHeaders = {};
+        return {};
+      }
+    },
+    
+    loadCollaborationAuthHeaders() {
+      // Load headers from session storage for current user
+      if (!this.account) {
+        this.collaborationAuthHeaders = {};
+        return;
+      }
+      
+      const cachedHeaders = sessionStorage.getItem(`collaborationAuthHeaders_${this.account}`);
+      if (cachedHeaders) {
+        try {
+          const headers = JSON.parse(cachedHeaders);
+          const cachedChallenge = parseInt(headers['x-challenge']);
+          const now = Math.floor(Date.now() / 1000);
+          
+          // If headers are valid (less than 23 hours old), load them
+          if (cachedChallenge && (now - cachedChallenge) < (23 * 60 * 60)) {
+            this.collaborationAuthHeaders = headers;
+            console.log('Loaded valid collaboration headers for:', this.account);
+            return;
+          }
+        } catch (e) {
+          console.warn('Invalid cached collaboration headers:', e);
+        }
+      }
+      
+      // Clear invalid/expired headers
+      this.collaborationAuthHeaders = {};
+    },
+    
+    exitCollaborativeMode() {
+      this.isCollaborativeMode = false;
+      this.collaborativeDocument = null;
+    },
+    
+    requestCollaboration() {
+      // This method can be called from the post-vue component
+      // For now, we'll just show an alert to guide users to the collaborative docs section
+      alert('To start collaborative editing, please create or select a document from the Collaborative Documents section above.');
+    },
+    
+    handleCollaborativePermissionChange(permissionData) {
+      console.log('Permission change received:', permissionData);
+      this.collaborativePermission = permissionData.permission;
+      this.canPostFromCollaboration = permissionData.canPost;
+      
+      // Store for cross-component access
+      if (permissionData.documentPath) {
+        sessionStorage.setItem(`collaborativePermission_${this.account}_${permissionData.documentPath}`, 
+          JSON.stringify(permissionData));
+      }
+    },
+    
+    loadDocumentIntoPost(documentContent) {
+      console.log('Loading document content into post:', documentContent);
+      
+      // Store collaborative document data for multi-field editor
+      this.collaborativeDocumentData = documentContent;
+      
+      // Also load into regular post form for backwards compatibility
+      this.postTitle = documentContent.title || '';
+      this.postBody = documentContent.body || '';
+      
+      // Handle tags
+      if (documentContent.tags && Array.isArray(documentContent.tags)) {
+        this.postTags = documentContent.tags.join(' ');
+        this.postCustom_json.tags = documentContent.tags;
+      }
+      
+      // Handle custom JSON
+      if (documentContent.custom_json) {
+        this.postCustom_json = {
+          ...this.postCustom_json,
+          ...documentContent.custom_json
+        };
+      }
+      
+      // Generate permlink from title if not collaborative mode
+      if (documentContent.title && !this.isCollaborativeMode) {
+        this.postPermlink = this.permlink(documentContent.title);
+      }
+      
+      // Focus on the post section
+      this.$nextTick(() => {
+        const postSection = document.querySelector('.card-body');
+        if (postSection) {
+          postSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    },
+    
+    handleCollaborativePostData(postData) {
+      // Handle data changes from collaborative post editor
+      console.log('Collaborative post data updated:', postData);
+      this.postTitle = postData.title;
+      this.postBody = postData.body;
+      this.postTags = postData.tags;
+      this.postPermlink = postData.permlink;
+      this.postBens = postData.beneficiaries;
+      this.postCustom_json = { ...this.postCustom_json, ...postData.custom_json };
+    },
+    
+    handleCollaborativePublish(postData) {
+      // Handle publish request from collaborative editor
+      console.log('Publishing collaborative post:', postData);
+      
+      // Set the data and trigger normal post flow
+      this.postTitle = postData.title;
+      this.postBody = postData.body;
+      this.postTags = postData.tags.join ? postData.tags.join(' ') : postData.tags;
+      this.postPermlink = postData.permlink;
+      this.postBens = postData.beneficiaries;
+      this.postCustom_json = { ...this.postCustom_json, ...postData.custom_json };
+      
+      // Trigger post
+      this.post();
+    }
   },
   mounted() {
     // Check for active service worker
@@ -6084,6 +6326,9 @@ function buyNFT(setname, uid, price, type, callback){
     
     // Start observing for video elements to setup HLS
     this.videoObserver = this.initIpfsVideoSupport();
+    
+    // Load collaboration headers for current user
+    this.loadCollaborationAuthHeaders();
   },
   beforeDestroy() {
     this.observer.disconnect();
@@ -6158,6 +6403,7 @@ function buyNFT(setname, uid, price, type, callback){
         this.getRcAccount(newValue); // Fetch RC account data
         //this.fetchDelegationsData(); // Fetch delegations data
         this.initializeCharts(); // Initialize charts
+        this.loadCollaborationAuthHeaders(); // Load collaboration headers for new user
       },
     },
   },
@@ -6222,5 +6468,7 @@ function buyNFT(setname, uid, price, type, callback){
         (parseFloat(this.feedPrice.base))
       );
     },
+    
+
   },
 }).mount('#app')

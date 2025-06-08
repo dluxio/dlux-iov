@@ -941,4 +941,37 @@ export default {
     window._dluxVideoObserver = observer;
     return observer;
   },
+
+  // Collaboration utilities
+  createCollaborationYDoc() {
+    // Use the global Y.js instance to prevent conflicts
+    if (window.CollaborationBundle && window.CollaborationBundle.createDocument) {
+      return window.CollaborationBundle.createDocument();
+    } else if (window.Y && window.Y.Doc) {
+      return new window.Y.Doc();
+    } else {
+      console.error('Y.js not available for collaboration');
+      return null;
+    }
+  },
+
+  getCollaborationProvider() {
+    // Return the HocuspocusProvider from the global scope
+    return (window.CollaborationBundle && window.CollaborationBundle.HocuspocusProvider) 
+      || window.HocuspocusProvider;
+  },
+
+  validateCollaborationSetup() {
+    // Check if all required collaboration dependencies are available
+    const hasYjs = !!(window.CollaborationBundle?.Y || window.Y);
+    const hasProvider = !!(window.CollaborationBundle?.HocuspocusProvider || window.HocuspocusProvider);
+    const hasBundle = !!window.CollaborationBundle;
+    
+    return {
+      hasYjs,
+      hasProvider,
+      hasBundle,
+      isReady: hasYjs && hasProvider
+    };
+  }
 };

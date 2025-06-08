@@ -1,6 +1,6 @@
 /docs/.vitepress/cache
 /docs/.vitepress/dist
-/packages
+packages
 node_modules
 .vscode/settings.json
 css/bootstrap/.DS_Store
@@ -15,6 +15,7 @@ js/.DS_Store
 .DS_Store
 .DS_Store
 .DS_Store
+.cursor
 
 # Playwright
 /test-results/

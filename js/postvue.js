@@ -1,5 +1,5 @@
 import Tagify from "/js/tagifyvue.js";
-import MDE from "/js/mde.js";
+import TiptapEditor from "/js/tiptap-editor.js";
 import Bennies from "/js/bennies.js";
 
 export default {
@@ -32,7 +32,13 @@ export default {
         </div>
         <div class="form-group mb-3">
             <label class="mb-1" for="body">Post Body</label>
-            <mde @data="postBody = $event" :insert="insert"/>
+            <tiptap-editor @data="postBody = $event" 
+                          :insert="insert" 
+                          placeholder="Write your post content..."
+                          :show-collaboration="isCollaborativeMode"
+                          :collaborative-doc="collaborativeDocument"
+                          :collaboration-config="collaborationConfig"
+                          @requestCollaboration="requestCollaboration"/>
         </div>
         <div class="form-group mb-3">
             <label class="mb-1" for="tags">Tags</label><br>
@@ -114,6 +120,22 @@ export default {
       type: Object,
       required: false,
       default: null
+    },
+    // Collaborative editing props
+    isCollaborativeMode: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+    collaborativeDocument: {
+      type: String,
+      required: false,
+      default: ""
+    },
+    collaborationAuthHeaders: {
+      type: Object,
+      required: false,
+      default: () => ({})
     }
   },
   data() {
@@ -132,7 +154,7 @@ export default {
       }
     };
   },
-  emits: ['tosign', 'passdata'],
+  emits: ['tosign', 'passdata', 'requestCollaboration'],
   methods: {
     buildTags() {
       this.postTags = this.postTags.replace(/#/g, "");
@@ -318,9 +340,22 @@ export default {
         return true
       }
       return false
-    }
+    },
+    requestCollaboration() {
+      // Emit event to parent to handle collaboration setup
+      this.$emit('requestCollaboration');
+    },
   },
   computed: {
+    collaborationConfig() {
+      const config = {
+        authToken: this.collaborationAuthHeaders['x-signature'],
+        username: this.account,
+        userColor: '#' + Math.floor(Math.random()*16777215).toString(16)
+      };
+      console.log('🔧 Collaboration config computed:', config);
+      return config;
+    },
     validPost() {
       if (!this.postPermlink) return false
       if (!this.postTitle) return false
@@ -356,7 +391,7 @@ export default {
   },
   components: {
     "tagify": Tagify,
-    "mde": MDE,
+    "tiptap-editor": TiptapEditor,
     "bennies": Bennies
   },
   watch: {

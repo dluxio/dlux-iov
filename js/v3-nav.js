@@ -468,16 +468,20 @@ export default {
           this.broadcastCJA(op);
         } else if (op.type == "cj") {
           this.broadcastCJ(op);
-        } else if (this.op.type == "xfr") {
+        } else if (op.type == "xfr") {
           this.broadcastTransfer(op);
-        } else if (this.op.type == "comment") {
+        } else if (op.type == "comment") {
           this.broadcastComment(op);
-        } else if (this.op.type == "vote") {
+        } else if (op.type == "vote") {
           this.broadcastVote(op);
-        } else if (this.op.type == "raw") {
+        } else if (op.type == "raw") {
           this.broadcastRaw(op);
-        } else if (this.op.type == "sign_headers") {
+        } else if (op.type == "sign_headers") {
           this.signHeaders(op);
+        } else if (op.type == "collaboration_auth") {
+          this.generateCollaborationHeaders(op);
+        } else if (op.type == "sign") {
+          this.signOnly(op);
         }
         localStorage.setItem("pending", JSON.stringify(this.ops));
       }
@@ -2415,6 +2419,108 @@ export default {
       }, 250);
       
       this.signTimeouts.set(challenge, timeoutId);
+    },
+
+    async generateCollaborationHeaders(obj) {
+      this.cleanOps(obj.txid);
+      
+      try {
+        console.log('Generating collaboration headers for:', this.user);
+        
+        // Check if we have valid cached headers in session storage (user-specific)
+        const cachedHeaders = sessionStorage.getItem(`collaborationAuthHeaders_${this.user}`);
+        if (cachedHeaders) {
+          const headers = JSON.parse(cachedHeaders);
+          const cachedChallenge = parseInt(headers['x-challenge']);
+          const now = Math.floor(Date.now() / 1000);
+          
+          // If headers are valid (less than 23 hours old), reuse them
+          if (cachedChallenge && (now - cachedChallenge) < (23 * 60 * 60)) {
+            console.log('Using cached collaboration headers for:', this.user);
+            obj.status = 'Using cached authentication';
+            
+            // Call success callback if provided
+            if (obj.onSuccess) {
+              obj.onSuccess(headers);
+            }
+            return;
+          }
+        }
+
+        obj.status = 'Getting authentication challenge...';
+
+        // Get challenge from collaboration API
+        const challengeResponse = await fetch('https://data.dlux.io/api/collaboration/challenge');
+        if (!challengeResponse.ok) {
+          throw new Error(`Challenge API returned ${challengeResponse.status}`);
+        }
+        
+        const challengeData = await challengeResponse.json();
+        if (!challengeData.success) {
+          throw new Error('Failed to get challenge: ' + (challengeData.error || 'Unknown error'));
+        }
+
+        const challenge = challengeData.challenge;
+        obj.status = 'Signing authentication challenge...';
+        
+        // Sign the challenge using existing infrastructure
+        const signResult = await this.signChallenge(challenge.toString(), 'posting');
+        
+        if (!signResult || !signResult.signature) {
+          throw new Error('Failed to sign collaboration challenge');
+        }
+
+        obj.status = 'Building authentication headers...';
+
+        // Get public key
+        let pubKey = signResult.pubKey;
+        if (!pubKey) {
+          // Try to get from stored account info or current user data
+          const userDataResponse = await fetch(`https://hive-api.dlux.io`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${this.user}"]], "id":1}`
+          });
+          
+          if (userDataResponse.ok) {
+            const userData = await userDataResponse.json();
+            if (userData.result && userData.result[0] && userData.result[0].posting) {
+              pubKey = userData.result[0].posting.key_auths[0][0];
+            }
+          }
+        }
+        
+        if (!pubKey) {
+          throw new Error('Could not determine public key for collaboration');
+        }
+
+        const headers = {
+          'x-account': this.user,
+          'x-challenge': challenge.toString(),
+          'x-pubkey': pubKey,
+          'x-signature': signResult.signature
+        };
+
+        // Store in session storage for reuse (user-specific)
+        sessionStorage.setItem(`collaborationAuthHeaders_${this.user}`, JSON.stringify(headers));
+        
+        obj.status = 'Authentication successful!';
+        console.log('Generated and cached collaboration auth headers for:', this.user);
+        
+        // Call success callback if provided
+        if (obj.onSuccess) {
+          obj.onSuccess(headers);
+        }
+        
+      } catch (error) {
+        console.error('Failed to generate collaboration headers:', error);
+        obj.status = 'Authentication failed: ' + error.message;
+        
+        // Call error callback if provided
+        if (obj.onError) {
+          obj.onError(error);
+        }
+      }
     },
     
     executePendingSignRequests(challenge) {

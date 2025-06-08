@@ -40,6 +40,8 @@
     <script src="/js/buffer.js"></script>
     <script src="/js/drag-drop.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <!-- Tiptap Editor Styles -->
+    <link href="/css/tiptap-editor.css" rel="stylesheet" />
     <script src="/reg-sw.js"></script>
     <script src="/js/diff.js"></script>
     <script>
@@ -599,15 +601,75 @@
                     </div>
                 </div>
                 
-                <!-- Post Details (Single unified post section) -->
-                <div class="mt-3">
+                <!-- Collaborative Documents Section -->
+                <div class="accordion border-white-50 rounded mt-3" id="collaborationAccordion">
+                    <div class="accordion-item bg-img-none bg-dark-1">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collaborativeDocs" aria-expanded="false" aria-controls="collaborativeDocs">
+                                <i class="fa-solid fa-users fa-fw me-2"></i>Collaborative Documents
+                            </button>
+                        </h2>
+                        <div id="collaborativeDocs" class="accordion-collapse collapse" data-bs-parent="#collaborationAccordion">
+                            <div class="accordion-body">
+                                <collaborative-docs v-if="account" 
+                                    :account="account" 
+                                    :auth-headers="collaborationAuthHeaders"
+                                    @open-collaborative-doc="openCollaborativeDocument"
+                                    @request-auth-headers="ensureCollaborationAuth"
+                                    @permission-change="handleCollaborativePermissionChange"
+                                    @load-document-content="loadDocumentIntoPost"></collaborative-docs>
+                                <div v-else class="text-center text-muted py-4">
+                                    <i class="fas fa-sign-in-alt fa-2x mb-3"></i>
+                                    <p>Please log in to access collaborative documents.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Collaborative Post Editor (when in collaborative mode) -->
+                <div v-if="isCollaborativeMode" class="mt-3">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fa-solid fa-users fa-fw me-2"></i>Collaborative Post Editor</h5>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" @click="exitCollaborativeMode">
+                                <i class="fas fa-times me-1"></i>Exit Collaboration
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <collaborative-post-editor 
+                                :account="account"
+                                :show-collaboration="true"
+                                :collaborative-doc="collaborativeDocument"
+                                :collaboration-config="{ 
+                                    authToken: collaborationAuthHeaders['x-signature'],
+                                    username: account,
+                                    userColor: '#' + Math.floor(Math.random()*16777215).toString(16)
+                                }"
+                                :can-post="canPostFromCollaboration"
+                                :initial-data="collaborativeDocumentData"
+                                @data-changed="handleCollaborativePostData"
+                                @publish-post="handleCollaborativePublish" />
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Regular Post Details (when not in collaborative mode) -->
+                <div v-if="!isCollaborativeMode" class="mt-3">
                     <div class="card">
                         <div class="card-header">
                             <h5 class="mb-0"><i class="fa-solid fa-pen-to-square fa-fw me-2"></i>Post Details</h5>
                         </div>
                         <div class="card-body">
                             <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens"
-                                @tosign="sendIt($event)" :file_to_add="fileToAddToPost" />
+                                @tosign="sendIt($event)" :file_to_add="fileToAddToPost"
+                                :is-collaborative-mode="isCollaborativeMode"
+                                :collaborative-document="collaborativeDocument"
+                                :collaboration-auth-headers="collaborationAuthHeaders"
+                                :collaborative-permission="collaborativePermission"
+                                :can-post-from-collaboration="canPostFromCollaboration"
+                                @requestCollaboration="requestCollaboration" />
                         </div>
                     </div>
                 </div>
@@ -691,6 +753,34 @@
     </script>
     <script>
         var video_page = true
+    </script>
+    <!-- Load the collaboration bundle (includes Y.js) -->
+    <script src="/packages/hocuspocus-provider.bundle.js"></script>
+    <script>
+        // Verify that the collaboration bundle is loaded and prevent Y.js conflicts
+        setTimeout(() => {
+            console.log('CollaborationBundle available:', !!window.CollaborationBundle);
+            console.log('Global Y.js available:', !!window.Y);
+            console.log('HocuspocusProvider available:', !!window.HocuspocusProvider);
+            
+            if (window.CollaborationBundle) {
+                console.log('CollaborationBundle contents:', Object.keys(window.CollaborationBundle));
+                console.log('HocuspocusProvider from bundle:', typeof window.CollaborationBundle.HocuspocusProvider);
+                console.log('Y from bundle:', typeof window.CollaborationBundle.Y);
+                console.log('Y.Doc constructor from bundle:', typeof window.CollaborationBundle.Y.Doc);
+                
+                // Ensure global Y.js is available for compatibility
+                if (!window.Y && window.CollaborationBundle.Y) {
+                    window.Y = window.CollaborationBundle.Y;
+                    console.log('✅ Y.js made available globally from CollaborationBundle');
+                }
+                
+                // Test WebSocket URL access
+                console.log('Testing WebSocket URL: wss://data.dlux.io/ws/payment-monitor');
+            } else {
+                console.error('❌ CollaborationBundle not loaded - collaboration will not work');
+            }
+        }, 100);
     </script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 </body>

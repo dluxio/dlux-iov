@@ -428,13 +428,25 @@
 									<li><b>Pricing Data:</b> We collect real-time cryptocurrency pricing from CoinGecko and blockchain gas fees to calculate account creation costs. This market data is retained for up to 7 days for service optimization.</li>
 									<li><b>Generated Keys:</b> Private keys generated for new accounts are only stored temporarily in your browser during the onboarding process and are encrypted before any storage. You are responsible for securely backing up these keys.</li>
 								</ul>
+								<h3>Collaborative Editing Services</h3>
+								<p><b>Optional Feature:</b> DLUX offers collaborative document editing as an optional feature that allows multiple users to work on documents simultaneously. When you choose to use collaborative editing:</p>
+								<ul>
+									<li><b>Document Storage:</b> Collaborative documents are stored on our collaboration servers (data.dlux.io) and are associated with your HIVE account. Documents can be set as public (viewable by anyone) or private (restricted access).</li>
+									<li><b>Real-time Synchronization:</b> Document changes are synchronized in real-time between collaborators using WebSocket connections. This requires temporary storage of document states and user cursors/selections.</li>
+									<li><b>Access Control:</b> You can grant read or write permissions to other HIVE users. Permission changes and document access are logged for security purposes.</li>
+									<li><b>Authentication:</b> Collaborative editing uses cryptographic signatures to verify your identity, ensuring only authorized users can access shared documents.</li>
+									<li><b>Activity Logging:</b> We maintain logs of document access, edits, and permission changes for up to 30 days for security and collaboration transparency.</li>
+									<li><b>Data Retention:</b> Collaborative documents are retained until explicitly deleted by the document owner. Document history and version information may be kept for up to 90 days for recovery purposes.</li>
+								</ul>
+								<p>You can choose not to use collaborative editing features, and all other DLUX functionality remains available without any collaborative data processing.</p>
 								<h3>Third-Party Services</h3>
-								<p>Our onboarding service integrates with external services that may have their own privacy policies:</p>
+								<p>Our services integrate with external services that may have their own privacy policies:</p>
 								<ul>
 									<li><b>CoinGecko API:</b> For real-time cryptocurrency pricing data</li>
 									<li><b>Etherscan API:</b> For Ethereum network gas price estimates</li>
 									<li><b>Blockchain Networks:</b> For monitoring cryptocurrency payments (Solana, Ethereum, Polygon, BNB Chain)</li>
 									<li><b>Wallet Providers:</b> When connecting external wallets (MetaMask, Phantom, etc.) for key derivation</li>
+									<li><b>Collaboration Infrastructure:</b> Real-time collaborative editing services hosted on our servers for document synchronization and access control</li>
 								</ul>
 								<p>We do not share personal information with these services beyond what is necessary for functionality (e.g., public wallet addresses for payment monitoring).</p>
 								<ul>
@@ -477,7 +489,17 @@
 								<h3>1. Software and License</h3>
 								<p>DLUX is a front-end interface, not a custodian or financial advisor, and users bear all financial risks. DLUX is open-source software licensed under the MIT License. You are free to use, modify, and distribute the code for your own projects, and we encourage contributions via GitHub or Discord. The software is provided "as is" in public beta, without any warranties, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, or non-infringement. Report bugs or issues via Discord. Use DLUX at your own risk.
 								</p>
-								<h3>1.1. Account Creation Services</h3>
+								<h3>1.1. Collaborative Editing Services</h3>
+								<p>DLUX offers optional collaborative document editing services with the following considerations:</p>
+								<ul>
+									<li><b>Optional Service:</b> Collaborative editing is entirely optional. You can use all other DLUX features without participating in collaborative editing.</li>
+									<li><b>Document Ownership:</b> You retain ownership of documents you create. You control access permissions and can delete your documents at any time.</li>
+									<li><b>Real-time Collaboration:</b> When collaborating, your edits and cursor positions are shared in real-time with other authorized users. This data is processed on our servers to enable synchronization.</li>
+									<li><b>Access Control:</b> You are responsible for managing who has access to your collaborative documents. Granting permissions to other users allows them to view or edit your content according to the permissions you set.</li>
+									<li><b>Data Security:</b> While we implement security measures to protect collaborative documents, you should not store highly sensitive information in collaborative documents. Consider the collaborative nature of these documents when deciding what content to include.</li>
+									<li><b>Service Availability:</b> Collaborative editing services may experience downtime, technical issues, or interruptions. We strive for reliability but cannot guarantee continuous availability.</li>
+								</ul>
+								<h3>1.2. Account Creation Services</h3>
 								<p>DLUX provides account creation services for the HIVE blockchain with the following important considerations:</p>
 								<ul>
 									<li><b>Permanent Public Linkage:</b> Creating a HIVE account for another person establishes a permanent, immutable, and publicly visible connection between your account and the new account on the HIVE blockchain. This relationship cannot be removed, hidden, or reversed and will remain visible forever to anyone examining the blockchain.</li>
@@ -495,6 +517,7 @@
 								<ul>
 									<li>Use DLUX in compliance with applicable local and international laws and regulations, including any cryptocurrency and financial regulations in your jurisdiction.</li>
 									<li>Secure your private keys and authentication methods (e.g., Hive Keychain, dluxPEN). If using dluxPEN, maintain the security of your PIN/password and understand that encrypted keys are stored locally on your device.</li>
+									<li>When using collaborative editing, responsibly manage document permissions and understand that shared documents can be accessed by users you grant permissions to. Do not store sensitive personal information in collaborative documents.</li>
 									<li>When creating HIVE accounts for others, understand and accept that this creates a permanent public blockchain connection between your account and the new account that cannot be removed.</li>
 									<li>Verify the accuracy of payment addresses, amounts, and recipient information before sending cryptocurrency payments for account creation. Blockchain transactions are irreversible.</li>
 									<li>Securely backup and protect any private keys generated during the account creation process. We cannot recover lost keys.</li>
@@ -509,6 +532,7 @@
 								<h3>5. Data Practices</h3>
 								<p>DLUX's use of localStorage for unverified account names (e.g., whale_account), preferences (e.g., viewpoint=dark), transaction IDs, pending transactions, and encrypted private keys (dluxPEN only), as well as URL parameters for data passing, is detailed in our Privacy Policy. By using DLUX, you agree to these practices. When using dluxPEN, you acknowledge that your private keys are encrypted and stored locally on your device and that you are solely responsible for maintaining the security of your encryption password/PIN.</p>
 								<p>For account creation services, we temporarily collect and process payment information, account creation requests, pricing data, and generated cryptographic keys as detailed in our Privacy Policy. You consent to this processing and understand that creating HIVE accounts for others results in permanent public blockchain records linking the accounts. You acknowledge that we integrate with third-party services (CoinGecko, blockchain networks, wallet providers) as necessary to provide these services.</p>
+								<p>For collaborative editing services, when you choose to use this optional feature, we process and store collaborative documents, user permissions, edit history, and real-time synchronization data as detailed in our Privacy Policy. You consent to this processing and understand that collaborative documents are stored on our servers and shared with users you grant access to. You acknowledge that collaborative editing requires real-time data synchronization and activity logging for security and functionality purposes.</p>
 								<h3>6. Limitation of Liability</h3>
 								<p>To the fullest extent permitted by law, DLUX and its contributors shall not be liable for any direct, indirect, incidental, special, or consequential damages arising from your use of DLUX, including but not limited to loss of funds, data, or profits. You assume all risks associated with cryptocurrencies, DEX trading, account creation services, and third-party subdomains.</p>
 								<p>Specifically regarding account creation services, we are not liable for: (a) failed account creation attempts, (b) cryptocurrency payment losses due to incorrect addresses or network issues, (c) lost or compromised private keys, (d) blockchain network delays or failures, (e) third-party service outages (CoinGecko, Etherscan, etc.), (f) cryptocurrency market volatility affecting pricing, or (g) any permanent public blockchain records created through the account creation process. You acknowledge these risks and use the service at your own discretion.</p>
