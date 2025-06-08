@@ -1704,7 +1704,17 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    }
+    },
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
+      "priority": "lazy"
+    },
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
+      "priority": "lazy"
+    },
   }
 }
 ;

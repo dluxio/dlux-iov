@@ -31,7 +31,7 @@ else
     exit 1
 fi
 
-# Output files (no longer need separate cache-manifest.json)
+# Output files
 TEMP_SW="sw-temp.js"
 TEMP_MANIFEST="temp-manifest.json"
 
@@ -54,14 +54,21 @@ cat > "$TEMP_MANIFEST" << EOF
   "files": {
 EOF
 
+# Define redirect files (without leading slash to match array format)
+REDIRECT_FILES=(
+    "packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm"
+    "packages/core/package/dist/umd/ffmpeg-core.js"
+)
+
+# Initialize array to track added files
+ADDED_FILES=()
+
 # Extract file arrays from existing cacheManifest in sw.js
 echo "📋 Extracting file lists from service worker cache manifest..."
 
-# Check if we have an existing cache manifest to extract from
 if grep -q "self.cacheManifest =" sw.js; then
     echo "   📝 Found existing cache manifest, extracting files..."
     
-    # Extract files by priority from cacheManifest
     CRITICAL_FILES=($(awk '/self\.cacheManifest = /,/^};?$/' sw.js | \
                      grep -A 3 '"priority": "critical"' | \
                      grep -B 3 '"priority": "critical"' | \
@@ -104,7 +111,6 @@ if [ ${#CRITICAL_FILES[@]} -eq 0 ] && [ ${#IMPORTANT_FILES[@]} -eq 0 ]; then
     echo "❌ Error: No files extracted from service worker!"
     echo "   Using fallback file list..."
     
-    # Fallback to basic critical files
     CRITICAL_FILES=(
         "index.html"
         "css/custom.css"
@@ -113,37 +119,28 @@ if [ ${#CRITICAL_FILES[@]} -eq 0 ] && [ ${#IMPORTANT_FILES[@]} -eq 0 ]; then
         "sw.js"
     )
     
-    # If auto-important mode, find all cacheable files and categorize them
     if [ "$AUTO_IMPORTANT" = true ]; then
         echo "🤖 Auto-categorizing all cacheable files for GitHub Actions..."
         
-        # Get all cacheable files from git (same logic as gs.sh)
         ALL_FILES=($(git ls-files -- '*.html' '*.css' '*.js' '*.png' '*.jpg' '*.svg' '*.ico' '*.woff' '*.woff2' '*.ttf' '*.eot' | \
                     grep -vE '(.*/test/.*|.*/tests/.*|node_modules/.*|\.git/.*)'))
         
-        # Auto-categorize based on patterns
         for file in "${ALL_FILES[@]}"; do
-            # Remove leading slash if present
             clean_file="${file#/}"
             
-            # Skip if already in critical
             if [[ " ${CRITICAL_FILES[@]} " =~ " ${clean_file} " ]]; then
                 continue
             fi
             
-            # Critical patterns (override fallback)
             if [[ "$clean_file" =~ ^(index\.html|about/index\.html)$ ]] || \
                [[ "$clean_file" =~ \.(css)$ && "$clean_file" =~ (bootstrap|custom|v3) ]] || \
                [[ "$clean_file" =~ ^js/(vue\.esm|v3-nav|bootstrap\.bundle) ]]; then
                 CRITICAL_FILES+=("$clean_file")
-            # Page-specific patterns
             elif [[ "$clean_file" =~ (aframe|monaco|playground|chat|naf-playground) ]]; then
                 PAGE_SPECIFIC_FILES+=("$clean_file")
-            # Lazy patterns (old files, tests, etc.)
             elif [[ "$clean_file" =~ (-old\.|test|spec|debug|env_thumbs) ]] || \
                  [[ "$clean_file" =~ (monaco-editor/vs/basic-languages|monaco-editor/vs/nls\.messages) ]]; then
                 SKIPPED_FILES+=("$clean_file")
-            # Everything else becomes important (safe default for PRs)
             else
                 IMPORTANT_FILES+=("$clean_file")
             fi
@@ -160,7 +157,7 @@ if [ ${#CRITICAL_FILES[@]} -eq 0 ] && [ ${#IMPORTANT_FILES[@]} -eq 0 ]; then
     fi
 fi
 
-# Function to add file with checksum
+# Function to add file with checksum or special redirect configuration
 add_file_checksum() {
     local file="$1"
     local priority="$2"
@@ -178,9 +175,21 @@ add_file_checksum() {
         echo "      \"priority\": \"$priority\"" >> "$TEMP_MANIFEST"
         echo "    }," >> "$TEMP_MANIFEST"
         
+        ADDED_FILES+=("$file")
         echo "✅ /$file ($checksum)"
     else
-        echo "⚠️  File not found: $file"
+        if [[ " ${REDIRECT_FILES[@]} " =~ " ${file} " ]]; then
+            echo "    \"/$file\": {" >> "$TEMP_MANIFEST"
+            echo "      \"checksum\": \"no-hash-symlink\"," >> "$TEMP_MANIFEST"
+            echo "      \"size\": 0," >> "$TEMP_MANIFEST"
+            echo "      \"priority\": \"lazy\"" >> "$TEMP_MANIFEST"
+            echo "    }," >> "$TEMP_MANIFEST"
+            
+            ADDED_FILES+=("$file")
+            echo "✅ Added redirect entry: /$file"
+        else
+            echo "⚠️  File not found: $file"
+        fi
     fi
 }
 
@@ -204,6 +213,19 @@ for file in "${SKIPPED_FILES[@]}"; do
     add_file_checksum "$file" "lazy"
 done
 
+# Ensure redirect files are included if not already added
+echo "📁 Ensuring redirect entries are included..."
+for redirect_file in "${REDIRECT_FILES[@]}"; do
+    if [[ ! " ${ADDED_FILES[@]} " =~ " ${redirect_file} " ]]; then
+        echo "    \"/$redirect_file\": {" >> "$TEMP_MANIFEST"
+        echo "      \"checksum\": \"no-hash-symlink\"," >> "$TEMP_MANIFEST"
+        echo "      \"size\": 0," >> "$TEMP_MANIFEST"
+        echo "      \"priority\": \"lazy\"" >> "$TEMP_MANIFEST"
+        echo "    }," >> "$TEMP_MANIFEST"
+        echo "✅ Added missing redirect entry: /$redirect_file"
+    fi
+done
+
 # Remove trailing comma and close JSON
 sed -i.bak '$ s/,$//' "$TEMP_MANIFEST" && rm "${TEMP_MANIFEST}.bak"
 echo "  }" >> "$TEMP_MANIFEST"
@@ -211,21 +233,17 @@ echo "}" >> "$TEMP_MANIFEST"
 
 echo "📦 Generated temporary cache manifest"
 
-# Now update the service worker with the new version and manifest
+# Update the service worker with the new version and manifest
 echo "🔄 Updating service worker..."
 
-# Check if cache manifest already exists in sw.js
 if grep -q "self.cacheManifest =" sw.js; then
     echo "   📝 Replacing existing cache manifest..."
-    # Remove existing cache manifest (from "// Cache manifest" to the end of file)
     sed '/\/\/ Cache manifest with checksums - auto-generated/,$d' sw.js > "$TEMP_SW"
 else
     echo "   📝 Adding new cache manifest..."
-    # Copy sw.js without changing version (it's already updated by gs.sh)
     cp sw.js "$TEMP_SW"
 fi
 
-# Add cache manifest data to service worker
 cat >> "$TEMP_SW" << 'EOF'
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
@@ -234,20 +252,17 @@ EOF
 cat "$TEMP_MANIFEST" >> "$TEMP_SW"
 echo ";" >> "$TEMP_SW"
 
-# Replace original service worker
 mv "$TEMP_SW" sw.js
 
 echo "✅ Updated sw.js with version $TIMESTAMP and cache manifest"
 echo "📊 Manifest contains $(grep -c '"checksum"' "$TEMP_MANIFEST") files"
 
-# Calculate total size
 total_size=$(jq -r '.files | to_entries | map(.value.size) | add' "$TEMP_MANIFEST" 2>/dev/null || echo "unknown")
 if [ "$total_size" != "unknown" ] && [ "$total_size" -gt 0 ]; then
     total_mb=$(echo "scale=2; $total_size / 1024 / 1024" | bc 2>/dev/null || echo "$(($total_size / 1024 / 1024))")
     echo "📏 Total cache size: ${total_mb}MB"
 fi
 
-# Clean up temporary manifest file
 rm -f "$TEMP_MANIFEST"
 
 echo "🎉 Cache manifest integration complete!"

@@ -4468,7 +4468,10 @@ function buyNFT(setname, uid, price, type, callback){
       const successfulResolutions = [];
       
       try {
-        // Process each resolution separately to ensure completion
+        // Start internal progress monitor since ffmpeg.exec() can't be trusted
+        const progressInterval = this.startInternalProgressMonitor(bitrates.length);
+        
+        // Process each resolution separately but don't trust ffmpeg.exec()
         for (let i = 0; i < bitrates.length; i++) {
           const resHeight = parseInt(bitrates[i].split('x')[1]);
           
@@ -4510,15 +4513,26 @@ function buyNFT(setname, uid, price, type, callback){
           console.log(`🎬 Transcoding ${resHeight}p with command:`, commands);
           
           try {
-            console.log(`🚀 Starting FFmpeg exec for ${resHeight}p...`);
-            await ffmpeg.exec(commands);
+            console.log(`🚀 Starting FFmpeg exec for ${resHeight}p... (EXEC CANNOT BE TRUSTED!)`);
+            
+            // Start FFmpeg but don't wait for it - it lies about completion
+            ffmpeg.exec(commands).catch(error => {
+              console.warn(`⚠️ FFmpeg exec reported error for ${resHeight}p (but this may be normal):`, error);
+            });
+            
+            // Instead, wait for files to actually appear using file monitoring
+            await this.waitForResolutionFiles(ffmpeg, resHeight, 60000); // 60 second timeout per resolution
+            
             successfulResolutions.push(resHeight);
-            console.log(`✅ Successfully transcoded ${resHeight}p`);
+            console.log(`✅ Successfully transcoded ${resHeight}p (confirmed by file presence)`);
           } catch (error) {
             console.error(`❌ Failed to transcode ${resHeight}p:`, error);
             // Continue with other resolutions instead of failing completely
           }
         }
+        
+        // Stop the progress monitor
+        clearInterval(progressInterval);
         
         console.timeEnd('exec');
         
@@ -4790,6 +4804,73 @@ function buyNFT(setname, uid, price, type, callback){
       validateAndProcessFiles().catch(error => {
         console.error('Error processing transcoded files:', error);
         this.videoMsg = 'Error processing transcoded files. Please try again.';
+      });
+    },
+
+    async waitForResolutionFiles(ffmpeg, resHeight, timeoutMs = 60000) {
+      return new Promise((resolve, reject) => {
+        const startTime = Date.now();
+        const expectedPlaylist = `${resHeight}p_index.m3u8`;
+        let lastFileCount = 0;
+        let stableCount = 0;
+        const requiredStableChecks = 5; // Files must be stable for 5 consecutive checks
+        
+        const checkFiles = async () => {
+          try {
+            // Check if we've exceeded timeout
+            if (Date.now() - startTime > timeoutMs) {
+              console.warn(`⏰ Timeout waiting for ${resHeight}p files after ${Math.round(timeoutMs/1000)}s`);
+              reject(new Error(`Timeout waiting for ${resHeight}p files`));
+              return;
+            }
+            
+            const files = await ffmpeg.listDir("/");
+            const resolutionFiles = files.filter(f => 
+              f.name.startsWith(`${resHeight}p_`) && 
+              (f.name.endsWith('.ts') || f.name.endsWith('.m3u8'))
+            );
+            
+            const playlistExists = files.some(f => f.name === expectedPlaylist);
+            const currentFileCount = resolutionFiles.length;
+            const elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
+            
+            console.log(`📊 ${resHeight}p file check (${elapsedSeconds}s): ${currentFileCount} files, playlist: ${playlistExists ? '✅' : '❌'}`);
+            
+            // Need both playlist and at least one segment file
+            if (playlistExists && currentFileCount >= 2) { // playlist + at least 1 segment
+              if (currentFileCount === lastFileCount) {
+                stableCount++;
+                console.log(`📈 ${resHeight}p files stable (${stableCount}/${requiredStableChecks}): ${currentFileCount} files`);
+                
+                if (stableCount >= requiredStableChecks) {
+                  console.log(`✅ ${resHeight}p files confirmed stable: ${currentFileCount} total files`);
+                  resolve();
+                  return;
+                }
+              } else {
+                // File count changed, reset stability counter
+                stableCount = 0;
+                lastFileCount = currentFileCount;
+                console.log(`📝 ${resHeight}p file count changed to ${currentFileCount}, resetting stability`);
+              }
+            } else {
+              // Not ready yet, reset counters
+              stableCount = 0;
+              lastFileCount = currentFileCount;
+            }
+            
+            // Continue checking every 2 seconds
+            setTimeout(checkFiles, 2000);
+            
+          } catch (error) {
+            console.warn(`Error checking files for ${resHeight}p:`, error);
+            // Continue checking despite errors
+            setTimeout(checkFiles, 2000);
+          }
+        };
+        
+        // Start checking after 3 seconds to give FFmpeg time to start
+        setTimeout(checkFiles, 3000);
       });
     },
 
