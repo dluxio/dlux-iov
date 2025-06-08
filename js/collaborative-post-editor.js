@@ -460,8 +460,7 @@ export default {
         console.log('Collaboration setup skipped:', {
           showCollaboration: this.showCollaboration,
           collaborativeDoc: this.collaborativeDoc,
-          hasAccount: !!this.authHeaders['x-account'],
-          hasAuthHeaders: !!(this.authHeaders['x-challenge'] && this.authHeaders['x-pubkey'] && this.authHeaders['x-signature'])
+          sec: this.authHeaders
         });
         return;
       }
