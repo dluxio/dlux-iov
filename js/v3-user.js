@@ -4467,7 +4467,7 @@ function buyNFT(setname, uid, price, type, callback){
       const successfulResolutions = [];
       
       try {
-        // Process each resolution separately - much more reliable than single command
+        // Process each resolution with fresh FFmpeg instance - fixes WASM memory corruption
         for (let i = 0; i < bitrates.length; i++) {
           const resHeight = parseInt(bitrates[i].split('x')[1]);
           
@@ -4508,6 +4508,19 @@ function buyNFT(setname, uid, price, type, callback){
           try {
             console.log(`🚀 Starting ${resHeight}p transcoding...`);
             
+            // Create fresh FFmpeg instance for each resolution to avoid WASM corruption
+            if (i > 0) {
+              console.log(`🔄 Creating fresh FFmpeg instance for ${resHeight}p (prevents WASM corruption)`);
+              const { FFmpeg } = FFmpegWASM;
+              ffmpeg = new FFmpeg();
+              await ffmpeg.load();
+              
+              // Re-write the input file to the new instance
+              const { fetchFile } = FFmpegUtil;
+              await ffmpeg.writeFile(name, await fetchFile(event.target.files[0]));
+              console.log(`📁 Input file re-loaded for fresh FFmpeg instance`);
+            }
+            
             // Log filesystem state before transcode
             const filesBefore = await ffmpeg.listDir("/");
             console.log(`📁 Files before ${resHeight}p:`, filesBefore.map(f => f.name).filter(name => !name.startsWith('.') && !['dev', 'home', 'proc', 'tmp'].includes(name)));
@@ -4529,6 +4542,21 @@ function buyNFT(setname, uid, price, type, callback){
             if (playlistFile && segmentFiles.length > 0) {
               successfulResolutions.push(resHeight);
               console.log(`✅ ${resHeight}p transcoded successfully: ${segmentFiles.length} segments + playlist`);
+              
+              // Copy files to main FFmpeg instance if using fresh instance
+              if (i > 0 && this.ffmpeg !== ffmpeg) {
+                console.log(`📋 Copying ${resHeight}p files to main FFmpeg instance...`);
+                
+                // Read files from current instance and write to main instance
+                for (const segFile of segmentFiles) {
+                  const segData = await ffmpeg.readFile(segFile.name);
+                  await this.ffmpeg.writeFile(segFile.name, segData);
+                }
+                const playlistData = await ffmpeg.readFile(playlistFile.name);
+                await this.ffmpeg.writeFile(playlistFile.name, playlistData);
+                
+                console.log(`✅ ${resHeight}p files copied to main instance`);
+              }
             } else {
               // Log what's missing
               console.error(`❌ ${resHeight}p missing files - Segments: ${segmentFiles.length}, Playlist: ${playlistFile ? 'found' : 'missing'}`);
