@@ -4456,8 +4456,9 @@ function buyNFT(setname, uid, price, type, callback){
       console.log('📊 Final resolution ladder:', bitrates.map(b => parseInt(b.split('x')[1]) + 'p').join(', '));
       console.log('Video analysis complete, starting transcoding...');
 
-      // Reset hashing progress and start internal progress monitoring
+      // Reset hashing progress and start progress monitoring
       this.resetHashingProgress();
+      const progressInterval = this.startTranscodeProgressMonitoring(ffmpeg, bitrates.length);
       
       // Use separate FFmpeg commands for each resolution to ensure all files are created
       this.videoMsg = 'Starting multi-resolution transcoding...';
@@ -4466,10 +4467,7 @@ function buyNFT(setname, uid, price, type, callback){
       const successfulResolutions = [];
       
       try {
-        // Build single combined command for all resolutions using proper FFmpeg multiple output syntax
-        const commands = ["-i", name];
-        
-        // Add each resolution as a separate output in the same command
+        // Process each resolution separately - much more reliable than single command
         for (let i = 0; i < bitrates.length; i++) {
           const resHeight = parseInt(bitrates[i].split('x')[1]);
           
@@ -4477,15 +4475,15 @@ function buyNFT(setname, uid, price, type, callback){
           let scaleFilter;
           if (isPortrait) {
             scaleFilter = `scale=-1:${resHeight}`;
-            console.log(`📱 Adding ${resHeight}p output: Portrait scaling (width auto)`);
+            console.log(`📱 Processing ${resHeight}p: Portrait scaling (width auto)`);
           } else {
             scaleFilter = `scale=-1:${resHeight}`;
-            console.log(`🖥️ Adding ${resHeight}p output: Landscape scaling (width auto)`);
+            console.log(`🖥️ Processing ${resHeight}p: Landscape scaling (width auto)`);
           }
           
-          // Add all options for this resolution output (each output is separate)
-          commands.push(
-            "-map", "0:v:0", "-map", "0:a:0", // Map video and audio streams for this output
+          // Build command for this resolution
+          const commands = [
+            "-i", name,
             "-c:v", codec,
             "-crf", "26", 
             "-preset", "fast",
@@ -4503,41 +4501,23 @@ function buyNFT(setname, uid, price, type, callback){
             "-hls_time", "5",
             "-hls_list_size", "0",
             `${resHeight}p_%03d.ts`
-          );
+          ];
           
-          // Track which resolutions we expect
-          successfulResolutions.push(resHeight);
-        }
-        
-        console.log(`🎬 Single-pass transcoding for ${bitrates.length} resolutions:`, successfulResolutions.map(r => r + 'p').join(', '));
-        console.log(`📋 Combined FFmpeg command (${commands.length} args):`, commands);
-        
-        // Start the transcoding process
-        this.videoMsg = `Transcoding ${bitrates.length} resolutions in single pass...`;
-        
-        try {
-          console.log(`🚀 Starting single-pass FFmpeg transcoding...`);
+          this.videoMsg = `Transcoding ${resHeight}p (${i + 1}/${bitrates.length})...`;
           
-          // Start FFmpeg and wait for it to complete
-          await ffmpeg.exec(commands);
-          
-          // Now check for files after transcoding completes
-          console.log(`🔍 Transcoding completed, now checking for files...`);
-          await this.waitForAllResolutionFiles(ffmpeg, successfulResolutions, 180000); // 3 minute timeout for all
-          
-          console.log(`✅ All resolutions transcoded successfully: ${successfulResolutions.map(r => r + 'p').join(', ')}`);
-        } catch (error) {
-          console.error(`❌ Single-pass transcoding failed:`, error);
-          // Reset successful resolutions to whatever was actually created
-          const files = await ffmpeg.listDir("/");
-          const actualPlaylists = files.filter(f => f.name.endsWith('_index.m3u8')).map(f => {
-            const match = f.name.match(/(\d+)p_index\.m3u8/);
-            return match ? parseInt(match[1]) : null;
-          }).filter(r => r !== null);
-          
-          successfulResolutions.length = 0;
-          successfulResolutions.push(...actualPlaylists);
-          console.log(`📊 Found ${actualPlaylists.length} valid resolutions:`, actualPlaylists.map(r => r + 'p').join(', '));
+          try {
+            console.log(`🚀 Starting ${resHeight}p transcoding...`);
+            await ffmpeg.exec(commands);
+            
+            // Wait for files to be written and verify they exist
+            await this.waitForResolutionFiles(ffmpeg, resHeight, 60000);
+            
+            successfulResolutions.push(resHeight);
+            console.log(`✅ ${resHeight}p transcoded successfully`);
+          } catch (error) {
+            console.error(`❌ ${resHeight}p transcoding failed:`, error);
+            // Continue with other resolutions
+          }
         }
         
         console.timeEnd('exec');
@@ -4547,16 +4527,24 @@ function buyNFT(setname, uid, price, type, callback){
         }
         
         console.log(`✅ Successfully transcoded ${successfulResolutions.length}/${bitrates.length} resolutions:`, successfulResolutions.map(r => r + 'p').join(', '));
-        this.videoMsg = `🎉 Successfully transcoded ${successfulResolutions.length} resolutions! Waiting for file stability...`;
+        this.videoMsg = `🎉 Successfully transcoded ${successfulResolutions.length} resolutions! Preparing upload...`;
         
         // Wait a bit more for all files to be fully written
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
       } catch (err) {
         console.timeEnd('exec');
         console.error('❌ Transcoding failed:', err);
         this.videoMsg = 'Transcoding failed. Please try again with a smaller video file.';
+        if (progressInterval) {
+          clearInterval(progressInterval);
+        }
         return;
+      }
+      
+      // Clean up progress monitoring
+      if (progressInterval) {
+        clearInterval(progressInterval);
       }
       
       this.videoMsg = 'Transcoding complete! Checking generated files...';
