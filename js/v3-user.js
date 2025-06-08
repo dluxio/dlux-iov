@@ -4628,6 +4628,9 @@ function buyNFT(setname, uid, price, type, callback){
                 continue;
               }
               
+              // Debug the data before writing
+              console.log(`📝 About to write ${filename}: ${data.byteLength} bytes, constructor: ${data.constructor.name}`);
+              
               await ffmpeg.writeFile(filename, data);
               console.log(`✅ Restored ${filename} (${data.byteLength} bytes)`);
               
@@ -4635,6 +4638,8 @@ function buyNFT(setname, uid, price, type, callback){
               const verifyData = await ffmpeg.readFile(filename);
               if (verifyData.byteLength !== data.byteLength) {
                 console.error(`⚠️ Size mismatch for ${filename}: wrote ${data.byteLength}, read ${verifyData.byteLength}`);
+              } else {
+                console.log(`✅ Verified ${filename}: ${verifyData.byteLength} bytes restored correctly`);
               }
             } catch (writeError) {
               console.error(`❌ Failed to restore ${filename}:`, writeError);
@@ -4670,6 +4675,9 @@ function buyNFT(setname, uid, price, type, callback){
         
         // Wait a bit more for all files to be fully written
         await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Start file validation and processing immediately with extracted files
+        await validateAndProcessFiles(extractedFiles);
         
       } catch (err) {
         console.timeEnd('exec');
@@ -4990,11 +4998,7 @@ function buyNFT(setname, uid, price, type, callback){
         }
       };
       
-      // Start file validation and processing
-      validateAndProcessFiles(extractedFiles).catch(error => {
-        console.error('Error processing transcoded files:', error);
-        this.videoMsg = 'Error processing transcoded files. Please try again.';
-      });
+      // validateAndProcessFiles is now called inside the try block above
     },
 
     async waitForAllResolutionFiles(ffmpeg, expectedResolutions, timeoutMs = 180000) {
