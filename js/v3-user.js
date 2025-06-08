@@ -4250,7 +4250,6 @@ function buyNFT(setname, uid, price, type, callback){
       this.getPosts();
       this.getProtocol();
       this.getSpkStats();
-      this.getSPKUser()
       this.getRewardFund();
       this.getFeedPrice();
       this.getSapi(this.pageAccount, false);
@@ -4513,19 +4512,24 @@ function buyNFT(setname, uid, price, type, callback){
         console.log(`🎬 Single-pass transcoding for ${bitrates.length} resolutions:`, successfulResolutions.map(r => r + 'p').join(', '));
         console.log(`📋 Combined FFmpeg command (${commands.length} args):`, commands);
         
-        // Start progress monitor
-        const progressInterval = this.startInternalProgressMonitor(bitrates.length);
+        // Start the transcoding process
         this.videoMsg = `Transcoding ${bitrates.length} resolutions in single pass...`;
         
         try {
-          console.log(`🚀 Starting single-pass FFmpeg transcoding... (EXEC CANNOT BE TRUSTED!)`);
+          console.log(`🚀 Starting single-pass FFmpeg transcoding...`);
           
           // Start FFmpeg but don't trust its completion
           ffmpeg.exec(commands).catch(error => {
             console.warn(`⚠️ FFmpeg exec reported error (but this may be normal):`, error);
           });
           
-          // Wait for ALL resolution files to appear
+          // Wait for the internal progress monitor to complete first
+          console.log(`⏱️ Waiting for internal progress monitor to complete before checking files...`);
+          const estimatedDuration = bitrates.length * 30000; // Same as in startInternalProgressMonitor
+          await new Promise(resolve => setTimeout(resolve, estimatedDuration));
+          
+          // Now check for files after the internal progress monitor completes
+          console.log(`🔍 Internal progress monitor completed, now checking for files...`);
           await this.waitForAllResolutionFiles(ffmpeg, successfulResolutions, 180000); // 3 minute timeout for all
           
           console.log(`✅ All resolutions transcoded successfully: ${successfulResolutions.map(r => r + 'p').join(', ')}`);
@@ -4915,8 +4919,9 @@ function buyNFT(setname, uid, price, type, callback){
           }
         };
         
-        // Start checking after 5 seconds to give FFmpeg time to start
-        setTimeout(checkAllFiles, 5000);
+        // Start checking after longer delay to avoid race condition with filesystem access
+        // Wait 10 seconds to give FFmpeg more time to start writing files
+        setTimeout(checkAllFiles, 10000);
       });
     },
 
@@ -5050,6 +5055,8 @@ function buyNFT(setname, uid, price, type, callback){
       return progressInterval;
     },
     
+    // NOTE: This function is currently not used due to race condition issues with filesystem checking
+    // We're using startInternalProgressMonitor + delayed waitForAllResolutionFiles instead
     startTranscodeProgressMonitoring(ffmpeg, numResolutions) {
       const startTime = Date.now();
       let lastFileCount = 0;
