@@ -4641,117 +4641,30 @@ function buyNFT(setname, uid, price, type, callback){
         
       // Enhanced file validation and processing - MOVED TO TOP OF FUNCTION
       const validateAndProcessFiles = async (extractedFiles) => {
-        // Wait for files to stabilize after transcoding completion
-        let files = await ffmpeg.listDir("/");
-        let lastFileCount = files.length;
-        let stableCount = 0;
-        const requiredStableChecks = 3;
+        console.log(`🚀 Processing directly from extracted data (${extractedFiles.size} files)`);
         
-        console.log(`📊 Initial file scan: ${files.length} files`);
-        
-        // Give up to 5 seconds for files to stabilize
-        for (let attempt = 0; attempt < 5; attempt++) {
-          const currentFileCount = files.length;
-          const tsFiles = files.filter(f => f.name.endsWith('.ts'));
-          const m3u8Files = files.filter(f => f.name.endsWith('.m3u8'));
-          
-          console.log(`📊 File stability check ${attempt + 1}: ${currentFileCount} total files (${tsFiles.length} segments, ${m3u8Files.length} playlists)`);
-          
-          if (currentFileCount === lastFileCount) {
-            stableCount++;
-            if (stableCount >= requiredStableChecks) {
-              console.log(`✅ Files stabilized after ${attempt + 1} seconds`);
-              break;
-            }
-          } else {
-            stableCount = 0; // Reset stability counter
-            lastFileCount = currentFileCount;
-          }
-          
-          // Wait 1 second before next check
-          if (attempt < 4) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            files = await ffmpeg.listDir("/");
-          }
-        }
-        
-        console.log('📁 Final file listing after stabilization:', files.map(f => f.name).sort());
-        
-        // Validate expected files exist
-        const tsFiles = files.filter(f => f.name.endsWith('.ts'));
-        const m3u8Files = files.filter(f => f.name.endsWith('.m3u8'));
+        // Work directly with extracted files instead of filesystem
+        const extractedFilenames = Array.from(extractedFiles.keys());
+        const tsFiles = extractedFilenames.filter(name => name.endsWith('.ts'));
+        const m3u8Files = extractedFilenames.filter(name => name.endsWith('.m3u8'));
         const expectedPlaylists = successfulResolutions.map(r => `${r}p_index.m3u8`);
-        const actualPlaylists = m3u8Files.map(f => f.name);
+        const actualPlaylists = m3u8Files;
         
-        console.log(`📊 File validation:`);
-        console.log(`   🎬 Segment files: ${tsFiles.length}`);
-        console.log(`   📋 Playlist files: ${m3u8Files.length}`);
+        console.log(`📊 Extracted file validation:`);
+        console.log(`   🎬 Segment files: ${tsFiles.length} - ${tsFiles.join(', ')}`);
+        console.log(`   📋 Playlist files: ${m3u8Files.length} - ${m3u8Files.join(', ')}`);
         console.log(`   ✅ Expected playlists: ${expectedPlaylists.join(', ')}`);
         console.log(`   📁 Actual playlists: ${actualPlaylists.join(', ')}`);
         
-        // Check which playlists actually exist
+        // Check which playlists actually exist in extracted data
         const existingPlaylists = expectedPlaylists.filter(playlist => 
           actualPlaylists.includes(playlist)
         );
         
         if (existingPlaylists.length === 0) {
-          console.error(`❌ Critical: No playlists found in filesystem after restoration`);
-          console.log(`🔍 Attempting to recreate playlists from extracted data...`);
-          
-          // Try to recreate playlists from memory if filesystem restoration failed
-          if (extractedFiles.size > 0) {
-            console.log(`📋 Recreating playlists from extracted data...`);
-            
-            // Filter playlist files from extracted data
-            const playlistEntries = Array.from(extractedFiles.entries()).filter(([filename]) => filename.endsWith('.m3u8'));
-            
-            if (playlistEntries.length > 0) {
-              console.log(`🔧 Found ${playlistEntries.length} playlists in extracted data, recreating...`);
-              
-              for (const [filename, data] of playlistEntries) {
-                try {
-                  // Force write the playlist data again
-                  await ffmpeg.writeFile(filename, data);
-                  console.log(`🔄 Recreated ${filename} (${data.byteLength} bytes)`);
-                } catch (recreateError) {
-                  console.error(`❌ Failed to recreate ${filename}:`, recreateError);
-                }
-              }
-              
-              // Re-check the filesystem
-              const recheckFiles = await ffmpeg.listDir("/");
-              const recheckM3u8 = recheckFiles.filter(f => f.name.endsWith('.m3u8'));
-              
-              if (recheckM3u8.length > 0) {
-                console.log(`✅ Successfully recreated ${recheckM3u8.length} playlists`);
-                // Continue processing with recreated playlists
-                files = recheckFiles;
-                const newM3u8Files = recheckFiles.filter(f => f.name.endsWith('.m3u8'));
-                const newActualPlaylists = newM3u8Files.map(f => f.name);
-                const newExistingPlaylists = expectedPlaylists.filter(playlist => 
-                  newActualPlaylists.includes(playlist)
-                );
-                
-                if (newExistingPlaylists.length > 0) {
-                  existingPlaylists.length = 0;
-                  existingPlaylists.push(...newExistingPlaylists);
-                  console.log(`📋 Updated existing playlists: ${existingPlaylists.join(', ')}`);
-                } else {
-                  this.videoMsg = '❌ Playlist recreation failed. Please try transcoding again.';
-                  return;
-                }
-              } else {
-                this.videoMsg = '❌ Playlist recreation failed. Please try transcoding again.';
-                return;
-              }
-            } else {
-              this.videoMsg = '❌ No playlist data found in memory. Please try transcoding again.';
-              return;
-            }
-          } else {
-            this.videoMsg = '❌ No valid playlists found after transcoding. Please try again.';
-            return;
-          }
+          console.error(`❌ Critical: No playlists found in extracted data`);
+          this.videoMsg = '❌ No valid playlists found in extracted data. Please try transcoding again.';
+          return;
         }
         
         if (existingPlaylists.length < expectedPlaylists.length) {
@@ -4759,20 +4672,20 @@ function buyNFT(setname, uid, price, type, callback){
           console.warn(`⚠️ Missing playlists: ${missing.join(', ')} - continuing with available ones`);
         }
         
-        console.log(`✅ Valid playlists found: ${existingPlaylists.join(', ')}`);
-        this.videoMsg = `Processing ${existingPlaylists.length} valid resolution(s)...`;
+        console.log(`✅ Valid playlists found in extracted data: ${existingPlaylists.join(', ')}`);
+        this.videoMsg = `Processing ${existingPlaylists.length} valid resolution(s) from extracted data...`;
         
-        // Process files as before, but only for existing playlists
+        // Process files directly from extracted data
         const videoFiles = [];
         const segmentMapping = new Map();
         const resolutionPlaylists = [];
         
         // Initialize progress tracking for existing files only
-        const actualSegmentFiles = tsFiles.filter(file => {
+        const actualSegmentFiles = tsFiles.filter(filename => {
           // Check if this segment belongs to a valid resolution
           return existingPlaylists.some(playlist => {
             const resolution = playlist.match(/(\d+)p_index\.m3u8/)?.[1];
-            return resolution && file.name.startsWith(`${resolution}p_`);
+            return resolution && filename.startsWith(`${resolution}p_`);
           });
         });
         
@@ -4780,18 +4693,22 @@ function buyNFT(setname, uid, price, type, callback){
         this.hashingProgress.current = 0;
         this.hashingProgress.percentage = 0;
         
-        console.log(`📈 Processing ${actualSegmentFiles.length} segments and ${existingPlaylists.length} playlists`);
+        console.log(`📈 Processing ${actualSegmentFiles.length} segments and ${existingPlaylists.length} playlists from extracted data`);
         
-        // Process segments first
-        const segmentPromises = actualSegmentFiles.map(async (file) => {
-          const data = await ffmpeg.readFile(file.name);
+        // Process segments first from extracted data
+        const segmentPromises = actualSegmentFiles.map(async (filename) => {
+          const data = extractedFiles.get(filename);
+          if (!data) {
+            console.error(`❌ Missing extracted data for ${filename}`);
+            return null;
+          }
           
           this.hashingProgress.current++;
-          this.hashingProgress.currentFile = file.name;
+          this.hashingProgress.currentFile = filename;
           this.hashingProgress.percentage = Math.round((this.hashingProgress.current / this.hashingProgress.total) * 100);
-          this.videoMsg = `Reading segments: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)} - ${file.name}`;
+          this.videoMsg = `Reading segments: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)} - ${filename}`;
           
-          const newFileName = file.name.endsWith('_thumb.ts') ? file.name : file.name.replace('.ts', '_thumb.ts');
+          const newFileName = filename.endsWith('_thumb.ts') ? filename : filename.replace('.ts', '_thumb.ts');
           const contentBuffer = buffer.Buffer(data.buffer);
           const hashResult = await this.hashOf(contentBuffer, {});
           const segmentHash = hashResult.hash;
@@ -4807,25 +4724,27 @@ function buyNFT(setname, uid, price, type, callback){
           });
           
           this.dataURLS.push([newFileName, data.buffer, 'video/mp2t']);
-          segmentMapping.set(file.name, segmentHash);
+          segmentMapping.set(filename, segmentHash);
           
-          return { originalName: file.name, newFileName, segmentHash };
+          return { originalName: filename, newFileName, segmentHash };
         });
         
-        await Promise.all(segmentPromises);
+        await Promise.all(segmentPromises.filter(p => p !== null));
         
-        // Process playlists
+        // Process playlists from extracted data
         for (const playlistName of existingPlaylists) {
-          const file = files.find(f => f.name === playlistName);
-          if (!file) continue;
+          const data = extractedFiles.get(playlistName);
+          if (!data) {
+            console.error(`❌ Missing extracted data for ${playlistName}`);
+            continue;
+          }
           
-          const data = await ffmpeg.readFile(file.name);
           let playlistContent = new TextDecoder().decode(data);
           
           this.hashingProgress.current++;
-          this.hashingProgress.currentFile = file.name;
+          this.hashingProgress.currentFile = playlistName;
           this.hashingProgress.percentage = Math.round((this.hashingProgress.current / this.hashingProgress.total) * 100);
-          this.videoMsg = `Processing playlists: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)} - ${file.name}`;
+          this.videoMsg = `Processing playlists: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)} - ${playlistName}`;
           
           // Replace segment references with IPFS hashes
           segmentMapping.forEach((actualHash, originalName) => {
@@ -4833,7 +4752,7 @@ function buyNFT(setname, uid, price, type, callback){
             playlistContent = playlistContent.replace(segmentPattern, `https://ipfs.dlux.io/ipfs/${actualHash}?filename=${originalName}`);
           });
           
-          const resPlaylistFile = new File([new TextEncoder().encode(playlistContent)], file.name.replace('.m3u8', '_thumb.m3u8'), { 
+          const resPlaylistFile = new File([new TextEncoder().encode(playlistContent)], playlistName.replace('.m3u8', '_thumb.m3u8'), { 
             type: 'application/x-mpegURL' 
           });
           
@@ -4846,11 +4765,11 @@ function buyNFT(setname, uid, price, type, callback){
           
           this.dataURLS.push([resPlaylistFile.name, new TextEncoder().encode(playlistContent), 'application/x-mpegURL']);
           
-          const resolution = file.name.match(/(\d+)p_index/)?.[1] || 'unknown';
+          const resolution = playlistName.match(/(\d+)p_index/)?.[1] || 'unknown';
           resolutionPlaylists.push({
             fileName: resPlaylistFile.name,
             resolution: resolution,
-            originalName: file.name,
+            originalName: playlistName,
             content: playlistContent,
             originalContent: new TextDecoder().decode(data)
           });
