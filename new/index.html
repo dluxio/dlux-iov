@@ -185,94 +185,75 @@
                 @refresh="run($event)" :op="toSign" :lapi="lapi" />
         </div>
         <main role="main" class="d-flex flex-column flex-grow-1 padmain-subbar">
-            <!-- Post Type Selection -->
-            <div class="container">
-                <div class="accordion border-white-50 rounded mt-3" id="postTypeAccordion">
-                    <div class="accordion-item bg-img-none bg-dark-1">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#postTypeCollapse" aria-expanded="true" aria-controls="postTypeCollapse">
-                                <i class="fa-solid fa-list fa-fw me-2"></i>Post Type Selection
-                            </button>
-                        </h2>
-                        <div id="postTypeCollapse" class="accordion-collapse collapse show"
-                            data-bs-parent="#postTypeAccordion">
-                            <div class="accordion-body">
-                                <div class="d-flex flex-wrap justify-content-center gap-2">
-                                    <!-- Blog Post -->
-                                    <button class="btn btn-outline-primary" 
-                                        :class="{active: postCustom_json.vrHash == 'blog'}"
-                                        @click="postCustom_json.vrHash = 'blog';types='img,vid'">
-                                        <i class="fa-solid fa-book fa-fw me-2"></i>Blog Post
-                                    </button>
-                                    <!-- Video -->
-                                    <button class="btn btn-outline-primary"
-                                        :class="{active: postCustom_json.vrHash == 'video'}"
-                                        @click="postCustom_json.vrHash = 'video';types='img,vid'">
-                                        <i class="fa-solid fa-film fa-fw me-2"></i>Video
-                                    </button>
-                                    <!-- 360 Image Gallery -->
-                                    <button class="btn btn-outline-primary"
-                                        :class="{active: postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'}"
-                                        @click="postCustom_json.vrHash = 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k';types='ts,img'">
-                                        <i class="fa-solid fa-globe fa-fw me-2"></i>360 Image Gallery
-                                    </button>
-                                    <!-- New dApp -->
-                                    <button class="btn btn-outline-primary"
-                                        :class="{active: postCustom_json.vrHash == 'dapp'}"
-                                        @click="postCustom_json.vrHash = 'dapp';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
-                                        <i class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>New dApp
-                                    </button>
-                                    <!-- ReMix dApp -->
-                                    <button class="btn btn-outline-primary"
-                                        :class="{active: postCustom_json.vrHash == 'remix'}"
-                                        @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
-                                        <i class="fa-solid fa-shuffle fa-fw me-2"></i>ReMix dApp
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <div class="container fixed-top navbar-subbar p-0">
                 <div class="navbar-subbar-container">
                     <div class="navbar-subbar-content">
+                        <!-- Post Type Selection -->
+                        <div class="d-flex justify-content-center me-auto btn-group">
+                            <!-- Blog Post -->
+                            <button class="btn btn-sm btn-outline-primary px-2" :class="{active: postCustom_json.vrHash == 'blog'}"
+                                @click="postCustom_json.vrHash = 'blog';types='img,vid'">
+                                <i class="fa-solid fa-book fa-fw me-2"></i>Blog Post
+                            </button>
+                            <!-- Video -->
+                            <button class="btn btn-sm btn-outline-primary px-2" :class="{active: postCustom_json.vrHash == 'video'}"
+                                @click="postCustom_json.vrHash = 'video';types='img,vid'">
+                                <i class="fa-solid fa-film fa-fw me-2"></i>Video
+                            </button>
+                            <!-- 360 Image Gallery -->
+                            <button class="btn btn-sm btn-outline-primary px-2"
+                                :class="{active: postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'}"
+                                @click="postCustom_json.vrHash = 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k';types='ts,img'">
+                                <i class="fa-solid fa-globe fa-fw me-2"></i>360 Image Gallery
+                            </button>
+                            <!-- New dApp -->
+                            <button class="btn btn-sm btn-outline-primary px-2" :class="{active: postCustom_json.vrHash == 'dapp'}"
+                                @click="postCustom_json.vrHash = 'dapp';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
+                                <i class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>New dApp
+                            </button>
+                            <!-- ReMix dApp -->
+                            <button class="btn btn-sm btn-outline-primary px-2" :class="{active: postCustom_json.vrHash == 'remix'}"
+                                @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
+                                <i class="fa-solid fa-shuffle fa-fw me-2"></i>ReMix dApp
+                            </button>
+                        </div>
                         <!-- blog buttons -->
-                        <div class="d-flex justify-content-center ms-auto d-none"
-                            v-if="postCustom_json.vrHash == 'blog'">
-                            <div class="d-flex flex-wrap align-items-center ms-autojustify-content-center">
-                                <button type="button" class="btn btn-sm btn-secondary rounded-pill px-2 mx-1"
+                        <div class="d-flex justify-content-center ms-auto">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-secondary px-2"
                                     @click="saveNewToken()"><i class="fa-solid fa-fw fa-floppy-disk me-2"
                                         aria-hidden="true"></i>Save</button>
-                                <div class="dropdown">
-                                    <button type="button"
-                                        class="btn btn-sm btn-secondary dropdown-toggle rounded-pill px-2 mx-1"
-                                        data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fa-solid fa-fw fa-folder-open me-2"></i>Open
-                                    </button>
-                                    <ul class="dropdown-menu bg-black dropdown-menu-dark">
-                                        <li>
-                                            <h6 class="dropdown-header">LOCAL STORAGE</h6>
-                                        </li>
-                                        <li>
-                                            <hr class="dropdown-divider mt-0 mb-1">
-                                        </li>
-                                        <li class="text-center lead mb-2" v-if="!pendingTokens.length">Empty</li>
-                                        <li class="d-flex align-items-center justify-content-between"
-                                            v-for="pend of pendingTokens">
-                                            <a @click="loadNewToken(pend)" class="mx-1 dropdown-item rounded"
-                                                role="button">{{pend}}</a>
-                                            <a @click="deleteNewToken(pend)" class="mx-1 btn btn-sm btn-outline-danger"
-                                                role="button"><i class="fa-solid fa-trash-can fa-fw"></i></a>
-                                        </li>
-                                    </ul>
-                                </div>
+                                <button type="button" class="btn btn-sm btn-dark  ms-0 me-0 ps-0 pe-0 disabled"></button>
 
-                                <button type="button" class="btn btn-sm btn-secondary rounded-pill px-2 ms-1"
+                                <button type="button"
+                                    class="btn btn-sm btn-secondary dropdown-toggle px-2"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-fw fa-folder-open me-2"></i>Open
+                                </button>
+                                <ul class="dropdown-menu bg-black dropdown-menu-dark">
+                                    <li>
+                                        <h6 class="dropdown-header">LOCAL STORAGE</h6>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider mt-0 mb-1">
+                                    </li>
+                                    <li class="text-center lead mb-2" v-if="!pendingTokens.length">Empty</li>
+                                    <li class="d-flex align-items-center justify-content-between"
+                                        v-for="pend of pendingTokens">
+                                        <a @click="loadNewToken(pend)" class="mx-1 dropdown-item rounded"
+                                            role="button">{{pend}}</a>
+                                        <a @click="deleteNewToken(pend)" class="mx-1 btn btn-sm btn-outline-danger"
+                                            role="button"><i class="fa-solid fa-trash-can fa-fw"></i></a>
+                                    </li>
+                                </ul>
+
+
+                                <button type="button" class="btn btn-sm btn-secondary d-none rounded-pill px-2 ms-1"
                                     @click="saveNewToken()"><i class="fa-solid fa-fw fa-flag-checkered me-2"
                                         aria-hidden="true"></i>Publish</button>
+
+
                             </div>
                         </div>
                         <!-- 360 toggle buttons -->
@@ -328,13 +309,35 @@
                 </div>
             </div>
 
+            <!-- ALT CHOICE Post Type Selection -->
+            <div class="container d-none">
+                <div class="accordion border-white-50 rounded mt-3" id="postTypeAccordion">
+                    <div class="accordion-item bg-img-none bg-dark-1">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#postTypeCollapse" aria-expanded="true"
+                                aria-controls="postTypeCollapse">
+                                <i class="fa-solid fa-list fa-fw me-2"></i>Post Type Selection
+                            </button>
+                        </h2>
+                        <div id="postTypeCollapse" class="accordion-collapse collapse show"
+                            data-bs-parent="#postTypeAccordion">
+                            <div class="accordion-body">
+                                <div class="d-flex flex-wrap justify-content-center gap-2">
 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Main Content Container -->
             <div class="container">
-                
+
                 <!-- User Registration Section -->
-                <div v-if="spkapi.pubKey == 'NA'" class="alert alert-warning d-flex align-items-center mt-3" role="alert">
+                <div v-if="spkapi.pubKey == 'NA'" class="alert alert-warning d-flex align-items-center mt-3"
+                    role="alert">
                     <i class="fa-solid fa-user-gear fa-fw me-2"></i>
                     <div class="flex-grow-1">
                         <strong>Welcome!</strong> Register your account to store files on SPK Network.
@@ -345,7 +348,8 @@
                 </div>
 
                 <!-- Video Transcoding Section (Only show for video posts) -->
-                <div v-if="postCustom_json.vrHash == 'video' && spkapi.pubKey != 'NA'" class="accordion border-white-50 rounded mt-3" id="videoAccordion">
+                <div v-if="postCustom_json.vrHash == 'video' && spkapi.pubKey != 'NA'"
+                    class="accordion border-white-50 rounded mt-3" id="videoAccordion">
                     <div class="accordion-item bg-img-none bg-dark-1">
                         <h2 class="accordion-header">
                             <button class="accordion-button" type="button" data-bs-toggle="collapse"
@@ -353,24 +357,25 @@
                                 <i class="fa-solid fa-film fa-fw me-2"></i>Video Transcoding & Upload
                             </button>
                         </h2>
-                        <div id="videoTranscode" class="accordion-collapse collapse show" data-bs-parent="#videoAccordion">
+                        <div id="videoTranscode" class="accordion-collapse collapse show"
+                            data-bs-parent="#videoAccordion">
                             <div class="accordion-body">
                                 <!-- FFmpeg Status -->
-                                <div v-if="!ffmpegReady && !ffmpegSkipped" class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                                <div v-if="!ffmpegReady && !ffmpegSkipped"
+                                    class="alert alert-info d-flex align-items-center mb-3" role="alert">
                                     <i class="fa-solid fa-gears fa-fw me-2"></i>
                                     <div class="flex-grow-1">
                                         <strong>FFmpeg Required:</strong> Video transcoding needs FFmpeg to be loaded.
-                                        <div v-if="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')" class="small mt-1">
+                                        <div v-if="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')"
+                                            class="small mt-1">
                                             {{videoMsg}}
                                             <!-- FFmpeg Download Progress Bar -->
                                             <div v-if="ffmpegDownloadProgress > 0" class="mt-2">
                                                 <div class="progress" style="height: 8px;">
-                                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                                         role="progressbar" 
-                                                         :style="`width: ${ffmpegDownloadProgress}%`"
-                                                         :aria-valuenow="ffmpegDownloadProgress" 
-                                                         aria-valuemin="0" 
-                                                         aria-valuemax="100">
+                                                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                                        role="progressbar" :style="`width: ${ffmpegDownloadProgress}%`"
+                                                        :aria-valuenow="ffmpegDownloadProgress" aria-valuemin="0"
+                                                        aria-valuemax="100">
                                                     </div>
                                                 </div>
                                                 <div class="text-center mt-1 small text-muted">
@@ -379,10 +384,11 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <button class="btn btn-primary btn-sm ms-2" @click="downloadFFmpeg()" 
+                                    <button class="btn btn-primary btn-sm ms-2" @click="downloadFFmpeg()"
                                         :disabled="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')">
                                         <i class="fa-solid fa-download fa-fw me-1"></i>
-                                        <span v-if="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')">Loading...</span>
+                                        <span
+                                            v-if="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')">Loading...</span>
                                         <span v-else>Load FFmpeg</span>
                                     </button>
                                     <button class="btn btn-secondary btn-sm ms-1" @click="skipFFmpeg()"
@@ -390,17 +396,20 @@
                                         <i class="fa-solid fa-arrow-right fa-fw me-1"></i>Skip
                                     </button>
                                 </div>
-                                
+
                                 <!-- FFmpeg Error/Alternative -->
-                                <div v-if="ffmpegSkipped" class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                                <div v-if="ffmpegSkipped" class="alert alert-info d-flex align-items-center mb-3"
+                                    role="alert">
                                     <i class="fa-solid fa-info-circle fa-fw me-2"></i>
                                     <div class="flex-grow-1">
-                                        <strong>Direct Upload Mode:</strong> FFmpeg transcoding is not available. You can upload pre-processed video files directly.
+                                        <strong>Direct Upload Mode:</strong> FFmpeg transcoding is not available. You
+                                        can upload pre-processed video files directly.
                                         <div class="small mt-1">
                                             Supported formats: MP4, WebM, AVI, MOV, and most common video formats.
                                         </div>
                                     </div>
-                                    <button class="btn btn-primary btn-sm ms-2" @click="ffmpegSkipped = false; ffmpegReady = false; downloadFFmpeg()">
+                                    <button class="btn btn-primary btn-sm ms-2"
+                                        @click="ffmpegSkipped = false; ffmpegReady = false; downloadFFmpeg()">
                                         <i class="fa-solid fa-refresh fa-fw me-1"></i>Try FFmpeg Again
                                     </button>
                                 </div>
@@ -411,80 +420,80 @@
                                         <div class="col-md-6">
                                             <h6><i class="fa-solid fa-video fa-fw me-1"></i>Transcode a Video</h6>
                                             <p class="small text-muted mb-2">
-                                                Transcoding creates multiple quality versions of your video, giving users the best 
-                                                experience based on their bandwidth while enabling seamless seeking and smooth playback.
+                                                Transcoding creates multiple quality versions of your video, giving
+                                                users the best
+                                                experience based on their bandwidth while enabling seamless seeking and
+                                                smooth playback.
                                             </p>
                                             <input type="file" @change="transcode" accept="video/*"
                                                 class="form-control mb-2">
-                                            <small class="text-muted">Select a video file to transcode into multiple resolutions</small>
+                                            <small class="text-muted">Select a video file to transcode into multiple
+                                                resolutions</small>
                                         </div>
                                         <div class="col-md-6" v-if="videosrc">
                                             <h6><i class="fa-solid fa-play fa-fw me-1"></i>Preview</h6>
-                                            <video :src="videosrc" controls class="w-100" style="max-height: 200px;"></video>
+                                            <video :src="videosrc" controls class="w-100"
+                                                style="max-height: 200px;"></video>
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Status Message with Progress Bar -->
                                     <div v-if="videoMsg && videoMsg !== 'Drop a video file to transcode'" class="mt-2">
                                         <div class="alert alert-info">
                                             <i class="fa-solid fa-info-circle fa-fw me-1"></i>{{videoMsg}}
-                                            
+
                                             <!-- Progress Bar for Transcoding -->
-                                            <div v-if="videoMsg.includes('Transcoding:') && videoMsg.includes('%')" class="mt-2">
+                                            <div v-if="videoMsg.includes('Transcoding:') && videoMsg.includes('%')"
+                                                class="mt-2">
                                                 <div class="progress" style="height: 8px;">
-                                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                                         role="progressbar" 
-                                                         :style="`width: ${extractProgressPercent(videoMsg)}%`"
-                                                         :aria-valuenow="extractProgressPercent(videoMsg)" 
-                                                         aria-valuemin="0" 
-                                                         aria-valuemax="100">
+                                                    <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                                        role="progressbar"
+                                                        :style="`width: ${extractProgressPercent(videoMsg)}%`"
+                                                        :aria-valuenow="extractProgressPercent(videoMsg)"
+                                                        aria-valuemin="0" aria-valuemax="100">
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             <!-- Progress Bar for Hashing -->
-                                            <div v-if="videoMsg.includes('Hashing') && hashingProgress.total > 0" class="mt-2">
+                                            <div v-if="videoMsg.includes('Hashing') && hashingProgress.total > 0"
+                                                class="mt-2">
                                                 <div class="progress" style="height: 8px;">
-                                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" 
-                                                         role="progressbar" 
-                                                         :style="`width: ${hashingProgress.percentage}%`"
-                                                         :aria-valuenow="hashingProgress.percentage" 
-                                                         aria-valuemin="0" 
-                                                         aria-valuemax="100">
+                                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-info"
+                                                        role="progressbar"
+                                                        :style="`width: ${hashingProgress.percentage}%`"
+                                                        :aria-valuenow="hashingProgress.percentage" aria-valuemin="0"
+                                                        aria-valuemax="100">
                                                     </div>
                                                 </div>
                                                 <small class="text-muted">{{hashingProgress.currentFile}}</small>
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Upload Everywhere Component for Video Files -->
                                     <div class="alert alert-info bg-dark-1 border-info">
                                         <h6 class="mb-1">
                                             <i class="fa-solid fa-upload fa-fw me-1"></i>Upload Files
                                         </h6>
                                         <p class="mb-0 small">
-                                            Drop or click to upload transcoded video files, M3U8 playlists, and any other content. 
-                                            You can also drop your original video file here for direct upload without transcoding.
+                                            Drop or click to upload transcoded video files, M3U8 playlists, and any
+                                            other content.
+                                            You can also drop your original video file here for direct upload without
+                                            transcoding.
                                         </p>
                                     </div>
-                                    <upload-everywhere 
-                                        :account="account"
-                                        :saccountapi="spkapi"
-                                        :mypfp="mypfp"
-                                        :protocol="protocol"
-                                        :stats="spkStats"
-                                        :spkapi="spkapi"
+                                    <upload-everywhere :account="account" :saccountapi="spkapi" :mypfp="mypfp"
+                                        :protocol="protocol" :stats="spkStats" :spkapi="spkapi"
                                         :external-drop="{ files: videoFilesToUpload, targetPath: null }"
-                                        teleportref="#video-upload-area"
-                                        @tosign="sendIt($event)"
+                                        teleportref="#video-upload-area" @tosign="sendIt($event)"
                                         @done="handleVideoUploadComplete($event)"
                                         @update:external-drop="videoFilesToUpload = $event.files">
                                     </upload-everywhere>
-                                    
+
                                     <!-- Upload area for teleporting -->
                                     <div id="video-upload-area" class="mt-3"></div>
-                                    
+
                                     <!-- Video Preview Section -->
                                     <div v-if="transcodePreview.available" class="card mt-3">
                                         <div class="card-header">
@@ -498,24 +507,20 @@
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label class="form-label">Select Resolution:</label>
-                                                        <select v-model="transcodePreview.selectedResolution" 
-                                                                @change="onPreviewResolutionChange()"
-                                                                class="form-select">
-                                                            <option v-for="res in transcodePreview.resolutions" 
-                                                                    :key="res.resolution" 
-                                                                    :value="res">
+                                                        <select v-model="transcodePreview.selectedResolution"
+                                                            @change="onPreviewResolutionChange()" class="form-select">
+                                                            <option v-for="res in transcodePreview.resolutions"
+                                                                :key="res.resolution" :value="res">
                                                                 {{res.resolution}}p
                                                             </option>
                                                         </select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <video v-if="transcodePreview.videoSrc" 
-                                                           :src="transcodePreview.videoSrc" 
-                                                           controls 
-                                                           class="w-100" 
-                                                           style="max-height: 300px;"
-                                                           @loadstart="setupHLSPlayer($event.target)">
+                                                    <video v-if="transcodePreview.videoSrc"
+                                                        :src="transcodePreview.videoSrc" controls class="w-100"
+                                                        style="max-height: 300px;"
+                                                        @loadstart="setupHLSPlayer($event.target)">
                                                         Your browser does not support the video tag.
                                                     </video>
                                                 </div>
@@ -523,7 +528,7 @@
                                             <div class="mt-2">
                                                 <small class="text-muted">
                                                     <i class="fa-solid fa-info-circle fa-fw me-1"></i>
-                                                    This preview shows the transcoded video at the selected resolution. 
+                                                    This preview shows the transcoded video at the selected resolution.
                                                     Upload to make it available on IPFS.
                                                 </small>
                                             </div>
@@ -536,7 +541,8 @@
                 </div>
 
                 <!-- 360 dApp Asset Management (Only show for 360 posts) -->
-                <div v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'" class="accordion border-white-50 rounded mt-3" id="assetAccordion">
+                <div v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'"
+                    class="accordion border-white-50 rounded mt-3" id="assetAccordion">
                     <div class="accordion-item bg-img-none bg-dark-1">
                         <h2 class="accordion-header">
                             <button class="accordion-button" type="button" data-bs-toggle="collapse"
@@ -544,7 +550,8 @@
                                 <i class="fa-solid fa-shapes fa-fw me-2"></i>360 Asset Management
                             </button>
                         </h2>
-                        <div id="assetManager" class="accordion-collapse collapse show" data-bs-parent="#assetAccordion">
+                        <div id="assetManager" class="accordion-collapse collapse show"
+                            data-bs-parent="#assetAccordion">
                             <div class="accordion-body">
                                 <div class="row">
                                     <div class="col-md-6">
@@ -555,14 +562,16 @@
                                     <div class="col-md-6">
                                         <!-- 360 Preview -->
                                         <div class="position-relative">
-                                            <div class="d-flex w-100 justify-content-end align-items-center p-2 overlay position-absolute top-0 start-50 translate-middle-x">
+                                            <div
+                                                class="d-flex w-100 justify-content-end align-items-center p-2 overlay position-absolute top-0 start-50 translate-middle-x">
                                                 <div class="form-check form-switch form-switch-lg me-2">
                                                     <input class="form-check-input bg-blur-darkg" type="checkbox"
                                                         role="switch" id="flexSwitchCheckChecked" v-model="showLine"
                                                         title="Horizon Line">
                                                 </div>
                                                 <button class="btn btn-dark bg-blur-darkg border-0" title="Reset Camera"
-                                                    @click="resetCamera()"><i class="fa-solid fa-camera-rotate"></i></button>
+                                                    @click="resetCamera()"><i
+                                                        class="fa-solid fa-camera-rotate"></i></button>
                                             </div>
                                             <hr style="border: 5px solid red;" :class="{'invisible': !showLine}"
                                                 class="overlay m-0 w-100 position-absolute top-50 start-0 translate-middle-y" />
@@ -595,7 +604,8 @@
                                 <contract-vue v-if="account" :nodeview="false" :account="account" :mypfp="mypfp"
                                     :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
                                     :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
-                                    @done="getSapi" :postpage="true" @add-to-post="fileToAddToPost = $event"></contract-vue>
+                                    @done="getSapi" :postpage="true"
+                                    @add-to-post="fileToAddToPost = $event"></contract-vue>
                             </div>
                         </div>
                     </div>
@@ -674,64 +684,57 @@
                     </div>
                 </div>
             </div>
-                <!-- SPK Wallet Modal -->
-                <div class="modal modal-xl fade" id="spkWalletModal" tabindex="-1" aria-labelledby="spkWalletModalLabel"
-                    aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content bg-dark-90">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="spkWalletModalLabel">SPK Testnet Wallet</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <spk-vue node="false" :account="account" @tosign="sendIt($event);log($event)" />
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-                            </div>
+            <!-- SPK Wallet Modal -->
+            <div class="modal modal-xl fade" id="spkWalletModal" tabindex="-1" aria-labelledby="spkWalletModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content bg-dark-90">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="spkWalletModalLabel">SPK Testnet Wallet</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Sponsored Contract -->
-                <div class="modal fade" id="sponsoredModal" tabindex="-1" role="dialog" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                        <div class="modal-content bg-darker text-white">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Sponsored Contracts</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                            </div>
-
-                            <div class="modal-body text-start">
-                                <div v-for="spon in services">
-                                    <button :disabled="spon.channel" @click="petitionForContract(spon.provider)"
-                                        class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span
-                                            class="lead">@{{spon.provider}}</span><span
-                                            class="small text-warning">{{spon.memo}}</span></button>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-
-                            </div>
-
+                        <div class="modal-body">
+                            <spk-vue node="false" :account="account" @tosign="sendIt($event);log($event)" />
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
-        <!-- Footer -->
-        <foot-vue />
+
+            <!-- Sponsored Contract -->
+            <div class="modal fade" id="sponsoredModal" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content bg-darker text-white">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Sponsored Contracts</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body text-start">
+                            <div v-for="spon in services">
+                                <button :disabled="spon.channel" @click="petitionForContract(spon.provider)"
+                                    class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span
+                                        class="lead">@{{spon.provider}}</span><span
+                                        class="small text-warning">{{spon.memo}}</span></button>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+    </div>
+    </main>
+    <!-- Footer -->
+    <foot-vue />
     </div>
     <!-- Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-        integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
-        integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
-        crossorigin="anonymous"></script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
     <script>function deepLink(link) { }</script>
     <script>
         // Add JavaScript to toggle collapse on <tr> click

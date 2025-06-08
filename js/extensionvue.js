@@ -1,6 +1,6 @@
 export default {
     template: `<div :id="'contract-' +  contract.id" class="d-flex flex-grow-1">
-    <form id="contractForm" class="d-flex flex-column flex-grow-1 p-2 py-lg-3 px-lg-5">
+    <form class="d-flex flex-column flex-grow-1 p-2 py-lg-3 px-lg-5">
 
      <!-- node banner -->
             <div v-if="hasStorage && !nodeview" :class="{'alert-success' : isStored, 'alert-danger' : !isStored}" class="alert d-flex align-items-center py-1 ps-2 pe-1 mx-2 mt-2 mb-1">
