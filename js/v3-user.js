@@ -4572,16 +4572,16 @@ function buyNFT(setname, uid, price, type, callback){
               // Read segment files
               for (const segFile of segmentFiles) {
                 const segData = await ffmpeg.readFile(segFile.name);
-                // Ensure we have a proper Uint8Array copy
-                const segDataCopy = new Uint8Array(segData);
+                // Create proper copy - slice() creates a new buffer
+                const segDataCopy = segData.slice();
                 extractedFiles.set(segFile.name, segDataCopy);
                 console.log(`📄 Extracted ${segFile.name} (${segDataCopy.byteLength} bytes)`);
               }
               
               // Read playlist file
               const playlistData = await ffmpeg.readFile(playlistFile.name);
-              // Ensure we have a proper Uint8Array copy
-              const playlistDataCopy = new Uint8Array(playlistData);
+              // Create proper copy - slice() creates a new buffer
+              const playlistDataCopy = playlistData.slice();
               extractedFiles.set(playlistFile.name, playlistDataCopy);
               console.log(`📋 Extracted ${playlistFile.name} (${playlistDataCopy.byteLength} bytes)`);
               
@@ -4703,7 +4703,7 @@ function buyNFT(setname, uid, price, type, callback){
         });
       
       // Enhanced file validation and processing
-      const validateAndProcessFiles = async () => {
+      const validateAndProcessFiles = async (extractedFiles) => {
         // Wait for files to stabilize after transcoding completion
         let files = await ffmpeg.listDir("/");
         let lastFileCount = files.length;
@@ -4991,7 +4991,7 @@ function buyNFT(setname, uid, price, type, callback){
       };
       
       // Start file validation and processing
-      validateAndProcessFiles().catch(error => {
+      validateAndProcessFiles(extractedFiles).catch(error => {
         console.error('Error processing transcoded files:', error);
         this.videoMsg = 'Error processing transcoded files. Please try again.';
       });
