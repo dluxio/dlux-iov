@@ -4572,14 +4572,18 @@ function buyNFT(setname, uid, price, type, callback){
               // Read segment files
               for (const segFile of segmentFiles) {
                 const segData = await ffmpeg.readFile(segFile.name);
-                extractedFiles.set(segFile.name, segData);
-                console.log(`📄 Extracted ${segFile.name} (${segData.byteLength} bytes)`);
+                // Ensure we have a proper Uint8Array copy
+                const segDataCopy = new Uint8Array(segData);
+                extractedFiles.set(segFile.name, segDataCopy);
+                console.log(`📄 Extracted ${segFile.name} (${segDataCopy.byteLength} bytes)`);
               }
               
               // Read playlist file
               const playlistData = await ffmpeg.readFile(playlistFile.name);
-              extractedFiles.set(playlistFile.name, playlistData);
-              console.log(`📋 Extracted ${playlistFile.name} (${playlistData.byteLength} bytes)`);
+              // Ensure we have a proper Uint8Array copy
+              const playlistDataCopy = new Uint8Array(playlistData);
+              extractedFiles.set(playlistFile.name, playlistDataCopy);
+              console.log(`📋 Extracted ${playlistFile.name} (${playlistDataCopy.byteLength} bytes)`);
               
               // Clean up FFmpeg filesystem (keep input file for next resolution)
               console.log(`🧹 Cleaning up ${resHeight}p files from FFmpeg filesystem...`);
@@ -4618,8 +4622,20 @@ function buyNFT(setname, uid, price, type, callback){
           console.log(`📥 Writing ${extractedFiles.size} extracted files back to FFmpeg filesystem...`);
           for (const [filename, data] of extractedFiles) {
             try {
+              // Verify data integrity before writing
+              if (!data || data.byteLength === 0) {
+                console.error(`❌ ${filename} has no data (${data ? data.byteLength : 'null'} bytes)`);
+                continue;
+              }
+              
               await ffmpeg.writeFile(filename, data);
               console.log(`✅ Restored ${filename} (${data.byteLength} bytes)`);
+              
+              // Verify file was actually written
+              const verifyData = await ffmpeg.readFile(filename);
+              if (verifyData.byteLength !== data.byteLength) {
+                console.error(`⚠️ Size mismatch for ${filename}: wrote ${data.byteLength}, read ${verifyData.byteLength}`);
+              }
             } catch (writeError) {
               console.error(`❌ Failed to restore ${filename}:`, writeError);
             }
@@ -4742,8 +4758,63 @@ function buyNFT(setname, uid, price, type, callback){
         );
         
         if (existingPlaylists.length === 0) {
-          this.videoMsg = '❌ No valid playlists found after transcoding. Please try again.';
-          return;
+          console.error(`❌ Critical: No playlists found in filesystem after restoration`);
+          console.log(`🔍 Attempting to recreate playlists from extracted data...`);
+          
+          // Try to recreate playlists from memory if filesystem restoration failed
+          if (extractedFiles.size > 0) {
+            console.log(`📋 Recreating playlists from extracted data...`);
+            
+            // Filter playlist files from extracted data
+            const playlistEntries = Array.from(extractedFiles.entries()).filter(([filename]) => filename.endsWith('.m3u8'));
+            
+            if (playlistEntries.length > 0) {
+              console.log(`🔧 Found ${playlistEntries.length} playlists in extracted data, recreating...`);
+              
+              for (const [filename, data] of playlistEntries) {
+                try {
+                  // Force write the playlist data again
+                  await ffmpeg.writeFile(filename, data);
+                  console.log(`🔄 Recreated ${filename} (${data.byteLength} bytes)`);
+                } catch (recreateError) {
+                  console.error(`❌ Failed to recreate ${filename}:`, recreateError);
+                }
+              }
+              
+              // Re-check the filesystem
+              const recheckFiles = await ffmpeg.listDir("/");
+              const recheckM3u8 = recheckFiles.filter(f => f.name.endsWith('.m3u8'));
+              
+              if (recheckM3u8.length > 0) {
+                console.log(`✅ Successfully recreated ${recheckM3u8.length} playlists`);
+                // Continue processing with recreated playlists
+                files = recheckFiles;
+                const newM3u8Files = recheckFiles.filter(f => f.name.endsWith('.m3u8'));
+                const newActualPlaylists = newM3u8Files.map(f => f.name);
+                const newExistingPlaylists = expectedPlaylists.filter(playlist => 
+                  newActualPlaylists.includes(playlist)
+                );
+                
+                if (newExistingPlaylists.length > 0) {
+                  existingPlaylists.length = 0;
+                  existingPlaylists.push(...newExistingPlaylists);
+                  console.log(`📋 Updated existing playlists: ${existingPlaylists.join(', ')}`);
+                } else {
+                  this.videoMsg = '❌ Playlist recreation failed. Please try transcoding again.';
+                  return;
+                }
+              } else {
+                this.videoMsg = '❌ Playlist recreation failed. Please try transcoding again.';
+                return;
+              }
+            } else {
+              this.videoMsg = '❌ No playlist data found in memory. Please try transcoding again.';
+              return;
+            }
+          } else {
+            this.videoMsg = '❌ No valid playlists found after transcoding. Please try again.';
+            return;
+          }
         }
         
         if (existingPlaylists.length < expectedPlaylists.length) {
@@ -4906,7 +4977,14 @@ function buyNFT(setname, uid, price, type, callback){
           
           console.log('📁 Final video files to upload:', videoFiles.map(f => f.file.name));
           this.videoFilesToUpload = videoFiles;
-          this.videoMsg = `✅ ${resolutionPlaylists.length} resolution(s) ready for upload!`;
+          
+          // Debug the upload files structure
+          console.log('🔍 Upload files structure check:');
+          videoFiles.forEach((vf, idx) => {
+            console.log(`  ${idx + 1}. ${vf.file.name} (${vf.file.size} bytes, ${vf.file.type})`);
+          });
+          
+          this.videoMsg = `✅ ${resolutionPlaylists.length} resolution(s) ready for upload! (${videoFiles.length} files total)`;
         } else {
           this.videoMsg = '❌ No valid resolution playlists were generated. Please try again.';
         }
