@@ -4510,7 +4510,27 @@ function buyNFT(setname, uid, price, type, callback){
           console.log(`🎬 Transcoding ${resHeight}p with command:`, commands);
           
           try {
+            // Check filesystem state before transcoding
+            const preFiles = await ffmpeg.listDir("/");
+            console.log(`🗂️ Pre-transcode files for ${resHeight}p:`, preFiles.map(f => f.name).sort());
+            
             // Start the transcoding
+            console.log(`🚀 Starting FFmpeg exec for ${resHeight}p...`);
+            
+            // Add temporary logging to catch FFmpeg errors
+            const originalOnLog = ffmpeg.on ? ffmpeg.on.bind(ffmpeg) : null;
+            let ffmpegLogs = [];
+            
+            if (originalOnLog) {
+              const logHandler = ({ type, message }) => {
+                ffmpegLogs.push(`[${type}] ${message}`);
+                if (type === 'fferr' || message.toLowerCase().includes('error')) {
+                  console.error(`🔧 FFmpeg ${resHeight}p error:`, message);
+                }
+              };
+              ffmpeg.on('log', logHandler);
+            }
+            
             const execPromise = ffmpeg.exec(commands);
             
             // Wait for both exec completion AND file stability
@@ -4519,10 +4539,48 @@ function buyNFT(setname, uid, price, type, callback){
               this.waitForTranscodingCompletion(ffmpeg, resHeight, 30000) // 30 second timeout
             ]);
             
-            successfulResolutions.push(resHeight);
-            console.log(`✅ Successfully transcoded ${resHeight}p`);
+            // Verify files were actually created
+            const postFiles = await ffmpeg.listDir("/");
+            const newFiles = postFiles.filter(f => f.name.startsWith(`${resHeight}p_`));
+            
+            if (newFiles.length > 0) {
+              successfulResolutions.push(resHeight);
+              console.log(`✅ Successfully transcoded ${resHeight}p with ${newFiles.length} files:`, newFiles.map(f => f.name));
+              
+              // Clean up old resolution files to prevent conflicts (but keep input file and current resolution)
+              const filesToCleanup = postFiles.filter(f => 
+                f.name.match(/^\d+p_/) && // Is a resolution file
+                !f.name.startsWith(`${resHeight}p_`) && // But not from current resolution
+                !f.name.endsWith('.m3u8') // Keep playlists for now
+              );
+              
+              for (const fileToClean of filesToCleanup) {
+                try {
+                  await ffmpeg.deleteFile(fileToClean.name);
+                  console.log(`🧹 Cleaned up old file: ${fileToClean.name}`);
+                } catch (cleanError) {
+                  console.warn(`⚠️ Could not clean up ${fileToClean.name}:`, cleanError);
+                }
+              }
+            } else {
+              console.error(`❌ No files created for ${resHeight}p despite exec completing`);
+              if (ffmpegLogs.length > 0) {
+                console.log(`📋 FFmpeg logs for failed ${resHeight}p:`, ffmpegLogs.slice(-10)); // Last 10 log entries
+              }
+              throw new Error(`No output files created for ${resHeight}p`);
+            }
+            
           } catch (error) {
             console.error(`❌ Failed to transcode ${resHeight}p:`, error);
+            
+            // Check what files exist after failure
+            try {
+              const errorFiles = await ffmpeg.listDir("/");
+              console.log(`🔍 Files after ${resHeight}p failure:`, errorFiles.map(f => f.name).sort());
+            } catch (listError) {
+              console.error(`Could not list files after ${resHeight}p failure:`, listError);
+            }
+            
             // Continue with other resolutions instead of failing completely
           }
         }
