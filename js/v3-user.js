@@ -4484,7 +4484,7 @@ function buyNFT(setname, uid, price, type, callback){
             console.log(`🖥️ Processing ${resHeight}p: Landscape scaling (width auto)`);
           }
           
-          // Build command for this resolution
+          // Build command for this resolution with shorter segments for short videos
           const commands = [
             "-i", name,
             "-c:v", codec,
@@ -4497,12 +4497,13 @@ function buyNFT(setname, uid, price, type, callback){
             "-profile:v", "main",
             "-max_muxing_queue_size", "1024",
             "-f", "segment",
-            "-segment_time", "10", 
+            "-segment_time", "5",  // Shorter segments for better compatibility with short videos
             "-segment_format", "mpegts",
             "-segment_list_type", "m3u8",
             "-segment_list", `${resHeight}p_index.m3u8`,
-            "-hls_time", "5",
+            "-hls_time", "3",      // Shorter HLS time
             "-hls_list_size", "0",
+            "-force_key_frames", "expr:gte(t,n_forced*3)", // Force keyframes every 3 seconds
             `${resHeight}p_%03d.ts`
           ];
           
@@ -4516,8 +4517,31 @@ function buyNFT(setname, uid, price, type, callback){
             console.log(`📁 Files before ${resHeight}p:`, filesBefore.map(f => f.name).filter(name => !name.startsWith('.') && !['dev', 'home', 'proc', 'tmp'].includes(name)));
             
             console.log(`🎬 FFmpeg command for ${resHeight}p:`, commands.join(' '));
-            await ffmpeg.exec(commands);
-            console.log(`🔍 ${resHeight}p FFmpeg exec completed, checking filesystem...`);
+            
+            // Capture FFmpeg output for debugging
+            let ffmpegOutput = '';
+            let ffmpegErrors = '';
+            
+            ffmpeg.on('log', ({ message }) => {
+              ffmpegOutput += message + '\n';
+              console.log(`FFmpeg ${resHeight}p:`, message);
+            });
+            
+            try {
+              await ffmpeg.exec(commands);
+              console.log(`🔍 ${resHeight}p FFmpeg exec completed, checking filesystem...`);
+            } catch (execError) {
+              console.error(`❌ ${resHeight}p FFmpeg exec error:`, execError);
+              ffmpegErrors += execError.toString();
+            }
+            
+            // Log FFmpeg output summary
+            if (ffmpegOutput) {
+              console.log(`📝 ${resHeight}p FFmpeg output summary:`, ffmpegOutput.split('\n').slice(-5).join('\n'));
+            }
+            if (ffmpegErrors) {
+              console.error(`⚠️ ${resHeight}p FFmpeg errors:`, ffmpegErrors);
+            }
             
             // Check filesystem immediately after FFmpeg claims completion
             const filesAfter = await ffmpeg.listDir("/");
