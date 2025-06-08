@@ -184,54 +184,24 @@
             <nav-vue @login="account = $event;newme($event)" @logout="account = '';removeUser()" @ack="removeOp($event)"
                 @refresh="run($event)" :op="toSign" :lapi="lapi" />
         </div>
-        <main role="main" class="d-flex flex-column flex-grow-1 padmain-subbar">
+        <main role="main" class="d-flex flex-column flex-grow-1 padmain">
+            
 
-            <div class="container fixed-top navbar-subbar p-0">
+            <div class="container fixed-top navbar-subbar p-0 d-none">
                 <div class="navbar-subbar-container">
-                    <div class="navbar-subbar-content">
+                    <div class="navbar-subbar-content d-flex flex-wrap gap-1 mt-1">
                         <!-- Post Type Selection -->
-                        <div class="d-flex justify-content-center me-auto btn-group">
-                            <!-- Blog Post -->
-                            <button class="btn btn-sm btn-outline-primary px-2"
-                                :class="{active: postCustom_json.vrHash == 'blog'}"
-                                @click="postCustom_json.vrHash = 'blog';types='img,vid'">
-                                <i class="fa-solid fa-book fa-fw me-2"></i>Blog Post
-                            </button>
-                            <!-- Video -->
-                            <button class="btn btn-sm btn-outline-primary px-2"
-                                :class="{active: postCustom_json.vrHash == 'video'}"
-                                @click="postCustom_json.vrHash = 'video';types='img,vid'">
-                                <i class="fa-solid fa-film fa-fw me-2"></i>Video
-                            </button>
-                            <!-- 360 Image Gallery -->
-                            <button class="btn btn-sm btn-outline-primary px-2"
-                                :class="{active: postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'}"
-                                @click="postCustom_json.vrHash = 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k';types='ts,img'">
-                                <i class="fa-solid fa-globe fa-fw me-2"></i>360 Image Gallery
-                            </button>
-                            <!-- New dApp -->
-                            <button class="btn btn-sm btn-outline-primary px-2"
-                                :class="{active: postCustom_json.vrHash == 'dapp'}"
-                                @click="postCustom_json.vrHash = 'dapp';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
-                                <i class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>New dApp
-                            </button>
-                            <!-- ReMix dApp -->
-                            <button class="btn btn-sm btn-outline-primary px-2"
-                                :class="{active: postCustom_json.vrHash == 'remix'}"
-                                @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
-                                <i class="fa-solid fa-shuffle fa-fw me-2"></i>ReMix dApp
-                            </button>
-                        </div>
+
 
                         <!-- blog buttons -->
                         <div class="d-flex justify-content-center ms-auto">
                             <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-secondary px-2" @click="saveNewToken()"><i
-                                        class="fa-solid fa-fw fa-floppy-disk me-2" aria-hidden="true"></i>Save</button>
-                                <button type="button"
-                                    class="btn btn-sm btn-dark  ms-0 me-0 ps-0 pe-0 disabled"></button>
+                                <button type="button" class="rounded-start-pill btn btn-secondary px-3"
+                                    @click="saveNewToken()"><i class="fa-solid fa-fw fa-floppy-disk me-2"
+                                        aria-hidden="true"></i>Save</button>
+                                <button type="button" class="btn btn-secondary ms-0 me-0 ps-0 pe-0 disabled"></button>
 
-                                <button type="button" class="btn btn-sm btn-secondary dropdown-toggle px-2"
+                                <button type="button" class="rounded-end-pill btn btn-secondary dropdown-toggle px-3"
                                     data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="fa-solid fa-fw fa-folder-open me-2"></i>Open
                                 </button>
@@ -308,47 +278,88 @@
                     </div>
                 </div>
             </div>
+
             <div class="container text-center">
                 <!-- Post Type Information Banners -->
                 <div class="mt-3">
-                    <!-- Blog Post Banner -->
-                    <div v-if="postCustom_json.vrHash == 'blog'" class="neon-banner blog">
-                        <h6 class="justify-content-center"><i class="fa-solid fa-book"></i>Blog Posts</h6>
-                        <p>Blogs are the default post type and allow posting image URLs and markdown text to the Hive
-                            blockchain. Perfect for articles, tutorials, and general content sharing.</p>
-                    </div>
+                    <div class="neon-banner pt-3 px-3 pb-2" :class="{
+                        'blog': postCustom_json.vrHash == 'blog',
+                        'video': postCustom_json.vrHash == 'video',
+                        'gallery': postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k',
+                        'dapp': postCustom_json.vrHash == 'dapp',
+                        'remix': postCustom_json.vrHash == 'remix'
+                    }">
+                        <!-- Blog Post Content -->
+                        <div v-show="postCustom_json.vrHash == 'blog'">
+                            <h6 class="justify-content-center"><i class="fa-solid fa-book fa-fw"></i>Blog Post</h6>
+                            <p>Blogs are the default post type and support publishing image URLs and markdown
+                                text to the Hive blockchain. Perfect for articles, tutorials, and general content sharing.</p>
+                        </div>
 
-                    <!-- Video Banner -->
-                    <div v-if="postCustom_json.vrHash == 'video'" class="neon-banner video">
-                        <h6 class="justify-content-center"><i class="fa-solid fa-film"></i>Video Posts</h6>
-                        <p>Decentralized video streaming on SPK Network and requires M3U8 transcoding for
-                            IPFS HLS streaming via the CID CDN. Supports multiple quality levels for adaptive streaming.
-                        </p>
-                    </div>
+                        <!-- Video Content -->
+                        <div v-show="postCustom_json.vrHash == 'video'">
+                            <h6 class="justify-content-center"><i class="fa-solid fa-film"></i>Streaming Video</h6>
+                            <p>Decentralized video playback on SPK Network supports multiple quality levels for adaptive
+                                streaming. Streaming (IPFS HLS via CID CDN) requires locally transcoding your file into an M3U8
+                                playlist.</p>
+                        </div>
 
-                    <!-- 360 Image Gallery Banner -->
-                    <div v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'"
-                        class="neon-banner gallery">
-                        <h6 class="justify-content-center"><i class="fa-solid fa-globe"></i>360° Image Galleries</h6>
-                        <p>Create immersive 360° experiences using A-Frame to construct user-navigable, headset-enabled
-                            virtual environments. Perfect for virtual tours and immersive content.</p>
-                    </div>
+                        <!-- 360 Image Gallery Content -->
+                        <div v-show="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'">
+                            <h6 class="justify-content-center"><i class="fa-solid fa-globe fa-fw"></i>360° Image Gallery</h6>
+                            <p>Create immersive 360° experiences using A-Frame to construct user-navigable, headset-enabled
+                                virtual environments. Perfect for virtual tours and immersive content.</p>
+                        </div>
 
-                    <!-- dApp Banner -->
-                    <div v-if="postCustom_json.vrHash == 'dapp'" class="neon-banner dapp">
-                        <h6 class="justify-content-center"><i class="fa-solid fa-mobile-screen-button"></i>New dApp</h6>
-                        <p>Build decentralized applications using any modern web technology you're familiar with. Deploy
-                            your dApp to IPFS and make it accessible through the Hive blockchain.</p>
-                    </div>
+                        <!-- dApp Content -->
+                        <div v-show="postCustom_json.vrHash == 'dapp'">
+                            <h6 class="justify-content-center"><i class="fa-solid fa-mobile-screen-button fa-fw"></i>New dApp</span></h6>
+                            <p>Build decentralized applications using any modern web technology you're familiar with. Deploy
+                                your dApp to IPFS and make it accessible through the Hive blockchain.</p>
+                        </div>
 
-                    <!-- ReMix dApp Banner -->
-                    <div v-if="postCustom_json.vrHash == 'remix'" class="neon-banner remix">
-                        <h6 class="justify-content-center"><i class="fa-solid fa-shuffle"></i>ReMix dApp</h6>
-                        <p>Create derivative works by remixing existing dApps. Build upon the work of others while
-                            maintaining proper attribution and licensing.</p>
+                        <!-- ReMix dApp Content -->
+                        <div v-show="postCustom_json.vrHash == 'remix'">
+                            <h6 class="justify-content-center"><i class="fa-solid fa-shuffle fa-fw"></i>ReMix dApp</h6>
+                            <p>Create derivative works by remixing existing dApps. Build upon the work of others while
+                                maintaining proper attribution and licensing.</p>
+                        </div>
+
+                        <!-- Post Type Selection -->
+                        <div class="d-flex justify-content-center mx-auto gap-1 gap-md-2 mt-3">
+                            <!-- Blog Post -->
+                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap" :class="{active: postCustom_json.vrHash == 'blog'}"
+                                @click="postCustom_json.vrHash = 'blog';types='img,vid'">
+                                <i class="fa-solid fa-book fa-fw"></i><span class="d-none d-md-block ms-2">Blog</span>
+                            </button>
+                            <!-- Video -->
+                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap" :class="{active: postCustom_json.vrHash == 'video'}"
+                                @click="postCustom_json.vrHash = 'video';types='img,vid'">
+                                <i class="fa-solid fa-film fa-fw"></i><span class="d-none d-md-block ms-2">Video</span>
+                            </button>
+                            <!-- 360 Image Gallery -->
+                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap"
+                                :class="{active: postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'}"
+                                @click="postCustom_json.vrHash = 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k';types='ts,img'">
+                                <i class="fa-solid fa-globe fa-fw"></i><span class="d-none d-md-block ms-2">360°</span>
+                            </button>
+                            <!-- New dApp -->
+                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap" :class="{active: postCustom_json.vrHash == 'dapp'}"
+                                @click="postCustom_json.vrHash = 'dapp';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
+                                <i class="fa-solid fa-mobile-screen-button fa-fw"></i><span class="d-none d-md-flex ms-2 align-items-center"><span class="d-none d-xl-block me-1">New</span>dApp</span>
+                            </button>
+                            <!-- ReMix dApp -->
+                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap" :class="{active: postCustom_json.vrHash == 'remix'}"
+                                @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
+                                <i class="fa-solid fa-shuffle fa-fw"></i><span class="d-none d-md-flex ms-2 align-items-center">ReMix<span class="d-none d-xl-block ms-1">dApp</span></span>
+                            </button>
+                        </div>
                     </div>
+                    
                 </div>
             </div>
+
+            
 
             <!-- Main Content Container -->
             <div class="container">

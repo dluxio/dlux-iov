@@ -15030,8 +15030,6 @@ body[data-touch=false] .dropdown-extra:hover {
   background: rgba(17, 18, 34, 0.95);
   border: 1px solid rgba(92, 148, 254, 0.3);
   border-radius: 8px;
-  padding: 1.25rem;
-  margin-bottom: 1rem;
   position: relative;
   overflow: hidden;
   box-shadow: 0 0 15px rgba(92, 148, 254, 0.1);
@@ -15054,6 +15052,7 @@ body[data-touch=false] .dropdown-extra:hover {
 .neon-banner h6, .neon-banner .h6 {
   color: #5C94FE;
   font-family: "Space Grotesk", sans-serif;
+  font-size: 1.5rem;
   font-weight: 600;
   letter-spacing: 0.5px;
   margin-bottom: 0.75rem;
@@ -15067,9 +15066,11 @@ body[data-touch=false] .dropdown-extra:hover {
 }
 .neon-banner p {
   color: rgba(173, 181, 189, 0.9);
-  font-size: 0.9rem;
+  font-size: 1.3rem;
   line-height: 1.5;
   margin: 0;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 .neon-banner.blog {
   border-color: rgba(92, 148, 254, 0.3);
