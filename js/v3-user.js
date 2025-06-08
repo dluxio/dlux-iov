@@ -4508,12 +4508,22 @@ function buyNFT(setname, uid, price, type, callback){
           try {
             console.log(`🚀 Starting ${resHeight}p transcoding...`);
             await ffmpeg.exec(commands);
+            console.log(`🔍 ${resHeight}p FFmpeg completed, verifying files...`);
             
-            // Wait for files to be written and verify they exist
-            await this.waitForResolutionFiles(ffmpeg, resHeight, 60000);
+            // Give FFmpeg a moment to write files, then verify they exist
+            await new Promise(resolve => setTimeout(resolve, 2000));
             
-            successfulResolutions.push(resHeight);
-            console.log(`✅ ${resHeight}p transcoded successfully`);
+            // Quick verification that files exist
+            const files = await ffmpeg.listDir("/");
+            const segmentFiles = files.filter(f => f.name.startsWith(`${resHeight}p_`) && f.name.endsWith('.ts'));
+            const playlistFile = files.find(f => f.name === `${resHeight}p_index.m3u8`);
+            
+            if (playlistFile && segmentFiles.length > 0) {
+              successfulResolutions.push(resHeight);
+              console.log(`✅ ${resHeight}p transcoded successfully: ${segmentFiles.length} segments + playlist`);
+            } else {
+              throw new Error(`${resHeight}p files not found after FFmpeg completion`);
+            }
           } catch (error) {
             console.error(`❌ ${resHeight}p transcoding failed:`, error);
             // Continue with other resolutions
