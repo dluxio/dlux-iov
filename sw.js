@@ -1,4 +1,4 @@
-this.version = "2025.06.08.9";
+this.version = "2025.06.08.10";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.08.9",
-  "generated": "2025-06-08T01:33:11Z",
+  "version": "2025.06.08.10",
+  "generated": "2025-06-08T01:53:05Z",
   "files": {
-    "/img/tokens/spk_icon.png": {
-      "checksum": "ec1db8b25b57776a93d8efd59bcdfd7a",
-      "size": 33772,
-      "priority": "important"
-    },
     "/img/tokens/spk_logomark.png": {
       "checksum": "e7488b692154b55e2e2e390b21a7f8bb",
       "size": 25219,
@@ -976,7 +971,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "a32c1e9abd9c26782723db48c762c027",
+      "checksum": "8c657e056bb87434500adce7d218edec",
       "size": 36316,
       "priority": "important"
     },
@@ -1051,8 +1046,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "d814dae93b4c2c3e73e6d4a486f6a447",
-      "size": 204114,
+      "checksum": "6f423fb401a7a2d83e255b77bf84e37d",
+      "size": 199681,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1166,7 +1161,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "fbc1a13ca2139f727266418dc0f2f682",
+      "checksum": "423a1180a346083e647dc1325158c3b3",
       "size": 7299,
       "priority": "important"
     },
@@ -1239,11 +1234,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/objective-c/objective-c.js": {
-      "checksum": "5be9639901ce038cc52633b35437bd0b",
-      "size": 3239,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/pascal/pascal.js": {
       "checksum": "22cc9e523acf30fb92bc43518faff779",
