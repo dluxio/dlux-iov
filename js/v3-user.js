@@ -4458,7 +4458,6 @@ function buyNFT(setname, uid, price, type, callback){
 
       // Reset hashing progress and start internal progress monitoring
       this.resetHashingProgress();
-      const progressInterval = this.startInternalProgressMonitor(bitrates.length);
       
       // Use separate FFmpeg commands for each resolution to ensure all files are created
       this.videoMsg = 'Starting multi-resolution transcoding...';
@@ -4519,18 +4518,11 @@ function buyNFT(setname, uid, price, type, callback){
         try {
           console.log(`🚀 Starting single-pass FFmpeg transcoding...`);
           
-          // Start FFmpeg but don't trust its completion
-          ffmpeg.exec(commands).catch(error => {
-            console.warn(`⚠️ FFmpeg exec reported error (but this may be normal):`, error);
-          });
+          // Start FFmpeg and wait for it to complete
+          await ffmpeg.exec(commands);
           
-          // Wait for the internal progress monitor to complete first
-          console.log(`⏱️ Waiting for internal progress monitor to complete before checking files...`);
-          const estimatedDuration = bitrates.length * 30000; // Same as in startInternalProgressMonitor
-          await new Promise(resolve => setTimeout(resolve, estimatedDuration));
-          
-          // Now check for files after the internal progress monitor completes
-          console.log(`🔍 Internal progress monitor completed, now checking for files...`);
+          // Now check for files after transcoding completes
+          console.log(`🔍 Transcoding completed, now checking for files...`);
           await this.waitForAllResolutionFiles(ffmpeg, successfulResolutions, 180000); // 3 minute timeout for all
           
           console.log(`✅ All resolutions transcoded successfully: ${successfulResolutions.map(r => r + 'p').join(', ')}`);
@@ -4547,9 +4539,6 @@ function buyNFT(setname, uid, price, type, callback){
           successfulResolutions.push(...actualPlaylists);
           console.log(`📊 Found ${actualPlaylists.length} valid resolutions:`, actualPlaylists.map(r => r + 'p').join(', '));
         }
-        
-        // Stop the progress monitor
-        clearInterval(progressInterval);
         
         console.timeEnd('exec');
         
@@ -4568,11 +4557,6 @@ function buyNFT(setname, uid, price, type, callback){
         console.error('❌ Transcoding failed:', err);
         this.videoMsg = 'Transcoding failed. Please try again with a smaller video file.';
         return;
-      }
-      
-      // Clean up progress monitoring after transcoding completes
-      if (progressInterval) {
-        clearInterval(progressInterval);
       }
       
       this.videoMsg = 'Transcoding complete! Checking generated files...';
