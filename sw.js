@@ -1,4 +1,4 @@
-this.version = "2025.06.08.6";
+this.version = "2025.06.08.7";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.08.6",
-  "generated": "2025-06-08T00:48:08Z",
+  "version": "2025.06.08.7",
+  "generated": "2025-06-08T01:03:56Z",
   "files": {
-    "/img/tokens/hive_icon.svg": {
-      "checksum": "f11afc9005714fcb560171a788ee11bd",
-      "size": 1636,
-      "priority": "important"
-    },
     "/img/tokens/larynx_icon.png": {
       "checksum": "27fa9b4e1dc4f0205913529a03a2aced",
       "size": 29625,
@@ -801,8 +796,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/filesvue-dd.js": {
-      "checksum": "a8ddcde9872f9889965a4e3e03ec2d48",
-      "size": 268745,
+      "checksum": "23f8989d1093455129851ec4909295ec",
+      "size": 268000,
       "priority": "important"
     },
     "/js/filesvue.js": {
@@ -846,8 +841,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/methods-common.js": {
-      "checksum": "d455848f6aad9e1975299c1d67b99d82",
-      "size": 30441,
+      "checksum": "96b6e13042fa0c45e93d9fe671489a90",
+      "size": 30885,
       "priority": "important"
     },
     "/js/methods-modals.js": {
@@ -991,7 +986,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "6f558576a3b623a3ff52ffd83c8c7a02",
+      "checksum": "22ef646ac79a9ec29d79cc535452389a",
       "size": 36316,
       "priority": "important"
     },
@@ -1066,8 +1061,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "341d11ff7af7c495a004cfa39c0dc82b",
-      "size": 187132,
+      "checksum": "bf09a1f3e484e62ea2f410b7f3348f1b",
+      "size": 198216,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1181,7 +1176,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "b9c839d4d5d5c4de89745731eb49ed22",
+      "checksum": "0167dd2322b149bf0c41db10dcb75b5a",
       "size": 7299,
       "priority": "important"
     },
@@ -1254,11 +1249,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/mips/mips.js": {
-      "checksum": "12c2d9fd66a10e9ea6b84915d0909781",
-      "size": 3402,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/msdax/msdax.js": {
       "checksum": "50bde1fc7e1345b0b8814ad318c9dd80",
