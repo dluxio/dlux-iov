@@ -4321,30 +4321,22 @@ function buyNFT(setname, uid, price, type, callback){
       console.log('Iterations', j)
     },
     getPossibleBitrates(height) {
-      if (!height) {
-        return null
+      const resolutions = [2160, 1440, 1080, 720, 480, 360, 240, 144];
+      const possibleResolutions = resolutions.filter(r => r <= height);
+      
+      // Always include the original resolution if it's not standard
+      if (!resolutions.includes(height)) {
+          possibleResolutions.push(height);
+          // Sort again to maintain descending order
+          possibleResolutions.sort((a, b) => b - a);
       }
 
-      if (height < 144) {
-        // very small bitrate, use the original format.
-        return ['?x' + height]
-      } else if (height < 240) {
-        return ['?x144']
-      } else if (height < 360) {
-        return ['?x240', '?x144']
-      } else if (height < 480) {
-        return ['?x360', '?x240', '?x144']
-      } else if (height < 720) {
-        return ['?x480', '?x360', '?x240', '?x144']
-      } else if (height < 1080) {
-        return ['?x720', '?x480', '?x360', '?x240', '?x144']
-      } else if (height < 1440) {
-        return ['?x1080', '?x720', '?x480', '?x360', '?x240', '?x144']
-      } else if (height < 2160) {
-        return ['?x1440', '?x1080', '?x720', '?x480', '?x360', '?x240', '?x144']
-      } else {
-        return ['?x2160', '?x1440', '?x1080', '?x720', '?x480', '?x360', '?x240', '?x144']
+      if (possibleResolutions.length === 0) {
+        // If the video is smaller than the lowest standard, use its original height
+        return [`?x${height}`];
       }
+      
+      return possibleResolutions.map(r => `?x${r}`);
     },
     async transcode(event) {
       if (!this.ffmpegReady && !this.ffmpegSkipped) {
@@ -4369,6 +4361,11 @@ function buyNFT(setname, uid, price, type, callback){
         this.videoMsg = 'FFmpeg not properly initialized. Please try reloading FFmpeg.';
         return;
       }
+
+      // Add a logger to see detailed FFmpeg output
+      this.ffmpeg.on('log', ({ type, message }) => {
+        console.log(`FFMPEG [${type}]:`, message);
+      });
 
       this.ffmpeg_page = true;
       const { fetchFile } = FFmpegUtil;
