@@ -1,4 +1,4 @@
-this.version = "2025.06.08.7";
+this.version = "2025.06.08.8";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.08.7",
-  "generated": "2025-06-08T01:03:56Z",
+  "version": "2025.06.08.8",
+  "generated": "2025-06-08T01:19:34Z",
   "files": {
-    "/img/tokens/larynx_icon.png": {
-      "checksum": "27fa9b4e1dc4f0205913529a03a2aced",
-      "size": 29625,
-      "priority": "important"
-    },
     "/img/tokens/larynx_logomark.png": {
       "checksum": "c053db05ca715d5494af1e8cf0b9759b",
       "size": 28604,
@@ -986,7 +981,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "22ef646ac79a9ec29d79cc535452389a",
+      "checksum": "20df1a73e1abcb90d9aeb42a184997f0",
       "size": 36316,
       "priority": "important"
     },
@@ -1061,8 +1056,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "bf09a1f3e484e62ea2f410b7f3348f1b",
-      "size": 198216,
+      "checksum": "a914aea1591c52f2ceb7e07811c89697",
+      "size": 201248,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1176,7 +1171,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "0167dd2322b149bf0c41db10dcb75b5a",
+      "checksum": "2592155e2df897ab5ebbd80167c9b69c",
       "size": 7299,
       "priority": "important"
     },
@@ -1249,11 +1244,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/msdax/msdax.js": {
-      "checksum": "50bde1fc7e1345b0b8814ad318c9dd80",
-      "size": 5737,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/mysql/mysql.js": {
       "checksum": "1a8ad678a818b45c28bfec17a122e2d9",
