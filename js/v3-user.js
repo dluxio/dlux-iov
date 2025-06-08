@@ -4507,25 +4507,44 @@ function buyNFT(setname, uid, price, type, callback){
           
           try {
             console.log(`🚀 Starting ${resHeight}p transcoding...`);
+            
+            // Log filesystem state before transcode
+            const filesBefore = await ffmpeg.listDir("/");
+            console.log(`📁 Files before ${resHeight}p:`, filesBefore.map(f => f.name).filter(name => !name.startsWith('.') && !['dev', 'home', 'proc', 'tmp'].includes(name)));
+            
+            console.log(`🎬 FFmpeg command for ${resHeight}p:`, commands.join(' '));
             await ffmpeg.exec(commands);
-            console.log(`🔍 ${resHeight}p FFmpeg completed, verifying files...`);
+            console.log(`🔍 ${resHeight}p FFmpeg exec completed, checking filesystem...`);
             
-            // Give FFmpeg a moment to write files, then verify they exist
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Check filesystem immediately after FFmpeg claims completion
+            const filesAfter = await ffmpeg.listDir("/");
+            const allFiles = filesAfter.map(f => f.name).filter(name => !name.startsWith('.') && !['dev', 'home', 'proc', 'tmp'].includes(name));
+            console.log(`📁 All files after ${resHeight}p:`, allFiles);
             
-            // Quick verification that files exist
-            const files = await ffmpeg.listDir("/");
-            const segmentFiles = files.filter(f => f.name.startsWith(`${resHeight}p_`) && f.name.endsWith('.ts'));
-            const playlistFile = files.find(f => f.name === `${resHeight}p_index.m3u8`);
+            const segmentFiles = filesAfter.filter(f => f.name.startsWith(`${resHeight}p_`) && f.name.endsWith('.ts'));
+            const playlistFile = filesAfter.find(f => f.name === `${resHeight}p_index.m3u8`);
+            
+            console.log(`📊 ${resHeight}p file check: ${segmentFiles.length} segments, playlist: ${playlistFile ? '✅' : '❌'}`);
             
             if (playlistFile && segmentFiles.length > 0) {
               successfulResolutions.push(resHeight);
               console.log(`✅ ${resHeight}p transcoded successfully: ${segmentFiles.length} segments + playlist`);
             } else {
+              // Log what's missing
+              console.error(`❌ ${resHeight}p missing files - Segments: ${segmentFiles.length}, Playlist: ${playlistFile ? 'found' : 'missing'}`);
               throw new Error(`${resHeight}p files not found after FFmpeg completion`);
             }
           } catch (error) {
             console.error(`❌ ${resHeight}p transcoding failed:`, error);
+            
+            // Log filesystem state on failure
+            try {
+              const filesOnError = await ffmpeg.listDir("/");
+              console.log(`📁 Files on error:`, filesOnError.map(f => f.name).filter(name => !name.startsWith('.') && !['dev', 'home', 'proc', 'tmp'].includes(name)));
+            } catch (e) {
+              console.error(`Can't list files on error:`, e);
+            }
+            
             // Continue with other resolutions
           }
         }
