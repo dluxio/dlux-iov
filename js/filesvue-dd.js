@@ -250,6 +250,8 @@ export default {
                     @tosign="sendIt($event)" @done="handleUploadDone($event)" teleportref="#UEController" />
                 <button class="btn btn-secondary btn-sm" @click="createNewFolder"><i
                         class="fa-solid fa-folder-plus me-1"></i>New Folder</button>
+                <button class="btn btn-outline-secondary btn-sm ms-1" @click="refreshDrive" title="Refresh Drive"><i
+                        class="fa-solid fa-sync fa-fw"></i></button>
                 <button class="btn btn-success btn-sm ms-2" @click="saveChanges"
                     v-if="Object.keys(pendingChanges).length > 0"><i class="fa-solid fa-save me-1"></i>Save</button>
                 <button class="btn btn-danger btn-sm ms-2" @click="revertPendingChanges"
@@ -1357,6 +1359,12 @@ export default {
             } else if (folderName && (this.selectedUser !== this.account)) {
                 alert("Cannot create folders for other users.");
             }
+        },
+        refreshDrive() {
+            console.log('🔄 Refreshing drive data...');
+            this.$emit('refresh-drive');
+            // Also call init to reload local data
+            this.init();
         },
         appendUserFiles() {
             const newUser = this.newUser

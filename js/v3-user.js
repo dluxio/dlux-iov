@@ -4818,7 +4818,11 @@ function buyNFT(setname, uid, price, type, callback){
           
           console.log('📋 Master M3U8 Playlist:', masterPlaylistContent);
           
-          const masterPlaylistFile = new File([new TextEncoder().encode(masterPlaylistContent)], 'master_playlist.m3u8', {
+          // Create master playlist filename based on original video file
+          const originalName = name.substring(0, name.lastIndexOf('.')) || name;
+          const masterPlaylistFilename = `${originalName}.m3u8`;
+          
+          const masterPlaylistFile = new File([new TextEncoder().encode(masterPlaylistContent)], masterPlaylistFilename, {
             type: 'application/x-mpegURL'
           });
           
@@ -4829,7 +4833,7 @@ function buyNFT(setname, uid, price, type, callback){
             isMasterPlaylist: true
           });
           
-          this.dataURLS.push(['master_playlist.m3u8', new TextEncoder().encode(masterPlaylistContent), 'application/x-mpegURL']);
+          this.dataURLS.push([masterPlaylistFilename, new TextEncoder().encode(masterPlaylistContent), 'application/x-mpegURL']);
           
           console.log('📁 Final video files to upload:', videoFiles.map(f => f.file.name));
           this.videoFilesToUpload = videoFiles;
@@ -5236,12 +5240,64 @@ function buyNFT(setname, uid, price, type, callback){
         // This would be implemented based on how CIDs are returned from upload
       }
       
+      // Start polling for contract bundling
+      if (uploadedFiles && uploadedFiles.contractID) {
+        this.pollBundleStatus(uploadedFiles.contractID);
+      }
+      
       // Clear the video files array
       this.videoFilesToUpload = [];
       
       // Clear preview and reset progress after upload completion
       this.clearTranscodePreview();
       this.resetHashingProgress();
+    },
+
+    pollBundleStatus(contractID, since = 0) {
+      const contractInstanceId = contractID; 
+
+      if (!contractInstanceId) {
+          console.error("Cannot poll bundle status: contract instance ID is missing.", 
+                        { contractInstanceId });
+          return;
+      }
+
+      console.log(`Polling for bundle status. Expecting contract pattern: ${contractInstanceId} bundled`);
+      var lastSince = since
+      fetch('https://spktest.dlux.io/feed' + (since ? `/${since}` : ''))
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const feed = data.feed;
+          let foundAndBundled = false;
+          if (feed && typeof feed === 'object') {
+            for (const feedEntryKey in feed) {
+              lastSince = feedEntryKey.split(':')[0];
+              const feedEntryValue = feed[feedEntryKey];
+              if (feedEntryValue === contractID + ' bundled') {
+                foundAndBundled = true;
+                break;
+              }
+            }
+          }
+
+          if (foundAndBundled) {
+            console.log(`✅ Bundle complete for contract ${contractInstanceId}!`);
+            // Refresh SPK data to show updated files
+            this.getSapi();
+          } else {
+            console.log(`Bundle not yet complete for contract ${contractInstanceId}. Retrying in 5s...`);
+            setTimeout(() => this.pollBundleStatus(contractID, lastSince), 5000);
+          }
+        })
+        .catch(error => {
+          console.error('Error polling bundle status:', error);
+          setTimeout(() => this.pollBundleStatus(contractID, lastSince), 5000); 
+        });
     },
     
     async downloadFFmpeg() {

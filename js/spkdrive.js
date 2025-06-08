@@ -202,7 +202,7 @@ export default {
             <!-- has files -->
             <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center">
                 <files-vue ref="filesVue" :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" :computed-data="{usedBytes: usedBytes, availableBytes: availableBytes}"
-                    @refresh-contracts="refreshContracts" 
+                    @refresh-contracts="refreshContracts" @refresh-drive="handleRefreshDrive"
                     @tosign="sendIt($event)" :signedtx="signedtx" :post-component-available="postpage" @add-to-post="handleAddToPost($event)"></files-vue>
             </div>
         </div>
@@ -1605,6 +1605,10 @@ export default {
             
             // Set a flag to restore path after refresh
             this.pathToRestore = currentPath;
+        },
+        handleRefreshDrive() {
+            console.log('🔄 Refreshing SPK Drive data...');
+            this.getSapi();
         },
         handleAddToPost(fileData) {
             // Emit the file data to the parent so it can be passed to the post component
