@@ -130,7 +130,12 @@ export default {
     initialData: {
       type: Object,
       default: () => ({})
-    }
+    },
+    authHeaders: {
+        type: Object,
+        required: false,
+        default: () => ({})
+      }
   },
   emits: ['publishPost', 'dataChanged'],
   data() {
@@ -150,7 +155,9 @@ export default {
       },
       connectionStatus: null,
       collaborationProvider: null,
-      collaborationYdoc: null
+      collaborationYdoc: null,
+      recoveryInProgress: false,
+      recoveryAttempts: 0
     };
   },
   computed: {
@@ -447,11 +454,14 @@ export default {
     },
     
     async setupCollaboration() {
-      if (!this.showCollaboration || !this.collaborativeDoc || !this.collaborationConfig.authToken) {
+      
+      
+      if (!this.showCollaboration || !this.collaborativeDoc || !this.authHeaders['x-signature']) {
         console.log('Collaboration setup skipped:', {
           showCollaboration: this.showCollaboration,
           collaborativeDoc: this.collaborativeDoc,
-          hasAuthToken: !!this.collaborationConfig.authToken
+          hasAccount: !!this.authHeaders['x-account'],
+          hasAuthHeaders: !!(this.authHeaders['x-challenge'] && this.authHeaders['x-pubkey'] && this.authHeaders['x-signature'])
         });
         return;
       }
@@ -469,6 +479,7 @@ export default {
         
         // Get provider constructor
         const HocuspocusProvider = this.getCollaborationProvider();
+        console.log('🔍 HocuspocusProvider available:', !!HocuspocusProvider);
         if (!HocuspocusProvider) {
           throw new Error('HocuspocusProvider not available - check that collaboration bundle is loaded');
         }
@@ -481,37 +492,51 @@ export default {
           throw new Error('Failed to create Y.js document');
         }
         
-        // Setup WebSocket URL - use secure WSS
-        const websocketUrl = `wss://data.dlux.io/ws/payment-monitor`;
+        // Setup WebSocket URL with actual owner and permlink
+        const [owner, permlink] = this.collaborativeDoc.split('/');
+        const websocketUrl = `wss://data.dlux.io/collaboration/${owner}/${permlink}`;
         
         console.log('🔗 Connecting to WebSocket URL:', websocketUrl);
-        console.log('🔑 Using auth token:', this.collaborationConfig.authToken ? 'Present' : 'Missing');
+        console.log('📄 Document:', this.collaborativeDoc);
+        console.log('🔑 Auth headers available:', this.authHeaders);
+        console.log('🔍 Auth headers type and values:', {
+          type: typeof this.authHeaders,
+          keys: Object.keys(this.authHeaders || {}),
+          values: Object.values(this.authHeaders || {}),
+          rawObject: this.authHeaders
+        });
         
         // Add global error handler for uncaught Y.js/HocuspocusProvider errors
         this.originalErrorHandler = window.onerror;
+        this.recoveryInProgress = false;
+        this.recoveryAttempts = 0;
+        const maxRecoveryAttempts = 3;
+        
         window.onerror = (message, source, lineno, colno, error) => {
-          if (typeof message === 'string' && message.includes('Unexpected end of array')) {
-            console.warn('🔧 Caught global binary parsing error - suppressing and attempting recovery');
+          if (typeof message === 'string' && (
+            message.includes('Unexpected end of array') || 
+            message.includes('Applying a mismatched transaction')
+          )) {
+            console.warn('🔧 Caught collaboration error - suppressing:', message);
             
-            // Attempt to recover by creating a fresh Y.js document
-            if (this.collaborationProvider && this.collaborationYdoc) {
-              console.log('🔄 Creating fresh Y.js document to recover from binary error...');
-              setTimeout(() => {
-                try {
-                  // Create new Y.js document
-                  this.collaborationYdoc = this.createCollaborationYDoc();
-                  
-                  // Reconnect provider with fresh document
-                  if (this.collaborationProvider.document !== this.collaborationYdoc) {
-                    this.collaborationProvider.document = this.collaborationYdoc;
-                  }
-                  
-                  console.log('✅ Recovery attempt completed with fresh Y.js document');
-                } catch (recoveryError) {
-                  console.error('Failed to recover from binary parsing error:', recoveryError);
-                }
-              }, 1000);
+            // Prevent infinite recovery loops
+            if (this.recoveryInProgress || this.recoveryAttempts >= maxRecoveryAttempts) {
+              console.warn('⚠️ Recovery already in progress or max attempts reached, ignoring error');
+              return true;
             }
+            
+            this.recoveryInProgress = true;
+            this.recoveryAttempts++;
+            
+            console.log(`🔄 Attempting recovery ${this.recoveryAttempts}/${maxRecoveryAttempts}...`);
+            
+            // Schedule recovery with increasing delay
+            setTimeout(() => {
+              this.performCollaborationRecovery()
+                .finally(() => {
+                  this.recoveryInProgress = false;
+                });
+            }, 1000 * this.recoveryAttempts);
             
             return true; // Prevent default error handling
           }
@@ -524,12 +549,38 @@ export default {
           return false;
         };
 
-        // Create provider with enhanced error handling
-        this.collaborationProvider = new HocuspocusProvider({
+        // Prepare Hive authentication headers for the new API
+        // const authHeaders = {
+        //   'x-account': this.collaborationConfig.account || this.account,
+        //   'x-challenge': this.collaborationConfig.challenge || Math.floor(Date.now() / 1000).toString(),
+        //   'x-pubkey': this.collaborationConfig.pubkey || '',
+        //   'x-signature': this.collaborationConfig.signature || ''
+        // };
+
+        // This Should work with the backend auth function
+        const authParams = {
+            'account': this.authHeaders['x-account'],
+            'challenge': this.authHeaders['x-challenge'],
+            'pubkey': this.authHeaders['x-pubkey'] ,
+            'signature': this.authHeaders['x-signature']
+          };
+        
+        console.log('🔐 Authentication headers prepared:', Object.keys(authParams));
+        
+        // IMPORTANT: The new DLUX Collaboration API requires custom authentication
+        // The standard HocuspocusProvider may not support the Hive auth headers format
+        // According to the API docs, we need a custom DLUXProvider implementation
+        // For now, attempting connection with existing provider...
+        
+        console.log('🔨 Creating HocuspocusProvider with config...');
+        try {
+          this.collaborationProvider = new HocuspocusProvider({
           url: websocketUrl,
           name: this.collaborativeDoc,
           document: this.collaborationYdoc,
-          token: this.collaborationConfig.authToken,
+          // Try passing auth headers through different methods
+          token: JSON.stringify(authParams), // Fallback: encode headers as token
+          //parameters: authHeaders, // Primary: try as parameters
           // Add connection parameters to prevent binary data issues
           forceSyncInterval: 3000, // Increase sync interval to reduce errors
           maxAttempts: 3, // Reduce reconnection attempts to prevent error loops
@@ -537,12 +588,18 @@ export default {
           onConnect: () => {
             this.connectionStatus = 'Connected';
             console.log('✅ Connected to collaboration server for:', this.collaborativeDoc);
+            
+            // Reset recovery state on successful connection
+            this.recoveryAttempts = 0;
+            this.recoveryInProgress = false;
+            
             // Send initial activity when connected
             this.sendEditActivity('connection', 'connected');
           },
           onDisconnect: ({ event }) => {
             this.connectionStatus = 'Disconnected';
             console.log('❌ Disconnected from collaboration server:', event?.code, event?.reason);
+            console.log('🔍 Disconnect event details:', event);
           },
           onAuthenticationFailed: ({ reason }) => {
             this.connectionStatus = 'Auth Failed';
@@ -582,45 +639,10 @@ export default {
           },
           onError: (error) => {
             console.error('❌ WebSocket error:', error);
+            this.connectionStatus = 'Error';
             
-            // Handle specific error types more gracefully
-            if (error.message && error.message.includes('Unexpected end of array')) {
-              console.warn('🔧 Binary data parsing error detected in provider - attempting graceful recovery...');
-              this.connectionStatus = 'Recovering';
-              
-              // Try to recover without full reconnection first
-              setTimeout(() => {
-                if (this.collaborationProvider && this.collaborationYdoc) {
-                  try {
-                    console.log('🔄 Attempting to sync with fresh document state...');
-                    
-                    // Create a fresh Y.js document to clear any corrupted state
-                    const freshYdoc = this.createCollaborationYDoc();
-                    
-                    // Copy current editor content to fresh document
-                    if (this.postTitle) {
-                      freshYdoc.getText('title').insert(0, this.postTitle);
-                    }
-                    if (this.postBody) {
-                      freshYdoc.getText('body').insert(0, this.postBody);
-                    }
-                    
-                    // Replace the document in the provider
-                    this.collaborationYdoc = freshYdoc;
-                    this.collaborationProvider.document = freshYdoc;
-                    
-                    console.log('✅ Document recovery completed - continuing collaboration');
-                    this.connectionStatus = 'Connected';
-                    
-                  } catch (recoveryError) {
-                    console.error('Failed to recover from binary parsing error:', recoveryError);
-                    this.connectionStatus = 'Error';
-                  }
-                }
-              }, 2000);
-            } else {
-              this.connectionStatus = 'Error';
-            }
+            // Don't attempt immediate recovery here - let the global error handler deal with it
+            // This prevents multiple recovery attempts running simultaneously
           },
           // Add timeout settings
           timeout: 15000,
@@ -629,11 +651,23 @@ export default {
             console.log('📊 Connection status changed:', status);
             this.connectionStatus = status;
           }
-        });
+                  });
+
+          console.log('✅ HocuspocusProvider created successfully');
+        } catch (providerError) {
+          console.error('❌ Failed to create HocuspocusProvider:', providerError);
+          this.connectionStatus = 'Error';
+          throw providerError;
+        }
 
         this.connectionStatus = 'Connecting';
         console.log('🚀 Collaboration provider created and connecting...');
         console.log('📄 Y.Doc created and will be shared with all editors:', this.collaborationYdoc);
+        console.log('🌐 Provider configuration:', {
+          url: websocketUrl,
+          name: this.collaborativeDoc,
+          authHeadersLength: JSON.stringify(authParams).length
+        });
         
         // Add current user as author when provider is ready
         setTimeout(() => {
@@ -680,20 +714,20 @@ export default {
           // Track the save activity
           this.sendEditActivity('manual_save', 'document saved');
           
-          // TODO: Re-enable when backend API is implemented
+          // TODO: Implement using new Hive Collaboration API when needed
           /*
-          // Send save request to backend
-          const response = await fetch('https://data.dlux.io/api/collaboration/save', {
-            method: 'POST',
+          // Send save request to backend using new API format
+          const [owner, permlink] = this.collaborativeDoc.split('/');
+          const response = await fetch(`https://data.dlux.io/api/collaboration/documents/${owner}/${permlink}`, {
+            method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${this.collaborationConfig.authToken}`,
-              'x-account': this.account,
-              'x-timestamp': Date.now().toString(),
+              'x-account': this.collaborationConfig.account || this.account,
+              'x-challenge': this.collaborationConfig.challenge || Math.floor(Date.now() / 1000).toString(),
+              'x-pubkey': this.collaborationConfig.pubkey || '',
               'x-signature': this.collaborationConfig.signature || ''
             },
             body: JSON.stringify({
-              documentPath: this.collaborativeDoc,
               documentState: documentState,
               activity_type: 'manual_save',
               timestamp: new Date().toISOString()
@@ -713,6 +747,61 @@ export default {
       }
     },
     
+    async performCollaborationRecovery() {
+      console.log('🔄 Starting collaboration recovery process...');
+      
+      try {
+        // Store current content before recovery
+        const currentTitle = this.postTitle;
+        const currentBody = this.postBody;
+        
+        // Disconnect existing provider cleanly
+        if (this.collaborationProvider) {
+          console.log('🔌 Disconnecting existing provider...');
+          this.collaborationProvider.disconnect();
+          this.collaborationProvider = null;
+        }
+        
+        // Clear the Y.js document
+        this.collaborationYdoc = null;
+        
+        // Wait a moment for cleanup
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Reset connection status
+        this.connectionStatus = 'Recovering';
+        
+        // Re-setup collaboration from scratch
+        console.log('🔧 Re-initializing collaboration...');
+        await this.setupCollaboration();
+        
+        // Restore content if it was lost during recovery
+        setTimeout(() => {
+          if (currentTitle && !this.postTitle) {
+            console.log('📝 Restoring title after recovery');
+            this.postTitle = currentTitle;
+            this.generatePermlink();
+          }
+          if (currentBody && !this.postBody) {
+            console.log('📝 Restoring body after recovery');
+            this.postBody = currentBody;
+          }
+        }, 1000);
+        
+        console.log('✅ Collaboration recovery completed');
+        
+      } catch (error) {
+        console.error('❌ Recovery failed:', error);
+        this.connectionStatus = 'Recovery Failed';
+        
+        // If recovery fails completely, disable collaboration for this session
+        if (this.recoveryAttempts >= 3) {
+          console.warn('🚫 Max recovery attempts reached - disabling collaboration for this session');
+          this.disconnectCollaboration();
+        }
+      }
+    },
+    
     disconnectCollaboration() {
       if (this.collaborationProvider) {
         this.collaborationProvider.disconnect();
@@ -720,6 +809,10 @@ export default {
         this.connectionStatus = 'Disconnected';
         console.log('🔌 Collaboration disconnected');
       }
+      
+      // Reset recovery state
+      this.recoveryInProgress = false;
+      this.recoveryAttempts = 0;
       
       // Restore original error handler if we set a custom one
       if (this.originalErrorHandler !== undefined) {
@@ -738,6 +831,12 @@ export default {
   watch: {
     showCollaboration: {
       handler(newValue) {
+        console.log('👀 showCollaboration watcher triggered:', {
+          newValue,
+          collaborativeDoc: this.collaborativeDoc,
+          willSetupCollaboration: newValue && this.collaborativeDoc
+        });
+        
         if (newValue && this.collaborativeDoc) {
           // Setup collaboration when enabled
           setTimeout(() => {
@@ -753,6 +852,12 @@ export default {
     
     collaborativeDoc: {
       handler(newValue) {
+        console.log('👀 collaborativeDoc watcher triggered:', {
+          newValue,
+          showCollaboration: this.showCollaboration,
+          willReconnect: newValue && this.showCollaboration
+        });
+        
         if (newValue && this.showCollaboration) {
           // Reconnect to new document
           this.disconnectCollaboration();
@@ -774,6 +879,12 @@ export default {
   
   mounted() {
     this.loadInitialData();
+    console.log('🔧 Component mounted with props:', {
+      authHeaders: this.authHeaders,
+      collaborationConfig: this.collaborationConfig,
+      showCollaboration: this.showCollaboration,
+      collaborativeDoc: this.collaborativeDoc
+    });
   },
   
   beforeUnmount() {

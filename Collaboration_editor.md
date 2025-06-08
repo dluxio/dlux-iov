@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Hive Collaboration API provides real-time collaborative editing capabilities using [Hocuspocus](https://github.com/ueberdosis/hocuspocus) (a Y.js WebSocket backend) and [Tiptap](https://github.com/ueberdosis/tiptap) integration. Documents are authenticated using Hive blockchain keypairs and stored in PostgreSQL.
+The Hive Collaboration API provides real-time collaborative editing capabilities using Y.js CRDT (Conflict-free Replicated Data Type) technology with custom WebSocket integration and [Tiptap](https://github.com/ueberdosis/tiptap) support. Documents are authenticated using Hive blockchain keypairs and stored in PostgreSQL.
 
 ## Base URL
 
@@ -27,23 +27,38 @@ Example: `alice/my-document-2024`
 
 ## WebSocket Endpoint
 
+The collaboration system uses a custom Y.js implementation with Hive authentication:
+
 ```
-ws://data.dlux.io/ws/collaboration/{owner}/{permlink}
+ws://data.dlux.io/ws/collaborate/{owner}/{permlink}
 ```
 
 ### WebSocket Authentication
 
-WebSocket connections require a JSON token parameter containing authentication data:
+WebSocket connections use the same Hive authentication headers as API endpoints:
 
 ```javascript
-const authToken = JSON.stringify({
-  account: "your-hive-username",
-  challenge: 1703980800, // Unix timestamp
-  pubKey: "STM7BWmXwvuKHr8FpSPmj8knJspFMPKt3vcetAKKjZ2W2HoRgdkEg",
-  signature: "signature-here"
+// Connect using native WebSocket with headers
+const ws = new WebSocket('ws://data.dlux.io/ws/collaborate/alice/my-document', {
+  headers: {
+    'x-account': 'your-hive-username',
+    'x-challenge': '1703980800', // Unix timestamp  
+    'x-pubkey': 'STM7BWmXwvuKHr8FpSPmj8knJspFMPKt3vcetAKKjZ2W2HoRgdkEg',
+    'x-signature': 'signature-here'
+  }
 });
 
-const ws = new WebSocket('ws://data.dlux.io/ws/collaboration/alice/my-document?token=' + encodeURIComponent(authToken));
+// Or using a WebSocket library that supports headers
+import WebSocket from 'isomorphic-ws';
+
+const ws = new WebSocket('ws://data.dlux.io/ws/collaborate/alice/my-document', {
+  headers: {
+    'x-account': account,
+    'x-challenge': challenge,
+    'x-pubkey': pubKey,  
+    'x-signature': signature
+  }
+});
 ```
 
 ## API Endpoints
@@ -61,7 +76,7 @@ GET /api/collaboration/info
   "server": "Hive Collaboration Server",
   "version": "1.0.0",
   "endpoints": {
-    "websocket": "/ws/collaboration/{owner}/{permlink}",
+    "websocket": "/ws/collaborate/{owner}/{permlink}",
     "documents": "/api/collaboration/documents",
     "permissions": "/api/collaboration/permissions",
     "activity": "/api/collaboration/activity"
@@ -69,15 +84,14 @@ GET /api/collaboration/info
   "authentication": {
     "method": "Hive Signature",
     "headers": ["x-account", "x-challenge", "x-pubkey", "x-signature"],
-    "websocket_token": "JSON string with auth data"
+    "websocket_headers": "Use same Hive auth headers for WebSocket connections"
   },
   "document_format": "owner-hive-account/permlink",
   "features": [
     "Real-time collaborative editing",
     "Hive blockchain authentication", 
     "Document permissions management",
-    "Activity logging",
-    "Public/private documents"
+    "Activity logging"
   ]
 }
 ```
@@ -96,7 +110,7 @@ GET /api/collaboration/challenge
   "expires": 1703984400,
   "message": "Sign this timestamp with your HIVE key for collaboration access",
   "instructions": {
-    "websocket": "Pass as JSON token: {\"account\":\"username\",\"challenge\":\"timestamp\",\"pubKey\":\"key\",\"signature\":\"sig\"}",
+    "websocket": "Connect with Hive auth headers: x-account, x-challenge, x-pubkey, x-signature",
     "api": "Use in x-challenge header along with other auth headers"
   }
 }
@@ -167,7 +181,13 @@ POST /api/collaboration/documents
     "permlink": "my-new-document",
     "documentPath": "alice/my-new-document",
     "isPublic": false,
-    "websocketUrl": "/ws/collaboration/alice/my-new-document",
+    "websocketUrl": "/ws/collaborate/alice/my-new-document",
+    "authHeaders": {
+      "x-account": "alice",
+      "x-challenge": "timestamp",
+      "x-pubkey": "key",
+      "x-signature": "signature"
+    },
     "createdAt": "2024-01-01T12:00:00Z"
   }
 }
@@ -395,10 +415,15 @@ GET /api/collaboration/test-connection/{owner}/{permlink}
   "message": "Connection test endpoint for collaboration debugging",
   "document": "alice/my-document",
   "user": "alice",
-  "websocketUrl": "ws://localhost:3010/ws/collaboration/alice/my-document",
-  "testToken": "{\"account\":\"alice\",\"challenge\":1703980800,\"pubKey\":\"STM...\",\"signature\":\"...\"}",
+  "websocketUrl": "ws://data.dlux.io/ws/collaborate/alice/my-document",
+  "authHeaders": {
+    "x-account": "alice",  
+    "x-challenge": 1703980800,
+    "x-pubkey": "STM...",
+    "x-signature": "..."
+  },
   "instructions": {
-    "connect": "Use the testToken as authentication when connecting to WebSocket",
+    "connect": "Connect WebSocket with authHeaders to establish collaboration connection",
     "verify": "Check server logs for authentication and connection events"
   }
 }
@@ -439,22 +464,106 @@ import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
-import { HocuspocusProvider } from '@hocuspocus/provider'
 import * as Y from 'yjs'
+import WebSocket from 'isomorphic-ws'
 
 // Create Y.js document
 const ydoc = new Y.Doc()
 
-// Create Hocuspocus provider
-const provider = new HocuspocusProvider({
-  url: 'ws://data.dlux.io',
-  name: 'alice/my-document', // document path
-  document: ydoc,
-  token: authToken, // JSON string with authentication
-  onConnect: () => console.log('Connected to collaboration server'),
-  onDisconnect: () => console.log('Disconnected from collaboration server'),
-  onAuthenticationFailed: () => console.error('Authentication failed')
-})
+// Custom DLUX provider for Y.js collaboration
+class DLUXProvider {
+  constructor(url, documentName, authHeaders) {
+    this.url = url
+    this.documentName = documentName
+    this.authHeaders = authHeaders
+    this.ydoc = new Y.Doc()
+    this.awareness = new Map()
+    this.connected = false
+    this.eventListeners = new Map()
+    
+    this.connect()
+  }
+
+  connect() {
+    this.ws = new WebSocket(`${this.url}/ws/collaborate/${this.documentName}`, {
+      headers: this.authHeaders
+    })
+
+    this.ws.onopen = () => {
+      console.log('Connected to DLUX collaboration server')
+      this.connected = true
+      this.emit('status', { status: 'connected' })
+    }
+
+    this.ws.onmessage = (event) => {
+      if (event.data instanceof ArrayBuffer || event.data instanceof Uint8Array) {
+        // Y.js binary message
+        const message = new Uint8Array(event.data)
+        const messageType = message[0]
+        const messageData = message.slice(1)
+
+        if (messageType === 0) { // Y_MESSAGE_SYNC
+          Y.applyUpdate(this.ydoc, messageData, 'remote')
+          this.emit('sync', true)
+        } else if (messageType === 1) { // Y_MESSAGE_AWARENESS
+          // Handle awareness update
+          this.emit('awareness', messageData)
+        }
+      }
+    }
+
+    this.ws.onclose = () => {
+      console.log('Disconnected from collaboration server')
+      this.connected = false
+      this.emit('status', { status: 'disconnected' })
+    }
+
+    this.ws.onerror = (error) => {
+      console.error('WebSocket error:', error)
+      this.emit('status', { status: 'disconnected' })
+    }
+
+    // Send local changes to server
+    this.ydoc.on('update', (update, origin) => {
+      if (origin !== 'remote' && this.connected) {
+        const message = new Uint8Array(1 + update.length)
+        message[0] = 0 // Y_MESSAGE_SYNC
+        message.set(update, 1)
+        this.ws.send(message)
+      }
+    })
+  }
+
+  on(event, callback) {
+    if (!this.eventListeners.has(event)) {
+      this.eventListeners.set(event, [])
+    }
+    this.eventListeners.get(event).push(callback)
+  }
+
+  emit(event, data) {
+    const listeners = this.eventListeners.get(event)
+    if (listeners) {
+      listeners.forEach(callback => callback(data))
+    }
+  }
+
+  destroy() {
+    this.ws?.close()
+  }
+}
+
+// Create provider with Hive authentication
+const provider = new DLUXProvider(
+  'ws://data.dlux.io',
+  'alice/my-document', // document path
+  {
+    'x-account': 'alice',
+    'x-challenge': Math.floor(Date.now() / 1000).toString(),
+    'x-pubkey': 'STM7BWmXwvuKHr8FpSPmj8knJspFMPKt3vcetAKKjZ2W2HoRgdkEg',
+    'x-signature': 'your-signature-here'
+  }
+)
 
 // Create Tiptap editor with collaboration features
 const editor = new Editor({
@@ -463,7 +572,7 @@ const editor = new Editor({
       history: false, // Disable default history - Y.js handles this
     }),
     Collaboration.configure({
-      document: ydoc,
+      document: provider.ydoc, // Use provider's Y.Doc
     }),
     CollaborationCursor.configure({
       provider: provider,
@@ -475,20 +584,18 @@ const editor = new Editor({
   ],
 })
 
-// Optional: Listen for collaboration events
+// Listen for collaboration events
 provider.on('status', event => {
-  console.log('Connection status:', event.status) // connecting, connected, disconnected
+  console.log('Connection status:', event.status) // connected, disconnected
 })
 
 provider.on('sync', isSynced => {
   console.log('Document synced:', isSynced)
 })
 
-// Optional: Handle user awareness (cursor positions, selections)
-provider.awareness.on('change', ({ added, updated, removed }) => {
-  console.log('Users joined:', added)
-  console.log('Users updated:', updated) 
-  console.log('Users left:', removed)
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+  provider.destroy()
 })
 ```
 
@@ -497,7 +604,7 @@ provider.awareness.on('change', ({ added, updated, removed }) => {
 ```javascript
 import { PrivateKey } from 'hive-tx'
 
-async function generateAuthToken(username, privateKey) {
+async function generateAuthHeaders(username, privateKey) {
   const challenge = Math.floor(Date.now() / 1000)
   const publicKey = PrivateKey.from(privateKey).createPublic().toString()
   
@@ -506,16 +613,16 @@ async function generateAuthToken(username, privateKey) {
     .sign(Buffer.from(challenge.toString(), 'utf8'))
     .toString()
   
-  return JSON.stringify({
-    account: username,
-    challenge,
-    pubKey: publicKey,
-    signature
-  })
+  return {
+    'x-account': username,
+    'x-challenge': challenge.toString(),
+    'x-pubkey': publicKey,
+    'x-signature': signature
+  }
 }
 
 // Usage
-const authToken = await generateAuthToken('alice', 'your-private-posting-key')
+const authHeaders = await generateAuthHeaders('alice', 'your-private-posting-key')
 ```
 
 ## Database Schema
@@ -644,8 +751,8 @@ Currently no rate limiting is implemented, but it's recommended to:
 ### Common Issues
 
 1. **WebSocket Connection Failed**
-   - Check authentication token format
-   - Verify challenge timestamp is recent
+   - Check authentication headers format
+   - Verify challenge timestamp is recent (must be within 1 hour)
    - Ensure proper URL encoding
 
 2. **Permission Denied**
@@ -679,6 +786,16 @@ For issues and questions:
 - Use the test endpoints for debugging
 
 ## Version History
+
+- **v1.2.0**: Custom Y.js WebSocket Implementation
+  - **BREAKING CHANGE**: Switched from separate port to path-based routing
+  - **BREAKING CHANGE**: Removed token authentication in favor of Hive auth headers
+  - Custom Y.js WebSocket handler with binary protocol support
+  - Path-based WebSocket endpoint: `/ws/collaborate/{owner}/{permlink}`
+  - Unified Hive authentication for both REST and WebSocket
+  - Single-port operation (no more separate collaboration port)
+  - Binary Y.js message handling (Y_MESSAGE_SYNC, Y_MESSAGE_AWARENESS)
+  - Improved frontend integration with DLUXProvider class
 
 - **v1.1.0**: Enhanced permissions and cleanup system
   - Enhanced permission types: `readonly`, `editable`, `postable`
