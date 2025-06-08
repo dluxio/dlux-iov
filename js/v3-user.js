@@ -4353,7 +4353,6 @@ function buyNFT(setname, uid, price, type, callback){
       }
       
       if (this.ffmpegSkipped) {
-        // Handle direct file upload without transcoding
         const file = event.target.files[0];
         if (file) {
           this.videoFilesToUpload = [{
@@ -4371,44 +4370,20 @@ function buyNFT(setname, uid, price, type, callback){
         return;
       }
 
-      this.ffmpeg_page = true
+      this.ffmpeg_page = true;
       const { fetchFile } = FFmpegUtil;
-      let ffmpeg = this.ffmpeg;
-      var qsv = false
-      var height = 0
-      var width = 0
-      var run = 0
-      var bitrates = []
-      const patt = /\d{3,5}x\d{3,5}/
-      
-      if (!ffmpeg) {
-        this.videoMsg = 'FFmpeg not loaded. Please load FFmpeg first.';
-        return;
-      }
+      const ffmpeg = this.ffmpeg;
       
       const { name } = event.target.files[0];
       await ffmpeg.writeFile(name, await fetchFile(event.target.files[0]));
-      var codec = "libx264";
       
-      await ffmpeg.exec(["-encoders"]);
-      
-      // Get video dimensions to properly handle mobile/portrait videos
-      this.videoMsg = 'Analyzing video dimensions...';
-      try {
-        await ffmpeg.exec(["-i", name]);
-      } catch (e) {
-        // FFmpeg outputs info to stderr, so we expect an "error" here
-        // The dimensions info is still captured
-      }
-      
-      // Try to extract dimensions from FFmpeg output or use video element
-      let videoWidth = width || 1280;
-      let videoHeight = height || 720;
-      
-      // Create a temporary video element to get actual dimensions
+      this.videoMsg = 'Analyzing video...';
       const tempVideo = document.createElement('video');
       tempVideo.src = URL.createObjectURL(event.target.files[0]);
       
+      let videoWidth = 1280;
+      let videoHeight = 720;
+
       await new Promise((resolve) => {
         tempVideo.onloadedmetadata = () => {
           videoWidth = tempVideo.videoWidth;
@@ -4424,415 +4399,177 @@ function buyNFT(setname, uid, price, type, callback){
         };
       });
       
-      // Use the larger dimension as reference for resolution ladder
       const maxDimension = Math.max(videoWidth, videoHeight);
-      console.log(`📐 Using max dimension ${maxDimension} for resolution ladder`);
-      
-      bitrates = this.getPossibleBitrates(maxDimension);
-      
-      // For portrait videos, we need to adjust the scale filter
+      let bitrates = this.getPossibleBitrates(maxDimension);
       const isPortrait = videoHeight > videoWidth;
-      console.log(`📱 Video orientation: ${isPortrait ? 'Portrait' : 'Landscape'}`);
       
-      // Limit resolutions to reduce memory pressure in FFmpeg.wasm
       if (bitrates.length > 3) {
-        bitrates = bitrates.slice(0, 3); // Keep only top 3 resolutions
+        bitrates = bitrates.slice(0, 3);
         console.log('Limited to 3 resolutions to reduce memory usage:', bitrates);
       }
-      console.log('Video analysis complete, starting transcoding...');
-            // Use single FFmpeg command approach for better memory efficiency
-      this.videoMsg = 'Building optimized transcoding command...';
       
-      // Reset hashing progress and start internal progress monitoring
-      this.resetHashingProgress();
-      // Disabled independent progress monitor - causes confusion
-      // const progressInterval = this.startInternalProgressMonitor(bitrates.length);
-      
-      // Use separate FFmpeg executions for each resolution to ensure all playlists are generated
       this.videoMsg = 'Starting multi-resolution transcoding...';
       console.time('transcode-all');
       
-      // Process each resolution separately to avoid FFmpeg command conflicts
       for (var i = 0; i < bitrates.length; i++) {
         const resHeight = parseInt(bitrates[i].split('x')[1]);
         this.videoMsg = `Transcoding ${resHeight}p... (${i + 1}/${bitrates.length})`;
         
-        // Calculate proper scale filter for portrait/landscape
         let scaleFilter;
         if (isPortrait) {
-          // For portrait videos, scale by width and let height adjust
           const targetWidth = Math.round(resHeight * (videoWidth / videoHeight));
           scaleFilter = `scale=${targetWidth}:-1`;
-          console.log(`📱 Portrait scaling: ${targetWidth}x${resHeight} (target height)`);
         } else {
-          // For landscape videos, scale by height and let width adjust  
           scaleFilter = `scale=-1:${resHeight}`;
-          console.log(`🖥️ Landscape scaling: ${resHeight}p (target height)`);
         }
         
-        // Build command for this specific resolution
-        var commands = [
-          // input filename
+        const commands = [
           "-i", name,
-          // pixel format for compatibility
           "-pix_fmt", "yuv420p",
-          // max muxing queue size
-          '-max_muxing_queue_size', '1024',
-          // hls settings
-          '-hls_time', "5",
-          '-hls_list_size', "0",
-          // profile
-          '-profile:v', 'main',
-          // audio codec and bitrate
-          "-acodec", "aac", "-b:a", "256k"
-        ];
-        
-        // Add codec-specific options
-        if (qsv) {
-          codec = "h264_qsv";
-          commands.push('-preset', 'slow', '-look_ahead', '1', '-global_quality', '36', "-c:v", codec);
-        } else {
-          commands.push('-crf', '26', '-preset', 'fast', "-c:v", codec);
-        }
-        
-        // Add scale filter
-        commands.push('-vf', scaleFilter);
-        
-        // Add output parameters  
-        commands.push(
+          "-c:v", "libx264",
+          "-crf", "26", 
+          "-preset", "fast",
+          "-c:a", "aac", 
+          "-b:a", "128k",
+          "-vf", scaleFilter,
           "-f", "hls",
+          "-hls_time", "5",
+          "-hls_list_size", "0",
           "-hls_segment_filename", `${resHeight}p_%03d.ts`,
           `${resHeight}p_index.m3u8`
-        );
+        ];
         
         console.log(`📋 FFmpeg command for ${resHeight}p:`, commands);
         
         try {
-          console.time(`exec-${resHeight}p`);
-          console.log(`🎬 Starting ${resHeight}p transcoding...`);
-          
-          // Enable FFmpeg logging to see what's going wrong
-          await ffmpeg.exec(['-loglevel', 'error']);
-          
-          // Check if input file exists first
-          const inputFiles = await ffmpeg.listDir("/");
-          const inputExists = inputFiles.some(f => f.name === name);
-          console.log(`📁 Input file "${name}" exists: ${inputExists}`);
-          if (!inputExists) {
-            console.error(`❌ Input file "${name}" not found in virtual filesystem`);
-            console.log('Available files:', inputFiles.map(f => f.name));
-            this.videoMsg = `Input file not found. Please try uploading again.`;
-            return;
-          }
-          
-          // Start with a very simple test command to see if basic transcoding works
-          const testCommand = [
-            "-i", name,
-            "-t", "10", // Only process first 10 seconds for testing
-            "-c:v", "libx264", 
-            "-preset", "ultrafast", // Fastest preset
-            "-crf", "30", // Higher CRF for speed
-            "-c:a", "aac",
-            "-vf", scaleFilter,
-            "-f", "mp4",
-            `test_${resHeight}p.mp4`
-          ];
-          
-          console.log(`🧪 Testing basic transcoding for ${resHeight}p:`, testCommand);
-          await ffmpeg.exec(testCommand);
-          
-          // Check if test file was created
-          const testFiles = await ffmpeg.listDir("/");
-          const testFileExists = testFiles.some(f => f.name === `test_${resHeight}p.mp4`);
-          console.log(`🧪 Test file created: ${testFileExists}`);
-          
-          if (!testFileExists) {
-            console.error(`❌ Basic transcoding test failed for ${resHeight}p`);
-            this.videoMsg = `Transcoding test failed. The video format may not be supported.`;
-            return;
-          }
-          
-          // If test worked, try the actual HLS command
-          console.log(`✅ Test passed, running actual HLS command for ${resHeight}p`);
           await ffmpeg.exec(commands);
-          
-          console.timeEnd(`exec-${resHeight}p`);
-          
-          // Wait a moment for filesystem to settle
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-          // Verify that the playlist was created
-          const files = await ffmpeg.listDir("/");
-          const playlistExists = files.some(f => f.name === `${resHeight}p_index.m3u8`);
-          const segmentFiles = files.filter(f => f.name.startsWith(`${resHeight}p_`) && f.name.endsWith('.ts'));
-          
-          console.log(`📊 ${resHeight}p verification: playlist=${playlistExists}, segments=${segmentFiles.length}`);
-          
-          if (!playlistExists) {
-            console.warn(`⚠️ ${resHeight}p HLS failed, trying simpler approach...`);
-            
-            // Try the most basic segment approach
-            const simpleCommands = [
-              "-i", name,
-              "-c:v", "libx264", "-preset", "fast",
-              "-c:a", "aac",
-              "-vf", scaleFilter,
-              "-t", "60", // Limit to 60 seconds to avoid memory issues
-              "-hls_time", "10",
-              "-hls_list_size", "0",
-              `${resHeight}p_index.m3u8`
-            ];
-            console.log(`🔄 Simple retry for ${resHeight}p:`, simpleCommands);
-            await ffmpeg.exec(simpleCommands);
-            
-            // Check again
-            const retryFiles = await ffmpeg.listDir("/");
-            const retryPlaylistExists = retryFiles.some(f => f.name === `${resHeight}p_index.m3u8`);
-            console.log(`📊 ${resHeight}p simple retry result: playlist=${retryPlaylistExists}`);
-            
-            if (!retryPlaylistExists) {
-              console.error(`❌ All approaches failed for ${resHeight}p`);
-              this.videoMsg = `Transcoding failed at ${resHeight}p. Please try with a shorter video.`;
-              return;
-            }
-          }
-          
           console.log(`✅ ${resHeight}p transcoding completed successfully!`);
         } catch (err) {
-          console.error(`❌ ${resHeight}p transcoding failed with error:`, err);
-          console.error('Error details:', err.message, err.stack);
-          this.videoMsg = `Transcoding failed at ${resHeight}p: ${err.message}`;
+          console.error(`❌ ${resHeight}p transcoding failed:`, err);
+          this.videoMsg = `Transcoding failed at ${resHeight}p. Please try again.`;
           return;
         }
-             }
-       
-       console.timeEnd('transcode-all');
-       
-       // Give filesystem a moment to settle after all transcoding is complete
-       await new Promise(resolve => setTimeout(resolve, 2000));
-       
-       // Final verification
-       const finalFiles = await ffmpeg.listDir("/");
-       const finalTsFiles = finalFiles.filter(f => f.name.endsWith('.ts'));
-       const finalPlaylistFiles = finalFiles.filter(f => f.name.endsWith('.m3u8') && f.name.includes('p_index'));
-       
-       console.log(`📊 Final count: ${finalTsFiles.length} segments, ${finalPlaylistFiles.length} playlists`);
-       console.log('🎬 Segment files:', finalTsFiles.map(f => f.name).sort());
-       console.log('📋 Playlist files:', finalPlaylistFiles.map(f => f.name).sort());
-       
-       if (finalPlaylistFiles.length === 0) {
-         console.error('❌ No playlists were generated');
-         this.videoMsg = 'Transcoding failed - no playlists generated. Please try again.';
-         return;
-       }
-       
-       console.log('✅ All resolutions transcoded and verified successfully!');
-       this.videoMsg = `🎉 All ${bitrates.length} resolutions transcoded successfully! (${bitrates.map(b => parseInt(b.split('x')[1]) + 'p').join(', ')})`;
-       
-       // Progress monitoring cleanup no longer needed
-      this.videoMsg = 'Transcoding complete! Preparing files for upload...';
+      }
       
-      // Non-blocking contract fetch - don't let this interrupt transcoding
-      fetch(`https://spk-ipfs.3speak.tv/upload-contract?user=${this.account}`)
-        .then(r => r.json())
-        .then((data) => {
-          setTimeout(() => {
-            this.showUpload = true
-            this.getSPKUser()
-          }, 1000)
-        })
-        .catch(err => {
-          console.warn('Contract fetch failed, but continuing with transcoding:', err);
-          // Set showUpload anyway so user can continue
-          this.showUpload = true;
-        });
+      console.timeEnd('transcode-all');
       
-      // Prepare files for upload
+      this.videoMsg = 'Verifying transcoded files...';
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const finalFiles = await ffmpeg.listDir("/");
+      const finalTsFiles = finalFiles.filter(f => f.name.endsWith('.ts'));
+      const finalPlaylistFiles = finalFiles.filter(f => f.name.endsWith('.m3u8') && f.name.includes('p_index'));
+      
+      console.log(`📊 Final count: ${finalTsFiles.length} segments, ${finalPlaylistFiles.length} playlists`);
+      
+      if (finalPlaylistFiles.length < bitrates.length) {
+        console.error('❌ Not all playlists were generated');
+        this.videoMsg = 'Transcoding failed - some playlists are missing. Please try again.';
+        return;
+      }
+      
+      console.log('✅ All resolutions transcoded and verified successfully!');
+      this.videoMsg = `Processing transcoded files...`;
+      
       const videoFiles = [];
-      const playlistUpdates = {};
+      const segmentMapping = new Map();
+      const resolutionPlaylists = [];
       
-            // Get the final validated file list
-      const files = await ffmpeg.listDir("/");
-      console.log('Available files after transcoding:', files);
-      
-      // Debug: Show file breakdown
-      const tsFiles = files.filter(f => f.name.endsWith('.ts'));
-      const m3u8Files = files.filter(f => f.name.endsWith('.m3u8'));
-      console.log(`📊 Transcoding results: ${tsFiles.length} segment files, ${m3u8Files.length} playlist files`);
-      console.log('🎬 Segment files:', tsFiles.map(f => f.name).sort());
-      console.log('📋 Playlist files:', m3u8Files.map(f => f.name).sort());
-      
-      // Update progress to show file processing phase
-      this.videoMsg = 'Processing transcoded files...';
-      
-      // Now process the files in sequence to avoid race conditions
-      await this.processVideoFilesSequentially(files, videoFiles);
-    },
-    
-    async processVideoFilesSequentially(files, videoFiles) {
-      const segmentMapping = new Map(); // Map segment names to their actual hashes
-      const resolutionPlaylists = []; // Store resolution-specific playlists
-      
-      // Initialize file reading + hashing progress tracking
-      const segmentFiles = files.filter(file => file.name.includes('.ts'));
-      const playlistFiles = files.filter(file => file.name.includes('.m3u8') && file.name.includes('p_index'));
-      this.hashingProgress.total = (segmentFiles.length + playlistFiles.length) * 2; // *2 for read + hash
+      this.hashingProgress.total = (finalTsFiles.length + finalPlaylistFiles.length) * 2;
       this.hashingProgress.current = 0;
-      this.hashingProgress.percentage = 0;
       
-      // First pass: process video segments and hash them (sequentially)
-      for (const file of files) {
+      for (const file of finalFiles) {
         if (file.name.includes('.ts')) {
           const data = await ffmpeg.readFile(file.name);
-          
-          // Update progress after file reading
           this.hashingProgress.current++;
-          this.hashingProgress.currentFile = file.name;
-          this.hashingProgress.percentage = Math.round((this.hashingProgress.current / this.hashingProgress.total) * 100);
-          this.videoMsg = `Reading files: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)} - ${file.name}`;
+          this.videoMsg = `Reading files: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)}`;
           
-          // Create thumb file name for segments to hide them
-          const newFileName = file.name.endsWith('_thumb.ts') ? file.name : file.name.replace('.ts', '_thumb.ts');
-          
-          // Hash the segment content
+          const newFileName = file.name.replace('.ts', '_thumb.ts');
           const contentBuffer = buffer.Buffer(data.buffer);
           const hashResult = await this.hashOf(contentBuffer, {});
-          const segmentHash = hashResult.hash;
           
-          // Update progress after hashing
           this.hashingProgress.current++;
-          this.hashingProgress.percentage = Math.round((this.hashingProgress.current / this.hashingProgress.total) * 100);
-          this.videoMsg = `Hashing segments: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)} (${this.hashingProgress.percentage}%)`;
+          this.videoMsg = `Hashing segments: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)}`;
           
           videoFiles.push({
             file: new File([data.buffer], newFileName, { type: 'video/mp2t' }),
             targetPath: '/Videos',
-            isThumb: true // Mark as thumb file for special handling
+            isThumb: true
           });
           this.dataURLS.push([newFileName, data.buffer, 'video/mp2t']);
-          console.log(`Added video segment: ${newFileName} (${data.buffer.byteLength} bytes) - Hash: ${segmentHash}`);
-          
-          // Store mapping for M3U8 CID replacement with actual hash
-          segmentMapping.set(file.name, segmentHash);
+          segmentMapping.set(file.name, hashResult.hash);
         }
       }
       
-      // Second pass: process resolution-specific M3U8 playlists  
-      for (const file of files) {
+      for (const file of finalFiles) {
         if (file.name.includes('.m3u8') && file.name.includes('p_index')) {
           const data = await ffmpeg.readFile(file.name);
           let playlistContent = new TextDecoder().decode(data);
-          console.log(`M3U8 Resolution Playlist Content (${file.name}):`, playlistContent);
           
-          // Replace segment references with actual IPFS hashes and add filename hints
           segmentMapping.forEach((actualHash, originalName) => {
             const segmentPattern = new RegExp(originalName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
             playlistContent = playlistContent.replace(segmentPattern, `https://ipfs.dlux.io/ipfs/${actualHash}?filename=${originalName}`);
           });
           
-          console.log(`M3U8 with IPFS hashes (${file.name}):`, playlistContent);
-          
-          // Mark resolution playlists as thumbs (they're sub-files)
-          const resPlaylistFile = new File([new TextEncoder().encode(playlistContent)], file.name.replace('.m3u8', '_thumb.m3u8'), { 
-            type: 'application/x-mpegURL' 
-          });
+          const resPlaylistFile = new File([new TextEncoder().encode(playlistContent)], file.name.replace('.m3u8', '_thumb.m3u8'), { type: 'application/x-mpegURL' });
           
           videoFiles.push({
             file: resPlaylistFile,
             targetPath: '/Videos',
-            isThumb: true, // Mark resolution playlists as thumbs
+            isThumb: true,
             isResolutionPlaylist: true
           });
-          
           this.dataURLS.push([resPlaylistFile.name, new TextEncoder().encode(playlistContent), 'application/x-mpegURL']);
-          console.log(`Added resolution M3U8 playlist: ${resPlaylistFile.name} (marked as thumb)`);
           
-          // Store resolution playlist info for master playlist
           const resolution = file.name.match(/(\d+)p_index/)?.[1] || 'unknown';
           resolutionPlaylists.push({
             fileName: resPlaylistFile.name,
             resolution: resolution,
-            originalName: file.name,
             content: playlistContent,
-            originalContent: new TextDecoder().decode(data) // Keep original for preview
+            originalContent: new TextDecoder().decode(data)
           });
         }
       }
       
-      // Set up preview after playlists are processed
       if (resolutionPlaylists.length > 0) {
         this.transcodePreview.available = true;
-        this.transcodePreview.resolutions = resolutionPlaylists.map(playlist => ({
-          resolution: playlist.resolution,
-          fileName: playlist.fileName,
-          originalContent: playlist.originalContent
-        })).sort((a, b) => parseInt(b.resolution) - parseInt(a.resolution));
-        
-        // Default to highest resolution
+        this.transcodePreview.resolutions = resolutionPlaylists.map(p => ({
+            resolution: p.resolution,
+            fileName: p.fileName,
+            originalContent: p.originalContent
+        })).sort((a,b) => parseInt(b.resolution) - parseInt(a.resolution));
         this.transcodePreview.selectedResolution = this.transcodePreview.resolutions[0];
         this.setPreviewVideoSrc();
+
+        const hashPromises = resolutionPlaylists.map(async (playlist) => {
+          const contentBuffer = buffer.Buffer(new TextEncoder().encode(playlist.content));
+          const hashResult = await this.hashOf(contentBuffer, {});
+          playlist.hash = hashResult.hash;
+          return playlist;
+        });
         
-        console.log('Preview available with resolutions:', this.transcodePreview.resolutions.map(r => r.resolution));
-      }
-      
-      // Hash all the resolution playlists and create master playlist
-      if (resolutionPlaylists.length > 0) {
-        console.log('Hashing resolution playlists...');
+        const hashedPlaylists = await Promise.all(hashPromises);
+        let masterPlaylistContent = '#EXTM3U\n#EXT-X-VERSION:3\n';
+        hashedPlaylists.sort((a, b) => parseInt(b.resolution) - parseInt(a.resolution)).forEach(p => {
+          const bandwidth = this.calculateBandwidth(p.resolution);
+          const dimensions = this.getResolutionDimensions(p.resolution);
+          masterPlaylistContent += `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},RESOLUTION=${dimensions.width}x${dimensions.height}\n`;
+          masterPlaylistContent += `https://ipfs.dlux.io/ipfs/${p.hash}?filename=${p.fileName}\n`;
+        });
         
-        // Hash each resolution playlist content
-            const hashPromises = resolutionPlaylists.map(async (playlist) => {
-              // Update progress for playlist processing (reading was already done)
-              this.hashingProgress.current++;
-              this.hashingProgress.currentFile = playlist.fileName;
-              this.hashingProgress.percentage = Math.round((this.hashingProgress.current / this.hashingProgress.total) * 100);
-              this.videoMsg = `Processing playlists: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)} - ${playlist.fileName}`;
-              
-              const contentBuffer = buffer.Buffer(new TextEncoder().encode(playlist.content));
-              const hashResult = await this.hashOf(contentBuffer, {});
-              playlist.hash = hashResult.hash;
-              
-              // Update progress after hashing playlist
-              this.hashingProgress.current++;
-              this.hashingProgress.percentage = Math.round((this.hashingProgress.current / this.hashingProgress.total) * 100);
-              this.videoMsg = `Hashing playlists: ${Math.ceil(this.hashingProgress.current / 2)}/${Math.ceil(this.hashingProgress.total / 2)} (${this.hashingProgress.percentage}%)`;
-              
-              return playlist;
-            });
-            
-            // Wait for all resolution playlists to be hashed
-            const hashedPlaylists = await Promise.all(hashPromises);
-
-            // Construct master M3U8 playlist
-            let masterPlaylistContent = '#EXTM3U\n#EXT-X-VERSION:3\n';
-            hashedPlaylists.sort((a, b) => parseInt(b.resolution) - parseInt(a.resolution)).forEach(p => {
-              const bandwidth = this.calculateBandwidth(p.resolution);
-              const dimensions = this.getResolutionDimensions(p.resolution);
-              masterPlaylistContent += `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},RESOLUTION=${dimensions.width}x${dimensions.height}\n`;
-              masterPlaylistContent += `https://ipfs.dlux.io/ipfs/${p.hash}?filename=${p.fileName}\n`;
-            });
-            
-            console.log('Master M3U8 Playlist:', masterPlaylistContent);
-            
-            // Prepare master playlist for upload
-            const masterPlaylistFile = new File([new TextEncoder().encode(masterPlaylistContent)], 'master_playlist.m3u8', {
-              type: 'application/x-mpegURL'
-            });
-
-            // Add master playlist to the final upload list
-            videoFiles.push({
-              file: masterPlaylistFile,
-              targetPath: '/Videos',
-              isThumb: false, // This is the main entry point
-              isMasterPlaylist: true
-            });
-            this.dataURLS.push(['master_playlist.m3u8', new TextEncoder().encode(masterPlaylistContent), 'application/x-mpegURL']);
-
-        console.log('Final video files to upload:', videoFiles.map(f => f.file.name));
+        const masterPlaylistFile = new File([new TextEncoder().encode(masterPlaylistContent)], 'master_playlist.m3u8', { type: 'application/x-mpegURL' });
+        videoFiles.push({
+          file: masterPlaylistFile,
+          targetPath: '/Videos',
+          isThumb: false,
+          isMasterPlaylist: true
+        });
+        this.dataURLS.push(['master_playlist.m3u8', new TextEncoder().encode(masterPlaylistContent), 'application/x-mpegURL']);
+        
         this.videoFilesToUpload = videoFiles;
         this.videoMsg = 'All files are ready for upload!';
-        
       } else {
-        this.videoMsg = 'No resolution playlists were generated. Please check the transcoding process.';
+        this.videoMsg = 'File processing failed. Please try again.';
       }
     },
     downloadBlob(name, buf, mimeString) {
