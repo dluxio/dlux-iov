@@ -4467,10 +4467,10 @@ function buyNFT(setname, uid, price, type, callback){
       const successfulResolutions = [];
       
       try {
-        // Build single combined command for all resolutions (much more reliable!)
+        // Build single combined command for all resolutions using proper FFmpeg multiple output syntax
         const commands = ["-i", name];
         
-        // Add each resolution's options to the combined command
+        // Add each resolution as a separate output in the same command
         for (let i = 0; i < bitrates.length; i++) {
           const resHeight = parseInt(bitrates[i].split('x')[1]);
           
@@ -4484,8 +4484,9 @@ function buyNFT(setname, uid, price, type, callback){
             console.log(`🖥️ Adding ${resHeight}p output: Landscape scaling (width auto)`);
           }
           
-          // Add all options for this resolution output
+          // Add all options for this resolution output (each output is separate)
           commands.push(
+            "-map", "0:v:0", "-map", "0:a:0", // Map video and audio streams for this output
             "-c:v", codec,
             "-crf", "26", 
             "-preset", "fast",
