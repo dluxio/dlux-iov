@@ -4639,6 +4639,9 @@ function buyNFT(setname, uid, price, type, callback){
         // Wait a bit more for all files to be fully written
         await new Promise(resolve => setTimeout(resolve, 1000));
         
+        // Now process directly from extracted data while still in scope
+        await validateAndProcessFiles(extractedFiles);
+        
       } catch (err) {
         console.timeEnd('exec');
         console.error('❌ Transcoding failed:', err);
@@ -4958,11 +4961,7 @@ function buyNFT(setname, uid, price, type, callback){
         }
       };
       
-      // Now process directly from extracted data 
-      validateAndProcessFiles(extractedFiles).catch(error => {
-        console.error('Error processing transcoded files:', error);
-        this.videoMsg = 'Error processing transcoded files. Please try again.';
-      });
+      // Processing call moved to inside try block where extractedFiles is in scope
     },
 
     async waitForAllResolutionFiles(ffmpeg, expectedResolutions, timeoutMs = 180000) {
