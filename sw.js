@@ -1,4 +1,4 @@
-this.version = "2025.06.08.10";
+this.version = "2025.06.08.11";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.08.10",
-  "generated": "2025-06-08T01:53:05Z",
+  "version": "2025.06.08.11",
+  "generated": "2025-06-08T02:24:49Z",
   "files": {
-    "/img/tokens/spk_logomark.png": {
-      "checksum": "e7488b692154b55e2e2e390b21a7f8bb",
-      "size": 25219,
-      "priority": "important"
-    },
     "/img/txt-file-type-svgrepo-com.svg": {
       "checksum": "90a1ea59895f59235680505a41e17d10",
       "size": 1476,
@@ -971,8 +966,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "8c657e056bb87434500adce7d218edec",
-      "size": 36316,
+      "checksum": "f8ae0aa1743c51e183978e807d90e154",
+      "size": 36317,
       "priority": "important"
     },
     "/js/tagify.min.js": {
@@ -1046,8 +1041,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "6f423fb401a7a2d83e255b77bf84e37d",
-      "size": 199681,
+      "checksum": "ec498079d1878a35500af533423f5a07",
+      "size": 203444,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1161,8 +1156,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "423a1180a346083e647dc1325158c3b3",
-      "size": 7299,
+      "checksum": "d7dab325a684779c0d1d6a728198ec6b",
+      "size": 7300,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -1234,11 +1229,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/pascal/pascal.js": {
-      "checksum": "22cc9e523acf30fb92bc43518faff779",
-      "size": 3822,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/pascaligo/pascaligo.js": {
       "checksum": "81770539db995e23e17c8ba2b76ff89a",
@@ -1695,16 +1685,16 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
-      "priority": "lazy"
-    },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
+      "priority": "lazy"
+    }
   }
 }
 ;
