@@ -4510,77 +4510,12 @@ function buyNFT(setname, uid, price, type, callback){
           console.log(`🎬 Transcoding ${resHeight}p with command:`, commands);
           
           try {
-            // Check filesystem state before transcoding
-            const preFiles = await ffmpeg.listDir("/");
-            console.log(`🗂️ Pre-transcode files for ${resHeight}p:`, preFiles.map(f => f.name).sort());
-            
-            // Start the transcoding
             console.log(`🚀 Starting FFmpeg exec for ${resHeight}p...`);
-            
-            // Add temporary logging to catch FFmpeg errors
-            const originalOnLog = ffmpeg.on ? ffmpeg.on.bind(ffmpeg) : null;
-            let ffmpegLogs = [];
-            
-            if (originalOnLog) {
-              const logHandler = ({ type, message }) => {
-                ffmpegLogs.push(`[${type}] ${message}`);
-                if (type === 'fferr' || message.toLowerCase().includes('error')) {
-                  console.error(`🔧 FFmpeg ${resHeight}p error:`, message);
-                }
-              };
-              ffmpeg.on('log', logHandler);
-            }
-            
-            const execPromise = ffmpeg.exec(commands);
-            
-            // Wait for both exec completion AND file stability
-            await Promise.all([
-              execPromise,
-              this.waitForTranscodingCompletion(ffmpeg, resHeight, 30000) // 30 second timeout
-            ]);
-            
-            // Verify files were actually created
-            const postFiles = await ffmpeg.listDir("/");
-            const newFiles = postFiles.filter(f => f.name.startsWith(`${resHeight}p_`));
-            
-            if (newFiles.length > 0) {
-              successfulResolutions.push(resHeight);
-              console.log(`✅ Successfully transcoded ${resHeight}p with ${newFiles.length} files:`, newFiles.map(f => f.name));
-              
-              // Clean up old resolution files to prevent conflicts (but keep input file and current resolution)
-              const filesToCleanup = postFiles.filter(f => 
-                f.name.match(/^\d+p_/) && // Is a resolution file
-                !f.name.startsWith(`${resHeight}p_`) && // But not from current resolution
-                !f.name.endsWith('.m3u8') // Keep playlists for now
-              );
-              
-              for (const fileToClean of filesToCleanup) {
-                try {
-                  await ffmpeg.deleteFile(fileToClean.name);
-                  console.log(`🧹 Cleaned up old file: ${fileToClean.name}`);
-                } catch (cleanError) {
-                  console.warn(`⚠️ Could not clean up ${fileToClean.name}:`, cleanError);
-                }
-              }
-            } else {
-              console.error(`❌ No files created for ${resHeight}p despite exec completing`);
-              if (ffmpegLogs.length > 0) {
-                console.log(`📋 FFmpeg logs for failed ${resHeight}p:`, ffmpegLogs.slice(-10)); // Last 10 log entries
-              }
-              throw new Error(`No output files created for ${resHeight}p`);
-            }
-            
+            await ffmpeg.exec(commands);
+            successfulResolutions.push(resHeight);
+            console.log(`✅ Successfully transcoded ${resHeight}p`);
           } catch (error) {
             console.error(`❌ Failed to transcode ${resHeight}p:`, error);
-            
-            // Check what files exist after failure
-            try {
-              const errorFiles = await ffmpeg.listDir("/");
-              console.log(`🔍 Files after ${resHeight}p failure:`, errorFiles.map(f => f.name).sort());
-            } catch (listError) {
-              console.error(`Could not list files after ${resHeight}p failure:`, listError);
-            }
-            
             // Continue with other resolutions instead of failing completely
           }
         }
@@ -4627,11 +4562,41 @@ function buyNFT(setname, uid, price, type, callback){
       
       // Enhanced file validation and processing
       const validateAndProcessFiles = async () => {
-        // Wait a moment for filesystem to settle
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Wait for files to stabilize after transcoding completion
+        let files = await ffmpeg.listDir("/");
+        let lastFileCount = files.length;
+        let stableCount = 0;
+        const requiredStableChecks = 3;
         
-        const files = await ffmpeg.listDir("/");
-        console.log('📁 Available files after transcoding:', files.map(f => f.name).sort());
+        console.log(`📊 Initial file scan: ${files.length} files`);
+        
+        // Give up to 5 seconds for files to stabilize
+        for (let attempt = 0; attempt < 5; attempt++) {
+          const currentFileCount = files.length;
+          const tsFiles = files.filter(f => f.name.endsWith('.ts'));
+          const m3u8Files = files.filter(f => f.name.endsWith('.m3u8'));
+          
+          console.log(`📊 File stability check ${attempt + 1}: ${currentFileCount} total files (${tsFiles.length} segments, ${m3u8Files.length} playlists)`);
+          
+          if (currentFileCount === lastFileCount) {
+            stableCount++;
+            if (stableCount >= requiredStableChecks) {
+              console.log(`✅ Files stabilized after ${attempt + 1} seconds`);
+              break;
+            }
+          } else {
+            stableCount = 0; // Reset stability counter
+            lastFileCount = currentFileCount;
+          }
+          
+          // Wait 1 second before next check
+          if (attempt < 4) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            files = await ffmpeg.listDir("/");
+          }
+        }
+        
+        console.log('📁 Final file listing after stabilization:', files.map(f => f.name).sort());
         
         // Validate expected files exist
         const tsFiles = files.filter(f => f.name.endsWith('.ts'));
@@ -4825,66 +4790,6 @@ function buyNFT(setname, uid, price, type, callback){
       validateAndProcessFiles().catch(error => {
         console.error('Error processing transcoded files:', error);
         this.videoMsg = 'Error processing transcoded files. Please try again.';
-      });
-    },
-
-    async waitForTranscodingCompletion(ffmpeg, resHeight, timeoutMs = 30000) {
-      return new Promise((resolve, reject) => {
-        const startTime = Date.now();
-        const expectedPlaylist = `${resHeight}p_index.m3u8`;
-        let lastFileCount = 0;
-        let stableCount = 0;
-        const requiredStableChecks = 3; // Files must be stable for 3 consecutive checks
-        
-        const checkCompletion = async () => {
-          try {
-            // Check if we've exceeded timeout
-            if (Date.now() - startTime > timeoutMs) {
-              console.warn(`⏰ Timeout waiting for ${resHeight}p transcoding completion`);
-              resolve(); // Resolve anyway to continue with what we have
-              return;
-            }
-            
-            const files = await ffmpeg.listDir("/");
-            const currentFiles = files.filter(f => 
-              f.name.startsWith(`${resHeight}p_`) && 
-              (f.name.endsWith('.ts') || f.name.endsWith('.m3u8'))
-            );
-            
-            const playlistExists = files.some(f => f.name === expectedPlaylist);
-            const currentFileCount = currentFiles.length;
-            
-            console.log(`📊 ${resHeight}p transcoding check: ${currentFileCount} files, playlist: ${playlistExists ? '✅' : '❌'}`);
-            
-            // Check if playlist exists and file count is stable
-            if (playlistExists) {
-              if (currentFileCount === lastFileCount && currentFileCount > 0) {
-                stableCount++;
-                console.log(`📈 ${resHeight}p file count stable (${stableCount}/${requiredStableChecks}): ${currentFileCount} files`);
-                
-                if (stableCount >= requiredStableChecks) {
-                  console.log(`✅ ${resHeight}p transcoding confirmed complete: ${currentFileCount} files stable`);
-                  resolve();
-                  return;
-                }
-              } else {
-                stableCount = 0; // Reset if count changed
-                lastFileCount = currentFileCount;
-              }
-            }
-            
-            // Continue checking
-            setTimeout(checkCompletion, 1000); // Check every second
-            
-          } catch (error) {
-            console.warn(`Error checking transcoding completion for ${resHeight}p:`, error);
-            // Continue checking despite errors
-            setTimeout(checkCompletion, 1000);
-          }
-        };
-        
-        // Start checking after a brief delay
-        setTimeout(checkCompletion, 1000);
       });
     },
 
