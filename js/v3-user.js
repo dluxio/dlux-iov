@@ -4617,52 +4617,15 @@ function buyNFT(setname, uid, price, type, callback){
           }
         }
         
-        // Write all extracted files back to FFmpeg filesystem for final processing
-        if (extractedFiles.size > 0) {
-          console.log(`📥 Writing ${extractedFiles.size} extracted files back to FFmpeg filesystem...`);
-          for (const [filename, data] of extractedFiles) {
-            try {
-              // Verify data integrity before writing
-              if (!data || data.byteLength === 0) {
-                console.error(`❌ ${filename} has no data (${data ? data.byteLength : 'null'} bytes)`);
-                continue;
-              }
-              
-              // Debug the data before writing
-              console.log(`📝 About to write ${filename}: ${data.byteLength} bytes, constructor: ${data.constructor.name}`);
-              
-              await ffmpeg.writeFile(filename, data);
-              console.log(`✅ Restored ${filename} (${data.byteLength} bytes)`);
-              
-              // Verify file was actually written
-              const verifyData = await ffmpeg.readFile(filename);
-              if (verifyData.byteLength !== data.byteLength) {
-                console.error(`⚠️ Size mismatch for ${filename}: wrote ${data.byteLength}, read ${verifyData.byteLength}`);
-              } else {
-                console.log(`✅ Verified ${filename}: ${verifyData.byteLength} bytes restored correctly`);
-              }
-            } catch (writeError) {
-              console.error(`❌ Failed to restore ${filename}:`, writeError);
-            }
-          }
-          
-          // Verify all files were actually restored
-          const verifyFiles = await ffmpeg.listDir("/");
-          const restoredFiles = verifyFiles.map(f => f.name).filter(name => 
-            !name.startsWith('.') && !['dev', 'home', 'proc', 'tmp'].includes(name)
-          );
-          console.log(`🔍 Verification: ${restoredFiles.length} files in filesystem:`, restoredFiles);
-          
-          // Check specifically for playlist files
-          const playlistFiles = restoredFiles.filter(name => name.endsWith('.m3u8'));
-          console.log(`📋 Playlist files restored: ${playlistFiles.length}`, playlistFiles);
-          
-          if (playlistFiles.length !== successfulResolutions.length) {
-            console.error(`⚠️ Playlist count mismatch! Expected ${successfulResolutions.length}, found ${playlistFiles.length}`);
-          }
-          
-          console.log(`✅ File restoration complete: ${restoredFiles.length} total files`);
-        }
+        // Skip restoration - we have the files in memory and they exist in filesystem
+        console.log(`🚀 Skipping filesystem restoration - processing directly from extracted data (${extractedFiles.size} files)`);
+        
+        // Verify filesystem still has our files
+        const verifyFiles = await ffmpeg.listDir("/");
+        const existingFiles = verifyFiles.map(f => f.name).filter(name => 
+          !name.startsWith('.') && !['dev', 'home', 'proc', 'tmp'].includes(name)
+        );
+        console.log(`🔍 Existing files in filesystem: ${existingFiles.length}`, existingFiles);
         
         console.timeEnd('exec');
         
@@ -4675,9 +4638,6 @@ function buyNFT(setname, uid, price, type, callback){
         
         // Wait a bit more for all files to be fully written
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Start file validation and processing immediately with extracted files
-        await validateAndProcessFiles(extractedFiles);
         
       } catch (err) {
         console.timeEnd('exec');
@@ -4998,7 +4958,11 @@ function buyNFT(setname, uid, price, type, callback){
         }
       };
       
-      // validateAndProcessFiles is now called inside the try block above
+      // Now process directly from extracted data 
+      validateAndProcessFiles(extractedFiles).catch(error => {
+        console.error('Error processing transcoded files:', error);
+        this.videoMsg = 'Error processing transcoded files. Please try again.';
+      });
     },
 
     async waitForAllResolutionFiles(ffmpeg, expectedResolutions, timeoutMs = 180000) {
