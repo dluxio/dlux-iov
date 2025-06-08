@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.08.35",
-  "generated": "2025-06-08T19:24:25Z",
+  "version": "2025.06.08.12",
+  "generated": "2025-06-08T19:48:59Z",
   "files": {
-    "/js/dataCommon.js": {
-      "checksum": "f38ec95a53d917b4e2d7fe983646d5ea",
-      "size": 229,
-      "priority": "important"
-    },
     "/js/dd.js": {
       "checksum": "359b73a60da7efe421181249ece6f7d2",
       "size": 9257,
@@ -841,7 +836,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "1b0b6f24b69a20cd6594f393d3278c63",
+      "checksum": "8e1d0a1ba5e05d5207ff593c2bb0a7ae",
       "size": 36317,
       "priority": "important"
     },
@@ -976,8 +971,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "46520c18f52a4fee03c0df33fe1f2f50",
-      "size": 47859,
+      "checksum": "1b1f1f21eb7676ebeb7b224efdbcc41b",
+      "size": 49299,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -1031,7 +1026,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "7cc162e88e170e50078e4e70ae440265",
+      "checksum": "60eb52e8774cf67f95656fec077bb9e9",
       "size": 7300,
       "priority": "important"
     },
@@ -1104,11 +1099,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/sophia/sophia.js": {
-      "checksum": "122424f290eebd8629588833320d7b50",
-      "size": 3591,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/sparql/sparql.js": {
       "checksum": "b4fbde148a69c3fca7c0690ca3bc84d0",
@@ -1435,12 +1425,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

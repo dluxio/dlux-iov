@@ -192,12 +192,14 @@
                         <!-- Post Type Selection -->
                         <div class="d-flex justify-content-center me-auto btn-group">
                             <!-- Blog Post -->
-                            <button class="btn btn-sm btn-outline-primary px-2" :class="{active: postCustom_json.vrHash == 'blog'}"
+                            <button class="btn btn-sm btn-outline-primary px-2"
+                                :class="{active: postCustom_json.vrHash == 'blog'}"
                                 @click="postCustom_json.vrHash = 'blog';types='img,vid'">
                                 <i class="fa-solid fa-book fa-fw me-2"></i>Blog Post
                             </button>
                             <!-- Video -->
-                            <button class="btn btn-sm btn-outline-primary px-2" :class="{active: postCustom_json.vrHash == 'video'}"
+                            <button class="btn btn-sm btn-outline-primary px-2"
+                                :class="{active: postCustom_json.vrHash == 'video'}"
                                 @click="postCustom_json.vrHash = 'video';types='img,vid'">
                                 <i class="fa-solid fa-film fa-fw me-2"></i>Video
                             </button>
@@ -208,26 +210,28 @@
                                 <i class="fa-solid fa-globe fa-fw me-2"></i>360 Image Gallery
                             </button>
                             <!-- New dApp -->
-                            <button class="btn btn-sm btn-outline-primary px-2" :class="{active: postCustom_json.vrHash == 'dapp'}"
+                            <button class="btn btn-sm btn-outline-primary px-2"
+                                :class="{active: postCustom_json.vrHash == 'dapp'}"
                                 @click="postCustom_json.vrHash = 'dapp';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
                                 <i class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>New dApp
                             </button>
                             <!-- ReMix dApp -->
-                            <button class="btn btn-sm btn-outline-primary px-2" :class="{active: postCustom_json.vrHash == 'remix'}"
+                            <button class="btn btn-sm btn-outline-primary px-2"
+                                :class="{active: postCustom_json.vrHash == 'remix'}"
                                 @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
                                 <i class="fa-solid fa-shuffle fa-fw me-2"></i>ReMix dApp
                             </button>
                         </div>
+
                         <!-- blog buttons -->
                         <div class="d-flex justify-content-center ms-auto">
                             <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-secondary px-2"
-                                    @click="saveNewToken()"><i class="fa-solid fa-fw fa-floppy-disk me-2"
-                                        aria-hidden="true"></i>Save</button>
-                                <button type="button" class="btn btn-sm btn-dark  ms-0 me-0 ps-0 pe-0 disabled"></button>
-
+                                <button type="button" class="btn btn-sm btn-secondary px-2" @click="saveNewToken()"><i
+                                        class="fa-solid fa-fw fa-floppy-disk me-2" aria-hidden="true"></i>Save</button>
                                 <button type="button"
-                                    class="btn btn-sm btn-secondary dropdown-toggle px-2"
+                                    class="btn btn-sm btn-dark  ms-0 me-0 ps-0 pe-0 disabled"></button>
+
+                                <button type="button" class="btn btn-sm btn-secondary dropdown-toggle px-2"
                                     data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="fa-solid fa-fw fa-folder-open me-2"></i>Open
                                 </button>
@@ -247,13 +251,9 @@
                                             role="button"><i class="fa-solid fa-trash-can fa-fw"></i></a>
                                     </li>
                                 </ul>
-
-
                                 <button type="button" class="btn btn-sm btn-secondary d-none rounded-pill px-2 ms-1"
                                     @click="saveNewToken()"><i class="fa-solid fa-fw fa-flag-checkered me-2"
                                         aria-hidden="true"></i>Publish</button>
-
-
                             </div>
                         </div>
                         <!-- 360 toggle buttons -->
@@ -308,26 +308,44 @@
                     </div>
                 </div>
             </div>
+            <div class="container text-center">
+                <!-- Post Type Information Banners -->
+                <div class="mt-3">
+                    <!-- Blog Post Banner -->
+                    <div v-if="postCustom_json.vrHash == 'blog'" class="neon-banner blog">
+                        <h6 class="justify-content-center"><i class="fa-solid fa-book"></i>Blog Posts</h6>
+                        <p>Blogs are the default post type and allow posting image URLs and markdown text to the Hive
+                            blockchain. Perfect for articles, tutorials, and general content sharing.</p>
+                    </div>
 
-            <!-- ALT CHOICE Post Type Selection -->
-            <div class="container d-none">
-                <div class="accordion border-white-50 rounded mt-3" id="postTypeAccordion">
-                    <div class="accordion-item bg-img-none bg-dark-1">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#postTypeCollapse" aria-expanded="true"
-                                aria-controls="postTypeCollapse">
-                                <i class="fa-solid fa-list fa-fw me-2"></i>Post Type Selection
-                            </button>
-                        </h2>
-                        <div id="postTypeCollapse" class="accordion-collapse collapse show"
-                            data-bs-parent="#postTypeAccordion">
-                            <div class="accordion-body">
-                                <div class="d-flex flex-wrap justify-content-center gap-2">
+                    <!-- Video Banner -->
+                    <div v-if="postCustom_json.vrHash == 'video'" class="neon-banner video">
+                        <h6 class="justify-content-center"><i class="fa-solid fa-film"></i>Video Posts</h6>
+                        <p>Decentralized video streaming on SPK Network and requires M3U8 transcoding for
+                            IPFS HLS streaming via the CID CDN. Supports multiple quality levels for adaptive streaming.
+                        </p>
+                    </div>
 
-                                </div>
-                            </div>
-                        </div>
+                    <!-- 360 Image Gallery Banner -->
+                    <div v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'"
+                        class="neon-banner gallery">
+                        <h6 class="justify-content-center"><i class="fa-solid fa-globe"></i>360° Image Galleries</h6>
+                        <p>Create immersive 360° experiences using A-Frame to construct user-navigable, headset-enabled
+                            virtual environments. Perfect for virtual tours and immersive content.</p>
+                    </div>
+
+                    <!-- dApp Banner -->
+                    <div v-if="postCustom_json.vrHash == 'dapp'" class="neon-banner dapp">
+                        <h6 class="justify-content-center"><i class="fa-solid fa-mobile-screen-button"></i>New dApp</h6>
+                        <p>Build decentralized applications using any modern web technology you're familiar with. Deploy
+                            your dApp to IPFS and make it accessible through the Hive blockchain.</p>
+                    </div>
+
+                    <!-- ReMix dApp Banner -->
+                    <div v-if="postCustom_json.vrHash == 'remix'" class="neon-banner remix">
+                        <h6 class="justify-content-center"><i class="fa-solid fa-shuffle"></i>ReMix dApp</h6>
+                        <p>Create derivative works by remixing existing dApps. Build upon the work of others while
+                            maintaining proper attribution and licensing.</p>
                     </div>
                 </div>
             </div>
@@ -610,20 +628,21 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Collaborative Documents Section -->
                 <div class="accordion border-white-50 rounded mt-3" id="collaborationAccordion">
                     <div class="accordion-item bg-img-none bg-dark-1">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collaborativeDocs" aria-expanded="false" aria-controls="collaborativeDocs">
+                                data-bs-target="#collaborativeDocs" aria-expanded="false"
+                                aria-controls="collaborativeDocs">
                                 <i class="fa-solid fa-users fa-fw me-2"></i>Collaborative Documents
                             </button>
                         </h2>
-                        <div id="collaborativeDocs" class="accordion-collapse collapse" data-bs-parent="#collaborationAccordion">
+                        <div id="collaborativeDocs" class="accordion-collapse collapse"
+                            data-bs-parent="#collaborationAccordion">
                             <div class="accordion-body">
-                                <collaborative-docs v-if="account" 
-                                    :account="account" 
+                                <collaborative-docs v-if="account" :account="account"
                                     :auth-headers="collaborationAuthHeaders"
                                     @open-collaborative-doc="openCollaborativeDocument"
                                     @request-auth-headers="ensureCollaborationAuth"
@@ -637,34 +656,30 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Collaborative Post Editor (when in collaborative mode) -->
                 <div v-if="isCollaborativeMode" class="mt-3">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fa-solid fa-users fa-fw me-2"></i>Collaborative Post Editor</h5>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" @click="exitCollaborativeMode">
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                @click="exitCollaborativeMode">
                                 <i class="fas fa-times me-1"></i>Exit Collaboration
                             </button>
                         </div>
                         <div class="card-body">
-                            <collaborative-post-editor 
-                                :account="account"
-                                :show-collaboration="true"
-                                :collaborative-doc="collaborativeDocument"
-                                :collaboration-config="{ 
+                            <collaborative-post-editor :account="account" :show-collaboration="true"
+                                :collaborative-doc="collaborativeDocument" :collaboration-config="{ 
                                     authToken: collaborationAuthHeaders['x-signature'],
                                     username: account,
                                     userColor: '#' + Math.floor(Math.random()*16777215).toString(16)
-                                }"
-                                :can-post="canPostFromCollaboration"
-                                :initial-data="collaborativeDocumentData"
+                                }" :can-post="canPostFromCollaboration" :initial-data="collaborativeDocumentData"
                                 @data-changed="handleCollaborativePostData"
                                 @publish-post="handleCollaborativePublish" />
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Regular Post Details (when not in collaborative mode) -->
                 <div v-if="!isCollaborativeMode" class="mt-3">
                     <div class="card">
@@ -765,19 +780,19 @@
             console.log('CollaborationBundle available:', !!window.CollaborationBundle);
             console.log('Global Y.js available:', !!window.Y);
             console.log('HocuspocusProvider available:', !!window.HocuspocusProvider);
-            
+
             if (window.CollaborationBundle) {
                 console.log('CollaborationBundle contents:', Object.keys(window.CollaborationBundle));
                 console.log('HocuspocusProvider from bundle:', typeof window.CollaborationBundle.HocuspocusProvider);
                 console.log('Y from bundle:', typeof window.CollaborationBundle.Y);
                 console.log('Y.Doc constructor from bundle:', typeof window.CollaborationBundle.Y.Doc);
-                
+
                 // Ensure global Y.js is available for compatibility
                 if (!window.Y && window.CollaborationBundle.Y) {
                     window.Y = window.CollaborationBundle.Y;
                     console.log('✅ Y.js made available globally from CollaborationBundle');
                 }
-                
+
                 // Test WebSocket URL access
                 console.log('Testing WebSocket URL: wss://data.dlux.io/ws/payment-monitor');
             } else {
