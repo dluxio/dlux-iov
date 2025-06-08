@@ -4474,14 +4474,28 @@ function buyNFT(setname, uid, price, type, callback){
         for (let i = 0; i < bitrates.length; i++) {
           const resHeight = parseInt(bitrates[i].split('x')[1]);
           
-          // Calculate proper scale filter for portrait/landscape
+          // Calculate proper scale filter with explicit dimensions
           let scaleFilter;
+          let targetWidth, targetHeight;
+          
           if (isPortrait) {
-            scaleFilter = `scale=-1:${resHeight}`;
-            console.log(`📱 Processing ${resHeight}p: Portrait scaling (width auto)`);
+            // For portrait: calculate width based on aspect ratio
+            targetHeight = resHeight;
+            targetWidth = Math.round((videoWidth / videoHeight) * targetHeight);
+            // Ensure even numbers for h264
+            if (targetWidth % 2 !== 0) targetWidth += 1;
+            if (targetHeight % 2 !== 0) targetHeight += 1;
+            scaleFilter = `scale=${targetWidth}:${targetHeight}`;
+            console.log(`📱 Processing ${resHeight}p: Portrait scaling ${targetWidth}x${targetHeight}`);
           } else {
-            scaleFilter = `scale=-1:${resHeight}`;
-            console.log(`🖥️ Processing ${resHeight}p: Landscape scaling (width auto)`);
+            // For landscape: calculate height based on aspect ratio  
+            targetWidth = Math.round((resHeight * videoWidth) / videoHeight);
+            targetHeight = resHeight;
+            // Ensure even numbers for h264
+            if (targetWidth % 2 !== 0) targetWidth += 1;
+            if (targetHeight % 2 !== 0) targetHeight += 1;
+            scaleFilter = `scale=${targetWidth}:${targetHeight}`;
+            console.log(`🖥️ Processing ${resHeight}p: Landscape scaling ${targetWidth}x${targetHeight}`);
           }
           
           // Build command for this resolution with shorter segments for short videos
