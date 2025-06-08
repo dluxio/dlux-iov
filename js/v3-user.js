@@ -4467,7 +4467,10 @@ function buyNFT(setname, uid, price, type, callback){
       const successfulResolutions = [];
       
       try {
-        // Process each resolution with fresh FFmpeg instance - fixes WASM memory corruption
+        // Store extracted files for all resolutions
+        const extractedFiles = new Map(); // Map<filename, Uint8Array>
+        
+        // Process each resolution sequentially - extract files after each completion
         for (let i = 0; i < bitrates.length; i++) {
           const resHeight = parseInt(bitrates[i].split('x')[1]);
           
@@ -4508,19 +4511,6 @@ function buyNFT(setname, uid, price, type, callback){
           try {
             console.log(`🚀 Starting ${resHeight}p transcoding...`);
             
-            // Create fresh FFmpeg instance for each resolution to avoid WASM corruption
-            if (i > 0) {
-              console.log(`🔄 Creating fresh FFmpeg instance for ${resHeight}p (prevents WASM corruption)`);
-              const { FFmpeg } = FFmpegWASM;
-              ffmpeg = new FFmpeg();
-              await ffmpeg.load();
-              
-              // Re-write the input file to the new instance
-              const { fetchFile } = FFmpegUtil;
-              await ffmpeg.writeFile(name, await fetchFile(event.target.files[0]));
-              console.log(`📁 Input file re-loaded for fresh FFmpeg instance`);
-            }
-            
             // Log filesystem state before transcode
             const filesBefore = await ffmpeg.listDir("/");
             console.log(`📁 Files before ${resHeight}p:`, filesBefore.map(f => f.name).filter(name => !name.startsWith('.') && !['dev', 'home', 'proc', 'tmp'].includes(name)));
@@ -4543,20 +4533,33 @@ function buyNFT(setname, uid, price, type, callback){
               successfulResolutions.push(resHeight);
               console.log(`✅ ${resHeight}p transcoded successfully: ${segmentFiles.length} segments + playlist`);
               
-              // Copy files to main FFmpeg instance if using fresh instance
-              if (i > 0 && this.ffmpeg !== ffmpeg) {
-                console.log(`📋 Copying ${resHeight}p files to main FFmpeg instance...`);
-                
-                // Read files from current instance and write to main instance
-                for (const segFile of segmentFiles) {
-                  const segData = await ffmpeg.readFile(segFile.name);
-                  await this.ffmpeg.writeFile(segFile.name, segData);
-                }
-                const playlistData = await ffmpeg.readFile(playlistFile.name);
-                await this.ffmpeg.writeFile(playlistFile.name, playlistData);
-                
-                console.log(`✅ ${resHeight}p files copied to main instance`);
+              // Extract files to memory for processing and cleanup filesystem
+              console.log(`📦 Extracting ${resHeight}p files to memory...`);
+              
+              // Read segment files
+              for (const segFile of segmentFiles) {
+                const segData = await ffmpeg.readFile(segFile.name);
+                extractedFiles.set(segFile.name, segData);
+                console.log(`📄 Extracted ${segFile.name} (${segData.byteLength} bytes)`);
               }
+              
+              // Read playlist file
+              const playlistData = await ffmpeg.readFile(playlistFile.name);
+              extractedFiles.set(playlistFile.name, playlistData);
+              console.log(`📋 Extracted ${playlistFile.name} (${playlistData.byteLength} bytes)`);
+              
+              // Clean up FFmpeg filesystem (keep input file for next resolution)
+              console.log(`🧹 Cleaning up ${resHeight}p files from FFmpeg filesystem...`);
+              try {
+                for (const segFile of segmentFiles) {
+                  await ffmpeg.deleteFile(segFile.name);
+                }
+                await ffmpeg.deleteFile(playlistFile.name);
+                console.log(`✅ ${resHeight}p files cleaned from FFmpeg filesystem`);
+              } catch (cleanupError) {
+                console.warn(`⚠️ Cleanup warning for ${resHeight}p:`, cleanupError);
+              }
+              
             } else {
               // Log what's missing
               console.error(`❌ ${resHeight}p missing files - Segments: ${segmentFiles.length}, Playlist: ${playlistFile ? 'found' : 'missing'}`);
@@ -4575,6 +4578,15 @@ function buyNFT(setname, uid, price, type, callback){
             
             // Continue with other resolutions
           }
+        }
+        
+        // Write all extracted files back to FFmpeg filesystem for final processing
+        if (extractedFiles.size > 0) {
+          console.log(`📥 Writing ${extractedFiles.size} extracted files back to FFmpeg filesystem...`);
+          for (const [filename, data] of extractedFiles) {
+            await ffmpeg.writeFile(filename, data);
+          }
+          console.log(`✅ All extracted files restored to FFmpeg filesystem`);
         }
         
         console.timeEnd('exec');
