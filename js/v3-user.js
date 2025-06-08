@@ -4510,7 +4510,15 @@ function buyNFT(setname, uid, price, type, callback){
           console.log(`🎬 Transcoding ${resHeight}p with command:`, commands);
           
           try {
-            await ffmpeg.exec(commands);
+            // Start the transcoding
+            const execPromise = ffmpeg.exec(commands);
+            
+            // Wait for both exec completion AND file stability
+            await Promise.all([
+              execPromise,
+              this.waitForTranscodingCompletion(ffmpeg, resHeight, 30000) // 30 second timeout
+            ]);
+            
             successfulResolutions.push(resHeight);
             console.log(`✅ Successfully transcoded ${resHeight}p`);
           } catch (error) {
@@ -4526,7 +4534,10 @@ function buyNFT(setname, uid, price, type, callback){
         }
         
         console.log(`✅ Successfully transcoded ${successfulResolutions.length}/${bitrates.length} resolutions:`, successfulResolutions.map(r => r + 'p').join(', '));
-        this.videoMsg = `🎉 Successfully transcoded ${successfulResolutions.length} resolutions! Processing files...`;
+        this.videoMsg = `🎉 Successfully transcoded ${successfulResolutions.length} resolutions! Waiting for file stability...`;
+        
+        // Wait a bit more for all files to be fully written
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
       } catch (err) {
         console.timeEnd('exec');
@@ -4758,6 +4769,67 @@ function buyNFT(setname, uid, price, type, callback){
         this.videoMsg = 'Error processing transcoded files. Please try again.';
       });
     },
+
+    async waitForTranscodingCompletion(ffmpeg, resHeight, timeoutMs = 30000) {
+      return new Promise((resolve, reject) => {
+        const startTime = Date.now();
+        const expectedPlaylist = `${resHeight}p_index.m3u8`;
+        let lastFileCount = 0;
+        let stableCount = 0;
+        const requiredStableChecks = 3; // Files must be stable for 3 consecutive checks
+        
+        const checkCompletion = async () => {
+          try {
+            // Check if we've exceeded timeout
+            if (Date.now() - startTime > timeoutMs) {
+              console.warn(`⏰ Timeout waiting for ${resHeight}p transcoding completion`);
+              resolve(); // Resolve anyway to continue with what we have
+              return;
+            }
+            
+            const files = await ffmpeg.listDir("/");
+            const currentFiles = files.filter(f => 
+              f.name.startsWith(`${resHeight}p_`) && 
+              (f.name.endsWith('.ts') || f.name.endsWith('.m3u8'))
+            );
+            
+            const playlistExists = files.some(f => f.name === expectedPlaylist);
+            const currentFileCount = currentFiles.length;
+            
+            console.log(`📊 ${resHeight}p transcoding check: ${currentFileCount} files, playlist: ${playlistExists ? '✅' : '❌'}`);
+            
+            // Check if playlist exists and file count is stable
+            if (playlistExists) {
+              if (currentFileCount === lastFileCount && currentFileCount > 0) {
+                stableCount++;
+                console.log(`📈 ${resHeight}p file count stable (${stableCount}/${requiredStableChecks}): ${currentFileCount} files`);
+                
+                if (stableCount >= requiredStableChecks) {
+                  console.log(`✅ ${resHeight}p transcoding confirmed complete: ${currentFileCount} files stable`);
+                  resolve();
+                  return;
+                }
+              } else {
+                stableCount = 0; // Reset if count changed
+                lastFileCount = currentFileCount;
+              }
+            }
+            
+            // Continue checking
+            setTimeout(checkCompletion, 1000); // Check every second
+            
+          } catch (error) {
+            console.warn(`Error checking transcoding completion for ${resHeight}p:`, error);
+            // Continue checking despite errors
+            setTimeout(checkCompletion, 1000);
+          }
+        };
+        
+        // Start checking after a brief delay
+        setTimeout(checkCompletion, 1000);
+      });
+    },
+
     downloadBlob(name, buf, mimeString) {
 
       const blob = new Blob([buf], { type: mimeString });
