@@ -4468,67 +4468,79 @@ function buyNFT(setname, uid, price, type, callback){
       const successfulResolutions = [];
       
       try {
-        // Start internal progress monitor since ffmpeg.exec() can't be trusted
-        const progressInterval = this.startInternalProgressMonitor(bitrates.length);
+        // Build single combined command for all resolutions (much more reliable!)
+        const commands = ["-i", name];
         
-        // Process each resolution separately but don't trust ffmpeg.exec()
+        // Add each resolution's options to the combined command
         for (let i = 0; i < bitrates.length; i++) {
           const resHeight = parseInt(bitrates[i].split('x')[1]);
           
           // Calculate proper scale filter for portrait/landscape
           let scaleFilter;
           if (isPortrait) {
-            // For portrait videos, maintain aspect ratio by scaling height
             scaleFilter = `scale=-1:${resHeight}`;
-            console.log(`📱 Portrait scaling: target height ${resHeight}p (width auto)`);
+            console.log(`📱 Adding ${resHeight}p output: Portrait scaling (width auto)`);
           } else {
-            // For landscape videos, scale by height
             scaleFilter = `scale=-1:${resHeight}`;
-            console.log(`🖥️ Landscape scaling: target height ${resHeight}p (width auto)`);
+            console.log(`🖥️ Adding ${resHeight}p output: Landscape scaling (width auto)`);
           }
           
-          // Build command for this specific resolution
-          const commands = [
-            "-i", name,
+          // Add all options for this resolution output
+          commands.push(
             "-c:v", codec,
-            "-crf", "26",
+            "-crf", "26", 
             "-preset", "fast",
-            "-c:a", "aac",
+            "-c:a", "aac", 
             "-b:a", "256k",
             "-vf", scaleFilter,
             "-pix_fmt", "yuv420p",
             "-profile:v", "main",
+            "-max_muxing_queue_size", "1024",
             "-f", "segment",
-            "-segment_time", "10",
+            "-segment_time", "10", 
             "-segment_format", "mpegts",
             "-segment_list_type", "m3u8",
             "-segment_list", `${resHeight}p_index.m3u8`,
             "-hls_time", "5",
             "-hls_list_size", "0",
-            "-max_muxing_queue_size", "1024",
             `${resHeight}p_%03d.ts`
-          ];
+          );
           
-          this.videoMsg = `Transcoding ${resHeight}p (${i + 1}/${bitrates.length})...`;
-          console.log(`🎬 Transcoding ${resHeight}p with command:`, commands);
+          // Track which resolutions we expect
+          successfulResolutions.push(resHeight);
+        }
+        
+        console.log(`🎬 Single-pass transcoding for ${bitrates.length} resolutions:`, successfulResolutions.map(r => r + 'p').join(', '));
+        console.log(`📋 Combined FFmpeg command (${commands.length} args):`, commands);
+        
+        // Start progress monitor
+        const progressInterval = this.startInternalProgressMonitor(bitrates.length);
+        this.videoMsg = `Transcoding ${bitrates.length} resolutions in single pass...`;
+        
+        try {
+          console.log(`🚀 Starting single-pass FFmpeg transcoding... (EXEC CANNOT BE TRUSTED!)`);
           
-          try {
-            console.log(`🚀 Starting FFmpeg exec for ${resHeight}p... (EXEC CANNOT BE TRUSTED!)`);
-            
-            // Start FFmpeg but don't wait for it - it lies about completion
-            ffmpeg.exec(commands).catch(error => {
-              console.warn(`⚠️ FFmpeg exec reported error for ${resHeight}p (but this may be normal):`, error);
-            });
-            
-            // Instead, wait for files to actually appear using file monitoring
-            await this.waitForResolutionFiles(ffmpeg, resHeight, 60000); // 60 second timeout per resolution
-            
-            successfulResolutions.push(resHeight);
-            console.log(`✅ Successfully transcoded ${resHeight}p (confirmed by file presence)`);
-          } catch (error) {
-            console.error(`❌ Failed to transcode ${resHeight}p:`, error);
-            // Continue with other resolutions instead of failing completely
-          }
+          // Start FFmpeg but don't trust its completion
+          ffmpeg.exec(commands).catch(error => {
+            console.warn(`⚠️ FFmpeg exec reported error (but this may be normal):`, error);
+          });
+          
+          // Wait for ALL resolution files to appear
+          await this.waitForAllResolutionFiles(ffmpeg, successfulResolutions, 180000); // 3 minute timeout for all
+          
+          console.log(`✅ All resolutions transcoded successfully: ${successfulResolutions.map(r => r + 'p').join(', ')}`);
+        } catch (error) {
+          console.error(`❌ Single-pass transcoding failed:`, error);
+          // Reset successful resolutions to whatever was actually created
+          const files = await ffmpeg.listDir("/");
+          const actualPlaylists = files.filter(f => f.name.endsWith('_index.m3u8')).map(f => {
+            const match = f.name.match(/(\d+)p_index\.m3u8/);
+            return match ? parseInt(match[1]) : null;
+          }).filter(r => r !== null);
+          
+          successfulResolutions.length = 0;
+          successfulResolutions.push(...actualPlaylists);
+          console.log(`📊 Found ${actualPlaylists.length} valid resolutions:`, actualPlaylists.map(r => r + 'p').join(', '));
         }
         
         // Stop the progress monitor
@@ -4804,6 +4816,107 @@ function buyNFT(setname, uid, price, type, callback){
       validateAndProcessFiles().catch(error => {
         console.error('Error processing transcoded files:', error);
         this.videoMsg = 'Error processing transcoded files. Please try again.';
+      });
+    },
+
+    async waitForAllResolutionFiles(ffmpeg, expectedResolutions, timeoutMs = 180000) {
+      return new Promise((resolve, reject) => {
+        const startTime = Date.now();
+        let lastTotalFileCount = 0;
+        let stableCount = 0;
+        const requiredStableChecks = 5; // Files must be stable for 5 consecutive checks
+        
+        // Track individual resolution status
+        const resolutionStatus = {};
+        expectedResolutions.forEach(res => {
+          resolutionStatus[res] = { playlist: false, segments: 0, stable: false };
+        });
+        
+        const checkAllFiles = async () => {
+          try {
+            // Check if we've exceeded timeout
+            if (Date.now() - startTime > timeoutMs) {
+              console.warn(`⏰ Timeout waiting for all resolutions after ${Math.round(timeoutMs/1000)}s`);
+              reject(new Error(`Timeout waiting for all resolution files`));
+              return;
+            }
+            
+            const files = await ffmpeg.listDir("/");
+            const elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
+            let totalCurrentFiles = 0;
+            let completedResolutions = 0;
+            
+            // Check each resolution
+            for (const resHeight of expectedResolutions) {
+              const expectedPlaylist = `${resHeight}p_index.m3u8`;
+              const resolutionFiles = files.filter(f => 
+                f.name.startsWith(`${resHeight}p_`) && 
+                (f.name.endsWith('.ts') || f.name.endsWith('.m3u8'))
+              );
+              
+              const playlistExists = files.some(f => f.name === expectedPlaylist);
+              const segmentCount = resolutionFiles.length - (playlistExists ? 1 : 0);
+              
+              // Update resolution status
+              resolutionStatus[resHeight].playlist = playlistExists;
+              resolutionStatus[resHeight].segments = segmentCount;
+              
+              totalCurrentFiles += resolutionFiles.length;
+              
+              // Check if this resolution is complete (playlist + at least 1 segment)
+              if (playlistExists && segmentCount >= 1) {
+                resolutionStatus[resHeight].stable = true;
+                completedResolutions++;
+              } else {
+                resolutionStatus[resHeight].stable = false;
+              }
+            }
+            
+            // Log progress
+            const statusSummary = expectedResolutions.map(r => {
+              const status = resolutionStatus[r];
+              const icon = status.stable ? '✅' : status.playlist ? '🔄' : '❌';
+              return `${r}p${icon}(${status.segments})`;
+            }).join(' ');
+            
+            console.log(`📊 All resolutions check (${elapsedSeconds}s): ${statusSummary} | Total: ${totalCurrentFiles} files`);
+            
+            // Check if all resolutions are complete
+            if (completedResolutions === expectedResolutions.length) {
+              // All resolutions have at least playlist + 1 segment, check stability
+              if (totalCurrentFiles === lastTotalFileCount) {
+                stableCount++;
+                console.log(`📈 All files stable (${stableCount}/${requiredStableChecks}): ${totalCurrentFiles} total files`);
+                
+                if (stableCount >= requiredStableChecks) {
+                  console.log(`✅ All ${expectedResolutions.length} resolutions confirmed stable!`);
+                  resolve();
+                  return;
+                }
+              } else {
+                // File count changed, reset stability counter
+                stableCount = 0;
+                lastTotalFileCount = totalCurrentFiles;
+                console.log(`📝 File count changed to ${totalCurrentFiles}, resetting stability`);
+              }
+            } else {
+              // Not all resolutions ready yet, reset counters
+              stableCount = 0;
+              lastTotalFileCount = totalCurrentFiles;
+            }
+            
+            // Continue checking every 3 seconds
+            setTimeout(checkAllFiles, 3000);
+            
+          } catch (error) {
+            console.warn(`Error checking all resolution files:`, error);
+            // Continue checking despite errors
+            setTimeout(checkAllFiles, 3000);
+          }
+        };
+        
+        // Start checking after 5 seconds to give FFmpeg time to start
+        setTimeout(checkAllFiles, 5000);
       });
     },
 
