@@ -4617,9 +4617,30 @@ function buyNFT(setname, uid, price, type, callback){
         if (extractedFiles.size > 0) {
           console.log(`📥 Writing ${extractedFiles.size} extracted files back to FFmpeg filesystem...`);
           for (const [filename, data] of extractedFiles) {
-            await ffmpeg.writeFile(filename, data);
+            try {
+              await ffmpeg.writeFile(filename, data);
+              console.log(`✅ Restored ${filename} (${data.byteLength} bytes)`);
+            } catch (writeError) {
+              console.error(`❌ Failed to restore ${filename}:`, writeError);
+            }
           }
-          console.log(`✅ All extracted files restored to FFmpeg filesystem`);
+          
+          // Verify all files were actually restored
+          const verifyFiles = await ffmpeg.listDir("/");
+          const restoredFiles = verifyFiles.map(f => f.name).filter(name => 
+            !name.startsWith('.') && !['dev', 'home', 'proc', 'tmp'].includes(name)
+          );
+          console.log(`🔍 Verification: ${restoredFiles.length} files in filesystem:`, restoredFiles);
+          
+          // Check specifically for playlist files
+          const playlistFiles = restoredFiles.filter(name => name.endsWith('.m3u8'));
+          console.log(`📋 Playlist files restored: ${playlistFiles.length}`, playlistFiles);
+          
+          if (playlistFiles.length !== successfulResolutions.length) {
+            console.error(`⚠️ Playlist count mismatch! Expected ${successfulResolutions.length}, found ${playlistFiles.length}`);
+          }
+          
+          console.log(`✅ File restoration complete: ${restoredFiles.length} total files`);
         }
         
         console.timeEnd('exec');
