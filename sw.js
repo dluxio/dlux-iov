@@ -1,4 +1,4 @@
-this.version = "2025.06.08.5";
+this.version = "2025.06.08.6";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.08.5",
-  "generated": "2025-06-08T00:08:44Z",
+  "version": "2025.06.08.6",
+  "generated": "2025-06-08T00:48:08Z",
   "files": {
-    "/img/tokens/hbd_icon.svg": {
-      "checksum": "4cdd7402ddcbd06d7145d437da14c670",
-      "size": 999,
-      "priority": "important"
-    },
     "/img/tokens/hive_icon.svg": {
       "checksum": "f11afc9005714fcb560171a788ee11bd",
       "size": 1636,
@@ -996,7 +991,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "ef76fd3b679e04ac9ef378c0c3a5b668",
+      "checksum": "6f558576a3b623a3ff52ffd83c8c7a02",
       "size": 36316,
       "priority": "important"
     },
@@ -1071,8 +1066,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "6c43b95ca2632984cb55e20b2972b24f",
-      "size": 187191,
+      "checksum": "341d11ff7af7c495a004cfa39c0dc82b",
+      "size": 187132,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1186,7 +1181,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "6ff2c849e7face60be2a023f080b5d68",
+      "checksum": "b9c839d4d5d5c4de89745731eb49ed22",
       "size": 7299,
       "priority": "important"
     },
@@ -1259,11 +1254,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/mdx/mdx.js": {
-      "checksum": "e940c9747d6640710f5ae80dda7b5d3c",
-      "size": 5916,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/mips/mips.js": {
       "checksum": "12c2d9fd66a10e9ea6b84915d0909781",
