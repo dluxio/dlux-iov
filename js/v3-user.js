@@ -4518,29 +4518,24 @@ function buyNFT(setname, uid, price, type, callback){
             
             console.log(`🎬 FFmpeg command for ${resHeight}p:`, commands.join(' '));
             
-            // Capture FFmpeg output for debugging
-            let ffmpegOutput = '';
-            let ffmpegErrors = '';
-            
-            ffmpeg.on('log', ({ message }) => {
-              ffmpegOutput += message + '\n';
-              console.log(`FFmpeg ${resHeight}p:`, message);
-            });
-            
             try {
               await ffmpeg.exec(commands);
               console.log(`🔍 ${resHeight}p FFmpeg exec completed, checking filesystem...`);
+              
+              // Wait a moment for FFmpeg to fully write files
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              
+              // Test if input file is still accessible
+              try {
+                await ffmpeg.exec(["-i", name, "-t", "0.1", "-f", "null", "-"]);
+                console.log(`✅ ${resHeight}p: Input file still accessible after transcode`);
+              } catch (testError) {
+                console.error(`⚠️ ${resHeight}p: Input file test failed:`, testError);
+              }
+              
             } catch (execError) {
               console.error(`❌ ${resHeight}p FFmpeg exec error:`, execError);
-              ffmpegErrors += execError.toString();
-            }
-            
-            // Log FFmpeg output summary
-            if (ffmpegOutput) {
-              console.log(`📝 ${resHeight}p FFmpeg output summary:`, ffmpegOutput.split('\n').slice(-5).join('\n'));
-            }
-            if (ffmpegErrors) {
-              console.error(`⚠️ ${resHeight}p FFmpeg errors:`, ffmpegErrors);
+              throw execError;
             }
             
             // Check filesystem immediately after FFmpeg claims completion
