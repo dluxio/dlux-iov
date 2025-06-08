@@ -4639,41 +4639,7 @@ function buyNFT(setname, uid, price, type, callback){
         // Wait a bit more for all files to be fully written
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Now process directly from extracted data while still in scope
-        await validateAndProcessFiles(extractedFiles);
-        
-      } catch (err) {
-        console.timeEnd('exec');
-        console.error('❌ Transcoding failed:', err);
-        this.videoMsg = 'Transcoding failed. Please try again with a smaller video file.';
-        if (progressInterval) {
-          clearInterval(progressInterval);
-        }
-        return;
-      }
-      
-      // Clean up progress monitoring
-      if (progressInterval) {
-        clearInterval(progressInterval);
-      }
-      
-      this.videoMsg = 'Transcoding complete! Checking generated files...';
-      
-      // Non-blocking contract fetch
-      fetch(`https://spk-ipfs.3speak.tv/upload-contract?user=${this.account}`)
-        .then(r => r.json())
-        .then((data) => {
-          setTimeout(() => {
-            this.showUpload = true
-            this.getSPKUser()
-          }, 1000)
-        })
-        .catch(err => {
-          console.warn('Contract fetch failed, but continuing with transcoding:', err);
-          this.showUpload = true;
-        });
-      
-      // Enhanced file validation and processing
+      // Enhanced file validation and processing - MOVED TO TOP OF FUNCTION
       const validateAndProcessFiles = async (extractedFiles) => {
         // Wait for files to stabilize after transcoding completion
         let files = await ffmpeg.listDir("/");
@@ -4960,8 +4926,40 @@ function buyNFT(setname, uid, price, type, callback){
           this.videoMsg = '❌ No valid resolution playlists were generated. Please try again.';
         }
       };
+
+        // Now process directly from extracted data while still in scope
+        await validateAndProcessFiles(extractedFiles);
+        
+      } catch (err) {
+        console.timeEnd('exec');
+        console.error('❌ Transcoding failed:', err);
+        this.videoMsg = 'Transcoding failed. Please try again with a smaller video file.';
+        if (progressInterval) {
+          clearInterval(progressInterval);
+        }
+        return;
+      }
       
-      // Processing call moved to inside try block where extractedFiles is in scope
+      // Clean up progress monitoring
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+      
+      this.videoMsg = 'Transcoding complete! Checking generated files...';
+      
+      // Non-blocking contract fetch
+      fetch(`https://spk-ipfs.3speak.tv/upload-contract?user=${this.account}`)
+        .then(r => r.json())
+        .then((data) => {
+          setTimeout(() => {
+            this.showUpload = true
+            this.getSPKUser()
+          }, 1000)
+        })
+        .catch(err => {
+          console.warn('Contract fetch failed, but continuing with transcoding:', err);
+          this.showUpload = true;
+        });
     },
 
     async waitForAllResolutionFiles(ffmpeg, expectedResolutions, timeoutMs = 180000) {
