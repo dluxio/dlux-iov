@@ -1,4 +1,4 @@
-this.version = "2025.06.08.4";
+this.version = "2025.06.08.5";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.08.4",
-  "generated": "2025-06-07T23:55:35Z",
+  "version": "2025.06.08.5",
+  "generated": "2025-06-08T00:08:44Z",
   "files": {
-    "/img/tokens/duat_icon.png": {
-      "checksum": "eed179af8a36b2d8be72a721dada0f84",
-      "size": 114195,
-      "priority": "important"
-    },
     "/img/tokens/hbd_icon.svg": {
       "checksum": "4cdd7402ddcbd06d7145d437da14c670",
       "size": 999,
@@ -1001,7 +996,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "77adf742dbed08dc6c65b4d19b896c45",
+      "checksum": "ef76fd3b679e04ac9ef378c0c3a5b668",
       "size": 36316,
       "priority": "important"
     },
@@ -1076,8 +1071,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "6c0b5392526d703954ed7aa2ea0e9ebe",
-      "size": 200401,
+      "checksum": "6c43b95ca2632984cb55e20b2972b24f",
+      "size": 187191,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1191,7 +1186,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "b35deff9bdcdbc36a435990cde40a8a8",
+      "checksum": "6ff2c849e7face60be2a023f080b5d68",
       "size": 7299,
       "priority": "important"
     },
@@ -1264,11 +1259,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/markdown/markdown.js": {
-      "checksum": "e19ba42ced633c14b87715c3bdf66316",
-      "size": 4619,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/mdx/mdx.js": {
       "checksum": "e940c9747d6640710f5ae80dda7b5d3c",
