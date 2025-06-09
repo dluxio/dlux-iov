@@ -2450,7 +2450,7 @@ export default {
         obj.status = 'Getting authentication challenge...';
 
         // Get challenge from collaboration API
-        const challengeResponse = await fetch('https://data.dlux.io/api/collaboration/challenge');
+        const challengeResponse = await fetch('https://data.dlux.io/collaboration/challenge');
         if (!challengeResponse.ok) {
           throw new Error(`Challenge API returned ${challengeResponse.status}`);
         }

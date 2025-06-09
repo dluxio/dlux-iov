@@ -239,7 +239,7 @@ export default {
   },
   computed: {
     isCollaborating() {
-      return this.provider && this.provider.wsconnected;
+      return this.collaborationProvider && this.collaborationProvider.isSynced;
     },
     connectionStatusClass() {
       switch (this.connectionStatus) {
@@ -259,6 +259,82 @@ export default {
       // Prevent updates when collaboration is setting up
       if (this.showCollaboration && !this.collaborationProvider) {
         console.log('Waiting for collaboration provider before inserting text');
+        return;
+      }
+      
+      // In collaboration mode, check if Y.js observer is working
+      if (this.showCollaboration) {
+        console.log('🔍 Collaboration mode: checking if content needs update', {
+          field: this.collaborationField,
+          newValue: value ? value.substring(0, 50) + '...' : 'empty',
+          currentContent: this.editor.getText().substring(0, 50) + '...',
+          hasYText: !!this._yText,
+          contentMatches: this.editor.getText() === value
+        });
+        
+        // If content is different and we have a Y.js text instance, try to sync it
+        if (value && this.editor.getText() !== value && this._yText) {
+          const yTextContent = this._yText.toString();
+          
+          // If Y.js has the content but TipTap doesn't, force update TipTap
+          if (yTextContent === value && this.editor.getText() !== value) {
+            console.log('🔧 Forcing TipTap update from Y.js content for field:', this.collaborationField);
+            this._updatingFromYjs = true;
+            try {
+              console.log(`🔧 About to force setContent for field ${this.collaborationField}:`, {
+                value: value.substring(0, 100),
+                valueLength: value.length,
+                currentContent: this.editor.getText().substring(0, 100),
+                currentLength: this.editor.getText().length,
+                yTextContent: yTextContent.substring(0, 100),
+                editorExists: !!this.editor,
+                editorDestroyed: this.editor.isDestroyed
+              });
+              
+              const success = this.editor.commands.setContent(value || '', false);
+              console.log(`🔧 Force setContent result for field ${this.collaborationField}:`, success);
+              
+              if (success) {
+                console.log(`✅ Successfully forced TipTap update for field ${this.collaborationField}`);
+              } else {
+                console.warn(`⚠️ Force setContent returned false for field ${this.collaborationField}`);
+              }
+              
+              setTimeout(() => {
+                this._updatingFromYjs = false;
+                // Double-check if content was actually set
+                const finalContent = this.editor.getText();
+                console.log(`🔍 Final editor content check for field ${this.collaborationField}:`, {
+                  expectedContent: value.substring(0, 50),
+                  actualContent: finalContent.substring(0, 50),
+                  contentMatches: finalContent === value
+                });
+              }, 100);
+              return;
+            } catch (error) {
+              console.error('❌ Failed to force update TipTap from Y.js:', error);
+              console.error('Error details:', {
+                errorMessage: error.message,
+                errorStack: error.stack,
+                field: this.collaborationField,
+                value: value ? value.substring(0, 50) : 'empty'
+              });
+              this._updatingFromYjs = false;
+            }
+          }
+          
+          // If neither Y.js nor TipTap has the content, update Y.js
+          if (yTextContent !== value) {
+            console.log('🔧 Updating Y.js from prop change for field:', this.collaborationField);
+            this.collaborationYdoc.transact(() => {
+              this._yText.delete(0, this._yText.length);
+              this._yText.insert(0, value);
+            }, 'prop-update');
+            return;
+          }
+        }
+        
+        console.log('✅ Collaboration mode: no manual update needed');
         return;
       }
       
@@ -404,108 +480,215 @@ export default {
     },
     
     async createEditorWithSimpleCollaboration(initialContent = '') {
+      console.log('🔧 Creating TipTap editor with bundle Y.js (no external imports)');
+      
       const { Editor } = await import('https://esm.sh/@tiptap/core@3.0.0');
       const StarterKit = await import('https://esm.sh/@tiptap/starter-kit@3.0.0');
       const Placeholder = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
-
-      // Get or create Y.js text for this field
-      const yText = this.collaborationYdoc.getText(this.collaborationField);
       
       this.editor = new Editor({
         element: this.$refs.editor,
         extensions: [
           StarterKit.default.configure({
-            history: false, // Disable history completely for collaboration
+            history: false, // Disable history for collaboration
           }),
           Placeholder.default.configure({
             placeholder: this.placeholder,
           }),
         ],
         editable: true,
-        content: initialContent || '', // Use initial content
+        content: initialContent || '',
         editorProps: {
           attributes: {
             class: 'tiptap-collaborative',
           },
         },
         onUpdate: ({ editor }) => {
-          // Sync changes to Y.js text only if not updating from Y.js
-          if (!this._updatingFromYjs) {
-            const content = this.getMarkdown();
+          const content = this.getMarkdown();
+          
+          console.log(`🔄 TipTap onUpdate called for field ${this.collaborationField}:`, {
+            contentLength: content.length,
+            content: content.substring(0, 50) + '...',
+            updatingFromYjs: this._updatingFromYjs,
+            hasCollaborationYdoc: !!this.collaborationYdoc,
+            willSyncToYjs: !!(this.collaborationYdoc && !this._updatingFromYjs)
+          });
+          
+          this.$emit("data", content);
+          
+          // Sync to Y.js using bundle's Y.js instance (no imports!)
+          if (this.collaborationYdoc && !this._updatingFromYjs) {
+            const yText = this.collaborationYdoc.getText(this.collaborationField);
+            const yTextContent = yText.toString();
             
-            // Only update Y.js if content is different to avoid loops
-            if (yText.toString() !== content) {
-              // Use Y.js transaction to avoid conflicts
+            console.log(`🔍 Checking if Y.js needs update for field ${this.collaborationField}:`, {
+              yTextContent: yTextContent.substring(0, 50) + '...',
+              editorContent: content.substring(0, 50) + '...',
+              contentsMatch: yTextContent === content
+            });
+            
+            if (yTextContent !== content) {
+              console.log(`📤 Syncing TipTap content to Y.js field ${this.collaborationField}:`, {
+                content: content.substring(0, 50) + '...',
+                yjsDocId: this.collaborationYdoc.clientID,
+                yjsConnected: this.collaborationProvider ? (this.collaborationProvider.isSynced ? 'isSynced' : 'not synced') : 'no provider',
+                providerKeys: this.collaborationProvider ? Object.keys(this.collaborationProvider) : 'no provider'
+              });
               this.collaborationYdoc.transact(() => {
                 yText.delete(0, yText.length);
                 yText.insert(0, content);
-              }, 'local-update');
+              }, 'tiptap-update');
+            } else {
+              console.log(`✅ Y.js content already matches TipTap for field ${this.collaborationField}, no sync needed`);
             }
-            
-            this.$emit("data", content);
+          } else {
+            console.log(`⏭️ Skipping Y.js sync for field ${this.collaborationField}:`, {
+              hasYdoc: !!this.collaborationYdoc,
+              updatingFromYjs: this._updatingFromYjs,
+              reason: !this.collaborationYdoc ? 'no Y.js doc' : 'updating from Y.js'
+            });
           }
+          
           this.updateCanUndoRedo();
         },
         onSelectionUpdate: () => {
           this.updateCanUndoRedo();
         },
         onCreate: () => {
-          console.log(`✅ TipTap editor created with simple collaboration for field: ${this.collaborationField}`);
+          console.log(`✅ TipTap editor created with bundle Y.js for field: ${this.collaborationField}`);
           
-          // Set up Y.js text change observer
-          this.setupYTextObserver(yText);
+          // Set up Y.js → TipTap sync using bundle's Y.js
+          if (this.collaborationYdoc) {
+            this.setupBundleYjsSync();
+          }
         },
         onError: (error) => {
           console.error(`TipTap editor error for field ${this.collaborationField}:`, error);
         }
       });
       
-      console.log('✅ TipTap editor recreated with simple collaboration for field:', this.collaborationField);
+      console.log('✅ TipTap editor ready with bundle Y.js!');
     },
     
-    setupYTextObserver(yText) {
-      // Listen for remote changes to Y.js text
+    setupBundleYjsSync() {
+      const yText = this.collaborationYdoc.getText(this.collaborationField);
+      
+      console.log(`🔧 Setting up Y.js sync for field ${this.collaborationField}:`, {
+        yDocExists: !!this.collaborationYdoc,
+        yTextExists: !!yText,
+        yDocClientId: this.collaborationYdoc ? this.collaborationYdoc.clientID : 'none',
+        yTextContent: yText ? yText.toString() : 'no yText',
+        yTextLength: yText ? yText.length : 0,
+        editorExists: !!this.editor,
+        providerExists: !!this.collaborationProvider,
+        providerSynced: this.collaborationProvider ? this.collaborationProvider.isSynced : 'no provider'
+      });
+      
+      // Listen for Y.js changes and update TipTap
       const observer = (event, transaction) => {
-        // Only handle remote transactions, not our own local updates
-        if (this.editor && !this._updatingFromYjs && transaction.origin !== 'local-update') {
+        console.log(`🔍 Y.js observer called for field ${this.collaborationField}:`, {
+          origin: transaction.origin,
+          updatingFromYjs: this._updatingFromYjs,
+          hasEditor: !!this.editor,
+          yTextContent: yText.toString().substring(0, 50) + '...'
+        });
+        
+        if (transaction.origin !== 'tiptap-update' && !this._updatingFromYjs) {
           const newContent = yText.toString();
           const currentContent = this.getMarkdown();
           
           if (newContent !== currentContent) {
+            console.log(`📥 Syncing Y.js content to TipTap field ${this.collaborationField}:`, {
+              newLength: newContent.length,
+              currentLength: currentContent.length,
+              origin: transaction.origin,
+              newContent: newContent.substring(0, 100) + '...',
+              currentContent: currentContent.substring(0, 100) + '...'
+            });
+            
+            // Set flag BEFORE any setContent call to prevent loops
             this._updatingFromYjs = true;
+            console.log(`🔒 Set _updatingFromYjs = true for field ${this.collaborationField}`);
             
-            console.log(`🔄 Syncing remote changes to TipTap editor for field: ${this.collaborationField}`);
-            
-            try {
-              // Convert markdown to HTML if needed
-              const htmlContent = this.markdownToHtml(newContent);
-              
-              // Use requestAnimationFrame to avoid transaction conflicts
-              requestAnimationFrame(() => {
-                if (this.editor && this._updatingFromYjs) {
-                  this.editor.commands.setContent(htmlContent, false, {
-                    preserveWhitespace: 'full'
-                  });
+            // Update TipTap content carefully
+            if (this.editor && !this.editor.isDestroyed) {
+              try {
+                console.log(`🔧 About to call setContent for field ${this.collaborationField}:`, {
+                  newContent: newContent.substring(0, 100),
+                  contentLength: newContent.length,
+                  editorIsDestroyed: this.editor.isDestroyed,
+                  editorHasCommands: !!this.editor.commands,
+                  editorHasSetContent: !!this.editor.commands.setContent
+                });
+                
+                // Try setContent with error handling and timeout detection
+                let setContentCompleted = false;
+                let setContentResult = false;
+                
+                // Set a timeout to detect hanging
+                const timeoutId = setTimeout(() => {
+                  if (!setContentCompleted) {
+                    console.warn(`⏰ setContent appears to be hanging for field ${this.collaborationField} - this indicates a deeper TipTap issue`);
+                  }
+                }, 1000);
+                
+                try {
+                  setContentResult = this.editor.commands.setContent(newContent || '', false);
+                  setContentCompleted = true;
+                  clearTimeout(timeoutId);
+                  console.log(`🔧 setContent result for field ${this.collaborationField}:`, setContentResult);
+                } catch (error) {
+                  setContentCompleted = true;
+                  clearTimeout(timeoutId);
+                  console.error(`❌ setContent threw error for field ${this.collaborationField}:`, error);
                 }
                 
-                setTimeout(() => {
-                  this._updatingFromYjs = false;
-                }, 50);
+                this.$emit("data", newContent);
+                console.log(`✅ TipTap updated from Y.js for field ${this.collaborationField}`);
+              } catch (error) {
+                console.error(`❌ Failed to update TipTap from Y.js for field ${this.collaborationField}:`, error);
+                console.error('Error details:', {
+                  errorMessage: error.message,
+                  errorStack: error.stack,
+                  editorState: this.editor ? 'exists' : 'null',
+                  editorDestroyed: this.editor ? this.editor.isDestroyed : 'no editor'
+                });
+              }
+            } else {
+              console.warn(`⚠️ Cannot update TipTap for field ${this.collaborationField} - editor not available:`, {
+                hasEditor: !!this.editor,
+                isDestroyed: this.editor ? this.editor.isDestroyed : 'no editor'
               });
-              
-            } catch (error) {
-              console.error(`Error updating TipTap editor for field ${this.collaborationField}:`, error);
-              this._updatingFromYjs = false;
             }
+            
+            setTimeout(() => {
+              this._updatingFromYjs = false;
+            }, 100);
+          } else {
+            console.log(`🔄 Y.js content same as TipTap for field ${this.collaborationField}, no update needed`);
           }
+        } else {
+          console.log(`⏭️ Y.js observer skipped for field ${this.collaborationField} (origin: ${transaction.origin}, updating: ${this._updatingFromYjs})`);
         }
       };
       
       yText.observe(observer);
-      
-      // Store observer for cleanup
       this._yTextObserver = observer;
       this._yText = yText;
+      
+      console.log(`👂 Set up bundle Y.js sync for field: ${this.collaborationField}`);
+      
+      // Load any existing content from Y.js
+      const existingContent = yText.toString();
+      if (existingContent && existingContent !== this.getMarkdown()) {
+        console.log(`📥 Loading existing Y.js content for field ${this.collaborationField}:`, existingContent.substring(0, 50) + '...');
+        this._updatingFromYjs = true;
+        this.editor.commands.setContent(existingContent, false);
+        this.$emit("data", existingContent);
+        setTimeout(() => {
+          this._updatingFromYjs = false;
+        }, 100);
+      }
     },
     
     markdownToHtml(markdown) {
@@ -515,6 +698,28 @@ export default {
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
         .replace(/\n/g, '<br>')
         .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    },
+    
+    async recreateEditorWithNewContent(newContent) {
+      if (!this.editor) return;
+      
+      console.log('🔄 Recreating TipTap editor with new content:', newContent.substring(0, 50) + '...');
+      
+      // Store current setup
+      const editorElement = this.$refs.editor;
+      const currentYText = this._yText;
+      const currentObserver = this._yTextObserver;
+      
+      // Clean up current editor
+      if (currentObserver && currentYText) {
+        currentYText.unobserve(currentObserver);
+      }
+      this.editor.destroy();
+      
+      // Recreate editor with new content
+      await this.createEditorWithSimpleCollaboration(newContent);
+      
+      console.log('✅ TipTap editor recreated with new content');
     },
     
     disconnectCollaboration() {
@@ -637,9 +842,19 @@ export default {
   },
   watch: {
     'insert': {
-      handler: function (newValue) {
+      handler: function (newValue, oldValue) {
+        console.log(`🔍 TipTap insert prop watcher triggered for field ${this.collaborationField}:`, {
+          newValue: newValue ? newValue.substring(0, 50) + '...' : 'empty/null',
+          oldValue: oldValue ? oldValue.substring(0, 50) + '...' : 'empty/null',
+          valueChanged: newValue !== oldValue,
+          showCollaboration: this.showCollaboration,
+          editorExists: !!this.editor
+        });
+        
         if (newValue) {
           this.insertText(newValue);
+        } else {
+          console.log(`⏭️ Skipping insertText for field ${this.collaborationField} - no value provided`);
         }
       },
       deep: true
@@ -647,6 +862,12 @@ export default {
     
     'collaborationProvider': {
       handler: function (newProvider) {
+                 console.log('📡 TipTap collaboration provider watcher triggered:', {
+           hasProvider: !!newProvider,
+           showCollaboration: this.showCollaboration,
+           hasYdoc: !!this.collaborationYdoc,
+           providerConnected: newProvider ? (newProvider.isSynced ? 'isSynced' : newProvider.isAuthenticated ? 'authenticated' : 'not synced') : 'none'
+         });
         if (newProvider && this.showCollaboration && this.collaborationYdoc) {
           console.log('📡 TipTap collaboration provider received, setting up...');
           setTimeout(() => {

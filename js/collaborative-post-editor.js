@@ -157,7 +157,8 @@ export default {
       collaborationProvider: null,
       collaborationYdoc: null,
       recoveryInProgress: false,
-      recoveryAttempts: 0
+      recoveryAttempts: 0,
+      autoSaveTimeout: null
     };
   },
   computed: {
@@ -366,8 +367,16 @@ export default {
     // Enhanced collaboration tracking
     trackCollaborativeEdit(field, content) {
       if (this.collaborationProvider && this.showCollaboration) {
-        // Only log edit activity locally since API endpoint doesn't exist yet
         console.log(`📝 Edit activity tracked for field ${field}:`, content ? content.length + ' chars' : 'empty');
+        
+        // Auto-save after each edit (debounced to prevent too many saves)
+        if (this.autoSaveTimeout) {
+          clearTimeout(this.autoSaveTimeout);
+        }
+        
+        this.autoSaveTimeout = setTimeout(() => {
+          this.autoSaveDocument();
+        }, 3000); // Save 3 seconds after last edit
       }
     },
     
@@ -381,7 +390,7 @@ export default {
       if (!this.collaborativeDoc || !this.collaborationConfig.authToken) return;
       
       try {
-        const response = await fetch('https://data.dlux.io/api/collaboration/activity', {
+        const response = await fetch('https://data.dlux.io/collaboration/activity', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -493,9 +502,11 @@ export default {
         
         // Setup WebSocket URL with actual owner and permlink
         const [owner, permlink] = this.collaborativeDoc.split('/');
-        const websocketUrl = `wss://data.dlux.io/collaboration/${owner}/${permlink}`;
+        const baseWebsocketUrl = `wss://data.dlux.io/collaboration/${owner}/${permlink}`;
+        const websocketUrl = `${baseWebsocketUrl}?signature=${this.authHeaders['x-signature']}&account=${this.authHeaders['x-account']}&challenge=${this.authHeaders['x-challenge']}&pubkey=${this.authHeaders['x-pubkey']}`;
         
         console.log('🔗 Connecting to WebSocket URL:', websocketUrl);
+        console.log('🔗 Base URL:', baseWebsocketUrl);
         console.log('📄 Document:', this.collaborativeDoc);
         console.log('🔑 Auth headers available:', this.authHeaders);
         console.log('🔍 Auth headers type and values:', {
@@ -564,6 +575,8 @@ export default {
             'signature': this.authHeaders['x-signature']
           };
         
+        console.log('🔍 Auth parameters for WebSocket:', authParams);
+        
         console.log('🔐 Authentication headers prepared:', Object.keys(authParams));
         
         // IMPORTANT: The new DLUX Collaboration API requires custom authentication
@@ -573,17 +586,17 @@ export default {
         
         console.log('🔨 Creating HocuspocusProvider with config...');
         try {
+          console.log('🔧 About to create HocuspocusProvider with URL:', websocketUrl);
           this.collaborationProvider = new HocuspocusProvider({
           url: websocketUrl,
           name: this.collaborativeDoc,
           document: this.collaborationYdoc,
           // Try passing auth headers through different methods
           token: JSON.stringify(authParams), // Fallback: encode headers as token
-          //parameters: authHeaders, // Primary: try as parameters
           // Add connection parameters to prevent binary data issues
           forceSyncInterval: 3000, // Increase sync interval to reduce errors
           maxAttempts: 3, // Reduce reconnection attempts to prevent error loops
-          delay: 2000, // Increase delay between reconnection attempts
+          delay: 5000, // Increase delay between reconnection attempts
           onConnect: () => {
             this.connectionStatus = 'Connected';
             console.log('✅ Connected to collaboration server for:', this.collaborativeDoc);
@@ -592,8 +605,7 @@ export default {
             this.recoveryAttempts = 0;
             this.recoveryInProgress = false;
             
-            // Send initial activity when connected
-            this.sendEditActivity('connection', 'connected');
+            console.log('🎯 Using official TipTap Collaboration extension - no manual Y.js access needed!');
           },
           onDisconnect: ({ event }) => {
             this.connectionStatus = 'Disconnected';
@@ -627,10 +639,45 @@ export default {
             console.log('📡 Document synced with server:', synced);
             if (synced) {
               this.connectionStatus = 'Synced';
+              
+              // DEBUG: Check what's actually in the Y.js document after sync
+              setTimeout(() => {
+                const yTitle = this.collaborationYdoc.getText('title');
+                const yBody = this.collaborationYdoc.getText('body');
+                const yTags = this.collaborationYdoc.getText('tags');
+                
+                console.log('🔍 Y.js document content after server sync:', {
+                  title: `"${yTitle.toString()}"`,
+                  body: `"${yBody.toString()}"`,
+                  tags: `"${yTags.toString()}"`,
+                  docClientId: this.collaborationYdoc.clientID,
+                  providerConnected: this.collaborationProvider ? this.collaborationProvider.isSynced : false
+                });
+                
+                // CRITICAL: Check if we got any content from the server
+                const hasServerContent = yTitle.toString() || yBody.toString() || yTags.toString();
+                if (!hasServerContent) {
+                  console.error('❌ Y.js document is EMPTY after sync - no server content loaded!');
+                  console.log('🔍 This means either:');
+                  console.log('  1. Document doesn\'t exist on server (first time)');
+                  console.log('  2. WebSocket connection failed silently');
+                  console.log('  3. Provider is in local-only mode');
+                  console.log('  4. Server auth failed but provider still thinks it\'s connected');
+                } else {
+                  console.log('✅ Server content loaded successfully:', hasServerContent);
+                  // Load the server content into Vue component
+                  this.loadContentFromYDoc();
+                }
+              }, 1000);
             }
           },
           onMessage: (message) => {
-            console.log('📨 Collaboration message received:', message);
+            console.log('📨 Y.js message received - official TipTap extension handles sync automatically', {
+              messageType: typeof message,
+              messageLength: message ? message.length || message.byteLength || 'unknown' : 0,
+              isArrayBuffer: message instanceof ArrayBuffer,
+              isUint8Array: message instanceof Uint8Array
+            });
           },
           onClose: (event) => {
             console.log('🔌 WebSocket closed:', event.code, event.reason);
@@ -638,6 +685,13 @@ export default {
           },
           onError: (error) => {
             console.error('❌ WebSocket error:', error);
+            console.error('🔍 Error details:', {
+              errorType: typeof error,
+              errorMessage: error.message || error.toString(),
+              errorCode: error.code,
+              errorReason: error.reason,
+              providerUrl: this.collaborationProvider ? this.collaborationProvider.url : 'unknown'
+            });
             this.connectionStatus = 'Error';
             
             // Don't attempt immediate recovery here - let the global error handler deal with it
@@ -653,6 +707,34 @@ export default {
                   });
 
           console.log('✅ HocuspocusProvider created successfully');
+        
+                 // DEBUG: Check all properties on the provider
+         setTimeout(() => {
+           console.log('🔍 HocuspocusProvider properties:', {
+             providerKeys: Object.keys(this.collaborationProvider),
+             // OLD properties (undefined):
+             wsconnected: this.collaborationProvider.wsconnected,
+             connected: this.collaborationProvider.connected,
+             synced: this.collaborationProvider.synced,
+             status: this.collaborationProvider.status,
+             // CORRECT properties:
+             isSynced: this.collaborationProvider.isSynced,
+             isAuthenticated: this.collaborationProvider.isAuthenticated,
+             authorizedScope: this.collaborationProvider.authorizedScope,
+             websocket: this.collaborationProvider.websocket ? 'exists' : 'null',
+             ws: this.collaborationProvider.ws ? 'exists' : 'null',
+             connection: this.collaborationProvider.connection ? 'exists' : 'null',
+             document: this.collaborationProvider.document ? 'exists' : 'null',
+             url: this.collaborationProvider.url
+           });
+           
+           // Check if there are any connection errors
+           if (!this.collaborationProvider.websocket && !this.collaborationProvider.ws) {
+             console.error('❌ WebSocket connection failed - no websocket property found!');
+             console.log('🔍 All provider keys:', Object.keys(this.collaborationProvider));
+             console.log('🔍 Provider constructor:', this.collaborationProvider.constructor.name);
+           }
+         }, 2000);
         } catch (providerError) {
           console.error('❌ Failed to create HocuspocusProvider:', providerError);
           this.connectionStatus = 'Error';
@@ -668,16 +750,68 @@ export default {
           authHeadersLength: JSON.stringify(authParams).length
         });
         
+        // Check WebSocket connection establishment after a brief delay
+        setTimeout(() => {
+          const wsStatus = this.collaborationProvider.websocket || this.collaborationProvider.ws;
+          console.log('🔍 WebSocket connection check:', {
+            hasWebSocket: !!wsStatus,
+            readyState: wsStatus ? wsStatus.readyState : 'no websocket',
+            url: wsStatus ? wsStatus.url : 'no websocket',
+                         providerSynced: this.collaborationProvider.isSynced
+          });
+          
+          if (!wsStatus) {
+            console.error('⚠️ No WebSocket found after provider creation - connection may have failed silently');
+          } else if (wsStatus.readyState !== 1) { // 1 = OPEN
+            console.warn('⚠️ WebSocket not open:', wsStatus.readyState, '(0=CONNECTING, 1=OPEN, 2=CLOSING, 3=CLOSED)');
+          }
+        }, 1000);
+        
+        // Set up Y.js document change listener to sync content
+        this.setupYDocChangeListener();
+        
+        // Check for existing content after a short delay to allow connection to stabilize
+        setTimeout(() => {
+          this.loadContentFromYDoc();
+        }, 2000);
+        
         // Add current user as author when provider is ready
         setTimeout(() => {
           if (this.collaborationProvider && this.collaborationYdoc) {
             this.addAuthor(this.account);
           }
-        }, 500); // Increased delay to ensure connection is stable
+        }, 5000); // Increased delay to ensure connection is stable
 
       } catch (error) {
         console.error('Failed to setup collaboration:', error);
         this.connectionStatus = 'Error';
+      }
+    },
+    
+    async autoSaveDocument() {
+      if (!this.collaborationProvider || !this.collaborativeDoc) {
+        return;
+      }
+
+      try {
+        const documentState = {
+          title: this.postTitle,
+          body: this.postBody,
+          tags: this.postTags,
+          permlink: this.postPermlink,
+          beneficiaries: this.postBens,
+          custom_json: this.postCustom_json,
+          lastModified: new Date().toISOString(),
+          modifiedBy: this.account
+        };
+
+                 console.log('🔄 Auto-saving document changes...');
+         
+         // NOTE: Content is automatically saved via Y.js document sync
+         // No need for manual API calls - Y.js handles persistence
+         console.log('✅ Document auto-saved via Y.js sync');
+      } catch (error) {
+        console.warn('⚠️ Auto-save error:', error.message);
       }
     },
     
@@ -702,44 +836,42 @@ export default {
             modifiedBy: this.account
           };
 
-          // Log save attempt locally - API endpoint not implemented yet
-          console.log('💾 Document manually saved locally:', {
+          // Save document content to backend
+          console.log('💾 Saving document state:', {
             documentPath: this.collaborativeDoc,
             documentState: documentState,
             activity_type: 'manual_save',
             timestamp: new Date().toISOString()
           });
           
-          // Track the save activity
-          this.sendEditActivity('manual_save', 'document saved');
-          
-          // TODO: Implement using new Hive Collaboration API when needed
-          /*
-          // Send save request to backend using new API format
-          const [owner, permlink] = this.collaborativeDoc.split('/');
-          const response = await fetch(`https://data.dlux.io/api/collaboration/documents/${owner}/${permlink}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-account': this.collaborationConfig.account || this.account,
-              'x-challenge': this.collaborationConfig.challenge || Math.floor(Date.now() / 1000).toString(),
-              'x-pubkey': this.collaborationConfig.pubkey || '',
-              'x-signature': this.collaborationConfig.signature || ''
-            },
-            body: JSON.stringify({
-              documentState: documentState,
-              activity_type: 'manual_save',
-              timestamp: new Date().toISOString()
-            })
-          });
-
-          if (response.ok) {
-            console.log('💾 Document manually saved to backend');
-            this.sendEditActivity('manual_save', 'document saved');
-          } else {
-            console.warn('Failed to save document:', response.statusText);
+          // Force Y.js document sync to ensure content is persisted
+          try {
+            if (this.collaborationProvider && this.collaborationProvider.isSynced) {
+              console.log('✅ Document content synced via Y.js');
+              this.sendEditActivity('manual_save', 'document saved');
+              
+              // Show success feedback to user
+              const saveButton = document.querySelector('button[title="Save Draft"]');
+              if (saveButton) {
+                const originalText = saveButton.innerHTML;
+                saveButton.innerHTML = '<i class="fa-solid fa-fw fa-check me-2"></i>Saved!';
+                saveButton.classList.add('btn-success');
+                saveButton.classList.remove('btn-secondary');
+                
+                setTimeout(() => {
+                  saveButton.innerHTML = originalText;
+                  saveButton.classList.remove('btn-success');
+                  saveButton.classList.add('btn-secondary');
+                }, 2000);
+              }
+            } else {
+              console.warn('⚠️ Y.js provider not synced - manual save may not persist');
+              this.sendEditActivity('manual_save', 'local save (not synced)');
+            }
+          } catch (saveError) {
+            console.error('❌ Error during manual save:', saveError);
+            this.sendEditActivity('manual_save', 'local save (error)');
           }
-          */
         }
       } catch (error) {
         console.error('Error saving collaborative document:', error);
@@ -798,6 +930,234 @@ export default {
           console.warn('🚫 Max recovery attempts reached - disabling collaboration for this session');
           this.disconnectCollaboration();
         }
+      }
+    },
+    
+    setupYDocChangeListener() {
+      if (!this.collaborationYdoc) return;
+      
+      // Listen for future changes to the Y.js document
+      this.collaborationYdoc.on('update', (update, origin) => {
+        console.log('📡 Y.js document updated, checking for new content...', {
+          origin: origin,
+          updateLength: update ? update.length : 'unknown'
+        });
+        
+        // Skip updates from TipTap editors to prevent interference
+        // Handle both string origins and proxy-wrapped origins
+        const originString = origin && typeof origin === 'object' && origin.toString ? origin.toString() : String(origin);
+        if (originString === 'tiptap-update' || (origin && origin.constructor && origin.constructor.name === 'Proxy')) {
+          console.log('⏭️ Skipping parent document listener - update from TipTap editor', {
+            originType: typeof origin,
+            originString: originString,
+            isProxy: origin && origin.constructor && origin.constructor.name === 'Proxy'
+          });
+          return;
+        }
+        
+        // Delay to allow the update to be fully processed
+        setTimeout(() => {
+          this.loadContentFromYDoc();
+        }, 500);
+      });
+      
+      console.log('👂 Set up Y.js document change listener');
+    },
+    
+    loadContentFromYDoc() {
+      if (!this.collaborationYdoc) {
+        console.log('📄 No Y.js document available for loading FROM');
+        return;
+      }
+      
+      try {
+        console.log('🔄 Loading content FROM Y.js document to Vue component...', {
+          yDocClientId: this.collaborationYdoc.clientID,
+          providerSynced: this.collaborationProvider ? this.collaborationProvider.isSynced : 'no provider'
+        });
+        
+        // Get Y.js text instances
+        const yTitle = this.collaborationYdoc.getText('title');
+        const yBody = this.collaborationYdoc.getText('body');
+        const yTags = this.collaborationYdoc.getText('tags');
+        
+        console.log('🔍 Y.js text instances:', {
+          titleExists: !!yTitle,
+          bodyExists: !!yBody,
+          tagsExists: !!yTags,
+          titleContent: yTitle ? yTitle.toString() : 'no title',
+          bodyContent: yBody ? yBody.toString().substring(0, 50) + '...' : 'no body',
+          tagsContent: yTags ? yTags.toString() : 'no tags'
+        });
+        
+        // Get current content from Y.js
+        const titleFromYjs = yTitle.toString();
+        const bodyFromYjs = yBody.toString();
+        const tagsFromYjs = yTags.toString();
+        
+        let contentUpdated = false;
+        
+        // Update title if different
+        if (titleFromYjs && titleFromYjs !== this.postTitle) {
+          console.log('📥 Loading title FROM Y.js:', titleFromYjs);
+          this.postTitle = titleFromYjs;
+          this.generatePermlink();
+          contentUpdated = true;
+        }
+        
+        // Update body if different  
+        if (bodyFromYjs && bodyFromYjs !== this.postBody) {
+          console.log('📥 Loading body FROM Y.js:', bodyFromYjs.substring(0, 50) + '...');
+          this.postBody = bodyFromYjs;
+          contentUpdated = true;
+        }
+        
+        // Update tags if different
+        if (tagsFromYjs && tagsFromYjs !== this.postTags) {
+          console.log('📥 Loading tags FROM Y.js:', tagsFromYjs);
+          this.postTags = tagsFromYjs;
+          
+          // Update custom JSON tags array
+          const tagsArray = tagsFromYjs.split(' ').filter(tag => tag.trim());
+          this.postCustom_json = {
+            ...this.postCustom_json,
+            tags: tagsArray
+          };
+          contentUpdated = true;
+        }
+        
+        if (contentUpdated) {
+          console.log('✅ Content loaded FROM Y.js document to Vue component');
+          this.emitDataChange();
+          
+          // Force Vue reactivity update
+          this.$nextTick(() => {
+            console.log('🔄 Vue nextTick - reactive data should be updated now:', {
+              postTitle: this.postTitle,
+              postBodyLength: this.postBody ? this.postBody.length : 0,
+              postTags: this.postTags
+            });
+          });
+        } else {
+          console.log('📋 No new content to load FROM Y.js document');
+        }
+        
+      } catch (error) {
+        console.error('❌ Error loading content FROM Y.js document:', error);
+      }
+    },
+    
+    applySavedJsonToYDoc(jsonData) {
+      if (!this.collaborationYdoc) return;
+      
+      try {
+        console.log('📄 Applying JSON data to Y.js document:', jsonData);
+        
+        // Apply each field if it exists in the saved data
+        if (jsonData.title) {
+          const yTitle = this.collaborationYdoc.getText('title');
+          this.collaborationYdoc.transact(() => {
+            yTitle.delete(0, yTitle.length);
+            yTitle.insert(0, jsonData.title);
+          });
+          console.log('📝 Applied saved title:', jsonData.title);
+        }
+        
+        if (jsonData.body) {
+          const yBody = this.collaborationYdoc.getText('body');
+          this.collaborationYdoc.transact(() => {
+            yBody.delete(0, yBody.length);
+            yBody.insert(0, jsonData.body);
+          });
+          console.log('📝 Applied saved body:', jsonData.body.substring(0, 50) + '...');
+        }
+        
+        if (jsonData.tags) {
+          const yTags = this.collaborationYdoc.getText('tags');
+          const tagsText = Array.isArray(jsonData.tags) ? jsonData.tags.join(' ') : jsonData.tags;
+          this.collaborationYdoc.transact(() => {
+            yTags.delete(0, yTags.length);
+            yTags.insert(0, tagsText);
+          });
+          console.log('📝 Applied saved tags:', tagsText);
+        }
+        
+      } catch (error) {
+        console.error('❌ Error applying JSON data to Y.js document:', error);
+      }
+    },
+    
+    syncCurrentContentToYDoc() {
+      if (!this.collaborationYdoc) {
+        console.log('📄 No Y.js document available for syncing TO');
+        return;
+      }
+      
+      try {
+        console.log('🔄 Syncing current content TO Y.js document...');
+        
+        let contentSynced = false;
+        
+        // Sync title TO Y.js if we have one
+        if (this.postTitle && this.postTitle.trim()) {
+          const yTitle = this.collaborationYdoc.getText('title');
+          if (yTitle.toString() !== this.postTitle) {
+            console.log('📤 Syncing title TO Y.js:', this.postTitle);
+            this.collaborationYdoc.transact(() => {
+              yTitle.delete(0, yTitle.length);
+              yTitle.insert(0, this.postTitle);
+            }, 'initial-sync');
+            contentSynced = true;
+          }
+        }
+        
+        // Sync body TO Y.js if we have one
+        if (this.postBody && this.postBody.trim()) {
+          const yBody = this.collaborationYdoc.getText('body');
+          console.log('🔍 Checking if body needs sync TO Y.js:', {
+            currentBody: `"${this.postBody.substring(0, 50)}..."`,
+            yBodyContent: `"${yBody.toString().substring(0, 50)}..."`,
+            bodiesMatch: yBody.toString() === this.postBody
+          });
+          if (yBody.toString() !== this.postBody) {
+            console.log('📤 Syncing body TO Y.js:', this.postBody.substring(0, 50) + '...');
+            this.collaborationYdoc.transact(() => {
+              yBody.delete(0, yBody.length);
+              yBody.insert(0, this.postBody);
+            }, 'initial-sync');
+            contentSynced = true;
+            
+            // Force the TipTap editor to update after syncing
+            setTimeout(() => {
+              console.log('🔄 Checking if TipTap editor received the synced content...');
+              this.loadContentFromYDoc();
+            }, 500);
+          }
+        } else {
+          console.log('🔍 No body content to sync TO Y.js (empty or null)');
+        }
+        
+        // Sync tags TO Y.js if we have them
+        if (this.postTags && this.postTags.trim()) {
+          const yTags = this.collaborationYdoc.getText('tags');
+          if (yTags.toString() !== this.postTags) {
+            console.log('📤 Syncing tags TO Y.js:', this.postTags);
+            this.collaborationYdoc.transact(() => {
+              yTags.delete(0, yTags.length);
+              yTags.insert(0, this.postTags);
+            }, 'initial-sync');
+            contentSynced = true;
+          }
+        }
+        
+        if (contentSynced) {
+          console.log('✅ Current content synced TO Y.js document');
+        } else {
+          console.log('📋 No content to sync TO Y.js document');
+        }
+        
+      } catch (error) {
+        console.error('❌ Error syncing content TO Y.js document:', error);
       }
     },
     
@@ -887,6 +1247,11 @@ export default {
   },
   
   beforeUnmount() {
+    // Clean up auto-save timeout
+    if (this.autoSaveTimeout) {
+      clearTimeout(this.autoSaveTimeout);
+    }
+    
     this.disconnectCollaboration();
   }
 }; 

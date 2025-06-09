@@ -7,7 +7,7 @@ The Hive Collaboration API provides real-time collaborative editing capabilities
 ## Base URL
 
 ```
-https://data.dlux.io/api/collaboration
+https://data.dlux.io/collaboration
 ```
 
 ## Authentication
@@ -76,10 +76,10 @@ GET /api/collaboration/info
   "server": "Hive Collaboration Server",
   "version": "1.0.0",
   "endpoints": {
-    "websocket": "/ws/collaborate/{owner}/{permlink}",
-    "documents": "/api/collaboration/documents",
-    "permissions": "/api/collaboration/permissions",
-    "activity": "/api/collaboration/activity"
+    "websocket": "/ws/api/api/collaborate/{owner}/{permlink}",
+    "documents": "/collaboration/documents",
+    "permissions": "/collaboration/permissions",
+    "activity": "/collaboration/activity"
   },
   "authentication": {
     "method": "Hive Signature",
@@ -99,7 +99,7 @@ GET /api/collaboration/info
 ### 2. Get Authentication Challenge
 
 ```http
-GET /api/collaboration/challenge
+GET /collaboration/challenge
 ```
 
 **Response:**
@@ -119,7 +119,7 @@ GET /api/collaboration/challenge
 ### 3. List Documents
 
 ```http
-GET /api/collaboration/documents
+GET /collaboration/documents
 ```
 
 **Query Parameters:**
@@ -159,7 +159,7 @@ GET /api/collaboration/documents
 ### 4. Create Document
 
 ```http
-POST /api/collaboration/documents
+POST /collaboration/documents
 ```
 
 **Request Body:**
@@ -196,7 +196,7 @@ POST /api/collaboration/documents
 ### 5. Delete Document
 
 ```http
-DELETE /api/collaboration/documents/{owner}/{permlink}
+DELETE /collaboration/documents/{owner}/{permlink}
 ```
 
 **Note:** Only document owners can delete documents.
@@ -212,7 +212,7 @@ DELETE /api/collaboration/documents/{owner}/{permlink}
 ### 6. Get Document Permissions
 
 ```http
-GET /api/collaboration/permissions/{owner}/{permlink}
+GET /collaboration/permissions/{owner}/{permlink}
 ```
 
 **Response:**
@@ -239,7 +239,7 @@ GET /api/collaboration/permissions/{owner}/{permlink}
 ### 7. Grant Permission
 
 ```http
-POST /api/collaboration/permissions/{owner}/{permlink}
+POST /collaboration/permissions/{owner}/{permlink}
 ```
 
 **Request Body:**
@@ -277,7 +277,7 @@ POST /api/collaboration/permissions/{owner}/{permlink}
 ### 8. Revoke Permission
 
 ```http
-DELETE /api/collaboration/permissions/{owner}/{permlink}/{targetAccount}
+DELETE /collaboration/permissions/{owner}/{permlink}/{targetAccount}
 ```
 
 **Response:**
@@ -291,7 +291,7 @@ DELETE /api/collaboration/permissions/{owner}/{permlink}/{targetAccount}
 ### 9. Get Activity Log
 
 ```http
-GET /api/collaboration/activity/{owner}/{permlink}
+GET /collaboration/activity/{owner}/{permlink}
 ```
 
 **Query Parameters:**
@@ -326,7 +326,7 @@ GET /api/collaboration/activity/{owner}/{permlink}
 ### 10. Get Document Statistics
 
 ```http
-GET /api/collaboration/stats/{owner}/{permlink}
+GET /collaboration/stats/{owner}/{permlink}
 ```
 
 **Response:**
@@ -361,7 +361,7 @@ GET /api/collaboration/stats/{owner}/{permlink}
 ### 11. Get Detailed Permissions
 
 ```http
-GET /api/collaboration/permissions-detailed/{owner}/{permlink}
+GET /collaboration/permissions-detailed/{owner}/{permlink}
 ```
 
 **Response:**
@@ -388,7 +388,7 @@ GET /api/collaboration/permissions-detailed/{owner}/{permlink}
 ### 12. Manual Document Cleanup
 
 ```http
-POST /api/collaboration/cleanup/manual/{owner}/{permlink}
+POST /collaboration/cleanup/manual/{owner}/{permlink}
 ```
 
 **Note:** Only document owners can trigger manual cleanup.
@@ -405,7 +405,7 @@ POST /api/collaboration/cleanup/manual/{owner}/{permlink}
 ### 13. Test Connection
 
 ```http
-GET /api/collaboration/test-connection/{owner}/{permlink}
+GET /collaboration/test-connection/{owner}/{permlink}
 ```
 
 **Response:**
@@ -721,7 +721,7 @@ The collaboration system includes automatic cleanup to manage inactive documents
 
 ### Manual Cleanup
 - **Access**: Document owners only
-- **Endpoint**: `POST /api/collaboration/cleanup/manual/{owner}/{permlink}`
+- **Endpoint**: `POST /collaboration/cleanup/manual/{owner}/{permlink}`
 - **Action**: Immediately archives the document data
 - **Use Case**: Clean up documents before the 30-day threshold
 
@@ -770,7 +770,7 @@ Currently no rate limiting is implemented, but it's recommended to:
 Use the test connection endpoint to debug WebSocket issues:
 
 ```bash
-curl -X GET "https://data.dlux.io/api/collaboration/test-connection/alice/my-document" \
+curl -X GET "https://data.dlux.io/collaboration/test-connection/alice/my-document" \
   -H "x-account: alice" \
   -H "x-challenge: 1703980800" \
   -H "x-pubkey: STM7BWmXwvuKHr8FpSPmj8knJspFMPKt3vcetAKKjZ2W2HoRgdkEg" \
@@ -781,8 +781,8 @@ curl -X GET "https://data.dlux.io/api/collaboration/test-connection/alice/my-doc
 
 For issues and questions:
 - Check server logs for detailed error messages
-- Verify authentication using `/api/collaboration/challenge`
-- Test basic connectivity with `/api/collaboration/info`
+- Verify authentication using `/collaboration/challenge`
+- Test basic connectivity with `/collaboration/info`
 - Use the test endpoints for debugging
 
 ## Version History

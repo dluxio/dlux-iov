@@ -583,8 +583,10 @@ export default {
       if (!this.selectedDoc) return;
       
       try {
-        // Load document content without unwanted collaboration metadata
-        const documentContent = {
+        console.log('📖 Loading document content for:', this.selectedDoc.documentPath);
+        
+        // Default content structure
+        let documentContent = {
           body: '',
           title: this.selectedDoc.permlink.replace(/-/g, ' '),
           tags: ['dlux', 'collaboration'],
@@ -599,11 +601,27 @@ export default {
           }
         };
         
+        // NOTE: Content is stored in the Y.js document and synced via WebSocket
+        // The collaborative editor will load content from the Y.js document after connection
+        console.log('📋 Using default document structure - content will be loaded from Y.js document after WebSocket connection');
+        
         // Emit the document content to parent for TipTap editor
         this.$emit('load-document-content', documentContent);
         
       } catch (error) {
         console.error('Failed to load document content:', error);
+        
+        // Emit default content even if there's an error
+        const fallbackContent = {
+          body: '',
+          title: this.selectedDoc ? this.selectedDoc.permlink.replace(/-/g, ' ') : 'Untitled Document',
+          tags: ['dlux', 'collaboration'],
+          custom_json: {
+            app: 'dlux/0.1.0',
+            tags: ['dlux', 'collaboration']
+          }
+        };
+        this.$emit('load-document-content', fallbackContent);
       }
     },
     
