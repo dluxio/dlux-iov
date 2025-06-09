@@ -159,7 +159,7 @@
 </head>
 
 <body class="d-flex h-100 align-items-stretch text-white">
-  <div id="app" v-cloak class="d-flex w-100 flex-column w-100">
+  <div id="app" v-cloak class="d-flex flex-column w-100">
     <!-- navbar -->
     <div>
       <nav-vue ref="navComponent" @login="account = $event" @logout="account = '';removeUser()" @ack="removeOp($event)"

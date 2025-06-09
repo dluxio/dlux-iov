@@ -93,12 +93,13 @@
             --bs-accordion-color: rgb(173, 181, 189);
             --bs-accordion-bg: #212529;
             --bs-accordion-border-color: #495057;
-            --bs-accordion-btn-color: #5C94FE;
+            --bs-accordion-btn-color: #000000;
             --bs-accordion-btn-bg: #2f3133;
             --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%235C94FE'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
             --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%235C94FE'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
             --bs-accordion-active-color: #5C94FE;
             --bs-accordion-active-bg: #001D4C;
+            --bs-accordion-icon-color: #000000;
 
         }
 
@@ -177,15 +178,15 @@
     </style>
 </head>
 
-<body>
-    <div id="app" class="d-flex flex-column vh-100" v-cloak>
+<body class="d-flex h-100 align-items-stretch text-white bg-img-gradient">
+    <div id="app" class="d-flex flex-column w-100" v-cloak>
         <!-- navbar -->
         <div>
             <nav-vue @login="account = $event;newme($event)" @logout="account = '';removeUser()" @ack="removeOp($event)"
                 @refresh="run($event)" :op="toSign" :lapi="lapi" />
         </div>
         <main role="main" class="d-flex flex-column flex-grow-1 padmain">
-            
+
 
             <div class="container fixed-top navbar-subbar p-0 d-none">
                 <div class="navbar-subbar-container">
@@ -293,28 +294,98 @@
                         <div v-show="postCustom_json.vrHash == 'blog'">
                             <h6 class="justify-content-center"><i class="fa-solid fa-book fa-fw"></i>Blog Post</h6>
                             <p>Blogs are the default post type and support publishing image URLs and markdown
-                                text to the Hive blockchain. Perfect for articles, tutorials, and general content sharing.</p>
+                                text to the Hive blockchain. Perfect for articles, tutorials, and general content
+                                sharing.</p>
                         </div>
 
                         <!-- Video Content -->
                         <div v-show="postCustom_json.vrHash == 'video'">
                             <h6 class="justify-content-center"><i class="fa-solid fa-film"></i>Streaming Video</h6>
-                            <p>Decentralized video playback on SPK Network supports multiple quality levels for adaptive
-                                streaming. Streaming (IPFS HLS via CID CDN) requires locally transcoding your file into an M3U8
-                                playlist.</p>
+                            <p>Decentralized video streaming on SPK Network provides multiple quality levels for
+                                adaptive playback. To support streaming playback, your file must be converted to an
+                                <pop-vue popover-id="streaming-info" title="Streaming Technology Stack">
+                                    <template #trigger>
+                                        <a class="text-info-50">
+                                            <span class="tooltip-text text-nowrap">M3U8 playlist</span>
+                                            <i class="fa-solid fa-circle-question fa-fw mx-1"></i>
+                                        </a>
+                                    </template>
+                                    <template #content>
+                                        <ul class="text-start list-unstyled mt-2">
+
+                                            <!-- HLS -->
+                                            <li class="border border-0 border-bottom pb-2 mb-2">
+                                                <div>
+                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">HLS - HTTP Live
+                                                        Streaming
+                                                    </h6>
+                                                </div>
+                                                <p>A streaming protocol that breaks video into small segmented files and
+                                                    creates an M3U8 playlist supporting multiple resolutions.</p>
+                                            </li>
+                                            <!-- M3U8 -->
+                                            <li class="border border-0 border-bottom pb-2 mb-2">
+                                                <div>
+                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">M3U8 - Media Playlist
+                                                    </h6>
+                                                </div>
+                                                <p>A playlist format that contains a list of video segments and their
+                                                    associated CIDs, allowing for adaptive bitrate streaming.</p>
+                                            </li>
+                                            <!-- CID -->
+                                            <li class="border border-0 border-bottom pb-2 mb-2">
+                                                <div>
+                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">CID - Content
+                                                        IDentifier
+                                                    </h6>
+                                                </div>
+                                                <p>A unique identifier for content in IPFS, generated from the content's
+                                                    cryptographic hash to ensure integrity.
+                                                </p>
+                                            </li>
+                                            <!-- IPFS -->
+                                            <li class="border border-0 border-bottom pb-2 mb-2">
+                                                <div>
+                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">IPFS - InterPlanetary
+                                                        File
+                                                        System</h6>
+                                                </div>
+                                                <p>A decentralized, peer-to-peer file storage and sharing system where
+                                                    files are distributed across
+                                                    multiple nodes.
+                                                </p>
+                                            </li>
+                                            <!-- CDN -->
+                                            <li>
+                                                <div>
+                                                    <h6 class="hero-subtitle text-white fs-5 mb-1">CDN - Content
+                                                        Delivery
+                                                        Network</h6>
+                                                </div>
+                                                <p>A distributed network of servers that uses CIDs to locate and deliver
+                                                    IPFS content to users.</p>
+                                            </li>
+                                        </ul>
+                                    </template>
+                                </pop-vue>
+                            </p>
                         </div>
 
                         <!-- 360 Image Gallery Content -->
                         <div v-show="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'">
-                            <h6 class="justify-content-center"><i class="fa-solid fa-globe fa-fw"></i>360° Image Gallery</h6>
-                            <p>Create immersive 360° experiences using A-Frame to construct user-navigable, headset-enabled
+                            <h6 class="justify-content-center"><i class="fa-solid fa-globe fa-fw"></i>360° Image Gallery
+                            </h6>
+                            <p>Create immersive 360° experiences using A-Frame to construct user-navigable,
+                                headset-enabled
                                 virtual environments. Perfect for virtual tours and immersive content.</p>
                         </div>
 
                         <!-- dApp Content -->
                         <div v-show="postCustom_json.vrHash == 'dapp'">
-                            <h6 class="justify-content-center"><i class="fa-solid fa-mobile-screen-button fa-fw"></i>New dApp</span></h6>
-                            <p>Build decentralized applications using any modern web technology you're familiar with. Deploy
+                            <h6 class="justify-content-center"><i class="fa-solid fa-mobile-screen-button fa-fw"></i>New
+                                dApp</span></h6>
+                            <p>Build decentralized applications using any modern web technology you're familiar with.
+                                Deploy
                                 your dApp to IPFS and make it accessible through the Hive blockchain.</p>
                         </div>
 
@@ -328,12 +399,14 @@
                         <!-- Post Type Selection -->
                         <div class="d-flex justify-content-center mx-auto gap-1 gap-md-2 mt-3">
                             <!-- Blog Post -->
-                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap" :class="{active: postCustom_json.vrHash == 'blog'}"
+                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap"
+                                :class="{active: postCustom_json.vrHash == 'blog'}"
                                 @click="postCustom_json.vrHash = 'blog';types='img,vid'">
                                 <i class="fa-solid fa-book fa-fw"></i><span class="d-none d-md-block ms-2">Blog</span>
                             </button>
                             <!-- Video -->
-                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap" :class="{active: postCustom_json.vrHash == 'video'}"
+                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap"
+                                :class="{active: postCustom_json.vrHash == 'video'}"
                                 @click="postCustom_json.vrHash = 'video';types='img,vid'">
                                 <i class="fa-solid fa-film fa-fw"></i><span class="d-none d-md-block ms-2">Video</span>
                             </button>
@@ -344,36 +417,48 @@
                                 <i class="fa-solid fa-globe fa-fw"></i><span class="d-none d-md-block ms-2">360°</span>
                             </button>
                             <!-- New dApp -->
-                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap" :class="{active: postCustom_json.vrHash == 'dapp'}"
+                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap"
+                                :class="{active: postCustom_json.vrHash == 'dapp'}"
                                 @click="postCustom_json.vrHash = 'dapp';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
-                                <i class="fa-solid fa-mobile-screen-button fa-fw"></i><span class="d-none d-md-flex ms-2 align-items-center"><span class="d-none d-xl-block me-1">New</span>dApp</span>
+                                <i class="fa-solid fa-mobile-screen-button fa-fw"></i><span
+                                    class="d-none d-md-flex ms-2 align-items-center"><span
+                                        class="d-none d-xl-block me-1">New</span>dApp</span>
                             </button>
                             <!-- ReMix dApp -->
-                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap" :class="{active: postCustom_json.vrHash == 'remix'}"
+                            <button class="btn btn-primary bg-card rounded-pill d-flex align-items-center no-wrap"
+                                :class="{active: postCustom_json.vrHash == 'remix'}"
                                 @click="postCustom_json.vrHash = 'remix';types='ts,obj,img,vid,aud,app,pdf,oth,bin,doc,txt'">
-                                <i class="fa-solid fa-shuffle fa-fw"></i><span class="d-none d-md-flex ms-2 align-items-center">ReMix<span class="d-none d-xl-block ms-1">dApp</span></span>
+                                <i class="fa-solid fa-shuffle fa-fw"></i><span
+                                    class="d-none d-md-flex ms-2 align-items-center">ReMix<span
+                                        class="d-none d-xl-block ms-1">dApp</span></span>
                             </button>
                         </div>
                     </div>
-                    
+
                 </div>
             </div>
-
-            
-
             <!-- Main Content Container -->
-            <div class="container">
-
-                <!-- User Registration Section -->
-                <div v-if="spkapi.pubKey == 'NA'" class="alert alert-warning d-flex align-items-center mt-3"
-                    role="alert">
-                    <i class="fa-solid fa-user-gear fa-fw me-2"></i>
-                    <div class="flex-grow-1">
-                        <strong>Welcome!</strong> Register your account to store files on SPK Network.
+            <div class="container mb-5">
+                <!-- SPK Network IPFS Drive -->
+                <div class="accordion border-white-50 rounded mt-3" id="accordionExample">
+                    <div class="accordion-item bg-img-none bg-dark-1">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button bg-card collapsed hero-subtitle fs-3 p-3" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#ipfsDrive" aria-expanded="false"
+                                aria-controls="ipfsDrive">
+                                <i class="fa-solid fa-hard-drive fa-fw me-2"></i>Your Files
+                            </button>
+                        </h2>
+                        <div id="ipfsDrive" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <contract-vue v-if="account" :nodeview="false" :account="account" :mypfp="mypfp"
+                                    :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
+                                    :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
+                                    @done="getSapi" :postpage="true"
+                                    @add-to-post="fileToAddToPost = $event"></contract-vue>
+                            </div>
+                        </div>
                     </div>
-                    <button type="button" class="btn btn-primary btn-sm ms-2" @click="updatePubkey()">
-                        <i class="fa-solid fa-user-plus fa-fw me-1"></i> Register Account
-                    </button>
                 </div>
 
                 <!-- Video Transcoding Section (Only show for video posts) -->
@@ -381,49 +466,103 @@
                     class="accordion border-white-50 rounded mt-3" id="videoAccordion">
                     <div class="accordion-item bg-img-none bg-dark-1">
                         <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#videoTranscode" aria-expanded="true" aria-controls="videoTranscode">
-                                <i class="fa-solid fa-film fa-fw me-2"></i>Video Transcoding & Upload
+                            <button class="accordion-button bg-card hero-subtitle fs-3 p-3" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#videoTranscode" aria-expanded="true"
+                                aria-controls="videoTranscode">
+                                <i class="fa-solid fa-film fa-fw me-2"></i>Video Preview
                             </button>
                         </h2>
                         <div id="videoTranscode" class="accordion-collapse collapse show"
                             data-bs-parent="#videoAccordion">
                             <div class="accordion-body">
                                 <!-- FFmpeg Status -->
-                                <div v-if="!ffmpegReady && !ffmpegSkipped"
-                                    class="alert alert-info d-flex align-items-center mb-3" role="alert">
-                                    <i class="fa-solid fa-gears fa-fw me-2"></i>
-                                    <div class="flex-grow-1">
-                                        <strong>FFmpeg Required:</strong> Video transcoding needs FFmpeg to be loaded.
-                                        <div v-if="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')"
-                                            class="small mt-1">
-                                            {{videoMsg}}
-                                            <!-- FFmpeg Download Progress Bar -->
-                                            <div v-if="ffmpegDownloadProgress > 0" class="mt-2">
-                                                <div class="progress" style="height: 8px;">
-                                                    <div class="progress-bar progress-bar-striped progress-bar-animated"
-                                                        role="progressbar" :style="`width: ${ffmpegDownloadProgress}%`"
-                                                        :aria-valuenow="ffmpegDownloadProgress" aria-valuemin="0"
-                                                        aria-valuemax="100">
+                                <div v-if="!ffmpegReady && !ffmpegSkipped">
+
+                                    <!-- Main Action - install FFmpeg -->
+                                    <div class="alert alert-primary mb-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <!-- alert row -->
+                                            <div
+                                                class="d-flex flex-grow-1 align-items-center justify-content-center gap-3 flex-wrap">
+                                                <!-- alert icon -->
+                                                <div class="card d-flex align-items-center justify-content-center rounded-circle fs-2 text-dark-1-muted"
+                                                    style="min-width: 120px; min-height: 120px;">
+                                                    <i class="fa-solid fa-gear"></i>
+                                                </div>
+                                                <div class="d-flex flex-grow-1 flex-column">
+                                                    <!-- alert title -->
+                                                    <h5 class="hero-subtitle fs-4 mb-1 text-center text-lg-start">FFmpeg
+                                                        Component</h5>
+                                                    <h6 class="lead text-center text-lg-start">Status: <strong>Not
+                                                            Loaded</strong></h6>
+                                                    <p class="text-center text-lg-start">FFmpeg is required to transcode
+                                                        video files to M3U8 playlists for streaming.</p>
+                                                    <div v-if="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')"
+                                                        class="small mt-1">
+                                                        {{videoMsg}}
+                                                        <!-- FFmpeg Download Progress Bar -->
+                                                        <div v-if="ffmpegDownloadProgress > 0" class="mt-2">
+                                                            <div class="progress" style="height: 8px;">
+                                                                <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                                                    role="progressbar"
+                                                                    :style="`width: ${ffmpegDownloadProgress}%`"
+                                                                    :aria-valuenow="ffmpegDownloadProgress"
+                                                                    aria-valuemin="0" aria-valuemax="100">
+                                                                </div>
+                                                            </div>
+                                                            <div class="text-center mt-1 small text-muted">
+                                                                {{ffmpegDownloadProgress}}% - FFmpeg WASM Core (~31MB)
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="text-center mt-1 small text-muted">
-                                                    {{ffmpegDownloadProgress}}% - FFmpeg WASM Core (~31MB)
+                                                <button class="mx-auto btn btn-primary rounded-pill text-nowrap"
+                                                    @click="downloadFFmpeg()" style="min-width: 180px;"
+                                                    :disabled="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')"
+                                                    class="d-flex w-100 align-items-center">
+                                                    <span>
+                                                        <span
+                                                            v-if="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')">Loading...</span>
+                                                        <span v-else>Load FFmpeg</span>
+                                                    </span>
+                                                    <i class="fa-solid fa-download fa-fw ms-2"></i>
+                                                </button>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <!-- Secondary Action - Skip FFmpeg -->
+                                    <div class="alert alert-warning">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div
+                                                class="d-flex flex-grow-1 align-items-center justify-content-center gap-3 flex-wrap">
+                                                <!-- alert icon -->
+                                                <div class="card d-flex align-items-center justify-content-center rounded-circle fs-2 text-dark-1-muted"
+                                                    style="min-width: 120px; min-height: 120px;">
+                                                    <i class="fa-solid fa-exclamation-triangle"></i>
                                                 </div>
+                                                <div class="d-flex flex-grow-1 flex-column">
+                                                    <!-- alert title -->
+                                                    <h5 class="hero-subtitle fs-4 mb-1 text-center text-lg-start">Skip
+                                                        FFmpeg</h5>
+                                                    <p class="text-center text-lg-start" style="max-width: 600px;">You
+                                                        can skip FFmpeg and upload your video
+                                                        directly. Streaming playback will only be available if your
+                                                        video is already in the M3U8 format.</p>
+                                                </div>
+                                                <button class="btn mx-auto btn-info rounded-pill text-nowrap"
+                                                    @click="skipFFmpeg()" style="min-width: 180px;"
+                                                    :disabled="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')"><span
+                                                        class="d-flex w-100 align-items-center">
+                                                        <span>Skip</span>
+                                                        <i class="fa-solid fa-arrow-right fa-fw ms-auto"></i></span>
+                                                </button>
+
                                             </div>
                                         </div>
                                     </div>
-                                    <button class="btn btn-primary btn-sm ms-2" @click="downloadFFmpeg()"
-                                        :disabled="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')">
-                                        <i class="fa-solid fa-download fa-fw me-1"></i>
-                                        <span
-                                            v-if="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')">Loading...</span>
-                                        <span v-else>Load FFmpeg</span>
-                                    </button>
-                                    <button class="btn btn-secondary btn-sm ms-1" @click="skipFFmpeg()"
-                                        :disabled="videoMsg.includes('Loading') || videoMsg.includes('Downloading') || videoMsg.includes('Preparing')">
-                                        <i class="fa-solid fa-arrow-right fa-fw me-1"></i>Skip
-                                    </button>
+
                                 </div>
 
                                 <!-- FFmpeg Error/Alternative -->
@@ -574,8 +713,9 @@
                     class="accordion border-white-50 rounded mt-3" id="assetAccordion">
                     <div class="accordion-item bg-img-none bg-dark-1">
                         <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#assetManager" aria-expanded="true" aria-controls="assetManager">
+                            <button class="accordion-button bg-card hero-subtitle fs-3 p-3" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#assetManager" aria-expanded="true"
+                                aria-controls="assetManager">
                                 <i class="fa-solid fa-shapes fa-fw me-2"></i>360 Asset Management
                             </button>
                         </h2>
@@ -619,40 +759,23 @@
                     </div>
                 </div>
 
-                <!-- SPK Network IPFS Drive -->
-                <div class="accordion border-white-50 rounded mt-3" id="accordionExample">
-                    <div class="accordion-item bg-img-none bg-dark-1">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#ipfsDrive" aria-expanded="false" aria-controls="ipfsDrive">
-                                <i class="fa-solid fa-hard-drive fa-fw me-2"></i>SPK Network IPFS Drive
-                            </button>
-                        </h2>
-                        <div id="ipfsDrive" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-                            <div class="accordion-body">
-                                <contract-vue v-if="account" :nodeview="false" :account="account" :mypfp="mypfp"
-                                    :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
-                                    :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
-                                    @done="getSapi" :postpage="true"
-                                    @add-to-post="fileToAddToPost = $event"></contract-vue>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Collaborative Documents Section -->
-                <div class="accordion border-white-50 rounded mt-3" id="collaborationAccordion">
+
+
+                <!-- Post Details Accordion -->
+                <div class="accordion border-white-50 rounded mt-3" id="postDetailsAccordion">
                     <div class="accordion-item bg-img-none bg-dark-1">
                         <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collaborativeDocs" aria-expanded="false"
-                                aria-controls="collaborativeDocs">
-                                <i class="fa-solid fa-users fa-fw me-2"></i>Collaborative Documents
+                            <button class="accordion-button bg-card hero-subtitle fs-3 p-3" type="button"
+                                :class="{'collapsed': postCustom_json.vrHash != 'blog'}" data-bs-toggle="collapse"
+                                data-bs-target="#postDetails" aria-expanded="false" aria-controls="postDetails">
+                                <i class="fa-solid fa-pen-to-square fa-fw me-2"></i>Post Details
                             </button>
                         </h2>
-                        <div id="collaborativeDocs" class="accordion-collapse collapse"
-                            data-bs-parent="#collaborationAccordion">
+                        <div id="postDetails" class="accordion-collapse collapse"
+                            :class="{'show': postCustom_json.vrHash == 'blog'}" data-bs-parent="#postDetailsAccordion">
                             <div class="accordion-body">
+                                <!-- document manager -->
                                 <collaborative-docs v-if="account" :account="account"
                                     :auth-headers="collaborationAuthHeaders"
                                     @open-collaborative-doc="openCollaborativeDocument"
@@ -663,106 +786,109 @@
                                     <i class="fas fa-sign-in-alt fa-2x mb-3"></i>
                                     <p>Please log in to access collaborative documents.</p>
                                 </div>
+
+                                <!-- Collaborative Post Editor (when in collaborative mode) -->
+                                <div v-if="isCollaborativeMode" class="mt-3">
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0"><i class="fa-solid fa-users fa-fw me-2"></i>Collaborative
+                                                Post Editor</h5>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                @click="exitCollaborativeMode">
+                                                <i class="fas fa-times me-1"></i>Exit Collaboration
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <collaborative-post-editor :account="account" :show-collaboration="true"
+                                                :collaborative-doc="collaborativeDocument" :collaboration-config="{ 
+                                                authToken: collaborationAuthHeaders['x-signature'],
+                                                username: account,
+                                                userColor: '#' + Math.floor(Math.random()*16777215).toString(16)
+                                            }" :auth-headers="collaborationAuthHeaders"
+                                                :can-post="canPostFromCollaboration"
+                                                :initial-data="collaborativeDocumentData"
+                                                @data-changed="handleCollaborativePostData"
+                                                @publish-post="handleCollaborativePublish" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Regular Post Details (when not in collaborative mode) -->
+                                <div v-if="!isCollaborativeMode" class="mt-3">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0"><i class="fa-solid fa-pen-to-square fa-fw me-2"></i>Post
+                                                Details</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <post-vue :account="account" :prop_json="postCustom_json"
+                                                :prop_bens="postBens" @tosign="sendIt($event)"
+                                                :file_to_add="fileToAddToPost"
+                                                :is-collaborative-mode="isCollaborativeMode"
+                                                :collaborative-document="collaborativeDocument"
+                                                :collaboration-auth-headers="collaborationAuthHeaders"
+                                                :collaborative-permission="collaborativePermission"
+                                                :can-post-from-collaboration="canPostFromCollaboration"
+                                                @requestCollaboration="requestCollaboration" />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Collaborative Post Editor (when in collaborative mode) -->
-                <div v-if="isCollaborativeMode" class="mt-3">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0"><i class="fa-solid fa-users fa-fw me-2"></i>Collaborative Post Editor</h5>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" @click="exitCollaborativeMode">
-                                <i class="fas fa-times me-1"></i>Exit Collaboration
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <collaborative-post-editor 
-                                :account="account"
-                                :show-collaboration="true"
-                                :collaborative-doc="collaborativeDocument"
-                                :collaboration-config="{ 
-                                    authToken: collaborationAuthHeaders['x-signature'],
-                                    username: account,
-                                    userColor: '#' + Math.floor(Math.random()*16777215).toString(16)
-                                }"
-                                :auth-headers="collaborationAuthHeaders"
-                                :can-post="canPostFromCollaboration"
-                                :initial-data="collaborativeDocumentData"
-                                @data-changed="handleCollaborativePostData"
-                                @publish-post="handleCollaborativePublish" />
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Regular Post Details (when not in collaborative mode) -->
-                <div v-if="!isCollaborativeMode" class="mt-3">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0"><i class="fa-solid fa-pen-to-square fa-fw me-2"></i>Post Details</h5>
-                        </div>
-                        <div class="card-body">
-                            <post-vue :account="account" :prop_json="postCustom_json" :prop_bens="postBens"
-                                @tosign="sendIt($event)" :file_to_add="fileToAddToPost"
-                                :is-collaborative-mode="isCollaborativeMode"
-                                :collaborative-document="collaborativeDocument"
-                                :collaboration-auth-headers="collaborationAuthHeaders"
-                                :collaborative-permission="collaborativePermission"
-                                :can-post-from-collaboration="canPostFromCollaboration"
-                                @requestCollaboration="requestCollaboration" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- SPK Wallet Modal -->
-            <div class="modal modal-xl fade" id="spkWalletModal" tabindex="-1" aria-labelledby="spkWalletModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content bg-dark-90">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="spkWalletModalLabel">SPK Testnet Wallet</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <spk-vue node="false" :account="account" @tosign="sendIt($event);log($event)" />
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Sponsored Contract -->
-            <div class="modal fade" id="sponsoredModal" tabindex="-1" role="dialog" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content bg-darker text-white">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Sponsored Contracts</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-
-                        <div class="modal-body text-start">
-                            <div v-for="spon in services">
-                                <button :disabled="spon.channel" @click="petitionForContract(spon.provider)"
-                                    class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span
-                                        class="lead">@{{spon.provider}}</span><span
-                                        class="small text-warning">{{spon.memo}}</span></button>
+                <!-- SPK Wallet Modal -->
+                <div class="modal modal-xl fade" id="spkWalletModal" tabindex="-1" aria-labelledby="spkWalletModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content bg-dark-90">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="spkWalletModalLabel">SPK Testnet Wallet</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <spk-vue node="false" :account="account" @tosign="sendIt($event);log($event)"
+                                    @update-pubkey="updatePubkey" />
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+                <!-- Sponsored Contract -->
+                <div class="modal fade" id="sponsoredModal" tabindex="-1" role="dialog" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content bg-darker text-white">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Sponsored Contracts</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body text-start">
+                                <div v-for="spon in services">
+                                    <button :disabled="spon.channel" @click="petitionForContract(spon.provider)"
+                                        class="btn btn-lg text-white btn-outline-primary w-100 border d-flex justify-content-between align-items-center"><span
+                                            class="lead">@{{spon.provider}}</span><span
+                                            class="small text-warning">{{spon.memo}}</span></button>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                            </div>
 
                         </div>
-
                     </div>
                 </div>
             </div>
-    </div>
-    </main>
-    <!-- Footer -->
-    <foot-vue />
+        </main>
+        <!-- Footer -->
+        <foot-vue />
     </div>
     <!-- Bootstrap -->
     <script src="/js/bootstrap.bundle.min.js"></script>

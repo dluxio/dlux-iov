@@ -3,7 +3,7 @@ import { createApp, toRaw } from '/js/vue.esm-browser.js'
 import Navue from "/js/v3-nav.js";
 import FootVue from "/js/footvue.js";
 import Cycler from "/js/cycler.js";
-import Popper from "/js/pop.js";
+import Popover from "/js/popover.js";
 import ModalVue from "/js/modal-manager.js";
 import Marker from "/js/marker.js";
 import Ratings from "/js/ratings.js";
@@ -1083,7 +1083,7 @@ PORT=3000
     "nav-vue": Navue,
     "foot-vue": FootVue,
     "cycle-text": Cycler,
-    "pop-vue": Popper,
+    "pop-vue": Popover,
     "modal-vue": ModalVue,
     "vue-markdown": Marker,
     "vue-ratings": Ratings,

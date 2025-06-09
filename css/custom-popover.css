@@ -1,0 +1,108 @@
+.custom-popover {
+  position: absolute;
+  z-index: 1070;
+  display: block;
+  max-width: v-bind("width");
+  padding: 0;
+  font-family: var(--bs-font-sans-serif);
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  text-decoration: none;
+  text-shadow: none;
+  text-transform: none;
+  letter-spacing: normal;
+  word-break: normal;
+  word-spacing: normal;
+  white-space: normal;
+  line-break: auto;
+  font-size: 0.875rem;
+  word-wrap: break-word;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0.3rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  transition: opacity 0.15s linear;
+}
+.custom-popover[popover]:not(:open) {
+  display: none;
+}
+.custom-popover[popover]:open {
+  opacity: 1;
+}
+.custom-popover.light {
+  background-color: #fff;
+  color: #212529;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+.custom-popover.dark {
+  background-color: #212529;
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.custom-popover .custom-popover-content {
+  padding: 1rem;
+}
+.custom-popover .custom-popover-title {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0;
+  font-size: 1rem;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+.dark .custom-popover .custom-popover-title {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+.custom-popover .custom-popover-body {
+  padding: 0.5rem 1rem;
+  color: inherit;
+}
+.custom-popover::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 8px 8px;
+  border-style: solid;
+  border-color: transparent transparent rgba(0, 0, 0, 0.2) transparent;
+}
+.dark .custom-popover::before {
+  border-color: transparent transparent rgba(255, 255, 255, 0.2) transparent;
+}
+.custom-popover::after {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 0 7px 7px;
+  border-style: solid;
+  border-color: transparent transparent #fff transparent;
+}
+.dark .custom-popover::after {
+  border-color: transparent transparent #212529 transparent;
+}
+
+.custom-popover-trigger {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease-in-out;
+}
+.custom-popover-trigger:hover {
+  opacity: 0.8;
+}
+.custom-popover-trigger:focus {
+  outline: none;
+}/*# sourceMappingURL=custom-popover.css.map */

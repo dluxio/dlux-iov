@@ -12602,6 +12602,10 @@ body {
   border-color: rgba(255, 255, 255, 0.5) !important;
 }
 
+.text-info-50 {
+  color: #26a4ce !important;
+}
+
 .col-sort {
   background-color: #154e4c !important;
 }
@@ -15110,4 +15114,34 @@ body[data-touch=false] .dropdown-extra:hover {
   100% {
     transform: translateX(100%);
   }
+}
+[popover] {
+  background: #212529;
+  color: rgb(173, 181, 189);
+  border: 1px solid #495057;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  width: auto;
+  max-width: 500px;
+  margin: 0;
+  position: absolute;
+  inset: auto;
+  z-index: 1060;
+}
+
+[popover] h4, [popover] .h4 {
+  font-size: 1.25rem;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #5C94FE;
+  font-family: "Space Grotesk", sans-serif;
+}
+
+[popover] p {
+  margin-bottom: 0.5rem;
+}
+
+[popover] p:last-child {
+  margin-bottom: 0;
 }/*# sourceMappingURL=custom.css.map */

@@ -1236,6 +1236,12 @@ export default {
         },
         pFloat(value) {
             return parseFloat(value);
+        },
+        updatePubkey() {
+            this.$emit('update-pubkey');
+        },
+        saveNodeSettings() {
+            // Implementation of saveNodeSettings method
         }
     },
     computed: {
