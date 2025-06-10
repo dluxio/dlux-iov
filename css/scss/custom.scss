@@ -3030,8 +3030,20 @@ body[data-touch="false"] {
 .ProseMirror .is-editor-empty:first-child::before {
     content: attr(data-placeholder);
     position: absolute;
-    left: 0.5rem;
+    left: 1.5rem;
     pointer-events: none;
     color: #adb5bd;
 }
 
+.row-collaborative {
+  border-left: 8px solid #5C94FE !important;
+}
+
+.row-local {
+  border-left: 8px solid #6c757d !important;
+}
+
+
+.no-caret::after {
+    display: none;
+}

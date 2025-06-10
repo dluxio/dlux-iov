@@ -290,6 +290,19 @@ export default {
         // Get pending uploads for display
         pendingUploads() {
             return this.getPendingUploads();
+        },
+        
+        allDocuments() {
+            const allFiles = [
+                ...this.localFiles.map(f => ({ ...f, type: 'local' })),
+                ...(this.showCollaborativeFeatures ? this.collaborativeDocs.map(f => ({ ...f, type: 'collaborative' })) : [])
+            ];
+            
+            return allFiles.sort((a, b) => {
+                const aDate = new Date(a.updatedAt || a.lastModified || 0);
+                const bDate = new Date(b.updatedAt || b.lastModified || 0);
+                return bDate - aDate;
+            });
         }
     },
     
@@ -1825,6 +1838,7 @@ export default {
                 // Create body editor (full rich text with comprehensive extensions)
                 try {
                     // Import additional extensions for full compatibility
+                    
                     const Link = await import('https://esm.sh/@tiptap/extension-link@3.0.0');
                     const Image = await import('https://esm.sh/@tiptap/extension-image@3.0.0');
                     const Youtube = await import('https://esm.sh/@tiptap/extension-youtube@3.0.0');
@@ -2580,19 +2594,19 @@ export default {
     template: `
     <div class="collaborative-post-editor">
         <!-- File Menu Bar -->
-        <div class="file-menu-bar bg-dark border-bottom border-secondary p-2 mb-3">
-            <div class="d-flex align-items-center gap-1">
+        <div class="file-menu-bar bg-dark border-bottom border-secondary mb-3 p-05 d-flex">
+            <div class="">
                 <!-- File Menu -->
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-light dropdown-toggle" 
+                <div class="btn-group">
+                    <button class="btn btn-dark no-caret dropdown-toggle" 
                             type="button" 
                             data-bs-toggle="dropdown" 
                             aria-expanded="false">
-                        <i class="fas fa-file me-sm-1"></i><span class="d-none d-sm-inline">File</span>
+                        <i class="fas fa-file me-sm-1 d-none"></i><span class="d-none d-sm-inline ">File</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-dark">
+                    <ul class="dropdown-menu dropdown-menu-dark bg-dark">
                         <li><a class="dropdown-item" href="#" @click.prevent="newDocument">
-                            <i class="fas fa-file-plus me-2"></i>New Local Document
+                            <i class="fas fa-file-circle-plus me-2"></i>New Local Document
                         </a></li>
                         <li v-if="showCollaborativeFeatures">
                             <a class="dropdown-item" href="#" @click.prevent="newCollaborativeDocument">
@@ -2655,14 +2669,14 @@ export default {
                 </div>
                 
                 <!-- Edit Menu -->
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-light dropdown-toggle" 
+                <div class="btn-group">
+                    <button class="btn btn-dark no-caret dropdown-toggle" 
                             type="button" 
                             data-bs-toggle="dropdown" 
                             aria-expanded="false">
-                        <i class="fas fa-edit me-sm-1"></i><span class="d-none d-sm-inline">Edit</span>
+                        <i class="fas fa-edit me-sm-1 d-none"></i><span class="d-none d-sm-inline">Edit</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-dark">
+                    <ul class="dropdown-menu dropdown-menu-dark bg-dark">
                         <li><a class="dropdown-item" href="#" @click.prevent="bodyEditor?.chain().focus().undo().run()">
                             <i class="fas fa-undo me-2"></i>Undo
                         </a></li>
@@ -2677,14 +2691,14 @@ export default {
                 </div>
                 
                 <!-- Collaboration Menu -->
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-light dropdown-toggle" 
+                <div class="btn-group">
+                    <button class="btn btn-dark no-caret dropdown-toggle" 
                             type="button" 
                             data-bs-toggle="dropdown" 
                             aria-expanded="false">
-                        <i class="fas fa-users me-sm-1"></i><span class="d-none d-sm-inline">Collaboration</span>
+                        <i class="fas fa-users me-sm-1 d-none"></i><span class="d-none d-sm-inline">Collaboration</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-dark">
+                    <ul class="dropdown-menu dropdown-menu-dark bg-dark">
                         <li v-if="!isAuthenticated || isAuthExpired">
                             <a class="dropdown-item" href="#" @click.prevent="requestAuthentication">
                                 <i class="fas fa-key me-2"></i>Authenticate
@@ -2711,14 +2725,14 @@ export default {
                 </div>
                 
                 <!-- View Menu -->
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-light dropdown-toggle" 
+                <div class="btn-group">
+                    <button class="btn btn-dark no-caret dropdown-toggle" 
                             type="button" 
                             data-bs-toggle="dropdown" 
                             aria-expanded="false">
-                        <i class="fas fa-eye me-sm-1"></i><span class="d-none d-sm-inline">View</span>
+                        <i class="fas fa-eye me-sm-1 d-none"></i><span class="d-none d-sm-inline">View</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-dark">
+                    <ul class="dropdown-menu dropdown-menu-dark bg-dark">
                         <li><a class="dropdown-item" href="#" @click.prevent="showAdvancedOptions = !showAdvancedOptions">
                             <i class="fas fa-cog me-2"></i>{{ showAdvancedOptions ? 'Hide' : 'Show' }} Advanced Options
                         </a></li>
@@ -2727,6 +2741,7 @@ export default {
                         </a></li>
                     </ul>
                 </div>
+            </div>
                 
                 <!-- File Status -->
                 <div class="ms-auto d-flex align-items-center gap-2">
@@ -3189,7 +3204,7 @@ export default {
 </div>
         <!-- Publish Modal -->
         <div v-if="showPublishModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog modal-dialog-scrollable modal-lg">
                 <div class="modal-content bg-dark text-white">
                     <div class="modal-header border-secondary">
                         <h5 class="modal-title">
@@ -3260,106 +3275,90 @@ export default {
         
         <!-- Load Modal -->
         <div v-if="showLoadModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
+            <div class="modal-dialog modal-dialog-scrollable modal-lg">
+                <div class="modal-content bg-dark text-white">
+                    <div class="modal-header border-secondary">
                         <h5 class="modal-title">
-                            <i class="fas fa-folder-open me-2"></i>Load Document
+                            <i class="fas fa-folder-open me-2"></i>Saved Drafts
                         </h5>
-                        <button @click="showLoadModal = false" class="btn-close"></button>
+                        <button @click="showLoadModal = false" class="btn-close btn-close-white"></button>
                     </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <!-- Local Files -->
-                            <div class="col-md-6">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <h6><i class="fas fa-file me-2"></i>Local Files</h6>
-                                    <button v-if="localFiles.length > 0" 
-                                            @click="clearAllLocalFiles"
-                                            class="btn btn-sm btn-outline-danger">
-                                        <i class="fas fa-trash me-1"></i>Clear All
-                                    </button>
-                                </div>
-                                <div v-if="localFiles.length === 0" class="text-muted">No local files found</div>
-                                <div v-else class="list-group">
-                                    <div v-for="file in localFiles" :key="file.id" 
-                                         class="list-group-item d-flex justify-content-between align-items-center">
-                                        <div class="flex-grow-1 cursor-pointer" @click="loadDocument(file)">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div>
-                                                    <h6 class="mb-1">{{ file.name }}</h6>
-                                                    <p class="mb-1 small text-muted">{{ formatFileSize(file.size) }}</p>
-                                                </div>
-                                                <small>{{ formatFileDate(file.lastModified) }}</small>
-                                            </div>
-                                        </div>
-                                        <div class="ms-2">
-                                            <button @click.stop="deleteLocalFileWithConfirm(file)" 
-                                                    class="btn btn-sm btn-outline-danger"
-                                                    title="Delete file">
-                                                <i class="fas fa-trash fa-xs"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div class="modal-body p-1">
+                        <!-- Auth prompt if needed -->
+                        <div v-if="!isAuthenticated || isAuthExpired" class="text-center py-4 border border-secondary rounded mb-3 p-1">
+                            <div class="text-muted mb-2">
+                                <i class="fas fa-lock fa-2x mb-2"></i>
+                                <p>{{ isAuthExpired ? 'Authentication expired' : 'Authentication required' }}</p>
                             </div>
-                            
-                            <!-- Collaborative Documents -->
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center justify-content-between mb-2">
-                                    <h6><i class="fas fa-users me-2"></i>Collaborative Documents</h6>
-                                    <span v-if="isAuthenticated && !isAuthExpired" class="badge bg-success small">
-                                        <i class="fas fa-check-circle me-1"></i>Authenticated
-                                    </span>
-                                </div>
-                                
-                                <!-- Not authenticated -->
-                                <div v-if="!isAuthenticated || isAuthExpired" class="text-center py-4">
-                                    <div class="text-muted mb-2">
-                                        <i class="fas fa-lock fa-2x mb-2"></i>
-                                        <p>{{ isAuthExpired ? 'Authentication expired' : 'Authentication required' }}</p>
-                                    </div>
-                                    <button @click="requestAuthentication(); showLoadModal = false" class="btn btn-primary btn-sm">
-                                        <i class="fas fa-key me-1"></i>Authenticate for Collaboration
-                                    </button>
-                                </div>
-                                
-                                <!-- Authenticated -->
-                                <div v-else>
-                                    <div v-if="loadingDocs" class="text-center">
-                                        <i class="fas fa-spinner fa-spin"></i> Loading...
-                                    </div>
-                                    <div v-else-if="collaborativeDocs.length === 0" class="text-muted">No collaborative documents found</div>
-                                    <div v-else class="list-group">
-                                        <div v-for="doc in collaborativeDocs" :key="doc.documentPath" 
-                                             class="list-group-item d-flex justify-content-between align-items-center">
-                                            <div class="flex-grow-1 cursor-pointer" @click="loadDocument(doc)">
-                                                <div class="d-flex justify-content-between align-items-start">
-                                                    <div>
-                                                        <h6 class="mb-1">{{ doc.documentName || doc.permlink }}</h6>
-                                                        <p class="mb-1 small text-muted">
-                                                            by @{{ doc.owner }}
-                                                            <span v-if="doc.documentName && doc.documentName !== doc.permlink" class="text-muted ms-1">
-                                                                • {{ doc.permlink }}
-                                                            </span>
-                                                        </p>
-                                                    </div>
-                                                    <small>{{ formatFileDate(doc.updatedAt) }}</small>
-                                                </div>
-                                            </div>
-                                            <div class="ms-2">
-                                                <button @click.stop="deleteCollaborativeDocWithConfirm(doc)" 
-                                                        class="btn btn-sm btn-outline-danger"
-                                                        :disabled="doc.owner !== authHeaders['x-account']"
-                                                        :title="doc.owner === authHeaders['x-account'] ? 'Delete document' : 'Only document owner can delete'">
-                                                    <i class="fas fa-trash fa-xs"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <button @click="requestAuthentication(); showLoadModal = false" class="btn btn-primary btn-sm">
+                                <i class="fas fa-key me-1"></i>Authenticate for Collaboration
+                            </button>
                         </div>
+
+                        <!-- Table of documents -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <h6 class="mb-0 ms-2"><i class="fas fa-list me-2 d-none"></i>All Drafts</h6>
+                                <div class="d-flex align-items-center gap-3 small text-muted">
+                                    <span><span class="d-inline-block me-2" style="width: 8px; height: 0.75rem; background-color: #5C94FE; vertical-align: middle;"></span> Collaborative</span>
+                                    <span><span class="d-inline-block me-2" style="width: 8px; height: 0.75rem; background-color: #6c757d; vertical-align: middle;"></span> Local</span>
+
+                                    
+                                </div>
+                            </div>
+                            <button v-if="localFiles.length > 0" @click="clearAllLocalFiles" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash me-1"></i>Clear All Local Files
+                            </button>
+                        </div>
+
+                        <div v-if="loadingDocs && isAuthenticated" class="text-center py-4">
+                            <i class="fas fa-spinner fa-spin fa-lg"></i><span class="ms-2">Loading documents...</span>
+                        </div>
+                        <div v-else-if="allDocuments.length === 0" class="text-muted text-center py-4 border border-secondary rounded">
+                            No documents found.
+                        </div>
+                        <div v-else class="table-responsive">
+                            <table class="table table-hover table-dark align-middle mb-0 ">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style="width: 40%;">Name</th>
+                                        <th scope="col">Details</th>
+                                        <th scope="col">Last Modified</th>
+                                        <th scope="col" class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="file in allDocuments" :key="file.id || file.documentPath"
+                                        :class="file.type === 'collaborative' ? 'row-collaborative' : 'row-local'">
+                                        <td @click="loadDocument(file)" class="cursor-pointer">
+                                            <strong class="d-block text-white">{{ file.name || file.documentName || file.permlink }}</strong>
+                                            <small v-if="file.type === 'collaborative' && file.documentName && file.documentName !== file.permlink" class="text-muted">{{ file.permlink }}</small>
+                                        </td>
+                                        <td @click="loadDocument(file)" class="cursor-pointer">
+                                            <small v-if="file.type === 'local'" class="text-muted">{{ formatFileSize(file.size) }}</small>
+                                            <small v-if="file.type === 'collaborative'" class="text-muted">by @{{ file.owner }}</small>
+                                        </td>
+                                        <td @click="loadDocument(file)" class="cursor-pointer">
+                                            <small>{{ formatFileDate(file.lastModified || file.updatedAt) }}</small>
+                                        </td>
+                                        <td class="text-end">
+                                            <button @click.stop="loadDocument(file)" class="btn btn-sm btn-outline-light me-1" title="Load document">
+                                                <i class="fas fa-folder-open"></i>
+                                            </button>
+                                            <button v-if="file.type === 'local'" @click.stop="deleteLocalFileWithConfirm(file)" class="btn btn-sm btn-outline-danger" title="Delete file">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            <button v-if="file.type === 'collaborative'" @click.stop="deleteCollaborativeDocWithConfirm(file)" class="btn btn-sm btn-outline-danger" :disabled="file.owner !== authHeaders['x-account']" :title="file.owner === authHeaders['x-account'] ? 'Delete document' : 'Only document owner can delete'">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button @click="showLoadModal = false" class="btn btn-secondary">Close</button>
                     </div>
                 </div>
             </div>
@@ -3367,7 +3366,7 @@ export default {
         
         <!-- Save Modal -->
         <div v-if="showSaveModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
@@ -3508,7 +3507,7 @@ export default {
         
         <!-- Share Modal -->
         <div v-if="showShareModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog modal-dialog-scrollable modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
@@ -3830,6 +3829,19 @@ export default {
     .position-absolute {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
+
+    .table-hover > tbody > tr.row-collaborative:hover {
+        --bs-table-hover-bg: rgba(92, 148, 254, 0.1);
+    }
+
+    .table-hover > tbody > tr.row-local:hover {
+        --bs-table-hover-bg: rgba(108, 117, 125, 0.1);
+    }
+
+    .no-caret::after {
+        display: none;
+    }
+
     </style>
     `
 }; 
