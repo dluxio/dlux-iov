@@ -1,419 +1,198 @@
-import commonMethods from "/js/methods-common.js";
-
 export default {
-  name: "SimpleFieldEditor",
-  template: `
-    <div class="simple-field-editor">
-      <div ref="editor" 
-           class="form-control bg-dark border-dark text-white"
-           :style="fieldStyle"></div>
-    </div>
-  `,
-  emits: ["data"],
-  data() {
-    return {
-      editor: null,
-      isUpdatingFromProps: false,
-      _updatingFromYjs: false
-    }
-  },
-  props: {
-    insert: {
-      type: String,
-      required: false,
-      default: ""
-    },
-    placeholder: {
-      type: String,
-      required: false,
-      default: "Enter text..."
-    },
-    showCollaboration: {
-      type: Boolean,
-      required: false,
-      default: false
-    },
-    collaborationProvider: {
-      type: Object,
-      required: false,
-      default: null
-    },
-    collaborationYdoc: {
-      type: Object,
-      required: false,
-      default: null
-    },
-    collaborationConfig: {
-      type: Object,
-      required: false,
-      default: () => ({})
-    },
-    collaborationField: {
-      type: String,
-      required: false,
-      default: "field"
-    },
-    multiline: {
-      type: Boolean,
-      required: false,
-      default: false
-    }
-  },
-  computed: {
-    fieldStyle() {
-      return {
-        minHeight: this.multiline ? '100px' : '38px',
-        maxHeight: this.multiline ? '200px' : '38px',
-        overflow: this.multiline ? 'auto' : 'hidden'
-      };
-    }
-  },
-  methods: {
-    ...commonMethods, // Include common methods for collaboration utilities
-    
-    insertText(value) {
-      if (!this.editor || this.isUpdatingFromProps) return;
-      
-      // Prevent updates when collaboration is setting up
-      if (this.showCollaboration && !this.collaborationProvider) {
-        console.log('Waiting for collaboration provider before inserting text in field:', this.collaborationField);
-        return;
-      }
-      
-      // Prevent circular updates
-      this.isUpdatingFromProps = true;
-      
-      try {
-        // Only update if content is different and editor is ready
-        const currentText = this.editor.getText();
-        if (currentText !== value) {
-          // Use a more reliable method to set content
-          this.editor.commands.clearContent();
-          if (value) {
-            this.editor.commands.setContent(value);
-          }
+    name: 'SimpleFieldEditor',
+    props: {
+        // TipTap bundle passed from parent
+        tiptapBundle: {
+            type: Object,
+            required: true
+        },
+        // Y.js document for collaboration
+        ydoc: {
+            type: Object,
+            required: true
+        },
+        // Collaboration provider
+        provider: {
+            type: Object,
+            required: true
+        },
+        // Field name in Y.js document
+        fieldName: {
+            type: String,
+            required: true
+        },
+        // User configuration
+        user: {
+            type: Object,
+            default: () => ({
+                name: 'anonymous',
+                color: '#f783ac'
+            })
+        },
+        // Placeholder text
+        placeholder: {
+            type: String,
+            default: 'Enter text...'
+        },
+        // Whether this is a single-line field (like title)
+        singleLine: {
+            type: Boolean,
+            default: false
+        },
+        // Initial content
+        content: {
+            type: String,
+            default: ''
+        },
+        // Editor configuration
+        editorConfig: {
+            type: Object,
+            default: () => ({})
         }
-      } catch (error) {
-        console.warn('Failed to insert text in simple field editor:', error);
-      } finally {
-        // Reset the flag after a short delay
-        setTimeout(() => {
-          this.isUpdatingFromProps = false;
-        }, 100);
-      }
     },
-    
-    async setupCollaboration() {
-      if (!this.showCollaboration || !this.collaborationProvider || !this.collaborationYdoc) {
-        console.log('Simple field collaboration setup skipped - missing provider or ydoc for field:', this.collaborationField);
-        return;
-      }
-
-      console.log('Setting up simplified collaboration for field:', this.collaborationField);
-
-      try {
-        // Instead of using TipTap collaboration extensions, create a simple sync system
-        // This avoids Y.js conflicts by not importing TipTap's collaboration extensions
-        
-        // Destroy and recreate editor with simple collaboration
+    data() {
+        return {
+            editor: null
+        };
+    },
+    mounted() {
+        this.initializeEditor();
+    },
+    beforeDestroy() {
         if (this.editor) {
-          const currentContent = this.editor.getText();
-          this.editor.destroy();
-          await this.createEditorWithSimpleCollaboration(currentContent);
+            this.editor.destroy();
         }
-
-      } catch (error) {
-        console.error(`Failed to setup collaboration for field ${this.collaborationField}:`, error);
-      }
     },
-    
-    async createEditorWithSimpleCollaboration(initialContent = '') {
-      const { Editor } = await import('https://esm.sh/@tiptap/core@3.0.0');
-      const StarterKit = await import('https://esm.sh/@tiptap/starter-kit@3.0.0');
-      const Placeholder = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
-
-      // Get or create Y.js text for this field
-      const yText = this.collaborationYdoc.getText(this.collaborationField);
-
-      this.editor = new Editor({
-        element: this.$refs.editor,
-        extensions: [
-          StarterKit.default.configure({
-            // Disable all formatting for simple fields
-            bold: false,
-            italic: false,
-            strike: false,
-            code: false,
-            heading: false,
-            bulletList: false,
-            orderedList: false,
-            blockquote: false,
-            horizontalRule: false,
-            hardBreak: this.multiline,
-            history: false, // Disable history completely for collaboration
-          }),
-          Placeholder.default.configure({
-            placeholder: this.placeholder,
-          }),
-        ],
-        editable: true,
-        content: initialContent || '', // Use initial content
-        editorProps: {
-          attributes: {
-            class: 'simple-field-content simple-field-collaborative',
-            style: 'outline: none; padding: 6px 12px;'
-          },
-          handleKeyDown: (view, event) => {
-            // For single-line fields, prevent Enter key
-            if (!this.multiline && event.key === 'Enter') {
-              event.preventDefault();
-              return true;
+    methods: {
+        initializeEditor() {
+            const { Editor, StarterKit, Collaboration, CollaborationCursor } = this.tiptapBundle;
+            
+            if (!Editor || !StarterKit || !Collaboration) {
+                console.error('❌ TipTap bundle missing required components');
+                return;
             }
-            return false;
-          }
-        },
-        onUpdate: ({ editor }) => {
-          if (!this.isUpdatingFromProps && !this._updatingFromYjs) {
-            const content = editor.getText();
-            
-            // Only update Y.js if content is different to avoid loops
-            if (yText.toString() !== content) {
-              // Use Y.js transaction to avoid conflicts
-              this.collaborationYdoc.transact(() => {
-                yText.delete(0, yText.length);
-                yText.insert(0, content);
-              }, 'local-update');
-            }
-            
-            this.$emit("data", content);
-          }
-        },
-        onCreate: () => {
-          console.log(`✅ Simple field editor created with simple collaboration for field: ${this.collaborationField}`);
-          
-          // Set up Y.js text change observer
-          this.setupYTextObserver(yText);
-        },
-        onError: (error) => {
-          console.error(`Simple field editor error for field ${this.collaborationField}:`, error);
-        }
-      });
-    },
-    
-    setupYTextObserver(yText) {
-      // Listen for remote changes to Y.js text
-      const observer = (event, transaction) => {
-        // Only handle remote transactions, not our own local updates
-        if (this.editor && !this._updatingFromYjs && !this.isUpdatingFromProps && transaction.origin !== 'local-update') {
-          const newContent = yText.toString();
-          const currentContent = this.editor.getText();
-          
-          if (newContent !== currentContent) {
-            this._updatingFromYjs = true;
-            this.isUpdatingFromProps = true;
-            
-            console.log(`🔄 Syncing remote changes to simple field editor for field: ${this.collaborationField}`);
             
             try {
-              // Use requestAnimationFrame to avoid transaction conflicts
-              requestAnimationFrame(() => {
-                if (this.editor && this._updatingFromYjs) {
-                  this.editor.commands.setContent(newContent, false);
+                // Configure StarterKit based on field type
+                const starterKitConfig = this.singleLine ? {
+                    // Single line - disable block elements
+                    heading: false,
+                    bulletList: false,
+                    orderedList: false,
+                    blockquote: false,
+                    codeBlock: false,
+                    horizontalRule: false
+                } : {
+                    // Multi-line - enable all features
+                    ...this.editorConfig.starterKit
+                };
+                
+                // Create editor extensions
+                const extensions = [
+                    StarterKit.configure(starterKitConfig),
+                    Collaboration.configure({
+                        document: this.ydoc,
+                        field: this.fieldName
+                    })
+                ];
+                
+                // Add collaboration cursor if provider is available
+                if (CollaborationCursor && this.provider) {
+                    extensions.push(
+                        CollaborationCursor.configure({
+                            provider: this.provider,
+                            user: this.user
+                        })
+                    );
                 }
                 
-                setTimeout(() => {
-                  this._updatingFromYjs = false;
-                  this.isUpdatingFromProps = false;
-                }, 50);
-              });
-              
+                // Editor properties
+                const editorProps = {
+                    attributes: {
+                        class: 'simple-field-editor',
+                        placeholder: this.placeholder,
+                        ...this.editorConfig.attributes
+                    }
+                };
+                
+                // Handle single-line restriction
+                if (this.singleLine) {
+                    editorProps.handleKeyDown = (view, event) => {
+                        if (event.key === 'Enter') {
+                            event.preventDefault();
+                            this.$emit('enter-pressed');
+                            return true;
+                        }
+                        return false;
+                    };
+                }
+                
+                // Create the editor
+                this.editor = new Editor({
+                    element: this.$refs.editorElement,
+                    extensions,
+                    content: this.content,
+                    editorProps,
+                    onCreate: () => {
+                        console.log(`📝 Simple field editor created for field: ${this.fieldName}`);
+                        this.$emit('editor-created', this.editor);
+                    },
+                    onUpdate: ({ editor }) => {
+                        const html = editor.getHTML();
+                        const text = editor.getText();
+                        this.$emit('content-updated', { html, text, editor });
+                    },
+                    onFocus: () => {
+                        this.$emit('editor-focus');
+                    },
+                    onBlur: () => {
+                        this.$emit('editor-blur');
+                    }
+                });
+                
             } catch (error) {
-              console.error(`Error updating simple field editor for field ${this.collaborationField}:`, error);
-              this._updatingFromYjs = false;
-              this.isUpdatingFromProps = false;
+                console.error('❌ Failed to initialize simple field editor:', error);
+                this.$emit('editor-error', error);
             }
-          }
-        }
-      };
-      
-      yText.observe(observer);
-      
-      // Store observer for cleanup
-      this._yTextObserver = observer;
-      this._yText = yText;
-    },
-    
-    disconnectCollaboration() {
-      // Clean up Y.js observers
-      if (this._yTextObserver && this._yText) {
-        this._yText.unobserve(this._yTextObserver);
-        this._yTextObserver = null;
-        this._yText = null;
-      }
-      
-      // Collaboration is managed by parent component now
-      console.log('Simple field collaboration disconnect handled by parent for field:', this.collaborationField);
-    },
-    
-    async recreateEditorWithoutCollaboration() {
-      if (!this.editor) return;
-      
-      const currentContent = this.editor.getText();
-      this.editor.destroy();
-      
-      const { Editor } = await import('https://esm.sh/@tiptap/core@3.0.0');
-      const StarterKit = await import('https://esm.sh/@tiptap/starter-kit@3.0.0');
-      const Placeholder = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
-
-      this.editor = new Editor({
-        element: this.$refs.editor,
-        extensions: [
-          StarterKit.default.configure({
-            // Disable all formatting for simple fields
-            bold: false,
-            italic: false,
-            strike: false,
-            code: false,
-            heading: false,
-            bulletList: false,
-            orderedList: false,
-            blockquote: false,
-            horizontalRule: false,
-            hardBreak: this.multiline,
-            history: true, // Enable history when not collaborating
-          }),
-          Placeholder.default.configure({
-            placeholder: this.placeholder,
-          }),
-        ],
-        content: currentContent,
-        editorProps: {
-          attributes: {
-            class: 'simple-field-content',
-            style: 'outline: none; padding: 6px 12px;'
-          },
-          handleKeyDown: (view, event) => {
-            // For single-line fields, prevent Enter key
-            if (!this.multiline && event.key === 'Enter') {
-              event.preventDefault();
-              return true;
+        },
+        
+        // Public methods for parent component
+        getContent() {
+            if (!this.editor) return { html: '', text: '' };
+            
+            return {
+                html: this.editor.getHTML(),
+                text: this.editor.getText()
+            };
+        },
+        
+        setContent(content) {
+            if (this.editor) {
+                this.editor.commands.setContent(content);
             }
-            return false;
-          }
         },
-        onUpdate: ({ editor }) => {
-          if (!this.isUpdatingFromProps) {
-            const text = editor.getText();
-            this.$emit("data", text);
-          }
-        }
-      });
-    }
-  },
-  watch: {
-    'insert': {
-      handler: function (newValue, oldValue) {
-        if (newValue && newValue !== oldValue && !this.isUpdatingFromProps) {
-          this.insertText(newValue);
-        }
-      },
-      deep: true
-    },
-    
-    'collaborationProvider': {
-      handler: function (newProvider) {
-        if (newProvider && this.showCollaboration && this.collaborationYdoc) {
-          console.log(`📡 Simple field collaboration provider received for field ${this.collaborationField}, setting up...`);
-          setTimeout(() => {
-            this.setupCollaboration();
-          }, 100);
-        }
-      },
-      immediate: true
-    },
-    
-    'showCollaboration': {
-      handler: function (newValue) {
-        console.log(`🤝 Simple field show collaboration changed for field ${this.collaborationField}:`, newValue);
-        if (newValue && this.collaborationProvider && this.collaborationYdoc) {
-          setTimeout(() => {
-            this.setupCollaboration();
-          }, 100);
-        } else if (!newValue && this.editor) {
-          // Recreate editor without collaboration
-          this.recreateEditorWithoutCollaboration();
-        }
-      }
-    }
-  },
-  async mounted() {
-    // Import Tiptap modules
-    const { Editor } = await import('https://esm.sh/@tiptap/core@3.0.0');
-    const StarterKit = await import('https://esm.sh/@tiptap/starter-kit@3.0.0');
-    const Placeholder = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
-
-    this.editor = new Editor({
-      element: this.$refs.editor,
-      extensions: [
-        StarterKit.default.configure({
-          // Disable all formatting for simple fields
-          bold: false,
-          italic: false,
-          strike: false,
-          code: false,
-          heading: false,
-          bulletList: false,
-          orderedList: false,
-          blockquote: false,
-          horizontalRule: false,
-          hardBreak: this.multiline,
-          history: !this.showCollaboration, // Only enable history if not collaborating
-        }),
-        Placeholder.default.configure({
-          placeholder: this.placeholder,
-        }),
-      ],
-      content: '',
-      editorProps: {
-        attributes: {
-          class: 'simple-field-content',
-          style: 'outline: none; padding: 6px 12px;'
+        
+        clearContent() {
+            if (this.editor) {
+                this.editor.commands.clearContent();
+            }
         },
-        handleKeyDown: (view, event) => {
-          // For single-line fields, prevent Enter key
-          if (!this.multiline && event.key === 'Enter') {
-            event.preventDefault();
-            return true;
-          }
-          return false;
+        
+        focus() {
+            if (this.editor) {
+                this.editor.commands.focus();
+            }
+        },
+        
+        insertContent(content) {
+            if (this.editor) {
+                this.editor.commands.insertContent(content);
+            }
         }
-      },
-      onUpdate: ({ editor }) => {
-        if (!this.isUpdatingFromProps) {
-          const text = editor.getText();
-          this.$emit("data", text);
-        }
-      }
-    });
-
-    // Insert initial content if provided and not in collaboration mode
-    if (this.insert && !this.showCollaboration) {
-      setTimeout(() => {
-        this.insertText(this.insert);
-      }, 100);
-    }
-
-    // Setup collaboration if provider is already available
-    if (this.showCollaboration && this.collaborationProvider && this.collaborationYdoc) {
-      setTimeout(() => {
-        this.setupCollaboration();
-      }, 200);
-    }
-  },
-  beforeUnmount() {
-    this.disconnectCollaboration();
-    if (this.editor) {
-      this.editor.destroy();
-    }
-  }
-}; 
+    },
+    template: `
+        <div class="simple-field-editor-wrapper">
+            <div ref="editorElement" class="simple-field-editor-content"></div>
+        </div>
+    `
+};

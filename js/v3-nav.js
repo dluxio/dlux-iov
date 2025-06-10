@@ -2449,18 +2449,7 @@ export default {
 
         obj.status = 'Getting authentication challenge...';
 
-        // Get challenge from collaboration API
-        const challengeResponse = await fetch('https://data.dlux.io/collaboration/challenge');
-        if (!challengeResponse.ok) {
-          throw new Error(`Challenge API returned ${challengeResponse.status}`);
-        }
-        
-        const challengeData = await challengeResponse.json();
-        if (!challengeData.success) {
-          throw new Error('Failed to get challenge: ' + (challengeData.error || 'Unknown error'));
-        }
-
-        const challenge = challengeData.challenge;
+        const challenge = Math.floor(Date.now() / 1000)
         obj.status = 'Signing authentication challenge...';
         
         // Sign the challenge using existing infrastructure

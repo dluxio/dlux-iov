@@ -7,7 +7,7 @@ The Hive Collaboration API provides real-time collaborative editing capabilities
 ## Base URL
 
 ```
-https://data.dlux.io/collaboration
+https://data.dlux.io/api/collaboration
 ```
 
 ## Authentication
@@ -23,103 +23,35 @@ All API endpoints (except public info endpoints) require Hive blockchain authent
 
 Documents are identified by the format: `owner-hive-account/permlink`
 
-Example: `alice/my-document-2024`
+Example: `alice/URiHERhq0qFjczMD`
 
-## WebSocket Endpoint
+**Note**: Documents now have separate display names and technical permlinks:
+- **Permlink**: URL-safe random identifier (e.g., `URiHERhq0qFjczMD`) used for routing and references
+- **Document Name**: User-friendly display name (e.g., `My Project Notes`) that can be changed by owners/editors
 
-The collaboration system uses a custom Y.js implementation with Hive authentication:
+## Document Naming System
 
-```
-ws://data.dlux.io/ws/collaborate/{owner}/{permlink}
-```
+The collaboration system uses a dual-identifier approach:
 
-### WebSocket Authentication
+### Technical Permlinks
+- **Auto-generated**: 16-character URL-safe random strings (e.g., `URiHERhq0qFjczMD`)
+- **Immutable**: Never change once created, ensuring stable URLs and references
+- **Used for**: WebSocket connections, API endpoints, database relationships
 
-WebSocket connections use the same Hive authentication headers as API endpoints:
+### Display Names
+- **User-friendly**: Human-readable names (e.g., `My Project Notes`, `2024-01-15 Meeting Minutes`)
+- **Editable**: Can be changed by document owners or users with edit permissions
+- **Default format**: `YYYY-MM-DD untitled` if not specified during creation
+- **Used for**: UI display, document organization, user experience
 
-```javascript
-// Connect using native WebSocket with headers
-const ws = new WebSocket('ws://data.dlux.io/ws/collaborate/alice/my-document', {
-  headers: {
-    'x-account': 'your-hive-username',
-    'x-challenge': '1703980800', // Unix timestamp  
-    'x-pubkey': 'STM7BWmXwvuKHr8FpSPmj8knJspFMPKt3vcetAKKjZ2W2HoRgdkEg',
-    'x-signature': 'signature-here'
-  }
-});
+This separation allows users to rename documents without breaking existing links or references.
 
-// Or using a WebSocket library that supports headers
-import WebSocket from 'isomorphic-ws';
 
-const ws = new WebSocket('ws://data.dlux.io/ws/collaborate/alice/my-document', {
-  headers: {
-    'x-account': account,
-    'x-challenge': challenge,
-    'x-pubkey': pubKey,  
-    'x-signature': signature
-  }
-});
-```
-
-## API Endpoints
-
-### 1. Get Server Information
-
-```http
-GET /api/collaboration/info
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "server": "Hive Collaboration Server",
-  "version": "1.0.0",
-  "endpoints": {
-    "websocket": "/ws/api/api/collaborate/{owner}/{permlink}",
-    "documents": "/collaboration/documents",
-    "permissions": "/collaboration/permissions",
-    "activity": "/collaboration/activity"
-  },
-  "authentication": {
-    "method": "Hive Signature",
-    "headers": ["x-account", "x-challenge", "x-pubkey", "x-signature"],
-    "websocket_headers": "Use same Hive auth headers for WebSocket connections"
-  },
-  "document_format": "owner-hive-account/permlink",
-  "features": [
-    "Real-time collaborative editing",
-    "Hive blockchain authentication", 
-    "Document permissions management",
-    "Activity logging"
-  ]
-}
-```
-
-### 2. Get Authentication Challenge
-
-```http
-GET /collaboration/challenge
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "challenge": 1703980800,
-  "expires": 1703984400,
-  "message": "Sign this timestamp with your HIVE key for collaboration access",
-  "instructions": {
-    "websocket": "Connect with Hive auth headers: x-account, x-challenge, x-pubkey, x-signature",
-    "api": "Use in x-challenge header along with other auth headers"
-  }
-}
-```
 
 ### 3. List Documents
 
 ```http
-GET /collaboration/documents
+GET /api/collaboration/documents
 ```
 
 **Query Parameters:**
@@ -137,14 +69,16 @@ GET /collaboration/documents
   "documents": [
     {
       "owner": "alice",
-      "permlink": "my-document-2024",
-      "documentPath": "alice/my-document-2024",
+      "permlink": "URiHERhq0qFjczMD",
+      "documentName": "My Project Notes",
+      "documentPath": "alice/URiHERhq0qFjczMD",
       "isPublic": false,
       "hasContent": true,
       "contentSize": 1024,
       "accessType": "owner",
       "createdAt": "2024-01-01T12:00:00Z",
-      "updatedAt": "2024-01-01T15:30:00Z"
+      "updatedAt": "2024-01-01T15:30:00Z",
+      "lastActivity": "2024-01-01T15:30:00Z"
     }
   ],
   "pagination": {
@@ -165,12 +99,17 @@ POST /collaboration/documents
 **Request Body:**
 ```json
 {
-  "permlink": "my-new-document",
+  "documentName": "My New Document", 
   "isPublic": false,
   "title": "My New Document",
   "description": "A collaborative document"
 }
 ```
+
+**Notes:**
+- `documentName` is optional. If not provided, defaults to `YYYY-MM-DD untitled` format
+- `permlink` is automatically generated as a 16-character URL-safe random string
+- `title` and `description` are optional metadata for activity logging
 
 **Response:**
 ```json
@@ -178,22 +117,82 @@ POST /collaboration/documents
   "success": true,
   "document": {
     "owner": "alice",
-    "permlink": "my-new-document",
-    "documentPath": "alice/my-new-document",
+    "permlink": "URiHERhq0qFjczMD",
+    "documentName": "My New Document",
+    "documentPath": "alice/URiHERhq0qFjczMD",
     "isPublic": false,
-    "websocketUrl": "/ws/collaborate/alice/my-new-document",
-    "authHeaders": {
-      "x-account": "alice",
-      "x-challenge": "timestamp",
-      "x-pubkey": "key",
-      "x-signature": "signature"
-    },
+    "websocketUrl": "ws://localhost:1234/alice/URiHERhq0qFjczMD",
     "createdAt": "2024-01-01T12:00:00Z"
   }
 }
 ```
 
-### 5. Delete Document
+### 5. Update Document Name
+
+```http
+PATCH /collaboration/documents/{owner}/{permlink}/name
+```
+
+**Request Body:**
+```json
+{
+  "documentName": "Updated Document Name"
+}
+```
+
+**Notes:**
+- Only document owners or users with edit permissions can rename documents
+- Document name cannot be empty and has a maximum length of 500 characters
+- Permlink remains unchanged when renaming
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Document name updated successfully",
+  "document": {
+    "owner": "alice",
+    "permlink": "URiHERhq0qFjczMD",
+    "documentName": "Updated Document Name",
+    "documentPath": "alice/URiHERhq0qFjczMD",
+    "updatedBy": "alice",
+    "updatedAt": "2024-01-01T16:00:00Z"
+  }
+}
+```
+
+### 6. Get Document Info
+
+```http
+GET /collaboration/info/{owner}/{permlink}
+```
+
+**Notes:**
+- Returns detailed information about a specific document
+- Requires read access to the document (owner, granted permission, or public document)
+
+**Response:**
+```json
+{
+  "success": true,
+  "document": {
+    "owner": "alice",
+    "permlink": "URiHERhq0qFjczMD",
+    "documentName": "My Document",
+    "documentPath": "alice/URiHERhq0qFjczMD",
+    "isPublic": false,
+    "hasContent": true,
+    "contentSize": 1024,
+    "accessType": "owner",
+    "websocketUrl": "ws://localhost:1234/alice/URiHERhq0qFjczMD",
+    "createdAt": "2024-01-01T12:00:00Z",
+    "updatedAt": "2024-01-01T15:30:00Z",
+    "lastActivity": "2024-01-01T15:30:00Z"
+  }
+}
+```
+
+### 7. Delete Document
 
 ```http
 DELETE /collaboration/documents/{owner}/{permlink}
@@ -209,7 +208,7 @@ DELETE /collaboration/documents/{owner}/{permlink}
 }
 ```
 
-### 6. Get Document Permissions
+### 8. Get Document Permissions
 
 ```http
 GET /collaboration/permissions/{owner}/{permlink}
@@ -219,7 +218,7 @@ GET /collaboration/permissions/{owner}/{permlink}
 ```json
 {
   "success": true,
-  "document": "alice/my-document",
+  "document": "alice/URiHERhq0qFjczMD",
   "permissions": [
     {
       "account": "bob",
@@ -236,7 +235,7 @@ GET /collaboration/permissions/{owner}/{permlink}
 }
 ```
 
-### 7. Grant Permission
+### 9. Grant Permission
 
 ```http
 POST /collaboration/permissions/{owner}/{permlink}
@@ -274,7 +273,7 @@ POST /collaboration/permissions/{owner}/{permlink}
 }
 ```
 
-### 8. Revoke Permission
+### 10. Revoke Permission
 
 ```http
 DELETE /collaboration/permissions/{owner}/{permlink}/{targetAccount}
@@ -288,7 +287,7 @@ DELETE /collaboration/permissions/{owner}/{permlink}/{targetAccount}
 }
 ```
 
-### 9. Get Activity Log
+### 11. Get Activity Log
 
 ```http
 GET /collaboration/activity/{owner}/{permlink}
@@ -302,7 +301,7 @@ GET /collaboration/activity/{owner}/{permlink}
 ```json
 {
   "success": true,
-  "document": "alice/my-document",
+  "document": "alice/URiHERhq0qFjczMD",
   "activity": [
     {
       "account": "bob",
@@ -323,7 +322,7 @@ GET /collaboration/activity/{owner}/{permlink}
 }
 ```
 
-### 10. Get Document Statistics
+### 12. Get Document Statistics
 
 ```http
 GET /collaboration/stats/{owner}/{permlink}
@@ -333,7 +332,7 @@ GET /collaboration/stats/{owner}/{permlink}
 ```json
 {
   "success": true,
-  "document": "alice/my-document",
+  "document": "alice/URiHERhq0qFjczMD",
   "stats": {
     "total_users": 3,
     "active_users": 1,
@@ -358,7 +357,7 @@ GET /collaboration/stats/{owner}/{permlink}
 }
 ```
 
-### 11. Get Detailed Permissions
+### 13. Get Detailed Permissions
 
 ```http
 GET /collaboration/permissions-detailed/{owner}/{permlink}
@@ -368,7 +367,7 @@ GET /collaboration/permissions-detailed/{owner}/{permlink}
 ```json
 {
   "success": true,
-  "document": "alice/my-document",
+  "document": "alice/URiHERhq0qFjczMD",
   "permissions": [
     {
       "account": "bob",
@@ -385,7 +384,7 @@ GET /collaboration/permissions-detailed/{owner}/{permlink}
 }
 ```
 
-### 12. Manual Document Cleanup
+### 14. Manual Document Cleanup
 
 ```http
 POST /collaboration/cleanup/manual/{owner}/{permlink}
@@ -399,33 +398,6 @@ POST /collaboration/cleanup/manual/{owner}/{permlink}
   "success": true,
   "message": "Document cleaned up successfully",
   "action": "Document data archived, metadata preserved"
-}
-```
-
-### 13. Test Connection
-
-```http
-GET /collaboration/test-connection/{owner}/{permlink}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Connection test endpoint for collaboration debugging",
-  "document": "alice/my-document",
-  "user": "alice",
-  "websocketUrl": "ws://data.dlux.io/ws/collaborate/alice/my-document",
-  "authHeaders": {
-    "x-account": "alice",  
-    "x-challenge": 1703980800,
-    "x-pubkey": "STM...",
-    "x-signature": "..."
-  },
-  "instructions": {
-    "connect": "Connect WebSocket with authHeaders to establish collaboration connection",
-    "verify": "Check server logs for authentication and connection events"
-  }
 }
 ```
 
@@ -455,149 +427,62 @@ The Hive Collaboration API provides comprehensive real-time collaboration capabi
 - **Edit Statistics**: Monitor document changes and user activity
 - **Permission Auditing**: Log all permission grants and revocations
 
-## Frontend Integration
+## API Usage Examples
 
-### Tiptap + Y.js Setup
+### Creating Documents
 
 ```javascript
-import { Editor } from '@tiptap/core'
-import StarterKit from '@tiptap/starter-kit'
-import Collaboration from '@tiptap/extension-collaboration'
-import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
-import * as Y from 'yjs'
-import WebSocket from 'isomorphic-ws'
-
-// Create Y.js document
-const ydoc = new Y.Doc()
-
-// Custom DLUX provider for Y.js collaboration
-class DLUXProvider {
-  constructor(url, documentName, authHeaders) {
-    this.url = url
-    this.documentName = documentName
-    this.authHeaders = authHeaders
-    this.ydoc = new Y.Doc()
-    this.awareness = new Map()
-    this.connected = false
-    this.eventListeners = new Map()
-    
-    this.connect()
-  }
-
-  connect() {
-    this.ws = new WebSocket(`${this.url}/ws/collaborate/${this.documentName}`, {
-      headers: this.authHeaders
-    })
-
-    this.ws.onopen = () => {
-      console.log('Connected to DLUX collaboration server')
-      this.connected = true
-      this.emit('status', { status: 'connected' })
-    }
-
-    this.ws.onmessage = (event) => {
-      if (event.data instanceof ArrayBuffer || event.data instanceof Uint8Array) {
-        // Y.js binary message
-        const message = new Uint8Array(event.data)
-        const messageType = message[0]
-        const messageData = message.slice(1)
-
-        if (messageType === 0) { // Y_MESSAGE_SYNC
-          Y.applyUpdate(this.ydoc, messageData, 'remote')
-          this.emit('sync', true)
-        } else if (messageType === 1) { // Y_MESSAGE_AWARENESS
-          // Handle awareness update
-          this.emit('awareness', messageData)
-        }
-      }
-    }
-
-    this.ws.onclose = () => {
-      console.log('Disconnected from collaboration server')
-      this.connected = false
-      this.emit('status', { status: 'disconnected' })
-    }
-
-    this.ws.onerror = (error) => {
-      console.error('WebSocket error:', error)
-      this.emit('status', { status: 'disconnected' })
-    }
-
-    // Send local changes to server
-    this.ydoc.on('update', (update, origin) => {
-      if (origin !== 'remote' && this.connected) {
-        const message = new Uint8Array(1 + update.length)
-        message[0] = 0 // Y_MESSAGE_SYNC
-        message.set(update, 1)
-        this.ws.send(message)
-      }
-    })
-  }
-
-  on(event, callback) {
-    if (!this.eventListeners.has(event)) {
-      this.eventListeners.set(event, [])
-    }
-    this.eventListeners.get(event).push(callback)
-  }
-
-  emit(event, data) {
-    const listeners = this.eventListeners.get(event)
-    if (listeners) {
-      listeners.forEach(callback => callback(data))
-    }
-  }
-
-  destroy() {
-    this.ws?.close()
-  }
-}
-
-// Create provider with Hive authentication
-const provider = new DLUXProvider(
-  'ws://data.dlux.io',
-  'alice/my-document', // document path
-  {
+// Create document with custom name
+const response = await fetch('/api/collaboration/documents', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
     'x-account': 'alice',
     'x-challenge': Math.floor(Date.now() / 1000).toString(),
-    'x-pubkey': 'STM7BWmXwvuKHr8FpSPmj8knJspFMPKt3vcetAKKjZ2W2HoRgdkEg',
-    'x-signature': 'your-signature-here'
-  }
-)
-
-// Create Tiptap editor with collaboration features
-const editor = new Editor({
-  extensions: [
-    StarterKit.configure({
-      history: false, // Disable default history - Y.js handles this
-    }),
-    Collaboration.configure({
-      document: provider.ydoc, // Use provider's Y.Doc
-    }),
-    CollaborationCursor.configure({
-      provider: provider,
-      user: {
-        name: 'Alice',
-        color: '#f783ac',
-      },
-    }),
-  ],
+    'x-pubkey': 'STM...',
+    'x-signature': '...'
+  },
+  body: JSON.stringify({
+    documentName: 'My Project Notes',
+    isPublic: false
+  })
 })
 
-// Listen for collaboration events
-provider.on('status', event => {
-  console.log('Connection status:', event.status) // connected, disconnected
+// Returns: { permlink: "URiHERhq0qFjczMD", documentName: "My Project Notes" }
+```
+
+```javascript
+// Create document with default name
+const response = await fetch('/api/collaboration/documents', {
+  method: 'POST',
+  headers: { /* auth headers */ },
+  body: JSON.stringify({
+    isPublic: false
+  })
 })
 
-provider.on('sync', isSynced => {
-  console.log('Document synced:', isSynced)
-})
+// Returns: { permlink: "loWoeOsHjrz8UhRR", documentName: "2024-01-15 untitled" }
+```
 
-// Cleanup on page unload
-window.addEventListener('beforeunload', () => {
-  provider.destroy()
+### Renaming Documents
+
+```javascript
+// Update document name
+const response = await fetch('/api/collaboration/documents/alice/URiHERhq0qFjczMD/name', {
+  method: 'PATCH',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-account': 'alice', // or user with edit permission
+    // ... other auth headers
+  },
+  body: JSON.stringify({
+    documentName: 'Updated Project Notes'
+  })
 })
 ```
+
+## Frontend Integration
+
 
 ### Authentication Helper
 
@@ -635,6 +520,7 @@ CREATE TABLE collaboration_documents (
   id SERIAL PRIMARY KEY,
   owner VARCHAR(50) NOT NULL,
   permlink VARCHAR(255) NOT NULL,
+  document_name VARCHAR(500) DEFAULT '',
   document_data TEXT,
   is_public BOOLEAN DEFAULT false,
   last_activity TIMESTAMP DEFAULT NOW(),
@@ -721,7 +607,7 @@ The collaboration system includes automatic cleanup to manage inactive documents
 
 ### Manual Cleanup
 - **Access**: Document owners only
-- **Endpoint**: `POST /collaboration/cleanup/manual/{owner}/{permlink}`
+- **Endpoint**: `POST /api/collaboration/cleanup/manual/{owner}/{permlink}`
 - **Action**: Immediately archives the document data
 - **Use Case**: Clean up documents before the 30-day threshold
 
@@ -731,84 +617,3 @@ The collaboration system includes automatic cleanup to manage inactive documents
 3. Activity log entry is created with cleanup details
 4. Document can still be accessed but will start with empty content
 
-## Rate Limiting
-
-Currently no rate limiting is implemented, but it's recommended to:
-- Limit API requests to 100 per minute per user
-- Limit WebSocket connections to 10 concurrent per user
-- Monitor for abuse patterns
-
-## Security Considerations
-
-1. **Authentication**: Always verify Hive signatures server-side
-2. **Challenge Expiry**: WebSocket challenges expire after 1 hour
-3. **Permissions**: Document owners have full control over access
-4. **Public Documents**: Use `is_public` flag carefully
-5. **Data Persistence**: Y.js documents are automatically saved to PostgreSQL
-
-## Troubleshooting
-
-### Common Issues
-
-1. **WebSocket Connection Failed**
-   - Check authentication headers format
-   - Verify challenge timestamp is recent (must be within 1 hour)
-   - Ensure proper URL encoding
-
-2. **Permission Denied**
-   - Document owner must grant explicit permission
-   - Check if document exists
-   - Verify user has valid Hive account
-
-3. **Signature Invalid**
-   - Ensure correct private key is used
-   - Check challenge timestamp accuracy
-   - Verify public key matches account
-
-### Debug Endpoints
-
-Use the test connection endpoint to debug WebSocket issues:
-
-```bash
-curl -X GET "https://data.dlux.io/collaboration/test-connection/alice/my-document" \
-  -H "x-account: alice" \
-  -H "x-challenge: 1703980800" \
-  -H "x-pubkey: STM7BWmXwvuKHr8FpSPmj8knJspFMPKt3vcetAKKjZ2W2HoRgdkEg" \
-  -H "x-signature: signature-here"
-```
-
-## Support
-
-For issues and questions:
-- Check server logs for detailed error messages
-- Verify authentication using `/collaboration/challenge`
-- Test basic connectivity with `/collaboration/info`
-- Use the test endpoints for debugging
-
-## Version History
-
-- **v1.2.0**: Custom Y.js WebSocket Implementation
-  - **BREAKING CHANGE**: Switched from separate port to path-based routing
-  - **BREAKING CHANGE**: Removed token authentication in favor of Hive auth headers
-  - Custom Y.js WebSocket handler with binary protocol support
-  - Path-based WebSocket endpoint: `/ws/collaborate/{owner}/{permlink}`
-  - Unified Hive authentication for both REST and WebSocket
-  - Single-port operation (no more separate collaboration port)
-  - Binary Y.js message handling (Y_MESSAGE_SYNC, Y_MESSAGE_AWARENESS)
-  - Improved frontend integration with DLUXProvider class
-
-- **v1.1.0**: Enhanced permissions and cleanup system
-  - Enhanced permission types: `readonly`, `editable`, `postable`
-  - Granular permission capabilities (`canRead`, `canEdit`, `canPostToHive`)
-  - Automatic document cleanup after 30 days of inactivity
-  - Manual cleanup functionality for document owners
-  - Document statistics and analytics
-  - Improved activity tracking with user permissions
-  - Cursor sharing and user awareness support
-
-- **v1.0.0**: Initial release with basic collaboration features
-  - Hive authentication integration
-  - Real-time collaborative editing
-  - Basic document permissions system
-  - Activity logging
-  - PostgreSQL persistence 

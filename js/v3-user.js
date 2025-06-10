@@ -29,6 +29,7 @@ import SPKVue from "/js/spk-wallet.js";
 import Assets from "/js/assets.js"
 import MFI from "/js/mfi-vue.js";
 import UploadEverywhere from "/js/upload-everywhere.js";
+import TiptapEditorWithFileMenu from "/js/tiptap-editor-with-file-menu.js";
 import MCommon from '/js/methods-common.js'
 
 let url = location.href.replace(/\/$/, "");
@@ -1046,6 +1047,7 @@ PORT=3000
       contracts: [],
       numitems: 0,
       postBens: [],
+      postOptions: {},
       serviceWorkerPromises: {},
       fileToAddToPost: null,
       playlistUpdates: {},
@@ -1107,6 +1109,7 @@ PORT=3000
     "choices-vue": ChoicesVue,
     "mfi-vue": MFI,
     "upload-everywhere": UploadEverywhere,
+    "tiptap-editor-with-file-menu": TiptapEditorWithFileMenu,
   },
   methods: {
     ...MCommon,
@@ -6234,6 +6237,75 @@ function buyNFT(setname, uid, price, type, callback){
       this.postCustom_json = { ...this.postCustom_json, ...postData.custom_json };
       
       // Trigger post
+      this.post();
+    },
+    
+    handleEnhancedPostData(postData) {
+      // Handle data changes from enhanced collaborative post editor
+      console.log('Enhanced post data updated:', postData);
+      this.postTitle = postData.title;
+      this.postBody = postData.body;
+      this.postTags = postData.tags;
+      this.postPermlink = postData.permlink;
+      this.postBens = postData.beneficiaries || [];
+      this.postCustom_json = { ...this.postCustom_json, ...postData.custom_json };
+    },
+    
+    handleEnhancedPublish(postData) {
+      // Handle publish request from enhanced collaborative editor
+      console.log('Publishing enhanced post:', postData);
+      
+      // Set the data and trigger normal post flow
+      this.postTitle = postData.title;
+      this.postBody = postData.body;
+      this.postTags = postData.tags.join ? postData.tags.join(' ') : postData.tags;
+      this.postPermlink = postData.permlink;
+      this.postBens = postData.beneficiaries || [];
+      this.postCustom_json = { ...this.postCustom_json, ...postData.custom_json };
+      
+      // Trigger post
+      this.post();
+    },
+    
+    // TipTap Editor Event Handlers
+    handlePostContentChanged(postData) {
+      // Update the main Vue instance data with content changes
+      this.postTitle = postData.title || '';
+      this.postBody = postData.body || '';
+      this.postTags = postData.tags || [];
+      this.postPermlink = postData.permlink || '';
+      this.postBens = postData.beneficiaries || [];
+      
+      // Merge custom_json data
+      this.postCustom_json = {
+        ...this.postCustom_json,
+        ...postData.custom_json
+      };
+      
+      console.log('📝 Post content updated:', {
+        title: this.postTitle,
+        tags: this.postTags,
+        hasBody: !!this.postBody
+      });
+    },
+    
+    handlePostPublish(postData) {
+      console.log('🚀 Publishing post from TipTap editor:', postData);
+      
+      // Update all post data
+      this.postTitle = postData.title;
+      this.postBody = postData.body;
+      this.postTags = postData.tags;
+      this.postPermlink = postData.permlink;
+      this.postBens = postData.beneficiaries || [];
+      
+      // Merge custom_json with existing data
+      this.postCustom_json = {
+        ...this.postCustom_json,
+        ...postData.custom_json
+      };
+      
+      // Call the existing post method to handle the actual publishing
       this.post();
     }
   },

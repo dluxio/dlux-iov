@@ -176,7 +176,8 @@ export default {
     collaborationConfigWithDoc() {
       return {
         ...this.collaborationConfig,
-        documentName: this.collaborativeDoc ? this.collaborativeDoc.split('/')[1] : 'Document'
+        documentName: this.collaborativeDoc ? this.collaborativeDoc.split('/')[1] : 'Document',
+        username: this.account // Pass the current user's account name
       };
     }
   },
@@ -708,32 +709,15 @@ export default {
 
           console.log('✅ HocuspocusProvider created successfully');
         
-                 // DEBUG: Check all properties on the provider
+                 // Provider debugging
          setTimeout(() => {
-           console.log('🔍 HocuspocusProvider properties:', {
-             providerKeys: Object.keys(this.collaborationProvider),
-             // OLD properties (undefined):
-             wsconnected: this.collaborationProvider.wsconnected,
-             connected: this.collaborationProvider.connected,
-             synced: this.collaborationProvider.synced,
-             status: this.collaborationProvider.status,
-             // CORRECT properties:
+           console.log('🔍 HocuspocusProvider status:', {
              isSynced: this.collaborationProvider.isSynced,
              isAuthenticated: this.collaborationProvider.isAuthenticated,
              authorizedScope: this.collaborationProvider.authorizedScope,
-             websocket: this.collaborationProvider.websocket ? 'exists' : 'null',
-             ws: this.collaborationProvider.ws ? 'exists' : 'null',
-             connection: this.collaborationProvider.connection ? 'exists' : 'null',
-             document: this.collaborationProvider.document ? 'exists' : 'null',
+             hasDocument: !!this.collaborationProvider.document,
              url: this.collaborationProvider.url
            });
-           
-           // Check if there are any connection errors
-           if (!this.collaborationProvider.websocket && !this.collaborationProvider.ws) {
-             console.error('❌ WebSocket connection failed - no websocket property found!');
-             console.log('🔍 All provider keys:', Object.keys(this.collaborationProvider));
-             console.log('🔍 Provider constructor:', this.collaborationProvider.constructor.name);
-           }
          }, 2000);
         } catch (providerError) {
           console.error('❌ Failed to create HocuspocusProvider:', providerError);
@@ -750,20 +734,18 @@ export default {
           authHeadersLength: JSON.stringify(authParams).length
         });
         
-        // Check WebSocket connection establishment after a brief delay
+        // Check connection status using proper HocuspocusProvider methods
         setTimeout(() => {
-          const wsStatus = this.collaborationProvider.websocket || this.collaborationProvider.ws;
           console.log('🔍 WebSocket connection check:', {
-            hasWebSocket: !!wsStatus,
-            readyState: wsStatus ? wsStatus.readyState : 'no websocket',
-            url: wsStatus ? wsStatus.url : 'no websocket',
-                         providerSynced: this.collaborationProvider.isSynced
+            isSynced: this.collaborationProvider.isSynced,
+            isAuthenticated: this.collaborationProvider.isAuthenticated,
+            hasDocument: !!this.collaborationProvider.document,
+            hasWebSocketProvider: !!this.collaborationProvider.configuration?.websocketProvider,
+            websocketProviderStatus: this.collaborationProvider.configuration?.websocketProvider?.status
           });
           
-          if (!wsStatus) {
-            console.error('⚠️ No WebSocket found after provider creation - connection may have failed silently');
-          } else if (wsStatus.readyState !== 1) { // 1 = OPEN
-            console.warn('⚠️ WebSocket not open:', wsStatus.readyState, '(0=CONNECTING, 1=OPEN, 2=CLOSING, 3=CLOSED)');
+          if (!this.collaborationProvider.isSynced) {
+            console.warn('⚠️ Provider not yet synced - may still be connecting');
           }
         }, 1000);
         

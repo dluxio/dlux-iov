@@ -1,0 +1,3134 @@
+import methodsCommon from './methods-common.js';
+
+export default {
+    name: 'TipTapEditorWithFileMenu',
+    
+    props: {
+        username: {
+            type: String,
+            required: true
+        },
+        authHeaders: {
+            type: Object,
+            default: () => ({})
+        },
+        collaborationUrl: {
+            type: String,
+            default: 'wss://data.dlux.io/collaboration'
+        },
+        initialContent: {
+            type: Object,
+            default: () => ({})
+        },
+        // New props for post integration
+        fileToAdd: {
+            type: Object,
+            default: null
+        },
+        postCustomJson: {
+            type: Object,
+            default: () => ({})
+        }
+    },
+    
+    mixins: [methodsCommon],
+    
+    data() {
+        return {
+            // Instance management
+            componentId: `tiptap_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            isInitializing: false,
+            
+            // File management
+            currentFile: null,
+            isCollaborativeMode: false,
+            hasUnsavedChanges: false,
+            fileType: 'local', // 'local' or 'collaborative'
+            
+            // TipTap editors
+            titleEditor: null,
+            permlinkEditor: null,
+            bodyEditor: null,
+            
+            // Collaboration
+            ydoc: null,
+            provider: null,
+            connectionStatus: 'disconnected',
+            connectionMessage: 'Not connected',
+            
+            // Content
+            content: {
+                title: '',
+                body: '',
+                tags: [],
+                custom_json: {},
+                permlink: '',
+                beneficiaries: []
+            },
+            
+            // UI state
+            showPermlinkEditor: false,
+            showAdvancedOptions: false,
+            
+            // Modals & UI state
+            showLoadModal: false,
+            showSaveModal: false,
+            showShareModal: false,
+            showHistoryModal: false,
+            showPublishModal: false,
+            
+            // Local storage files
+            localFiles: [],
+            
+            // Collaborative documents
+            collaborativeDocs: [],
+            loadingDocs: false,
+            
+            // File operations
+            saving: false,
+            loading: false,
+            deleting: false,
+            publishing: false,
+            
+            // Save/Load forms
+            saveForm: {
+                filename: '',
+                saveLocally: true,
+                saveToDlux: false,
+                isPublic: false,
+                description: '',
+                isNewDocument: false
+            },
+            
+            // Save as process state
+            saveAsProcess: {
+                inProgress: false,
+                step: '', // 'saving_local', 'creating_server', 'initializing', 'copying_content', 'finalizing'
+                message: '',
+                localBackupId: null,
+                serverDocId: null,
+                error: null
+            },
+            
+            shareForm: {
+                username: '',
+                permission: 'readonly'
+            },
+            
+            // Publish form
+            publishForm: {
+                beneficiaries: [],
+                votingWeight: 100
+            },
+            
+            // Beneficiaries input
+            beneficiaryInput: {
+                account: '',
+                percent: 1.0
+            },
+            
+            // Custom JSON handling
+            customJsonString: '',
+            customJsonError: '',
+            
+            // Comment options (Hive-specific)
+            commentOptions: {
+                allowVotes: true,
+                allowCurationRewards: true,
+                maxAcceptedPayout: false, // false = allow payout, true = decline payout
+                percentHbd: false // false = 50/50, true = 100% power up
+            },
+            
+            // History & diff
+            documentHistory: [],
+            selectedVersions: [],
+            
+            // UI
+            dropdownOpen: {},
+            
+            // Tag handling
+            tagInput: '',
+            availableTags: ['dlux', 'blog', 'video', 'collaboration', 'dapp', '360', 'hive', 'blockchain', 'web3'],
+            
+            // File attachments
+            attachedFiles: []
+        };
+    },
+    
+    computed: {
+        isConnected() {
+            return this.connectionStatus === 'connected';
+        },
+        
+        // Check if user is authenticated for collaborative features
+        isAuthenticated() {
+            return this.authHeaders && 
+                   this.authHeaders['x-account'] && 
+                   this.authHeaders['x-signature'] && 
+                   this.authHeaders['x-challenge'] && 
+                   this.authHeaders['x-pubkey'];
+        },
+        
+        // Check if auth headers are expired (older than 23 hours)
+        isAuthExpired() {
+            if (!this.authHeaders || !this.authHeaders['x-challenge']) return true;
+            
+            const challengeTime = parseInt(this.authHeaders['x-challenge']);
+            const now = Math.floor(Date.now() / 1000);
+            const hoursOld = (now - challengeTime) / 3600;
+            
+            return hoursOld >= 23;
+        },
+        
+        canSave() {
+            return this.hasUnsavedChanges && !this.saving;
+        },
+        
+        canShare() {
+            return this.currentFile && this.currentFile.type === 'collaborative' && this.isAuthenticated;
+        },
+        
+        canDelete() {
+            return this.currentFile && !this.deleting;
+        },
+        
+        canPublish() {
+            return this.content.title.trim() && this.content.body.trim() && this.content.tags.length > 0;
+        },
+        
+        hasValidFilename() {
+            return this.saveForm.filename && this.saveForm.filename.trim().length > 0;
+        },
+        
+        // Show collaborative features only when authenticated
+        showCollaborativeFeatures() {
+            return this.isAuthenticated && !this.isAuthExpired;
+        },
+        
+        recentFiles() {
+            // Combine local and collaborative files, sorted by last modified
+            const allFiles = [
+                ...this.localFiles.map(f => ({ ...f, type: 'local' })),
+                // Only show collaborative docs if authenticated
+                ...(this.showCollaborativeFeatures ? this.collaborativeDocs.map(f => ({ ...f, type: 'collaborative' })) : [])
+            ];
+            
+            return allFiles.sort((a, b) => {
+                const aDate = new Date(a.updatedAt || a.lastModified || 0);
+                const bDate = new Date(b.updatedAt || b.lastModified || 0);
+                return bDate - aDate;
+            }).slice(0, 5); // Show 5 most recent
+        },
+        
+        // Generate permlink from title
+        generatedPermlink() {
+            if (!this.content.title) return '';
+            return this.content.title
+                .toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .trim()
+                .replace(/\s+/g, '-')
+                .substring(0, 255);
+        },
+        
+        // Calculate save as progress based on current step
+        saveAsProgress() {
+            const steps = {
+                'saving_local': 20,
+                'creating_server': 40,
+                'initializing': 60,
+                'copying_content': 80,
+                'finalizing': 100
+            };
+            return steps[this.saveAsProcess.step] || 0;
+        },
+        
+        // Get pending uploads for display
+        pendingUploads() {
+            return this.getPendingUploads();
+        }
+    },
+    
+    methods: {
+        // File integration methods
+        addFileToPost(file) {
+            if (!file) return;
+            
+            // Add file to attachments
+            this.attachedFiles.push(file);
+            
+            // Insert file reference into editor based on file type
+            if (this.editor) {
+                let insertText = '';
+                
+                if (file.type && file.type.startsWith('image/')) {
+                    // Insert image
+                    insertText = `![${file.name}](https://ipfs.dlux.io/ipfs/${file.hash})`;
+                } else if (file.type && file.type.startsWith('video/')) {
+                    // Insert video
+                    insertText = `<video controls>\n  <source src="https://ipfs.dlux.io/ipfs/${file.hash}" type="${file.type}">\n  Your browser does not support the video tag.\n</video>`;
+                } else {
+                    // Insert file link
+                    insertText = `[📁 ${file.name}](https://ipfs.dlux.io/ipfs/${file.hash})`;
+                }
+                
+                // Insert at current cursor position
+                this.editor.chain().focus().insertContent(insertText + '\n\n').run();
+                this.hasUnsavedChanges = true;
+            }
+            
+            console.log('📎 File added to post:', file.name);
+        },
+        
+        removeAttachedFile(index) {
+            this.attachedFiles.splice(index, 1);
+            this.hasUnsavedChanges = true;
+        },
+        
+        // Tag management
+        addTag() {
+            if (this.tagInput.trim() && !this.content.tags.includes(this.tagInput.trim())) {
+                this.content.tags.push(this.tagInput.trim().toLowerCase());
+                this.tagInput = '';
+                this.hasUnsavedChanges = true;
+            }
+        },
+        
+        removeTag(index) {
+            this.content.tags.splice(index, 1);
+            this.hasUnsavedChanges = true;
+        },
+        
+        addTagDirect(tag) {
+            if (!this.content.tags.includes(tag)) {
+                this.content.tags.push(tag);
+                this.hasUnsavedChanges = true;
+            }
+        },
+        
+        // Beneficiaries management
+        addBeneficiary() {
+            const account = this.beneficiaryInput.account.replace('@', '').trim();
+            const percent = parseFloat(this.beneficiaryInput.percent);
+            
+            if (!account || !percent || percent <= 0 || percent > 100) {
+                alert('Please enter a valid account name and percentage (0.01-100%)');
+                return;
+            }
+            
+            // Check if account already exists
+            const existing = this.publishForm.beneficiaries.find(b => b.account === account);
+            if (existing) {
+                existing.weight = Math.round(percent * 100);
+            } else {
+                this.publishForm.beneficiaries.push({
+                    account: account,
+                    weight: Math.round(percent * 100)
+                });
+            }
+            
+            // Reset input
+            this.beneficiaryInput.account = '';
+            this.beneficiaryInput.percent = 1.0;
+            this.hasUnsavedChanges = true;
+        },
+        
+        removeBeneficiary(index) {
+            this.publishForm.beneficiaries.splice(index, 1);
+            this.hasUnsavedChanges = true;
+        },
+        
+        // Custom JSON handling
+        validateCustomJson() {
+            if (!this.customJsonString.trim()) {
+                this.customJsonError = '';
+                return;
+            }
+            
+            try {
+                JSON.parse(this.customJsonString);
+                this.customJsonError = '';
+                this.content.custom_json = JSON.parse(this.customJsonString);
+                this.hasUnsavedChanges = true;
+            } catch (error) {
+                this.customJsonError = error.message;
+            }
+        },
+        
+        // Permlink management  
+        togglePermlinkEditor() {
+            this.showPermlinkEditor = !this.showPermlinkEditor;
+            if (this.showPermlinkEditor && this.permlinkEditor) {
+                this.$nextTick(() => {
+                    this.permlinkEditor.commands.focus();
+                });
+            }
+        },
+        
+        useGeneratedPermlink() {
+            this.content.permlink = this.generatedPermlink;
+            if (this.permlinkEditor) {
+                this.permlinkEditor.commands.setContent(this.generatedPermlink);
+            }
+            this.hasUnsavedChanges = true;
+        },
+        
+        // Publishing
+        async publishPost() {
+            if (!this.canPublish) {
+                alert('Please fill in title, content, and at least one tag before publishing.');
+                return;
+            }
+            
+            this.showPublishModal = true;
+        },
+        
+        async performPublish() {
+            this.publishing = true;
+            
+            try {
+                const postData = {
+                    title: this.content.title,
+                    body: this.content.body,
+                    tags: this.content.tags,
+                    permlink: this.content.permlink || this.generatedPermlink,
+                    beneficiaries: this.publishForm.beneficiaries,
+                    custom_json: {
+                        ...this.postCustomJson,
+                        ...this.content.custom_json,
+                        attachedFiles: this.attachedFiles,
+                        collaborativeDoc: this.currentFile && this.currentFile.type === 'collaborative' ? {
+                            owner: this.currentFile.owner,
+                            permlink: this.currentFile.permlink
+                        } : null
+                    }
+                };
+                
+                // Emit publish event to parent
+                this.$emit('publish-post', postData);
+                
+                this.showPublishModal = false;
+                this.hasUnsavedChanges = false;
+                
+                console.log('📰 Post published:', postData.title);
+                
+            } catch (error) {
+                console.error('Publish failed:', error);
+                alert('Publish failed: ' + error.message);
+            } finally {
+                this.publishing = false;
+            }
+        },
+        
+        // Enhanced content update to emit changes
+        updateContent() {
+            // TEMPORARILY COMMENT OUT TO AVOID CONFLICTS
+            // if (this.editor) {
+            //     this.content.body = this.editor.getHTML();
+            // }
+            
+            // Emit content changes to parent
+            this.$emit('content-changed', {
+                ...this.content,
+                permlink: this.content.permlink || this.generatedPermlink,
+                attachedFiles: this.attachedFiles
+            });
+        },
+        
+        // File Menu Actions
+        async newDocument() {
+            if (this.hasUnsavedChanges) {
+                const confirmResult = await this.confirmUnsavedChanges();
+                if (!confirmResult) return;
+            }
+            
+            // Reset all document state
+            this.currentFile = null;
+            this.isCollaborativeMode = false;
+            this.fileType = 'local';
+            this.content = {
+                title: '',
+                body: '',
+                tags: [],
+                custom_json: {},
+                permlink: '',
+                beneficiaries: []
+            };
+            this.attachedFiles = [];
+            
+            // Reset save form
+            this.saveForm = {
+                filename: '',
+                saveLocally: true,
+                saveToDlux: false,
+                isPublic: false,
+                description: '',
+                isNewDocument: false
+            };
+            
+            // Clean up any collaborative connections
+            this.disconnectCollaboration();
+            
+            // Wait for cleanup to complete
+            await this.$nextTick();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Create fresh standard editor
+            await this.createStandardEditor();
+            this.clearEditor();
+            this.hasUnsavedChanges = false;
+            
+            // Focus on title editor if available
+            if (this.titleEditor) {
+                this.$nextTick(() => {
+                    this.titleEditor.commands.focus();
+                });
+            }
+            
+            console.log('📄 New local document created - ready for editing');
+        },
+        
+        async newCollaborativeDocument() {
+            if (!this.showCollaborativeFeatures) {
+                const confirmAuth = confirm('You need to authenticate to create collaborative documents. Authenticate now?');
+                if (confirmAuth) {
+                    this.requestAuthentication();
+                }
+                return;
+            }
+            
+            if (this.hasUnsavedChanges) {
+                const confirmResult = await this.confirmUnsavedChanges();
+                if (!confirmResult) return;
+            }
+            
+            // Show save modal for new collaborative document
+            this.saveForm = {
+                filename: `collaboration-${new Date().toISOString().split('T')[0]}`,
+                saveLocally: false,
+                saveToDlux: true,
+                isPublic: false,
+                description: 'New collaborative document',
+                isNewDocument: true
+            };
+            
+            this.showSaveModal = true;
+            
+            console.log('🤝 Creating new collaborative document...');
+        },
+        
+        async loadDocument(file) {
+            if (this.hasUnsavedChanges) {
+                const confirm = await this.confirmUnsavedChanges();
+                if (!confirm) return;
+            }
+            
+            this.loading = true;
+            
+            try {
+                if (file.type === 'local') {
+                    await this.loadLocalFile(file);
+                } else {
+                    await this.loadCollaborativeFile(file);
+                }
+                this.showLoadModal = false;
+                this.hasUnsavedChanges = false;
+            } catch (error) {
+                console.error('Failed to load document:', error);
+                alert('Failed to load document: ' + error.message);
+            } finally {
+                this.loading = false;
+            }
+        },
+        
+        async saveDocument() {
+            if (!this.hasUnsavedChanges && this.currentFile) {
+                // Quick save existing file
+                if (this.currentFile.type === 'local') {
+                    await this.saveToLocalStorage();
+                } else {
+                    await this.saveToCollaborativeDoc();
+                }
+            } else {
+                // Show save dialog
+                this.showSaveModal = true;
+                if (this.currentFile) {
+                    this.saveForm.filename = this.currentFile.name || this.currentFile.permlink || '';
+                }
+            }
+        },
+        
+        async saveAsDocument() {
+            // Force showing save modal for "Save As"
+            this.showSaveModal = true;
+            this.saveForm.filename = ''; // Clear filename to force new name
+            this.saveForm.isNewDocument = true; // Flag to indicate this is a "Save As"
+        },
+        
+        async performSaveAs() {
+            const documentName = this.saveForm.filename || `document_${Date.now()}`;
+            
+            // Initialize save as process
+            this.saveAsProcess = {
+                inProgress: true,
+                step: 'saving_local',
+                message: 'Creating local backup...',
+                localBackupId: null,
+                serverDocId: null,
+                error: null
+            };
+            
+            try {
+                // Step 1: Save content locally as backup
+                const content = this.getEditorContent();
+                const backupId = `backup_${Date.now()}_${documentName}`;
+                
+                localStorage.setItem(`dlux_tiptap_backup_${backupId}`, JSON.stringify({
+                    ...content,
+                    originalFile: this.currentFile,
+                    timestamp: new Date().toISOString(),
+                    isBackup: true
+                }));
+                
+                this.saveAsProcess.localBackupId = backupId;
+                this.saveAsProcess.step = 'creating_server';
+                this.saveAsProcess.message = 'Creating document on server...';
+                
+                // Step 2: Create new document on server - API now auto-generates permlinks
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout for document creation
+                
+                const response = await fetch('https://data.dlux.io/api/collaboration/documents', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...this.authHeaders
+                    },
+                    body: JSON.stringify({
+                        documentName: documentName, // Changed from permlink to documentName
+                        isPublic: this.saveForm.isPublic,
+                        title: content.title || documentName,
+                        description: this.saveForm.description || 'Document created with DLUX TipTap Editor'
+                    }),
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    throw new Error(`Failed to create server document: ${errorData.error || response.statusText}`);
+                }
+                
+                const docData = await response.json();
+                console.log('📄 Server response:', docData);
+                
+                // The API now returns the full document object in docData.document
+                const serverDoc = docData.document || docData;
+                this.saveAsProcess.serverDocId = serverDoc;
+                this.saveAsProcess.step = 'initializing';
+                this.saveAsProcess.message = 'Initializing collaborative document...';
+                
+                // Step 3: Initialize collaboration with the new document
+                try {
+                    await this.initializeCollaboration(serverDoc);
+                } catch (collabError) {
+                    console.warn('⚠️ Initial collaboration setup failed, attempting recovery:', collabError);
+                    
+                    // If we get a Y.js type conflict, try with a longer delay and full cleanup
+                    if (collabError.message.includes('already been defined') || 
+                        collabError.message.includes('different constructor')) {
+                        console.log('🔄 Y.js type conflict detected, attempting full cleanup and retry...');
+                        
+                        // Force complete cleanup
+                        this.disconnectCollaboration();
+                        await new Promise(resolve => setTimeout(resolve, 1000)); // Longer delay
+                        
+                        // Try again with fresh initialization
+                        try {
+                            await this.initializeCollaboration(serverDoc);
+                            console.log('✅ Collaboration retry successful');
+                        } catch (retryError) {
+                            console.error('❌ Collaboration retry also failed:', retryError);
+                            throw new Error(`Collaboration setup failed: ${retryError.message}. Try refreshing the page and attempting again.`);
+                        }
+                    } else {
+                        throw collabError;
+                    }
+                }
+                
+                // Wait for connection to be established
+                let retries = 0;
+                const maxRetries = 10;
+                while (this.connectionStatus !== 'connected' && retries < maxRetries) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    retries++;
+                }
+                
+                if (this.connectionStatus !== 'connected') {
+                    throw new Error('Failed to connect to collaborative document');
+                }
+                
+                this.saveAsProcess.step = 'copying_content';
+                this.saveAsProcess.message = 'Copying content to collaborative document...';
+                
+                // Step 4: Wait for sync and then set content
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Give Y.js time to sync
+                
+                // Set content in the collaborative editors
+                if (this.titleEditor && content.title) {
+                    this.titleEditor.commands.setContent(content.title);
+                }
+                
+                if (this.bodyEditor && content.body) {
+                    this.bodyEditor.commands.setContent(content.body);
+                }
+                
+                // Update the current file reference
+                this.currentFile = {
+                    ...serverDoc,
+                    type: 'collaborative'
+                };
+                this.fileType = 'collaborative';
+                this.isCollaborativeMode = true;
+                
+                // Step 5: Final cleanup
+                this.saveAsProcess.step = 'finalizing';
+                this.saveAsProcess.message = 'Finalizing...';
+                
+                await this.loadCollaborativeDocs();
+                
+                // Wait a bit for everything to settle
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Remove local backup since everything succeeded
+                localStorage.removeItem(`dlux_tiptap_backup_${backupId}`);
+                
+                console.log('✅ Save As completed successfully:', documentName);
+                
+            } catch (error) {
+                console.error('❌ Save As failed:', error);
+                
+                // Store error for display
+                this.saveAsProcess.error = error.message;
+                
+                // Keep local backup since server operation failed
+                if (this.saveAsProcess.localBackupId) {
+                    console.log('💾 Local backup preserved:', this.saveAsProcess.localBackupId);
+                    
+                    // Add backup to pending uploads list
+                    const pendingBackups = JSON.parse(localStorage.getItem('dlux_pending_uploads') || '[]');
+                    pendingBackups.push({
+                        id: this.saveAsProcess.localBackupId,
+                        filename: documentName,
+                        timestamp: new Date().toISOString(),
+                        type: 'collaborative_backup',
+                        error: error.message
+                    });
+                    localStorage.setItem('dlux_pending_uploads', JSON.stringify(pendingBackups));
+                }
+                
+                throw error;
+            } finally {
+                // Reset save as process state
+                setTimeout(() => {
+                    this.saveAsProcess = {
+                        inProgress: false,
+                        step: '',
+                        message: '',
+                        localBackupId: null,
+                        serverDocId: null,
+                        error: null
+                    };
+                }, 3000); // Keep visible for 3 seconds
+            }
+        },
+        
+        async performSave() {
+            if (!this.hasValidFilename) return;
+            
+            this.saving = true;
+            
+            try {
+                // Check if this is a "Save As" to collaborative doc
+                if (this.saveForm.isNewDocument && this.saveForm.saveToDlux) {
+                    await this.performSaveAs();
+                } else {
+                    // Regular save
+                    if (this.saveForm.saveLocally) {
+                        await this.saveToLocalStorage();
+                    }
+                    
+                    if (this.saveForm.saveToDlux) {
+                        await this.saveToCollaborativeDoc();
+                    }
+                }
+                
+                this.showSaveModal = false;
+                this.hasUnsavedChanges = false;
+                this.saveForm.filename = '';
+                this.saveForm.isNewDocument = false;
+            } catch (error) {
+                console.error('Save failed:', error);
+                alert('Save failed: ' + error.message);
+            } finally {
+                this.saving = false;
+            }
+        },
+        
+        async shareDocument() {
+            if (!this.canShare) {
+                // If not authenticated, prompt to authenticate
+                if (!this.isAuthenticated || this.isAuthExpired) {
+                    const confirmAuth = confirm('You need to authenticate to access collaborative features. Authenticate now?');
+                    if (confirmAuth) {
+                        this.requestAuthentication();
+                    }
+                    return;
+                }
+                
+                // If local file, prompt to save to DLUX first
+                if (this.currentFile && this.currentFile.type === 'local') {
+                    this.saveForm.saveToDlux = true;
+                    this.saveForm.saveLocally = false;
+                    this.showSaveModal = true;
+                    return;
+                }
+                
+                alert('Please save to DLUX collaborative documents first to enable sharing.');
+                return;
+            }
+            
+            this.showShareModal = true;
+        },
+        
+        async performShare() {
+            if (!this.shareForm.username.trim()) return;
+            
+            try {
+                const response = await fetch(`https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...this.authHeaders
+                    },
+                    body: JSON.stringify({
+                        targetAccount: this.shareForm.username.trim(),
+                        permissionType: this.shareForm.permission
+                    })
+                });
+                
+                if (response.ok) {
+                    this.showShareModal = false;
+                    this.shareForm.username = '';
+                    alert(`Document shared with @${this.shareForm.username}!`);
+                } else {
+                    throw new Error('Failed to share document');
+                }
+            } catch (error) {
+                console.error('Share failed:', error);
+                alert('Share failed: ' + error.message);
+            }
+        },
+        
+        async deleteDocument() {
+            if (!this.canDelete) return;
+            
+            const confirmMsg = this.currentFile.type === 'local' 
+                ? `Delete local file "${this.currentFile.name}"?`
+                : `Delete collaborative document "${this.currentFile.permlink}"? This action cannot be undone.`;
+                
+            if (!confirm(confirmMsg)) return;
+            
+            this.deleting = true;
+            
+            try {
+                if (this.currentFile.type === 'local') {
+                    await this.deleteLocalFile();
+                } else {
+                    await this.deleteCollaborativeDoc();
+                }
+                
+                // Create new document after deletion
+                await this.newDocument();
+            } catch (error) {
+                console.error('Delete failed:', error);
+                alert('Delete failed: ' + error.message);
+            } finally {
+                this.deleting = false;
+            }
+        },
+        
+        // Local Storage Operations
+        async loadLocalFiles() {
+            try {
+                const files = JSON.parse(localStorage.getItem('dlux_tiptap_files') || '[]');
+                this.localFiles = files;
+            } catch (error) {
+                console.error('Failed to load local files:', error);
+                this.localFiles = [];
+            }
+        },
+        
+        async loadLocalFile(file) {
+            const content = JSON.parse(localStorage.getItem(`dlux_tiptap_file_${file.id}`) || '{}');
+            
+            this.currentFile = file;
+            this.fileType = 'local';
+            this.isCollaborativeMode = false;
+            this.content = content;
+            
+            this.disconnectCollaboration();
+            await this.createStandardEditor();
+            this.setEditorContent(content);
+            
+            console.log('📂 Local file loaded:', file.name);
+        },
+        
+        async saveToLocalStorage() {
+            const content = this.getEditorContent();
+            const filename = this.saveForm.filename || `document_${Date.now()}`;
+            
+            // Generate ID if new file
+            const fileId = this.currentFile?.id || `local_${Date.now()}`;
+            
+            // Save content
+            localStorage.setItem(`dlux_tiptap_file_${fileId}`, JSON.stringify(content));
+            
+            // Update file index
+            const files = JSON.parse(localStorage.getItem('dlux_tiptap_files') || '[]');
+            const existingIndex = files.findIndex(f => f.id === fileId);
+            
+            const fileInfo = {
+                id: fileId,
+                name: filename,
+                type: 'local',
+                lastModified: new Date().toISOString(),
+                size: JSON.stringify(content).length
+            };
+            
+            if (existingIndex >= 0) {
+                files[existingIndex] = fileInfo;
+            } else {
+                files.push(fileInfo);
+            }
+            
+            localStorage.setItem('dlux_tiptap_files', JSON.stringify(files));
+            
+            this.currentFile = fileInfo;
+            this.fileType = 'local';
+            await this.loadLocalFiles();
+            
+            console.log('💾 Saved to local storage:', filename);
+        },
+        
+        async deleteLocalFile(fileId = null) {
+            const targetFileId = fileId || this.currentFile?.id;
+            
+            if (!targetFileId) {
+                console.error('No file ID provided for deletion');
+                return;
+            }
+            
+            // Remove file content
+            localStorage.removeItem(`dlux_tiptap_file_${targetFileId}`);
+            
+            // Remove from index
+            const files = JSON.parse(localStorage.getItem('dlux_tiptap_files') || '[]');
+            const updatedFiles = files.filter(f => f.id !== targetFileId);
+            localStorage.setItem('dlux_tiptap_files', JSON.stringify(updatedFiles));
+            
+            await this.loadLocalFiles();
+            console.log('🗑️ Local file deleted:', targetFileId);
+            
+            // If we deleted the currently loaded file, create a new document
+            if (this.currentFile?.id === targetFileId) {
+                await this.newDocument();
+            }
+        },
+        
+        // Collaborative Document Operations
+        async loadCollaborativeDocs() {
+            if (!this.showCollaborativeFeatures) {
+                console.log('Not authenticated for collaborative features');
+                this.collaborativeDocs = [];
+                return;
+            }
+            
+            this.loadingDocs = true;
+            
+            try {
+                const response = await fetch('https://data.dlux.io/api/collaboration/documents', {
+                    headers: this.authHeaders
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    this.collaborativeDocs = data.documents || [];
+                } else {
+                    console.error('Failed to load collaborative documents:', response.statusText);
+                    if (response.status === 401) {
+                        console.log('Authentication required for collaborative documents');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading collaborative documents:', error);
+            } finally {
+                this.loadingDocs = false;
+            }
+        },
+        
+        async loadCollaborativeFile(doc) {
+            // CRITICAL: Clean up existing editors and connections first
+            this.disconnectCollaboration();
+            
+            // Add a longer delay to ensure complete cleanup
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            this.currentFile = {
+                ...doc,
+                type: 'collaborative'
+            };
+            this.fileType = 'collaborative';
+            this.isCollaborativeMode = true;
+            
+            // Load content structure
+            this.content = {
+                title: doc.documentName || doc.permlink.replace(/-/g, ' '),
+                body: '',
+                tags: ['dlux', 'collaboration'],
+                custom_json: {
+                    app: 'dlux/0.1.0',
+                    authors: [doc.owner]
+                }
+            };
+            
+            try {
+                await this.initializeCollaboration(doc);
+                console.log('🤝 Collaborative document loaded:', doc.permlink);
+            } catch (error) {
+                console.error('❌ Failed to load collaborative document:', error);
+                
+                // Enhanced error handling for different types of failures
+                if (error.message.includes('different constructor') || 
+                    error.message.includes('already been defined') ||
+                    error.message.includes('mismatched transaction')) {
+                    console.log('🔄 Schema/type conflict detected, attempting clean retry...');
+                    
+                    // Force a complete cleanup
+                    this.disconnectCollaboration();
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    try {
+                        // Try again with a fresh start
+                        await this.initializeCollaboration(doc);
+                        console.log('✅ Collaborative document loaded on retry:', doc.permlink);
+                        return; // Success on retry
+                    } catch (retryError) {
+                        console.error('❌ Retry also failed:', retryError);
+                        // Fall through to fallback mode
+                    }
+                }
+                
+                // Fall back to standard editor if collaboration fails
+                console.log('🔄 Falling back to standard editor due to collaboration error');
+                this.fileType = 'local';
+                this.isCollaborativeMode = false;
+                
+                try {
+                    await this.createStandardEditor();
+                    
+                    // Try to load content safely in standard mode
+                    console.log('📄 Loading content in standard editor mode...');
+                    await new Promise(resolve => setTimeout(resolve, 100)); // Small delay for editor initialization
+                    this.setEditorContent(this.content);
+                    
+                    console.log('✅ Successfully loaded in standard editor mode');
+                } catch (fallbackError) {
+                    console.error('❌ Standard editor fallback also failed:', fallbackError);
+                    
+                    // Ultimate fallback - create minimal content
+                    this.content = {
+                        title: doc.permlink.replace(/-/g, ' '),
+                        body: '<p>This document could not be loaded properly. There may be a compatibility issue with the content format.</p>',
+                        tags: ['dlux', 'collaboration'],
+                        custom_json: { app: 'dlux/0.1.0', authors: [doc.owner] },
+                        permlink: '',
+                        beneficiaries: []
+                    };
+                }
+                
+                // Show user-friendly error message
+                this.connectionMessage = `Collaboration failed: ${error.message}. Using offline mode.`;
+                this.connectionStatus = 'disconnected';
+                
+                // Show user notification
+                console.warn('Operating in offline mode due to collaboration error');
+                alert(`⚠️ Collaborative mode failed for this document.\n\nError: ${error.message}\n\nThe document has been loaded in offline mode. You can still edit it, but changes won't be synchronized with other users.`);
+            }
+        },
+        
+        async saveToCollaborativeDoc() {
+            if (!this.showCollaborativeFeatures) {
+                const confirmAuth = confirm('You need to authenticate to save collaborative documents. Authenticate now?');
+                if (confirmAuth) {
+                    this.requestAuthentication();
+                }
+                return;
+            }
+            
+            const content = this.getEditorContent();
+            const documentName = this.saveForm.filename || `document_${Date.now()}`;
+            
+            // Try saving with retry logic and better error handling
+            const maxRetries = 3;
+            let lastError = null;
+            
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    console.log(`💾 Attempting to save to collaborative documents (attempt ${attempt}/${maxRetries})`);
+                    
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+                    
+                    const response = await fetch('https://data.dlux.io/api/collaboration/documents', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...this.authHeaders
+                        },
+                        body: JSON.stringify({
+                            documentName: documentName, // Changed from permlink to documentName
+                            isPublic: this.saveForm.isPublic,
+                            title: content.title || documentName,
+                            description: this.saveForm.description || 'Document created with DLUX TipTap Editor'
+                        }),
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    
+                    if (response.ok) {
+                        const docData = await response.json();
+                        // The API now returns the document in docData.document
+                        const serverDoc = docData.document || docData;
+                        this.currentFile = {
+                            ...serverDoc,
+                            type: 'collaborative'
+                        };
+                        this.fileType = 'collaborative';
+                        this.isCollaborativeMode = true;
+                        
+                        await this.loadCollaborativeDocs();
+                        await this.initializeCollaboration(this.currentFile);
+                        
+                        console.log('☁️ Saved to collaborative documents:', documentName);
+                        return; // Success - exit retry loop
+                        
+                    } else {
+                        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                        
+                        if (response.status === 401) {
+                            throw new Error('Authentication expired. Please authenticate again.');
+                        } else if (response.status === 503 || response.status === 502) {
+                            throw new Error('Server temporarily unavailable. Please try again.');
+                        } else if (response.status >= 500) {
+                            throw new Error(`Server error (${response.status}). Please try again.`);
+                        } else {
+                            throw new Error(`Failed to create collaborative document: ${errorData.error || response.statusText}`);
+                        }
+                    }
+                    
+                } catch (error) {
+                    lastError = error;
+                    console.error(`❌ Save attempt ${attempt} failed:`, error);
+                    
+                    // Don't retry authentication errors
+                    if (error.message.includes('Authentication')) {
+                        const confirmAuth = confirm('Authentication required. Authenticate now?');
+                        if (confirmAuth) {
+                            this.requestAuthentication();
+                        }
+                        throw error;
+                    }
+                    
+                    // Don't retry client errors (400-499 except 401)
+                    if (error.name === 'TypeError' && error.message.includes('NetworkError')) {
+                        // Network error - could be temporary, continue retrying
+                    } else if (error.message.includes('Server temporarily unavailable') || 
+                              error.message.includes('Server error') ||
+                              error.name === 'AbortError') {
+                        // Server errors or timeouts - continue retrying
+                    } else {
+                        // Other errors - don't retry
+                        throw error;
+                    }
+                    
+                    // Wait before retry (exponential backoff)
+                    if (attempt < maxRetries) {
+                        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000); // 1s, 2s, 4s max
+                        console.log(`⏳ Waiting ${delay}ms before retry...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+            }
+            
+            // If we get here, all retries failed
+            console.error('❌ All save attempts failed');
+            
+            // Offer fallback to local storage
+            const fallbackToLocal = confirm(
+                `Failed to save to collaborative documents after ${maxRetries} attempts.\n\n` +
+                `Error: ${lastError.message}\n\n` +
+                `Would you like to save locally instead?`
+            );
+            
+            if (fallbackToLocal) {
+                console.log('💾 Falling back to local storage save');
+                this.saveForm.saveLocally = true;
+                this.saveForm.saveToDlux = false;
+                await this.saveToLocalStorage();
+                
+                // Show success message with warning
+                alert(`Document saved locally as "${documentName}".\n\nNote: This is not a collaborative document. You can try saving to DLUX later when the service is available.`);
+            } else {
+                throw lastError;
+            }
+        },
+        
+        async deleteCollaborativeDoc(doc = null) {
+            const targetDoc = doc || this.currentFile;
+            
+            if (!targetDoc || !targetDoc.owner || !targetDoc.permlink) {
+                console.error('No valid collaborative document provided for deletion');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`https://data.dlux.io/api/collaboration/documents/${targetDoc.owner}/${targetDoc.permlink}`, {
+                    method: 'DELETE',
+                    headers: this.authHeaders
+                });
+                
+                if (response.ok) {
+                    await this.loadCollaborativeDocs();
+                    console.log('🗑️ Collaborative document deleted:', targetDoc.permlink);
+                    
+                    // If we deleted the currently loaded file, create a new document
+                    if (this.currentFile?.permlink === targetDoc.permlink && this.currentFile?.owner === targetDoc.owner) {
+                        await this.newDocument();
+                    }
+                } else {
+                    const errorText = await response.text().catch(() => 'Unknown error');
+                    throw new Error(`Failed to delete collaborative document: ${errorText}`);
+                }
+            } catch (error) {
+                console.error('Failed to delete collaborative document:', error);
+                
+                if (error.message.includes('NetworkError')) {
+                    throw new Error('Network error: Unable to connect to server. Please check your connection and try again.');
+                }
+                
+                throw error;
+            }
+        },
+        
+        // Editor Management
+        async createStandardEditor() {
+            // Destroy existing editors and clean up DOM
+            if (this.titleEditor) this.titleEditor.destroy();
+            if (this.permlinkEditor) this.permlinkEditor.destroy();
+            if (this.bodyEditor) this.bodyEditor.destroy();
+            
+            // Clean up DOM elements before creating new editors
+            this.cleanupDOMElements();
+            
+            // Wait for DOM cleanup to complete
+            await this.$nextTick();
+            
+            const { Editor } = await import('https://esm.sh/@tiptap/core@3.0.0');
+            const StarterKit = await import('https://esm.sh/@tiptap/starter-kit@3.0.0');
+            const Placeholder = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
+            
+            // Import the same extensions as collaborative mode for schema compatibility
+            const Link = await import('https://esm.sh/@tiptap/extension-link@3.0.0');
+            const Image = await import('https://esm.sh/@tiptap/extension-image@3.0.0');
+            const Youtube = await import('https://esm.sh/@tiptap/extension-youtube@3.0.0');
+            const Table = await import('https://esm.sh/@tiptap/extension-table@3.0.0');
+            const TableRow = await import('https://esm.sh/@tiptap/extension-table-row@3.0.0');
+            const TableCell = await import('https://esm.sh/@tiptap/extension-table-cell@3.0.0');
+            const TableHeader = await import('https://esm.sh/@tiptap/extension-table-header@3.0.0');
+            
+            // Create title editor (simple, single-line)
+            if (this.$refs.titleEditor) {
+                this.titleEditor = new Editor({
+                    element: this.$refs.titleEditor,
+                    extensions: [
+                        StarterKit.default.configure({
+                            heading: false,
+                            history: false,
+                            bulletList: false,
+                            orderedList: false,
+                            blockquote: false,
+                            codeBlock: false,
+                            horizontalRule: false
+                        }),
+                        Placeholder.default.configure({
+                            placeholder: 'Enter your post title...',
+                        }),
+                    ],
+                    content: this.content.title,
+                    editorProps: {
+                        attributes: {
+                            class: 'form-control bg-transparent text-white border-0 fs-4 fw-bold',
+                        },
+                        handleKeyDown: (view, event) => {
+                            if (event.key === 'Enter') {
+                                event.preventDefault();
+                                if (this.bodyEditor) {
+                                    this.bodyEditor.commands.focus();
+                                }
+                                return true;
+                            }
+                            return false;
+                        }
+                    },
+                    // NO onUpdate - avoid reactive conflicts
+                });
+            }
+            
+            // Create permlink editor (simple, single-line, alphanumeric + dashes)
+            if (this.$refs.permlinkEditor) {
+                this.permlinkEditor = new Editor({
+                    element: this.$refs.permlinkEditor,
+                    extensions: [
+                        StarterKit.default.configure({
+                            heading: false,
+                            bulletList: false,
+                            orderedList: false,
+                            blockquote: false,
+                            codeBlock: false,
+                            horizontalRule: false,
+                            history: true
+                        }),
+                        Placeholder.default.configure({
+                            placeholder: 'custom-url-slug',
+                        }),
+                    ],
+                    content: this.content.permlink,
+                    editorProps: {
+                        attributes: {
+                            class: 'form-control bg-transparent text-white border-0 font-monospace',
+                        },
+                        handleKeyDown: (view, event) => {
+                            // Only allow alphanumeric and dashes
+                            if (event.key.length === 1 && !/[a-z0-9\-]/.test(event.key)) {
+                                event.preventDefault();
+                                return true;
+                            }
+                            if (event.key === 'Enter') {
+                                event.preventDefault();
+                                this.showPermlinkEditor = false;
+                                return true;
+                            }
+                            return false;
+                        }
+                    },
+                    // NO onUpdate - avoid reactive conflicts
+                });
+            }
+            
+            // Create body editor (full rich text with same extensions as collaborative mode)
+            if (this.$refs.bodyEditor) {
+                this.bodyEditor = new Editor({
+                    element: this.$refs.bodyEditor,
+                    extensions: [
+                        StarterKit.default.configure({
+                            history: true, // Enable history for non-collaborative
+                        }),
+                        Placeholder.default.configure({
+                            placeholder: 'Start writing your post content...',
+                        }),
+                        Link.default.configure({
+                            openOnClick: false,
+                            HTMLAttributes: {
+                                target: '_blank',
+                            },
+                        }),
+                        Image.default.configure({
+                            HTMLAttributes: {
+                                class: 'img-fluid',
+                            },
+                        }),
+                        Youtube.default.configure({
+                            width: 480,
+                            height: 320,
+                            ccLanguage: 'en',
+                            interfaceLanguage: 'en',
+                        }),
+                        Table.default.configure({
+                            resizable: true,
+                        }),
+                        TableRow.default,
+                        TableHeader.default,
+                        TableCell.default,
+                    ],
+                    content: this.content.body,
+                    editorProps: {
+                        attributes: {
+                            class: 'form-control bg-transparent text-white border-0',
+                        }
+                    },
+                    // NO onUpdate - avoid reactive conflicts
+                });
+            }
+            
+            console.log('📝 Standard editors created');
+        },
+        
+        async initializeCollaboration(doc) {
+            console.log('🚀 Initializing collaboration for document:', doc, 'Component ID:', this.componentId);
+            
+            // Prevent multiple simultaneous initializations
+            if (this.isInitializing) {
+                console.warn('⚠️ Collaboration initialization already in progress, aborting');
+                throw new Error('Collaboration initialization already in progress');
+            }
+            
+            this.isInitializing = true;
+            
+            // Check for global collaborative instance conflicts
+            if (window.dluxCollaborativeInstance && window.dluxCollaborativeInstance !== this.componentId) {
+                console.warn('⚠️ Another collaborative instance detected, cleaning up:', window.dluxCollaborativeInstance);
+                // Force cleanup the previous instance
+                if (window.dluxCollaborativeCleanup) {
+                    try {
+                        await window.dluxCollaborativeCleanup();
+                    } catch (error) {
+                        console.warn('Error cleaning up previous instance:', error);
+                    }
+                }
+            }
+            
+            // Register this instance as the active collaborative instance
+            window.dluxCollaborativeInstance = this.componentId;
+            window.dluxCollaborativeCleanup = () => this.disconnectCollaboration();
+            
+            // CRITICAL: Clean up existing editors and connections first
+            this.disconnectCollaboration();
+            
+            // Wait for DOM cleanup and Vue reactivity to complete
+            await this.$nextTick();
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // Force cleanup any lingering Y.js global state
+            if (window.Y && window.Y.cleanupGlobal) {
+                try {
+                    window.Y.cleanupGlobal();
+                } catch (error) {
+                    console.warn('Error cleaning up Y.js global state:', error);
+                }
+            }
+            
+            const bundle = window.TiptapCollaboration.default || window.TiptapCollaboration;
+            
+            if (!bundle) {
+                console.error('TipTap bundle not loaded');
+                this.connectionStatus = 'disconnected';
+                this.connectionMessage = 'Error: TipTap bundle not loaded';
+                return;
+            }
+            
+            const { Editor, StarterKit, Y, HocuspocusProvider, Collaboration, CollaborationCursor } = bundle;
+            
+            try {
+                // Create single Y.js document for both fields
+                this.ydoc = new Y.Doc();
+                
+                // Setup WebSocket provider FIRST to sync existing document state
+                const authToken = JSON.stringify({
+                    account: this.authHeaders['x-account'],
+                    signature: this.authHeaders['x-signature'],
+                    challenge: this.authHeaders['x-challenge'],
+                    pubkey: this.authHeaders['x-pubkey']
+                });
+                
+                const wsUrl = `${this.collaborationUrl}/${doc.owner}/${doc.permlink}`;
+                
+                this.provider = new HocuspocusProvider({
+                    url: wsUrl,
+                    name: `${doc.owner}/${doc.permlink}`,
+                    document: this.ydoc,
+                    token: authToken,
+                    onConnect: () => {
+                        console.log('✅ Connected to collaboration server');
+                        this.connectionStatus = 'connected';
+                        this.connectionMessage = 'Connected - Real-time collaboration active';
+                    },
+                    onDisconnect: ({ event }) => {
+                        console.log('❌ Disconnected from collaboration server');
+                        this.connectionStatus = 'disconnected';
+                        this.connectionMessage = 'Disconnected from server';
+                    },
+                    onSynced: ({ synced }) => {
+                        if (synced) {
+                            console.log('📡 Document synchronized');
+                            this.connectionMessage = 'Connected - Document synchronized';
+                        }
+                    },
+                    onAuthenticationFailed: ({ reason }) => {
+                        console.error('🔐 Authentication failed:', reason);
+                        this.connectionStatus = 'disconnected';
+                        this.connectionMessage = `Authentication failed: ${reason}`;
+                    }
+                });
+                
+                // Wait for initial sync to complete before accessing/creating types
+                await new Promise(resolve => {
+                    if (this.provider.synced) {
+                        resolve();
+                    } else {
+                        this.provider.on('synced', resolve);
+                        // Fallback timeout to prevent hanging
+                        setTimeout(resolve, 5000);
+                    }
+                });
+                
+                // Now safely handle Y.js shared types after sync
+                console.log('📋 Checking existing Y.js types after sync:', {
+                    shareKeys: Array.from(this.ydoc.share.keys()),
+                    shareEntries: Array.from(this.ydoc.share.entries()).map(([key, type]) => [key, type.constructor.name])
+                });
+                
+                // Use consistent field names based on document - all tabs editing the same document should use the same field names
+                let titleFieldName = 'title';
+                let bodyFieldName = 'body';
+                
+                console.log('📝 Using standard field names for collaboration:', { titleFieldName, bodyFieldName });
+                
+                // Get or create shared types (Y.js handles conflicts automatically)
+                let titleText, bodyText;
+                try {
+                    // Get the shared types - Y.js will create them if they don't exist
+                    titleText = this.ydoc.getXmlFragment(titleFieldName);
+                    bodyText = this.ydoc.getXmlFragment(bodyFieldName);
+                    
+                    console.log('📝 Y.js shared types ready:', {
+                        titleField: titleFieldName,
+                        titleReady: !!titleText,
+                        titleConstructor: titleText.constructor.name,
+                        bodyField: bodyFieldName,
+                        bodyReady: !!bodyText,
+                        bodyConstructor: bodyText.constructor.name,
+                        shareKeys: Array.from(this.ydoc.share.keys())
+                    });
+                    
+                } catch (typeError) {
+                    console.error('❌ Failed to setup Y.js types:', typeError);
+                    throw new Error(`Y.js type setup failed: ${typeError.message}`);
+                }
+                
+                // Create title editor (simple single-line)
+                try {
+                    this.titleEditor = new Editor({
+                        element: this.$refs.titleEditor,
+                        extensions: [
+                            StarterKit.configure({
+                                heading: false,
+                                bulletList: false,
+                                orderedList: false,
+                                blockquote: false,
+                                codeBlock: false,
+                                horizontalRule: false,
+                                history: false // Disable history for collaborative mode
+                            }),
+                            Collaboration.configure({
+                                document: this.ydoc,
+                                field: titleFieldName // Use unique field name to prevent conflicts
+                            }),
+                            CollaborationCursor.configure({
+                                provider: this.provider,
+                                user: {
+                                    name: this.username,
+                                    color: '#f783ac'
+                                }
+                            })
+                        ],
+                        content: '',
+                        editorProps: {
+                            attributes: {
+                                class: 'form-control border-0',
+                                placeholder: 'Enter document title...'
+                            },
+                            handleKeyDown: (view, event) => {
+                                // Prevent Enter key in title (single line)
+                                if (event.key === 'Enter') {
+                                    event.preventDefault();
+                                    // Focus body editor instead
+                                    if (this.bodyEditor) {
+                                        this.bodyEditor.commands.focus();
+                                    }
+                                    return true;
+                                }
+                                return false;
+                            }
+                        },
+                        onCreate: () => {
+                            console.log('📝 Title editor created');
+                        },
+                        onDestroy: () => {
+                            console.log('🗑️ Title editor destroyed');
+                        }
+                    });
+                } catch (titleError) {
+                    console.error('❌ Failed to create title editor:', titleError);
+                    throw new Error(`Title editor creation failed: ${titleError.message}`);
+                }
+                
+                // Create body editor (full rich text with comprehensive extensions)
+                try {
+                    // Import additional extensions for full compatibility
+                    const Placeholder = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
+                    const Link = await import('https://esm.sh/@tiptap/extension-link@3.0.0');
+                    const Image = await import('https://esm.sh/@tiptap/extension-image@3.0.0');
+                    const Youtube = await import('https://esm.sh/@tiptap/extension-youtube@3.0.0');
+                    const Table = await import('https://esm.sh/@tiptap/extension-table@3.0.0');
+                    const TableRow = await import('https://esm.sh/@tiptap/extension-table-row@3.0.0');
+                    const TableCell = await import('https://esm.sh/@tiptap/extension-table-cell@3.0.0');
+                    const TableHeader = await import('https://esm.sh/@tiptap/extension-table-header@3.0.0');
+                    
+                    this.bodyEditor = new Editor({
+                        element: this.$refs.bodyEditor,
+                        extensions: [
+                            StarterKit.configure({
+                                history: false // Disable history for collaborative mode
+                            }),
+                            Placeholder.default.configure({
+                                placeholder: 'Start writing your collaborative document...',
+                            }),
+                            Link.default.configure({
+                                openOnClick: false,
+                                HTMLAttributes: {
+                                    target: '_blank',
+                                },
+                            }),
+                            Image.default.configure({
+                                HTMLAttributes: {
+                                    class: 'img-fluid',
+                                },
+                            }),
+                            Youtube.default.configure({
+                                width: 480,
+                                height: 320,
+                                ccLanguage: 'en',
+                                interfaceLanguage: 'en',
+                            }),
+                            Table.default.configure({
+                                resizable: true,
+                            }),
+                            TableRow.default,
+                            TableHeader.default,
+                            TableCell.default,
+                            Collaboration.configure({
+                                document: this.ydoc,
+                                field: bodyFieldName // Use unique field name to prevent conflicts
+                            }),
+                            CollaborationCursor.configure({
+                                provider: this.provider,
+                                user: {
+                                    name: this.username,
+                                    color: '#f783ac'
+                                }
+                            })
+                        ],
+                        content: '<p>Start writing your document content here...</p>',
+                        editorProps: {
+                            attributes: {
+                                class: 'form-control border-0',
+                            }
+                        },
+                        onCreate: () => {
+                            console.log('📝 Body editor created');
+                        },
+                        onDestroy: () => {
+                            console.log('🗑️ Body editor destroyed');
+                        }
+                    });
+                } catch (bodyError) {
+                    console.error('❌ Failed to create body editor:', bodyError);
+                    // Clean up title editor if body editor fails
+                    if (this.titleEditor) {
+                        this.titleEditor.destroy();
+                        this.titleEditor = null;
+                    }
+                    throw new Error(`Body editor creation failed: ${bodyError.message}`);
+                }
+                
+                console.log('🎉 Collaborative editor initialized with title and body fields');
+                
+            } catch (error) {
+                console.error('❌ Failed to initialize collaborative editor:', error);
+                this.connectionStatus = 'disconnected';
+                this.connectionMessage = `Error: ${error.message}`;
+                
+                // Clean up on failure with DOM cleanup
+                this.disconnectCollaboration();
+                
+                // Additional DOM cleanup on failure
+                await this.$nextTick();
+                this.cleanupDOMElements();
+                
+                // Re-throw to allow caller to handle the error
+                throw error;
+            } finally {
+                this.isInitializing = false;
+            }
+        },
+        
+        disconnectCollaboration() {
+            console.log('🧹 Cleaning up collaborative editor connections...');
+            
+            // Destroy all editors first to prevent them from trying to access destroyed Y.js types
+            if (this.titleEditor) {
+                try {
+                    console.log('🗑️ Destroying title editor');
+                    this.titleEditor.destroy();
+                } catch (error) {
+                    console.warn('Error destroying title editor:', error);
+                }
+                this.titleEditor = null;
+            }
+            if (this.permlinkEditor) {
+                try {
+                    console.log('🗑️ Destroying permlink editor');
+                    this.permlinkEditor.destroy();
+                } catch (error) {
+                    console.warn('Error destroying permlink editor:', error);
+                }
+                this.permlinkEditor = null;
+            }
+            if (this.bodyEditor) {
+                try {
+                    console.log('🗑️ Destroying body editor');
+                    this.bodyEditor.destroy();
+                } catch (error) {
+                    console.warn('Error destroying body editor:', error);
+                }
+                this.bodyEditor = null;
+            }
+            
+            // CRITICAL: Clean up DOM elements completely
+            this.cleanupDOMElements();
+            
+            // Disconnect provider after editors are destroyed
+            if (this.provider) {
+                try {
+                    console.log('🔌 Disconnecting collaboration provider');
+                    this.provider.disconnect();
+                } catch (error) {
+                    console.warn('Error disconnecting provider:', error);
+                }
+                this.provider = null;
+            }
+            
+            // Destroy Y.js document last with complete cleanup
+            if (this.ydoc) {
+                try {
+                    console.log('📄 Destroying Y.js document with complete cleanup');
+                    
+                    // Clear all shared types first to prevent conflicts
+                    const shareKeys = Array.from(this.ydoc.share.keys());
+                    console.log('🧹 Clearing Y.js shared types:', shareKeys);
+                    shareKeys.forEach(key => {
+                        try {
+                            const type = this.ydoc.share.get(key);
+                            if (type && typeof type.destroy === 'function') {
+                                type.destroy();
+                            }
+                            this.ydoc.share.delete(key);
+                        } catch (error) {
+                            console.warn(`Error deleting Y.js type ${key}:`, error);
+                        }
+                    });
+                    
+                    // Clear subdocs if any
+                    if (this.ydoc.subdocs) {
+                        this.ydoc.subdocs.forEach(subdoc => {
+                            try {
+                                subdoc.destroy();
+                            } catch (error) {
+                                console.warn('Error destroying Y.js subdoc:', error);
+                            }
+                        });
+                    }
+                    
+                    // Now destroy the document
+                    this.ydoc.destroy();
+                } catch (error) {
+                    console.warn('Error destroying Y.js document:', error);
+                }
+                this.ydoc = null;
+            }
+            
+            this.connectionStatus = 'disconnected';
+            this.connectionMessage = 'Not connected';
+            
+            // Clear global instance tracking if this is the active instance
+            if (window.dluxCollaborativeInstance === this.componentId) {
+                window.dluxCollaborativeInstance = null;
+                window.dluxCollaborativeCleanup = null;
+                console.log('🧹 Cleared global collaborative instance tracking');
+            }
+            
+            // Reset initialization flag
+            this.isInitializing = false;
+            
+            console.log('✅ Collaborative editor cleanup completed');
+        },
+        
+        // Clean up DOM elements completely to prevent conflicts
+        cleanupDOMElements() {
+            console.log('🧽 Cleaning up DOM elements...');
+            
+            const elementsToClean = [
+                { ref: 'titleEditor', name: 'title', className: 'title-editor' },
+                { ref: 'permlinkEditor', name: 'permlink', className: 'permlink-editor' }, 
+                { ref: 'bodyEditor', name: 'body', className: 'body-editor' }
+            ];
+            
+            elementsToClean.forEach(({ ref, name, className }) => {
+                // Use both Vue ref and direct DOM selection as fallback
+                let element = this.$refs[ref];
+                if (!element) {
+                    element = document.querySelector(`.${className}`);
+                }
+                
+                if (element) {
+                    try {
+                        // Clear all content and attributes
+                        element.innerHTML = '';
+                        
+                        // Reset to original classes
+                        element.className = className;
+                        
+                        // Remove any TipTap-specific attributes
+                        const proseMirrorAttrs = [
+                            'contenteditable', 'data-testid', 'spellcheck', 'translate',
+                            'data-gramm', 'data-gramm_editor', 'data-enable-grammarly'
+                        ];
+                        proseMirrorAttrs.forEach(attr => {
+                            element.removeAttribute(attr);
+                        });
+                        
+                        // Remove any ProseMirror-specific classes
+                        element.classList.remove('ProseMirror', 'ProseMirror-focused');
+                        
+                        // Force a style reset
+                        element.style.cssText = '';
+                        
+                        console.log(`✅ Cleaned up ${name} editor DOM element`);
+                    } catch (error) {
+                        console.warn(`Error cleaning up ${name} editor DOM:`, error);
+                    }
+                }
+            });
+            
+            // Force Vue to update refs
+            this.$forceUpdate();
+        },
+        
+        // Connection handlers
+        onConnect() {
+            this.connectionStatus = 'connected';
+            this.connectionMessage = 'Connected - Real-time collaboration active';
+        },
+        
+        onDisconnect() {
+            this.connectionStatus = 'disconnected';
+            this.connectionMessage = 'Disconnected from server';
+        },
+        
+        onSynced() {
+            this.connectionMessage = 'Connected - Document synchronized';
+        },
+        
+        onAuthenticationFailed(reason) {
+            this.connectionStatus = 'disconnected';
+            this.connectionMessage = `Authentication failed: ${reason}`;
+        },
+        
+        // Content management
+        getEditorContent() {
+            // ONLY read from editors when explicitly requested - like clean.html
+            return {
+                title: this.titleEditor ? this.titleEditor.getText() : this.content.title,
+                titleHTML: this.titleEditor ? this.titleEditor.getHTML() : '',
+                body: this.bodyEditor ? this.bodyEditor.getText() : this.content.body,
+                bodyHTML: this.bodyEditor ? this.bodyEditor.getHTML() : this.content.body,
+                permlink: this.permlinkEditor ? this.permlinkEditor.getText() : this.content.permlink,
+                tags: this.content.tags,
+                custom_json: this.content.custom_json,
+                beneficiaries: this.publishForm.beneficiaries
+            };
+        },
+        
+        setEditorContent(content) {
+            try {
+                // For collaborative mode, avoid setting content directly
+                // Let the Y.js sync handle content loading
+                if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
+                    console.log('🤝 Skipping direct content setting in collaborative mode - letting Y.js sync handle it');
+                    
+                    // Only update the local content state for UI binding
+                    this.content = { ...this.content, ...content };
+                    
+                    // Set custom JSON string for editing
+                    if (content.custom_json) {
+                        this.customJsonString = JSON.stringify(content.custom_json, null, 2);
+                    }
+                    
+                    return;
+                }
+                
+                // For standard mode, set content normally with error handling
+                if (this.titleEditor && content.title) {
+                    try {
+                        this.titleEditor.commands.setContent(content.title);
+                    } catch (error) {
+                        console.warn('Failed to set title content:', error);
+                        // Fallback to text-only
+                        this.titleEditor.commands.setContent(content.title.replace(/<[^>]*>/g, ''));
+                    }
+                }
+                
+                if (this.permlinkEditor && content.permlink) {
+                    try {
+                        this.permlinkEditor.commands.setContent(content.permlink);
+                    } catch (error) {
+                        console.warn('Failed to set permlink content:', error);
+                        this.permlinkEditor.commands.setContent(content.permlink.replace(/<[^>]*>/g, ''));
+                    }
+                }
+                
+                if (this.bodyEditor && content.body) {
+                    try {
+                        this.bodyEditor.commands.setContent(content.body);
+                    } catch (error) {
+                        console.warn('Failed to set body content, trying as plain text:', error);
+                        // If HTML content fails, try as plain text wrapped in paragraph
+                        const textContent = content.body.replace(/<[^>]*>/g, '');
+                        this.bodyEditor.commands.setContent(`<p>${textContent}</p>`);
+                    }
+                }
+                
+                this.content = { ...content };
+                
+                // Set custom JSON string for editing
+                if (content.custom_json) {
+                    this.customJsonString = JSON.stringify(content.custom_json, null, 2);
+                }
+                
+                console.log('✅ Editor content set successfully');
+                
+            } catch (error) {
+                console.error('❌ Failed to set editor content:', error);
+                
+                // Create minimal safe content
+                this.content = {
+                    title: content.title || '',
+                    body: content.body || '<p>Content could not be loaded properly. Please check the document format.</p>',
+                    tags: content.tags || [],
+                    custom_json: content.custom_json || {},
+                    permlink: content.permlink || '',
+                    beneficiaries: content.beneficiaries || []
+                };
+                
+                // Set safe fallback content in editors
+                if (this.titleEditor) {
+                    this.titleEditor.commands.setContent(this.content.title.replace(/<[^>]*>/g, ''));
+                }
+                if (this.bodyEditor) {
+                    this.bodyEditor.commands.setContent(this.content.body);
+                }
+                
+                throw new Error(`Content loading failed: ${error.message}`);
+            }
+        },
+        
+        clearEditor() {
+            if (this.titleEditor) {
+                this.titleEditor.commands.clearContent();
+            }
+            if (this.permlinkEditor) {
+                this.permlinkEditor.commands.clearContent();
+            }
+            if (this.bodyEditor) {
+                this.bodyEditor.commands.clearContent();
+            }
+        },
+        
+        updateContent() {
+            // Update content from editors
+            if (this.titleEditor) {
+                this.content.title = this.titleEditor.getText();
+            }
+            if (this.permlinkEditor) {
+                this.content.permlink = this.permlinkEditor.getText();
+            }
+            if (this.bodyEditor) {
+                this.content.body = this.bodyEditor.getHTML();
+            }
+            
+            // Emit content changes to parent
+            this.$emit('content-changed', {
+                ...this.content,
+                beneficiaries: this.publishForm.beneficiaries,
+                attachedFiles: this.attachedFiles
+            });
+        },
+        
+        // Utility methods
+        generateUserColor(username) {
+            let hash = 0;
+            for (let i = 0; i < username.length; i++) {
+                hash = username.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const hue = Math.abs(hash) % 360;
+            return `hsl(${hue}, 70%, 60%)`;
+        },
+        
+        async confirmUnsavedChanges() {
+            return confirm('You have unsaved changes. Are you sure you want to continue?');
+        },
+        
+        formatFileDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        },
+        
+        formatFileSize(bytes) {
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            if (bytes === 0) return '0 Bytes';
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        },
+        
+        // History and diff (placeholder methods)
+        async loadDocumentHistory() {
+            // TODO: Implement document history loading
+            console.log('Loading document history...');
+        },
+        
+        async showDiff() {
+            // TODO: Implement diff functionality
+            console.log('Showing document diff...');
+        },
+        
+        toggleDropdown(name) {
+            this.dropdownOpen = {
+                ...this.dropdownOpen,
+                [name]: !this.dropdownOpen[name]
+            };
+        },
+        
+        closeDropdowns() {
+            this.dropdownOpen = {};
+        },
+        
+        // File management methods with confirmation
+        async deleteLocalFileWithConfirm(file) {
+            const confirmMsg = `Delete local file "${file.name}"?\n\nThis action cannot be undone.`;
+            if (confirm(confirmMsg)) {
+                try {
+                    await this.deleteLocalFile(file.id);
+                    console.log('✅ Local file deleted successfully');
+                } catch (error) {
+                    console.error('❌ Failed to delete local file:', error);
+                    alert(`Failed to delete file: ${error.message}`);
+                }
+            }
+        },
+        
+        async deleteCollaborativeDocWithConfirm(doc) {
+            if (doc.owner !== this.authHeaders['x-account']) {
+                alert('You can only delete documents that you own.');
+                return;
+            }
+            
+            const confirmMsg = `Delete collaborative document "${doc.permlink}"?\n\nThis action cannot be undone and will affect all collaborators.`;
+            if (confirm(confirmMsg)) {
+                try {
+                    await this.deleteCollaborativeDoc(doc);
+                    console.log('✅ Collaborative document deleted successfully');
+                } catch (error) {
+                    console.error('❌ Failed to delete collaborative document:', error);
+                    alert(`Failed to delete document: ${error.message}`);
+                }
+            }
+        },
+        
+        async clearAllLocalFiles() {
+            const confirmMsg = `Delete ALL local files (${this.localFiles.length} files)?\n\nThis action cannot be undone.`;
+            if (confirm(confirmMsg)) {
+                try {
+                    // Clear all local file content
+                    for (const file of this.localFiles) {
+                        localStorage.removeItem(`dlux_tiptap_file_${file.id}`);
+                    }
+                    
+                    // Clear the file index
+                    localStorage.removeItem('dlux_tiptap_files');
+                    
+                    // Reload the file list
+                    await this.loadLocalFiles();
+                    
+                    console.log('✅ All local files cleared successfully');
+                    
+                    // If current file was local, create a new document
+                    if (this.currentFile && this.currentFile.type === 'local') {
+                        await this.newDocument();
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to clear local files:', error);
+                    alert(`Failed to clear files: ${error.message}`);
+                }
+            }
+        },
+        
+        // Authentication methods
+        async requestAuthentication() {
+            console.log('🔐 Requesting authentication for collaborative editing...');
+            
+            // Emit request to parent - this matches the pattern used in collaborative-docs.js
+            this.$emit('request-auth-headers');
+        },
+        
+        // Pending uploads management
+        getPendingUploads() {
+            return JSON.parse(localStorage.getItem('dlux_pending_uploads') || '[]');
+        },
+        
+        async retryPendingUpload(uploadId) {
+            const pendingUploads = this.getPendingUploads();
+            const upload = pendingUploads.find(u => u.id === uploadId);
+            
+            if (!upload) {
+                console.error('Pending upload not found:', uploadId);
+                return;
+            }
+            
+            try {
+                // Load the backup content
+                const backupContent = JSON.parse(localStorage.getItem(`dlux_tiptap_backup_${upload.id}`) || '{}');
+                
+                if (!backupContent.isBackup) {
+                    throw new Error('Invalid backup content');
+                }
+                
+                // Set up the save form with the backup data
+                this.saveForm.filename = upload.filename;
+                this.saveForm.saveToDlux = true;
+                this.saveForm.saveLocally = false;
+                this.saveForm.isNewDocument = true;
+                
+                // Set the content from backup
+                this.content = {
+                    title: backupContent.title || '',
+                    body: backupContent.body || '',
+                    tags: backupContent.tags || [],
+                    custom_json: backupContent.custom_json || {},
+                    permlink: backupContent.permlink || '',
+                    beneficiaries: backupContent.beneficiaries || []
+                };
+                
+                // Show save modal and attempt to retry
+                this.showSaveModal = true;
+                
+                console.log('🔄 Retry setup for pending upload:', upload.filename);
+            } catch (error) {
+                console.error('Failed to setup retry for pending upload:', error);
+                alert('Failed to retry upload: ' + error.message);
+            }
+        },
+        
+        removePendingUpload(uploadId) {
+            const pendingUploads = this.getPendingUploads();
+            const filteredUploads = pendingUploads.filter(u => u.id !== uploadId);
+            localStorage.setItem('dlux_pending_uploads', JSON.stringify(filteredUploads));
+            
+            // Also remove the backup file
+            localStorage.removeItem(`dlux_tiptap_backup_${uploadId}`);
+            
+            console.log('🗑️ Removed pending upload:', uploadId);
+        }
+    },
+    
+    watch: {
+        authHeaders: {
+            handler(newHeaders) {
+                if (newHeaders && newHeaders['x-account'] && !this.isAuthExpired) {
+                    this.loadCollaborativeDocs();
+                } else {
+                    this.collaborativeDocs = [];
+                }
+            },
+            immediate: true
+        },
+        
+        fileToAdd: {
+            handler(newFile) {
+                if (newFile) {
+                    this.addFileToPost(newFile);
+                    // Clear the file to add after processing
+                    this.$emit('update:fileToAdd', null);
+                }
+            }
+        },
+        
+        // COMMENTED OUT TO AVOID REACTIVE CONFLICTS
+        // 'content.title': {
+        //     handler() {
+        //         this.hasUnsavedChanges = true;
+        //         this.updateContent();
+        //     }
+        // },
+        
+        // 'content.tags': {
+        //     handler() {
+        //         this.hasUnsavedChanges = true;
+        //         this.updateContent();
+        //     },
+        //     deep: true
+        // }
+    },
+    
+    async mounted() {
+        // Load initial data
+        await this.loadLocalFiles();
+        
+        if (this.authHeaders['x-account']) {
+            await this.loadCollaborativeDocs();
+        }
+        
+        // Create initial editor
+        await this.createStandardEditor();
+        
+        // Load initial content if provided
+        if (this.initialContent && Object.keys(this.initialContent).length > 0) {
+            this.content = { ...this.content, ...this.initialContent };
+            this.setEditorContent(this.content);
+        }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.dropdown')) {
+                this.closeDropdowns();
+            }
+        });
+    },
+    
+    beforeUnmount() {
+        this.disconnectCollaboration();
+        
+        // Clean up all editors
+        if (this.titleEditor) {
+            this.titleEditor.destroy();
+        }
+        if (this.permlinkEditor) {
+            this.permlinkEditor.destroy();
+        }
+        if (this.bodyEditor) {
+            this.bodyEditor.destroy();
+        }
+    },
+    
+    template: `
+    <div class="collaborative-post-editor">
+        <!-- File Menu Bar -->
+        <div class="file-menu-bar bg-dark border-bottom border-secondary p-2 mb-3">
+            <div class="d-flex align-items-center gap-1">
+                <!-- File Menu -->
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-light dropdown-toggle" 
+                            type="button" 
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false">
+                        <i class="fas fa-file me-1"></i>File
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" href="#" @click.prevent="newDocument">
+                            <i class="fas fa-file-plus me-2"></i>New Local Document
+                        </a></li>
+                        <li v-if="showCollaborativeFeatures">
+                            <a class="dropdown-item" href="#" @click.prevent="newCollaborativeDocument">
+                                <i class="fas fa-users me-2"></i>New Collaborative Document
+                            </a>
+                        </li>
+                        <li v-else-if="!isAuthenticated || isAuthExpired">
+                            <a class="dropdown-item text-muted" href="#" @click.prevent="requestAuthentication">
+                                <i class="fas fa-users me-2"></i>New Collaborative Document
+                                <small class="d-block text-warning">Authentication required</small>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="showLoadModal = true">
+                            <i class="fas fa-folder-open me-2"></i>Open Document...
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="saveDocument" :class="{ disabled: !canSave }">
+                            <i class="fas fa-save me-2"></i>Save
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="saveAsDocument">
+                            <i class="fas fa-copy me-2"></i>Save As...
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="shareDocument" :class="{ disabled: !canShare }">
+                            <i class="fas fa-share me-2"></i>Share...
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="deleteDocument" :class="{ disabled: !canDelete }">
+                            <i class="fas fa-trash me-2"></i>Delete
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="publishPost" :class="{ disabled: !canPublish }">
+                            <i class="fas fa-paper-plane me-2"></i>Publish to Hive
+                        </a></li>
+                        <li v-if="pendingUploads.length > 0"><hr class="dropdown-divider"></li>
+                        <li v-if="pendingUploads.length > 0" class="dropdown-header">
+                            <i class="fas fa-clock me-1"></i>Pending Uploads ({{ pendingUploads.length }})
+                        </li>
+                        <li v-for="upload in pendingUploads" :key="upload.id" class="dropdown-item-text small">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="flex-grow-1">
+                                    <div class="text-warning">{{ upload.filename }}</div>
+                                    <div class="text-muted small">{{ upload.error }}</div>
+                                </div>
+                                <div class="btn-group btn-group-sm">
+                                    <button @click.stop="retryPendingUpload(upload.id)" 
+                                            class="btn btn-outline-primary btn-xs"
+                                            title="Retry upload">
+                                        <i class="fas fa-redo fa-xs"></i>
+                                    </button>
+                                    <button @click.stop="removePendingUpload(upload.id)" 
+                                            class="btn btn-outline-danger btn-xs"
+                                            title="Remove from pending">
+                                        <i class="fas fa-trash fa-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Edit Menu -->
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-light dropdown-toggle" 
+                            type="button" 
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false">
+                        <i class="fas fa-edit me-1"></i>Edit
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" href="#" @click.prevent="bodyEditor?.chain().focus().undo().run()">
+                            <i class="fas fa-undo me-2"></i>Undo
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="bodyEditor?.chain().focus().redo().run()">
+                            <i class="fas fa-redo me-2"></i>Redo
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="clearEditor">
+                            <i class="fas fa-eraser me-2"></i>Clear All
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <!-- Collaboration Menu -->
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-light dropdown-toggle" 
+                            type="button" 
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false">
+                        <i class="fas fa-users me-1"></i>Collaboration
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                        <li v-if="!isAuthenticated || isAuthExpired">
+                            <a class="dropdown-item" href="#" @click.prevent="requestAuthentication">
+                                <i class="fas fa-key me-2"></i>Authenticate
+                            </a>
+                        </li>
+                        <li v-else-if="connectionStatus === 'disconnected' && currentFile?.type === 'collaborative'">
+                            <a class="dropdown-item" href="#" @click.prevent="initializeCollaboration(currentFile)">
+                                <i class="fas fa-plug me-2"></i>Connect
+                            </a>
+                        </li>
+                        <li v-else-if="connectionStatus === 'connected'">
+                            <a class="dropdown-item" href="#" @click.prevent="disconnectCollaboration">
+                                <i class="fas fa-unlink me-2"></i>Disconnect
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="shareDocument" :class="{ disabled: !canShare }">
+                            <i class="fas fa-user-plus me-2"></i>Share Document
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="showLoadModal = true">
+                            <i class="fas fa-folder me-2"></i>Browse Documents
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <!-- View Menu -->
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-light dropdown-toggle" 
+                            type="button" 
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false">
+                        <i class="fas fa-eye me-1"></i>View
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" href="#" @click.prevent="showAdvancedOptions = !showAdvancedOptions">
+                            <i class="fas fa-cog me-2"></i>{{ showAdvancedOptions ? 'Hide' : 'Show' }} Advanced Options
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="showPermlinkEditor = !showPermlinkEditor">
+                            <i class="fas fa-link me-2"></i>{{ showPermlinkEditor ? 'Hide' : 'Show' }} Permlink Editor
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <!-- File Status -->
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <span v-if="currentFile" class="text-light small">
+                        <i class="fas fa-file me-1"></i>{{ currentFile.name || currentFile.documentName || currentFile.permlink }}
+                        <span v-if="hasUnsavedChanges" class="text-warning ms-1">●</span>
+                    </span>
+                    <span v-else class="text-muted small">
+                        <i class="fas fa-file-plus me-1"></i>Untitled
+                        <span v-if="hasUnsavedChanges" class="text-warning ms-1">●</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Connection Status -->
+        <div class="collaboration-status mb-3 p-2 rounded border-start border-3" :class="{
+            'border-success bg-success-subtle text-success': connectionStatus === 'connected',
+            'border-warning bg-warning-subtle text-warning': connectionStatus === 'connecting',
+            'border-danger bg-danger-subtle text-danger': connectionStatus === 'disconnected'
+        }">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-fw me-2" :class="{
+                    'fa-check-circle': connectionStatus === 'connected',
+                    'fa-spinner fa-spin': connectionStatus === 'connecting',
+                    'fa-exclamation-circle': connectionStatus === 'disconnected'
+                }"></i>
+                <span class="small">{{ connectionMessage }}</span>
+                <span v-if="isConnected && currentFile?.type === 'collaborative'" class="badge bg-primary ms-2">
+                    <i class="fas fa-users me-1"></i>Live
+                </span>
+                <span v-else-if="currentFile?.type === 'local'" class="badge bg-secondary ms-2">
+                    <i class="fas fa-file me-1"></i>Local
+                </span>
+            </div>
+        </div>
+            
+        <!-- Title Field -->
+        <div class="mb-4">
+            <label class="form-label text-white fw-bold">
+                <i class="fas fa-heading me-2"></i>Title
+                <span class="badge bg-primary ms-2" v-if="isConnected">Collaborative</span>
+            </label>
+            <div class="editor-field bg-dark border border-secondary rounded p-3">
+                <div ref="titleEditor" class="title-editor"></div>
+            </div>
+        </div>
+        
+        <!-- Permlink Field -->
+        <div class="mb-4">
+            <label class="form-label text-white fw-bold">
+                <i class="fas fa-link me-2"></i>URL Slug (Permlink)
+                <span class="badge bg-secondary ms-2">Local Only</span>
+            </label>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <code class="text-info">/@{{ username }}/</code>
+                <div class="flex-grow-1 position-relative">
+                    <div v-if="!showPermlinkEditor" 
+                         @click="togglePermlinkEditor"
+                         class="bg-dark border border-secondary rounded p-2 cursor-pointer text-white font-monospace">
+                        {{ content.permlink || generatedPermlink || 'Click to edit...' }}
+                    </div>
+                    <div v-else class="editor-field bg-dark border border-secondary rounded p-2">
+                        <div ref="permlinkEditor" class="permlink-editor"></div>
+                    </div>
+                </div>
+                <button @click="useGeneratedPermlink" class="btn btn-sm btn-outline-secondary"
+                        :disabled="!generatedPermlink">
+                    Auto-generate
+                </button>
+            </div>
+            <small class="text-muted">URL-safe characters only (a-z, 0-9, dashes). Not synchronized in collaborative mode.</small>
+        </div>
+                
+        <!-- Body Field -->
+        <div class="mb-4">
+            <label class="form-label text-white fw-bold">
+                <i class="fas fa-edit me-2"></i>Content
+                <span class="badge bg-primary ms-2" v-if="isConnected">Collaborative</span>
+            </label>
+            <div class="editor-field bg-dark border border-secondary rounded p-3">
+                <div ref="bodyEditor" class="body-editor"></div>
+            </div>
+            <small class="text-muted">Full WYSIWYG editor with markdown export support. Supports &lt;center&gt;, &lt;video&gt;, and other HTML tags.</small>
+        </div>
+        
+        <!-- Tags Field (Non-collaborative) -->
+        <div class="mb-4">
+            <label class="form-label text-white fw-bold">
+                <i class="fas fa-tags me-2"></i>Tags
+                <span class="badge bg-secondary ms-2">Local Only</span>
+            </label>
+            <div class="d-flex flex-wrap gap-2 mb-2">
+                            <span v-for="(tag, index) in content.tags" :key="index" 
+                                  class="badge bg-primary d-flex align-items-center">
+                                {{ tag }}
+                    <button @click="removeTag(index)" class="btn-close btn-close-white ms-2 small"></button>
+                            </span>
+                        </div>
+                        <div class="input-group">
+                <input v-model="tagInput" @keydown.enter="addTag" 
+                       class="form-control bg-dark text-white border-secondary" 
+                       placeholder="Add a tag..."
+                       maxlength="50">
+                <button @click="addTag" class="btn btn-outline-primary">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+            <div class="mt-2">
+                <small class="text-muted me-2">Suggested:</small>
+                <button v-for="tag in availableTags" :key="tag" 
+                        @click="addTagDirect(tag)"
+                        :disabled="content.tags.includes(tag)"
+                        class="btn btn-sm btn-outline-secondary me-1 mb-1">
+                                {{ tag }}
+                </button>
+                    </div>
+                </div>
+                
+        <!-- Advanced Options Collapsible -->
+        <div class="mb-4">
+            <button class="btn btn-outline-light d-flex align-items-center w-100 text-start" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#advancedOptions" 
+                    aria-expanded="false" 
+                    aria-controls="advancedOptions">
+                <i class="fas fa-cog me-2"></i>
+                Advanced Options
+                <i class="fas fa-chevron-down ms-auto"></i>
+            </button>
+            
+            <div class="collapse mt-3" id="advancedOptions">
+                <!-- Beneficiaries Section -->
+                <div class="mb-4">
+                    <label class="form-label text-white fw-bold">
+                        <i class="fas fa-users me-2"></i>Beneficiaries (Reward Sharing)
+                    </label>
+                    <div class="bg-dark border border-secondary rounded p-3">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <small>Configure reward sharing with other accounts. Total cannot exceed 100%.</small>
+                                </div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <input type="text" 
+                                   class="form-control bg-dark text-white border-secondary" 
+                                   placeholder="@username" 
+                                   v-model="beneficiaryInput.account">
+                            <input type="number" 
+                                   class="form-control bg-dark text-white border-secondary" 
+                                   placeholder="%" 
+                                   min="0.01" 
+                                   max="100" 
+                                   step="0.01"
+                                   v-model="beneficiaryInput.percent">
+                            <button @click="addBeneficiary" class="btn btn-outline-success">
+                                <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        <div v-if="publishForm.beneficiaries.length > 0" class="mt-2">
+                            <div v-for="(ben, index) in publishForm.beneficiaries" :key="index" 
+                                 class="d-flex align-items-center justify-content-between bg-secondary rounded p-2 mb-1">
+                                <span>@{{ ben.account }} - {{ (ben.weight / 100).toFixed(2) }}%</span>
+                                <button @click="removeBeneficiary(index)" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                        </div>
+                    </div>
+                </div>
+                </div>
+                
+                <!-- Custom JSON Section -->
+                <div class="mb-4">
+                    <label class="form-label text-white fw-bold">
+                        <i class="fas fa-code me-2"></i>Custom JSON Metadata
+                    </label>
+                    <div class="bg-dark border border-secondary rounded p-3">
+                        <textarea v-model="customJsonString" 
+                                  @input="validateCustomJson"
+                                  class="form-control bg-dark text-white border-secondary font-monospace"
+                                  rows="6"
+                                  placeholder="Enter custom JSON metadata..."></textarea>
+                        <div v-if="customJsonError" class="text-danger small mt-1">
+                            <i class="fas fa-exclamation-triangle me-1"></i>{{ customJsonError }}
+                        </div>
+                        <div v-else-if="customJsonString" class="text-success small mt-1">
+                            <i class="fas fa-check-circle me-1"></i>Valid JSON
+                        </div>
+                        <small class="text-muted">Additional metadata for your post. Must be valid JSON.</small>
+            </div>
+        </div>
+        
+                <!-- Comment Options (Hive-specific) -->
+                <div class="mb-4">
+                    <label class="form-label text-white fw-bold">
+                        <i class="fas fa-cog me-2"></i>Comment Options
+                    </label>
+                    <div class="bg-dark border border-secondary rounded p-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           v-model="commentOptions.allowVotes" 
+                                           id="allowVotes">
+                                    <label class="form-check-label text-white" for="allowVotes">
+                                        Allow votes
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           v-model="commentOptions.allowCurationRewards" 
+                                           id="allowCurationRewards">
+                                    <label class="form-check-label text-white" for="allowCurationRewards">
+                                        Allow curation rewards
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           v-model="commentOptions.maxAcceptedPayout" 
+                                           id="maxPayout">
+                                    <label class="form-check-label text-white" for="maxPayout">
+                                        Decline payout
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" 
+                                           type="checkbox" 
+                                           v-model="commentOptions.percentHbd" 
+                                           id="powerUp">
+                                    <label class="form-check-label text-white" for="powerUp">
+                                        100% Power Up
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Publish Modal -->
+        <div v-if="showPublishModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content bg-dark text-white">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title">
+                            <i class="fas fa-paper-plane me-2"></i>Publish Post to Hive
+                        </h5>
+                        <button @click="showPublishModal = false" class="btn-close btn-close-white"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-4">
+                            <h6 class="text-info">{{ content.title || 'Untitled Post' }}</h6>
+                            <p class="text-muted">
+                                <i class="fas fa-tags me-1"></i>{{ content.tags.join(', ') || 'No tags' }}
+                            </p>
+                            <p class="text-muted">
+                                <i class="fas fa-link me-1"></i>/@{{ username }}/{{ content.permlink || generatedPermlink }}
+                            </p>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-white">Beneficiaries</h6>
+                                <div v-if="publishForm.beneficiaries.length === 0" class="text-muted small">
+                                    No beneficiaries set - 100% rewards to author
+                                </div>
+                                <div v-else>
+                                    <div v-for="ben in publishForm.beneficiaries" :key="ben.account" 
+                                         class="d-flex justify-content-between small mb-1">
+                                        <span>@{{ ben.account }}</span>
+                                        <span>{{ (ben.weight / 100).toFixed(2) }}%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-white">Comment Options</h6>
+                                <div class="small">
+                                    <div><i class="fas fa-vote-yea me-1"></i>Votes: {{ commentOptions.allowVotes ? 'Allowed' : 'Disabled' }}</div>
+                                    <div><i class="fas fa-coins me-1"></i>Curation: {{ commentOptions.allowCurationRewards ? 'Enabled' : 'Disabled' }}</div>
+                                    <div><i class="fas fa-money-bill me-1"></i>Payout: {{ commentOptions.maxAcceptedPayout ? 'Declined' : 'Enabled' }}</div>
+                                    <div><i class="fas fa-bolt me-1"></i>Power Up: {{ commentOptions.percentHbd ? '100%' : '50/50 Split' }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Beneficiaries (Optional)</label>
+                            <div class="form-text">Set accounts to receive a percentage of rewards</div>
+                            <!-- Beneficiaries input would go here -->
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            This will publish your post to the Hive blockchain. Make sure all content is final.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button @click="showPublishModal = false" class="btn btn-secondary">Cancel</button>
+                        <button @click="performPublish" 
+                                class="btn btn-primary" 
+                                :disabled="publishing || !canPublish">
+                            <i v-if="publishing" class="fas fa-spinner fa-spin me-1"></i>
+                            <i v-else class="fas fa-paper-plane me-1"></i>
+                            {{ publishing ? 'Publishing...' : 'Publish to Hive' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Load Modal -->
+        <div v-if="showLoadModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-folder-open me-2"></i>Load Document
+                        </h5>
+                        <button @click="showLoadModal = false" class="btn-close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <!-- Local Files -->
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6><i class="fas fa-file me-2"></i>Local Files</h6>
+                                    <button v-if="localFiles.length > 0" 
+                                            @click="clearAllLocalFiles"
+                                            class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash me-1"></i>Clear All
+                                    </button>
+                                </div>
+                                <div v-if="localFiles.length === 0" class="text-muted">No local files found</div>
+                                <div v-else class="list-group">
+                                    <div v-for="file in localFiles" :key="file.id" 
+                                         class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div class="flex-grow-1 cursor-pointer" @click="loadDocument(file)">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="mb-1">{{ file.name }}</h6>
+                                                    <p class="mb-1 small text-muted">{{ formatFileSize(file.size) }}</p>
+                                                </div>
+                                                <small>{{ formatFileDate(file.lastModified) }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="ms-2">
+                                            <button @click.stop="deleteLocalFileWithConfirm(file)" 
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    title="Delete file">
+                                                <i class="fas fa-trash fa-xs"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Collaborative Documents -->
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <h6><i class="fas fa-users me-2"></i>Collaborative Documents</h6>
+                                    <span v-if="isAuthenticated && !isAuthExpired" class="badge bg-success small">
+                                        <i class="fas fa-check-circle me-1"></i>Authenticated
+                                    </span>
+                                </div>
+                                
+                                <!-- Not authenticated -->
+                                <div v-if="!isAuthenticated || isAuthExpired" class="text-center py-4">
+                                    <div class="text-muted mb-2">
+                                        <i class="fas fa-lock fa-2x mb-2"></i>
+                                        <p>{{ isAuthExpired ? 'Authentication expired' : 'Authentication required' }}</p>
+                                    </div>
+                                    <button @click="requestAuthentication(); showLoadModal = false" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-key me-1"></i>Authenticate for Collaboration
+                                    </button>
+                                </div>
+                                
+                                <!-- Authenticated -->
+                                <div v-else>
+                                    <div v-if="loadingDocs" class="text-center">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading...
+                                    </div>
+                                    <div v-else-if="collaborativeDocs.length === 0" class="text-muted">No collaborative documents found</div>
+                                    <div v-else class="list-group">
+                                        <div v-for="doc in collaborativeDocs" :key="doc.documentPath" 
+                                             class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div class="flex-grow-1 cursor-pointer" @click="loadDocument(doc)">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div>
+                                                        <h6 class="mb-1">{{ doc.documentName || doc.permlink }}</h6>
+                                                        <p class="mb-1 small text-muted">
+                                                            by @{{ doc.owner }}
+                                                            <span v-if="doc.documentName && doc.documentName !== doc.permlink" class="text-muted ms-1">
+                                                                • {{ doc.permlink }}
+                                                            </span>
+                                                        </p>
+                                                    </div>
+                                                    <small>{{ formatFileDate(doc.updatedAt) }}</small>
+                                                </div>
+                                            </div>
+                                            <div class="ms-2">
+                                                <button @click.stop="deleteCollaborativeDocWithConfirm(doc)" 
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        :disabled="doc.owner !== authHeaders['x-account']"
+                                                        :title="doc.owner === authHeaders['x-account'] ? 'Delete document' : 'Only document owner can delete'">
+                                                    <i class="fas fa-trash fa-xs"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Save Modal -->
+        <div v-if="showSaveModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-save me-2"></i>{{ saveForm.isNewDocument ? 'Save As...' : 'Save Document' }}
+                        </h5>
+                        <button @click="showSaveModal = false" class="btn-close" :disabled="saveAsProcess.inProgress"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Save As Progress Indicator -->
+                        <div v-if="saveAsProcess.inProgress" class="mb-4">
+                            <div class="alert alert-primary d-flex align-items-center">
+                                <div class="me-3">
+                                    <i class="fas fa-spinner fa-spin fa-lg"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">Saving Document to Collaboration Server</h6>
+                                    <div class="progress mb-2" style="height: 4px;">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                             :style="{ width: saveAsProgress + '%' }"></div>
+                                    </div>
+                                    <small class="text-muted">{{ saveAsProcess.message }}</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Error Display -->
+                            <div v-if="saveAsProcess.error" class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Save failed:</strong> {{ saveAsProcess.error }}
+                                <div class="mt-2">
+                                    <small>Local backup has been preserved and added to pending uploads.</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Regular Save Form (hidden during save as process) -->
+                        <div v-if="!saveAsProcess.inProgress">
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    {{ saveForm.saveToDlux ? 'Document Name' : 'Filename' }}
+                                    <span v-if="saveForm.saveToDlux" class="small text-muted">(Display name for collaborative document)</span>
+                                </label>
+                                <input v-model="saveForm.filename" 
+                                       class="form-control" 
+                                       :placeholder="saveForm.saveToDlux ? 'Enter document name...' : 'Enter filename...'"
+                                       @keyup.enter="performSave">
+                                <div v-if="saveForm.saveToDlux" class="form-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        A unique technical ID will be auto-generated for this document
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input v-model="saveForm.saveLocally" 
+                                           class="form-check-input" 
+                                           type="checkbox" 
+                                           id="saveLocally">
+                                    <label class="form-check-label" for="saveLocally">
+                                        <i class="fas fa-file me-1"></i>Save locally
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input v-model="saveForm.saveToDlux" 
+                                           class="form-check-input" 
+                                           type="checkbox" 
+                                           id="saveToDlux"
+                                           :disabled="!isAuthenticated || isAuthExpired">
+                                    <label class="form-check-label" for="saveToDlux" :class="{ 'text-muted': !isAuthenticated || isAuthExpired }">
+                                        <i class="fas fa-users me-1"></i>Save to DLUX collaborative documents
+                                        <span v-if="!isAuthenticated || isAuthExpired" class="small text-warning ms-1">
+                                            (Authentication required)
+                                        </span>
+                                    </label>
+                                </div>
+                                <div v-if="(!isAuthenticated || isAuthExpired) && saveForm.saveToDlux" class="alert alert-warning small mt-2">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    You need to authenticate to save collaborative documents.
+                                    <button @click="requestAuthentication(); showSaveModal = false" class="btn btn-link btn-sm p-0 ms-1">
+                                        Authenticate now
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div v-if="saveForm.saveToDlux" class="mb-3">
+                                <div class="form-check">
+                                    <input v-model="saveForm.isPublic" 
+                                           class="form-check-input" 
+                                           type="checkbox" 
+                                           id="isPublic">
+                                    <label class="form-check-label" for="isPublic">
+                                        Make publicly discoverable
+                                    </label>
+                                </div>
+                                <div class="mt-2">
+                                    <label class="form-label">Description</label>
+                                    <textarea v-model="saveForm.description" 
+                                              class="form-control" 
+                                              rows="2" 
+                                              placeholder="Brief description of the document"></textarea>
+                                </div>
+                                <div v-if="saveForm.isNewDocument && saveForm.saveToDlux" class="alert alert-info small mt-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    <strong>{{ saveForm.filename ? 'Save As' : 'New Collaborative Document' }}:</strong> 
+                                    This will create a new collaborative document with a unique auto-generated ID. 
+                                    {{ currentFile && currentFile.type === 'collaborative' ? 'Your content will be copied to the new document.' : 'You will switch to collaborative editing mode.' }}
+                                </div>
+                                <div v-else class="alert alert-info small mt-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Collaborative documents are automatically deleted after 30 days of inactivity.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button @click="showSaveModal = false" 
+                                class="btn btn-secondary" 
+                                :disabled="saveAsProcess.inProgress">
+                            {{ saveAsProcess.inProgress ? 'Processing...' : 'Cancel' }}
+                        </button>
+                        <button @click="performSave" 
+                                class="btn btn-primary" 
+                                :disabled="!hasValidFilename || saving || saveAsProcess.inProgress">
+                            <i v-if="saving || saveAsProcess.inProgress" class="fas fa-spinner fa-spin me-1"></i>
+                            <i v-else class="fas fa-save me-1"></i>
+                            {{ saving || saveAsProcess.inProgress ? 'Saving...' : (saveForm.isNewDocument ? 'Save As' : 'Save') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Share Modal -->
+        <div v-if="showShareModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-share me-2"></i>Share Document
+                        </h5>
+                        <button @click="showShareModal = false" class="btn-close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Share with user</label>
+                            <div class="input-group">
+                                <span class="input-group-text">@</span>
+                                <input v-model="shareForm.username" 
+                                       class="form-control" 
+                                       placeholder="Enter HIVE username"
+                                       @keyup.enter="performShare">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Permission level</label>
+                            <select v-model="shareForm.permission" class="form-select">
+                                <option value="readonly">Read Only - Can view and connect</option>
+                                <option value="editable">Editable - Can view and edit content</option>
+                                <option value="postable">Full Access - Can edit and post to Hive</option>
+                            </select>
+                        </div>
+                        
+                        <div class="alert alert-info small">
+                            <i class="fas fa-info-circle me-1"></i>
+                            The user will need to authenticate with their HIVE account to access the document.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button @click="showShareModal = false" class="btn btn-secondary">Cancel</button>
+                        <button @click="performShare" 
+                                class="btn btn-primary" 
+                                :disabled="!shareForm.username.trim()">
+                            <i class="fas fa-share me-1"></i>Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    `,
+    
+    // Enhanced styles
+    style: `
+    <style scoped>
+    .collaborative-post-editor {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .file-menu-bar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(10px);
+        border-radius: 0.375rem 0.375rem 0 0;
+    }
+    
+    .file-menu-bar .dropdown-menu {
+        font-size: 0.875rem;
+    }
+    
+    .dropdown-item.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+    
+    .editor-field {
+        min-height: 60px;
+    }
+    
+    .title-editor {
+        min-height: 60px;
+    }
+    
+    .body-editor {
+        min-height: 300px;
+    }
+    
+    .permlink-editor {
+        min-height: 40px;
+    }
+    
+    .ProseMirror {
+        outline: none;
+        min-height: inherit;
+    }
+    
+    .cursor-pointer {
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+    
+    .cursor-pointer:hover {
+        opacity: 0.8;
+    }
+    
+    .collaboration-status {
+        transition: all 0.3s ease;
+        border-left-width: 4px !important;
+    }
+    
+    .fa-rotate-180 {
+        transform: rotate(180deg);
+        transition: transform 0.3s ease;
+    }
+    
+    .badge {
+        font-size: 0.75em;
+    }
+    
+    .bg-success-subtle {
+        background-color: rgba(25, 135, 84, 0.1);
+    }
+    
+    .bg-warning-subtle {
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+    
+    .bg-danger-subtle {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+    
+    .form-control:focus {
+        border-color: #5C94FE;
+        box-shadow: 0 0 0 0.2rem rgba(92, 148, 254, 0.25);
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: #5C94FE;
+        border-color: #5C94FE;
+    }
+    
+    .btn-outline-light:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .font-monospace {
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 0.9em;
+    }
+    
+    /* File status indicator */
+    .text-warning {
+        color: #ffc107 !important;
+    }
+    
+    /* File list improvements */
+    .cursor-pointer {
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    
+    .cursor-pointer:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .list-group-item {
+        transition: all 0.2s ease;
+    }
+    
+    .list-group-item:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .btn-outline-danger:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+    </style>
+    `
+}; 

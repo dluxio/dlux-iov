@@ -13,8 +13,7 @@ const CollaborationBundle = {
 // Export as default for UMD
 export default CollaborationBundle;
 
-// Only expose minimal globals to avoid conflicts
+// Expose globals for collaboration
 window.HocuspocusProvider = HocuspocusProvider;
 window.CollaborationBundle = CollaborationBundle;
-
-// Don't expose Y.js globally to avoid conflicts with TipTap's Y.js imports
+window.Y = Y; // Expose Y.js globally for TipTap extensions

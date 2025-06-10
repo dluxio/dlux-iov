@@ -1,6 +1,7 @@
 import Tagify from "/js/tagifyvue.js";
-import TiptapEditor from "/js/tiptap-editor.js";
+import CollaborativeTiptapEditor from "/js/collaborative-tiptap-editor.js";
 import Bennies from "/js/bennies.js";
+import commonMethods from "/js/methods-common.js";
 
 export default {
   template: `
@@ -32,13 +33,14 @@ export default {
         </div>
         <div class="form-group mb-3">
             <label class="mb-1" for="body">Post Body</label>
-            <tiptap-editor @data="postBody = $event" 
-                          :insert="insert" 
-                          placeholder="Write your post content..."
-                          :show-collaboration="isCollaborativeMode"
-                          :collaborative-doc="collaborativeDocument"
-                          :collaboration-config="collaborationConfig"
-                          @requestCollaboration="requestCollaboration"/>
+            <collaborative-tiptap-editor 
+                v-model="postBody"
+                placeholder="Write your post content..."
+                :show-collaboration="isCollaborativeMode"
+                :collaboration-config="collaborationConfig"
+                @connected="onCollaborationConnected"
+                @disconnected="onCollaborationDisconnected"
+                @error="onCollaborationError"/>
         </div>
         <div class="form-group mb-3">
             <label class="mb-1" for="tags">Tags</label><br>
@@ -156,6 +158,8 @@ export default {
   },
   emits: ['tosign', 'passdata', 'requestCollaboration'],
   methods: {
+    ...commonMethods, // Include common methods for auth handling
+
     buildTags() {
       this.postTags = this.postTags.replace(/#/g, "");
     },
@@ -345,15 +349,79 @@ export default {
       // Emit event to parent to handle collaboration setup
       this.$emit('requestCollaboration');
     },
+
+    onCollaborationConnected() {
+      console.log('✅ Collaboration connected');
+    },
+
+    onCollaborationDisconnected() {
+      console.log('❌ Collaboration disconnected');
+    },
+
+    onCollaborationError(error) {
+      console.error('❌ Collaboration error:', error);
+      // Show user-friendly error message
+      this.showCollaborationError(error.message);
+    },
+
+    showCollaborationError(message) {
+      // Simple error display - can be enhanced with toast notifications
+      const errorEl = document.createElement('div');
+      errorEl.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+      errorEl.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
+      errorEl.innerHTML = `
+        <strong>Collaboration Error:</strong> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      document.body.appendChild(errorEl);
+      
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        if (errorEl.parentNode) {
+          errorEl.parentNode.removeChild(errorEl);
+        }
+      }, 5000);
+    },
   },
   computed: {
     collaborationConfig() {
+      if (!this.isCollaborativeMode || !this.collaborativeDocument) {
+        return {};
+      }
+
+      // Build WebSocket URL with auth parameters
+      const [owner, permlink] = this.collaborativeDocument.split('/');
+      const baseUrl = `wss://data.dlux.io/collaboration/${owner}/${permlink}`;
+      
+      // Add auth parameters to URL
+      const authParams = new URLSearchParams();
+      if (this.collaborationAuthHeaders['x-signature']) {
+        authParams.set('signature', this.collaborationAuthHeaders['x-signature']);
+      }
+      if (this.collaborationAuthHeaders['x-account']) {
+        authParams.set('account', this.collaborationAuthHeaders['x-account']);
+      }
+      if (this.collaborationAuthHeaders['x-challenge']) {
+        authParams.set('challenge', this.collaborationAuthHeaders['x-challenge']);
+      }
+      if (this.collaborationAuthHeaders['x-pubkey']) {
+        authParams.set('pubkey', this.collaborationAuthHeaders['x-pubkey']);
+      }
+
+      const websocketUrl = `${baseUrl}?${authParams.toString()}`;
+
       const config = {
-        authToken: this.collaborationAuthHeaders['x-signature'],
-        username: this.account,
-        userColor: '#' + Math.floor(Math.random()*16777215).toString(16)
+        documentName: permlink || 'untitled',
+        websocketUrl: websocketUrl,
+        authHeaders: this.collaborationAuthHeaders
       };
-      console.log('🔧 Collaboration config computed:', config);
+      
+      console.log('🔧 Collaboration config computed:', {
+        documentName: config.documentName,
+        hasWebsocketUrl: !!config.websocketUrl,
+        hasAuthHeaders: Object.keys(config.authHeaders || {}).length > 0
+      });
+      
       return config;
     },
     validPost() {
@@ -391,7 +459,7 @@ export default {
   },
   components: {
     "tagify": Tagify,
-    "tiptap-editor": TiptapEditor,
+    "collaborative-tiptap-editor": CollaborativeTiptapEditor,
     "bennies": Bennies
   },
   watch: {
