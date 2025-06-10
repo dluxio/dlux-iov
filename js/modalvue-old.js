@@ -308,7 +308,7 @@ export default {
                         <input class="ps-4 form-control text-white border-dark bg-dark" type="text" v-model="d.to"> 
                       </div>
                       <label for="broker" class="small mb-1">IPFS Service Provider</label>
-                      <div class="position-relative mb-3" id="broker">
+                      <div class="position-relative mb-3">
                         <span class="position-absolute top-50 translate-middle-y ps-2">
                           <i class="fa-solid fa-at fa-fw"></i>
                         </span> 

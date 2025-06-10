@@ -621,10 +621,21 @@ td {
   border-bottom-color: rgb(33, 37, 41) !important;
 }
 
-.editor-toolbar {
+/* .editor-toolbar {
   border-top-color: rgb(33, 37, 41) !important;
   border-left-color: rgb(33, 37, 41) !important;
   border-right-color: rgb(33, 37, 41) !important;
+} */
+.title-editor .ProseMirror p {
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  margin-bottom: 0px !important;
+}
+
+
+.body-editor .ProseMirror  {
+  min-height: 200px;
 }
 
 .editor-toolbar.fullscreen {
@@ -3013,5 +3024,14 @@ body[data-touch="false"] {
 
 [popover] p:last-child {
     margin-bottom: 0;
+}
+
+/* Tiptap Placeholder */
+.ProseMirror .is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    position: absolute;
+    left: 0.5rem;
+    pointer-events: none;
+    color: #adb5bd;
 }
 

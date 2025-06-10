@@ -3,6 +3,8 @@ import methodsCommon from './methods-common.js';
 export default {
     name: 'TipTapEditorWithFileMenu',
     
+    emits: ['contentChanged', 'publishPost', 'requestAuthHeaders', 'tosign', 'update:fileToAdd'],
+    
     props: {
         username: {
             type: String,
@@ -1656,6 +1658,7 @@ export default {
             try {
                 // Get user color before creating editors
                 const userColor = this.getUserColor;
+                const Placeholder = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
                 
                 // Create single Y.js document for both fields
                 this.ydoc = new Y.Doc();
@@ -1774,6 +1777,9 @@ export default {
                                 horizontalRule: false,
                                 history: false // Disable history for collaborative mode
                             }),
+                            Placeholder.default.configure({
+                                placeholder: 'Enter document title...'
+                            }),
                             Collaboration.configure({
                                 document: this.ydoc,
                                 field: titleFieldName // Use unique field name to prevent conflicts
@@ -1789,8 +1795,7 @@ export default {
                         content: '',
                         editorProps: {
                             attributes: {
-                                class: 'form-control border-0',
-                                placeholder: 'Enter document title...'
+                                class: 'form-control border-0'
                             },
                             handleKeyDown: (view, event) => {
                                 // Prevent Enter key in title (single line)
@@ -1820,7 +1825,6 @@ export default {
                 // Create body editor (full rich text with comprehensive extensions)
                 try {
                     // Import additional extensions for full compatibility
-                    const Placeholder = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
                     const Link = await import('https://esm.sh/@tiptap/extension-link@3.0.0');
                     const Image = await import('https://esm.sh/@tiptap/extension-image@3.0.0');
                     const Youtube = await import('https://esm.sh/@tiptap/extension-youtube@3.0.0');
@@ -1836,7 +1840,7 @@ export default {
                                 history: false // Disable history for collaborative mode
                             }),
                             Placeholder.default.configure({
-                                placeholder: 'Start writing your collaborative document...',
+                                placeholder: 'Start writing your collaborative document...'
                             }),
                             Link.default.configure({
                                 openOnClick: false,
@@ -1873,7 +1877,7 @@ export default {
                                 }
                             })
                         ],
-                        content: '<p>Start writing your document content here...</p>',
+                        content: '',
                         editorProps: {
                             attributes: {
                                 class: 'form-control border-0',
@@ -2832,14 +2836,14 @@ export default {
         </div>
         
 
-            
+    <div class="d-flex flex-column gap-4 mx-2">
         <!-- Title Field -->
-        <div class="mb-4">
-            <label class="form-label text-white fw-bold">
+        <div class="">
+            <label class="form-label text-white fw-bold d-none">
                 <i class="fas fa-heading me-2"></i>Title
                 <span class="badge bg-primary ms-2" v-if="isConnected">Collaborative</span>
             </label>
-            <div class="editor-field bg-dark border border-secondary rounded p-3">
+            <div class="editor-field bg-dark border border-secondary rounded">
                 <div ref="titleEditor" class="title-editor"></div>
             </div>
             <!-- Auto-generated permlink display -->
@@ -2849,8 +2853,8 @@ export default {
         </div>
         
         <!-- Permlink Field -->
-        <div v-if="showPermlinkEditor" class="mb-4">
-            <label class="form-label text-white fw-bold">
+        <div v-if="showPermlinkEditor" class="">
+            <label class="form-label text-white fw-bold d-none">
                 <i class="fas fa-link me-2"></i>URL Slug (Permlink)
                 <span class="badge bg-secondary ms-2">Local Only</span>
             </label>
@@ -2862,7 +2866,7 @@ export default {
                          class="bg-dark border border-secondary rounded p-2 cursor-pointer text-white font-monospace">
                         {{ content.permlink || generatedPermlink || 'Click to edit...' }}
                     </div>
-                    <div v-else class="editor-field bg-dark border border-secondary rounded p-2">
+                    <div v-else class="editor-field bg-dark border border-secondary rounded">
                         <div ref="permlinkEditor" class="permlink-editor"></div>
                     </div>
                 </div>
@@ -2875,38 +2879,38 @@ export default {
         </div>
                 
         <!-- Body Field -->
-        <div class="mb-4">
-            <label class="form-label text-white fw-bold">
-                <i class="fas fa-edit me-2"></i>Content
+        <div class="">
+            <label class="form-label text-white fw-bold d-none">
+                <i class="fas fa- me-2"></i>Body
                 <span class="badge bg-primary ms-2" v-if="isConnected">Collaborative</span>
             </label>
             
             <!-- WYSIWYG Toolbar -->
-            <div class="editor-toolbar bg-dark border border-secondary border-bottom-0 rounded-top p-2">
+            <div class="editor-toolbar bg-dark border border-secondary rounded-top">
                 <div class="d-flex flex-wrap gap-1 align-items-center">
                     <!-- Text Formatting -->
-                    <div class="btn-group" role="group">
+                    <div class="" role="group">
                         <button @click="bodyEditor?.chain().focus().toggleBold().run()" 
                                 :class="{ active: bodyEditor?.isActive('bold') }" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Bold">
                             <i class="fas fa-bold"></i>
                         </button>
                         <button @click="bodyEditor?.chain().focus().toggleItalic().run()" 
                                 :class="{ active: bodyEditor?.isActive('italic') }" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Italic">
                             <i class="fas fa-italic"></i>
                         </button>
                         <button @click="bodyEditor?.chain().focus().toggleStrike().run()" 
                                 :class="{ active: bodyEditor?.isActive('strike') }" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Strikethrough">
                             <i class="fas fa-strikethrough"></i>
                         </button>
                         <button @click="bodyEditor?.chain().focus().toggleCode().run()" 
                                 :class="{ active: bodyEditor?.isActive('code') }" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Inline Code">
                             <i class="fas fa-code"></i>
                         </button>
@@ -2915,22 +2919,22 @@ export default {
                     <div class="vr"></div>
                     
                     <!-- Headings -->
-                    <div class="btn-group" role="group">
+                    <div class="" role="group">
                         <button @click="bodyEditor?.chain().focus().toggleHeading({ level: 1 }).run()" 
                                 :class="{ active: bodyEditor?.isActive('heading', { level: 1 }) }" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Heading 1">
                             H1
                         </button>
                         <button @click="bodyEditor?.chain().focus().toggleHeading({ level: 2 }).run()" 
                                 :class="{ active: bodyEditor?.isActive('heading', { level: 2 }) }" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Heading 2">
                             H2
                         </button>
                         <button @click="bodyEditor?.chain().focus().toggleHeading({ level: 3 }).run()" 
                                 :class="{ active: bodyEditor?.isActive('heading', { level: 3 }) }" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Heading 3">
                             H3
                         </button>
@@ -2939,16 +2943,16 @@ export default {
                     <div class="vr"></div>
                     
                     <!-- Lists -->
-                    <div class="btn-group" role="group">
+                    <div class="" role="group">
                         <button @click="bodyEditor?.chain().focus().toggleBulletList().run()" 
                                 :class="{ active: bodyEditor?.isActive('bulletList') }" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Bullet List">
                             <i class="fas fa-list-ul"></i>
                         </button>
                         <button @click="bodyEditor?.chain().focus().toggleOrderedList().run()" 
                                 :class="{ active: bodyEditor?.isActive('orderedList') }" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Numbered List">
                             <i class="fas fa-list-ol"></i>
                         </button>
@@ -2957,39 +2961,39 @@ export default {
                     <div class="vr"></div>
                     
                     <!-- Block Elements -->
-                    <div class="btn-group" role="group">
+                    <div class="" role="group">
                         <button @click="bodyEditor?.chain().focus().toggleBlockquote().run()" 
                                 :class="{ active: bodyEditor?.isActive('blockquote') }" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Quote">
                             <i class="fas fa-quote-left"></i>
                         </button>
                         <button @click="bodyEditor?.chain().focus().toggleCodeBlock().run()" 
                                 :class="{ active: bodyEditor?.isActive('codeBlock') }" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Code Block">
                             <i class="fas fa-terminal"></i>
                         </button>
                         <button @click="bodyEditor?.chain().focus().setHorizontalRule().run()" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Horizontal Rule">
                             <i class="fas fa-minus"></i>
                         </button>
                     </div>
                     
-                    <div class="vr"></div>
+                    <div class="vr d-none"></div>
                     
                     <!-- Actions -->
-                    <div class="btn-group" role="group">
+                    <div class="d-none" role="group">
                         <button @click="bodyEditor?.chain().focus().undo().run()" 
                                 :disabled="!bodyEditor?.can().undo()" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Undo">
                             <i class="fas fa-undo"></i>
                         </button>
                         <button @click="bodyEditor?.chain().focus().redo().run()" 
                                 :disabled="!bodyEditor?.can().redo()" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Redo">
                             <i class="fas fa-redo"></i>
                         </button>
@@ -2998,19 +3002,19 @@ export default {
                     <div class="vr"></div>
                     
                     <!-- Insert -->
-                    <div class="btn-group" role="group">
+                    <div class="" role="group">
                         <button @click="insertLink" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Insert Link">
                             <i class="fas fa-link"></i>
                         </button>
                         <button @click="insertImage" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Insert Image">
                             <i class="fas fa-image"></i>
                         </button>
                         <button @click="insertTable" 
-                                class="btn btn-sm btn-outline-light" 
+                                class="btn btn-sm btn-dark" 
                                 type="button" title="Insert Table">
                             <i class="fas fa-table"></i>
                         </button>
@@ -3018,15 +3022,15 @@ export default {
                 </div>
             </div>
             
-            <div class="editor-field bg-dark border border-secondary border-top-0 rounded-bottom p-3">
+            <div class="editor-field bg-dark border border-secondary border-top-0 rounded-bottom">
                 <div ref="bodyEditor" class="body-editor"></div>
             </div>
             <small class="text-muted">Full WYSIWYG editor with markdown export support. Supports &lt;center&gt;, &lt;video&gt;, and other HTML tags.</small>
         </div>
         
         <!-- Tags Field -->
-        <div class="mb-4">
-            <label class="form-label text-white fw-bold">
+        <div class="">
+            <label class="form-label text-white fw-bold d-none">
                 <i class="fas fa-tags me-2"></i>Tags
             </label>
             <div class="d-flex flex-wrap align-items-center gap-2">
@@ -3057,8 +3061,8 @@ export default {
         </div>
                 
         <!-- Advanced Options Collapsible -->
-        <div class="mb-4">
-            <button class="btn btn-outline-light d-flex align-items-center w-100 text-start" 
+        <div class="mb-3">
+            <button class="btn btn-lg p-2 btn-secondary bg-card d-flex align-items-center w-100 text-start" 
                     type="button" 
                     data-bs-toggle="collapse" 
                     data-bs-target="#advancedOptions" 
@@ -3130,7 +3134,7 @@ export default {
         </div>
         
                 <!-- Comment Options (Hive-specific) -->
-                <div class="mb-4">
+                <div class="">
                     <label class="form-label text-white fw-bold">
                         <i class="fas fa-cog me-2"></i>Comment Options
                     </label>
@@ -3181,7 +3185,8 @@ export default {
                 </div>
             </div>
         </div>
-        
+    </div>
+</div>
         <!-- Publish Modal -->
         <div v-if="showPublishModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
             <div class="modal-dialog modal-lg">
@@ -3628,12 +3633,11 @@ export default {
                 </div>
             </div>
         </div>
-    </div>
     `,
     
     // Enhanced styles
     style: `
-    <style scoped>
+    <style>
     .collaborative-post-editor {
         max-width: 900px;
         margin: 0 auto;

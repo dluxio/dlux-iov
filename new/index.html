@@ -487,13 +487,13 @@
                                                 <!-- alert icon -->
                                                 <div class="card d-flex align-items-center justify-content-center rounded-circle fs-2 text-dark-1-muted"
                                                     style="min-width: 120px; min-height: 120px;">
-                                                    <i class="fa-solid fa-gear"></i>
+                                                    <i class="fa-solid fa-gears"></i>
                                                 </div>
                                                 <div class="d-flex flex-grow-1 flex-column">
                                                     <!-- alert title -->
                                                     <h5 class="hero-subtitle fs-4 mb-1 text-center text-lg-start">FFmpeg
                                                         Component</h5>
-                                                    <h6 class="lead text-center text-lg-start">Status: <strong>Not
+                                                    <h6 class="lead text-center text-lg-start text-danger fw-bold">Status: <strong>Not
                                                             Loaded</strong></h6>
                                                     <p class="text-center text-lg-start">FFmpeg is required to transcode
                                                         video files to M3U8 playlists for streaming.</p>
@@ -585,7 +585,7 @@
                                 <!-- Video Upload Interface -->
                                 <div v-if="ffmpegReady || ffmpegSkipped">
                                     <div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col">
                                             <h6><i class="fa-solid fa-video fa-fw me-1"></i>Transcode a Video</h6>
                                             <p class="small text-muted mb-2">
                                                 Transcoding creates multiple quality versions of your video, giving

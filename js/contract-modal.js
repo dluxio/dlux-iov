@@ -104,7 +104,7 @@ export default {
                 <div class="position-relative">
                   <template v-if="field.type === 'O'">
                     <!-- provider select -->
-                    <select v-if="key === 'broker'" class="form-select text-white bg-dark border-dark" :id="key" v-model="form[key]">
+                    <select v-if="key === 'broker'" class="form-select text-white bg-dark border-dark" v-model="form[key]">
                       <option value="" disabled selected>Select {{ field.string.toLowerCase() }}</option>
                       <option v-for="(name, id) in filteredBrokerOptions" :value="id" :disabled="isProviderDisabled(id)">
                         {{getProviderIconUnicode(id)}} | @{{ id }}

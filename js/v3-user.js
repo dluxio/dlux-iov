@@ -6377,7 +6377,9 @@ function buyNFT(setname, uid, price, type, callback){
       this.init(true)
     }
     this.rcCosts()
-    this.initializeCharts(); // Make sure charts are initialized on mount
+    if (document.getElementById('accountDistributionChart') || document.getElementById('typeDistributionChart')) {
+      this.initializeCharts(); // Make sure charts are initialized on mount
+    }
     //this.init();
     //this.getSNodes();
     if (localStorage.getItem("user")) {
@@ -6474,7 +6476,9 @@ function buyNFT(setname, uid, price, type, callback){
         this.getSapi(newValue);
         this.getRcAccount(newValue); // Fetch RC account data
         //this.fetchDelegationsData(); // Fetch delegations data
-        this.initializeCharts(); // Initialize charts
+        if (document.getElementById('accountDistributionChart') || document.getElementById('typeDistributionChart')) {
+          this.initializeCharts(); // Initialize charts
+        }
         this.loadCollaborationAuthHeaders(); // Load collaboration headers for new user
       },
     },
