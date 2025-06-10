@@ -1,4 +1,4 @@
-this.version = "2025.06.10.1";
+this.version = "2025.06.10.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.09.4",
-  "generated": "2025-06-09T07:49:14Z",
+  "version": "2025.06.10.2",
+  "generated": "2025-06-10T05:36:47Z",
   "files": {
-    "/js/extensionvue.js": {
-      "checksum": "8676c44fc4a602732ea7e3a0c036a879",
-      "size": 18652,
-      "priority": "important"
-    },
     "/js/filesvue-dd.js": {
       "checksum": "6dc7ec2eb82059cd1c24d836361bd019",
       "size": 268397,
@@ -726,8 +721,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/postvue.js": {
-      "checksum": "c8e77c94a6f82ccc97f65c32fdf1f72f",
-      "size": 15100,
+      "checksum": "9be19c09506b06d603390bce714d77b3",
+      "size": 17552,
       "priority": "important"
     },
     "/js/purify.min.js": {
@@ -796,7 +791,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "60b244281ba9611e754285801c6756d1",
+      "checksum": "02a62a7b73c1befb4807404076f3bc2f",
       "size": 36316,
       "priority": "important"
     },
@@ -871,8 +866,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "ca0b80c876b5e5d7463a94bb82d1d03f",
-      "size": 224915,
+      "checksum": "909932d1ccf896c211659aad5ad9e15d",
+      "size": 227482,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -931,8 +926,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "ef7f1451d7d0785529c7d7c4167b4825",
-      "size": 60814,
+      "checksum": "7d4089399ed086b0a60b0d9b94eb11cc",
+      "size": 58008,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -986,7 +981,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "59a704e99d217c0bbd12e46d003e479e",
+      "checksum": "1dc22eeccb05fc87468de4b38a56760f",
       "size": 7299,
       "priority": "important"
     },
@@ -1059,11 +1054,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/basic-languages/typespec/typespec.js": {
-      "checksum": "3ea4220c40ac4d11038a4343895f42c5",
-      "size": 3627,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/basic-languages/vb/vb.js": {
       "checksum": "954c16b916d419d910d6e0d04a77c8fb",
@@ -1345,12 +1335,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
