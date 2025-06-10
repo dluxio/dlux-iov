@@ -55,6 +55,7 @@ export default {
             provider: null,
             connectionStatus: 'disconnected',
             connectionMessage: 'Not connected',
+            lastDocumentLoaded: null,
             
             // Content
             content: {
@@ -115,6 +116,15 @@ export default {
                 permission: 'readonly'
             },
             
+            // Document permissions and users
+            documentPermissions: [],
+            connectedUsers: [],
+            loadingPermissions: false,
+            
+            // User customization
+            userColor: null,
+            showColorPicker: false,
+            
             // Publish form
             publishForm: {
                 beneficiaries: [],
@@ -169,6 +179,23 @@ export default {
                    this.authHeaders['x-pubkey'];
         },
         
+        // Get user's preferred color (from localStorage or generate)
+        getUserColor() {
+            if (this.userColor) return this.userColor;
+            
+            const stored = localStorage.getItem(`dlux_user_color_${this.username}`);
+            if (stored) {
+                this.userColor = stored;
+                return stored;
+            }
+            
+            // Generate random hex color for new users
+            const color = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            this.userColor = color;
+            localStorage.setItem(`dlux_user_color_${this.username}`, color);
+            return color;
+        },
+        
         // Check if auth headers are expired (older than 23 hours)
         isAuthExpired() {
             if (!this.authHeaders || !this.authHeaders['x-challenge']) return true;
@@ -193,7 +220,22 @@ export default {
         },
         
         canPublish() {
-            return this.content.title.trim() && this.content.body.trim() && this.content.tags.length > 0;
+            const hasBasicContent = this.content.title.trim() && this.content.body.trim() && this.content.tags.length > 0;
+            
+            if (!hasBasicContent) return false;
+            
+            // If it's a collaborative document, check permissions
+            if (this.currentFile && this.currentFile.type === 'collaborative') {
+                // Owner can always publish
+                if (this.currentFile.owner === this.username) return true;
+                
+                // Check if user has postable permission
+                const userPermission = this.documentPermissions.find(p => p.account === this.username);
+                return userPermission && userPermission.permissionType === 'postable';
+            }
+            
+            // For local documents, always allow if basic content exists
+            return true;
         },
         
         hasValidFilename() {
@@ -287,7 +329,12 @@ export default {
         
         // Tag management
         addTag() {
-            if (this.tagInput.trim() && !this.content.tags.includes(this.tagInput.trim())) {
+            // Ensure tags is always an array
+            if (!Array.isArray(this.content.tags)) {
+                this.content.tags = [];
+            }
+            
+            if (this.tagInput.trim() && !this.content.tags.includes(this.tagInput.trim()) && this.content.tags.length < 10) {
                 this.content.tags.push(this.tagInput.trim().toLowerCase());
                 this.tagInput = '';
                 this.hasUnsavedChanges = true;
@@ -300,7 +347,12 @@ export default {
         },
         
         addTagDirect(tag) {
-            if (!this.content.tags.includes(tag)) {
+            // Ensure tags is always an array
+            if (!Array.isArray(this.content.tags)) {
+                this.content.tags = [];
+            }
+            
+            if (!this.content.tags.includes(tag) && this.content.tags.length < 10) {
                 this.content.tags.push(tag);
                 this.hasUnsavedChanges = true;
             }
@@ -561,8 +613,17 @@ export default {
         async saveAsDocument() {
             // Force showing save modal for "Save As"
             this.showSaveModal = true;
-            this.saveForm.filename = ''; // Clear filename to force new name
-            this.saveForm.isNewDocument = true; // Flag to indicate this is a "Save As"
+            
+            // For collaborative documents, pre-fill current name for rename
+            if (this.currentFile && this.currentFile.type === 'collaborative') {
+                this.saveForm.filename = this.currentFile.documentName || this.currentFile.permlink || '';
+                this.saveForm.saveLocally = false;
+                this.saveForm.saveToDlux = true;
+                this.saveForm.isNewDocument = false; // This is a rename, not new document
+            } else {
+                this.saveForm.filename = ''; // Clear filename to force new name
+                this.saveForm.isNewDocument = true; // Flag to indicate this is a "Save As"
+            }
         },
         
         async performSaveAs() {
@@ -750,8 +811,12 @@ export default {
             this.saving = true;
             
             try {
+                // Check if this is renaming an existing collaborative document
+                if (this.currentFile && this.currentFile.type === 'collaborative' && !this.saveForm.isNewDocument) {
+                    await this.renameCollaborativeDocument();
+                }
                 // Check if this is a "Save As" to collaborative doc
-                if (this.saveForm.isNewDocument && this.saveForm.saveToDlux) {
+                else if (this.saveForm.isNewDocument && this.saveForm.saveToDlux) {
                     await this.performSaveAs();
                 } else {
                     // Regular save
@@ -773,6 +838,41 @@ export default {
                 alert('Save failed: ' + error.message);
             } finally {
                 this.saving = false;
+            }
+        },
+        
+        async renameCollaborativeDocument() {
+            if (!this.currentFile || this.currentFile.type !== 'collaborative') return;
+            
+            try {
+                const response = await fetch(`https://data.dlux.io/api/collaboration/documents/${this.currentFile.owner}/${this.currentFile.permlink}/name`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...this.authHeaders
+                    },
+                    body: JSON.stringify({
+                        documentName: this.saveForm.filename
+                    })
+                });
+                
+                if (response.ok) {
+                    const updatedDoc = await response.json();
+                    
+                    // Update current file reference
+                    this.currentFile.documentName = this.saveForm.filename;
+                    
+                    // Reload collaborative docs list to reflect the change
+                    await this.loadCollaborativeDocs();
+                    
+                    console.log('📝 Document renamed successfully:', this.saveForm.filename);
+                } else {
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    throw new Error(`Failed to rename document: ${errorData.error || response.statusText}`);
+                }
+            } catch (error) {
+                console.error('Rename failed:', error);
+                throw error;
             }
         },
         
@@ -799,11 +899,15 @@ export default {
                 return;
             }
             
+            // Load current permissions before showing modal
+            await this.loadDocumentPermissions();
             this.showShareModal = true;
         },
         
         async performShare() {
             if (!this.shareForm.username.trim()) return;
+            
+            const username = this.shareForm.username.trim();
             
             try {
                 const response = await fetch(`https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}`, {
@@ -813,21 +917,99 @@ export default {
                         ...this.authHeaders
                     },
                     body: JSON.stringify({
-                        targetAccount: this.shareForm.username.trim(),
+                        targetAccount: username,
                         permissionType: this.shareForm.permission
                     })
                 });
                 
                 if (response.ok) {
-                    this.showShareModal = false;
+                    // Clear form
                     this.shareForm.username = '';
-                    alert(`Document shared with @${this.shareForm.username}!`);
+                    this.shareForm.permission = 'readonly';
+                    
+                    // Reload permissions to update the list
+                    await this.loadDocumentPermissions();
+                    
+                    alert(`Document shared with @${username}!`);
                 } else {
-                    throw new Error('Failed to share document');
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    throw new Error(`Failed to share document: ${errorData.error || response.statusText}`);
                 }
             } catch (error) {
                 console.error('Share failed:', error);
                 alert('Share failed: ' + error.message);
+            }
+        },
+        
+        async loadDocumentPermissions() {
+            if (!this.currentFile || this.currentFile.type !== 'collaborative') return;
+            
+            this.loadingPermissions = true;
+            
+            try {
+                const response = await fetch(`https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}`, {
+                    headers: this.authHeaders
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    this.documentPermissions = data.permissions || [];
+                } else {
+                    console.error('Failed to load permissions:', response.statusText);
+                    this.documentPermissions = [];
+                }
+            } catch (error) {
+                console.error('Error loading permissions:', error);
+                this.documentPermissions = [];
+            } finally {
+                this.loadingPermissions = false;
+            }
+        },
+        
+        async updatePermission(account, newPermission) {
+            try {
+                const response = await fetch(`https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...this.authHeaders
+                    },
+                    body: JSON.stringify({
+                        targetAccount: account,
+                        permissionType: newPermission
+                    })
+                });
+                
+                if (response.ok) {
+                    await this.loadDocumentPermissions();
+                    console.log(`Permission updated for @${account} to ${newPermission}`);
+                } else {
+                    throw new Error('Failed to update permission');
+                }
+            } catch (error) {
+                console.error('Update permission failed:', error);
+                alert('Failed to update permission: ' + error.message);
+            }
+        },
+        
+        async revokePermission(account) {
+            if (!confirm(`Revoke access for @${account}?`)) return;
+            
+            try {
+                const response = await fetch(`https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}/${account}`, {
+                    method: 'DELETE',
+                    headers: this.authHeaders
+                });
+                
+                if (response.ok) {
+                    await this.loadDocumentPermissions();
+                    console.log(`Permission revoked for @${account}`);
+                } else {
+                    throw new Error('Failed to revoke permission');
+                }
+            } catch (error) {
+                console.error('Revoke permission failed:', error);
+                alert('Failed to revoke permission: ' + error.message);
             }
         },
         
@@ -979,6 +1161,21 @@ export default {
         },
         
         async loadCollaborativeFile(doc) {
+            // Check if we're already loading this exact document
+            if (this.isInitializing) {
+                console.warn('⚠️ Already initializing, skipping load request');
+                return;
+            }
+            
+            // Check if this is the same document we just loaded (prevent rapid reloads)
+            const docKey = `${doc.owner}/${doc.permlink}`;
+            if (this.lastDocumentLoaded === docKey && this.connectionStatus === 'connected') {
+                console.log('📋 Same document already loaded and connected, skipping');
+                return;
+            }
+            
+            this.lastDocumentLoaded = docKey;
+            
             // CRITICAL: Clean up existing editors and connections first
             this.disconnectCollaboration();
             
@@ -994,7 +1191,7 @@ export default {
             
             // Load content structure
             this.content = {
-                title: doc.documentName || doc.permlink.replace(/-/g, ' '),
+                title: '', // Don't auto-fill title from document name
                 body: '',
                 tags: ['dlux', 'collaboration'],
                 custom_json: {
@@ -1002,6 +1199,9 @@ export default {
                     authors: [doc.owner]
                 }
             };
+            
+            // Load document permissions
+            await this.loadDocumentPermissions();
             
             try {
                 await this.initializeCollaboration(doc);
@@ -1397,6 +1597,18 @@ export default {
             
             this.isInitializing = true;
             
+            // Additional check: if we already have editors for this exact document, skip
+            if (this.currentFile && 
+                this.currentFile.owner === doc.owner && 
+                this.currentFile.permlink === doc.permlink && 
+                this.connectionStatus === 'connected' &&
+                this.titleEditor && 
+                this.bodyEditor) {
+                console.log('📋 Already connected to this document, skipping re-initialization');
+                this.isInitializing = false;
+                return;
+            }
+            
             // Check for global collaborative instance conflicts
             if (window.dluxCollaborativeInstance && window.dluxCollaborativeInstance !== this.componentId) {
                 console.warn('⚠️ Another collaborative instance detected, cleaning up:', window.dluxCollaborativeInstance);
@@ -1442,6 +1654,9 @@ export default {
             const { Editor, StarterKit, Y, HocuspocusProvider, Collaboration, CollaborationCursor } = bundle;
             
             try {
+                // Get user color before creating editors
+                const userColor = this.getUserColor;
+                
                 // Create single Y.js document for both fields
                 this.ydoc = new Y.Doc();
                 
@@ -1469,6 +1684,7 @@ export default {
                         console.log('❌ Disconnected from collaboration server');
                         this.connectionStatus = 'disconnected';
                         this.connectionMessage = 'Disconnected from server';
+                        this.connectedUsers = []; // Clear users on disconnect
                     },
                     onSynced: ({ synced }) => {
                         if (synced) {
@@ -1480,6 +1696,15 @@ export default {
                         console.error('🔐 Authentication failed:', reason);
                         this.connectionStatus = 'disconnected';
                         this.connectionMessage = `Authentication failed: ${reason}`;
+                    },
+                    onAwarenessChange: ({ states }) => {
+                        // Update connected users list
+                        this.connectedUsers = Array.from(states.values())
+                            .filter(state => state.user && state.user.name)
+                            .map(state => ({
+                                name: state.user.name,
+                                color: state.user.color || this.generateUserColor(state.user.name)
+                            }));
                     }
                 });
                 
@@ -1488,9 +1713,16 @@ export default {
                     if (this.provider.synced) {
                         resolve();
                     } else {
-                        this.provider.on('synced', resolve);
+                        const onSynced = () => {
+                            this.provider.off('synced', onSynced);
+                            resolve();
+                        };
+                        this.provider.on('synced', onSynced);
                         // Fallback timeout to prevent hanging
-                        setTimeout(resolve, 5000);
+                        setTimeout(() => {
+                            this.provider.off('synced', onSynced);
+                            resolve();
+                        }, 5000);
                     }
                 });
                 
@@ -1550,7 +1782,7 @@ export default {
                                 provider: this.provider,
                                 user: {
                                     name: this.username,
-                                    color: '#f783ac'
+                                    color: userColor
                                 }
                             })
                         ],
@@ -1637,7 +1869,7 @@ export default {
                                 provider: this.provider,
                                 user: {
                                     name: this.username,
-                                    color: '#f783ac'
+                                    color: userColor
                                 }
                             })
                         ],
@@ -1687,6 +1919,9 @@ export default {
         
         disconnectCollaboration() {
             console.log('🧹 Cleaning up collaborative editor connections...');
+            
+            // Set flag to prevent new operations during cleanup
+            this.isInitializing = false;
             
             // Destroy all editors first to prevent them from trying to access destroyed Y.js types
             if (this.titleEditor) {
@@ -1742,6 +1977,9 @@ export default {
                     shareKeys.forEach(key => {
                         try {
                             const type = this.ydoc.share.get(key);
+                            if (type && typeof type.clear === 'function') {
+                                type.clear(); // Clear content instead of destroy
+                            }
                             if (type && typeof type.destroy === 'function') {
                                 type.destroy();
                             }
@@ -2160,6 +2398,94 @@ export default {
             localStorage.removeItem(`dlux_tiptap_backup_${uploadId}`);
             
             console.log('🗑️ Removed pending upload:', uploadId);
+        },
+        
+        // Toolbar action methods
+        insertLink() {
+            const url = prompt('Enter URL:');
+            if (url) {
+                this.bodyEditor?.chain().focus().setLink({ href: url }).run();
+            }
+        },
+        
+        insertImage() {
+            const url = prompt('Enter image URL:');
+            if (url) {
+                this.bodyEditor?.chain().focus().setImage({ src: url }).run();
+            }
+        },
+        
+        insertTable() {
+            this.bodyEditor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+        },
+        
+        handleAvatarError(event, user) {
+            // Hide the broken image and show a fallback avatar
+            event.target.style.display = 'none';
+            
+            // Create a fallback avatar element
+            const fallback = document.createElement('div');
+            fallback.className = 'user-avatar-small rounded-circle d-flex align-items-center justify-content-center';
+            fallback.style.cssText = `
+                width: 24px; 
+                height: 24px; 
+                background-color: ${user.color}; 
+                font-size: 0.75rem; 
+                font-weight: bold; 
+                color: white;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                border: 2px solid ${user.color};
+                box-shadow: 0 0 0 1px rgba(255,255,255,0.2);
+            `;
+            fallback.textContent = user.name.charAt(0).toUpperCase();
+            fallback.title = user.name;
+            
+            // Replace the broken image with the fallback
+            event.target.parentNode.appendChild(fallback);
+        },
+        
+        handleOwnerAvatarError(event) {
+            // Hide the broken image and show the fallback
+            event.target.style.display = 'none';
+            const fallback = event.target.nextElementSibling;
+            if (fallback && fallback.classList.contains('user-avatar-fallback')) {
+                fallback.style.display = 'flex';
+            }
+        },
+        
+        handlePermissionAvatarError(event, username) {
+            // Hide the broken image and show the fallback
+            event.target.style.display = 'none';
+            const fallback = event.target.nextElementSibling;
+            if (fallback && fallback.classList.contains('user-avatar-fallback')) {
+                fallback.style.display = 'flex';
+            }
+        },
+        
+        // Color picker methods
+        toggleColorPicker() {
+            this.showColorPicker = !this.showColorPicker;
+        },
+        
+        updateUserColor(newColor) {
+            this.userColor = newColor;
+            localStorage.setItem(`dlux_user_color_${this.username}`, newColor);
+            
+            // Update collaboration cursor color if connected
+            if (this.provider && this.provider.awareness) {
+                const currentState = this.provider.awareness.getLocalState();
+                this.provider.awareness.setLocalStateField('user', {
+                    name: this.username,
+                    color: newColor
+                });
+            }
+            
+            this.showColorPicker = false;
+            console.log('🎨 User color updated:', newColor);
+        },
+        
+        getRandomColor() {
+            return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
         }
     },
     
@@ -2224,6 +2550,11 @@ export default {
             if (!e.target.closest('.dropdown')) {
                 this.closeDropdowns();
             }
+            
+            // Close color picker when clicking outside
+            if (!e.target.closest('.position-relative') && this.showColorPicker) {
+                this.showColorPicker = false;
+            }
         });
     },
     
@@ -2253,7 +2584,7 @@ export default {
                             type="button" 
                             data-bs-toggle="dropdown" 
                             aria-expanded="false">
-                        <i class="fas fa-file me-1"></i>File
+                        <i class="fas fa-file me-sm-1"></i><span class="d-none d-sm-inline">File</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark">
                         <li><a class="dropdown-item" href="#" @click.prevent="newDocument">
@@ -2325,7 +2656,7 @@ export default {
                             type="button" 
                             data-bs-toggle="dropdown" 
                             aria-expanded="false">
-                        <i class="fas fa-edit me-1"></i>Edit
+                        <i class="fas fa-edit me-sm-1"></i><span class="d-none d-sm-inline">Edit</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark">
                         <li><a class="dropdown-item" href="#" @click.prevent="bodyEditor?.chain().focus().undo().run()">
@@ -2347,7 +2678,7 @@ export default {
                             type="button" 
                             data-bs-toggle="dropdown" 
                             aria-expanded="false">
-                        <i class="fas fa-users me-1"></i>Collaboration
+                        <i class="fas fa-users me-sm-1"></i><span class="d-none d-sm-inline">Collaboration</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark">
                         <li v-if="!isAuthenticated || isAuthExpired">
@@ -2381,7 +2712,7 @@ export default {
                             type="button" 
                             data-bs-toggle="dropdown" 
                             aria-expanded="false">
-                        <i class="fas fa-eye me-1"></i>View
+                        <i class="fas fa-eye me-sm-1"></i><span class="d-none d-sm-inline">View</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark">
                         <li><a class="dropdown-item" href="#" @click.prevent="showAdvancedOptions = !showAdvancedOptions">
@@ -2394,7 +2725,7 @@ export default {
                 </div>
                 
                 <!-- File Status -->
-                <div class="ms-auto d-flex align-items-center gap-3">
+                <div class="ms-auto d-flex align-items-center gap-2">
                     <span v-if="currentFile" class="text-light small">
                         <i class="fas fa-file me-1"></i>{{ currentFile.name || currentFile.documentName || currentFile.permlink }}
                         <span v-if="hasUnsavedChanges" class="text-warning ms-1">●</span>
@@ -2403,31 +2734,104 @@ export default {
                         <i class="fas fa-file-plus me-1"></i>Untitled
                         <span v-if="hasUnsavedChanges" class="text-warning ms-1">●</span>
                     </span>
+                    
+                    <!-- Connection Status Badge -->
+                    <span v-if="currentFile?.type === 'collaborative'" class="badge" :class="{
+                        'bg-success': connectionStatus === 'connected',
+                        'bg-warning': connectionStatus === 'connecting', 
+                        'bg-secondary': connectionStatus === 'disconnected',
+                        'bg-danger': connectionStatus === 'error'
+                    }">
+                        <i class="fas fa-fw me-1" :class="{
+                            'fa-check-circle': connectionStatus === 'connected',
+                            'fa-spinner fa-spin': connectionStatus === 'connecting',
+                            'fa-circle': connectionStatus === 'disconnected',
+                            'fa-exclamation-circle': connectionStatus === 'error'
+                        }"></i>
+                        {{ connectionStatus === 'connected' ? 'Live' : 
+                           connectionStatus === 'connecting' ? 'Connecting' : 
+                           connectionStatus === 'error' ? 'Error' : 'Offline' }}
+                    </span>
+                    <span v-else-if="currentFile?.type === 'local'" class="badge bg-secondary">
+                        <i class="fas fa-file me-1"></i>Local
+                    </span>
+                    
+                    <!-- Current User (in collaborative mode) -->
+                    <div v-if="currentFile?.type === 'collaborative'" class="d-flex align-items-center gap-1">
+                        <div class="position-relative">
+                            <img :src="'https://images.hive.blog/u/' + username + '/avatar/small'"
+                                 :alt="username"
+                                 class="user-avatar-small rounded-circle cursor-pointer" 
+                                 :title="'You (' + username + ') - Click to change color'"
+                                 @click="toggleColorPicker"
+                                                              @error="handleAvatarError($event, { name: username, color: getUserColor })"
+                             :style="{ 
+                                 width: '24px', 
+                                 height: '24px', 
+                                 objectFit: 'cover',
+                                 border: '2px solid ' + getUserColor,
+                                     boxShadow: '0 0 0 1px rgba(255,255,255,0.2)'
+                                 }">
+                            
+                            <!-- Color picker dropdown -->
+                            <div v-if="showColorPicker" class="position-absolute bg-dark border border-secondary rounded p-2 shadow-lg" 
+                                 style="top: 30px; right: 0; z-index: 1000; width: 200px;">
+                                <div class="mb-2">
+                                    <small class="text-white fw-bold">Choose your cursor color:</small>
+                                </div>
+                                <div class="d-flex flex-wrap gap-1 mb-2">
+                                    <div v-for="(color, index) in ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e']" 
+                                         :key="index"
+                                         @click="updateUserColor(color)"
+                                         class="color-swatch cursor-pointer rounded" 
+                                         :style="{ backgroundColor: color, width: '20px', height: '20px', border: color === getUserColor ? '2px solid white' : '1px solid #ccc' }"
+                                         :title="color">
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-1 mb-2">
+                                    <input type="color" 
+                                           :value="getUserColor" 
+                                           @input="updateUserColor($event.target.value)"
+                                           class="form-control form-control-sm flex-grow-1"
+                                           style="height: 25px;">
+                                    <button @click="updateUserColor(getRandomColor())" 
+                                            class="btn btn-sm btn-outline-light"
+                                            title="Random color">
+                                        <i class="fas fa-random fa-xs"></i>
+                                    </button>
+                                </div>
+                                <button @click="showColorPicker = false" class="btn btn-sm btn-secondary w-100">
+                                    Done
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Other Connected Users -->
+                        <div v-for="user in connectedUsers.filter(u => u.name !== username).slice(0, 3)" 
+                             :key="user.name" 
+                             class="position-relative">
+                            <img :src="'https://images.hive.blog/u/' + user.name + '/avatar/small'"
+                                 :alt="user.name"
+                                 class="user-avatar-small rounded-circle" 
+                                 :title="user.name"
+                                 @error="handleAvatarError($event, user)"
+                                 :style="{ 
+                                     width: '24px', 
+                                     height: '24px', 
+                                     objectFit: 'cover',
+                                     border: '2px solid ' + user.color,
+                                     boxShadow: '0 0 0 1px rgba(255,255,255,0.2)'
+                                 }">
+                        </div>
+                        <span v-if="connectedUsers.filter(u => u.name !== username).length > 3" class="badge bg-light text-dark small">
+                            +{{ connectedUsers.filter(u => u.name !== username).length - 3 }}
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
         
-        <!-- Connection Status -->
-        <div class="collaboration-status mb-3 p-2 rounded border-start border-3" :class="{
-            'border-success bg-success-subtle text-success': connectionStatus === 'connected',
-            'border-warning bg-warning-subtle text-warning': connectionStatus === 'connecting',
-            'border-danger bg-danger-subtle text-danger': connectionStatus === 'disconnected'
-        }">
-            <div class="d-flex align-items-center">
-                <i class="fas fa-fw me-2" :class="{
-                    'fa-check-circle': connectionStatus === 'connected',
-                    'fa-spinner fa-spin': connectionStatus === 'connecting',
-                    'fa-exclamation-circle': connectionStatus === 'disconnected'
-                }"></i>
-                <span class="small">{{ connectionMessage }}</span>
-                <span v-if="isConnected && currentFile?.type === 'collaborative'" class="badge bg-primary ms-2">
-                    <i class="fas fa-users me-1"></i>Live
-                </span>
-                <span v-else-if="currentFile?.type === 'local'" class="badge bg-secondary ms-2">
-                    <i class="fas fa-file me-1"></i>Local
-                </span>
-            </div>
-        </div>
+
             
         <!-- Title Field -->
         <div class="mb-4">
@@ -2438,10 +2842,14 @@ export default {
             <div class="editor-field bg-dark border border-secondary rounded p-3">
                 <div ref="titleEditor" class="title-editor"></div>
             </div>
+            <!-- Auto-generated permlink display -->
+            <div v-if="generatedPermlink" class="mt-2 text-start">
+                <small class="text-muted font-monospace">/@{{ username }}/{{ generatedPermlink }}</small>
+            </div>
         </div>
         
         <!-- Permlink Field -->
-        <div class="mb-4">
+        <div v-if="showPermlinkEditor" class="mb-4">
             <label class="form-label text-white fw-bold">
                 <i class="fas fa-link me-2"></i>URL Slug (Permlink)
                 <span class="badge bg-secondary ms-2">Local Only</span>
@@ -2472,44 +2880,181 @@ export default {
                 <i class="fas fa-edit me-2"></i>Content
                 <span class="badge bg-primary ms-2" v-if="isConnected">Collaborative</span>
             </label>
-            <div class="editor-field bg-dark border border-secondary rounded p-3">
+            
+            <!-- WYSIWYG Toolbar -->
+            <div class="editor-toolbar bg-dark border border-secondary border-bottom-0 rounded-top p-2">
+                <div class="d-flex flex-wrap gap-1 align-items-center">
+                    <!-- Text Formatting -->
+                    <div class="btn-group" role="group">
+                        <button @click="bodyEditor?.chain().focus().toggleBold().run()" 
+                                :class="{ active: bodyEditor?.isActive('bold') }" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Bold">
+                            <i class="fas fa-bold"></i>
+                        </button>
+                        <button @click="bodyEditor?.chain().focus().toggleItalic().run()" 
+                                :class="{ active: bodyEditor?.isActive('italic') }" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Italic">
+                            <i class="fas fa-italic"></i>
+                        </button>
+                        <button @click="bodyEditor?.chain().focus().toggleStrike().run()" 
+                                :class="{ active: bodyEditor?.isActive('strike') }" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Strikethrough">
+                            <i class="fas fa-strikethrough"></i>
+                        </button>
+                        <button @click="bodyEditor?.chain().focus().toggleCode().run()" 
+                                :class="{ active: bodyEditor?.isActive('code') }" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Inline Code">
+                            <i class="fas fa-code"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="vr"></div>
+                    
+                    <!-- Headings -->
+                    <div class="btn-group" role="group">
+                        <button @click="bodyEditor?.chain().focus().toggleHeading({ level: 1 }).run()" 
+                                :class="{ active: bodyEditor?.isActive('heading', { level: 1 }) }" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Heading 1">
+                            H1
+                        </button>
+                        <button @click="bodyEditor?.chain().focus().toggleHeading({ level: 2 }).run()" 
+                                :class="{ active: bodyEditor?.isActive('heading', { level: 2 }) }" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Heading 2">
+                            H2
+                        </button>
+                        <button @click="bodyEditor?.chain().focus().toggleHeading({ level: 3 }).run()" 
+                                :class="{ active: bodyEditor?.isActive('heading', { level: 3 }) }" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Heading 3">
+                            H3
+                        </button>
+                    </div>
+                    
+                    <div class="vr"></div>
+                    
+                    <!-- Lists -->
+                    <div class="btn-group" role="group">
+                        <button @click="bodyEditor?.chain().focus().toggleBulletList().run()" 
+                                :class="{ active: bodyEditor?.isActive('bulletList') }" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Bullet List">
+                            <i class="fas fa-list-ul"></i>
+                        </button>
+                        <button @click="bodyEditor?.chain().focus().toggleOrderedList().run()" 
+                                :class="{ active: bodyEditor?.isActive('orderedList') }" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Numbered List">
+                            <i class="fas fa-list-ol"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="vr"></div>
+                    
+                    <!-- Block Elements -->
+                    <div class="btn-group" role="group">
+                        <button @click="bodyEditor?.chain().focus().toggleBlockquote().run()" 
+                                :class="{ active: bodyEditor?.isActive('blockquote') }" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Quote">
+                            <i class="fas fa-quote-left"></i>
+                        </button>
+                        <button @click="bodyEditor?.chain().focus().toggleCodeBlock().run()" 
+                                :class="{ active: bodyEditor?.isActive('codeBlock') }" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Code Block">
+                            <i class="fas fa-terminal"></i>
+                        </button>
+                        <button @click="bodyEditor?.chain().focus().setHorizontalRule().run()" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Horizontal Rule">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="vr"></div>
+                    
+                    <!-- Actions -->
+                    <div class="btn-group" role="group">
+                        <button @click="bodyEditor?.chain().focus().undo().run()" 
+                                :disabled="!bodyEditor?.can().undo()" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Undo">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                        <button @click="bodyEditor?.chain().focus().redo().run()" 
+                                :disabled="!bodyEditor?.can().redo()" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Redo">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="vr"></div>
+                    
+                    <!-- Insert -->
+                    <div class="btn-group" role="group">
+                        <button @click="insertLink" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Insert Link">
+                            <i class="fas fa-link"></i>
+                        </button>
+                        <button @click="insertImage" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Insert Image">
+                            <i class="fas fa-image"></i>
+                        </button>
+                        <button @click="insertTable" 
+                                class="btn btn-sm btn-outline-light" 
+                                type="button" title="Insert Table">
+                            <i class="fas fa-table"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="editor-field bg-dark border border-secondary border-top-0 rounded-bottom p-3">
                 <div ref="bodyEditor" class="body-editor"></div>
             </div>
             <small class="text-muted">Full WYSIWYG editor with markdown export support. Supports &lt;center&gt;, &lt;video&gt;, and other HTML tags.</small>
         </div>
         
-        <!-- Tags Field (Non-collaborative) -->
+        <!-- Tags Field -->
         <div class="mb-4">
             <label class="form-label text-white fw-bold">
                 <i class="fas fa-tags me-2"></i>Tags
-                <span class="badge bg-secondary ms-2">Local Only</span>
             </label>
-            <div class="d-flex flex-wrap gap-2 mb-2">
-                            <span v-for="(tag, index) in content.tags" :key="index" 
-                                  class="badge bg-primary d-flex align-items-center">
-                                {{ tag }}
-                    <button @click="removeTag(index)" class="btn-close btn-close-white ms-2 small"></button>
-                            </span>
-                        </div>
-                        <div class="input-group">
-                <input v-model="tagInput" @keydown.enter="addTag" 
-                       class="form-control bg-dark text-white border-secondary" 
-                       placeholder="Add a tag..."
-                       maxlength="50">
-                <button @click="addTag" class="btn btn-outline-primary">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-            <div class="mt-2">
-                <small class="text-muted me-2">Suggested:</small>
-                <button v-for="tag in availableTags" :key="tag" 
-                        @click="addTagDirect(tag)"
-                        :disabled="content.tags.includes(tag)"
-                        class="btn btn-sm btn-outline-secondary me-1 mb-1">
-                                {{ tag }}
-                </button>
-                    </div>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <!-- Add tag input (floating left) -->
+                <div class="input-group" style="width: 200px;">
+                    <input v-model="tagInput" @keydown.enter="addTag" 
+                           class="form-control form-control-sm bg-dark text-white border-secondary" 
+                           placeholder="Add a tag..."
+                           maxlength="50"
+                           :disabled="content.tags.length >= 10">
+                    <button @click="addTag" 
+                            class="btn btn-sm btn-outline-primary"
+                            :disabled="content.tags.length >= 10 || !tagInput.trim()">
+                        <i class="fas fa-plus"></i>
+                    </button>
                 </div>
+                
+                <!-- Current tags -->
+                <span v-for="(tag, index) in content.tags" :key="index" 
+                      class="badge bg-primary d-flex align-items-center">
+                    {{ tag }}
+                    <button @click="removeTag(index)" class="btn-close btn-close-white ms-2 small"></button>
+                </span>
+            </div>
+            <small v-if="content.tags.length >= 10" class="text-warning">
+                Maximum 10 tags allowed
+            </small>
+        </div>
                 
         <!-- Advanced Options Collapsible -->
         <div class="mb-4">
@@ -2920,7 +3465,12 @@ export default {
                                               rows="2" 
                                               placeholder="Brief description of the document"></textarea>
                                 </div>
-                                <div v-if="saveForm.isNewDocument && saveForm.saveToDlux" class="alert alert-info small mt-2">
+                                <div v-if="!saveForm.isNewDocument && currentFile?.type === 'collaborative'" class="alert alert-warning small mt-2">
+                                    <i class="fas fa-edit me-1"></i>
+                                    <strong>Rename Document:</strong> 
+                                    This will change the display name of the current collaborative document. The technical document ID will remain the same.
+                                </div>
+                                <div v-else-if="saveForm.isNewDocument && saveForm.saveToDlux" class="alert alert-info small mt-2">
                                     <i class="fas fa-info-circle me-1"></i>
                                     <strong>{{ saveForm.filename ? 'Save As' : 'New Collaborative Document' }}:</strong> 
                                     This will create a new collaborative document with a unique auto-generated ID. 
@@ -2953,7 +3503,7 @@ export default {
         
         <!-- Share Modal -->
         <div v-if="showShareModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
@@ -2962,37 +3512,117 @@ export default {
                         <button @click="showShareModal = false" class="btn-close"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Share with user</label>
-                            <div class="input-group">
-                                <span class="input-group-text">@</span>
-                                <input v-model="shareForm.username" 
-                                       class="form-control" 
-                                       placeholder="Enter HIVE username"
-                                       @keyup.enter="performShare">
+                        <!-- Current Permissions -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Current Access</h6>
+                            
+                            <!-- Document Owner -->
+                            <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded mb-2">
+                                <div class="d-flex align-items-center">
+                                    <img :src="'https://images.hive.blog/u/' + currentFile?.owner + '/avatar/small'"
+                                         :alt="currentFile?.owner"
+                                         class="user-avatar rounded-circle me-2" 
+                                         style="width: 40px; height: 40px; object-fit: cover;"
+                                         @error="handleOwnerAvatarError">
+                                    <div class="user-avatar-fallback me-2" 
+                                         :style="{ backgroundColor: generateUserColor(currentFile?.owner || '') }"
+                                         style="display: none; width: 40px; height: 40px; border-radius: 50%; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; color: white;">
+                                        {{ currentFile?.owner?.charAt(0).toUpperCase() }}
+                                    </div>
+                                    <div>
+                                        <strong>@{{ currentFile?.owner }}</strong>
+                                        <div class="text-muted small">Owner</div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-success">Full Access</span>
+                            </div>
+                            
+                            <!-- Loading State -->
+                            <div v-if="loadingPermissions" class="text-center py-2">
+                                <i class="fas fa-spinner fa-spin me-2"></i>Loading permissions...
+                            </div>
+                            
+                            <!-- Shared Users -->
+                            <div v-else-if="documentPermissions.length === 0" class="text-muted text-center py-3">
+                                <i class="fas fa-users me-2"></i>No additional users have access to this document
+                            </div>
+                            <div v-else>
+                                <div v-for="permission in documentPermissions" :key="permission.account" 
+                                     class="d-flex align-items-center justify-content-between p-2 bg-light rounded mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <img :src="'https://images.hive.blog/u/' + permission.account + '/avatar/small'"
+                                             :alt="permission.account"
+                                             class="user-avatar rounded-circle me-2" 
+                                             style="width: 40px; height: 40px; object-fit: cover;"
+                                             @error="handlePermissionAvatarError($event, permission.account)">
+                                        <div class="user-avatar-fallback me-2" 
+                                             :style="{ backgroundColor: generateUserColor(permission.account) }"
+                                             style="display: none; width: 40px; height: 40px; border-radius: 50%; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; color: white;">
+                                            {{ permission.account.charAt(0).toUpperCase() }}
+                                        </div>
+                                        <div>
+                                            <strong>@{{ permission.account }}</strong>
+                                            <div class="text-muted small">
+                                                Granted by @{{ permission.grantedBy }} • {{ formatFileDate(permission.grantedAt) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <select @change="updatePermission(permission.account, $event.target.value)" 
+                                                :value="permission.permissionType" 
+                                                class="form-select form-select-sm" 
+                                                style="width: auto;">
+                                            <option value="readonly">Read Only</option>
+                                            <option value="editable">Editable</option>
+                                            <option value="postable">Full Access</option>
+                                        </select>
+                                        <button @click="revokePermission(permission.account)" 
+                                                class="btn btn-sm btn-outline-danger"
+                                                title="Revoke access">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="mb-3">
-                            <label class="form-label">Permission level</label>
-                            <select v-model="shareForm.permission" class="form-select">
-                                <option value="readonly">Read Only - Can view and connect</option>
-                                <option value="editable">Editable - Can view and edit content</option>
-                                <option value="postable">Full Access - Can edit and post to Hive</option>
-                            </select>
+                        <hr>
+                        
+                        <!-- Add New User -->
+                        <div>
+                            <h6 class="fw-bold mb-3">Grant New Access</h6>
+                            <div class="mb-3">
+                                <label class="form-label">Share with user</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">@</span>
+                                    <input v-model="shareForm.username" 
+                                           class="form-control" 
+                                           placeholder="Enter HIVE username"
+                                           @keyup.enter="performShare">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Permission level</label>
+                                <select v-model="shareForm.permission" class="form-select">
+                                    <option value="readonly">Read Only - Can view and connect</option>
+                                    <option value="editable">Editable - Can view and edit content</option>
+                                    <option value="postable">Full Access - Can edit and post to Hive</option>
+                                </select>
+                            </div>
                         </div>
                         
                         <div class="alert alert-info small">
                             <i class="fas fa-info-circle me-1"></i>
-                            The user will need to authenticate with their HIVE account to access the document.
+                            Users need to authenticate with their HIVE account to access shared documents.
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button @click="showShareModal = false" class="btn btn-secondary">Cancel</button>
+                        <button @click="showShareModal = false" class="btn btn-secondary">Close</button>
                         <button @click="performShare" 
                                 class="btn btn-primary" 
                                 :disabled="!shareForm.username.trim()">
-                            <i class="fas fa-share me-1"></i>Share
+                            <i class="fas fa-user-plus me-1"></i>Grant Access
                         </button>
                     </div>
                 </div>
@@ -3128,6 +3758,73 @@ export default {
     .btn-outline-danger:disabled {
         opacity: 0.3;
         cursor: not-allowed;
+    }
+    
+    /* User avatars */
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+        font-weight: bold;
+        color: white;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Toolbar styles */
+    .editor-toolbar {
+        border-radius: 0.375rem 0.375rem 0 0 !important;
+    }
+    
+    .editor-toolbar .btn.active {
+        background-color: #5C94FE;
+        border-color: #5C94FE;
+        color: white;
+    }
+    
+    .editor-toolbar .btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .editor-toolbar .vr {
+        height: 24px;
+        opacity: 0.3;
+    }
+    
+    /* Status badges */
+    .badge.fs-6 {
+        font-size: 0.875rem !important;
+    }
+    
+    /* Share modal styles */
+    .modal-lg .user-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    /* Color picker styles */
+    .color-swatch {
+        transition: transform 0.1s ease;
+        cursor: pointer;
+    }
+    
+    .color-swatch:hover {
+        transform: scale(1.1);
+    }
+    
+    .user-avatar-small.cursor-pointer:hover {
+        transform: scale(1.1);
+        transition: transform 0.1s ease;
+    }
+    
+    /* Color picker dropdown */
+    .position-absolute {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
     </style>
     `
