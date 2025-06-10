@@ -1474,41 +1474,30 @@ export default {
             const TableCell = await import('https://esm.sh/@tiptap/extension-table-cell@3.0.0');
             const TableHeader = await import('https://esm.sh/@tiptap/extension-table-header@3.0.0');
             
-            // Create title editor (simple, single-line)
+            // Create title editor (simple single-line)
             if (this.$refs.titleEditor) {
                 this.titleEditor = new Editor({
                     element: this.$refs.titleEditor,
                     extensions: [
-                        StarterKit.default.configure({
+                        StarterKit.configure({
                             heading: false,
-                            history: false,
                             bulletList: false,
                             orderedList: false,
                             blockquote: false,
                             codeBlock: false,
-                            horizontalRule: false
+                            horizontalRule: false,
+                            history: true // Enable history for non-collaborative
                         }),
                         Placeholder.default.configure({
-                            placeholder: 'Enter your post title...',
-                        }),
+                            placeholder: 'Enter document title...'
+                        })
                     ],
                     content: this.content.title,
                     editorProps: {
                         attributes: {
-                            class: 'form-control bg-transparent text-white border-0 fs-4 fw-bold',
-                        },
-                        handleKeyDown: (view, event) => {
-                            if (event.key === 'Enter') {
-                                event.preventDefault();
-                                if (this.bodyEditor) {
-                                    this.bodyEditor.commands.focus();
-                                }
-                                return true;
-                            }
-                            return false;
+                            class: 'form-control bg-transparent text-white border-0',
                         }
-                    },
-                    // NO onUpdate - avoid reactive conflicts
+                    }
                 });
             }
             
@@ -1517,7 +1506,7 @@ export default {
                 this.permlinkEditor = new Editor({
                     element: this.$refs.permlinkEditor,
                     extensions: [
-                        StarterKit.default.configure({
+                        StarterKit.configure({
                             heading: false,
                             bulletList: false,
                             orderedList: false,
@@ -1527,8 +1516,8 @@ export default {
                             history: true
                         }),
                         Placeholder.default.configure({
-                            placeholder: 'custom-url-slug',
-                        }),
+                            placeholder: 'custom-url-slug'
+                        })
                     ],
                     content: this.content.permlink,
                     editorProps: {
@@ -1548,8 +1537,7 @@ export default {
                             }
                             return false;
                         }
-                    },
-                    // NO onUpdate - avoid reactive conflicts
+                    }
                 });
             }
             
@@ -1558,11 +1546,11 @@ export default {
                 this.bodyEditor = new Editor({
                     element: this.$refs.bodyEditor,
                     extensions: [
-                        StarterKit.default.configure({
-                            history: true, // Enable history for non-collaborative
+                        StarterKit.configure({
+                            history: true // Enable history for non-collaborative
                         }),
                         Placeholder.default.configure({
-                            placeholder: 'Start writing your post content...',
+                            placeholder: 'Start writing your post content...'
                         }),
                         Link.default.configure({
                             openOnClick: false,
@@ -1593,12 +1581,9 @@ export default {
                         attributes: {
                             class: 'form-control bg-transparent text-white border-0',
                         }
-                    },
-                    // NO onUpdate - avoid reactive conflicts
+                    }
                 });
             }
-            
-            console.log('📝 Standard editors created');
         },
         
         async initializeCollaboration(doc) {

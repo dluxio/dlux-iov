@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.11.1",
-  "generated": "2025-06-10T22:58:43Z",
+  "version": "2025.06.10.16",
+  "generated": "2025-06-10T23:54:06Z",
   "files": {
-    "/js/img-ipfs.js": {
-      "checksum": "c29daa440ebbab74b34d47cbbdcd59f1",
-      "size": 2340,
-      "priority": "important"
-    },
     "/js/indexvue.js": {
       "checksum": "361f81aaa9cf5523af1a4e8a03e53267",
       "size": 28461,
@@ -766,7 +761,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "718ebf118566393603019f24b823baf4",
+      "checksum": "9afe79b2f644d3849dac2de207396e76",
       "size": 36316,
       "priority": "important"
     },
@@ -956,7 +951,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "8d29170c590629d60d05ac6b5e9267a9",
+      "checksum": "85ee3b18754f3379d6e0e2954e809a10",
       "size": 7299,
       "priority": "important"
     },
@@ -1029,11 +1024,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/editor/editor.main.js": {
-      "checksum": "8216718a32af36c4cb9484476d428d08",
-      "size": 3766654,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/language/css/cssMode.js": {
       "checksum": "c116d50b0b63ce239bac1f764f38c7f8",
@@ -1285,12 +1275,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
