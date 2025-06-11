@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.11.13",
-  "generated": "2025-06-11T16:00:14Z",
+  "version": "2025.06.11.09",
+  "generated": "2025-06-11T16:02:43Z",
   "files": {
-    "/js/session.js": {
-      "checksum": "19fe354a509a25a48a47ae622f4c998e",
-      "size": 48412,
-      "priority": "important"
-    },
     "/js/setcard.js": {
       "checksum": "a2f10e9bed812046f0d49a8a6a339d6f",
       "size": 2890,
@@ -646,7 +641,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "0ed2e02bddf250916afe94cb8f73d58e",
+      "checksum": "66db1f4f921f8d935b3b9d118036801c",
       "size": 36317,
       "priority": "important"
     },
@@ -836,7 +831,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "f38b84642d9cebb17b0980534eeb7495",
+      "checksum": "94047d4c4b47d7efc518c495a9a36969",
       "size": 7300,
       "priority": "important"
     },
@@ -909,11 +904,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/test-video.html": {
-      "checksum": "1ba32579515f864ae6bdf65ba09b3384",
-      "size": 2292,
-      "priority": "page-specific"
     },
     "/playground/copy.html": {
       "checksum": "eaa6a972fcae4bb48121274d44b29367",
@@ -1045,12 +1035,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

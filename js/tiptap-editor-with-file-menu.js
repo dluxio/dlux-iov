@@ -1780,14 +1780,22 @@ export default {
                 }
                 
                 // Setup WebSocket provider FIRST to sync existing document state
-                const authParams = new URLSearchParams({
-                    'x-account': this.authHeaders['x-account'] || '',
-                    'x-signature': this.authHeaders['x-signature'] || '',
-                    'x-challenge': this.authHeaders['x-challenge'] || '',
-                    'x-pubkey': this.authHeaders['x-pubkey'] || ''
-                }).toString();
+                // Validate auth headers
+                if (!this.authHeaders['x-account'] || !this.authHeaders['x-signature'] || 
+                    !this.authHeaders['x-challenge'] || !this.authHeaders['x-pubkey']) {
+                    throw new Error('Missing required authentication headers');
+                }
+
+                // Build auth params
+                const authParams = new URLSearchParams();
+                Object.entries(this.authHeaders).forEach(([key, value]) => {
+                    if (value) authParams.append(key, value);
+                });
                 
-                const wsUrl = `${this.collaborationUrl}/${doc.owner}/${doc.permlink}?${authParams}`;
+                // Ensure URL is properly formatted
+                const baseUrl = this.collaborationUrl.replace(/\/$/, '');
+                const docPath = `${doc.owner}/${doc.permlink}`.replace(/^\//, '');
+                const wsUrl = `${baseUrl}/${docPath}?${authParams.toString()}`;
                 
                 // Create provider with sync event handling
                 const providerConfig = {
@@ -1864,41 +1872,87 @@ export default {
                         });
                     }
                     
-                    // CRITICAL: Wait for initial sync with timeout
-                    const syncTimeout = 10000; // 10 seconds timeout
+                    // CRITICAL: Wait for initial sync with timeout and connection check
+                    const syncTimeout = 30000; // 30 seconds timeout
                     const syncStart = Date.now();
+                    let isConnected = false;
                     
-                    await new Promise((resolve, reject) => {
-                        const checkSync = () => {
-                            if (!this.provider) {
-                                reject(new Error('Provider was destroyed during sync'));
-                                return;
-                            }
-                            
-                            if (this.provider.synced) {
-                                console.log('✅ Initial sync completed');
-                                resolve();
-                            } else if (Date.now() - syncStart > syncTimeout) {
-                                reject(new Error('Sync timeout exceeded'));
-                            } else {
-                                setTimeout(checkSync, 100);
-                            }
-                        };
-                        checkSync();
-                    });
+                    // Set up one-time connection handler
+                    const onConnected = () => {
+                        console.log('🔌 WebSocket connected');
+                        isConnected = true;
+                    };
+                    this.provider.on('connect', onConnected);
+                    
+                    try {
+                        await new Promise((resolve, reject) => {
+                            const checkSync = () => {
+                                if (!this.provider) {
+                                    reject(new Error('Provider was destroyed during sync'));
+                                    return;
+                                }
+                                
+                                // First wait for connection
+                                if (!isConnected) {
+                                    if (Date.now() - syncStart > 5000) { // 5 second connection timeout
+                                        reject(new Error('WebSocket connection timeout'));
+                                        return;
+                                    }
+                                    setTimeout(checkSync, 100);
+                                    return;
+                                }
+                                
+                                // Then wait for sync
+                                if (this.provider.synced) {
+                                    console.log('✅ Initial sync completed');
+                                    resolve();
+                                } else if (Date.now() - syncStart > syncTimeout) {
+                                    reject(new Error('Sync timeout exceeded'));
+                                } else {
+                                    setTimeout(checkSync, 100);
+                                }
+                            };
+                            checkSync();
+                        });
+                    } finally {
+                        // Clean up connection handler
+                        this.provider.off('connect', onConnected);
+                    }
                 } catch (error) {
                     console.error('Failed to establish collaboration:', error);
                     
                     // Clean up provider on error
                     if (this.provider) {
                         try {
-                            this.provider.awareness?.destroy();
-                            this.provider.disconnect();
+                            // Remove all event listeners first
+                            this.provider.off('connect');
+                            this.provider.off('disconnect');
+                            this.provider.off('status');
+                            this.provider.off('synced');
+                            this.provider.off('message');
+                            
+                            // Destroy awareness if it exists
+                            if (this.provider.awareness) {
+                                this.provider.awareness.destroy();
+                            }
+                            
+                            // Disconnect the provider
+                            await this.provider.disconnect();
+                            
+                            // Clear the document
+                            if (this.ydoc) {
+                                this.ydoc.destroy();
+                            }
                         } catch (cleanupError) {
                             console.warn('Error during provider cleanup:', cleanupError);
                         }
                         this.provider = null;
+                        this.ydoc = null;
                     }
+                    
+                    // Set connection status
+                    this.connectionStatus = 'disconnected';
+                    this.connectionMessage = `Connection failed: ${error.message}`;
                     
                     throw new Error(`Collaboration setup failed: ${error.message}`);
                 }
