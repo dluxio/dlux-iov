@@ -222,6 +222,7 @@ createApp({ // vue 3
       
       // Payment UI state  
       showPaymentQR: false,
+      showKeychainQR: false,
       walletPaymentLoading: false,
       
       // Wallet persistence for page refresh
@@ -2027,6 +2028,78 @@ createApp({ // vue 3
     toggleKeysVisibility() {
       this.showKeys = !this.showKeys;
     },
+
+    toggleKeychainQR() {
+      this.showKeychainQR = !this.showKeychainQR;
+      if (this.showKeychainQR) {
+        // Generate QR code when showing
+        this.$nextTick(() => {
+          this.generateKeychainQR();
+        });
+      }
+    },
+
+    generateKeychainQR() {
+      try {
+        // Ensure we have the required data
+        if (!this.newAccount.username || !this.newAccount.publicKeys) {
+          throw new Error('Account information not available. Please generate keys first.');
+        }
+
+        // Validate that all required public keys are present
+        const requiredKeys = ['owner', 'active', 'posting', 'memo'];
+        for (const key of requiredKeys) {
+          if (!this.newAccount.publicKeys[key]) {
+            throw new Error(`Missing ${key} public key. Please regenerate keys.`);
+          }
+        }
+
+        // Create the keychain URL with the specific format requested
+        const accountData = {
+          n: this.newAccount.username,
+          o: this.newAccount.publicKeys.owner,
+          a: this.newAccount.publicKeys.active,
+          p: this.newAccount.publicKeys.posting,
+          m: this.newAccount.publicKeys.memo
+        };
+
+        // Convert to JSON string and encode in base64
+        let keychainUrl;
+        try {
+          const jsonString = JSON.stringify(accountData);
+          const base64Data = btoa(jsonString);
+          keychainUrl = `keychain://create_account=${base64Data}`;
+        } catch (encodingError) {
+          throw new Error(`Failed to encode account data: ${encodingError.message}`);
+        }
+        
+        // Clear previous QR code
+        const qrContainer = document.getElementById('keychainQrCode');
+        if (!qrContainer) {
+          throw new Error('QR code container not found');
+        }
+        qrContainer.innerHTML = '';
+        
+        // Generate new QR code
+        const qrCode = new QRCode(qrContainer, {
+          text: keychainUrl,
+          width: 200,
+          height: 200,
+          colorDark: '#000000',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        
+        console.log('Keychain QR code generated successfully');
+        console.log('Account data:', accountData);
+        console.log('Keychain URL:', keychainUrl);
+        
+      } catch (error) {
+        console.error('Failed to generate Keychain QR code:', error);
+        alert('Failed to generate QR code: ' + error.message);
+        this.showKeychainQR = false;
+      }
+    },
     
     async copyToClipboard(text) {
       try {
@@ -2237,6 +2310,7 @@ createApp({ // vue 3
       this.requestMessage = '';
       this.accountCreated = false;
       this.showPaymentQR = false;
+      this.showKeychainQR = false;
       this.walletPaymentLoading = false;
       this.paymentDetails = null;
       this.paymentChannelId = null;
