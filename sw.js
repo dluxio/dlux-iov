@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.11.9",
-  "generated": "2025-06-11T04:53:23Z",
+  "version": "2025.06.10.22",
+  "generated": "2025-06-11T05:00:21Z",
   "files": {
-    "/js/onlyhash.js": {
-      "checksum": "ce57237fd9402179b8dfd8ef7aa1e1be",
-      "size": 707437,
-      "priority": "important"
-    },
     "/js/pop-frame.js": {
       "checksum": "679aed3281bcee07fb3942a985e7dbbe",
       "size": 904,
@@ -686,7 +681,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "71ee9ee94afa001fe388d34ad51e5b5a",
+      "checksum": "1a845bd807be4afe713cf972ab5dfc21",
       "size": 36316,
       "priority": "important"
     },
@@ -876,7 +871,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "11683b9956e9a174a3c9784fe606971f",
+      "checksum": "ed94a87ab5903a198fc9c585f44a9410",
       "size": 7299,
       "priority": "important"
     },
@@ -949,11 +944,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/nls.messages.ru.js": {
-      "checksum": "0f19eddfec0719f5f559c68e0f17319f",
-      "size": 538578,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/nls.messages.zh-cn.js": {
       "checksum": "73423967cc7656f344cf497626de181f",
@@ -1125,12 +1115,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

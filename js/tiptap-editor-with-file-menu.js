@@ -1804,17 +1804,18 @@ export default {
                 // Only add awareness if available
                 if (awareness) {
                     providerConfig.awareness = awareness;
-                    providerConfig.onAwarenessChange = () => {
-                        if (this.provider && this.provider.awareness) {
-                            const states = Array.from(this.provider.awareness.getStates().entries());
-                            this.connectedUsers = states
-                                .filter(([_, state]) => state?.user?.name)
-                                .map(([_, state]) => ({
-                                    name: state.user.name,
-                                    color: state.user.color || this.generateUserColor(state.user.name)
-                                }));
-                        }
-                    };
+                    // Set up awareness change handler
+                    awareness.on('change', () => {
+                        console.log('👥 Awareness changed:', awareness.getStates());
+                        const states = Array.from(awareness.getStates().entries());
+                        this.connectedUsers = states
+                            .filter(([_, state]) => state?.user?.name)
+                            .map(([_, state]) => ({
+                                name: state.user.name,
+                                color: state.user.color || this.generateUserColor(state.user.name)
+                            }));
+                        console.log('👥 Connected users:', this.connectedUsers);
+                    });
                 }
 
                 this.provider = new HocuspocusProvider(providerConfig);
@@ -1823,12 +1824,12 @@ export default {
                     // Explicitly connect after setup
                     await this.provider.connect();
                     
-                    // Ensure awareness is initialized
-                    if (!this.provider.awareness.getLocalState()) {
-                        this.provider.awareness.setLocalState({
+                    // Set initial awareness state
+                    if (awareness) {
+                        awareness.setLocalState({
                             user: {
                                 name: this.username,
-                                color: this.getUserColor
+                                color: userColor
                             }
                         });
                     }
@@ -1959,6 +1960,17 @@ export default {
                         name: this.username,
                         color: userColor,
                     },
+                    render: true,
+                    onUpdate: (users) => {
+                        console.log('🖱️ Cursor users updated:', users);
+                        if (Array.isArray(users)) {
+                            this.connectedUsers = users.map(user => ({
+                                name: user.name,
+                                color: user.color || this.generateUserColor(user.name)
+                            }));
+                            console.log('👥 Connected users from cursor:', this.connectedUsers);
+                        }
+                    }
                 });
 
                 try {
