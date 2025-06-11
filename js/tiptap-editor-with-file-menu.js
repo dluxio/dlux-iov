@@ -1484,15 +1484,17 @@ export default {
         
         // Editor Management
         async createStandardEditor() {
-            // Destroy existing editors and clean up DOM
-            if (this.titleEditor) this.titleEditor.destroy();
-            if (this.permlinkEditor) this.permlinkEditor.destroy();
-            if (this.bodyEditor) this.bodyEditor.destroy();
-            
-            // Clean up DOM elements before creating new editors
-            this.cleanupDOMElements();
-            
-            // Wait for DOM cleanup to complete
+            // Ensure proper cleanup first
+            if (this.titleEditor) {
+                this.titleEditor.destroy();
+                this.titleEditor = null;
+            }
+            if (this.bodyEditor) {
+                this.bodyEditor.destroy();
+                this.bodyEditor = null;
+            }
+
+            // Wait for cleanup to complete
             await this.$nextTick();
             
             // Import core TipTap modules
@@ -1631,6 +1633,19 @@ export default {
         },
         
         async initializeCollaboration(doc) {
+            // Ensure proper cleanup first
+            if (this.titleEditor) {
+                this.titleEditor.destroy();
+                this.titleEditor = null;
+            }
+            if (this.bodyEditor) {
+                this.bodyEditor.destroy();
+                this.bodyEditor = null;
+            }
+
+            // Wait for cleanup to complete
+            await this.$nextTick();
+            
             console.log('🚀 Initializing collaboration for document:', doc, 'Component ID:', this.componentId);
             
             // Prevent multiple simultaneous initializations
@@ -1893,95 +1908,135 @@ export default {
                 const titleFieldName = 'title';
                 const bodyFieldName = 'body';
                 
-                // Create shared types
+                // Create shared types and wait for them to be ready
                 const titleText = this.ydoc.getXmlFragment(titleFieldName);
                 const bodyText = this.ydoc.getXmlFragment(bodyFieldName);
                 
-                // Wait for another tick to ensure types are ready
+                // Wait for types to be ready and DOM to be updated
+                await new Promise(resolve => setTimeout(resolve, 100));
                 await this.$nextTick();
                 
-                // Create title editor
-                this.titleEditor = new Editor({
-                    element: this.$refs.titleEditor,
-                    extensions: [
-                        StarterKit.configure({
-                            history: false,
-                        }),
-                        Placeholder.default.configure({
-                            placeholder: 'Document Title'
-                        }),
-                        Collaboration.configure({
-                            document: this.ydoc,
-                            field: titleFieldName,
-                            fragmentContent: true,
-                        }),
-                    ],
-                    editorProps: {
-                        attributes: {
-                            class: 'form-control bg-transparent text-white border-0',
-                        }
-                    },
-                    onUpdate: ({ editor }) => {
-                        this.content.title = editor.getText();
-                    }
-                });
+                console.log('📋 Y.js types created, initializing editors');
                 
-                // Create body editor
-                this.bodyEditor = new Editor({
-                    element: this.$refs.bodyEditor,
-                    extensions: [
-                        StarterKit.configure({
-                            history: false,
-                        }),
-                        Placeholder.default.configure({
-                            placeholder: 'Start writing...'
-                        }),
-                        Collaboration.configure({
-                            document: this.ydoc,
-                            field: bodyFieldName,
-                            fragmentContent: true,
-                        }),
-                    ],
-                    editorProps: {
-                        attributes: {
-                            class: 'form-control bg-transparent text-white border-0',
+                console.log('📋 Creating title editor...');
+                try {
+                    // Create title editor
+                    this.titleEditor = new Editor({
+                        element: this.$refs.titleEditor,
+                        extensions: [
+                            StarterKit.configure({
+                                history: false,
+                            }),
+                            Placeholder.default.configure({
+                                placeholder: 'Enter document title...'
+                            }),
+                            Collaboration.configure({
+                                document: this.ydoc,
+                                field: titleFieldName,
+                                fragmentContent: true,
+                            }),
+                            CollaborationCursor.configure({
+                                provider: this.provider,
+                                user: {
+                                    name: this.username,
+                                    color: userColor
+                                }
+                            }),
+                        ],
+                        editorProps: {
+                            attributes: {
+                                class: 'form-control bg-transparent text-white border-0',
+                            }
+                        },
+                        onCreate: ({ editor }) => {
+                            console.log('✅ Title editor ready');
+                            editor.commands.focus();
+                        },
+                        onUpdate: ({ editor }) => {
+                            this.content.title = editor.getText();
                         }
-                    },
-                    onUpdate: ({ editor }) => {
-                        this.content.body = editor.getHTML();
-                    }
-                });
+                    });
+                    console.log('✅ Title editor created');
+                } catch (error) {
+                    console.error('❌ Failed to create title editor:', error);
+                    throw error;
+                }
+
+                // Wait a bit before creating body editor
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                console.log('📋 Creating body editor...');
+                try {
+                    // Create body editor
+                    this.bodyEditor = new Editor({
+                        element: this.$refs.bodyEditor,
+                        extensions: [
+                            StarterKit.configure({
+                                history: false,
+                            }),
+                            Placeholder.default.configure({
+                                placeholder: 'Start writing...'
+                            }),
+                            Collaboration.configure({
+                                document: this.ydoc,
+                                field: bodyFieldName,
+                                fragmentContent: true,
+                            }),
+                            CollaborationCursor.configure({
+                                provider: this.provider,
+                                user: {
+                                    name: this.username,
+                                    color: userColor
+                                }
+                            }),
+                        ],
+                        editorProps: {
+                            attributes: {
+                                class: 'form-control bg-transparent text-white border-0',
+                            }
+                        },
+                        onCreate: ({ editor }) => {
+                            console.log('✅ Body editor ready');
+                        },
+                        onUpdate: ({ editor }) => {
+                            this.content.body = editor.getHTML();
+                        }
+                    });
+                    console.log('✅ Body editor created');
+                } catch (error) {
+                    console.error('❌ Failed to create body editor:', error);
+                    throw error;
+                }
+
+                console.log('📋 Waiting for editors to be ready...');
+                
+                // Check if editors were created successfully
+                if (!this.titleEditor || !this.bodyEditor) {
+                    throw new Error('Editors were not created successfully');
+                }
 
                 // Wait for editors to be ready
-                await Promise.all([
-                    new Promise(resolve => {
-                        if (this.titleEditor.isDestroyed) resolve();
-                        else if (this.titleEditor.isReady) resolve();
-                        else this.titleEditor.on('ready', resolve);
-                    }),
-                    new Promise(resolve => {
-                        if (this.bodyEditor.isDestroyed) resolve();
-                        else if (this.bodyEditor.isReady) resolve();
-                        else this.bodyEditor.on('ready', resolve);
-                    })
-                ]);
-
-                // Add collaboration cursors after editors are ready
-                const cursorExtension = CollaborationCursor.configure({
-                    provider: this.provider,
-                    user: {
-                        name: this.username,
-                        color: userColor,
-                    },
-                });
-
                 try {
-                    // Add cursor extension to body editor only
-                    await this.bodyEditor.addExtension(cursorExtension);
+                    // Give editors a moment to initialize
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // Check editor states
+                    if (!this.titleEditor || this.titleEditor.isDestroyed) {
+                        throw new Error('Title editor is not available');
+                    }
+                    if (!this.bodyEditor || this.bodyEditor.isDestroyed) {
+                        throw new Error('Body editor is not available');
+                    }
+                    
+                    console.log('✅ Editors are ready');
                 } catch (error) {
-                    console.warn('Failed to add cursor extension:', error);
-                    // Continue without cursor support
+                    console.error('❌ Editor initialization failed:', error);
+                    throw error;
                 }
+                
+                console.log('📋 Editors initialized and ready');
+
+                // Editors are now ready with collaboration cursors already configured
 
                 // Update current file reference
                 this.currentFile = {
