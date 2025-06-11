@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.11.19",
-  "generated": "2025-06-11T20:46:27Z",
+  "version": "2025.06.11.14",
+  "generated": "2025-06-11T21:09:09Z",
   "files": {
-    "/js/tagifyvue.js": {
-      "checksum": "8c083377956e9a936f47a35f45afc951",
-      "size": 1127,
-      "priority": "important"
-    },
     "/js/toastvue.js": {
       "checksum": "15a042f49546393a84afe492cbe516d3",
       "size": 2374,
@@ -781,7 +776,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "fff13f54b311fb51e9a290dbcad01170",
+      "checksum": "4da306c839bf2c276cbfc711151a3797",
       "size": 7300,
       "priority": "important"
     },
@@ -854,11 +849,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/playground/env_thumbs/japan.png": {
-      "checksum": "889f67a76786bf74408d6c3f4b8f78b8",
-      "size": 132145,
-      "priority": "page-specific"
     },
     "/playground/env_thumbs/moon.png": {
       "checksum": "ee9ab8dd48a85e181896158dcdd522f3",
@@ -935,12 +925,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

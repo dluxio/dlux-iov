@@ -263,6 +263,11 @@ export default {
         },
         
         canSave() {
+            // For collaborative documents that are connected, don't show save option since they auto-sync
+            if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
+                return false; // Auto-syncing via Y.js, no manual save needed
+            }
+            
             return this.hasUnsavedChanges && !this.saving;
         },
         
@@ -1036,21 +1041,13 @@ export default {
                     'X-Requested-With': 'XMLHttpRequest'
                 };
 
-                // Extract and validate auth info
-                const authToken = typeof this.isAuthenticated === 'string' ? this.isAuthenticated : null;
-                const isValidSteemKey = authToken?.startsWith('STM');
-                
-                if (!authToken) {
-                    console.warn('⚠️ No valid auth token found:', this.isAuthenticated);
-                }
-
-                // Prepare the request
+                // Prepare the request with proper auth headers
                 const permissionsUrl = `https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}`;
                 const authHeaders = {
                     ...headers,
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': isValidSteemKey ? this.isAuthenticated : `Bearer ${this.isAuthenticated}`
+                    'Content-Type': 'application/json'
+                    // Note: Using this.authHeaders which contains the proper x-account, x-signature, etc.
                 };
                 
                 const controller = new AbortController();
@@ -1355,7 +1352,12 @@ export default {
             };
             
             try {
-                // Connect existing Y.js document to this server document
+                // STEP 1: Create offline collaborative editors first (this creates the Y.js document)
+                console.log('🏗️ Creating offline collaborative editors for loaded document...');
+                await this.createStandardEditor(); // This will create offline collaborative editors
+                
+                // STEP 2: Then connect the existing Y.js document to the server
+                console.log('🔗 Connecting to collaboration server...');
                 await this.connectToCollaborationServer(doc);
                 
                 // Load permissions after successful connection
@@ -1384,8 +1386,11 @@ export default {
                     await new Promise(resolve => setTimeout(resolve, 1000));
                     
                     try {
-                        // Try again with a fresh start
-                        await this.initializeCollaboration(doc);
+                        // Try again with a fresh start - create editors first, then connect
+                        console.log('🔄 Retry: Creating collaborative editors...');
+                        await this.createStandardEditor();
+                        console.log('🔄 Retry: Connecting to server...');
+                        await this.connectToCollaborationServer(doc);
                         console.log('✅ Collaborative document loaded on retry:', doc.permlink);
                         return; // Success on retry
                     } catch (retryError) {
@@ -1679,8 +1684,17 @@ export default {
                 },
                 onUpdate: ({ editor }) => {
                     this.content.title = editor.getHTML();
+                    
+                    // Always show unsaved indicator for user feedback
                     this.hasUnsavedChanges = true;
-                    this.autoSaveContent();
+                    
+                    // For collaborative docs, clear unsaved flag quickly (they auto-sync)
+                    // For local docs, use autosave
+                    if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
+                        this.clearUnsavedAfterSync();
+                    } else {
+                        this.autoSaveContent();
+                    }
                 }
             });
 
@@ -1708,8 +1722,17 @@ export default {
                 },
                 onUpdate: ({ editor }) => {
                     this.content.body = editor.getHTML();
+                    
+                    // Always show unsaved indicator for user feedback
                     this.hasUnsavedChanges = true;
-                    this.autoSaveContent();
+                    
+                    // For collaborative docs, clear unsaved flag quickly (they auto-sync)
+                    // For local docs, use autosave
+                    if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
+                        this.clearUnsavedAfterSync();
+                    } else {
+                        this.autoSaveContent();
+                    }
                 }
             });
 
@@ -1814,6 +1837,22 @@ export default {
                 }
             }, 2000); // Autosave 2 seconds after last edit
         },
+
+        // Clear unsaved changes flag after collaborative sync
+        clearUnsavedAfterSync() {
+            if (this.syncTimeout) {
+                clearTimeout(this.syncTimeout);
+            }
+            
+            // Clear the flag after a short delay to allow Y.js to sync
+            // This simulates the auto-save behavior for collaborative docs
+            this.syncTimeout = setTimeout(() => {
+                if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
+                    console.log('💾 Clearing unsaved flag for collaborative document (simulated sync)');
+                    this.hasUnsavedChanges = false;
+                }
+            }, 500); // Much faster than local autosave - 500ms
+        },
         
         async connectToCollaborationServer(serverDoc) {
             // TipTap Best Practice: Connect existing Y.js document to WebSocket provider
@@ -1837,7 +1876,7 @@ export default {
                 this.provider = null;
             }
             
-            // Build auth token and URL (use working pattern from initializeCollaboration)
+                        // Build auth token and URL - use token-in-config as primary approach (proven to work better)
             const authToken = JSON.stringify({
                 account: this.authHeaders['x-account'],
                 signature: this.authHeaders['x-signature'],
@@ -1847,25 +1886,25 @@ export default {
             
             const baseUrl = 'wss://data.dlux.io/collaboration';
             const docPath = `${serverDoc.owner}/${serverDoc.permlink}`;
-            const wsUrl = `${baseUrl}/${docPath}?token=${encodeURIComponent(authToken)}`;
             
             console.log('🔗 WebSocket connection details:', {
                 baseUrl,
                 docPath,
                 owner: serverDoc.owner,
                 permlink: serverDoc.permlink,
-                url: wsUrl.substring(0, 100) + '...',
-                authTokenLength: authToken.length
+                authTokenLength: authToken.length,
+                primaryMethod: 'token-in-config'
             });
-            
+                
             // Wait a moment for server to be ready for WebSocket connections
             console.log('⏳ Waiting for server to be ready for WebSocket connections...');
             await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
             
-            // Use comprehensive connection handling pattern that was working
+            // PRIMARY APPROACH: Use token in config (proven to work reliably)
             const providerConfig = {
-                url: wsUrl,
+                url: `${baseUrl}/${docPath}`, // Clean URL without token
                 name: docPath,
+                token: authToken, // Token in config - this is the reliable method
                 document: this.ydoc, // Connect existing Y.js document
                 connect: true,
                 timeout: 30000,
@@ -1886,9 +1925,18 @@ export default {
                     this.connectionMessage = 'Disconnected from server';
                 },
                 onSynced: ({ synced }) => {
+                    console.log('🔄 onSynced called:', { synced, isCollaborativeMode: this.isCollaborativeMode, connectionStatus: this.connectionStatus, hasUnsavedChanges: this.hasUnsavedChanges });
+                    
                     if (synced) {
                         console.log('📡 Document synchronized');
                         this.connectionMessage = 'Connected - Document synchronized';
+                        
+                        // Reset unsaved changes flag for collaborative documents
+                        if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
+                            console.log('💾 Clearing hasUnsavedChanges flag due to Y.js sync');
+                            this.hasUnsavedChanges = false;
+                        }
+                        
                         if (this.saveAsProcess.inProgress) {
                             this.saveAsProcess.step = 'synced';
                             this.saveAsProcess.message = 'Document synced with server!';
@@ -1917,12 +1965,23 @@ export default {
                 }
             };
             
-            console.log('🔌 Creating HocuspocusProvider...');
+            console.log('🔌 Creating HocuspocusProvider with token-in-config (primary method)...');
             this.provider = new HocuspocusProvider(providerConfig);
             
-            // Wait for connection with robust retry logic
+            // Add Y.js document update listener for more reliable sync detection
+            if (this.ydoc) {
+                this.ydoc.on('update', (update, origin) => {
+                    // Only clear unsaved changes for updates that come from remote (not local)
+                    if (origin !== this.ydoc.clientID && this.isCollaborativeMode && this.connectionStatus === 'connected') {
+                        console.log('📡 Y.js remote update detected, clearing unsaved flag');
+                        this.hasUnsavedChanges = false;
+                    }
+                });
+            }
+            
+            // Wait for connection with optimized retry logic
             let retries = 0;
-            const maxRetries = 30; // Increased retries
+            const maxRetries = 20; // Reduced since primary method should work faster
             let connectionSuccess = false;
             
             console.log('⏳ Waiting for WebSocket connection...');
@@ -1956,14 +2015,16 @@ export default {
                         this.provider.destroy();
                     }
                     
-                    // Try with token in config instead of URL
+                    // FALLBACK: Try with token in URL instead of config
+                    const wsUrlWithToken = `${baseUrl}/${docPath}?token=${encodeURIComponent(authToken)}`;
                     const fallbackConfig = {
                         ...providerConfig,
-                        url: `${baseUrl}/${docPath}`, // No token in URL
-                        token: authToken, // Token in config
+                        url: wsUrlWithToken, // Token in URL as fallback
+                        // Remove token from config
                     };
+                    delete fallbackConfig.token;
                     
-                    console.log('🔗 Trying fallback connection without token in URL...');
+                    console.log('🔗 Trying fallback connection with token in URL...');
                     this.provider = new HocuspocusProvider(fallbackConfig);
                 }
             }
@@ -2156,6 +2217,33 @@ export default {
             this.$forceUpdate();
         },
         
+        // Reconnect to collaborative document (wrapper for connect button)
+        async reconnectToCollaborativeDocument() {
+            if (!this.currentFile || this.currentFile.type !== 'collaborative') {
+                console.error('Cannot reconnect: no collaborative document loaded');
+                return;
+            }
+
+            try {
+                console.log('🔄 Reconnecting to collaborative document...');
+                
+                // Ensure we have collaborative editors and Y.js document
+                if (!this.ydoc) {
+                    console.log('🏗️ Creating collaborative editors before reconnecting...');
+                    await this.createStandardEditor(); // Creates offline collaborative editors
+                    await new Promise(resolve => setTimeout(resolve, 100)); // Let editors initialize
+                }
+                
+                // Connect to the server
+                await this.connectToCollaborationServer(this.currentFile);
+                console.log('✅ Successfully reconnected to collaborative document');
+                
+            } catch (error) {
+                console.error('❌ Failed to reconnect:', error);
+                alert(`Failed to connect to collaborative document:\n\n${error.message}`);
+            }
+        },
+
         // Connection handlers
         onConnect() {
             this.connectionStatus = 'connected';
@@ -2169,6 +2257,12 @@ export default {
         
         onSynced() {
             this.connectionMessage = 'Connected - Document synchronized';
+            
+            // Reset unsaved changes flag for collaborative documents
+            if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
+                this.hasUnsavedChanges = false;
+                console.log('💾 Collaborative document auto-saved via Y.js sync');
+            }
         },
         
         onAuthenticationFailed(reason) {
@@ -3172,7 +3266,7 @@ export default {
                     
                     <!-- Connection Actions -->
                     <li v-if="connectionStatus === 'disconnected' && currentFile?.type === 'collaborative'">
-                        <a class="dropdown-item" href="#" @click.prevent="connectToCollaborationServer(currentFile)">
+                        <a class="dropdown-item" href="#" @click.prevent="reconnectToCollaborativeDocument()">
                             <i class="fas fa-plug me-2"></i>Connect to Document
                         </a>
                     </li>
