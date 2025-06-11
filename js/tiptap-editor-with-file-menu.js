@@ -997,7 +997,10 @@ export default {
             
             try {
                 const response = await fetch(`https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}`, {
-                    headers: this.authHeaders
+                    headers: {
+                        ...this.authHeaders,
+                        'Content-Type': 'application/json'
+                    }
                 });
                 
                 if (response.ok) {
@@ -1777,21 +1780,20 @@ export default {
                 }
                 
                 // Setup WebSocket provider FIRST to sync existing document state
-                const authToken = JSON.stringify({
-                    account: this.authHeaders['x-account'],
-                    signature: this.authHeaders['x-signature'],
-                    challenge: this.authHeaders['x-challenge'],
-                    pubkey: this.authHeaders['x-pubkey']
-                });
+                const authParams = new URLSearchParams({
+                    'x-account': this.authHeaders['x-account'] || '',
+                    'x-signature': this.authHeaders['x-signature'] || '',
+                    'x-challenge': this.authHeaders['x-challenge'] || '',
+                    'x-pubkey': this.authHeaders['x-pubkey'] || ''
+                }).toString();
                 
-                const wsUrl = `${this.collaborationUrl}/${doc.owner}/${doc.permlink}`;
+                const wsUrl = `${this.collaborationUrl}/${doc.owner}/${doc.permlink}?${authParams}`;
                 
                 // Create provider with sync event handling
                 const providerConfig = {
                     url: wsUrl,
                     name: `${doc.owner}/${doc.permlink}`,
                     document: this.ydoc,
-                    token: authToken,
                     onConnect: () => {
                         console.log('✅ Connected to collaboration server');
                         this.connectionStatus = 'connected';
