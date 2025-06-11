@@ -3,7 +3,7 @@ import methodsCommon from './methods-common.js';
 export default {
     name: 'TipTapEditorWithFileMenu',
     
-    emits: ['contentChanged', 'publishPost', 'requestAuthHeaders', 'tosign', 'update:fileToAdd'],
+    emits: ['contentChanged', 'publishPost', 'requestAuthHeaders', 'tosign', 'update:fileToAdd', 'document-converted'],
     
     props: {
         username: {
@@ -2831,7 +2831,207 @@ export default {
         
         getPermissionAvatarUrl(account) {
             return `https://images.hive.blog/u/${account}/avatar/small`;
-        }
+        },
+        
+        async initializeEditor() {
+            // Clean up any existing editor
+            if (this.editor) {
+                this.editor.destroy();
+                this.editor = null;
+            }
+
+            // Import core TipTap modules
+            const { Editor } = await import('https://esm.sh/@tiptap/core@3.0.0');
+            const { default: StarterKit } = await import('https://esm.sh/@tiptap/starter-kit@3.0.0');
+            const { default: Placeholder } = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
+            
+            // Base extensions that are always included
+            const extensions = [
+                StarterKit.configure({
+                    history: !this.isCollaborative, // Only enable history for non-collaborative mode
+                }),
+                Placeholder.configure({
+                    placeholder: 'Start writing...'
+                })
+            ];
+
+            // If collaborative mode is enabled, add collaboration extensions
+            if (this.isCollaborative) {
+                try {
+                    // Initialize Y.js document and provider if not already done
+                    if (!this.ydoc || !this.provider) {
+                        await this.initializeCollaboration();
+                    }
+
+                    // Get collaboration extensions
+                    const bundle = window.TiptapCollaboration;
+                    const Collaboration = bundle.Collaboration;
+                    const CollaborationCursor = bundle.CollaborationCursor;
+
+                    if (!Collaboration || !CollaborationCursor) {
+                        throw new Error('Required collaboration extensions not found');
+                    }
+
+                    // Add collaboration extensions
+                    extensions.push(
+                        Collaboration.configure({
+                            document: this.ydoc,
+                            field: 'content',
+                            fragmentContent: true,
+                        }),
+                        CollaborationCursor.configure({
+                            provider: this.provider,
+                            user: {
+                                name: this.username,
+                                color: this.getUserColor
+                            }
+                        })
+                    );
+                } catch (error) {
+                    console.error('Failed to initialize collaborative mode:', error);
+                    // Fall back to non-collaborative mode
+                    this.isCollaborative = false;
+                    extensions[0] = StarterKit.configure({ history: true });
+                }
+            }
+
+            // Create the editor
+            this.editor = new Editor({
+                element: this.$refs.editor,
+                extensions,
+                content: this.content,
+                editorProps: {
+                    attributes: {
+                        class: 'form-control bg-transparent text-white border-0',
+                    }
+                },
+                onCreate: ({ editor }) => {
+                    console.log(`✅ Editor ready (${this.isCollaborative ? 'collaborative' : 'standard'} mode)`);
+                },
+                onUpdate: ({ editor }) => {
+                    this.content = editor.getHTML();
+                    if (!this.isCollaborative) {
+                        this.handleLocalUpdate();
+                    }
+                }
+            });
+        },
+
+        async initializeCollaboration() {
+            // Initialize Y.js document and provider
+            this.ydoc = new Y.Doc();
+            
+            // Set up WebRTC provider with automatic reconnection
+            this.provider = new WebrtcProvider(this.documentId, this.ydoc, {
+                signaling: ['wss://signaling.dlux.io'],
+                maxConns: 20 + Math.floor(Math.random() * 15),
+                peerOpts: { config: { iceServers: this.iceServers } },
+                awareness: this.awareness
+            });
+
+            // Set up connection monitoring
+            this.provider.on('status', ({ status }) => {
+                this.connectionStatus = status;
+            });
+
+            // Wait for initial connection
+            await new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => reject(new Error('Connection timeout')), 5000);
+                this.provider.once('synced', () => {
+                    clearTimeout(timeout);
+                    resolve();
+                });
+            });
+        },
+
+        // Method to toggle collaborative mode
+        async toggleCollaborativeMode() {
+            const wasCollaborative = this.isCollaborative;
+            this.isCollaborative = !wasCollaborative;
+            
+            // Store current content before switching
+            const currentContent = this.editor.getHTML();
+            
+            // Reinitialize editor with new mode
+            await this.initializeEditor();
+            
+            if (!wasCollaborative && this.isCollaborative) {
+                // If switching to collaborative mode, initialize the shared content
+                const yxml = this.ydoc.get('content', Y.XmlFragment);
+                yxml.delete(0, yxml.length);
+                yxml.insert(0, currentContent);
+            }
+        },
+
+        async convertToCollaborative() {
+            if (this.isCollaborative) {
+                console.warn('Document is already collaborative');
+                return;
+            }
+
+            try {
+                // Generate a new document ID if needed
+                if (!this.documentId) {
+                    this.documentId = `${this.username}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                }
+
+                // Store current content before conversion
+                const currentContent = {
+                    title: this.content.title,
+                    body: this.content.body
+                };
+
+                // Update document metadata
+                this.currentFile = {
+                    ...this.currentFile,
+                    type: 'collaborative',
+                    documentId: this.documentId,
+                    owner: this.username,
+                    lastModified: new Date().toISOString()
+                };
+
+                // Set initial permissions
+                this.documentPermissions = [{
+                    account: this.username,
+                    permissionType: 'owner',
+                    addedAt: new Date().toISOString()
+                }];
+
+                // Enable collaborative mode
+                this.isCollaborative = true;
+
+                // Initialize collaborative infrastructure
+                await this.initializeEditor();
+
+                // Initialize shared content
+                if (this.ydoc) {
+                    const titleText = this.ydoc.getXmlFragment('title');
+                    const bodyText = this.ydoc.getXmlFragment('body');
+                    
+                    // Clear any existing content
+                    titleText.delete(0, titleText.length);
+                    bodyText.delete(0, bodyText.length);
+                    
+                    // Insert current content
+                    titleText.insert(0, currentContent.title);
+                    bodyText.insert(0, currentContent.body);
+                }
+
+                // Emit event for parent components
+                this.$emit('document-converted', {
+                    type: 'collaborative',
+                    documentId: this.documentId
+                });
+
+                console.log('✅ Document successfully converted to collaborative mode');
+            } catch (error) {
+                console.error('Failed to convert document:', error);
+                // Revert changes on failure
+                this.isCollaborative = false;
+                this.documentId = null;
+                throw new Error(`Failed to convert document: ${error.message}`);
+            }
+        },
     },
     
     watch: {
