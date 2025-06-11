@@ -1792,15 +1792,27 @@ export default {
                     if (value) authParams.append(key, value);
                 });
                 
-                // Ensure URL is properly formatted
+                // Ensure URL is properly formatted and includes token
                 const baseUrl = this.collaborationUrl.replace(/\/$/, '');
                 const docPath = `${doc.owner}/${doc.permlink}`.replace(/^\//, '');
+                const token = JSON.stringify({
+                    account: this.authHeaders['x-account'],
+                    signature: this.authHeaders['x-signature'],
+                    challenge: this.authHeaders['x-challenge'],
+                    pubkey: this.authHeaders['x-pubkey']
+                });
                 const wsUrl = `${baseUrl}/${docPath}?${authParams.toString()}`;
                 
-                // Create provider with sync event handling
+                // Configure provider with recommended options
                 const providerConfig = {
                     url: wsUrl,
                     name: `${doc.owner}/${doc.permlink}`,
+                    token,
+                    connect: true,
+                    WebSocketPolyfill: WebSocket,
+                    timeout: 30000,
+                    forceSyncInterval: 30000,
+                    maxMessageSize: 1024 * 1024, // 1MB
                     document: this.ydoc,
                     onConnect: () => {
                         console.log('✅ Connected to collaboration server');
@@ -1877,12 +1889,19 @@ export default {
                     const syncStart = Date.now();
                     let isConnected = false;
                     
-                    // Set up one-time connection handler
+                    // Set up connection and status handlers
                     const onConnected = () => {
                         console.log('🔌 WebSocket connected');
                         isConnected = true;
+                        this.connectionStatus = 'connected';
+                        this.connectionMessage = 'Connected - Real-time collaboration active';
+                    };
+                    const onStatus = ({ status }) => {
+                        console.log('📡 Connection status:', status);
+                        this.connectionStatus = status;
                     };
                     this.provider.on('connect', onConnected);
+                    this.provider.on('status', onStatus);
                     
                     try {
                         await new Promise((resolve, reject) => {
@@ -1915,8 +1934,9 @@ export default {
                             checkSync();
                         });
                     } finally {
-                        // Clean up connection handler
+                        // Clean up all event handlers
                         this.provider.off('connect', onConnected);
+                        this.provider.off('status', onStatus);
                     }
                 } catch (error) {
                     console.error('Failed to establish collaboration:', error);
