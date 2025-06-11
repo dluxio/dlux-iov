@@ -303,6 +303,40 @@ export default {
                 const bDate = new Date(b.updatedAt || b.lastModified || 0);
                 return bDate - aDate;
             });
+        },
+        
+        saveButtonText() {
+            if (this.saving || this.saveAsProcess.inProgress) {
+                return 'Saving...';
+            }
+            return this.saveForm.isNewDocument ? 'Save As' : 'Save';
+        },
+
+        saveButtonDisabled() {
+            return !this.hasValidFilename || this.saving || this.saveAsProcess.inProgress;
+        },
+
+        cancelButtonText() {
+            return this.saveAsProcess.inProgress ? 'Processing...' : 'Cancel';
+        },
+
+        documentCreationMessage() {
+            if (this.currentFile && this.currentFile.type === 'collaborative') {
+                return 'Your content will be copied to the new document.';
+            }
+            return 'You will switch to collaborative editing mode.';
+        },
+
+        saveFormTitle() {
+            return this.saveForm.filename ? 'Save As' : 'New Collaborative Document';
+        },
+        
+        avatarUrl() {
+            return `https://images.hive.blog/u/${this.username}/avatar/small`;
+        },
+        
+        ownerAvatarUrl() {
+            return `https://images.hive.blog/u/${this.currentFile?.owner}/avatar/small`;
         }
     },
     
@@ -1461,18 +1495,19 @@ export default {
             // Wait for DOM cleanup to complete
             await this.$nextTick();
             
+            // Import core TipTap modules
             const { Editor } = await import('https://esm.sh/@tiptap/core@3.0.0');
-            const StarterKit = await import('https://esm.sh/@tiptap/starter-kit@3.0.0');
-            const Placeholder = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
+            const { default: StarterKit } = await import('https://esm.sh/@tiptap/starter-kit@3.0.0');
+            const { default: Placeholder } = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
             
-            // Import the same extensions as collaborative mode for schema compatibility
-            const Link = await import('https://esm.sh/@tiptap/extension-link@3.0.0');
-            const Image = await import('https://esm.sh/@tiptap/extension-image@3.0.0');
-            const Youtube = await import('https://esm.sh/@tiptap/extension-youtube@3.0.0');
-            const Table = await import('https://esm.sh/@tiptap/extension-table@3.0.0');
-            const TableRow = await import('https://esm.sh/@tiptap/extension-table-row@3.0.0');
-            const TableCell = await import('https://esm.sh/@tiptap/extension-table-cell@3.0.0');
-            const TableHeader = await import('https://esm.sh/@tiptap/extension-table-header@3.0.0');
+            // Import additional extensions
+            const { default: Link } = await import('https://esm.sh/@tiptap/extension-link@3.0.0');
+            const { default: Image } = await import('https://esm.sh/@tiptap/extension-image@3.0.0');
+            const { default: Youtube } = await import('https://esm.sh/@tiptap/extension-youtube@3.0.0');
+            const { default: Table } = await import('https://esm.sh/@tiptap/extension-table@3.0.0');
+            const { default: TableRow } = await import('https://esm.sh/@tiptap/extension-table-row@3.0.0');
+            const { default: TableCell } = await import('https://esm.sh/@tiptap/extension-table-cell@3.0.0');
+            const { default: TableHeader } = await import('https://esm.sh/@tiptap/extension-table-header@3.0.0');
             
             // Create title editor (simple single-line)
             if (this.$refs.titleEditor) {
@@ -1488,7 +1523,7 @@ export default {
                             horizontalRule: false,
                             history: true // Enable history for non-collaborative
                         }),
-                        Placeholder.default.configure({
+                        Placeholder.configure({
                             placeholder: 'Enter document title...'
                         })
                     ],
@@ -1497,6 +1532,9 @@ export default {
                         attributes: {
                             class: 'form-control bg-transparent text-white border-0',
                         }
+                    },
+                    onUpdate: ({ editor }) => {
+                        this.content.title = editor.getHTML();
                     }
                 });
             }
@@ -1515,7 +1553,7 @@ export default {
                             horizontalRule: false,
                             history: true
                         }),
-                        Placeholder.default.configure({
+                        Placeholder.configure({
                             placeholder: 'custom-url-slug'
                         })
                     ],
@@ -1537,6 +1575,9 @@ export default {
                             }
                             return false;
                         }
+                    },
+                    onUpdate: ({ editor }) => {
+                        this.content.permlink = editor.getHTML();
                     }
                 });
             }
@@ -1549,38 +1590,41 @@ export default {
                         StarterKit.configure({
                             history: true // Enable history for non-collaborative
                         }),
-                        Placeholder.default.configure({
+                        Placeholder.configure({
                             placeholder: 'Start writing your post content...'
                         }),
-                        Link.default.configure({
+                        Link.configure({
                             openOnClick: false,
                             HTMLAttributes: {
                                 target: '_blank',
                             },
                         }),
-                        Image.default.configure({
+                        Image.configure({
                             HTMLAttributes: {
                                 class: 'img-fluid',
                             },
                         }),
-                        Youtube.default.configure({
+                        Youtube.configure({
                             width: 480,
                             height: 320,
                             ccLanguage: 'en',
                             interfaceLanguage: 'en',
                         }),
-                        Table.default.configure({
+                        Table.configure({
                             resizable: true,
                         }),
-                        TableRow.default,
-                        TableHeader.default,
-                        TableCell.default,
+                        TableRow,
+                        TableHeader,
+                        TableCell,
                     ],
                     content: this.content.body,
                     editorProps: {
                         attributes: {
                             class: 'form-control bg-transparent text-white border-0',
                         }
+                    },
+                    onUpdate: ({ editor }) => {
+                        this.content.body = editor.getHTML();
                     }
                 });
             }
@@ -1766,7 +1810,7 @@ export default {
                     this.titleEditor = new Editor({
                         element: this.$refs.titleEditor,
                         extensions: [
-                            StarterKit.configure({
+                            StarterKit.default.configure({
                                 heading: false,
                                 bulletList: false,
                                 orderedList: false,
@@ -1835,7 +1879,7 @@ export default {
                     this.bodyEditor = new Editor({
                         element: this.$refs.bodyEditor,
                         extensions: [
-                            StarterKit.configure({
+                            StarterKit.default.configure({
                                 history: false // Disable history for collaborative mode
                             }),
                             Placeholder.default.configure({
@@ -2489,6 +2533,10 @@ export default {
         
         getRandomColor() {
             return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+        },
+        
+        getPermissionAvatarUrl(account) {
+            return `https://images.hive.blog/u/${account}/avatar/small`;
         }
     },
     
@@ -2532,33 +2580,38 @@ export default {
     },
     
     async mounted() {
-        // Load initial data
-        await this.loadLocalFiles();
-        
-        if (this.authHeaders['x-account']) {
-            await this.loadCollaborativeDocs();
-        }
-        
-        // Create initial editor
-        await this.createStandardEditor();
-        
-        // Load initial content if provided
-        if (this.initialContent && Object.keys(this.initialContent).length > 0) {
-            this.content = { ...this.content, ...this.initialContent };
-            this.setEditorContent(this.content);
-        }
-        
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.dropdown')) {
-                this.closeDropdowns();
+        try {
+            // Load initial data
+            await this.loadLocalFiles();
+            
+            // Check if authHeaders exists and has x-account
+            if (this.authHeaders && this.authHeaders['x-account']) {
+                await this.loadCollaborativeDocs();
             }
             
-            // Close color picker when clicking outside
-            if (!e.target.closest('.position-relative') && this.showColorPicker) {
-                this.showColorPicker = false;
+            // Create initial editor
+            await this.createStandardEditor();
+            
+            // Load initial content if provided
+            if (this.initialContent && Object.keys(this.initialContent).length > 0) {
+                this.content = { ...this.content, ...this.initialContent };
+                this.setEditorContent(this.content);
             }
-        });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.dropdown')) {
+                    this.closeDropdowns();
+                }
+                
+                // Close color picker when clicking outside
+                if (!e.target.closest('.position-relative') && this.showColorPicker) {
+                    this.showColorPicker = false;
+                }
+            });
+        } catch (error) {
+            console.error('Error in mounted hook:', error);
+        }
     },
     
     beforeUnmount() {
@@ -2576,265 +2629,272 @@ export default {
         }
     },
     
-    template: `
-    <div class="collaborative-post-editor">
-        <!-- File Menu Bar -->
-        <div class="file-menu-bar bg-dark border-bottom border-secondary mb-3 p-05 d-flex">
-            <div class="">
-                <!-- File Menu -->
-                <div class="btn-group">
-                    <button class="btn btn-dark no-caret dropdown-toggle" 
-                            type="button" 
-                            data-bs-toggle="dropdown" 
-                            aria-expanded="false">
-                        <i class="fas fa-file me-sm-1 d-none"></i><span class="d-none d-sm-inline ">File</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-dark bg-dark">
-                        <li><a class="dropdown-item" href="#" @click.prevent="newDocument">
+    template: `<div class="collaborative-post-editor">
+    <!-- File Menu Bar -->
+    <div class="file-menu-bar bg-dark border-bottom border-secondary mb-3 p-05 d-flex">
+        <div class="">
+            <!-- File Menu -->
+            <div class="btn-group">
+                <button class="btn btn-dark no-caret dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <i class="fas fa-file me-sm-1 d-none"></i><span class="d-none d-sm-inline ">File</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark bg-dark">
+                    <li><a class="dropdown-item" href="#" @click.prevent="newDocument">
                             <i class="fas fa-file-circle-plus me-2"></i>New Local Document
                         </a></li>
-                        <li v-if="showCollaborativeFeatures">
-                            <a class="dropdown-item" href="#" @click.prevent="newCollaborativeDocument">
-                                <i class="fas fa-users me-2"></i>New Collaborative Document
-                            </a>
-                        </li>
-                        <li v-else-if="!isAuthenticated || isAuthExpired">
-                            <a class="dropdown-item text-muted" href="#" @click.prevent="requestAuthentication">
-                                <i class="fas fa-users me-2"></i>New Collaborative Document
-                                <small class="d-block text-warning">Authentication required</small>
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" @click.prevent="showLoadModal = true">
+                    <li v-if="showCollaborativeFeatures">
+                        <a class="dropdown-item" href="#" @click.prevent="newCollaborativeDocument">
+                            <i class="fas fa-users me-2"></i>New Collaborative Document
+                        </a>
+                    </li>
+                    <li v-else-if="!isAuthenticated || isAuthExpired">
+                        <a class="dropdown-item text-muted" href="#" @click.prevent="requestAuthentication">
+                            <i class="fas fa-users me-2"></i>New Collaborative Document
+                            <small class="d-block text-warning">Authentication required</small>
+                        </a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="#" @click.prevent="showLoadModal = true">
                             <i class="fas fa-folder-open me-2"></i>Open Document...
                         </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" @click.prevent="saveDocument" :class="{ disabled: !canSave }">
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="#" @click.prevent="saveDocument" :class="{ disabled: !canSave }">
                             <i class="fas fa-save me-2"></i>Save
                         </a></li>
-                        <li><a class="dropdown-item" href="#" @click.prevent="saveAsDocument">
+                    <li><a class="dropdown-item" href="#" @click.prevent="saveAsDocument">
                             <i class="fas fa-copy me-2"></i>Save As...
                         </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" @click.prevent="shareDocument" :class="{ disabled: !canShare }">
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="#" @click.prevent="shareDocument"
+                            :class="{ disabled: !canShare }">
                             <i class="fas fa-share me-2"></i>Share...
                         </a></li>
-                        <li><a class="dropdown-item" href="#" @click.prevent="deleteDocument" :class="{ disabled: !canDelete }">
+                    <li><a class="dropdown-item" href="#" @click.prevent="deleteDocument"
+                            :class="{disabled: !canDelete }">
                             <i class="fas fa-trash me-2"></i>Delete
                         </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" @click.prevent="publishPost" :class="{ disabled: !canPublish }">
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="#" @click.prevent="publishPost"
+                            :class="{ disabled: !canPublish }">
                             <i class="fas fa-paper-plane me-2"></i>Publish to Hive
                         </a></li>
-                        <li v-if="pendingUploads.length > 0"><hr class="dropdown-divider"></li>
-                        <li v-if="pendingUploads.length > 0" class="dropdown-header">
-                            <i class="fas fa-clock me-1"></i>Pending Uploads ({{ pendingUploads.length }})
-                        </li>
-                        <li v-for="upload in pendingUploads" :key="upload.id" class="dropdown-item-text small">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="flex-grow-1">
-                                    <div class="text-warning">{{ upload.filename }}</div>
-                                    <div class="text-muted small">{{ upload.error }}</div>
-                                </div>
-                                <div class="btn-group btn-group-sm">
-                                    <button @click.stop="retryPendingUpload(upload.id)" 
-                                            class="btn btn-outline-primary btn-xs"
-                                            title="Retry upload">
-                                        <i class="fas fa-redo fa-xs"></i>
-                                    </button>
-                                    <button @click.stop="removePendingUpload(upload.id)" 
-                                            class="btn btn-outline-danger btn-xs"
-                                            title="Remove from pending">
-                                        <i class="fas fa-trash fa-xs"></i>
-                                    </button>
-                                </div>
+                    <li v-if="pendingUploads.length > 0">
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li v-if="pendingUploads.length > 0" class="dropdown-header">
+                        <i class="fas fa-clock me-1"></i>Pending Uploads ({{ pendingUploads.length }})
+                    </li>
+                    <li v-for="upload in pendingUploads" :key="upload.id" class="dropdown-item-text small">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="flex-grow-1">
+                                <div class="text-warning">{{ upload.filename }}</div>
+                                <div class="text-muted small">{{ upload.error }}</div>
                             </div>
-                        </li>
-                    </ul>
-                </div>
-                
-                <!-- Edit Menu -->
-                <div class="btn-group">
-                    <button class="btn btn-dark no-caret dropdown-toggle" 
-                            type="button" 
-                            data-bs-toggle="dropdown" 
-                            aria-expanded="false">
-                        <i class="fas fa-edit me-sm-1 d-none"></i><span class="d-none d-sm-inline">Edit</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-dark bg-dark">
-                        <li><a class="dropdown-item" href="#" @click.prevent="bodyEditor?.chain().focus().undo().run()">
-                            <i class="fas fa-undo me-2"></i>Undo
-                        </a></li>
-                        <li><a class="dropdown-item" href="#" @click.prevent="bodyEditor?.chain().focus().redo().run()">
-                            <i class="fas fa-redo me-2"></i>Redo
-                        </a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" @click.prevent="clearEditor">
-                            <i class="fas fa-eraser me-2"></i>Clear All
-                        </a></li>
-                    </ul>
-                </div>
-                
-                <!-- Collaboration Menu -->
-                <div class="btn-group">
-                    <button class="btn btn-dark no-caret dropdown-toggle" 
-                            type="button" 
-                            data-bs-toggle="dropdown" 
-                            aria-expanded="false">
-                        <i class="fas fa-users me-sm-1 d-none"></i><span class="d-none d-sm-inline">Collaboration</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-dark bg-dark">
-                        <li v-if="!isAuthenticated || isAuthExpired">
-                            <a class="dropdown-item" href="#" @click.prevent="requestAuthentication">
-                                <i class="fas fa-key me-2"></i>Authenticate
-                            </a>
-                        </li>
-                        <li v-else-if="connectionStatus === 'disconnected' && currentFile?.type === 'collaborative'">
-                            <a class="dropdown-item" href="#" @click.prevent="initializeCollaboration(currentFile)">
-                                <i class="fas fa-plug me-2"></i>Connect
-                            </a>
-                        </li>
-                        <li v-else-if="connectionStatus === 'connected'">
-                            <a class="dropdown-item" href="#" @click.prevent="disconnectCollaboration">
-                                <i class="fas fa-unlink me-2"></i>Disconnect
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" @click.prevent="shareDocument" :class="{ disabled: !canShare }">
-                            <i class="fas fa-user-plus me-2"></i>Share Document
-                        </a></li>
-                        <li><a class="dropdown-item" href="#" @click.prevent="showLoadModal = true">
-                            <i class="fas fa-folder me-2"></i>Browse Documents
-                        </a></li>
-                    </ul>
-                </div>
-                
-                <!-- View Menu -->
-                <div class="btn-group">
-                    <button class="btn btn-dark no-caret dropdown-toggle" 
-                            type="button" 
-                            data-bs-toggle="dropdown" 
-                            aria-expanded="false">
-                        <i class="fas fa-eye me-sm-1 d-none"></i><span class="d-none d-sm-inline">View</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-dark bg-dark">
-                        <li><a class="dropdown-item" href="#" @click.prevent="showAdvancedOptions = !showAdvancedOptions">
-                            <i class="fas fa-cog me-2"></i>{{ showAdvancedOptions ? 'Hide' : 'Show' }} Advanced Options
-                        </a></li>
-                        <li><a class="dropdown-item" href="#" @click.prevent="showPermlinkEditor = !showPermlinkEditor">
-                            <i class="fas fa-link me-2"></i>{{ showPermlinkEditor ? 'Hide' : 'Show' }} Permlink Editor
-                        </a></li>
-                    </ul>
-                </div>
-            </div>
-                
-                <!-- File Status -->
-                <div class="ms-auto d-flex align-items-center gap-2">
-                    <span v-if="currentFile" class="text-light small">
-                        <i class="fas fa-file me-1"></i>{{ currentFile.name || currentFile.documentName || currentFile.permlink }}
-                        <span v-if="hasUnsavedChanges" class="text-warning ms-1">●</span>
-                    </span>
-                    <span v-else class="text-muted small">
-                        <i class="fas fa-file-plus me-1"></i>Untitled
-                        <span v-if="hasUnsavedChanges" class="text-warning ms-1">●</span>
-                    </span>
-                    
-                    <!-- Connection Status Badge -->
-                    <span v-if="currentFile?.type === 'collaborative'" class="badge" :class="{
-                        'bg-success': connectionStatus === 'connected',
-                        'bg-warning': connectionStatus === 'connecting', 
-                        'bg-secondary': connectionStatus === 'disconnected',
-                        'bg-danger': connectionStatus === 'error'
-                    }">
-                        <i class="fas fa-fw me-1" :class="{
-                            'fa-check-circle': connectionStatus === 'connected',
-                            'fa-spinner fa-spin': connectionStatus === 'connecting',
-                            'fa-circle': connectionStatus === 'disconnected',
-                            'fa-exclamation-circle': connectionStatus === 'error'
-                        }"></i>
-                        {{ connectionStatus === 'connected' ? 'Live' : 
-                           connectionStatus === 'connecting' ? 'Connecting' : 
-                           connectionStatus === 'error' ? 'Error' : 'Offline' }}
-                    </span>
-                    <span v-else-if="currentFile?.type === 'local'" class="badge bg-secondary">
-                        <i class="fas fa-file me-1"></i>Local
-                    </span>
-                    
-                    <!-- Current User (in collaborative mode) -->
-                    <div v-if="currentFile?.type === 'collaborative'" class="d-flex align-items-center gap-1">
-                        <div class="position-relative">
-                            <img :src="'https://images.hive.blog/u/' + username + '/avatar/small'"
-                                 :alt="username"
-                                 class="user-avatar-small rounded-circle cursor-pointer" 
-                                 :title="'You (' + username + ') - Click to change color'"
-                                 @click="toggleColorPicker"
-                                                              @error="handleAvatarError($event, { name: username, color: getUserColor })"
-                             :style="{ 
-                                 width: '24px', 
-                                 height: '24px', 
-                                 objectFit: 'cover',
-                                 border: '2px solid ' + getUserColor,
-                                     boxShadow: '0 0 0 1px rgba(255,255,255,0.2)'
-                                 }">
-                            
-                            <!-- Color picker dropdown -->
-                            <div v-if="showColorPicker" class="position-absolute bg-dark border border-secondary rounded p-2 shadow-lg" 
-                                 style="top: 30px; right: 0; z-index: 1000; width: 200px;">
-                                <div class="mb-2">
-                                    <small class="text-white fw-bold">Choose your cursor color:</small>
-                                </div>
-                                <div class="d-flex flex-wrap gap-1 mb-2">
-                                    <div v-for="(color, index) in ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e']" 
-                                         :key="index"
-                                         @click="updateUserColor(color)"
-                                         class="color-swatch cursor-pointer rounded" 
-                                         :style="{ backgroundColor: color, width: '20px', height: '20px', border: color === getUserColor ? '2px solid white' : '1px solid #ccc' }"
-                                         :title="color">
-                                    </div>
-                                </div>
-                                <div class="d-flex gap-1 mb-2">
-                                    <input type="color" 
-                                           :value="getUserColor" 
-                                           @input="updateUserColor($event.target.value)"
-                                           class="form-control form-control-sm flex-grow-1"
-                                           style="height: 25px;">
-                                    <button @click="updateUserColor(getRandomColor())" 
-                                            class="btn btn-sm btn-outline-light"
-                                            title="Random color">
-                                        <i class="fas fa-random fa-xs"></i>
-                                    </button>
-                                </div>
-                                <button @click="showColorPicker = false" class="btn btn-sm btn-secondary w-100">
-                                    Done
+                            <div class="btn-group btn-group-sm">
+                                <button @click.stop="retryPendingUpload(upload.id)"
+                                    class="btn btn-outline-primary btn-xs" title="Retry upload">
+                                    <i class="fas fa-redo fa-xs"></i>
+                                </button>
+                                <button @click.stop="removePendingUpload(upload.id)"
+                                    class="btn btn-outline-danger btn-xs" title="Remove from pending">
+                                    <i class="fas fa-trash fa-xs"></i>
                                 </button>
                             </div>
                         </div>
-                        
-                        <!-- Other Connected Users -->
-                        <div v-for="user in connectedUsers.filter(u => u.name !== username).slice(0, 3)" 
-                             :key="user.name" 
-                             class="position-relative">
-                            <img :src="'https://images.hive.blog/u/' + user.name + '/avatar/small'"
-                                 :alt="user.name"
-                                 class="user-avatar-small rounded-circle" 
-                                 :title="user.name"
-                                 @error="handleAvatarError($event, user)"
-                                 :style="{ 
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Edit Menu -->
+            <div class="btn-group">
+                <button class="btn btn-dark no-caret dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <i class="fas fa-edit me-sm-1 d-none"></i><span class="d-none d-sm-inline">Edit</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark bg-dark">
+                    <li><a class="dropdown-item" href="#" @click.prevent="bodyEditor?.chain().focus().undo().run()">
+                            <i class="fas fa-undo me-2"></i>Undo
+                        </a></li>
+                    <li><a class="dropdown-item" href="#" @click.prevent="bodyEditor?.chain().focus().redo().run()">
+                            <i class="fas fa-redo me-2"></i>Redo
+                        </a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="#" @click.prevent="clearEditor">
+                            <i class="fas fa-eraser me-2"></i>Clear All
+                        </a></li>
+                </ul>
+            </div>
+
+            <!-- Collaboration Menu -->
+            <div class="btn-group">
+                <button class="btn btn-dark no-caret dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <i class="fas fa-users me-sm-1 d-none"></i><span class="d-none d-sm-inline">Collaboration</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark bg-dark">
+                    <li v-if="!isAuthenticated || isAuthExpired">
+                        <a class="dropdown-item" href="#" @click.prevent="requestAuthentication">
+                            <i class="fas fa-key me-2"></i>Authenticate
+                        </a>
+                    </li>
+                    <li v-else-if="connectionStatus === 'disconnected' && currentFile?.type === 'collaborative'">
+                        <a class="dropdown-item" href="#" @click.prevent="initializeCollaboration(currentFile)">
+                            <i class="fas fa-plug me-2"></i>Connect
+                        </a>
+                    </li>
+                    <li v-else-if="connectionStatus === 'connected'">
+                        <a class="dropdown-item" href="#" @click.prevent="disconnectCollaboration">
+                            <i class="fas fa-unlink me-2"></i>Disconnect
+                        </a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="#" @click.prevent="shareDocument"
+                            :class="{ disabled: !canShare }">
+                            <i class="fas fa-user-plus me-2"></i>Share Document
+                        </a></li>
+                    <li><a class="dropdown-item" href="#" @click.prevent="showLoadModal = true">
+                            <i class="fas fa-folder me-2"></i>Browse Documents
+                        </a></li>
+                </ul>
+            </div>
+
+            <!--View Menu-->
+            <div class="btn-group">
+                <button class="btn btn-dark no-caret dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <i class="fas fa-eye me-sm-1 d-none"></i><span class="d-none d-sm-inline">View</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark bg-dark">
+                    <li><a class="dropdown-item" href="#" @click.prevent="showAdvancedOptions = !showAdvancedOptions">
+                            <i class="fas fa-cog me-2"></i>{{ showAdvancedOptions? 'Hide': 'Show' }}
+                            Advanced Options
+                        </a></li>
+                    <li><a class="dropdown-item" href="#" @click.prevent="showPermlinkEditor = !showPermlinkEditor">
+                            <i class="fas fa-link me-2"></i>{{ showPermlinkEditor? 'Hide': 'Show' }}
+                            Permlink Editor
+                        </a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!--File Status-->
+        <div class="ms-auto d-flex align-items-center gap-2">
+            <span v-if="currentFile" class="text-light small">
+                <i class="fas fa-file me-1"></i>{{ currentFile.name || currentFile.documentName ||
+                currentFile.permlink }}
+                <span v-if="hasUnsavedChanges" class="text-warning ms-1">●</span>
+            </span>
+            <span v-else class="text-muted small">
+                <i class="fas fa-file-plus me-1"></i>Untitled
+                <span v-if="hasUnsavedChanges" class="text-warning ms-1">●</span>
+            </span>
+
+            <!-- Connection Status Badge -->
+            <span v-if="currentFile?.type === 'collaborative'" class="badge" :class="{
+            'bg-success': connectionStatus === 'connected',
+        'bg-warning': connectionStatus === 'connecting',
+        'bg-secondary': connectionStatus === 'disconnected',
+        'bg-danger': connectionStatus === 'error'
+                    }">
+                <i class="fas fa-fw me-1" :class="{
+            'fa-check-circle': connectionStatus === 'connected',
+        'fa-spinner fa-spin': connectionStatus === 'connecting',
+        'fa-circle': connectionStatus === 'disconnected',
+        'fa-exclamation-circle': connectionStatus === 'error'
+                        }"></i>
+                {
+                {
+                connectionStatus === 'connected' ? 'Live' :
+                connectionStatus === 'connecting' ? 'Connecting' :
+                connectionStatus === 'error' ? 'Error' : 'Offline'
+                }
+                }
+            </span>
+            <span v-else-if="currentFile?.type === 'local'" class="badge bg-secondary">
+                <i class="fas fa-file me-1"></i>Local
+            </span>
+
+            <!--Current User(in collaborative mode)-->
+            <div v-if="currentFile?.type === 'collaborative'" class="d-flex align-items-center gap-1">
+                <div class="position-relative">
+                    <img :src="avatarUrl"
+                        :alt="username"
+                        class="user-avatar-small rounded-circle cursor-pointer"
+                        :title="'You (' + username + ') - Click to change color'"
+                        @click="toggleColorPicker"
+                        @error="handleAvatarError($event, {name: username, color: getUserColor})"
+                        :style="{
+                            width: '24px',
+                            height: '24px',
+                            objectFit: 'cover',
+                            border: '2px solid ' + getUserColor,
+                            boxShadow: '0 0 0 1px rgba(255,255,255,0.2)'
+                        }">
+
+                        <!-- Color picker dropdown -->
+                        <div v-if="showColorPicker"
+                            class="position-absolute bg-dark border border-secondary rounded p-2 shadow-lg"
+                            style="top: 30px; right: 0; z-index: 1000; width: 200px;">
+                            <div class="mb-2">
+                                <small class="text-white fw-bold">Choose your cursor color:</small>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                <div v-for="(color, index) in ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e']"
+                                    :key="index" @click="updateUserColor(color)"
+                                    class="color-swatch cursor-pointer rounded"
+                                    :style="{backgroundColor: color, width: '20px', height: '20px', border: color === getUserColor ? '2px solid white' : '1px solid #ccc' }"
+                                    :title="color">
+                                </div>
+                            </div>
+                            <div class="d-flex gap-1 mb-2">
+                                <input type="color" :value="getUserColor" @input="updateUserColor($event.target.value)"
+                                    class="form-control form-control-sm flex-grow-1" style="height: 25px;">
+                                <button @click="updateUserColor(getRandomColor())" class="btn btn-sm btn-outline-light"
+                                    title="Random color">
+                                    <i class="fas fa-random fa-xs"></i>
+                                </button>
+                            </div>
+                            <button @click="showColorPicker = false" class="btn btn-sm btn-secondary w-100">
+                                Done
+                            </button>
+                        </div>
+                </div>
+
+                <!--Other Connected Users-->
+                <div v-for="user in connectedUsers.filter(u => u.name !== username).slice(0, 3)" :key="user.name"
+                    class="position-relative">
+                    <img :src="'https://images.hive.blog/u/' + user.name + '/avatar/small'" :alt="user.name"
+                        class="user-avatar-small rounded-circle" :title="user.name"
+                        @error="handleAvatarError($event, user)" :style="{ 
                                      width: '24px', 
                                      height: '24px', 
                                      objectFit: 'cover',
                                      border: '2px solid ' + user.color,
                                      boxShadow: '0 0 0 1px rgba(255,255,255,0.2)'
                                  }">
-                        </div>
-                        <span v-if="connectedUsers.filter(u => u.name !== username).length > 3" class="badge bg-light text-dark small">
-                            +{{ connectedUsers.filter(u => u.name !== username).length - 3 }}
-                        </span>
-                    </div>
                 </div>
+                <span v-if="connectedUsers.filter(u => u.name !== username).length > 3"
+                    class="badge bg-light text-dark small">
+                    +{{ connectedUsers.filter(u => u.name !== username).length - 3 }}
+                </span>
             </div>
         </div>
-        
+    </div>
+
+
 
     <div class="d-flex flex-column gap-4 mx-2">
         <!-- Title Field -->
@@ -2851,7 +2911,7 @@ export default {
                 <small class="text-muted font-monospace">/@{{ username }}/{{ generatedPermlink }}</small>
             </div>
         </div>
-        
+
         <!-- Permlink Field -->
         <div v-if="showPermlinkEditor" class="">
             <label class="form-label text-white fw-bold d-none">
@@ -2861,9 +2921,8 @@ export default {
             <div class="d-flex align-items-center gap-2 mb-2">
                 <code class="text-info">/@{{ username }}/</code>
                 <div class="flex-grow-1 position-relative">
-                    <div v-if="!showPermlinkEditor" 
-                         @click="togglePermlinkEditor"
-                         class="bg-dark border border-secondary rounded p-2 cursor-pointer text-white font-monospace">
+                    <div v-if="!showPermlinkEditor" @click="togglePermlinkEditor"
+                        class="bg-dark border border-secondary rounded p-2 cursor-pointer text-white font-monospace">
                         {{ content.permlink || generatedPermlink || 'Click to edit...' }}
                     </div>
                     <div v-else class="editor-field bg-dark border border-secondary rounded">
@@ -2871,164 +2930,144 @@ export default {
                     </div>
                 </div>
                 <button @click="useGeneratedPermlink" class="btn btn-sm btn-outline-secondary"
-                        :disabled="!generatedPermlink">
+                    :disabled="!generatedPermlink">
                     Auto-generate
                 </button>
             </div>
-            <small class="text-muted">URL-safe characters only (a-z, 0-9, dashes). Not synchronized in collaborative mode.</small>
+            <small class="text-muted">URL-safe characters only (a-z, 0-9, dashes). Not synchronized in collaborative
+                mode.</small>
         </div>
-                
-        <!-- Body Field -->
+
+        <!--Body Field-->
         <div class="">
             <label class="form-label text-white fw-bold d-none">
                 <i class="fas fa- me-2"></i>Body
                 <span class="badge bg-primary ms-2" v-if="isConnected">Collaborative</span>
             </label>
-            
+
             <!-- WYSIWYG Toolbar -->
             <div class="editor-toolbar bg-dark border border-secondary rounded-top">
                 <div class="d-flex flex-wrap gap-1 align-items-center">
                     <!-- Text Formatting -->
                     <div class="" role="group">
-                        <button @click="bodyEditor?.chain().focus().toggleBold().run()" 
-                                :class="{ active: bodyEditor?.isActive('bold') }" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Bold">
+                        <button @click="bodyEditor?.chain().focus().toggleBold().run()"
+                            :class="{active: bodyEditor?.isActive('bold') }" class="btn btn-sm btn-dark" type="button"
+                            title="Bold">
                             <i class="fas fa-bold"></i>
                         </button>
-                        <button @click="bodyEditor?.chain().focus().toggleItalic().run()" 
-                                :class="{ active: bodyEditor?.isActive('italic') }" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Italic">
+                        <button @click="bodyEditor?.chain().focus().toggleItalic().run()"
+                            :class="{active: bodyEditor?.isActive('italic') }" class="btn btn-sm btn-dark" type="button"
+                            title="Italic">
                             <i class="fas fa-italic"></i>
                         </button>
-                        <button @click="bodyEditor?.chain().focus().toggleStrike().run()" 
-                                :class="{ active: bodyEditor?.isActive('strike') }" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Strikethrough">
+                        <button @click="bodyEditor?.chain().focus().toggleStrike().run()"
+                            :class="{active: bodyEditor?.isActive('strike') }" class="btn btn-sm btn-dark" type="button"
+                            title="Strikethrough">
                             <i class="fas fa-strikethrough"></i>
                         </button>
-                        <button @click="bodyEditor?.chain().focus().toggleCode().run()" 
-                                :class="{ active: bodyEditor?.isActive('code') }" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Inline Code">
+                        <button @click="bodyEditor?.chain().focus().toggleCode().run()"
+                            :class="{active: bodyEditor?.isActive('code') }" class="btn btn-sm btn-dark" type="button"
+                            title="Inline Code">
                             <i class="fas fa-code"></i>
                         </button>
                     </div>
-                    
+
                     <div class="vr"></div>
-                    
-                    <!-- Headings -->
+
+                    <!--Headings -->
                     <div class="" role="group">
-                        <button @click="bodyEditor?.chain().focus().toggleHeading({ level: 1 }).run()" 
-                                :class="{ active: bodyEditor?.isActive('heading', { level: 1 }) }" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Heading 1">
+                        <button @click="bodyEditor?.chain().focus().toggleHeading({ level: 1 }).run()"
+                            :class="{ active: bodyEditor?.isActive('heading', { level: 1 }), 'btn btn-sm btn-dark': true }"
+                            type="button" title="Heading 1">
                             H1
                         </button>
-                        <button @click="bodyEditor?.chain().focus().toggleHeading({ level: 2 }).run()" 
-                                :class="{ active: bodyEditor?.isActive('heading', { level: 2 }) }" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Heading 2">
+                        <button @click="bodyEditor?.chain().focus().toggleHeading({ level: 2 }).run()"
+                            :class="{ active: bodyEditor?.isActive('heading', { level: 2 }), 'btn btn-sm btn-dark': true }"
+                            type="button" title="Heading 2">
                             H2
                         </button>
-                        <button @click="bodyEditor?.chain().focus().toggleHeading({ level: 3 }).run()" 
-                                :class="{ active: bodyEditor?.isActive('heading', { level: 3 }) }" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Heading 3">
+                        <button @click="bodyEditor?.chain().focus().toggleHeading({ level: 3 }).run()"
+                            :class="{ active: bodyEditor?.isActive('heading', { level: 3 }), 'btn btn-sm btn-dark': true }"
+                            type="button" title="Heading 3">
                             H3
                         </button>
                     </div>
-                    
+
                     <div class="vr"></div>
-                    
-                    <!-- Lists -->
+
+                    <!--Lists -->
                     <div class="" role="group">
-                        <button @click="bodyEditor?.chain().focus().toggleBulletList().run()" 
-                                :class="{ active: bodyEditor?.isActive('bulletList') }" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Bullet List">
+                        <button @click="bodyEditor?.chain().focus().toggleBulletList().run()"
+                            :class="{ active: bodyEditor?.isActive('bulletList') }" class="btn btn-sm btn-dark"
+                            type="button" title="Bullet List">
                             <i class="fas fa-list-ul"></i>
                         </button>
-                        <button @click="bodyEditor?.chain().focus().toggleOrderedList().run()" 
-                                :class="{ active: bodyEditor?.isActive('orderedList') }" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Numbered List">
+                        <button @click="bodyEditor?.chain().focus().toggleOrderedList().run()"
+                            :class="{ active: bodyEditor?.isActive('orderedList'), 'btn btn-sm btn-dark': true }"
+                            type="button" title="Numbered List">
                             <i class="fas fa-list-ol"></i>
                         </button>
                     </div>
-                    
+
                     <div class="vr"></div>
-                    
-                    <!-- Block Elements -->
+
+                    <!--Block Elements-->
                     <div class="" role="group">
-                        <button @click="bodyEditor?.chain().focus().toggleBlockquote().run()" 
-                                :class="{ active: bodyEditor?.isActive('blockquote') }" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Quote">
+                        <button @click="bodyEditor?.chain().focus().toggleBlockquote().run()"
+                            :class="{ active: bodyEditor?.isActive('blockquote') }" class="btn btn-sm btn-dark"
+                            type="button" title="Quote">
                             <i class="fas fa-quote-left"></i>
                         </button>
-                        <button @click="bodyEditor?.chain().focus().toggleCodeBlock().run()" 
-                                :class="{ active: bodyEditor?.isActive('codeBlock') }" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Code Block">
+                        <button @click="bodyEditor?.chain().focus().toggleCodeBlock().run()"
+                            :class="{ active: bodyEditor?.isActive('codeBlock'), 'btn btn-sm btn-dark': true }"
+                            type="button" title="Code Block">
                             <i class="fas fa-terminal"></i>
                         </button>
-                        <button @click="bodyEditor?.chain().focus().setHorizontalRule().run()" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Horizontal Rule">
+                        <button @click="bodyEditor?.chain().focus().setHorizontalRule().run()"
+                            class="btn btn-sm btn-dark" type="button" title="Horizontal Rule">
                             <i class="fas fa-minus"></i>
                         </button>
                     </div>
-                    
+
                     <div class="vr d-none"></div>
-                    
-                    <!-- Actions -->
+
+                    <!--Actions -->
                     <div class="d-none" role="group">
-                        <button @click="bodyEditor?.chain().focus().undo().run()" 
-                                :disabled="!bodyEditor?.can().undo()" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Undo">
+                        <button @click="bodyEditor?.chain().focus().undo().run()" :disabled="!bodyEditor?.can().undo()"
+                            class="btn btn-sm btn-dark" type="button" title="Undo">
                             <i class="fas fa-undo"></i>
                         </button>
-                        <button @click="bodyEditor?.chain().focus().redo().run()" 
-                                :disabled="!bodyEditor?.can().redo()" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Redo">
+                        <button @click="bodyEditor?.chain().focus().redo().run()" :disabled="!bodyEditor?.can().redo()"
+                            class="btn btn-sm btn-dark" type="button" title="Redo">
                             <i class="fas fa-redo"></i>
                         </button>
                     </div>
-                    
+
                     <div class="vr"></div>
-                    
-                    <!-- Insert -->
+
+                    <!--Insert -->
                     <div class="" role="group">
-                        <button @click="insertLink" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Insert Link">
+                        <button @click="insertLink" class="btn btn-sm btn-dark" type="button" title="Insert Link">
                             <i class="fas fa-link"></i>
                         </button>
-                        <button @click="insertImage" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Insert Image">
+                        <button @click="insertImage" class="btn btn-sm btn-dark" type="button" title="Insert Image">
                             <i class="fas fa-image"></i>
                         </button>
-                        <button @click="insertTable" 
-                                class="btn btn-sm btn-dark" 
-                                type="button" title="Insert Table">
+                        <button @click="insertTable" class="btn btn-sm btn-dark" type="button" title="Insert Table">
                             <i class="fas fa-table"></i>
                         </button>
                     </div>
                 </div>
             </div>
-            
+
             <div class="editor-field bg-dark border border-secondary border-top-0 rounded-bottom">
                 <div ref="bodyEditor" class="body-editor"></div>
             </div>
-            <small class="text-muted">Full WYSIWYG editor with markdown export support. Supports &lt;center&gt;, &lt;video&gt;, and other HTML tags.</small>
+            <small class="text-muted">Full WYSIWYG editor with markdown export support. Supports &lt;center&gt;,
+                &lt;video&gt;, and other HTML tags.</small>
         </div>
-        
-        <!-- Tags Field -->
+
+        <!--Tags Field-->
         <div class="">
             <label class="form-label text-white fw-bold d-none">
                 <i class="fas fa-tags me-2"></i>Tags
@@ -3036,21 +3075,18 @@ export default {
             <div class="d-flex flex-wrap align-items-center gap-2">
                 <!-- Add tag input (floating left) -->
                 <div class="input-group" style="width: 200px;">
-                    <input v-model="tagInput" @keydown.enter="addTag" 
-                           class="form-control form-control-sm bg-dark text-white border-secondary" 
-                           placeholder="Add a tag..."
-                           maxlength="50"
-                           :disabled="content.tags.length >= 10">
-                    <button @click="addTag" 
-                            class="btn btn-sm btn-outline-primary"
-                            :disabled="content.tags.length >= 10 || !tagInput.trim()">
+                    <input v-model="tagInput" @keydown.enter="addTag"
+                        class="form-control form-control-sm bg-dark text-white border-secondary"
+                        placeholder="Add a tag..." maxlength="50" :disabled="content.tags.length >= 10">
+                    <button @click="addTag" class="btn btn-sm btn-outline-primary"
+                        :disabled="content.tags.length >= 10 || !tagInput.trim()">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
-                
+
                 <!-- Current tags -->
-                <span v-for="(tag, index) in content.tags" :key="index" 
-                      class="badge bg-primary d-flex align-items-center">
+                <span v-for="(tag, index) in content.tags" :key="index"
+                    class="badge bg-primary d-flex align-items-center">
                     {{ tag }}
                     <button @click="removeTag(index)" class="btn-close btn-close-white ms-2 small"></button>
                 </span>
@@ -3059,20 +3095,17 @@ export default {
                 Maximum 10 tags allowed
             </small>
         </div>
-                
-        <!-- Advanced Options Collapsible -->
+
+        <!--Advanced Options Collapsible-->
         <div class="mb-3">
-            <button class="btn btn-lg p-2 btn-secondary bg-card d-flex align-items-center w-100 text-start" 
-                    type="button" 
-                    data-bs-toggle="collapse" 
-                    data-bs-target="#advancedOptions" 
-                    aria-expanded="false" 
-                    aria-controls="advancedOptions">
+            <button class="btn btn-lg p-2 btn-secondary bg-card d-flex align-items-center w-100 text-start"
+                type="button" data-bs-toggle="collapse" data-bs-target="#advancedOptions" aria-expanded="false"
+                aria-controls="advancedOptions">
                 <i class="fas fa-cog me-2"></i>
                 Advanced Options
                 <i class="fas fa-chevron-down ms-auto"></i>
             </button>
-            
+
             <div class="collapse mt-3" id="advancedOptions">
                 <!-- Beneficiaries Section -->
                 <div class="mb-4">
@@ -3082,47 +3115,39 @@ export default {
                     <div class="bg-dark border border-secondary rounded p-3">
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
-                            <small>Configure reward sharing with other accounts. Total cannot exceed 100%.</small>
-                                </div>
+                            <small>Configure reward sharing with other accounts. Total cannot exceed
+                                100%.</small>
+                        </div>
                         <div class="d-flex align-items-center gap-2 mb-2">
-                            <input type="text" 
-                                   class="form-control bg-dark text-white border-secondary" 
-                                   placeholder="@username" 
-                                   v-model="beneficiaryInput.account">
-                            <input type="number" 
-                                   class="form-control bg-dark text-white border-secondary" 
-                                   placeholder="%" 
-                                   min="0.01" 
-                                   max="100" 
-                                   step="0.01"
-                                   v-model="beneficiaryInput.percent">
+                            <input type="text" class="form-control bg-dark text-white border-secondary"
+                                placeholder="@username" v-model="beneficiaryInput.account">
+                            <input type="number" class="form-control bg-dark text-white border-secondary"
+                                placeholder="%" min="0.01" max="100" step="0.01" v-model="beneficiaryInput.percent">
                             <button @click="addBeneficiary" class="btn btn-outline-success">
                                 <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
+                            </button>
+                        </div>
                         <div v-if="publishForm.beneficiaries.length > 0" class="mt-2">
-                            <div v-for="(ben, index) in publishForm.beneficiaries" :key="index" 
-                                 class="d-flex align-items-center justify-content-between bg-secondary rounded p-2 mb-1">
+                            <div v-for="(ben, index) in publishForm.beneficiaries" :key="index"
+                                class="d-flex align-items-center justify-content-between bg-secondary rounded p-2 mb-1">
                                 <span>@{{ ben.account }} - {{ (ben.weight / 100).toFixed(2) }}%</span>
                                 <button @click="removeBeneficiary(index)" class="btn btn-sm btn-outline-danger">
                                     <i class="fas fa-trash"></i>
                                 </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                </div>
-                
-                <!-- Custom JSON Section -->
+
+                <!--Custom JSON Section-->
                 <div class="mb-4">
                     <label class="form-label text-white fw-bold">
                         <i class="fas fa-code me-2"></i>Custom JSON Metadata
                     </label>
                     <div class="bg-dark border border-secondary rounded p-3">
-                        <textarea v-model="customJsonString" 
-                                  @input="validateCustomJson"
-                                  class="form-control bg-dark text-white border-secondary font-monospace"
-                                  rows="6"
-                                  placeholder="Enter custom JSON metadata..."></textarea>
+                        <textarea v-model="customJsonString" @input="validateCustomJson"
+                            class="form-control bg-dark text-white border-secondary font-monospace" rows="6"
+                            placeholder="Enter custom JSON metadata..."></textarea>
                         <div v-if="customJsonError" class="text-danger small mt-1">
                             <i class="fas fa-exclamation-triangle me-1"></i>{{ customJsonError }}
                         </div>
@@ -3130,10 +3155,10 @@ export default {
                             <i class="fas fa-check-circle me-1"></i>Valid JSON
                         </div>
                         <small class="text-muted">Additional metadata for your post. Must be valid JSON.</small>
-            </div>
-        </div>
-        
-                <!-- Comment Options (Hive-specific) -->
+                    </div>
+                </div>
+
+                <!--Comment Options(Hive - specific)-->
                 <div class="">
                     <label class="form-label text-white fw-bold">
                         <i class="fas fa-cog me-2"></i>Comment Options
@@ -3142,19 +3167,15 @@ export default {
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-check">
-                                    <input class="form-check-input" 
-                                           type="checkbox" 
-                                           v-model="commentOptions.allowVotes" 
-                                           id="allowVotes">
+                                    <input class="form-check-input" type="checkbox" v-model="commentOptions.allowVotes"
+                                        id="allowVotes">
                                     <label class="form-check-label text-white" for="allowVotes">
                                         Allow votes
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" 
-                                           type="checkbox" 
-                                           v-model="commentOptions.allowCurationRewards" 
-                                           id="allowCurationRewards">
+                                    <input class="form-check-input" type="checkbox"
+                                        v-model="commentOptions.allowCurationRewards" id="allowCurationRewards">
                                     <label class="form-check-label text-white" for="allowCurationRewards">
                                         Allow curation rewards
                                     </label>
@@ -3162,19 +3183,15 @@ export default {
                             </div>
                             <div class="col-md-6">
                                 <div class="form-check">
-                                    <input class="form-check-input" 
-                                           type="checkbox" 
-                                           v-model="commentOptions.maxAcceptedPayout" 
-                                           id="maxPayout">
+                                    <input class="form-check-input" type="checkbox"
+                                        v-model="commentOptions.maxAcceptedPayout" id="maxPayout">
                                     <label class="form-check-label text-white" for="maxPayout">
                                         Decline payout
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" 
-                                           type="checkbox" 
-                                           v-model="commentOptions.percentHbd" 
-                                           id="powerUp">
+                                    <input class="form-check-input" type="checkbox" v-model="commentOptions.percentHbd"
+                                        id="powerUp">
                                     <label class="form-check-label text-white" for="powerUp">
                                         100% Power Up
                                     </label>
@@ -3187,646 +3204,444 @@ export default {
         </div>
     </div>
 </div>
-        <!-- Publish Modal -->
-        <div v-if="showPublishModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
-            <div class="modal-dialog modal-dialog-scrollable modal-lg">
-                <div class="modal-content bg-dark text-white">
-                    <div class="modal-header border-secondary">
-                        <h5 class="modal-title">
-                            <i class="fas fa-paper-plane me-2"></i>Publish Post to Hive
-                        </h5>
-                        <button @click="showPublishModal = false" class="btn-close btn-close-white"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-4">
-                            <h6 class="text-info">{{ content.title || 'Untitled Post' }}</h6>
-                            <p class="text-muted">
-                                <i class="fas fa-tags me-1"></i>{{ content.tags.join(', ') || 'No tags' }}
-                            </p>
-                            <p class="text-muted">
-                                <i class="fas fa-link me-1"></i>/@{{ username }}/{{ content.permlink || generatedPermlink }}
-                            </p>
+<!--Publish Modal-->
+<div v-if="showPublishModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">
+                    <i class="fas fa-paper-plane me-2"></i>Publish Post to Hive
+                </h5>
+                <button @click="showPublishModal = false" class="btn-close btn-close-white"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <h6 class="text-info">{{ content.title || 'Untitled Post' }}</h6>
+                    <p class="text-muted">
+                        <i class="fas fa-tags me-1"></i>{{ content.tags.join(', ') || 'No tags' }}
+                    </p>
+                    <p class="text-muted">
+                        <i class="fas fa-link me-1"></i>/@{{ username }}/{{ content.permlink || generatedPermlink }}
+                    </p>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-white">Beneficiaries</h6>
+                        <div v-if="publishForm.beneficiaries.length === 0" class="text-muted small">
+                            No beneficiaries set - 100% rewards to author
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h6 class="text-white">Beneficiaries</h6>
-                                <div v-if="publishForm.beneficiaries.length === 0" class="text-muted small">
-                                    No beneficiaries set - 100% rewards to author
-                                </div>
-                                <div v-else>
-                                    <div v-for="ben in publishForm.beneficiaries" :key="ben.account" 
-                                         class="d-flex justify-content-between small mb-1">
-                                        <span>@{{ ben.account }}</span>
-                                        <span>{{ (ben.weight / 100).toFixed(2) }}%</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <h6 class="text-white">Comment Options</h6>
-                                <div class="small">
-                                    <div><i class="fas fa-vote-yea me-1"></i>Votes: {{ commentOptions.allowVotes ? 'Allowed' : 'Disabled' }}</div>
-                                    <div><i class="fas fa-coins me-1"></i>Curation: {{ commentOptions.allowCurationRewards ? 'Enabled' : 'Disabled' }}</div>
-                                    <div><i class="fas fa-money-bill me-1"></i>Payout: {{ commentOptions.maxAcceptedPayout ? 'Declined' : 'Enabled' }}</div>
-                                    <div><i class="fas fa-bolt me-1"></i>Power Up: {{ commentOptions.percentHbd ? '100%' : '50/50 Split' }}</div>
-                                </div>
+                        <div v-else>
+                            <div v-for="ben in publishForm.beneficiaries" :key="ben.account"
+                                class="d-flex justify-content-between small mb-1">
+                                <span>@{{ ben.account }}</span>
+                                <span>{{ (ben.weight / 100).toFixed(2)}}%</span>
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Beneficiaries (Optional)</label>
-                            <div class="form-text">Set accounts to receive a percentage of rewards</div>
-                            <!-- Beneficiaries input would go here -->
-                        </div>
-                        
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            This will publish your post to the Hive blockchain. Make sure all content is final.
-                        </div>
                     </div>
-                    <div class="modal-footer border-secondary">
-                        <button @click="showPublishModal = false" class="btn btn-secondary">Cancel</button>
-                        <button @click="performPublish" 
-                                class="btn btn-primary" 
-                                :disabled="publishing || !canPublish">
-                            <i v-if="publishing" class="fas fa-spinner fa-spin me-1"></i>
-                            <i v-else class="fas fa-paper-plane me-1"></i>
-                            {{ publishing ? 'Publishing...' : 'Publish to Hive' }}
-                        </button>
+                    <div class="col-md-6">
+                        <h6 class="text-white">Comment Options</h6>
+                        <div class="small">
+                            <div><i class="fas fa-vote-yea me-1"></i>Votes: {{ commentOptions.allowVotes ? 'Allowed' :
+                                'Disabled' }}</div>
+                            <div><i class="fas fa-coins me-1"></i>Curation: {{ commentOptions.allowCurationRewards ?
+                                'Enabled' : 'Disabled' }}</div>
+                            <div><i class="fas fa-money-bill me-1"></i>Payout: {{ commentOptions.maxAcceptedPayout ?
+                                'Declined' : 'Enabled' }}</div>
+                            <div><i class="fas fa-bolt me-1"></i>Power Up: {{ commentOptions.percentHbd ? '100%' :
+                                '50/50 Split' }}</div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Load Modal -->
-        <div v-if="showLoadModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
-            <div class="modal-dialog modal-dialog-scrollable modal-lg">
-                <div class="modal-content bg-dark text-white">
-                    <div class="modal-header border-secondary">
-                        <h5 class="modal-title">
-                            <i class="fas fa-folder-open me-2"></i>Saved Drafts
-                        </h5>
-                        <button @click="showLoadModal = false" class="btn-close btn-close-white"></button>
-                    </div>
-                    <div class="modal-body p-1">
-                        <!-- Auth prompt if needed -->
-                        <div v-if="!isAuthenticated || isAuthExpired" class="text-center py-4 border border-secondary rounded mb-3 p-1">
-                            <div class="text-muted mb-2">
-                                <i class="fas fa-lock fa-2x mb-2"></i>
-                                <p>{{ isAuthExpired ? 'Authentication expired' : 'Authentication required' }}</p>
-                            </div>
-                            <button @click="requestAuthentication(); showLoadModal = false" class="btn btn-primary btn-sm">
-                                <i class="fas fa-key me-1"></i>Authenticate for Collaboration
-                            </button>
-                        </div>
 
-                        <!-- Table of documents -->
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="d-flex align-items-center gap-3">
-                                <h6 class="mb-0 ms-2"><i class="fas fa-list me-2 d-none"></i>All Drafts</h6>
-                                <div class="d-flex align-items-center gap-3 small text-muted">
-                                    <span><span class="d-inline-block me-2" style="width: 8px; height: 0.75rem; background-color: #5C94FE; vertical-align: middle;"></span> Collaborative</span>
-                                    <span><span class="d-inline-block me-2" style="width: 8px; height: 0.75rem; background-color: #6c757d; vertical-align: middle;"></span> Local</span>
+                <div class="mb-3">
+                    <label class="form-label">Beneficiaries (Optional)</label>
+                    <div class="form-text">Set accounts to receive a percentage of rewards</div>
+                    <!-- Beneficiaries input would go here -->
+                </div>
 
-                                    
-                                </div>
-                            </div>
-                            <button v-if="localFiles.length > 0" @click="clearAllLocalFiles" class="btn btn-sm btn-outline-danger">
-                                <i class="fas fa-trash me-1"></i>Clear All Local Files
-                            </button>
-                        </div>
-
-                        <div v-if="loadingDocs && isAuthenticated" class="text-center py-4">
-                            <i class="fas fa-spinner fa-spin fa-lg"></i><span class="ms-2">Loading documents...</span>
-                        </div>
-                        <div v-else-if="allDocuments.length === 0" class="text-muted text-center py-4 border border-secondary rounded">
-                            No documents found.
-                        </div>
-                        <div v-else class="table-responsive">
-                            <table class="table table-hover table-dark align-middle mb-0 ">
-                                <thead>
-                                    <tr>
-                                        <th scope="col" style="width: 40%;">Name</th>
-                                        <th scope="col">Details</th>
-                                        <th scope="col">Last Modified</th>
-                                        <th scope="col" class="text-end">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="file in allDocuments" :key="file.id || file.documentPath"
-                                        :class="file.type === 'collaborative' ? 'row-collaborative' : 'row-local'">
-                                        <td @click="loadDocument(file)" class="cursor-pointer">
-                                            <strong class="d-block text-white">{{ file.name || file.documentName || file.permlink }}</strong>
-                                            <small v-if="file.type === 'collaborative' && file.documentName && file.documentName !== file.permlink" class="text-muted">{{ file.permlink }}</small>
-                                        </td>
-                                        <td @click="loadDocument(file)" class="cursor-pointer">
-                                            <small v-if="file.type === 'local'" class="text-muted">{{ formatFileSize(file.size) }}</small>
-                                            <small v-if="file.type === 'collaborative'" class="text-muted">by @{{ file.owner }}</small>
-                                        </td>
-                                        <td @click="loadDocument(file)" class="cursor-pointer">
-                                            <small>{{ formatFileDate(file.lastModified || file.updatedAt) }}</small>
-                                        </td>
-                                        <td class="text-end">
-                                            <button @click.stop="loadDocument(file)" class="btn btn-sm btn-outline-light me-1" title="Load document">
-                                                <i class="fas fa-folder-open"></i>
-                                            </button>
-                                            <button v-if="file.type === 'local'" @click.stop="deleteLocalFileWithConfirm(file)" class="btn btn-sm btn-outline-danger" title="Delete file">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                            <button v-if="file.type === 'collaborative'" @click.stop="deleteCollaborativeDocWithConfirm(file)" class="btn btn-sm btn-outline-danger" :disabled="file.owner !== authHeaders['x-account']" :title="file.owner === authHeaders['x-account'] ? 'Delete document' : 'Only document owner can delete'">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-secondary">
-                        <button @click="showLoadModal = false" class="btn btn-secondary">Close</button>
-                    </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This will publish your post to the Hive blockchain. Make sure all content is final.
                 </div>
             </div>
+            <div class="modal-footer border-secondary">
+                <button @click="showPublishModal = false" class="btn btn-secondary">Cancel</button>
+                <button @click="performPublish" class="btn btn-primary" :disabled="publishing || !canPublish">
+                    <i v-if="publishing" class="fas fa-spinner fa-spin me-1"></i>
+                    <i v-else class="fas fa-paper-plane me-1"></i>
+                    {{ publishing? 'Publishing...': 'Publish to Hive' }}
+                </button>
+            </div>
         </div>
-        
-        <!-- Save Modal -->
-        <div v-if="showSaveModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
-            <div class="modal-dialog modal-dialog-scrollable">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            <i class="fas fa-save me-2"></i>{{ saveForm.isNewDocument ? 'Save As...' : 'Save Document' }}
-                        </h5>
-                        <button @click="showSaveModal = false" class="btn-close" :disabled="saveAsProcess.inProgress"></button>
+    </div>
+</div>
+
+<!--Load Modal-->
+<div v-if="showLoadModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">
+                    <i class="fas fa-folder-open me-2"></i>Saved Drafts
+                </h5>
+                <button @click="showLoadModal = false" class="btn-close btn-close-white"></button>
+            </div>
+            <div class="modal-body p-1">
+                <!-- Auth prompt if needed -->
+                <div v-if="!isAuthenticated || isAuthExpired"
+                    class="text-center py-4 border border-secondary rounded mb-3 p-1">
+                    <div class="text-muted mb-2">
+                        <i class="fas fa-lock fa-2x mb-2"></i>
+                        <p>{{ isAuthExpired ? 'Authentication expired' : 'Authentication required' }}</p>
                     </div>
-                    <div class="modal-body">
-                        <!-- Save As Progress Indicator -->
-                        <div v-if="saveAsProcess.inProgress" class="mb-4">
-                            <div class="alert alert-primary d-flex align-items-center">
-                                <div class="me-3">
-                                    <i class="fas fa-spinner fa-spin fa-lg"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1">Saving Document to Collaboration Server</h6>
-                                    <div class="progress mb-2" style="height: 4px;">
-                                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                             :style="{ width: saveAsProgress + '%' }"></div>
-                                    </div>
-                                    <small class="text-muted">{{ saveAsProcess.message }}</small>
-                                </div>
-                            </div>
-                            
-                            <!-- Error Display -->
-                            <div v-if="saveAsProcess.error" class="alert alert-danger">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>Save failed:</strong> {{ saveAsProcess.error }}
-                                <div class="mt-2">
-                                    <small>Local backup has been preserved and added to pending uploads.</small>
-                                </div>
-                            </div>
+                    <button @click="requestAuthentication(); showLoadModal = false" class="btn btn-primary btn-sm">
+                        <i class="fas fa-key me-1"></i>Authenticate for Collaboration
+                    </button>
+                </div>
+
+                <!-- Table of documents -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center gap-3">
+                        <h6 class="mb-0 ms-2"><i class="fas fa-list me-2 d-none"></i>All Drafts</h6>
+                        <div class="d-flex align-items-center gap-3 small text-muted">
+                            <span><span class="d-inline-block me-2"
+                                    style="width: 8px; height: 0.75rem; background-color: #5C94FE; vertical-align: middle;"></span>
+                                Collaborative</span>
+                            <span><span class="d-inline-block me-2"
+                                    style="width: 8px; height: 0.75rem; background-color: #6c757d; vertical-align: middle;"></span>
+                                Local</span>
+
+
                         </div>
-                        
-                        <!-- Regular Save Form (hidden during save as process) -->
-                        <div v-if="!saveAsProcess.inProgress">
-                            <div class="mb-3">
-                                <label class="form-label">
-                                    {{ saveForm.saveToDlux ? 'Document Name' : 'Filename' }}
-                                    <span v-if="saveForm.saveToDlux" class="small text-muted">(Display name for collaborative document)</span>
-                                </label>
-                                <input v-model="saveForm.filename" 
-                                       class="form-control" 
-                                       :placeholder="saveForm.saveToDlux ? 'Enter document name...' : 'Enter filename...'"
-                                       @keyup.enter="performSave">
-                                <div v-if="saveForm.saveToDlux" class="form-text">
-                                    <small class="text-muted">
-                                        <i class="fas fa-info-circle me-1"></i>
-                                        A unique technical ID will be auto-generated for this document
-                                    </small>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    <input v-model="saveForm.saveLocally" 
-                                           class="form-check-input" 
-                                           type="checkbox" 
-                                           id="saveLocally">
-                                    <label class="form-check-label" for="saveLocally">
-                                        <i class="fas fa-file me-1"></i>Save locally
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input v-model="saveForm.saveToDlux" 
-                                           class="form-check-input" 
-                                           type="checkbox" 
-                                           id="saveToDlux"
-                                           :disabled="!isAuthenticated || isAuthExpired">
-                                    <label class="form-check-label" for="saveToDlux" :class="{ 'text-muted': !isAuthenticated || isAuthExpired }">
-                                        <i class="fas fa-users me-1"></i>Save to DLUX collaborative documents
-                                        <span v-if="!isAuthenticated || isAuthExpired" class="small text-warning ms-1">
-                                            (Authentication required)
-                                        </span>
-                                    </label>
-                                </div>
-                                <div v-if="(!isAuthenticated || isAuthExpired) && saveForm.saveToDlux" class="alert alert-warning small mt-2">
-                                    <i class="fas fa-exclamation-triangle me-1"></i>
-                                    You need to authenticate to save collaborative documents.
-                                    <button @click="requestAuthentication(); showSaveModal = false" class="btn btn-link btn-sm p-0 ms-1">
-                                        Authenticate now
+                    </div>
+                    <button v-if="localFiles.length > 0" @click="clearAllLocalFiles"
+                        class="btn btn-sm btn-outline-danger">
+                        <i class="fas fa-trash me-1"></i>Clear All Local Files
+                    </button>
+                </div>
+
+                <div v-if="loadingDocs && isAuthenticated" class="text-center py-4">
+                    <i class="fas fa-spinner fa-spin fa-lg"></i><span class="ms-2">Loading documents...</span>
+                </div>
+                <div v-else-if="allDocuments.length === 0"
+                    class="text-muted text-center py-4 border border-secondary rounded">
+                    No documents found.
+                </div>
+                <div v-else class="table-responsive">
+                    <table class="table table-hover table-dark align-middle mb-0 ">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="width: 40%;">Name</th>
+                                <th scope="col">Details</th>
+                                <th scope="col">Last Modified</th>
+                                <th scope="col" class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="file in allDocuments" :key="file.id || file.documentPath"
+                                :class="file.type === 'collaborative' ? 'row-collaborative' : 'row-local'">
+                                <td @click="loadDocument(file)" class="cursor-pointer">
+                                    <strong class="d-block text-white">{{ file.name || file.documentName ||
+                                        file.permlink }}</strong>
+                                    <small
+                                        v-if="file.type === 'collaborative' && file.documentName && file.documentName !== file.permlink"
+                                        class="text-muted">{{ file.permlink }}</small>
+                                </td>
+                                <td @click="loadDocument(file)" class="cursor-pointer">
+                                    <small v-if="file.type === 'local'" class="text-muted">{{
+                                        formatFileSize(file.size) }}</small>
+                                    <small v-if="file.type === 'collaborative'" class="text-muted">by @{{ file.owner
+                                        }}</small>
+                                </td>
+                                <td @click="loadDocument(file)" class="cursor-pointer">
+                                    <small>{{ formatFileDate(file.lastModified || file.updatedAt) }}</small>
+                                </td>
+                                <td class="text-end">
+                                    <button @click.stop="loadDocument(file)" class="btn btn-sm btn-outline-light me-1"
+                                        title="Load document">
+                                        <i class="fas fa-folder-open"></i>
                                     </button>
-                                </div>
-                            </div>
-                            
-                            <div v-if="saveForm.saveToDlux" class="mb-3">
-                                <div class="form-check">
-                                    <input v-model="saveForm.isPublic" 
-                                           class="form-check-input" 
-                                           type="checkbox" 
-                                           id="isPublic">
-                                    <label class="form-check-label" for="isPublic">
-                                        Make publicly discoverable
-                                    </label>
-                                </div>
-                                <div class="mt-2">
-                                    <label class="form-label">Description</label>
-                                    <textarea v-model="saveForm.description" 
-                                              class="form-control" 
-                                              rows="2" 
-                                              placeholder="Brief description of the document"></textarea>
-                                </div>
-                                <div v-if="!saveForm.isNewDocument && currentFile?.type === 'collaborative'" class="alert alert-warning small mt-2">
-                                    <i class="fas fa-edit me-1"></i>
-                                    <strong>Rename Document:</strong> 
-                                    This will change the display name of the current collaborative document. The technical document ID will remain the same.
-                                </div>
-                                <div v-else-if="saveForm.isNewDocument && saveForm.saveToDlux" class="alert alert-info small mt-2">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    <strong>{{ saveForm.filename ? 'Save As' : 'New Collaborative Document' }}:</strong> 
-                                    This will create a new collaborative document with a unique auto-generated ID. 
-                                    {{ currentFile && currentFile.type === 'collaborative' ? 'Your content will be copied to the new document.' : 'You will switch to collaborative editing mode.' }}
-                                </div>
-                                <div v-else class="alert alert-info small mt-2">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Collaborative documents are automatically deleted after 30 days of inactivity.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button @click="showSaveModal = false" 
-                                class="btn btn-secondary" 
-                                :disabled="saveAsProcess.inProgress">
-                            {{ saveAsProcess.inProgress ? 'Processing...' : 'Cancel' }}
-                        </button>
-                        <button @click="performSave" 
-                                class="btn btn-primary" 
-                                :disabled="!hasValidFilename || saving || saveAsProcess.inProgress">
-                            <i v-if="saving || saveAsProcess.inProgress" class="fas fa-spinner fa-spin me-1"></i>
-                            <i v-else class="fas fa-save me-1"></i>
-                            {{ saving || saveAsProcess.inProgress ? 'Saving...' : (saveForm.isNewDocument ? 'Save As' : 'Save') }}
-                        </button>
-                    </div>
+                                    <button v-if="file.type === 'local'" @click.stop="deleteLocalFileWithConfirm(file)"
+                                        class="btn btn-sm btn-outline-danger" title="Delete file">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    <button v-if="file.type === 'collaborative'"
+                                        @click.stop="deleteCollaborativeDocWithConfirm(file)"
+                                        class="btn btn-sm btn-outline-danger"
+                                        :disabled="file.owner !== authHeaders['x-account']"
+                                        :title="file.owner === authHeaders['x-account'] ? 'Delete document' : 'Only document owner can delete'">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+            <div class="modal-footer border-secondary">
+                <button @click="showLoadModal = false" class="btn btn-secondary">Close</button>
+            </div>
         </div>
-        
-        <!-- Share Modal -->
-        <div v-if="showShareModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
-            <div class="modal-dialog modal-dialog-scrollable modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            <i class="fas fa-share me-2"></i>Share Document
-                        </h5>
-                        <button @click="showShareModal = false" class="btn-close"></button>
+    </div>
+</div>
+
+<!--Save Modal-->
+<div v-if="showSaveModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-save me-2"></i>{{ saveForm.isNewDocument ? 'Save As...' : 'Save Document'
+                    }}
+                </h5>
+                <button @click="showSaveModal = false" class="btn-close" :disabled="saveAsProcess.inProgress"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Save As Progress Indicator -->
+                <div v-if="saveAsProcess.inProgress" class="mb-4">
+                    <div class="alert alert-primary d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-spinner fa-spin fa-lg"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">Saving Document to Collaboration Server</h6>
+                            <div class="progress mb-2" style="height: 4px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                    :style="{width: saveAsProgress + '%' }"></div>
+                            </div>
+                            <small class="text-muted">{{ saveAsProcess.message }}</small>
+                        </div>
                     </div>
-                    <div class="modal-body">
-                        <!-- Current Permissions -->
-                        <div class="mb-4">
-                            <h6 class="fw-bold mb-3">Current Access</h6>
-                            
-                            <!-- Document Owner -->
-                            <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded mb-2">
-                                <div class="d-flex align-items-center">
-                                    <img :src="'https://images.hive.blog/u/' + currentFile?.owner + '/avatar/small'"
-                                         :alt="currentFile?.owner"
-                                         class="user-avatar rounded-circle me-2" 
-                                         style="width: 40px; height: 40px; object-fit: cover;"
-                                         @error="handleOwnerAvatarError">
-                                    <div class="user-avatar-fallback me-2" 
-                                         :style="{ backgroundColor: generateUserColor(currentFile?.owner || '') }"
-                                         style="display: none; width: 40px; height: 40px; border-radius: 50%; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; color: white;">
-                                        {{ currentFile?.owner?.charAt(0).toUpperCase() }}
-                                    </div>
-                                    <div>
-                                        <strong>@{{ currentFile?.owner }}</strong>
-                                        <div class="text-muted small">Owner</div>
-                                    </div>
-                                </div>
-                                <span class="badge bg-success">Full Access</span>
-                            </div>
-                            
-                            <!-- Loading State -->
-                            <div v-if="loadingPermissions" class="text-center py-2">
-                                <i class="fas fa-spinner fa-spin me-2"></i>Loading permissions...
-                            </div>
-                            
-                            <!-- Shared Users -->
-                            <div v-else-if="documentPermissions.length === 0" class="text-muted text-center py-3">
-                                <i class="fas fa-users me-2"></i>No additional users have access to this document
-                            </div>
-                            <div v-else>
-                                <div v-for="permission in documentPermissions" :key="permission.account" 
-                                     class="d-flex align-items-center justify-content-between p-2 bg-light rounded mb-2">
-                                    <div class="d-flex align-items-center">
-                                        <img :src="'https://images.hive.blog/u/' + permission.account + '/avatar/small'"
-                                             :alt="permission.account"
-                                             class="user-avatar rounded-circle me-2" 
-                                             style="width: 40px; height: 40px; object-fit: cover;"
-                                             @error="handlePermissionAvatarError($event, permission.account)">
-                                        <div class="user-avatar-fallback me-2" 
-                                             :style="{ backgroundColor: generateUserColor(permission.account) }"
-                                             style="display: none; width: 40px; height: 40px; border-radius: 50%; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; color: white;">
-                                            {{ permission.account.charAt(0).toUpperCase() }}
-                                        </div>
-                                        <div>
-                                            <strong>@{{ permission.account }}</strong>
-                                            <div class="text-muted small">
-                                                Granted by @{{ permission.grantedBy }} • {{ formatFileDate(permission.grantedAt) }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <select @change="updatePermission(permission.account, $event.target.value)" 
-                                                :value="permission.permissionType" 
-                                                class="form-select form-select-sm" 
-                                                style="width: auto;">
-                                            <option value="readonly">Read Only</option>
-                                            <option value="editable">Editable</option>
-                                            <option value="postable">Full Access</option>
-                                        </select>
-                                        <button @click="revokePermission(permission.account)" 
-                                                class="btn btn-sm btn-outline-danger"
-                                                title="Revoke access">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+
+                    <!-- Error Display -->
+                    <div v-if="saveAsProcess.error" class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Save failed:</strong> {{ saveAsProcess.error }}
+                        <div class="mt-2">
+                            <small>Local backup has been preserved and added to pending uploads.</small>
                         </div>
-                        
-                        <hr>
-                        
-                        <!-- Add New User -->
-                        <div>
-                            <h6 class="fw-bold mb-3">Grant New Access</h6>
-                            <div class="mb-3">
-                                <label class="form-label">Share with user</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">@</span>
-                                    <input v-model="shareForm.username" 
-                                           class="form-control" 
-                                           placeholder="Enter HIVE username"
-                                           @keyup.enter="performShare">
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Permission level</label>
-                                <select v-model="shareForm.permission" class="form-select">
-                                    <option value="readonly">Read Only - Can view and connect</option>
-                                    <option value="editable">Editable - Can view and edit content</option>
-                                    <option value="postable">Full Access - Can edit and post to Hive</option>
-                                </select>
-                            </div>
+                    </div>
+                </div>
+
+                <!-- Regular Save Form (hidden during save as process) -->
+                <div v-if="!saveAsProcess.inProgress">
+                    <div class="mb-3">
+                        <label class="form-label">
+                            {{ saveForm.saveToDlux ? 'Document Name' : 'Filename' }}
+                            <span v-if="saveForm.saveToDlux" class="small text-muted">(Display name for
+                                collaborative document)</span>
+                        </label>
+                        <input v-model="saveForm.filename" class="form-control"
+                            :placeholder="saveForm.saveToDlux ? 'Enter document name...' : 'Enter filename...'"
+                            @keyup.enter="performSave">
+                        <div v-if="saveForm.saveToDlux" class="form-text">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                A unique technical ID will be auto-generated for this document
+                            </small>
                         </div>
-                        
-                        <div class="alert alert-info small">
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input v-model="saveForm.saveLocally" class="form-check-input" type="checkbox"
+                                id="saveLocally">
+                            <label class="form-check-label" for="saveLocally">
+                                <i class="fas fa-file me-1"></i>Save locally
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input v-model="saveForm.saveToDlux" class="form-check-input" type="checkbox"
+                                id="saveToDlux" :disabled="!isAuthenticated || isAuthExpired">
+                            <label class="form-check-label" for="saveToDlux"
+                                :class="{'text-muted': !isAuthenticated || isAuthExpired }">
+                                <i class="fas fa-users me-1"></i>Save to DLUX collaborative documents
+                                <span v-if="!isAuthenticated || isAuthExpired" class="small text-warning ms-1">
+                                    (Authentication required)
+                                </span>
+                            </label>
+                        </div>
+                        <div v-if="(!isAuthenticated || isAuthExpired) && saveForm.saveToDlux"
+                            class="alert alert-warning small mt-2">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            You need to authenticate to save collaborative documents.
+                            <button @click="requestAuthentication(); showSaveModal = false"
+                                class="btn btn-link btn-sm p-0 ms-1">
+                                Authenticate now
+                            </button>
+                        </div>
+                    </div>
+
+                    <div v-if="saveForm.saveToDlux" class="mb-3">
+                        <div class="form-check">
+                            <input v-model="saveForm.isPublic" class="form-check-input" type="checkbox" id="isPublic">
+                            <label class="form-check-label" for="isPublic">
+                                Make publicly discoverable
+                            </label>
+                        </div>
+                        <div class="mt-2">
+                            <label class="form-label">Description</label>
+                            <textarea v-model="saveForm.description" class="form-control" rows="2"
+                                placeholder="Brief description of the document"></textarea>
+                        </div>
+                        <div v-if="!saveForm.isNewDocument && currentFile?.type === 'collaborative'"
+                            class="alert alert-warning small mt-2">
+                            <i class="fas fa-edit me-1"></i>
+                            <strong>Rename Document:</strong>
+                            This will change the display name of the current collaborative document. The
+                            technical document ID will remain the same.
+                        </div>
+                        <div v-else-if="saveForm.isNewDocument && saveForm.saveToDlux"
+                            class="alert alert-info small mt-2">
                             <i class="fas fa-info-circle me-1"></i>
-                            Users need to authenticate with their HIVE account to access shared documents.
+                            <strong>{{ saveForm.filename ? 'Save As' : 'New Collaborative Document' }}:</strong>
+                            This will create a new collaborative document with a unique auto-generated ID.
+                            {{ documentCreationMessage }}
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button @click="showShareModal = false" class="btn btn-secondary">Close</button>
-                        <button @click="performShare" 
-                                class="btn btn-primary" 
-                                :disabled="!shareForm.username.trim()">
-                            <i class="fas fa-user-plus me-1"></i>Grant Access
-                        </button>
+                        <div v-else class="alert alert-info small mt-2">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Collaborative documents are automatically deleted after 30 days of inactivity.
+                        </div>
                     </div>
                 </div>
             </div>
+            <div class="modal-footer">
+                <button @click="showSaveModal = false" class="btn btn-secondary" :disabled="saveAsProcess.inProgress">
+                    {{ cancelButtonText }}
+                </button>
+                <button @click="performSave" class="btn btn-primary" :disabled="saveButtonDisabled">
+                    <i v-if="saving || saveAsProcess.inProgress" class="fas fa-spinner fa-spin me-1"></i>
+                    <i v-else class="fas fa-save me-1"></i>
+                    {{ saveButtonText }}
+                </button>
+            </div>
         </div>
-    `,
-    
-    // Enhanced styles
-    style: `
-    <style>
-    .collaborative-post-editor {
-        max-width: 900px;
-        margin: 0 auto;
-    }
-    
-    .file-menu-bar {
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        backdrop-filter: blur(10px);
-        border-radius: 0.375rem 0.375rem 0 0;
-    }
-    
-    .file-menu-bar .dropdown-menu {
-        font-size: 0.875rem;
-    }
-    
-    .dropdown-item.disabled {
-        opacity: 0.5;
-        pointer-events: none;
-    }
-    
-    .editor-field {
-        min-height: 60px;
-    }
-    
-    .title-editor {
-        min-height: 60px;
-    }
-    
-    .body-editor {
-        min-height: 300px;
-    }
-    
-    .permlink-editor {
-        min-height: 40px;
-    }
-    
-    .ProseMirror {
-        outline: none;
-        min-height: inherit;
-    }
-    
-    .cursor-pointer {
-        cursor: pointer;
-        transition: opacity 0.2s;
-    }
-    
-    .cursor-pointer:hover {
-        opacity: 0.8;
-    }
-    
-    .collaboration-status {
-        transition: all 0.3s ease;
-        border-left-width: 4px !important;
-    }
-    
-    .fa-rotate-180 {
-        transform: rotate(180deg);
-        transition: transform 0.3s ease;
-    }
-    
-    .badge {
-        font-size: 0.75em;
-    }
-    
-    .bg-success-subtle {
-        background-color: rgba(25, 135, 84, 0.1);
-    }
-    
-    .bg-warning-subtle {
-        background-color: rgba(255, 193, 7, 0.1);
-    }
-    
-    .bg-danger-subtle {
-        background-color: rgba(220, 53, 69, 0.1);
-    }
-    
-    .form-control:focus {
-        border-color: #5C94FE;
-        box-shadow: 0 0 0 0.2rem rgba(92, 148, 254, 0.25);
-    }
-    
-    .btn-outline-primary:hover {
-        background-color: #5C94FE;
-        border-color: #5C94FE;
-    }
-    
-    .btn-outline-light:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.2);
-    }
-    
-    .font-monospace {
-        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-        font-size: 0.9em;
-    }
-    
-    /* File status indicator */
-    .text-warning {
-        color: #ffc107 !important;
-    }
-    
-    /* File list improvements */
-    .cursor-pointer {
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-    }
-    
-    .cursor-pointer:hover {
-        background-color: rgba(255, 255, 255, 0.05);
-    }
-    
-    .list-group-item {
-        transition: all 0.2s ease;
-    }
-    
-    .list-group-item:hover {
-        background-color: rgba(255, 255, 255, 0.05);
-    }
-    
-    .btn-outline-danger:disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
-    }
-    
-    /* User avatars */
-    .user-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.875rem;
-        font-weight: bold;
-        color: white;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    }
-    
-    /* Toolbar styles */
-    .editor-toolbar {
-        border-radius: 0.375rem 0.375rem 0 0 !important;
-    }
-    
-    .editor-toolbar .btn.active {
-        background-color: #5C94FE;
-        border-color: #5C94FE;
-        color: white;
-    }
-    
-    .editor-toolbar .btn:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.2);
-    }
-    
-    .editor-toolbar .vr {
-        height: 24px;
-        opacity: 0.3;
-    }
-    
-    /* Status badges */
-    .badge.fs-6 {
-        font-size: 0.875rem !important;
-    }
-    
-    /* Share modal styles */
-    .modal-lg .user-avatar {
-        width: 40px;
-        height: 40px;
-        font-size: 1rem;
-    }
-    
-    /* Color picker styles */
-    .color-swatch {
-        transition: transform 0.1s ease;
-        cursor: pointer;
-    }
-    
-    .color-swatch:hover {
-        transform: scale(1.1);
-    }
-    
-    .user-avatar-small.cursor-pointer:hover {
-        transform: scale(1.1);
-        transition: transform 0.1s ease;
-    }
-    
-    /* Color picker dropdown */
-    .position-absolute {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
+    </div>
+</div>
 
-    .table-hover > tbody > tr.row-collaborative:hover {
-        --bs-table-hover-bg: rgba(92, 148, 254, 0.1);
-    }
+<!--Share Modal-->
+<div v-if="showShareModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-share me-2"></i>Share Document
+                </h5>
+                <button @click="showShareModal = false" class="btn-close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Current Permissions -->
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">Current Access</h6>
 
-    .table-hover > tbody > tr.row-local:hover {
-        --bs-table-hover-bg: rgba(108, 117, 125, 0.1);
-    }
+                    <!-- Document Owner -->
+                    <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded mb-2">
+                        <div class="d-flex align-items-center">
+                            <img :src="ownerAvatarUrl"
+                                :alt="currentFile?.owner"
+                                class="user-avatar rounded-circle me-2"
+                                style="width: 40px; height: 40px; object-fit: cover;"
+                                @error="handleOwnerAvatarError">
+                            <div class="user-avatar-fallback me-2"
+                                :style="{backgroundColor: generateUserColor(currentFile?.owner || '') }"
+                                style="display: none; width: 40px; height: 40px; border-radius: 50%; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; color: white;">
+                                {{ currentFile?.owner?.charAt(0).toUpperCase()}}
+                            </div>
+                            <div>
+                                <strong>@{{ currentFile?.owner}}</strong>
+                                <div class="text-muted small">Owner</div>
+                            </div>
+                        </div>
+                        <span class="badge bg-success">Full Access</span>
+                    </div>
 
-    .no-caret::after {
-        display: none;
-    }
+                    <!-- Loading State -->
+                    <div v-if="loadingPermissions" class="text-center py-2">
+                        <i class="fas fa-spinner fa-spin me-2"></i>Loading permissions...
+                    </div>
 
-    </style>
-    `
+                    <!-- Shared Users -->
+                    <div v-else-if="documentPermissions.length === 0" class="text-muted text-center py-3">
+                        <i class="fas fa-users me-2"></i>No additional users have access to this document
+                    </div>
+                    <div v-else>
+                        <div v-for="permission in documentPermissions" :key="permission.account"
+                            class="d-flex align-items-center justify-content-between p-2 bg-light rounded mb-2">
+                            <div class="d-flex align-items-center">
+                                <img :src="getPermissionAvatarUrl(permission.account)"
+                                    :alt="permission.account"
+                                    class="user-avatar rounded-circle me-2"
+                                    style="width: 40px; height: 40px; object-fit: cover;"
+                                    @error="handlePermissionAvatarError($event, permission.account)">
+                                <div class="user-avatar-fallback me-2"
+                                    :style="{backgroundColor: generateUserColor(permission.account) }"
+                                    style="display: none; width: 40px; height: 40px; border-radius: 50%; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; color: white;">
+                                    {{ permission.account.charAt(0).toUpperCase() }}
+                                </div>
+                                <div>
+                                    <strong>@{{ permission.account }}</strong>
+                                    <div class="text-muted small">
+                                        Granted by @{{ permission.grantedBy }} • {{
+                                        formatFileDate(permission.grantedAt) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <select @change="updatePermission(permission.account, $event.target.value)"
+                                    :value="permission.permissionType" class="form-select form-select-sm"
+                                    style="width: auto;">
+                                    <option value="readonly">Read Only</option>
+                                    <option value="editable">Editable</option>
+                                    <option value="postable">Full Access</option>
+                                </select>
+                                <button @click="revokePermission(permission.account)"
+                                    class="btn btn-sm btn-outline-danger" title="Revoke access">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <!-- Add New User -->
+                <div>
+                    <h6 class="fw-bold mb-3">Grant New Access</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Share with user</label>
+                        <div class="input-group">
+                            <span class="input-group-text">@</span>
+                            <input v-model="shareForm.username" class="form-control" placeholder="Enter HIVE username"
+                                @keyup.enter="performShare">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Permission level</label>
+                        <select v-model="shareForm.permission" class="form-select">
+                            <option value="readonly">Read Only - Can view and connect</option>
+                            <option value="editable">Editable - Can view and edit content</option>
+                            <option value="postable">Full Access - Can edit and post to Hive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="alert alert-info small">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Users need to authenticate with their HIVE account to access shared documents.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button @click="showShareModal = false" class="btn btn-secondary">Close</button>
+                <button @click="performShare" class="btn btn-primary" :disabled="!shareForm.username.trim()">
+                    <i class="fas fa-user-plus me-1"></i>Grant Access
+                </button>
+            </div>
+        </div>
+    </div>
+</div>`,
+    
+    style: ''
 }; 

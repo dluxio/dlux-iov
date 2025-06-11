@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.11.2",
-  "generated": "2025-06-10T23:54:18Z",
+  "version": "2025.06.10.19",
+  "generated": "2025-06-11T02:08:10Z",
   "files": {
-    "/js/marker.js": {
-      "checksum": "c2198bba963f1d95ef8e9787875a0eb7",
-      "size": 4540,
-      "priority": "important"
-    },
     "/js/mde.js": {
       "checksum": "53b8c9f226da2c3a3a3b3b2ffa21abac",
       "size": 999,
@@ -756,7 +751,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "9afe79b2f644d3849dac2de207396e76",
+      "checksum": "b9063ee6b7a478698be379a10b62bbb4",
       "size": 36316,
       "priority": "important"
     },
@@ -946,7 +941,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "85ee3b18754f3379d6e0e2954e809a10",
+      "checksum": "3b51e5636a8bfa3e1d2effea8f69bb76",
       "size": 7299,
       "priority": "important"
     },
@@ -1019,11 +1014,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/language/css/cssWorker.js": {
-      "checksum": "0f28cabc4e103f7f5011048887c0aa28",
-      "size": 778035,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/language/html/htmlMode.js": {
       "checksum": "c8d05bfbd0ee3e74b9377afc77413d14",
@@ -1265,12 +1255,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
