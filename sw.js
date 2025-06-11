@@ -1,4 +1,4 @@
-this.version = "2025.06.11.4";
+this.version = "2025.06.11.5";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.10.20",
-  "generated": "2025-06-11T03:44:51Z",
+  "version": "2025.06.11.5",
+  "generated": "2025-06-11T03:45:03Z",
   "files": {
-    "/js/mfi-vue.js": {
-      "checksum": "7fbd69d4f3b44ab70507017b7cb61e94",
-      "size": 15064,
-      "priority": "important"
-    },
     "/js/modal-manager.js": {
       "checksum": "051b4cf0394772b91ff1ff0a8a507de0",
       "size": 5286,
@@ -995,11 +990,6 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/naf-playground/monaco-editor/vs/language/typescript/tsMode.js": {
-      "checksum": "db3710a236b6ebf3f75715f782fd9fcd",
-      "size": 23919,
-      "priority": "page-specific"
-    },
     "/naf-playground/monaco-editor/vs/language/typescript/tsWorker.js": {
       "checksum": "8ad7f367030861562122593f237c8ce2",
       "size": 5749518,
@@ -1215,12 +1205,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
