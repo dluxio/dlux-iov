@@ -1675,16 +1675,7 @@ export default {
             
             // Wait for DOM cleanup and Vue reactivity to complete
             await this.$nextTick();
-            await new Promise(resolve => setTimeout(resolve, 300));
-            
-            // Force cleanup any lingering Y.js global state
-            if (window.Y && window.Y.cleanupGlobal) {
-                try {
-                    window.Y.cleanupGlobal();
-                } catch (error) {
-                    console.warn('Error cleaning up Y.js global state:', error);
-                }
-            }
+            await new Promise(resolve => setTimeout(resolve, 500)); // Increased delay for better cleanup
             
             const bundle = window.TiptapCollaboration.default || window.TiptapCollaboration;
             
@@ -1694,8 +1685,38 @@ export default {
                 this.connectionMessage = 'Error: TipTap bundle not loaded';
                 return;
             }
+
+            console.log('📦 Bundle structure:', {
+                bundle,
+                keys: Object.keys(bundle),
+                StarterKit: bundle.StarterKit,
+                StarterKitDefault: bundle.StarterKit?.default,
+                Editor: bundle.Editor,
+                EditorDefault: bundle.Editor?.default,
+                Collaboration: bundle.Collaboration,
+                CollaborationDefault: bundle.Collaboration?.default,
+            });
             
-            const { Editor, StarterKit, Y, HocuspocusProvider, Collaboration, CollaborationCursor } = bundle;
+            // Get components from the bundle
+            const Editor = bundle.Editor?.default || bundle.Editor;
+            const StarterKit = bundle.StarterKit?.default || bundle.StarterKit;
+            const Y = bundle.Y?.default || bundle.Y;
+            const HocuspocusProvider = bundle.HocuspocusProvider?.default || bundle.HocuspocusProvider;
+            const Collaboration = bundle.Collaboration?.default || bundle.Collaboration;
+            const CollaborationCursor = bundle.CollaborationCursor?.default || bundle.CollaborationCursor;
+
+            // Verify components are available
+            if (!Editor || !StarterKit || !Y || !HocuspocusProvider || !Collaboration || !CollaborationCursor) {
+                console.error('❌ Missing required components:', {
+                    Editor: !!Editor,
+                    StarterKit: !!StarterKit,
+                    Y: !!Y,
+                    HocuspocusProvider: !!HocuspocusProvider,
+                    Collaboration: !!Collaboration,
+                    CollaborationCursor: !!CollaborationCursor
+                });
+                throw new Error('Required TipTap components not found in bundle');
+            }
             
             try {
                 // Get user color before creating editors
@@ -1715,6 +1736,7 @@ export default {
                 
                 const wsUrl = `${this.collaborationUrl}/${doc.owner}/${doc.permlink}`;
                 
+                // Create provider with sync event handling
                 this.provider = new HocuspocusProvider({
                     url: wsUrl,
                     name: `${doc.owner}/${doc.permlink}`,
@@ -1753,211 +1775,124 @@ export default {
                     }
                 });
                 
-                // Wait for initial sync to complete before accessing/creating types
-                await new Promise(resolve => {
-                    if (this.provider.synced) {
-                        resolve();
-                    } else {
-                        const onSynced = () => {
-                            this.provider.off('synced', onSynced);
+                // CRITICAL: Wait for initial sync with timeout
+                const syncTimeout = 10000; // 10 seconds timeout
+                const syncStart = Date.now();
+                
+                await new Promise((resolve, reject) => {
+                    const checkSync = () => {
+                        if (this.provider.synced) {
+                            console.log('✅ Initial sync completed');
                             resolve();
-                        };
-                        this.provider.on('synced', onSynced);
-                        // Fallback timeout to prevent hanging
-                        setTimeout(() => {
-                            this.provider.off('synced', onSynced);
-                            resolve();
-                        }, 5000);
-                    }
+                        } else if (Date.now() - syncStart > syncTimeout) {
+                            reject(new Error('Sync timeout exceeded'));
+                        } else {
+                            setTimeout(checkSync, 100);
+                        }
+                    };
+                    checkSync();
                 });
                 
                 // Now safely handle Y.js shared types after sync
-                console.log('📋 Checking existing Y.js types after sync:', {
-                    shareKeys: Array.from(this.ydoc.share.keys()),
-                    shareEntries: Array.from(this.ydoc.share.entries()).map(([key, type]) => [key, type.constructor.name])
+                console.log('📋 Creating Y.js types after sync');
+                
+                // Use consistent field names
+                const titleFieldName = 'title';
+                const bodyFieldName = 'body';
+                
+                // Create shared types
+                const titleText = this.ydoc.getXmlFragment(titleFieldName);
+                const bodyText = this.ydoc.getXmlFragment(bodyFieldName);
+                
+                // Wait for another tick to ensure types are ready
+                await this.$nextTick();
+                
+                // Create title editor
+                this.titleEditor = new Editor({
+                    element: this.$refs.titleEditor,
+                    extensions: [
+                        StarterKit.configure({
+                            history: false,
+                        }),
+                        Placeholder.default.configure({
+                            placeholder: 'Document Title'
+                        }),
+                        Collaboration.configure({
+                            document: this.ydoc,
+                            field: titleFieldName,
+                        }),
+                        CollaborationCursor.configure({
+                            provider: this.provider,
+                            user: {
+                                name: this.username,
+                                color: userColor,
+                            },
+                        }),
+                    ],
+                    editorProps: {
+                        attributes: {
+                            class: 'form-control bg-transparent text-white border-0 h1',
+                        }
+                    },
+                    onUpdate: ({ editor }) => {
+                        this.content.title = editor.getText();
+                    }
                 });
                 
-                // Use consistent field names based on document - all tabs editing the same document should use the same field names
-                let titleFieldName = 'title';
-                let bodyFieldName = 'body';
-                
-                console.log('📝 Using standard field names for collaboration:', { titleFieldName, bodyFieldName });
-                
-                // Get or create shared types (Y.js handles conflicts automatically)
-                let titleText, bodyText;
-                try {
-                    // Get the shared types - Y.js will create them if they don't exist
-                    titleText = this.ydoc.getXmlFragment(titleFieldName);
-                    bodyText = this.ydoc.getXmlFragment(bodyFieldName);
-                    
-                    console.log('📝 Y.js shared types ready:', {
-                        titleField: titleFieldName,
-                        titleReady: !!titleText,
-                        titleConstructor: titleText.constructor.name,
-                        bodyField: bodyFieldName,
-                        bodyReady: !!bodyText,
-                        bodyConstructor: bodyText.constructor.name,
-                        shareKeys: Array.from(this.ydoc.share.keys())
-                    });
-                    
-                } catch (typeError) {
-                    console.error('❌ Failed to setup Y.js types:', typeError);
-                    throw new Error(`Y.js type setup failed: ${typeError.message}`);
-                }
-                
-                // Create title editor (simple single-line)
-                try {
-                    this.titleEditor = new Editor({
-                        element: this.$refs.titleEditor,
-                        extensions: [
-                            StarterKit.default.configure({
-                                heading: false,
-                                bulletList: false,
-                                orderedList: false,
-                                blockquote: false,
-                                codeBlock: false,
-                                horizontalRule: false,
-                                history: false // Disable history for collaborative mode
-                            }),
-                            Placeholder.default.configure({
-                                placeholder: 'Enter document title...'
-                            }),
-                            Collaboration.configure({
-                                document: this.ydoc,
-                                field: titleFieldName // Use unique field name to prevent conflicts
-                            }),
-                            CollaborationCursor.configure({
-                                provider: this.provider,
-                                user: {
-                                    name: this.username,
-                                    color: userColor
-                                }
-                            })
-                        ],
-                        content: '',
-                        editorProps: {
-                            attributes: {
-                                class: 'form-control border-0'
+                // Create body editor
+                this.bodyEditor = new Editor({
+                    element: this.$refs.bodyEditor,
+                    extensions: [
+                        StarterKit.configure({
+                            history: false,
+                        }),
+                        Placeholder.default.configure({
+                            placeholder: 'Start writing...'
+                        }),
+                        Collaboration.configure({
+                            document: this.ydoc,
+                            field: bodyFieldName,
+                        }),
+                        CollaborationCursor.configure({
+                            provider: this.provider,
+                            user: {
+                                name: this.username,
+                                color: userColor,
                             },
-                            handleKeyDown: (view, event) => {
-                                // Prevent Enter key in title (single line)
-                                if (event.key === 'Enter') {
-                                    event.preventDefault();
-                                    // Focus body editor instead
-                                    if (this.bodyEditor) {
-                                        this.bodyEditor.commands.focus();
-                                    }
-                                    return true;
-                                }
-                                return false;
-                            }
-                        },
-                        onCreate: () => {
-                            console.log('📝 Title editor created');
-                        },
-                        onDestroy: () => {
-                            console.log('🗑️ Title editor destroyed');
+                        }),
+                    ],
+                    editorProps: {
+                        attributes: {
+                            class: 'form-control bg-transparent text-white border-0',
                         }
-                    });
-                } catch (titleError) {
-                    console.error('❌ Failed to create title editor:', titleError);
-                    throw new Error(`Title editor creation failed: ${titleError.message}`);
-                }
-                
-                // Create body editor (full rich text with comprehensive extensions)
-                try {
-                    // Import additional extensions for full compatibility
-                    
-                    const Link = await import('https://esm.sh/@tiptap/extension-link@3.0.0');
-                    const Image = await import('https://esm.sh/@tiptap/extension-image@3.0.0');
-                    const Youtube = await import('https://esm.sh/@tiptap/extension-youtube@3.0.0');
-                    const Table = await import('https://esm.sh/@tiptap/extension-table@3.0.0');
-                    const TableRow = await import('https://esm.sh/@tiptap/extension-table-row@3.0.0');
-                    const TableCell = await import('https://esm.sh/@tiptap/extension-table-cell@3.0.0');
-                    const TableHeader = await import('https://esm.sh/@tiptap/extension-table-header@3.0.0');
-                    
-                    this.bodyEditor = new Editor({
-                        element: this.$refs.bodyEditor,
-                        extensions: [
-                            StarterKit.default.configure({
-                                history: false // Disable history for collaborative mode
-                            }),
-                            Placeholder.default.configure({
-                                placeholder: 'Start writing your collaborative document...'
-                            }),
-                            Link.default.configure({
-                                openOnClick: false,
-                                HTMLAttributes: {
-                                    target: '_blank',
-                                },
-                            }),
-                            Image.default.configure({
-                                HTMLAttributes: {
-                                    class: 'img-fluid',
-                                },
-                            }),
-                            Youtube.default.configure({
-                                width: 480,
-                                height: 320,
-                                ccLanguage: 'en',
-                                interfaceLanguage: 'en',
-                            }),
-                            Table.default.configure({
-                                resizable: true,
-                            }),
-                            TableRow.default,
-                            TableHeader.default,
-                            TableCell.default,
-                            Collaboration.configure({
-                                document: this.ydoc,
-                                field: bodyFieldName // Use unique field name to prevent conflicts
-                            }),
-                            CollaborationCursor.configure({
-                                provider: this.provider,
-                                user: {
-                                    name: this.username,
-                                    color: userColor
-                                }
-                            })
-                        ],
-                        content: '',
-                        editorProps: {
-                            attributes: {
-                                class: 'form-control border-0',
-                            }
-                        },
-                        onCreate: () => {
-                            console.log('📝 Body editor created');
-                        },
-                        onDestroy: () => {
-                            console.log('🗑️ Body editor destroyed');
-                        }
-                    });
-                } catch (bodyError) {
-                    console.error('❌ Failed to create body editor:', bodyError);
-                    // Clean up title editor if body editor fails
-                    if (this.titleEditor) {
-                        this.titleEditor.destroy();
-                        this.titleEditor = null;
+                    },
+                    onUpdate: ({ editor }) => {
+                        this.content.body = editor.getHTML();
                     }
-                    throw new Error(`Body editor creation failed: ${bodyError.message}`);
-                }
+                });
                 
-                console.log('🎉 Collaborative editor initialized with title and body fields');
+                // Update current file reference
+                this.currentFile = {
+                    ...doc,
+                    type: 'collaborative'
+                };
+                this.fileType = 'collaborative';
+                this.isCollaborativeMode = true;
+                
+                console.log('✅ Collaborative initialization completed successfully');
                 
             } catch (error) {
-                console.error('❌ Failed to initialize collaborative editor:', error);
+                console.error('❌ Collaboration initialization failed:', error);
                 this.connectionStatus = 'disconnected';
                 this.connectionMessage = `Error: ${error.message}`;
                 
-                // Clean up on failure with DOM cleanup
+                // Clean up on failure
                 this.disconnectCollaboration();
                 
                 // Additional DOM cleanup on failure
                 await this.$nextTick();
                 this.cleanupDOMElements();
                 
-                // Re-throw to allow caller to handle the error
                 throw error;
             } finally {
                 this.isInitializing = false;
@@ -2006,6 +1941,12 @@ export default {
             if (this.provider) {
                 try {
                     console.log('🔌 Disconnecting collaboration provider');
+                    // Remove all event listeners first
+                    ['synced', 'connect', 'disconnect', 'status', 'message'].forEach(event => {
+                        if (this.provider && typeof this.provider.off === 'function') {
+                            this.provider.off(event);
+                        }
+                    });
                     this.provider.disconnect();
                 } catch (error) {
                     console.warn('Error disconnecting provider:', error);
@@ -2815,13 +2756,9 @@ export default {
         'fa-circle': connectionStatus === 'disconnected',
         'fa-exclamation-circle': connectionStatus === 'error'
                         }"></i>
-                {
-                {
-                connectionStatus === 'connected' ? 'Live' :
-                connectionStatus === 'connecting' ? 'Connecting' :
-                connectionStatus === 'error' ? 'Error' : 'Offline'
-                }
-                }
+                {{ connectionStatus === 'connected' ? 'Live' :
+                   connectionStatus === 'connecting' ? 'Connecting' :
+                   connectionStatus === 'error' ? 'Error' : 'Offline' }}
             </span>
             <span v-else-if="currentFile?.type === 'local'" class="badge bg-secondary">
                 <i class="fas fa-file me-1"></i>Local

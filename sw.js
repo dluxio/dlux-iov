@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.11.4",
-  "generated": "2025-06-11T03:28:04Z",
+  "version": "2025.06.10.20",
+  "generated": "2025-06-11T03:44:51Z",
   "files": {
-    "/js/methods-spk.js": {
-      "checksum": "e434298a33d0318e41336bcdf551e567",
-      "size": 7542,
-      "priority": "important"
-    },
     "/js/mfi-vue.js": {
       "checksum": "7fbd69d4f3b44ab70507017b7cb61e94",
       "size": 15064,
@@ -736,7 +731,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "b798f12337e79ca759e4781f79c55ffd",
+      "checksum": "efdfdabf0dc59b4c72efdb960c643c83",
       "size": 36316,
       "priority": "important"
     },
@@ -926,7 +921,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "77f32d9a5523e5630249ca2bdf23a916",
+      "checksum": "932b92a27a030a0eac84f8abd4f03fdb",
       "size": 7299,
       "priority": "important"
     },
@@ -999,11 +994,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/language/json/jsonWorker.js": {
-      "checksum": "967a0435896e2a1ef60866f159cf3002",
-      "size": 131177,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/language/typescript/tsMode.js": {
       "checksum": "db3710a236b6ebf3f75715f782fd9fcd",
@@ -1225,12 +1215,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
