@@ -4,7 +4,7 @@ export default {
       // Service Worker states
       swStatus: 'loading', // loading, current, update-available, installing, updated, error
       swVersion: null,
-      desiredVersion: '2025.06.11.16',
+      desiredVersion: '2025.06.11.17',
 
 
       // PWA Install states
