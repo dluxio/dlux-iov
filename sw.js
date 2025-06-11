@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.11.5",
-  "generated": "2025-06-11T03:45:03Z",
+  "version": "2025.06.10.20",
+  "generated": "2025-06-11T03:53:36Z",
   "files": {
-    "/js/modal-manager.js": {
-      "checksum": "051b4cf0394772b91ff1ff0a8a507de0",
-      "size": 5286,
-      "priority": "important"
-    },
     "/js/modalvue.js": {
       "checksum": "e94da9d51e347d514b9d6182e5f52dda",
       "size": 42661,
@@ -726,7 +721,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "efdfdabf0dc59b4c72efdb960c643c83",
+      "checksum": "09f4acce0be733847f85e05d517a0fe7",
       "size": 36316,
       "priority": "important"
     },
@@ -916,7 +911,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "932b92a27a030a0eac84f8abd4f03fdb",
+      "checksum": "3d6f59c0691ec0c5bbb24abdc15faf18",
       "size": 7299,
       "priority": "important"
     },
@@ -989,11 +984,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/language/typescript/tsWorker.js": {
-      "checksum": "8ad7f367030861562122593f237c8ce2",
-      "size": 5749518,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/loader.js": {
       "checksum": "bb6e6a026f04f24eab30a3924c8ccd30",
@@ -1205,12 +1195,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

@@ -1831,7 +1831,7 @@ export default {
                     ],
                     editorProps: {
                         attributes: {
-                            class: 'form-control bg-transparent text-white border-0 h1',
+                            class: 'form-control bg-transparent text-white border-0',
                         }
                     },
                     onUpdate: ({ editor }) => {
