@@ -992,27 +992,114 @@ export default {
         
         async loadDocumentPermissions() {
             if (!this.currentFile || this.currentFile.type !== 'collaborative') return;
+            if (!this.isAuthenticated) {
+                console.warn('Cannot load permissions: Not authenticated');
+                return;
+            }
             
             this.loadingPermissions = true;
             
             try {
-                const response = await fetch(`https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}`, {
-                    headers: {
-                        ...this.authHeaders,
-                        'Content-Type': 'application/json'
+                // First verify we have valid auth headers
+                const authHeadersValid = Object.entries(this.authHeaders).every(([key, value]) => {
+                    if (!value) {
+                        console.warn(`Missing auth header: ${key}`);
+                        return false;
                     }
+                    return true;
                 });
+
+                if (!authHeadersValid) {
+                    throw new Error('Invalid or missing authentication headers');
+                }
+
+                // Prepare headers with proper authentication
+                const headers = {
+                    ...this.authHeaders,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                };
+
+                // Extract and validate auth info
+                const authToken = typeof this.isAuthenticated === 'string' ? this.isAuthenticated : null;
+                const isValidSteemKey = authToken?.startsWith('STM');
                 
-                if (response.ok) {
+                if (!authToken) {
+                    console.warn('⚠️ No valid auth token found:', this.isAuthenticated);
+                }
+
+                // Prepare the request
+                const permissionsUrl = `https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}`;
+                const authHeaders = {
+                    ...headers,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': isValidSteemKey ? this.isAuthenticated : `Bearer ${this.isAuthenticated}`
+                };
+                
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                let response = null;
+
+                // Log attempt details
+                console.log('🔐 Fetching permissions:', {
+                    url: permissionsUrl,
+                    headers: Object.keys(authHeaders),
+                    authenticated: this.isAuthenticated,
+                    timestamp: new Date().toISOString()
+                });
+
+                try {
+                    // Make the request with optimized settings
+                    response = await fetch(permissionsUrl, {
+                        method: 'GET',
+                        headers: authHeaders,
+                        credentials: 'omit', // We know this works
+                        signal: controller.signal,
+                        mode: 'cors',
+                        cache: 'no-cache'
+                    });
+
+                    // Log response details
+                    console.log('Permission response:', {
+                        url: permissionsUrl,
+                        status: response?.status,
+                        ok: response?.ok,
+                        headers: Object.fromEntries(response?.headers?.entries() || [])
+                    });
+
+                    if (!response?.ok) {
+                        // Set default permissions with owner access
+                        const defaultPermissions = {
+                            [this.currentFile.owner]: 'write',
+                            [this.username]: this.currentFile.owner === this.username ? 'write' : 'read'
+                        };
+
+                        console.log('Using default permissions:', defaultPermissions);
+                        this.documentPermissions = defaultPermissions;
+                        throw new Error(`HTTP ${response?.status}`);
+                    }
+
+                    // Parse and set permissions
                     const data = await response.json();
                     this.documentPermissions = data.permissions || [];
-                } else {
-                    console.error('Failed to load permissions:', response.statusText);
-                    this.documentPermissions = [];
+                    console.log('✅ Permissions loaded successfully');
+                } catch (error) {
+                    console.warn('Permission request failed:', {
+                        error: error.message,
+                        url: permissionsUrl,
+                        headers: Object.keys(authHeaders),
+                        timestamp: new Date().toISOString()
+                    });
+                    throw error;
+                } finally {
+                    clearTimeout(timeoutId);
                 }
             } catch (error) {
                 console.error('Error loading permissions:', error);
                 this.documentPermissions = [];
+                throw error; // Re-throw to handle in the calling function
             } finally {
                 this.loadingPermissions = false;
             }
@@ -1252,11 +1339,21 @@ export default {
                 }
             };
             
-            // Load document permissions
-            await this.loadDocumentPermissions();
-            
             try {
+                // Initialize collaboration first
                 await this.initializeCollaboration(doc);
+                
+                // Only load permissions after successful connection
+                if (this.connectionStatus === 'connected') {
+                    try {
+                        await this.loadDocumentPermissions();
+                    } catch (error) {
+                        console.warn('Failed to load permissions, but connection established:', error);
+                        // Continue even if permissions fail - user might still have access
+                    }
+                } else {
+                    console.warn('Skipping permissions load - not connected');
+                }
                 console.log('🤝 Collaborative document loaded:', doc.permlink);
             } catch (error) {
                 console.error('❌ Failed to load collaborative document:', error);
