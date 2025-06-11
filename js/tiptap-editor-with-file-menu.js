@@ -1686,24 +1686,47 @@ export default {
                 return;
             }
 
-            console.log('📦 Bundle structure:', {
-                bundle,
-                keys: Object.keys(bundle),
-                StarterKit: bundle.StarterKit,
-                StarterKitDefault: bundle.StarterKit?.default,
-                Editor: bundle.Editor,
-                EditorDefault: bundle.Editor?.default,
-                Collaboration: bundle.Collaboration,
-                CollaborationDefault: bundle.Collaboration?.default,
+            // More detailed bundle debugging
+            console.log('📦 Full bundle:', bundle);
+            console.log('📦 Bundle keys:', Object.keys(bundle));
+            console.log('📦 Y structure:', {
+                Y: bundle.Y,
+                YDefault: bundle.Y?.default,
+                YAwareness: bundle.Y?.Awareness,
+                YDefaultAwareness: bundle.Y?.default?.Awareness
             });
             
-            // Get components from the bundle
+            // Get components from the bundle with more careful extraction
             const Editor = bundle.Editor?.default || bundle.Editor;
             const StarterKit = bundle.StarterKit?.default || bundle.StarterKit;
             const Y = bundle.Y?.default || bundle.Y;
             const HocuspocusProvider = bundle.HocuspocusProvider?.default || bundle.HocuspocusProvider;
             const Collaboration = bundle.Collaboration?.default || bundle.Collaboration;
             const CollaborationCursor = bundle.CollaborationCursor?.default || bundle.CollaborationCursor;
+            
+            // Try different paths to get Awareness
+            let Awareness = null;
+            if (Y?.Awareness) {
+                Awareness = Y.Awareness;
+            } else if (bundle.Y?.Awareness) {
+                Awareness = bundle.Y.Awareness;
+            } else if (bundle.Awareness) {
+                Awareness = bundle.Awareness;
+            }
+
+            // Log what we found
+            console.log('🔍 Extracted components:', {
+                Editor: !!Editor,
+                StarterKit: !!StarterKit,
+                Y: !!Y,
+                HocuspocusProvider: !!HocuspocusProvider,
+                Collaboration: !!Collaboration,
+                CollaborationCursor: !!CollaborationCursor,
+                Awareness: !!Awareness,
+                // Detailed Y info
+                YObject: Y,
+                AwarenessObject: Awareness
+            });
 
             // Verify components are available
             if (!Editor || !StarterKit || !Y || !HocuspocusProvider || !Collaboration || !CollaborationCursor) {
@@ -1726,6 +1749,18 @@ export default {
                 // Create single Y.js document for both fields
                 this.ydoc = new Y.Doc();
                 
+                // Create awareness instance - make it optional
+                let awareness = null;
+                if (Awareness) {
+                    awareness = new Awareness(this.ydoc);
+                    awareness.setLocalState({
+                        user: {
+                            name: this.username,
+                            color: userColor
+                        }
+                    });
+                }
+                
                 // Setup WebSocket provider FIRST to sync existing document state
                 const authToken = JSON.stringify({
                     account: this.authHeaders['x-account'],
@@ -1737,7 +1772,7 @@ export default {
                 const wsUrl = `${this.collaborationUrl}/${doc.owner}/${doc.permlink}`;
                 
                 // Create provider with sync event handling
-                this.provider = new HocuspocusProvider({
+                const providerConfig = {
                     url: wsUrl,
                     name: `${doc.owner}/${doc.permlink}`,
                     document: this.ydoc,
@@ -1763,35 +1798,79 @@ export default {
                         console.error('🔐 Authentication failed:', reason);
                         this.connectionStatus = 'disconnected';
                         this.connectionMessage = `Authentication failed: ${reason}`;
-                    },
-                    onAwarenessChange: ({ states }) => {
-                        // Update connected users list
-                        this.connectedUsers = Array.from(states.values())
-                            .filter(state => state.user && state.user.name)
-                            .map(state => ({
-                                name: state.user.name,
-                                color: state.user.color || this.generateUserColor(state.user.name)
-                            }));
                     }
-                });
-                
-                // CRITICAL: Wait for initial sync with timeout
-                const syncTimeout = 10000; // 10 seconds timeout
-                const syncStart = Date.now();
-                
-                await new Promise((resolve, reject) => {
-                    const checkSync = () => {
-                        if (this.provider.synced) {
-                            console.log('✅ Initial sync completed');
-                            resolve();
-                        } else if (Date.now() - syncStart > syncTimeout) {
-                            reject(new Error('Sync timeout exceeded'));
-                        } else {
-                            setTimeout(checkSync, 100);
+                };
+
+                // Only add awareness if available
+                if (awareness) {
+                    providerConfig.awareness = awareness;
+                    providerConfig.onAwarenessChange = () => {
+                        if (this.provider && this.provider.awareness) {
+                            const states = Array.from(this.provider.awareness.getStates().entries());
+                            this.connectedUsers = states
+                                .filter(([_, state]) => state?.user?.name)
+                                .map(([_, state]) => ({
+                                    name: state.user.name,
+                                    color: state.user.color || this.generateUserColor(state.user.name)
+                                }));
                         }
                     };
-                    checkSync();
-                });
+                }
+
+                this.provider = new HocuspocusProvider(providerConfig);
+                
+                try {
+                    // Explicitly connect after setup
+                    await this.provider.connect();
+                    
+                    // Ensure awareness is initialized
+                    if (!this.provider.awareness.getLocalState()) {
+                        this.provider.awareness.setLocalState({
+                            user: {
+                                name: this.username,
+                                color: this.getUserColor
+                            }
+                        });
+                    }
+                    
+                    // CRITICAL: Wait for initial sync with timeout
+                    const syncTimeout = 10000; // 10 seconds timeout
+                    const syncStart = Date.now();
+                    
+                    await new Promise((resolve, reject) => {
+                        const checkSync = () => {
+                            if (!this.provider) {
+                                reject(new Error('Provider was destroyed during sync'));
+                                return;
+                            }
+                            
+                            if (this.provider.synced) {
+                                console.log('✅ Initial sync completed');
+                                resolve();
+                            } else if (Date.now() - syncStart > syncTimeout) {
+                                reject(new Error('Sync timeout exceeded'));
+                            } else {
+                                setTimeout(checkSync, 100);
+                            }
+                        };
+                        checkSync();
+                    });
+                } catch (error) {
+                    console.error('Failed to establish collaboration:', error);
+                    
+                    // Clean up provider on error
+                    if (this.provider) {
+                        try {
+                            this.provider.awareness?.destroy();
+                            this.provider.disconnect();
+                        } catch (cleanupError) {
+                            console.warn('Error during provider cleanup:', cleanupError);
+                        }
+                        this.provider = null;
+                    }
+                    
+                    throw new Error(`Collaboration setup failed: ${error.message}`);
+                }
                 
                 // Now safely handle Y.js shared types after sync
                 console.log('📋 Creating Y.js types after sync');
@@ -1821,32 +1900,11 @@ export default {
                             document: this.ydoc,
                             field: titleFieldName,
                             fragmentContent: true,
-                            child: true,
-                        }),
-                        CollaborationCursor.configure({
-                            provider: this.provider,
-                            user: {
-                                name: this.username,
-                                color: userColor,
-                            },
-                            render: false,
                         }),
                     ],
                     editorProps: {
                         attributes: {
                             class: 'form-control bg-transparent text-white border-0',
-                        },
-                        handleDOMEvents: {
-                            focus: (view, event) => {
-                                return true;
-                            }
-                        }
-                    },
-                    onCreate: ({ editor }) => {
-                        // Set up cursor storage watcher
-                        const cursorStorage = editor.storage.collaborationCursor;
-                        if (cursorStorage) {
-                            cursorStorage.users = [];
                         }
                     },
                     onUpdate: ({ editor }) => {
@@ -1868,58 +1926,49 @@ export default {
                             document: this.ydoc,
                             field: bodyFieldName,
                             fragmentContent: true,
-                            child: true,
-                        }),
-                        CollaborationCursor.configure({
-                            provider: this.provider,
-                            user: {
-                                name: this.username,
-                                color: userColor,
-                            },
                         }),
                     ],
                     editorProps: {
                         attributes: {
                             class: 'form-control bg-transparent text-white border-0',
-                        },
-                        handleDOMEvents: {
-                            focus: (view, event) => {
-                                if (view.state.decorations) {
-                                    return false;
-                                }
-                                return true;
-                            }
-                        }
-                    },
-                    onCreate: ({ editor }) => {
-                        // Set up cursor storage watcher
-                        const cursorStorage = editor.storage.collaborationCursor;
-                        if (cursorStorage) {
-                            // Initialize users array
-                            cursorStorage.users = [];
-                            
-                            // Set up watcher for cursor updates
-                            Object.defineProperty(cursorStorage, 'users', {
-                                get() {
-                                    return this._users || [];
-                                },
-                                set: (users) => {
-                                    cursorStorage._users = users;
-                                    if (Array.isArray(users)) {
-                                        this.connectedUsers = users.map(user => ({
-                                            name: user.name,
-                                            color: user.color || this.generateUserColor(user.name)
-                                        }));
-                                    }
-                                }
-                            });
                         }
                     },
                     onUpdate: ({ editor }) => {
                         this.content.body = editor.getHTML();
                     }
                 });
-                
+
+                // Wait for editors to be ready
+                await Promise.all([
+                    new Promise(resolve => {
+                        if (this.titleEditor.isDestroyed) resolve();
+                        else if (this.titleEditor.isReady) resolve();
+                        else this.titleEditor.on('ready', resolve);
+                    }),
+                    new Promise(resolve => {
+                        if (this.bodyEditor.isDestroyed) resolve();
+                        else if (this.bodyEditor.isReady) resolve();
+                        else this.bodyEditor.on('ready', resolve);
+                    })
+                ]);
+
+                // Add collaboration cursors after editors are ready
+                const cursorExtension = CollaborationCursor.configure({
+                    provider: this.provider,
+                    user: {
+                        name: this.username,
+                        color: userColor,
+                    },
+                });
+
+                try {
+                    // Add cursor extension to body editor only
+                    await this.bodyEditor.addExtension(cursorExtension);
+                } catch (error) {
+                    console.warn('Failed to add cursor extension:', error);
+                    // Continue without cursor support
+                }
+
                 // Update current file reference
                 this.currentFile = {
                     ...doc,
@@ -1927,7 +1976,20 @@ export default {
                 };
                 this.fileType = 'collaborative';
                 this.isCollaborativeMode = true;
-                
+
+                // Set up awareness change handler
+                if (this.provider && this.provider.awareness) {
+                    this.provider.awareness.on('change', () => {
+                        const states = Array.from(this.provider.awareness.getStates().entries());
+                        this.connectedUsers = states
+                            .filter(([_, state]) => state?.user?.name)
+                            .map(([_, state]) => ({
+                                name: state.user.name,
+                                color: state.user.color || this.generateUserColor(state.user.name)
+                            }));
+                    });
+                }
+
                 console.log('✅ Collaborative initialization completed successfully');
                 
             } catch (error) {
