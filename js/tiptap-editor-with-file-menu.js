@@ -521,6 +521,12 @@ export default {
         
         // Beneficiaries management
         addBeneficiary() {
+            // Don't allow changes in read-only mode
+            if (this.isReadOnlyMode) {
+                console.log('🔒 Beneficiary addition blocked: read-only mode');
+                return;
+            }
+            
             const account = this.beneficiaryInput.account.replace('@', '').trim();
             const percent = parseFloat(this.beneficiaryInput.percent);
             
@@ -547,6 +553,12 @@ export default {
         },
         
         removeBeneficiary(index) {
+            // Don't allow changes in read-only mode
+            if (this.isReadOnlyMode) {
+                console.log('🔒 Beneficiary removal blocked: read-only mode');
+                return;
+            }
+            
             this.publishForm.beneficiaries.splice(index, 1);
             this.hasUnsavedChanges = true;
         },
@@ -555,6 +567,12 @@ export default {
         validateCustomJson() {
             if (!this.customJsonString.trim()) {
                 this.customJsonError = '';
+                return;
+            }
+            
+            // Don't allow changes in read-only mode
+            if (this.isReadOnlyMode) {
+                console.log('🔒 Custom JSON validation blocked: read-only mode');
                 return;
             }
             
@@ -570,6 +588,12 @@ export default {
         
         // Permlink management  
         togglePermlinkEditor() {
+            // Don't allow toggling in read-only mode
+            if (this.isReadOnlyMode) {
+                console.log('🔒 Permlink editing blocked: read-only mode');
+                return;
+            }
+            
             this.showPermlinkEditor = !this.showPermlinkEditor;
             if (this.showPermlinkEditor && this.permlinkEditor) {
                 this.$nextTick(() => {
@@ -579,6 +603,12 @@ export default {
         },
         
         useGeneratedPermlink() {
+            // Don't allow changes in read-only mode
+            if (this.isReadOnlyMode) {
+                console.log('🔒 Permlink generation blocked: read-only mode');
+                return;
+            }
+            
             this.content.permlink = this.generatedPermlink;
             if (this.permlinkEditor) {
                 this.permlinkEditor.commands.setContent(this.generatedPermlink);
@@ -3793,13 +3823,22 @@ export default {
         <div class="mb-3">
             <button class="btn btn-lg p-2 btn-secondary bg-card d-flex align-items-center w-100 text-start"
                 type="button" data-bs-toggle="collapse" data-bs-target="#advancedOptions" aria-expanded="false"
-                aria-controls="advancedOptions">
+                aria-controls="advancedOptions"
+                :class="{ 'opacity-50': isReadOnlyMode }">
                 <i class="fas fa-cog me-2"></i>
                 Advanced Options
+                <span v-if="isReadOnlyMode" class="badge bg-warning text-dark ms-2">Read-Only</span>
                 <i class="fas fa-chevron-down ms-auto"></i>
             </button>
 
             <div class="collapse mt-3" id="advancedOptions">
+                <!-- Read-only notice for advanced options -->
+                <div v-if="isReadOnlyMode" class="alert alert-warning border-warning bg-dark text-warning mb-3">
+                    <i class="fas fa-lock me-2"></i>
+                    <strong>Advanced Options - Read-Only Mode</strong>
+                    <div class="small mt-1">These settings cannot be modified with your current permissions.</div>
+                </div>
+                
                 <!-- Permlink Field -->
                 <div class="">
                     <label class="form-label text-white fw-bold d-none">
@@ -3809,16 +3848,17 @@ export default {
                     <div class="d-flex align-items-center gap-2 mb-2">
                         <code class="text-info">/@{{ username }}/</code>
                         <div class="flex-grow-1 position-relative">
-                            <div v-if="!showPermlinkEditor" @click="togglePermlinkEditor"
-                                class="bg-dark border border-secondary rounded p-2 cursor-pointer text-white font-monospace">
-                                {{ content.permlink || generatedPermlink || 'Click to edit...' }}
+                            <div v-if="!showPermlinkEditor" @click="!isReadOnlyMode && togglePermlinkEditor"
+                                class="bg-dark border border-secondary rounded p-2 text-white font-monospace"
+                                :class="{ 'cursor-pointer': !isReadOnlyMode, 'opacity-50': isReadOnlyMode }">
+                                {{ content.permlink || generatedPermlink || (isReadOnlyMode ? 'Permlink (read-only)' : 'Click to edit...') }}
                             </div>
                             <div v-else class="editor-field bg-dark border border-secondary rounded">
                                 <div ref="permlinkEditor" class="permlink-editor"></div>
                             </div>
                         </div>
                         <button @click="useGeneratedPermlink" class="btn btn-sm btn-outline-secondary"
-                            :disabled="!generatedPermlink">
+                            :disabled="!generatedPermlink || isReadOnlyMode">
                             Auto-generate
                         </button>
                     </div>
@@ -3838,10 +3878,13 @@ export default {
                         </div>
                         <div class="d-flex align-items-center gap-2 mb-2">
                             <input type="text" class="form-control bg-dark text-white border-secondary"
-                                placeholder="@username" v-model="beneficiaryInput.account">
+                                placeholder="@username" v-model="beneficiaryInput.account"
+                                :disabled="isReadOnlyMode">
                             <input type="number" class="form-control bg-dark text-white border-secondary"
-                                placeholder="%" min="0.01" max="100" step="0.01" v-model="beneficiaryInput.percent">
-                            <button @click="addBeneficiary" class="btn btn-outline-success">
+                                placeholder="%" min="0.01" max="100" step="0.01" v-model="beneficiaryInput.percent"
+                                :disabled="isReadOnlyMode">
+                            <button @click="addBeneficiary" class="btn btn-outline-success"
+                                :disabled="isReadOnlyMode">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
@@ -3849,7 +3892,7 @@ export default {
                             <div v-for="(ben, index) in publishForm.beneficiaries" :key="index"
                                 class="d-flex align-items-center justify-content-between bg-secondary rounded p-2 mb-1">
                                 <span>@{{ ben.account }} - {{ (ben.weight / 100).toFixed(2) }}%</span>
-                                <button @click="removeBeneficiary(index)" class="btn btn-sm btn-outline-danger">
+                                <button v-if="!isReadOnlyMode" @click="removeBeneficiary(index)" class="btn btn-sm btn-outline-danger">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -3865,7 +3908,8 @@ export default {
                     <div class="bg-dark border border-secondary rounded p-3">
                         <textarea v-model="customJsonString" @input="validateCustomJson"
                             class="form-control bg-dark text-white border-secondary font-monospace" rows="6"
-                            placeholder="Enter custom JSON metadata..."></textarea>
+                            placeholder="Enter custom JSON metadata..."
+                            :disabled="isReadOnlyMode"></textarea>
                         <div v-if="customJsonError" class="text-danger small mt-1">
                             <i class="fas fa-exclamation-triangle me-1"></i>{{ customJsonError }}
                         </div>
@@ -3886,15 +3930,18 @@ export default {
                             <div class="col-md-6">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" v-model="commentOptions.allowVotes"
-                                        id="allowVotes">
-                                    <label class="form-check-label text-white" for="allowVotes">
+                                        id="allowVotes" :disabled="isReadOnlyMode">
+                                    <label class="form-check-label text-white" for="allowVotes"
+                                        :class="{ 'opacity-50': isReadOnlyMode }">
                                         Allow votes
                                     </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox"
-                                        v-model="commentOptions.allowCurationRewards" id="allowCurationRewards">
-                                    <label class="form-check-label text-white" for="allowCurationRewards">
+                                        v-model="commentOptions.allowCurationRewards" id="allowCurationRewards"
+                                        :disabled="isReadOnlyMode">
+                                    <label class="form-check-label text-white" for="allowCurationRewards"
+                                        :class="{ 'opacity-50': isReadOnlyMode }">
                                         Allow curation rewards
                                     </label>
                                 </div>
@@ -3902,15 +3949,18 @@ export default {
                             <div class="col-md-6">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox"
-                                        v-model="commentOptions.maxAcceptedPayout" id="maxPayout">
-                                    <label class="form-check-label text-white" for="maxPayout">
+                                        v-model="commentOptions.maxAcceptedPayout" id="maxPayout"
+                                        :disabled="isReadOnlyMode">
+                                    <label class="form-check-label text-white" for="maxPayout"
+                                        :class="{ 'opacity-50': isReadOnlyMode }">
                                         Decline payout
                                     </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" v-model="commentOptions.percentHbd"
-                                        id="powerUp">
-                                    <label class="form-check-label text-white" for="powerUp">
+                                        id="powerUp" :disabled="isReadOnlyMode">
+                                    <label class="form-check-label text-white" for="powerUp"
+                                        :class="{ 'opacity-50': isReadOnlyMode }">
                                         100% Power Up
                                     </label>
                                 </div>

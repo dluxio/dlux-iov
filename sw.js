@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.11.22",
-  "generated": "2025-06-11T21:34:15Z",
+  "version": "2025.06.11.14",
+  "generated": "2025-06-11T21:40:17Z",
   "files": {
-    "/js/uuidv.js": {
-      "checksum": "e64fbbb49c9b48c9fb15e778de8d86ad",
-      "size": 1105,
-      "priority": "important"
-    },
     "/js/v3-app.js": {
       "checksum": "4d7919c210198f0ac40a9f92a69e42d4",
       "size": 46537,
@@ -751,7 +746,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "62b14f91fe3d2acca6c2ed40960fbf8c",
+      "checksum": "66c2d5f4ff2d30ef187f647570dd3ca5",
       "size": 7300,
       "priority": "important"
     },
@@ -825,11 +820,6 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/playground/env_thumbs/threetowers.png": {
-      "checksum": "c24c3d56a600787acda2af591ea761af",
-      "size": 147229,
-      "priority": "page-specific"
-    },
     "/playground/env_thumbs/tron.png": {
       "checksum": "1d86d459dce615cd1fcf66025d7fd63c",
       "size": 129691,
@@ -875,12 +865,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
