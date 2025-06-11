@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.11.18",
-  "generated": "2025-06-11T18:16:30Z",
+  "version": "2025.06.11.13",
+  "generated": "2025-06-11T20:46:15Z",
   "files": {
-    "/js/sw-monitor.js": {
-      "checksum": "ef1a2c59c1caf815a1cbee2c2b04e0d3",
-      "size": 36317,
-      "priority": "important"
-    },
     "/js/tagify.min.js": {
       "checksum": "245e4e1b9c956dbebd6b52a595eabd79",
       "size": 59697,
@@ -791,7 +786,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "ce1a35f01f1e47df0e08bce49352c924",
+      "checksum": "fff13f54b311fb51e9a290dbcad01170",
       "size": 7300,
       "priority": "important"
     },
@@ -864,11 +859,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/playground/env_thumbs/goaland.png": {
-      "checksum": "03b96c7628fec3f7c7e9a6cca11077d9",
-      "size": 132405,
-      "priority": "page-specific"
     },
     "/playground/env_thumbs/goldmine.png": {
       "checksum": "45fe056e75d02ac5de7b498c380477d5",
@@ -955,12 +945,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

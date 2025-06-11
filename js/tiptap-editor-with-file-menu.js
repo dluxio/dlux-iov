@@ -3,7 +3,7 @@ import methodsCommon from './methods-common.js';
 export default {
     name: 'TipTapEditorWithFileMenu',
     
-    emits: ['contentChanged', 'publishPost', 'requestAuthHeaders', 'tosign', 'update:fileToAdd', 'document-converted'],
+    emits: ['contentChanged', 'publishPost', 'requestAuthHeaders', 'request-auth-headers', 'tosign', 'update:fileToAdd', 'document-converted'],
     
     props: {
         username: {
@@ -40,6 +40,10 @@ export default {
             // Instance management
             componentId: `tiptap_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             isInitializing: false,
+            
+            // Authentication state
+            serverAuthFailed: false,
+            lastAuthCheck: null,
             
             // File management
             currentFile: null,
@@ -174,11 +178,48 @@ export default {
         
         // Check if user is authenticated for collaborative features
         isAuthenticated() {
-            return this.authHeaders && 
-                   this.authHeaders['x-account'] && 
-                   this.authHeaders['x-signature'] && 
-                   this.authHeaders['x-challenge'] && 
-                   this.authHeaders['x-pubkey'];
+            const debugInfo = {
+                serverAuthFailed: this.serverAuthFailed,
+                hasAuthHeaders: !!this.authHeaders,
+                hasAccount: !!this.authHeaders?.['x-account'],
+                hasSignature: !!this.authHeaders?.['x-signature'],
+                hasChallenge: !!this.authHeaders?.['x-challenge'],
+                hasPubkey: !!this.authHeaders?.['x-pubkey'],
+                isExpired: this.isAuthExpired
+            };
+
+            // If we've detected server-side auth failure, return false regardless of headers
+            if (this.serverAuthFailed) {
+                console.log('🔐 Authentication check failed: server rejected auth', debugInfo);
+                return false;
+            }
+
+            if (!this.authHeaders || 
+                !this.authHeaders['x-account'] || 
+                !this.authHeaders['x-signature'] || 
+                !this.authHeaders['x-challenge'] || 
+                !this.authHeaders['x-pubkey']) {
+                console.log('🔐 Authentication check failed: missing headers', debugInfo);
+                return false;
+            }
+
+            // Additional validation: check if signature and pubkey are not just empty strings
+            if (this.authHeaders['x-signature'].trim() === '' || 
+                this.authHeaders['x-pubkey'].trim() === '' ||
+                this.authHeaders['x-account'].trim() === '') {
+                console.log('🔐 Authentication check failed: empty values detected', debugInfo);
+                return false;
+            }
+
+            // Check if challenge is a valid timestamp
+            const challengeTime = parseInt(this.authHeaders['x-challenge']);
+            if (isNaN(challengeTime) || challengeTime <= 0) {
+                console.log('🔐 Authentication check failed: invalid challenge timestamp', debugInfo);
+                return false;
+            }
+
+            console.log('✅ Authentication check passed', debugInfo);
+            return true;
         },
         
         // Get user's preferred color (from localStorage or generate)
@@ -200,13 +241,25 @@ export default {
         
         // Check if auth headers are expired (older than 23 hours)
         isAuthExpired() {
-            if (!this.authHeaders || !this.authHeaders['x-challenge']) return true;
+            if (!this.authHeaders || !this.authHeaders['x-challenge']) {
+                console.log('🔐 Auth expired check: no headers or challenge');
+                return true;
+            }
             
             const challengeTime = parseInt(this.authHeaders['x-challenge']);
             const now = Math.floor(Date.now() / 1000);
             const hoursOld = (now - challengeTime) / 3600;
+            const isExpired = hoursOld >= 23;
             
-            return hoursOld >= 23;
+            console.log('🔐 Auth expiry check:', {
+                challengeTime,
+                now,
+                hoursOld: hoursOld.toFixed(1),
+                isExpired,
+                threshold: '23 hours'
+            });
+            
+            return isExpired;
         },
         
         canSave() {
@@ -337,6 +390,14 @@ export default {
         
         ownerAvatarUrl() {
             return `https://images.hive.blog/u/${this.currentFile?.owner}/avatar/small`;
+        },
+
+        // Get collaborative documents owned by current user
+        ownedCloudFiles() {
+            if (!this.showCollaborativeFeatures || !this.authHeaders['x-account']) {
+                return [];
+            }
+            return this.collaborativeDocs.filter(doc => doc.owner === this.authHeaders['x-account']);
         }
     },
     
@@ -594,6 +655,14 @@ export default {
                 const confirmAuth = confirm('You need to authenticate to create collaborative documents. Authenticate now?');
                 if (confirmAuth) {
                     this.requestAuthentication();
+                    try {
+                        await this.waitForAuthentication();
+                        // Retry after authentication
+                        return this.newCollaborativeDocument();
+                    } catch (error) {
+                        alert('Authentication failed. Please try again.');
+                        return;
+                    }
                 }
                 return;
             }
@@ -689,7 +758,7 @@ export default {
             };
             
             try {
-                // Step 1: Save content locally as backup
+                // Step 1: Save content locally as backup (Y.js content already in collaborative format)
                 const content = this.getEditorContent();
                 const backupId = `backup_${Date.now()}_${documentName}`;
                 
@@ -704,9 +773,9 @@ export default {
                 this.saveAsProcess.step = 'creating_server';
                 this.saveAsProcess.message = 'Creating document on server...';
                 
-                // Step 2: Create new document on server - API now auto-generates permlinks
+                // Step 2: Create new document on server
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout for document creation
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
                 
                 const response = await fetch('https://data.dlux.io/api/collaboration/documents', {
                     method: 'POST',
@@ -715,7 +784,7 @@ export default {
                         ...this.authHeaders
                     },
                     body: JSON.stringify({
-                        documentName: documentName, // Changed from permlink to documentName
+                        documentName: documentName,
                         isPublic: this.saveForm.isPublic,
                         title: content.title || documentName,
                         description: this.saveForm.description || 'Document created with DLUX TipTap Editor'
@@ -733,91 +802,37 @@ export default {
                 const docData = await response.json();
                 console.log('📄 Server response:', docData);
                 
-                // The API now returns the full document object in docData.document
                 const serverDoc = docData.document || docData;
                 this.saveAsProcess.serverDocId = serverDoc;
-                this.saveAsProcess.step = 'initializing';
-                this.saveAsProcess.message = 'Initializing collaborative document...';
+                this.saveAsProcess.step = 'connecting';
+                this.saveAsProcess.message = 'Connecting existing document to server...';
                 
-                // Step 3: Initialize collaboration with the new document
-                try {
-                    await this.initializeCollaboration(serverDoc);
-                } catch (collabError) {
-                    console.warn('⚠️ Initial collaboration setup failed, attempting recovery:', collabError);
-                    
-                    // If we get a Y.js type conflict, try with a longer delay and full cleanup
-                    if (collabError.message.includes('already been defined') || 
-                        collabError.message.includes('different constructor')) {
-                        console.log('🔄 Y.js type conflict detected, attempting full cleanup and retry...');
-                        
-                        // Force complete cleanup
-                        this.disconnectCollaboration();
-                        await new Promise(resolve => setTimeout(resolve, 1000)); // Longer delay
-                        
-                        // Try again with fresh initialization
-                        try {
-                            await this.initializeCollaboration(serverDoc);
-                            console.log('✅ Collaboration retry successful');
-                        } catch (retryError) {
-                            console.error('❌ Collaboration retry also failed:', retryError);
-                            throw new Error(`Collaboration setup failed: ${retryError.message}. Try refreshing the page and attempting again.`);
-                        }
-                    } else {
-                        throw collabError;
-                    }
-                }
+                // Step 3: TipTap Best Practice - Connect existing Y.js document to WebSocket provider
+                // No content transfer needed - the Y.js document already contains all content
                 
-                // Wait for connection to be established
-                let retries = 0;
-                const maxRetries = 10;
-                while (this.connectionStatus !== 'connected' && retries < maxRetries) {
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    retries++;
-                }
+                await this.connectToCollaborationServer(serverDoc);
                 
-                if (this.connectionStatus !== 'connected') {
-                    throw new Error('Failed to connect to collaborative document');
-                }
-                
-                this.saveAsProcess.step = 'copying_content';
-                this.saveAsProcess.message = 'Copying content to collaborative document...';
-                
-                // Step 4: Wait for sync and then set content
-                await new Promise(resolve => setTimeout(resolve, 1000)); // Give Y.js time to sync
-                
-                // Set content in the collaborative editors
-                if (this.titleEditor && content.title) {
-                    this.titleEditor.commands.setContent(content.title);
-                }
-                
-                if (this.bodyEditor && content.body) {
-                    this.bodyEditor.commands.setContent(content.body);
-                }
-                
-                // Update the current file reference
+                // Update current file and state
                 this.currentFile = {
                     ...serverDoc,
                     type: 'collaborative'
                 };
                 this.fileType = 'collaborative';
-                this.isCollaborativeMode = true;
+                // isCollaborativeMode already true from offline-first approach
                 
-                // Step 5: Final cleanup
                 this.saveAsProcess.step = 'finalizing';
                 this.saveAsProcess.message = 'Finalizing...';
                 
+                // Reload collaborative documents list
                 await this.loadCollaborativeDocs();
-                
-                // Wait a bit for everything to settle
-                await new Promise(resolve => setTimeout(resolve, 1000));
                 
                 // Remove local backup since everything succeeded
                 localStorage.removeItem(`dlux_tiptap_backup_${backupId}`);
                 
-                console.log('✅ Save As completed successfully:', documentName);
+                console.log('✅ Offline-first document successfully published to collaboration server:', documentName);
                 
             } catch (error) {
-                console.error('❌ Save As failed:', error);
+                console.error('❌ Publishing to collaboration server failed:', error);
                 
                 // Store error for display
                 this.saveAsProcess.error = error.message;
@@ -1330,7 +1345,7 @@ export default {
             
             // Load content structure
             this.content = {
-                title: '', // Don't auto-fill title from document name
+                title: '', // Start with empty content for collaborative documents
                 body: '',
                 tags: ['dlux', 'collaboration'],
                 custom_json: {
@@ -1340,10 +1355,10 @@ export default {
             };
             
             try {
-                // Initialize collaboration first
-                await this.initializeCollaboration(doc);
+                // Connect existing Y.js document to this server document
+                await this.connectToCollaborationServer(doc);
                 
-                // Only load permissions after successful connection
+                // Load permissions after successful connection
                 if (this.connectionStatus === 'connected') {
                     try {
                         await this.loadDocumentPermissions();
@@ -1469,7 +1484,7 @@ export default {
                         this.isCollaborativeMode = true;
                         
                         await this.loadCollaborativeDocs();
-                        await this.initializeCollaboration(this.currentFile);
+                        await this.connectToCollaborationServer(this.currentFile);
                         
                         console.log('☁️ Saved to collaborative documents:', documentName);
                         return; // Success - exit retry loop
@@ -1582,9 +1597,11 @@ export default {
             }
         },
         
-        // Editor Management
+        // Editor Management - TipTap Best Practice: Offline-First Collaborative
         async createStandardEditor() {
-            // Ensure proper cleanup first
+            console.log('🏗️ Creating offline-first collaborative editors...');
+            
+            // Clean up any existing editor
             if (this.titleEditor) {
                 this.titleEditor.destroy();
                 this.titleEditor = null;
@@ -1596,660 +1613,383 @@ export default {
 
             // Wait for cleanup to complete
             await this.$nextTick();
+            
+            // Try to get collaboration components first
+            const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
+            
+            if (bundle) {
+                // Use collaborative editors (offline-first approach)
+                await this.createOfflineCollaborativeEditors(bundle);
+            } else {
+                // Fallback to basic editors if collaboration bundle not available
+                console.warn('⚠️ Collaboration bundle not available, using basic editors');
+                await this.createBasicEditors();
+            }
+        },
+
+        async createOfflineCollaborativeEditors(bundle) {
+            // Get components from the bundle
+            const Editor = bundle.Editor?.default || bundle.Editor;
+            const StarterKit = bundle.StarterKit?.default || bundle.StarterKit;
+            const Y = bundle.Y?.default || bundle.Y;
+            const Collaboration = bundle.Collaboration?.default || bundle.Collaboration;
+            const Placeholder = bundle.Placeholder?.default || bundle.Placeholder;
+
+            if (!Y || !Collaboration || !Editor || !StarterKit || !Placeholder) {
+                console.warn('⚠️ Required collaboration components missing, falling back to basic editors');
+                await this.createBasicEditors();
+                return;
+            }
+
+            // Create Y.js document for offline collaborative editing (no WebSocket provider)
+            this.ydoc = new Y.Doc();
+            
+            // Initialize shared types
+            this.ydoc.get('title', Y.XmlFragment);
+            this.ydoc.get('body', Y.XmlFragment);
+
+            // Create collaborative editors (offline mode - no WebSocket connection)
+            this.titleEditor = new Editor({
+                element: this.$refs.titleEditor,
+                extensions: [
+                    StarterKit.configure({
+                        history: false, // Collaboration handles history
+                        heading: false,
+                        bulletList: false,
+                        orderedList: false,
+                        blockquote: false,
+                        codeBlock: false,
+                        horizontalRule: false
+                    }),
+                    Collaboration.configure({
+                        document: this.ydoc,
+                        field: 'title'
+                    }),
+                    Placeholder.configure({
+                        placeholder: 'Enter title...'
+                    })
+                ],
+                editorProps: {
+                    attributes: {
+                        class: 'form-control bg-transparent text-white border-0',
+                    }
+                },
+                onCreate: ({ editor }) => {
+                    console.log('✅ Offline collaborative title editor ready');
+                },
+                onUpdate: ({ editor }) => {
+                    this.content.title = editor.getHTML();
+                    this.hasUnsavedChanges = true;
+                    this.autoSaveContent();
+                }
+            });
+
+            this.bodyEditor = new Editor({
+                element: this.$refs.bodyEditor,
+                extensions: [
+                    StarterKit.configure({
+                        history: false // Collaboration handles history
+                    }),
+                    Collaboration.configure({
+                        document: this.ydoc,
+                        field: 'body'
+                    }),
+                    Placeholder.configure({
+                        placeholder: 'Start writing...'
+                    })
+                ],
+                editorProps: {
+                    attributes: {
+                        class: 'form-control bg-transparent text-white border-0',
+                    }
+                },
+                onCreate: ({ editor }) => {
+                    console.log('✅ Offline collaborative body editor ready');
+                },
+                onUpdate: ({ editor }) => {
+                    this.content.body = editor.getHTML();
+                    this.hasUnsavedChanges = true;
+                    this.autoSaveContent();
+                }
+            });
+
+            // Set state to offline collaborative mode
+            this.isCollaborativeMode = true;  // Always collaborative now
+            this.connectionStatus = 'offline'; // But offline until connected to server
+            this.fileType = 'local';           // Still local until published to server
+
+            console.log('✅ Offline collaborative editors created successfully');
+        },
+
+        async createBasicEditors() {
+            // Fallback to basic editors if collaboration not available
+            console.log('🏗️ Creating basic fallback editors...');
             
             // Import core TipTap modules
             const { Editor } = await import('https://esm.sh/@tiptap/core@3.0.0');
             const { default: StarterKit } = await import('https://esm.sh/@tiptap/starter-kit@3.0.0');
             const { default: Placeholder } = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
             
-            // Import additional extensions
-            const { default: Link } = await import('https://esm.sh/@tiptap/extension-link@3.0.0');
-            const { default: Image } = await import('https://esm.sh/@tiptap/extension-image@3.0.0');
-            const { default: Youtube } = await import('https://esm.sh/@tiptap/extension-youtube@3.0.0');
-            const { default: Table } = await import('https://esm.sh/@tiptap/extension-table@3.0.0');
-            const { default: TableRow } = await import('https://esm.sh/@tiptap/extension-table-row@3.0.0');
-            const { default: TableCell } = await import('https://esm.sh/@tiptap/extension-table-cell@3.0.0');
-            const { default: TableHeader } = await import('https://esm.sh/@tiptap/extension-table-header@3.0.0');
-            
-            // Create title editor (simple single-line)
-            if (this.$refs.titleEditor) {
-                this.titleEditor = new Editor({
-                    element: this.$refs.titleEditor,
-                    extensions: [
-                        StarterKit.configure({
-                            heading: false,
-                            bulletList: false,
-                            orderedList: false,
-                            blockquote: false,
-                            codeBlock: false,
-                            horizontalRule: false,
-                            history: true // Enable history for non-collaborative
-                        }),
-                        Placeholder.configure({
-                            placeholder: 'Enter document title...'
-                        })
-                    ],
-                    content: this.content.title,
-                    editorProps: {
-                        attributes: {
-                            class: 'form-control bg-transparent text-white border-0',
-                        }
-                    },
-                    onUpdate: ({ editor }) => {
-                        this.content.title = editor.getHTML();
+            this.titleEditor = new Editor({
+                element: this.$refs.titleEditor,
+                extensions: [
+                    StarterKit.configure({
+                        heading: false,
+                        bulletList: false,
+                        orderedList: false,
+                        blockquote: false,
+                        codeBlock: false,
+                        horizontalRule: false
+                    }),
+                    Placeholder.configure({
+                        placeholder: 'Enter title...'
+                    })
+                ],
+                editorProps: {
+                    attributes: {
+                        class: 'form-control bg-transparent text-white border-0',
                     }
-                });
+                },
+                onCreate: ({ editor }) => {
+                    console.log('✅ Basic title editor ready');
+                },
+                onUpdate: ({ editor }) => {
+                    this.content.title = editor.getHTML();
+                    this.hasUnsavedChanges = true;
+                    this.autoSaveContent();
+                }
+            });
+
+            this.bodyEditor = new Editor({
+                element: this.$refs.bodyEditor,
+                extensions: [
+                    StarterKit,
+                    Placeholder.configure({
+                        placeholder: 'Start writing...'
+                    })
+                ],
+                editorProps: {
+                    attributes: {
+                        class: 'form-control bg-transparent text-white border-0',
+                    }
+                },
+                onCreate: ({ editor }) => {
+                    console.log('✅ Basic body editor ready');
+                },
+                onUpdate: ({ editor }) => {
+                    this.content.body = editor.getHTML();
+                    this.hasUnsavedChanges = true;
+                    this.autoSaveContent();
+                }
+            });
+
+            // Set to basic mode  
+            this.isCollaborativeMode = false;
+            this.fileType = 'local';
+        },
+
+        // Autosave functionality
+        autoSaveContent() {
+            if (this.autoSaveTimeout) {
+                clearTimeout(this.autoSaveTimeout);
             }
             
-            // Create permlink editor (simple, single-line, alphanumeric + dashes)
-            if (this.$refs.permlinkEditor) {
-                this.permlinkEditor = new Editor({
-                    element: this.$refs.permlinkEditor,
-                    extensions: [
-                        StarterKit.configure({
-                            heading: false,
-                            bulletList: false,
-                            orderedList: false,
-                            blockquote: false,
-                            codeBlock: false,
-                            horizontalRule: false,
-                            history: true
-                        }),
-                        Placeholder.configure({
-                            placeholder: 'custom-url-slug'
-                        })
-                    ],
-                    content: this.content.permlink,
-                    editorProps: {
-                        attributes: {
-                            class: 'form-control bg-transparent text-white border-0 font-monospace',
-                        },
-                        handleKeyDown: (view, event) => {
-                            // Only allow alphanumeric and dashes
-                            if (event.key.length === 1 && !/[a-z0-9\-]/.test(event.key)) {
-                                event.preventDefault();
-                                return true;
-                            }
-                            if (event.key === 'Enter') {
-                                event.preventDefault();
-                                this.showPermlinkEditor = false;
-                                return true;
-                            }
-                            return false;
-                        }
-                    },
-                    onUpdate: ({ editor }) => {
-                        this.content.permlink = editor.getHTML();
-                    }
-                });
-            }
-            
-            // Create body editor (full rich text with same extensions as collaborative mode)
-            if (this.$refs.bodyEditor) {
-                this.bodyEditor = new Editor({
-                    element: this.$refs.bodyEditor,
-                    extensions: [
-                        StarterKit.configure({
-                            history: true // Enable history for non-collaborative
-                        }),
-                        Placeholder.configure({
-                            placeholder: 'Start writing your post content...'
-                        }),
-                        Link.configure({
-                            openOnClick: false,
-                            HTMLAttributes: {
-                                target: '_blank',
-                            },
-                        }),
-                        Image.configure({
-                            HTMLAttributes: {
-                                class: 'img-fluid',
-                            },
-                        }),
-                        Youtube.configure({
-                            width: 480,
-                            height: 320,
-                            ccLanguage: 'en',
-                            interfaceLanguage: 'en',
-                        }),
-                        Table.configure({
-                            resizable: true,
-                        }),
-                        TableRow,
-                        TableHeader,
-                        TableCell,
-                    ],
-                    content: this.content.body,
-                    editorProps: {
-                        attributes: {
-                            class: 'form-control bg-transparent text-white border-0',
-                        }
-                    },
-                    onUpdate: ({ editor }) => {
-                        this.content.body = editor.getHTML();
-                    }
-                });
-            }
+            this.autoSaveTimeout = setTimeout(async () => {
+                if (!this.currentFile) {
+                    // Create a new local file if none exists
+                    const timestamp = Date.now();
+                    const fileId = `local_${timestamp}`;
+                    this.currentFile = {
+                        id: fileId,
+                        name: `Untitled ${new Date().toLocaleDateString()}`,
+                        type: 'local',
+                        lastModified: new Date().toISOString()
+                    };
+                    this.fileType = 'local';
+                }
+                
+                if (this.currentFile.type === 'local') {
+                    await this.saveToLocalStorage();
+                    this.hasUnsavedChanges = false;
+                }
+            }, 2000); // Autosave 2 seconds after last edit
         },
         
-        async initializeCollaboration(doc) {
-            // Ensure proper cleanup first
-            if (this.titleEditor) {
-                this.titleEditor.destroy();
-                this.titleEditor = null;
-            }
-            if (this.bodyEditor) {
-                this.bodyEditor.destroy();
-                this.bodyEditor = null;
-            }
-
-            // Wait for cleanup to complete
-            await this.$nextTick();
+        async connectToCollaborationServer(serverDoc) {
+            // TipTap Best Practice: Connect existing Y.js document to WebSocket provider
+            console.log('🔗 Connecting existing Y.js document to collaboration server...', serverDoc);
             
-            console.log('🚀 Initializing collaboration for document:', doc, 'Component ID:', this.componentId);
-            
-            // Prevent multiple simultaneous initializations
-            if (this.isInitializing) {
-                console.warn('⚠️ Collaboration initialization already in progress, aborting');
-                throw new Error('Collaboration initialization already in progress');
+            if (!this.ydoc) {
+                throw new Error('No Y.js document available - this should not happen with offline-first approach');
             }
             
-            this.isInitializing = true;
-            
-            // Additional check: if we already have editors for this exact document, skip
-            if (this.currentFile && 
-                this.currentFile.owner === doc.owner && 
-                this.currentFile.permlink === doc.permlink && 
-                this.connectionStatus === 'connected' &&
-                this.titleEditor && 
-                this.bodyEditor) {
-                console.log('📋 Already connected to this document, skipping re-initialization');
-                this.isInitializing = false;
-                return;
-            }
-            
-            // Check for global collaborative instance conflicts
-            if (window.dluxCollaborativeInstance && window.dluxCollaborativeInstance !== this.componentId) {
-                console.warn('⚠️ Another collaborative instance detected, cleaning up:', window.dluxCollaborativeInstance);
-                // Force cleanup the previous instance
-                if (window.dluxCollaborativeCleanup) {
-                    try {
-                        await window.dluxCollaborativeCleanup();
-                    } catch (error) {
-                        console.warn('Error cleaning up previous instance:', error);
-                    }
-                }
-            }
-            
-            // Register this instance as the active collaborative instance
-            window.dluxCollaborativeInstance = this.componentId;
-            window.dluxCollaborativeCleanup = () => this.disconnectCollaboration();
-            
-            // CRITICAL: Clean up existing editors and connections first
-            this.disconnectCollaboration();
-            
-            // Wait for DOM cleanup and Vue reactivity to complete
-            await this.$nextTick();
-            await new Promise(resolve => setTimeout(resolve, 500)); // Increased delay for better cleanup
-            
-            const bundle = window.TiptapCollaboration.default || window.TiptapCollaboration;
-            
-            if (!bundle) {
-                console.error('TipTap bundle not loaded');
-                this.connectionStatus = 'disconnected';
-                this.connectionMessage = 'Error: TipTap bundle not loaded';
-                return;
-            }
-
-            // More detailed bundle debugging
-            console.log('📦 Full bundle:', bundle);
-            console.log('📦 Bundle keys:', Object.keys(bundle));
-            console.log('📦 Y structure:', {
-                Y: bundle.Y,
-                YDefault: bundle.Y?.default,
-                YAwareness: bundle.Y?.Awareness,
-                YDefaultAwareness: bundle.Y?.default?.Awareness
-            });
-            
-            // Get components from the bundle with more careful extraction
-            const Editor = bundle.Editor?.default || bundle.Editor;
-            const StarterKit = bundle.StarterKit?.default || bundle.StarterKit;
-            const Y = bundle.Y?.default || bundle.Y;
+            const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
             const HocuspocusProvider = bundle.HocuspocusProvider?.default || bundle.HocuspocusProvider;
-            const Collaboration = bundle.Collaboration?.default || bundle.Collaboration;
-            const CollaborationCursor = bundle.CollaborationCursor?.default || bundle.CollaborationCursor;
             
-            // Try different paths to get Awareness
-            let Awareness = null;
-            if (Y?.Awareness) {
-                Awareness = Y.Awareness;
-            } else if (bundle.Y?.Awareness) {
-                Awareness = bundle.Y.Awareness;
-            } else if (bundle.Awareness) {
-                Awareness = bundle.Awareness;
+            if (!HocuspocusProvider) {
+                throw new Error('HocuspocusProvider not available');
             }
-
-            // Log what we found
-            console.log('🔍 Extracted components:', {
-                Editor: !!Editor,
-                StarterKit: !!StarterKit,
-                Y: !!Y,
-                HocuspocusProvider: !!HocuspocusProvider,
-                Collaboration: !!Collaboration,
-                CollaborationCursor: !!CollaborationCursor,
-                Awareness: !!Awareness,
-                // Detailed Y info
-                YObject: Y,
-                AwarenessObject: Awareness
+            
+            // Clean up any existing provider
+            if (this.provider) {
+                this.provider.disconnect();
+                this.provider.destroy();
+                this.provider = null;
+            }
+            
+            // Build auth token and URL (use working pattern from initializeCollaboration)
+            const authToken = JSON.stringify({
+                account: this.authHeaders['x-account'],
+                signature: this.authHeaders['x-signature'],
+                challenge: this.authHeaders['x-challenge'],
+                pubkey: this.authHeaders['x-pubkey']
             });
-
-            // Verify components are available
-            if (!Editor || !StarterKit || !Y || !HocuspocusProvider || !Collaboration || !CollaborationCursor) {
-                console.error('❌ Missing required components:', {
-                    Editor: !!Editor,
-                    StarterKit: !!StarterKit,
-                    Y: !!Y,
-                    HocuspocusProvider: !!HocuspocusProvider,
-                    Collaboration: !!Collaboration,
-                    CollaborationCursor: !!CollaborationCursor
-                });
-                throw new Error('Required TipTap components not found in bundle');
+            
+            const baseUrl = 'wss://data.dlux.io/collaboration';
+            const docPath = `${serverDoc.owner}/${serverDoc.permlink}`;
+            const wsUrl = `${baseUrl}/${docPath}?token=${encodeURIComponent(authToken)}`;
+            
+            console.log('🔗 WebSocket connection details:', {
+                baseUrl,
+                docPath,
+                owner: serverDoc.owner,
+                permlink: serverDoc.permlink,
+                url: wsUrl.substring(0, 100) + '...',
+                authTokenLength: authToken.length
+            });
+            
+            // Wait a moment for server to be ready for WebSocket connections
+            console.log('⏳ Waiting for server to be ready for WebSocket connections...');
+            await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
+            
+            // Use comprehensive connection handling pattern that was working
+            const providerConfig = {
+                url: wsUrl,
+                name: docPath,
+                document: this.ydoc, // Connect existing Y.js document
+                connect: true,
+                timeout: 30000,
+                forceSyncInterval: 30000,
+                maxMessageSize: 1024 * 1024,
+                onConnect: () => {
+                    console.log('✅ Connected to collaboration server');
+                    this.connectionStatus = 'connected';
+                    this.connectionMessage = 'Connected - Real-time collaboration active';
+                },
+                onDisconnect: ({ event }) => {
+                    console.log('❌ Disconnected from collaboration server', {
+                        code: event?.code,
+                        reason: event?.reason,
+                        wasClean: event?.wasClean
+                    });
+                    this.connectionStatus = 'disconnected';
+                    this.connectionMessage = 'Disconnected from server';
+                },
+                onSynced: ({ synced }) => {
+                    if (synced) {
+                        console.log('📡 Document synchronized');
+                        this.connectionMessage = 'Connected - Document synchronized';
+                        if (this.saveAsProcess.inProgress) {
+                            this.saveAsProcess.step = 'synced';
+                            this.saveAsProcess.message = 'Document synced with server!';
+                        }
+                    }
+                },
+                onError: ({ event }) => {
+                    console.error('❌ WebSocket error:', {
+                        event,
+                        error: event?.error,
+                        message: event?.message,
+                        type: event?.type
+                    });
+                },
+                onAuthenticationFailed: ({ reason }) => {
+                    console.error('🔐 Authentication failed:', reason);
+                    this.serverAuthFailed = true;
+                    this.connectionStatus = 'disconnected';
+                    this.connectionMessage = `Authentication failed: ${reason}`;
+                    
+                    if (reason === 'permission-denied') {
+                        setTimeout(() => {
+                            this.handleAuthenticationFailure();
+                        }, 1000);
+                    }
+                }
+            };
+            
+            console.log('🔌 Creating HocuspocusProvider...');
+            this.provider = new HocuspocusProvider(providerConfig);
+            
+            // Wait for connection with robust retry logic
+            let retries = 0;
+            const maxRetries = 30; // Increased retries
+            let connectionSuccess = false;
+            
+            console.log('⏳ Waiting for WebSocket connection...');
+            while (!connectionSuccess && retries < maxRetries) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                retries++;
+                
+                // Check multiple connection states
+                const wsReady = this.provider.ws?.readyState === WebSocket.OPEN;
+                const statusConnected = this.connectionStatus === 'connected';
+                
+                if (wsReady || statusConnected) {
+                    this.connectionStatus = 'connected';
+                    connectionSuccess = true;
+                    console.log('✅ WebSocket connected successfully');
+                    break;
+                }
+                
+                // Log progress every 2 seconds
+                if (retries % 4 === 0) {
+                    console.log(`⏳ Connection attempt ${retries}/${maxRetries} - WebSocket state: ${this.provider.ws?.readyState}, Status: ${this.connectionStatus}`);
+                }
+                
+                // Try fallback authentication approach after half the retries
+                if (retries === Math.floor(maxRetries / 2) && !connectionSuccess) {
+                    console.log('🔄 Trying fallback authentication approach...');
+                    
+                    // Clean up current provider
+                    if (this.provider) {
+                        this.provider.disconnect();
+                        this.provider.destroy();
+                    }
+                    
+                    // Try with token in config instead of URL
+                    const fallbackConfig = {
+                        ...providerConfig,
+                        url: `${baseUrl}/${docPath}`, // No token in URL
+                        token: authToken, // Token in config
+                    };
+                    
+                    console.log('🔗 Trying fallback connection without token in URL...');
+                    this.provider = new HocuspocusProvider(fallbackConfig);
+                }
             }
             
-            try {
-                // Get user color before creating editors
-                const userColor = this.getUserColor;
-                const Placeholder = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
-                
-                // Create single Y.js document for both fields
-                this.ydoc = new Y.Doc();
-                
-                // Create awareness instance - make it optional
-                let awareness = null;
-                if (Awareness) {
-                    awareness = new Awareness(this.ydoc);
-                    awareness.setLocalState({
-                        user: {
-                            name: this.username,
-                            color: userColor
-                        }
-                    });
-                }
-                
-                // Setup WebSocket provider FIRST to sync existing document state
-                // Validate auth headers
-                if (!this.authHeaders['x-account'] || !this.authHeaders['x-signature'] || 
-                    !this.authHeaders['x-challenge'] || !this.authHeaders['x-pubkey']) {
-                    throw new Error('Missing required authentication headers');
-                }
-
-                // Build auth params
-                const authParams = new URLSearchParams();
-                Object.entries(this.authHeaders).forEach(([key, value]) => {
-                    if (value) authParams.append(key, value);
-                });
-                
-                // Ensure URL is properly formatted and includes token
-                const baseUrl = this.collaborationUrl.replace(/\/$/, '');
-                const docPath = `${doc.owner}/${doc.permlink}`.replace(/^\//, '');
-                const token = JSON.stringify({
-                    account: this.authHeaders['x-account'],
-                    signature: this.authHeaders['x-signature'],
-                    challenge: this.authHeaders['x-challenge'],
-                    pubkey: this.authHeaders['x-pubkey']
-                });
-                const wsUrl = `${baseUrl}/${docPath}?${authParams.toString()}`;
-                
-                // Configure provider with recommended options
-                const providerConfig = {
-                    url: wsUrl,
-                    name: `${doc.owner}/${doc.permlink}`,
-                    token,
-                    connect: true,
-                    WebSocketPolyfill: WebSocket,
-                    timeout: 30000,
-                    forceSyncInterval: 30000,
-                    maxMessageSize: 1024 * 1024, // 1MB
-                    document: this.ydoc,
-                    onConnect: () => {
-                        console.log('✅ Connected to collaboration server');
-                        this.connectionStatus = 'connected';
-                        this.connectionMessage = 'Connected - Real-time collaboration active';
-                        
-                        // Update user list on connect
-                        if (this.provider && this.provider.awareness) {
-                            const states = Array.from(this.provider.awareness.getStates().entries());
-                            this.connectedUsers = states
-                                .filter(([_, state]) => state?.user?.name)
-                                .map(([_, state]) => ({
-                                    name: state.user.name,
-                                    color: state.user.color || this.generateUserColor(state.user.name)
-                                }));
-                        }
-                    },
-                    onDisconnect: ({ event }) => {
-                        console.log('❌ Disconnected from collaboration server');
-                        this.connectionStatus = 'disconnected';
-                        this.connectionMessage = 'Disconnected from server';
-                        this.connectedUsers = []; // Clear users on disconnect
-                    },
-                    onSynced: ({ synced }) => {
-                        if (synced) {
-                            console.log('📡 Document synchronized');
-                            this.connectionMessage = 'Connected - Document synchronized';
-                        }
-                    },
-                    onAuthenticationFailed: ({ reason }) => {
-                        console.error('🔐 Authentication failed:', reason);
-                        this.connectionStatus = 'disconnected';
-                        this.connectionMessage = `Authentication failed: ${reason}`;
-                    }
+            if (!connectionSuccess) {
+                // More detailed error information
+                const errorDetails = {
+                    wsState: this.provider.ws?.readyState,
+                    wsUrl: this.provider.ws?.url,
+                    providerStatus: this.provider.status,
+                    connectionStatus: this.connectionStatus,
+                    maxRetries,
+                    totalWaitTime: (maxRetries * 0.5) + 's'
                 };
-
-                // Only add awareness if available
-                if (awareness) {
-                    providerConfig.awareness = awareness;
-                    providerConfig.onAwarenessChange = () => {
-                        console.log('👥 Awareness changed');
-                        if (this.provider && this.provider.awareness) {
-                            const states = Array.from(this.provider.awareness.getStates().entries());
-                            console.log('Current awareness states:', states);
-                            this.connectedUsers = states
-                                .filter(([_, state]) => state?.user?.name)
-                                .map(([_, state]) => ({
-                                    name: state.user.name,
-                                    color: state.user.color || this.generateUserColor(state.user.name)
-                                }));
-                            console.log('Updated connected users:', this.connectedUsers);
-                        }
-                    };
-                }
-
-                this.provider = new HocuspocusProvider(providerConfig);
-                
-                try {
-                    // Explicitly connect after setup
-                    await this.provider.connect();
-                    
-                    // Ensure awareness is initialized
-                    if (!this.provider.awareness.getLocalState()) {
-                        this.provider.awareness.setLocalState({
-                            user: {
-                                name: this.username,
-                                color: this.getUserColor
-                            }
-                        });
-                    }
-                    
-                    // CRITICAL: Wait for initial sync with timeout and connection check
-                    const syncTimeout = 30000; // 30 seconds timeout
-                    const syncStart = Date.now();
-                    let isConnected = false;
-                    
-                    // Set up connection and status handlers
-                    const onConnected = () => {
-                        console.log('🔌 WebSocket connected');
-                        isConnected = true;
-                        this.connectionStatus = 'connected';
-                        this.connectionMessage = 'Connected - Real-time collaboration active';
-                    };
-                    const onStatus = ({ status }) => {
-                        console.log('📡 Connection status:', status);
-                        this.connectionStatus = status;
-                    };
-                    this.provider.on('connect', onConnected);
-                    this.provider.on('status', onStatus);
-                    
-                    try {
-                        await new Promise((resolve, reject) => {
-                            const checkSync = () => {
-                                if (!this.provider) {
-                                    reject(new Error('Provider was destroyed during sync'));
-                                    return;
-                                }
-                                
-                                // First wait for connection
-                                if (!isConnected) {
-                                    if (Date.now() - syncStart > 5000) { // 5 second connection timeout
-                                        reject(new Error('WebSocket connection timeout'));
-                                        return;
-                                    }
-                                    setTimeout(checkSync, 100);
-                                    return;
-                                }
-                                
-                                // Then wait for sync
-                                if (this.provider.synced) {
-                                    console.log('✅ Initial sync completed');
-                                    resolve();
-                                } else if (Date.now() - syncStart > syncTimeout) {
-                                    reject(new Error('Sync timeout exceeded'));
-                                } else {
-                                    setTimeout(checkSync, 100);
-                                }
-                            };
-                            checkSync();
-                        });
-                    } finally {
-                        // Clean up all event handlers
-                        this.provider.off('connect', onConnected);
-                        this.provider.off('status', onStatus);
-                    }
-                } catch (error) {
-                    console.error('Failed to establish collaboration:', error);
-                    
-                    // Clean up provider on error
-                    if (this.provider) {
-                        try {
-                            // Remove all event listeners first
-                            this.provider.off('connect');
-                            this.provider.off('disconnect');
-                            this.provider.off('status');
-                            this.provider.off('synced');
-                            this.provider.off('message');
-                            
-                            // Destroy awareness if it exists
-                            if (this.provider.awareness) {
-                                this.provider.awareness.destroy();
-                            }
-                            
-                            // Disconnect the provider
-                            await this.provider.disconnect();
-                            
-                            // Clear the document
-                            if (this.ydoc) {
-                                this.ydoc.destroy();
-                            }
-                        } catch (cleanupError) {
-                            console.warn('Error during provider cleanup:', cleanupError);
-                        }
-                        this.provider = null;
-                        this.ydoc = null;
-                    }
-                    
-                    // Set connection status
-                    this.connectionStatus = 'disconnected';
-                    this.connectionMessage = `Connection failed: ${error.message}`;
-                    
-                    throw new Error(`Collaboration setup failed: ${error.message}`);
-                }
-                
-                // Now safely handle Y.js shared types after sync
-                console.log('📋 Creating Y.js types after sync');
-                
-                // Use consistent field names
-                const titleFieldName = 'title';
-                const bodyFieldName = 'body';
-                
-                // Create shared types and wait for them to be ready
-                const titleText = this.ydoc.getXmlFragment(titleFieldName);
-                const bodyText = this.ydoc.getXmlFragment(bodyFieldName);
-                
-                // Wait for types to be ready and DOM to be updated
-                await new Promise(resolve => setTimeout(resolve, 100));
-                await this.$nextTick();
-                
-                console.log('📋 Y.js types created, initializing editors');
-                
-                console.log('📋 Creating title editor...');
-                try {
-                    // Create title editor
-                    this.titleEditor = new Editor({
-                        element: this.$refs.titleEditor,
-                        extensions: [
-                            StarterKit.configure({
-                                history: false,
-                            }),
-                            Placeholder.default.configure({
-                                placeholder: 'Enter document title...'
-                            }),
-                            Collaboration.configure({
-                                document: this.ydoc,
-                                field: titleFieldName,
-                                fragmentContent: true,
-                            }),
-                            CollaborationCursor.configure({
-                                provider: this.provider,
-                                user: {
-                                    name: this.username,
-                                    color: userColor
-                                }
-                            }),
-                        ],
-                        editorProps: {
-                            attributes: {
-                                class: 'form-control bg-transparent text-white border-0',
-                            }
-                        },
-                        onCreate: ({ editor }) => {
-                            console.log('✅ Title editor ready');
-                            editor.commands.focus();
-                        },
-                        onUpdate: ({ editor }) => {
-                            this.content.title = editor.getText();
-                        }
-                    });
-                    console.log('✅ Title editor created');
-                } catch (error) {
-                    console.error('❌ Failed to create title editor:', error);
-                    throw error;
-                }
-
-                // Wait a bit before creating body editor
-                await new Promise(resolve => setTimeout(resolve, 100));
-
-                console.log('📋 Creating body editor...');
-                try {
-                    // Create body editor
-                    this.bodyEditor = new Editor({
-                        element: this.$refs.bodyEditor,
-                        extensions: [
-                            StarterKit.configure({
-                                history: false,
-                            }),
-                            Placeholder.default.configure({
-                                placeholder: 'Start writing...'
-                            }),
-                            Collaboration.configure({
-                                document: this.ydoc,
-                                field: bodyFieldName,
-                                fragmentContent: true,
-                            }),
-                            CollaborationCursor.configure({
-                                provider: this.provider,
-                                user: {
-                                    name: this.username,
-                                    color: userColor
-                                }
-                            }),
-                        ],
-                        editorProps: {
-                            attributes: {
-                                class: 'form-control bg-transparent text-white border-0',
-                            }
-                        },
-                        onCreate: ({ editor }) => {
-                            console.log('✅ Body editor ready');
-                        },
-                        onUpdate: ({ editor }) => {
-                            this.content.body = editor.getHTML();
-                        }
-                    });
-                    console.log('✅ Body editor created');
-                } catch (error) {
-                    console.error('❌ Failed to create body editor:', error);
-                    throw error;
-                }
-
-                console.log('📋 Waiting for editors to be ready...');
-                
-                // Check if editors were created successfully
-                if (!this.titleEditor || !this.bodyEditor) {
-                    throw new Error('Editors were not created successfully');
-                }
-
-                // Wait for editors to be ready
-                try {
-                    // Give editors a moment to initialize
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    
-                    // Check editor states
-                    if (!this.titleEditor || this.titleEditor.isDestroyed) {
-                        throw new Error('Title editor is not available');
-                    }
-                    if (!this.bodyEditor || this.bodyEditor.isDestroyed) {
-                        throw new Error('Body editor is not available');
-                    }
-                    
-                    console.log('✅ Editors are ready');
-                } catch (error) {
-                    console.error('❌ Editor initialization failed:', error);
-                    throw error;
-                }
-                
-                console.log('📋 Editors initialized and ready');
-
-                // Editors are now ready with collaboration cursors already configured
-
-                // Update current file reference
-                this.currentFile = {
-                    ...doc,
-                    type: 'collaborative'
-                };
-                this.fileType = 'collaborative';
-                this.isCollaborativeMode = true;
-
-                // Set up awareness change handler
-                if (this.provider && this.provider.awareness) {
-                    this.provider.awareness.on('change', () => {
-                        const states = Array.from(this.provider.awareness.getStates().entries());
-                        this.connectedUsers = states
-                            .filter(([_, state]) => state?.user?.name)
-                            .map(([_, state]) => ({
-                                name: state.user.name,
-                                color: state.user.color || this.generateUserColor(state.user.name)
-                            }));
-                    });
-                }
-
-                console.log('✅ Collaborative initialization completed successfully');
-                
-            } catch (error) {
-                console.error('❌ Collaboration initialization failed:', error);
-                this.connectionStatus = 'disconnected';
-                this.connectionMessage = `Error: ${error.message}`;
-                
-                // Clean up on failure
-                this.disconnectCollaboration();
-                
-                // Additional DOM cleanup on failure
-                await this.$nextTick();
-                this.cleanupDOMElements();
-                
-                throw error;
-            } finally {
-                this.isInitializing = false;
+                console.error('❌ Connection failed with details:', errorDetails);
+                throw new Error(`Failed to connect to collaboration server after ${(maxRetries * 0.5)}s - WebSocket state: ${errorDetails.wsState}`);
             }
+            
+            console.log('✅ Existing Y.js document successfully connected to collaboration server');
+        },
+
+        // Legacy method - replaced by connectToCollaborationServer for offline-first approach
+        // This method was used when we created editors on-demand, but now editors are always collaborative
+        async initializeCollaboration(doc) {
+            console.warn('⚠️ initializeCollaboration is deprecated - using connectToCollaborationServer instead');
+            return this.connectToCollaborationServer(doc);
         },
         
         disconnectCollaboration() {
@@ -2535,6 +2275,22 @@ export default {
         },
         
         clearEditor() {
+            // Avoid clearing collaborative editors directly - this causes transaction conflicts
+            if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
+                console.log('🤝 Skipping editor clearing in collaborative mode - let Y.js handle state');
+                // Just clear the local content state
+                this.content = {
+                    title: '',
+                    body: '',
+                    tags: [],
+                    custom_json: {},
+                    permlink: '',
+                    beneficiaries: []
+                };
+                return;
+            }
+            
+            // Clear non-collaborative editors normally
             if (this.titleEditor) {
                 this.titleEditor.commands.clearContent();
             }
@@ -2673,13 +2429,127 @@ export default {
                 }
             }
         },
+
+        async clearAllCloudFiles() {
+            if (!this.showCollaborativeFeatures) {
+                alert('You need to authenticate to manage cloud files.');
+                return;
+            }
+
+            // Filter documents that the user owns
+            const ownedDocs = this.collaborativeDocs.filter(doc => doc.owner === this.authHeaders['x-account']);
+            
+            if (ownedDocs.length === 0) {
+                alert('You don\'t own any cloud documents to delete.');
+                return;
+            }
+
+            const confirmMsg = `Delete ALL your cloud documents (${ownedDocs.length} files)?\n\nThis action cannot be undone and will affect any collaborators on these documents.`;
+            if (confirm(confirmMsg)) {
+                try {
+                    console.log(`🗑️ Deleting ${ownedDocs.length} owned cloud documents...`);
+                    
+                    // Delete each owned document
+                    let successCount = 0;
+                    let failureCount = 0;
+                    
+                    for (const doc of ownedDocs) {
+                        try {
+                            await this.deleteCollaborativeDoc(doc);
+                            successCount++;
+                            console.log(`✅ Deleted: ${doc.documentName || doc.permlink}`);
+                        } catch (error) {
+                            failureCount++;
+                            console.error(`❌ Failed to delete ${doc.documentName || doc.permlink}:`, error);
+                        }
+                    }
+                    
+                    // Reload the collaborative documents list
+                    await this.loadCollaborativeDocs();
+                    
+                    const resultMsg = `Cloud files cleanup completed.\n\n✅ Successfully deleted: ${successCount} files${failureCount > 0 ? `\n❌ Failed to delete: ${failureCount} files` : ''}`;
+                    alert(resultMsg);
+                    
+                    console.log(`✅ Cloud files cleanup completed: ${successCount} success, ${failureCount} failures`);
+                    
+                    // If current file was one of the deleted collaborative files, create a new document
+                    if (this.currentFile && 
+                        this.currentFile.type === 'collaborative' && 
+                        this.currentFile.owner === this.authHeaders['x-account']) {
+                        await this.newDocument();
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to clear cloud files:', error);
+                    alert(`Failed to clear cloud files: ${error.message}`);
+                }
+            }
+        },
         
         // Authentication methods
         async requestAuthentication() {
             console.log('🔐 Requesting authentication for collaborative editing...');
             
+            // Reset server auth failure state when requesting new auth
+            this.serverAuthFailed = false;
+            this.lastAuthCheck = Date.now();
+            
             // Emit request to parent - this matches the pattern used in collaborative-docs.js
             this.$emit('request-auth-headers');
+        },
+
+        // Wait for authentication to complete with timeout
+        async waitForAuthentication(timeoutMs = 30000) {
+            console.log('⏳ Waiting for authentication to complete...');
+            
+            const startTime = Date.now();
+            
+            return new Promise((resolve, reject) => {
+                const checkAuth = () => {
+                    if (this.isAuthenticated && !this.isAuthExpired) {
+                        console.log('✅ Authentication completed successfully');
+                        resolve(true);
+                        return;
+                    }
+                    
+                    if (Date.now() - startTime > timeoutMs) {
+                        console.error('❌ Authentication timeout');
+                        reject(new Error('Authentication timeout. Please try again.'));
+                        return;
+                    }
+                    
+                    // Check again in 500ms
+                    setTimeout(checkAuth, 500);
+                };
+                
+                checkAuth();
+            });
+        },
+
+        // Handle authentication failure by requesting fresh auth
+        async handleAuthenticationFailure() {
+            console.log('🔐 Handling authentication failure - requesting fresh authentication...');
+            
+            // Clear any cached auth headers
+            if (window.sessionStorage) {
+                const keys = Object.keys(sessionStorage).filter(key => 
+                    key.includes('collaborationAuthHeaders') || key.includes('auth')
+                );
+                keys.forEach(key => sessionStorage.removeItem(key));
+                console.log('🧹 Cleared cached auth headers:', keys);
+            }
+
+            // Request fresh authentication
+            await this.requestAuthentication();
+            
+            // Show user guidance
+            alert(
+                'Authentication failed for collaborative editing.\n\n' +
+                'Please sign the authentication challenge when prompted.\n\n' +
+                'This may happen if:\n' +
+                '• Your authentication has expired (>23 hours old)\n' +
+                '• Your account lacks collaboration permissions\n' +
+                '• There was a signature validation error'
+            );
         },
         
         // Pending uploads management
@@ -2917,32 +2787,7 @@ export default {
             });
         },
 
-        async initializeCollaboration() {
-            // Initialize Y.js document and provider
-            this.ydoc = new Y.Doc();
-            
-            // Set up WebRTC provider with automatic reconnection
-            this.provider = new WebrtcProvider(this.documentId, this.ydoc, {
-                signaling: ['wss://signaling.dlux.io'],
-                maxConns: 20 + Math.floor(Math.random() * 15),
-                peerOpts: { config: { iceServers: this.iceServers } },
-                awareness: this.awareness
-            });
 
-            // Set up connection monitoring
-            this.provider.on('status', ({ status }) => {
-                this.connectionStatus = status;
-            });
-
-            // Wait for initial connection
-            await new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => reject(new Error('Connection timeout')), 5000);
-                this.provider.once('synced', () => {
-                    clearTimeout(timeout);
-                    resolve();
-                });
-            });
-        },
 
         // Method to toggle collaborative mode
         async toggleCollaborativeMode() {
@@ -2963,82 +2808,151 @@ export default {
             }
         },
 
-        async convertToCollaborative() {
-            if (this.isCollaborative) {
-                console.warn('Document is already collaborative');
+                async convertToCollaborative() {
+            // TipTap Best Practice: All documents are already collaborative (offline-first)
+            // This method now just "publishes" the existing Y.js document to the server
+            
+            if (this.currentFile?.type === 'collaborative' && this.connectionStatus === 'connected') {
+                console.log('Document is already connected to collaboration server');
                 return;
             }
 
-            try {
-                // Generate a new document ID if needed
-                if (!this.documentId) {
-                    this.documentId = `${this.username}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            // Check authentication
+            if (!this.isAuthenticated || this.isAuthExpired) {
+                const confirmAuth = confirm('You need to authenticate to publish this document to the cloud. Authenticate now?');
+                if (confirmAuth) {
+                    this.requestAuthentication();
+                    try {
+                        await this.waitForAuthentication();
+                    } catch (error) {
+                        alert('Authentication failed. Please try again.');
+                        return;
+                    }
+                } else {
+                    return;
                 }
-
-                // Store current content before conversion
-                const currentContent = {
-                    title: this.content.title,
-                    body: this.content.body
-                };
-
-                // Update document metadata
-                this.currentFile = {
-                    ...this.currentFile,
-                    type: 'collaborative',
-                    documentId: this.documentId,
-                    owner: this.username,
-                    lastModified: new Date().toISOString()
-                };
-
-                // Set initial permissions
-                this.documentPermissions = [{
-                    account: this.username,
-                    permissionType: 'owner',
-                    addedAt: new Date().toISOString()
-                }];
-
-                // Enable collaborative mode
-                this.isCollaborative = true;
-
-                // Initialize collaborative infrastructure
-                await this.initializeEditor();
-
-                // Initialize shared content
-                if (this.ydoc) {
-                    const titleText = this.ydoc.getXmlFragment('title');
-                    const bodyText = this.ydoc.getXmlFragment('body');
-                    
-                    // Clear any existing content
-                    titleText.delete(0, titleText.length);
-                    bodyText.delete(0, bodyText.length);
-                    
-                    // Insert current content
-                    titleText.insert(0, currentContent.title);
-                    bodyText.insert(0, currentContent.body);
-                }
-
-                // Emit event for parent components
-                this.$emit('document-converted', {
-                    type: 'collaborative',
-                    documentId: this.documentId
-                });
-
-                console.log('✅ Document successfully converted to collaborative mode');
-            } catch (error) {
-                console.error('Failed to convert document:', error);
-                // Revert changes on failure
-                this.isCollaborative = false;
-                this.documentId = null;
-                throw new Error(`Failed to convert document: ${error.message}`);
             }
+
+            // Test basic connectivity first
+            console.log('🧪 Testing WebSocket connectivity...');
+            const connectivityTest = await this.testWebSocketConnectivity();
+            if (!connectivityTest.success) {
+                alert(`❌ Cannot connect to collaboration server.\n\nError: ${connectivityTest.error}\n\nPlease check your internet connection and try again later.`);
+                return;
+            }
+            console.log('✅ Basic connectivity test passed');
+
+            // Show the save modal for publishing to cloud
+            const documentName = this.currentFile?.name || `document-${Date.now()}`;
+            
+            this.saveForm = {
+                filename: documentName,
+                saveLocally: false,
+                saveToDlux: true,
+                isPublic: false,
+                description: 'Published from offline document',
+                isNewDocument: true
+            };
+            
+            this.showSaveModal = true;
+            console.log('🔄 Ready to publish offline collaborative document to server');
+        },
+
+        // New method: Test WebSocket connectivity
+        async testWebSocketConnectivity() {
+            return new Promise((resolve) => {
+                const timeout = setTimeout(() => {
+                    resolve({
+                        success: false,
+                        error: 'Connection timeout - collaboration server may be unavailable'
+                    });
+                }, 5000);
+
+                try {
+                    // Test simple WebSocket connection to collaboration server base URL
+                    const testUrl = this.collaborationUrl.replace(/^wss?:\/\//, 'wss://');
+                    console.log('🧪 Testing WebSocket connectivity to:', testUrl);
+                    
+                    const testWs = new WebSocket(testUrl + '/test');
+                    
+                    testWs.onopen = () => {
+                        console.log('✅ Basic WebSocket connection successful');
+                        clearTimeout(timeout);
+                        testWs.close();
+                        resolve({
+                            success: true,
+                            message: 'WebSocket connectivity confirmed'
+                        });
+                    };
+                    
+                    testWs.onerror = (error) => {
+                        console.log('⚠️ Test WebSocket connection had issues (this may be normal):', error.type);
+                        clearTimeout(timeout);
+                        // Even if test connection fails, the real connection might work
+                        // So we'll return success but with a warning
+                        resolve({
+                            success: true,
+                            message: 'WebSocket base connectivity test completed',
+                            warning: 'Test connection had issues but real connection may still work'
+                        });
+                    };
+                    
+                    testWs.onclose = (event) => {
+                        console.log('🔌 Test WebSocket closed:', {
+                            code: event.code,
+                            reason: event.reason,
+                            wasClean: event.wasClean
+                        });
+                        
+                        // If it closes immediately, that's often normal for test connections
+                        if (!timeout._destroyed) {
+                            clearTimeout(timeout);
+                            resolve({
+                                success: true,
+                                message: 'WebSocket connectivity test completed'
+                            });
+                        }
+                    };
+                } catch (error) {
+                    clearTimeout(timeout);
+                    console.log('⚠️ WebSocket test failed, but proceeding anyway:', error.message);
+                    // Don't fail the whole operation just because test failed
+                    resolve({
+                        success: true,
+                        message: 'WebSocket test had issues but proceeding with actual connection',
+                        warning: error.message
+                    });
+                }
+            });
         },
     },
     
     watch: {
         authHeaders: {
-            handler(newHeaders) {
-                if (newHeaders && newHeaders['x-account'] && !this.isAuthExpired) {
-                    this.loadCollaborativeDocs();
+            handler(newHeaders, oldHeaders) {
+                // Reset server auth failure when new auth headers are received
+                if (newHeaders && newHeaders['x-account']) {
+                    // Check if this is actually new authentication (different from previous)
+                    const isNewAuth = !oldHeaders || 
+                        oldHeaders['x-challenge'] !== newHeaders['x-challenge'] ||
+                        oldHeaders['x-signature'] !== newHeaders['x-signature'];
+                    
+                    if (isNewAuth) {
+                        console.log('🔐 New authentication received, resetting auth failure state');
+                        this.serverAuthFailed = false;
+                        this.lastAuthCheck = Date.now();
+                        
+                        // Update connection message if we were in a failed state
+                        if (this.connectionMessage.includes('Authentication failed')) {
+                            this.connectionMessage = 'Authentication updated';
+                        }
+                    }
+                    
+                    if (!this.isAuthExpired) {
+                        this.loadCollaborativeDocs();
+                    } else {
+                        this.collaborativeDocs = [];
+                    }
                 } else {
                     this.collaborativeDocs = [];
                 }
@@ -3208,43 +3122,64 @@ export default {
                 </ul>
             </div>
 
-            <!-- Edit Menu -->
-            <div class="btn-group">
-                <button class="btn btn-dark no-caret dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                    aria-expanded="false">
-                    <i class="fas fa-edit me-sm-1 d-none"></i><span class="d-none d-sm-inline">Edit</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-dark bg-dark">
-                    <li><a class="dropdown-item" href="#" @click.prevent="bodyEditor?.chain().focus().undo().run()">
-                            <i class="fas fa-undo me-2"></i>Undo
-                        </a></li>
-                    <li><a class="dropdown-item" href="#" @click.prevent="bodyEditor?.chain().focus().redo().run()">
-                            <i class="fas fa-redo me-2"></i>Redo
-                        </a></li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li><a class="dropdown-item" href="#" @click.prevent="clearEditor">
-                            <i class="fas fa-eraser me-2"></i>Clear All
-                        </a></li>
-                </ul>
-            </div>
+            
 
             <!-- Collaboration Menu -->
             <div class="btn-group">
                 <button class="btn btn-dark no-caret dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                    aria-expanded="false">
-                    <i class="fas fa-users me-sm-1 d-none"></i><span class="d-none d-sm-inline">Collaboration</span>
+                    aria-expanded="false"
+                    :class="{
+                        'btn-outline-warning': !isAuthenticated || isAuthExpired,
+                        'btn-outline-success': isAuthenticated && !isAuthExpired && connectionStatus === 'connected',
+                        'btn-outline-primary': isAuthenticated && !isAuthExpired && connectionStatus !== 'connected'
+                    }">
+                    <i class="fas me-sm-1 d-none" :class="{
+                        'fa-key text-warning': !isAuthenticated || isAuthExpired,
+                        'fa-users text-success': isAuthenticated && !isAuthExpired && connectionStatus === 'connected',
+                        'fa-users text-primary': isAuthenticated && !isAuthExpired && connectionStatus !== 'connected'
+                    }"></i>
+                    <span class="d-none d-sm-inline">Collaboration</span>
+                    <!-- Auth status indicator -->
+                    <i v-if="!isAuthenticated || isAuthExpired" class="fas fa-exclamation-triangle text-warning ms-1" title="Authentication required"></i>
+                    <i v-else-if="connectionStatus === 'connected'" class="fas fa-check-circle text-success ms-1" title="Connected and authenticated"></i>
+                    <i v-else class="fas fa-shield-alt text-primary ms-1" title="Authenticated"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-dark bg-dark">
+                    <!-- Authentication Status Header -->
+                    <li class="dropdown-header d-flex align-items-center justify-content-between">
+                        <span>Authentication Status</span>
+                        <span v-if="!isAuthenticated || isAuthExpired" class="badge bg-warning text-dark">
+                            <i class="fas fa-key me-1"></i>{{ isAuthExpired ? 'Expired' : 'Required' }}
+                        </span>
+                        <span v-else class="badge bg-success">
+                            <i class="fas fa-check me-1"></i>Authenticated
+                        </span>
+                    </li>
+                    
+                    <!-- Authentication Actions -->
                     <li v-if="!isAuthenticated || isAuthExpired">
-                        <a class="dropdown-item" href="#" @click.prevent="requestAuthentication">
-                            <i class="fas fa-key me-2"></i>Authenticate
+                        <a class="dropdown-item text-warning fw-bold" href="#" @click.prevent="requestAuthentication">
+                            <i class="fas fa-key me-2"></i>{{ isAuthExpired ? 'Re-authenticate' : 'Authenticate Now' }}
                         </a>
                     </li>
-                    <li v-else-if="connectionStatus === 'disconnected' && currentFile?.type === 'collaborative'">
-                        <a class="dropdown-item" href="#" @click.prevent="initializeCollaboration(currentFile)">
-                            <i class="fas fa-plug me-2"></i>Connect
+                    <li v-else>
+                        <a class="dropdown-item text-muted" href="#" @click.prevent="requestAuthentication">
+                            <i class="fas fa-redo me-2"></i>Refresh Authentication
+                        </a>
+                    </li>
+                    
+                    <li><hr class="dropdown-divider"></li>
+                    
+                    <!-- Connection Actions -->
+                    <li v-if="connectionStatus === 'disconnected' && currentFile?.type === 'collaborative'">
+                        <a class="dropdown-item" href="#" @click.prevent="connectToCollaborationServer(currentFile)">
+                            <i class="fas fa-plug me-2"></i>Connect to Document
+                        </a>
+                    </li>
+                    <li v-if="currentFile && currentFile.type !== 'collaborative'">
+                        <a class="dropdown-item" href="#" @click.prevent="!isAuthenticated ? requestAuthentication() : convertToCollaborative()">
+                            <i class="fas fa-cloud-upload-alt me-2"></i>Publish to Cloud
+                            <small v-if="!isAuthenticated" class="d-block text-muted">Authentication required</small>
                         </a>
                     </li>
                     <li v-else-if="connectionStatus === 'connected'">
@@ -3252,33 +3187,17 @@ export default {
                             <i class="fas fa-unlink me-2"></i>Disconnect
                         </a>
                     </li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
+                    
+                    <li><hr class="dropdown-divider"></li>
+                    
+                    <!-- Document Actions -->
                     <li><a class="dropdown-item" href="#" @click.prevent="shareDocument"
                             :class="{ disabled: !canShare }">
                             <i class="fas fa-user-plus me-2"></i>Share Document
+                            <small v-if="!canShare && (!isAuthenticated || isAuthExpired)" class="d-block text-muted">Authentication required</small>
                         </a></li>
                     <li><a class="dropdown-item" href="#" @click.prevent="showLoadModal = true">
                             <i class="fas fa-folder me-2"></i>Browse Documents
-                        </a></li>
-                </ul>
-            </div>
-
-            <!--View Menu-->
-            <div class="btn-group">
-                <button class="btn btn-dark no-caret dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                    aria-expanded="false">
-                    <i class="fas fa-eye me-sm-1 d-none"></i><span class="d-none d-sm-inline">View</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-dark bg-dark">
-                    <li><a class="dropdown-item" href="#" @click.prevent="showAdvancedOptions = !showAdvancedOptions">
-                            <i class="fas fa-cog me-2"></i>{{ showAdvancedOptions? 'Hide': 'Show' }}
-                            Advanced Options
-                        </a></li>
-                    <li><a class="dropdown-item" href="#" @click.prevent="showPermlinkEditor = !showPermlinkEditor">
-                            <i class="fas fa-link me-2"></i>{{ showPermlinkEditor? 'Hide': 'Show' }}
-                            Permlink Editor
                         </a></li>
                 </ul>
             </div>
@@ -3400,32 +3319,6 @@ export default {
             <div v-if="generatedPermlink" class="mt-2 text-start">
                 <small class="text-muted font-monospace">/@{{ username }}/{{ generatedPermlink }}</small>
             </div>
-        </div>
-
-        <!-- Permlink Field -->
-        <div v-if="showPermlinkEditor" class="">
-            <label class="form-label text-white fw-bold d-none">
-                <i class="fas fa-link me-2"></i>URL Slug (Permlink)
-                <span class="badge bg-secondary ms-2">Local Only</span>
-            </label>
-            <div class="d-flex align-items-center gap-2 mb-2">
-                <code class="text-info">/@{{ username }}/</code>
-                <div class="flex-grow-1 position-relative">
-                    <div v-if="!showPermlinkEditor" @click="togglePermlinkEditor"
-                        class="bg-dark border border-secondary rounded p-2 cursor-pointer text-white font-monospace">
-                        {{ content.permlink || generatedPermlink || 'Click to edit...' }}
-                    </div>
-                    <div v-else class="editor-field bg-dark border border-secondary rounded">
-                        <div ref="permlinkEditor" class="permlink-editor"></div>
-                    </div>
-                </div>
-                <button @click="useGeneratedPermlink" class="btn btn-sm btn-outline-secondary"
-                    :disabled="!generatedPermlink">
-                    Auto-generate
-                </button>
-            </div>
-            <small class="text-muted">URL-safe characters only (a-z, 0-9, dashes). Not synchronized in collaborative
-                mode.</small>
         </div>
 
         <!--Body Field-->
@@ -3597,6 +3490,31 @@ export default {
             </button>
 
             <div class="collapse mt-3" id="advancedOptions">
+                <!-- Permlink Field -->
+                <div class="">
+                    <label class="form-label text-white fw-bold d-none">
+                        <i class="fas fa-link me-2"></i>URL Slug (Permlink)
+                        <span class="badge bg-secondary ms-2">Local Only</span>
+                    </label>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <code class="text-info">/@{{ username }}/</code>
+                        <div class="flex-grow-1 position-relative">
+                            <div v-if="!showPermlinkEditor" @click="togglePermlinkEditor"
+                                class="bg-dark border border-secondary rounded p-2 cursor-pointer text-white font-monospace">
+                                {{ content.permlink || generatedPermlink || 'Click to edit...' }}
+                            </div>
+                            <div v-else class="editor-field bg-dark border border-secondary rounded">
+                                <div ref="permlinkEditor" class="permlink-editor"></div>
+                            </div>
+                        </div>
+                        <button @click="useGeneratedPermlink" class="btn btn-sm btn-outline-secondary"
+                            :disabled="!generatedPermlink">
+                            Auto-generate
+                        </button>
+                    </div>
+                    <small class="text-muted">URL-safe characters only (a-z, 0-9, dashes). Not synchronized in collaborative
+                        mode.</small>
+                </div>
                 <!-- Beneficiaries Section -->
                 <div class="mb-4">
                     <label class="form-label text-white fw-bold">
@@ -3805,10 +3723,16 @@ export default {
 
                         </div>
                     </div>
-                    <button v-if="localFiles.length > 0" @click="clearAllLocalFiles"
-                        class="btn btn-sm btn-outline-danger">
-                        <i class="fas fa-trash me-1"></i>Clear All Local Files
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button v-if="localFiles.length > 0" @click="clearAllLocalFiles"
+                            class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-trash me-1"></i>Clear All Local Files
+                        </button>
+                        <button v-if="ownedCloudFiles.length > 0" @click="clearAllCloudFiles"
+                            class="btn btn-sm btn-outline-warning">
+                            <i class="fas fa-cloud me-1"></i>Clear My Cloud Files
+                        </button>
+                    </div>
                 </div>
 
                 <div v-if="loadingDocs && isAuthenticated" class="text-center py-4">
