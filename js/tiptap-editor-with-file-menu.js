@@ -1821,6 +1821,7 @@ export default {
                             document: this.ydoc,
                             field: titleFieldName,
                             fragmentContent: true,
+                            child: true,
                         }),
                         CollaborationCursor.configure({
                             provider: this.provider,
@@ -1828,12 +1829,24 @@ export default {
                                 name: this.username,
                                 color: userColor,
                             },
-                            render: () => null, // Disable cursor rendering for title
+                            render: false,
                         }),
                     ],
                     editorProps: {
                         attributes: {
                             class: 'form-control bg-transparent text-white border-0',
+                        },
+                        handleDOMEvents: {
+                            focus: (view, event) => {
+                                return true;
+                            }
+                        }
+                    },
+                    onCreate: ({ editor }) => {
+                        // Set up cursor storage watcher
+                        const cursorStorage = editor.storage.collaborationCursor;
+                        if (cursorStorage) {
+                            cursorStorage.users = [];
                         }
                     },
                     onUpdate: ({ editor }) => {
@@ -1855,6 +1868,7 @@ export default {
                             document: this.ydoc,
                             field: bodyFieldName,
                             fragmentContent: true,
+                            child: true,
                         }),
                         CollaborationCursor.configure({
                             provider: this.provider,
@@ -1867,6 +1881,38 @@ export default {
                     editorProps: {
                         attributes: {
                             class: 'form-control bg-transparent text-white border-0',
+                        },
+                        handleDOMEvents: {
+                            focus: (view, event) => {
+                                if (view.state.decorations) {
+                                    return false;
+                                }
+                                return true;
+                            }
+                        }
+                    },
+                    onCreate: ({ editor }) => {
+                        // Set up cursor storage watcher
+                        const cursorStorage = editor.storage.collaborationCursor;
+                        if (cursorStorage) {
+                            // Initialize users array
+                            cursorStorage.users = [];
+                            
+                            // Set up watcher for cursor updates
+                            Object.defineProperty(cursorStorage, 'users', {
+                                get() {
+                                    return this._users || [];
+                                },
+                                set: (users) => {
+                                    cursorStorage._users = users;
+                                    if (Array.isArray(users)) {
+                                        this.connectedUsers = users.map(user => ({
+                                            name: user.name,
+                                            color: user.color || this.generateUserColor(user.name)
+                                        }));
+                                    }
+                                }
+                            });
                         }
                     },
                     onUpdate: ({ editor }) => {
