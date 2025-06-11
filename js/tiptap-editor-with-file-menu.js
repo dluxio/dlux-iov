@@ -409,12 +409,29 @@ export default {
         isReadOnlyMode() {
             // Only applies to collaborative documents
             if (!this.currentFile || this.currentFile.type !== 'collaborative') {
+                console.log('🔐 Not a collaborative document, allowing full access');
                 return false;
             }
             
             // Document owner always has full access
             if (this.currentFile.owner === this.username) {
+                console.log('🔐 User is document owner, allowing full access');
                 return false;
+            }
+            
+            // Debug: Log current state
+            console.log('🔐 Permission check debug:', {
+                username: this.username,
+                owner: this.currentFile.owner,
+                documentPermissions: this.documentPermissions,
+                isArray: Array.isArray(this.documentPermissions),
+                length: this.documentPermissions?.length
+            });
+            
+            // Ensure documentPermissions is an array
+            if (!Array.isArray(this.documentPermissions)) {
+                console.warn('🔒 documentPermissions is not an array, defaulting to read-only mode');
+                return true;
             }
             
             // Check user's permission level
@@ -1113,13 +1130,28 @@ export default {
                     });
 
                     if (!response?.ok) {
-                        // Set default permissions with owner access
-                        const defaultPermissions = {
-                            [this.currentFile.owner]: 'write',
-                            [this.username]: this.currentFile.owner === this.username ? 'write' : 'read'
-                        };
+                        // Set default permissions as array with proper structure
+                        const defaultPermissions = [];
+                        
+                        // Add owner permission
+                        defaultPermissions.push({
+                            account: this.currentFile.owner,
+                            permissionType: 'postable', // Owner has full access
+                            grantedBy: this.currentFile.owner,
+                            grantedAt: new Date().toISOString()
+                        });
+                        
+                        // Add current user permission if different from owner
+                        if (this.username !== this.currentFile.owner) {
+                            defaultPermissions.push({
+                                account: this.username,
+                                permissionType: 'readonly', // Default to read-only for safety
+                                grantedBy: this.currentFile.owner,
+                                grantedAt: new Date().toISOString()
+                            });
+                        }
 
-                        console.log('Using default permissions:', defaultPermissions);
+                        console.log('Using default permissions array:', defaultPermissions);
                         this.documentPermissions = defaultPermissions;
                         throw new Error(`HTTP ${response?.status}`);
                     }
@@ -1395,21 +1427,25 @@ export default {
                 console.log('🔗 Connecting to collaboration server...');
                 await this.connectToCollaborationServer(doc);
                 
-                // Load permissions after successful connection
-                if (this.connectionStatus === 'connected') {
-                    try {
-                        await this.loadDocumentPermissions();
-                        // CRITICAL: Update editor permissions after loading permissions
-                        this.updateEditorPermissions();
-                    } catch (error) {
-                        console.warn('Failed to load permissions, but connection established:', error);
-                        // Continue even if permissions fail - user might still have access
-                        // But default to read-only for safety
-                        this.updateEditorPermissions();
+                // CRITICAL: Always try to load permissions for collaborative documents
+                try {
+                    console.log('🔐 Loading permissions for collaborative document...');
+                    await this.loadDocumentPermissions();
+                    console.log('✅ Permissions loaded, updating editor permissions...');
+                    this.updateEditorPermissions();
+                } catch (error) {
+                    console.warn('⚠️ Failed to load permissions:', error);
+                    // Ensure we have some default permissions structure
+                    if (!Array.isArray(this.documentPermissions)) {
+                        console.log('🔒 Setting fallback permissions for safety');
+                        this.documentPermissions = [{
+                            account: this.username,
+                            permissionType: 'readonly', // Default to read-only for safety
+                            grantedBy: this.currentFile.owner,
+                            grantedAt: new Date().toISOString()
+                        }];
                     }
-                } else {
-                    console.warn('Skipping permissions load - not connected');
-                    // Update permissions anyway (will default to read-only if no permissions)
+                    // Update editor permissions with fallback
                     this.updateEditorPermissions();
                 }
                 console.log('🤝 Collaborative document loaded:', doc.permlink);
@@ -1723,7 +1759,7 @@ export default {
                     },
                 onCreate: ({ editor }) => {
                     console.log(`✅ Offline collaborative title editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
-                },
+                    },
                     onUpdate: ({ editor }) => {
                         // SECURITY: Block updates for read-only users
                         if (this.isReadOnlyMode) {
@@ -1842,7 +1878,7 @@ export default {
                     this.content.title = editor.getHTML();
                     this.hasUnsavedChanges = true;
                     this.autoSaveContent();
-                    }
+            }
                 });
             
                 this.bodyEditor = new Editor({
@@ -1861,7 +1897,7 @@ export default {
                     },
                 onCreate: ({ editor }) => {
                     console.log(`✅ Basic body editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
-                },
+                    },
                     onUpdate: ({ editor }) => {
                         // SECURITY: Block updates for read-only users
                         if (this.isReadOnlyMode) {
@@ -1928,6 +1964,24 @@ export default {
                 // Note: TipTap doesn't have a direct way to update placeholder after creation
                 // The placeholder will be correct on next editor recreation
             }
+            
+            // Force Vue to re-evaluate computed properties and update UI
+            this.$forceUpdate();
+        },
+        
+        // Debug method to manually check and update permissions
+        debugPermissions() {
+            console.log('🔍 DEBUG: Manual permission check triggered');
+            console.log('Current state:', {
+                username: this.username,
+                currentFile: this.currentFile,
+                documentPermissions: this.documentPermissions,
+                isReadOnlyMode: this.isReadOnlyMode,
+                connectionStatus: this.connectionStatus
+            });
+            
+            // Force update editor permissions
+            this.updateEditorPermissions();
         },
 
         // Clear unsaved changes flag after collaborative sync
@@ -3224,6 +3278,34 @@ export default {
     },
     
     template: `<div class="collaborative-post-editor">
+    <style>
+        /* Read-only editor styling */
+        .ProseMirror[contenteditable="false"] {
+            background-color: rgba(108, 117, 125, 0.1) !important;
+            cursor: default !important;
+            opacity: 0.8;
+        }
+        
+        .ProseMirror[contenteditable="false"]:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* Read-only toolbar styling */
+        .editor-toolbar[style*="pointer-events: none"] {
+            user-select: none;
+        }
+        
+        /* Read-only warning banner animation */
+        .alert-info {
+            animation: subtle-pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes subtle-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
+        }
+    </style>
     <!-- File Menu Bar -->
     <div class="file-menu-bar bg-dark border-bottom border-secondary mb-3 p-05 d-flex">
         <div class="">
@@ -3362,6 +3444,13 @@ export default {
                             <i class="fas fa-plug me-2"></i>Connect to Document
                         </a>
                     </li>
+                    
+                    <!-- Debug option for testing permissions -->
+                    <li v-if="currentFile?.type === 'collaborative'">
+                        <a class="dropdown-item text-info" href="#" @click.prevent="debugPermissions()">
+                            <i class="fas fa-bug me-2"></i>Debug Permissions
+                        </a>
+                    </li>
                     <li v-if="currentFile && currentFile.type !== 'collaborative'">
                         <a class="dropdown-item" href="#" @click.prevent="!isAuthenticated ? requestAuthentication() : convertToCollaborative()">
                             <i class="fas fa-cloud-upload-alt me-2"></i>Publish to Cloud
@@ -3395,6 +3484,15 @@ export default {
                 <i class="fas fa-file me-1"></i>{{ currentFile.name || currentFile.documentName ||
                 currentFile.permlink }}
                 <span v-if="hasUnsavedChanges" class="text-warning ms-1">●</span>
+                <!-- Permission indicator for collaborative docs -->
+                <span v-if="currentFile.type === 'collaborative'" class="ms-2">
+                    <span v-if="isReadOnlyMode" class="badge bg-warning text-dark">
+                        <i class="fas fa-eye me-1"></i>Read-Only
+                    </span>
+                    <span v-else class="badge bg-success">
+                        <i class="fas fa-edit me-1"></i>Editable
+                    </span>
+                </span>
             </span>
             <span v-else class="text-muted small">
                 <i class="fas fa-file-plus me-1"></i>Untitled
@@ -3943,7 +4041,7 @@ export default {
                         <button v-if="ownedCloudFiles.length > 0" @click="clearAllCloudFiles"
                             class="btn btn-sm btn-outline-warning">
                             <i class="fas fa-cloud me-1"></i>Clear My Cloud Files
-                        </button>
+                    </button>
                     </div>
                 </div>
 
