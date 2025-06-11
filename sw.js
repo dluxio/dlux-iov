@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.11.6",
-  "generated": "2025-06-11T03:53:46Z",
+  "version": "2025.06.10.21",
+  "generated": "2025-06-11T04:38:32Z",
   "files": {
-    "/js/model-viewer.min.js": {
-      "checksum": "dd677b435b16f44e4ca08a9f354bac24",
-      "size": 955555,
-      "priority": "important"
-    },
     "/js/nav.js": {
       "checksum": "7ec38d3ee084cc52ed87ba82bad4d563",
       "size": 27637,
@@ -716,7 +711,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "09f4acce0be733847f85e05d517a0fe7",
+      "checksum": "ec536161c08ce4bde07880f49b90fce4",
       "size": 36316,
       "priority": "important"
     },
@@ -906,7 +901,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "3d6f59c0691ec0c5bbb24abdc15faf18",
+      "checksum": "0fee324caf0f9b08702673baf74516fd",
       "size": 7299,
       "priority": "important"
     },
@@ -979,11 +974,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/nls.messages.de.js": {
-      "checksum": "cd01fdaf9e23b2da4de6c7628b06e6b3",
-      "size": 119967,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-editor/vs/nls.messages.es.js": {
       "checksum": "e55051c17fde8e3a33086d9cf68e5be1",
@@ -1185,12 +1175,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

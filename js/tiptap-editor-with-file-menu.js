@@ -1820,6 +1820,7 @@ export default {
                         Collaboration.configure({
                             document: this.ydoc,
                             field: titleFieldName,
+                            fragmentContent: true,
                         }),
                         CollaborationCursor.configure({
                             provider: this.provider,
@@ -1827,6 +1828,7 @@ export default {
                                 name: this.username,
                                 color: userColor,
                             },
+                            render: () => null, // Disable cursor rendering for title
                         }),
                     ],
                     editorProps: {
@@ -1852,6 +1854,7 @@ export default {
                         Collaboration.configure({
                             document: this.ydoc,
                             field: bodyFieldName,
+                            fragmentContent: true,
                         }),
                         CollaborationCursor.configure({
                             provider: this.provider,
