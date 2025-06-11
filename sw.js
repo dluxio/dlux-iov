@@ -1,4 +1,4 @@
-this.version = "2025.06.11.19";
+this.version = "2025.06.11.20";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.11.14",
-  "generated": "2025-06-11T21:09:09Z",
+  "version": "2025.06.11.20",
+  "generated": "2025-06-11T21:09:19Z",
   "files": {
-    "/js/toastvue.js": {
-      "checksum": "15a042f49546393a84afe492cbe516d3",
-      "size": 2374,
-      "priority": "important"
-    },
     "/js/trading-vue.min.js": {
       "checksum": "6e6bb2f8dd6f94e2c8656759eafc1a26",
       "size": 264037,
@@ -850,11 +845,6 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/playground/env_thumbs/moon.png": {
-      "checksum": "ee9ab8dd48a85e181896158dcdd522f3",
-      "size": 211072,
-      "priority": "page-specific"
-    },
     "/playground/env_thumbs/none.png": {
       "checksum": "f5dee31316fd9060eea8f8134918c28f",
       "size": 35892,
@@ -925,12 +915,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
