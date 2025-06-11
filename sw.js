@@ -1,4 +1,4 @@
-this.version = "2025.06.11.15";
+this.version = "2025.06.11.16";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.11.09",
-  "generated": "2025-06-11T16:22:21Z",
+  "version": "2025.06.11.16",
+  "generated": "2025-06-11T16:22:34Z",
   "files": {
-    "/js/spkdrive.js": {
-      "checksum": "2346e67c6af61c3477f721f836160258",
-      "size": 82702,
-      "priority": "important"
-    },
     "/js/spkvue.js": {
       "checksum": "383f1b410ce7ceb6210f7b4227e8f894",
       "size": 92248,
@@ -885,11 +880,6 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/playground/env_thumbs/default.png": {
-      "checksum": "0b47acc6325bdbae72559e198f6169a8",
-      "size": 117008,
-      "priority": "page-specific"
-    },
     "/playground/env_thumbs/dream.png": {
       "checksum": "632127c42e2c92db1bce11add6499e41",
       "size": 113290,
@@ -995,12 +985,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
