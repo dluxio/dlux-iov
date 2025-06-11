@@ -403,7 +403,36 @@ export default {
                 return [];
             }
             return this.collaborativeDocs.filter(doc => doc.owner === this.authHeaders['x-account']);
-        }
+        },
+
+        // Check if current user should have read-only access to the collaborative document
+        isReadOnlyMode() {
+            // Only applies to collaborative documents
+            if (!this.currentFile || this.currentFile.type !== 'collaborative') {
+                return false;
+            }
+            
+            // Document owner always has full access
+            if (this.currentFile.owner === this.username) {
+                return false;
+            }
+            
+            // Check user's permission level
+            const userPermission = this.documentPermissions.find(p => p.account === this.username);
+            
+            // If no permission found, default to read-only for safety
+            if (!userPermission) {
+                console.log('🔒 No permission found for user, defaulting to read-only mode');
+                return true;
+            }
+            
+            // Only 'readonly' permission type should be read-only
+            const isReadOnly = userPermission.permissionType === 'readonly';
+            
+            console.log(`🔐 Permission check for ${this.username}: ${userPermission.permissionType}, read-only: ${isReadOnly}`);
+            
+            return isReadOnly;
+        },
     },
     
     methods: {
@@ -811,7 +840,7 @@ export default {
                 this.saveAsProcess.serverDocId = serverDoc;
                 this.saveAsProcess.step = 'connecting';
                 this.saveAsProcess.message = 'Connecting existing document to server...';
-                
+                        
                 // Step 3: TipTap Best Practice - Connect existing Y.js document to WebSocket provider
                 // No content transfer needed - the Y.js document already contains all content
                 
@@ -998,6 +1027,8 @@ export default {
                     
                     // Reload permissions to update the list
                     await this.loadDocumentPermissions();
+                    // Update editor permissions in case they changed
+                    this.updateEditorPermissions();
                     
                     alert(`Document shared with @${username}!`);
                 } else {
@@ -1133,6 +1164,8 @@ export default {
                 
                 if (response.ok) {
                     await this.loadDocumentPermissions();
+                    // Update editor permissions in case current user's permissions changed
+                    this.updateEditorPermissions();
                     console.log(`Permission updated for @${account} to ${newPermission}`);
                 } else {
                     throw new Error('Failed to update permission');
@@ -1154,6 +1187,8 @@ export default {
                 
                 if (response.ok) {
                     await this.loadDocumentPermissions();
+                    // Update editor permissions in case current user's permissions changed
+                    this.updateEditorPermissions();
                     console.log(`Permission revoked for @${account}`);
                 } else {
                     throw new Error('Failed to revoke permission');
@@ -1364,12 +1399,18 @@ export default {
                 if (this.connectionStatus === 'connected') {
                     try {
                         await this.loadDocumentPermissions();
+                        // CRITICAL: Update editor permissions after loading permissions
+                        this.updateEditorPermissions();
                     } catch (error) {
                         console.warn('Failed to load permissions, but connection established:', error);
                         // Continue even if permissions fail - user might still have access
+                        // But default to read-only for safety
+                        this.updateEditorPermissions();
                     }
                 } else {
                     console.warn('Skipping permissions load - not connected');
+                    // Update permissions anyway (will default to read-only if no permissions)
+                    this.updateEditorPermissions();
                 }
                 console.log('🤝 Collaborative document loaded:', doc.permlink);
             } catch (error) {
@@ -1652,38 +1693,45 @@ export default {
             // Initialize shared types
             this.ydoc.get('title', Y.XmlFragment);
             this.ydoc.get('body', Y.XmlFragment);
-
+            
             // Create collaborative editors (offline mode - no WebSocket connection)
-            this.titleEditor = new Editor({
-                element: this.$refs.titleEditor,
-                extensions: [
-                    StarterKit.configure({
+                this.titleEditor = new Editor({
+                    element: this.$refs.titleEditor,
+                    extensions: [
+                        StarterKit.configure({
                         history: false, // Collaboration handles history
-                        heading: false,
-                        bulletList: false,
-                        orderedList: false,
-                        blockquote: false,
-                        codeBlock: false,
+                            heading: false,
+                            bulletList: false,
+                            orderedList: false,
+                            blockquote: false,
+                            codeBlock: false,
                         horizontalRule: false
                     }),
                     Collaboration.configure({
                         document: this.ydoc,
                         field: 'title'
-                    }),
-                    Placeholder.configure({
-                        placeholder: 'Enter title...'
-                    })
-                ],
-                editorProps: {
-                    attributes: {
-                        class: 'form-control bg-transparent text-white border-0',
-                    }
-                },
+                        }),
+                        Placeholder.configure({
+                        placeholder: this.isReadOnlyMode ? 'Title (read-only)' : 'Enter title...'
+                        })
+                    ],
+                    editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
+                    editorProps: {
+                        attributes: {
+                            class: 'form-control bg-transparent text-white border-0',
+                        }
+                    },
                 onCreate: ({ editor }) => {
-                    console.log('✅ Offline collaborative title editor ready');
+                    console.log(`✅ Offline collaborative title editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
                 },
-                onUpdate: ({ editor }) => {
-                    this.content.title = editor.getHTML();
+                    onUpdate: ({ editor }) => {
+                        // SECURITY: Block updates for read-only users
+                        if (this.isReadOnlyMode) {
+                            console.warn('🚫 Blocked title update: user has read-only permissions');
+                            return;
+                        }
+                        
+                        this.content.title = editor.getHTML();
                     
                     // Always show unsaved indicator for user feedback
                     this.hasUnsavedChanges = true;
@@ -1709,18 +1757,25 @@ export default {
                         field: 'body'
                     }),
                     Placeholder.configure({
-                        placeholder: 'Start writing...'
+                        placeholder: this.isReadOnlyMode ? 'Content (read-only)' : 'Start writing...'
                     })
                 ],
+                editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
                 editorProps: {
                     attributes: {
                         class: 'form-control bg-transparent text-white border-0',
                     }
                 },
                 onCreate: ({ editor }) => {
-                    console.log('✅ Offline collaborative body editor ready');
+                    console.log(`✅ Offline collaborative body editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
                 },
                 onUpdate: ({ editor }) => {
+                    // SECURITY: Block updates for read-only users
+                    if (this.isReadOnlyMode) {
+                        console.warn('🚫 Blocked body update: user has read-only permissions');
+                        return;
+                    }
+                    
                     this.content.body = editor.getHTML();
                     
                     // Always show unsaved indicator for user feedback
@@ -1755,52 +1810,66 @@ export default {
             
             this.titleEditor = new Editor({
                 element: this.$refs.titleEditor,
-                extensions: [
-                    StarterKit.configure({
-                        heading: false,
-                        bulletList: false,
-                        orderedList: false,
-                        blockquote: false,
-                        codeBlock: false,
+                    extensions: [
+                        StarterKit.configure({
+                            heading: false,
+                            bulletList: false,
+                            orderedList: false,
+                            blockquote: false,
+                            codeBlock: false,
                         horizontalRule: false
-                    }),
-                    Placeholder.configure({
-                        placeholder: 'Enter title...'
-                    })
-                ],
-                editorProps: {
-                    attributes: {
+                        }),
+                        Placeholder.configure({
+                        placeholder: this.isReadOnlyMode ? 'Title (read-only)' : 'Enter title...'
+                        })
+                    ],
+                    editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
+                    editorProps: {
+                        attributes: {
                         class: 'form-control bg-transparent text-white border-0',
                     }
                 },
                 onCreate: ({ editor }) => {
-                    console.log('✅ Basic title editor ready');
-                },
-                onUpdate: ({ editor }) => {
+                    console.log(`✅ Basic title editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
+                    },
+                    onUpdate: ({ editor }) => {
+                    // SECURITY: Block updates for read-only users
+                    if (this.isReadOnlyMode) {
+                        console.warn('🚫 Blocked title update: user has read-only permissions');
+                        return;
+                    }
+                    
                     this.content.title = editor.getHTML();
                     this.hasUnsavedChanges = true;
                     this.autoSaveContent();
-                }
-            });
-
-            this.bodyEditor = new Editor({
-                element: this.$refs.bodyEditor,
-                extensions: [
-                    StarterKit,
-                    Placeholder.configure({
-                        placeholder: 'Start writing...'
-                    })
-                ],
-                editorProps: {
-                    attributes: {
-                        class: 'form-control bg-transparent text-white border-0',
                     }
-                },
+                });
+            
+                this.bodyEditor = new Editor({
+                    element: this.$refs.bodyEditor,
+                    extensions: [
+                    StarterKit,
+                        Placeholder.configure({
+                        placeholder: this.isReadOnlyMode ? 'Content (read-only)' : 'Start writing...'
+                    })
+                    ],
+                    editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
+                    editorProps: {
+                        attributes: {
+                            class: 'form-control bg-transparent text-white border-0',
+                        }
+                    },
                 onCreate: ({ editor }) => {
-                    console.log('✅ Basic body editor ready');
+                    console.log(`✅ Basic body editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
                 },
-                onUpdate: ({ editor }) => {
-                    this.content.body = editor.getHTML();
+                    onUpdate: ({ editor }) => {
+                        // SECURITY: Block updates for read-only users
+                        if (this.isReadOnlyMode) {
+                            console.warn('🚫 Blocked body update: user has read-only permissions');
+                            return;
+                        }
+                        
+                        this.content.body = editor.getHTML();
                     this.hasUnsavedChanges = true;
                     this.autoSaveContent();
                 }
@@ -1836,6 +1905,29 @@ export default {
                     this.hasUnsavedChanges = false;
                 }
             }, 2000); // Autosave 2 seconds after last edit
+        },
+
+        // Update editor permissions based on current user's access level
+        updateEditorPermissions() {
+            console.log('🔐 Updating editor permissions, read-only mode:', this.isReadOnlyMode);
+            
+            // Update title editor permissions
+            if (this.titleEditor) {
+                this.titleEditor.setEditable(!this.isReadOnlyMode);
+                console.log(`📝 Title editor set to ${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'}`);
+            }
+            
+            // Update body editor permissions
+            if (this.bodyEditor) {
+                this.bodyEditor.setEditable(!this.isReadOnlyMode);
+                console.log(`📝 Body editor set to ${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'}`);
+            }
+            
+            // Update placeholders to reflect read-only state
+            if (this.titleEditor) {
+                // Note: TipTap doesn't have a direct way to update placeholder after creation
+                // The placeholder will be correct on next editor recreation
+            }
         },
 
         // Clear unsaved changes flag after collaborative sync
@@ -1874,15 +1966,15 @@ export default {
                 this.provider.disconnect();
                 this.provider.destroy();
                 this.provider = null;
-            }
-            
+                }
+                
                         // Build auth token and URL - use token-in-config as primary approach (proven to work better)
             const authToken = JSON.stringify({
-                account: this.authHeaders['x-account'],
-                signature: this.authHeaders['x-signature'],
-                challenge: this.authHeaders['x-challenge'],
-                pubkey: this.authHeaders['x-pubkey']
-            });
+                    account: this.authHeaders['x-account'],
+                    signature: this.authHeaders['x-signature'],
+                    challenge: this.authHeaders['x-challenge'],
+                    pubkey: this.authHeaders['x-pubkey']
+                });
             
             const baseUrl = 'wss://data.dlux.io/collaboration';
             const docPath = `${serverDoc.owner}/${serverDoc.permlink}`;
@@ -1901,35 +1993,35 @@ export default {
             await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
             
             // PRIMARY APPROACH: Use token in config (proven to work reliably)
-            const providerConfig = {
+                const providerConfig = {
                 url: `${baseUrl}/${docPath}`, // Clean URL without token
                 name: docPath,
                 token: authToken, // Token in config - this is the reliable method
                 document: this.ydoc, // Connect existing Y.js document
-                connect: true,
-                timeout: 30000,
-                forceSyncInterval: 30000,
+                    connect: true,
+                    timeout: 30000,
+                    forceSyncInterval: 30000,
                 maxMessageSize: 1024 * 1024,
-                onConnect: () => {
-                    console.log('✅ Connected to collaboration server');
-                    this.connectionStatus = 'connected';
-                    this.connectionMessage = 'Connected - Real-time collaboration active';
-                },
-                onDisconnect: ({ event }) => {
+                    onConnect: () => {
+                        console.log('✅ Connected to collaboration server');
+                        this.connectionStatus = 'connected';
+                        this.connectionMessage = 'Connected - Real-time collaboration active';
+                    },
+                    onDisconnect: ({ event }) => {
                     console.log('❌ Disconnected from collaboration server', {
                         code: event?.code,
                         reason: event?.reason,
                         wasClean: event?.wasClean
                     });
-                    this.connectionStatus = 'disconnected';
-                    this.connectionMessage = 'Disconnected from server';
-                },
-                onSynced: ({ synced }) => {
+                        this.connectionStatus = 'disconnected';
+                        this.connectionMessage = 'Disconnected from server';
+                    },
+                    onSynced: ({ synced }) => {
                     console.log('🔄 onSynced called:', { synced, isCollaborativeMode: this.isCollaborativeMode, connectionStatus: this.connectionStatus, hasUnsavedChanges: this.hasUnsavedChanges });
                     
-                    if (synced) {
-                        console.log('📡 Document synchronized');
-                        this.connectionMessage = 'Connected - Document synchronized';
+                        if (synced) {
+                            console.log('📡 Document synchronized');
+                            this.connectionMessage = 'Connected - Document synchronized';
                         
                         // Reset unsaved changes flag for collaborative documents
                         if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
@@ -1950,12 +2042,12 @@ export default {
                         message: event?.message,
                         type: event?.type
                     });
-                },
-                onAuthenticationFailed: ({ reason }) => {
-                    console.error('🔐 Authentication failed:', reason);
+                    },
+                    onAuthenticationFailed: ({ reason }) => {
+                        console.error('🔐 Authentication failed:', reason);
                     this.serverAuthFailed = true;
-                    this.connectionStatus = 'disconnected';
-                    this.connectionMessage = `Authentication failed: ${reason}`;
+                        this.connectionStatus = 'disconnected';
+                        this.connectionMessage = `Authentication failed: ${reason}`;
                     
                     if (reason === 'permission-denied') {
                         setTimeout(() => {
@@ -1966,8 +2058,8 @@ export default {
             };
             
             console.log('🔌 Creating HocuspocusProvider with token-in-config (primary method)...');
-            this.provider = new HocuspocusProvider(providerConfig);
-            
+                this.provider = new HocuspocusProvider(providerConfig);
+                
             // Add Y.js document update listener for more reliable sync detection
             if (this.ydoc) {
                 this.ydoc.on('update', (update, origin) => {
@@ -1975,10 +2067,10 @@ export default {
                     if (origin !== this.ydoc.clientID && this.isCollaborativeMode && this.connectionStatus === 'connected') {
                         console.log('📡 Y.js remote update detected, clearing unsaved flag');
                         this.hasUnsavedChanges = false;
+                            }
+                        });
                     }
-                });
-            }
-            
+                    
             // Wait for connection with optimized retry logic
             let retries = 0;
             const maxRetries = 20; // Reduced since primary method should work faster
@@ -1998,17 +2090,17 @@ export default {
                     connectionSuccess = true;
                     console.log('✅ WebSocket connected successfully');
                     break;
-                }
-                
+                                }
+                                
                 // Log progress every 2 seconds
                 if (retries % 4 === 0) {
                     console.log(`⏳ Connection attempt ${retries}/${maxRetries} - WebSocket state: ${this.provider.ws?.readyState}, Status: ${this.connectionStatus}`);
-                }
+                    }
                 
                 // Try fallback authentication approach after half the retries
                 if (retries === Math.floor(maxRetries / 2) && !connectionSuccess) {
                     console.log('🔄 Trying fallback authentication approach...');
-                    
+                            
                     // Clean up current provider
                     if (this.provider) {
                         this.provider.disconnect();
@@ -2023,7 +2115,7 @@ export default {
                         // Remove token from config
                     };
                     delete fallbackConfig.token;
-                    
+                
                     console.log('🔗 Trying fallback connection with token in URL...');
                     this.provider = new HocuspocusProvider(fallbackConfig);
                 }
@@ -2041,8 +2133,8 @@ export default {
                 };
                 console.error('❌ Connection failed with details:', errorDetails);
                 throw new Error(`Failed to connect to collaboration server after ${(maxRetries * 0.5)}s - WebSocket state: ${errorDetails.wsState}`);
-            }
-            
+                    }
+                    
             console.log('✅ Existing Y.js document successfully connected to collaboration server');
         },
 
@@ -2243,7 +2335,7 @@ export default {
                 alert(`Failed to connect to collaborative document:\n\n${error.message}`);
             }
         },
-
+        
         // Connection handlers
         onConnect() {
             this.connectionStatus = 'connected';
@@ -2902,7 +2994,7 @@ export default {
             }
         },
 
-                async convertToCollaborative() {
+        async convertToCollaborative() {
             // TipTap Best Practice: All documents are already collaborative (offline-first)
             // This method now just "publishes" the existing Y.js document to the server
             
@@ -2925,7 +3017,7 @@ export default {
                 } else {
                     return;
                 }
-            }
+                }
 
             // Test basic connectivity first
             console.log('🧪 Testing WebSocket connectivity...');
@@ -3007,7 +3099,7 @@ export default {
                             });
                         }
                     };
-                } catch (error) {
+            } catch (error) {
                     clearTimeout(timeout);
                     console.log('⚠️ WebSocket test failed, but proceeding anyway:', error.message);
                     // Don't fail the whole operation just because test failed
@@ -3016,7 +3108,7 @@ export default {
                         message: 'WebSocket test had issues but proceeding with actual connection',
                         warning: error.message
                     });
-                }
+            }
             });
         },
     },
@@ -3043,7 +3135,7 @@ export default {
                     }
                     
                     if (!this.isAuthExpired) {
-                        this.loadCollaborativeDocs();
+                    this.loadCollaborativeDocs();
                     } else {
                         this.collaborativeDocs = [];
                     }
@@ -3311,18 +3403,21 @@ export default {
 
             <!-- Connection Status Badge -->
             <span v-if="currentFile?.type === 'collaborative'" class="badge" :class="{
-            'bg-success': connectionStatus === 'connected',
+            'bg-success': connectionStatus === 'connected' && !isReadOnlyMode,
+            'bg-info': connectionStatus === 'connected' && isReadOnlyMode,
         'bg-warning': connectionStatus === 'connecting',
         'bg-secondary': connectionStatus === 'disconnected',
         'bg-danger': connectionStatus === 'error'
                     }">
                 <i class="fas fa-fw me-1" :class="{
-            'fa-check-circle': connectionStatus === 'connected',
+            'fa-check-circle': connectionStatus === 'connected' && !isReadOnlyMode,
+            'fa-eye': connectionStatus === 'connected' && isReadOnlyMode,
         'fa-spinner fa-spin': connectionStatus === 'connecting',
         'fa-circle': connectionStatus === 'disconnected',
         'fa-exclamation-circle': connectionStatus === 'error'
                         }"></i>
-                {{ connectionStatus === 'connected' ? 'Live' :
+                {{ connectionStatus === 'connected' && isReadOnlyMode ? 'Read-Only' :
+                   connectionStatus === 'connected' ? 'Live' :
                    connectionStatus === 'connecting' ? 'Connecting' :
                    connectionStatus === 'error' ? 'Error' : 'Offline' }}
             </span>
@@ -3399,6 +3494,15 @@ export default {
 
 
 
+    <!-- Read-Only Mode Warning Banner -->
+    <div v-if="isReadOnlyMode" class="alert alert-info border-info bg-dark text-info d-flex align-items-center mx-2 mb-3">
+        <i class="fas fa-eye me-2"></i>
+        <div class="flex-grow-1">
+            <strong>Read-Only Mode</strong> - You can view this document but cannot make changes. 
+            Contact <strong>@{{ currentFile?.owner }}</strong> for edit permissions.
+        </div>
+    </div>
+
     <div class="d-flex flex-column gap-4 mx-2">
         <!-- Title Field -->
         <div class="">
@@ -3423,27 +3527,40 @@ export default {
             </label>
 
             <!-- WYSIWYG Toolbar -->
-            <div class="editor-toolbar bg-dark border border-secondary rounded-top">
+            <div class="editor-toolbar bg-dark border border-secondary rounded-top" 
+                 :class="{ 'opacity-50': isReadOnlyMode }"
+                 :style="{ pointerEvents: isReadOnlyMode ? 'none' : 'auto' }">
                 <div class="d-flex flex-wrap gap-1 align-items-center">
+                    <div v-if="isReadOnlyMode" class="small text-muted me-2">
+                        <i class="fas fa-eye me-1"></i>Read-only mode
+                    </div>
                     <!-- Text Formatting -->
                     <div class="" role="group">
                         <button @click="bodyEditor?.chain().focus().toggleBold().run()"
-                            :class="{active: bodyEditor?.isActive('bold') }" class="btn btn-sm btn-dark" type="button"
+                            :class="{active: bodyEditor?.isActive('bold') }" 
+                            :disabled="isReadOnlyMode"
+                            class="btn btn-sm btn-dark" type="button"
                             title="Bold">
                             <i class="fas fa-bold"></i>
                         </button>
                         <button @click="bodyEditor?.chain().focus().toggleItalic().run()"
-                            :class="{active: bodyEditor?.isActive('italic') }" class="btn btn-sm btn-dark" type="button"
+                            :class="{active: bodyEditor?.isActive('italic') }" 
+                            :disabled="isReadOnlyMode"
+                            class="btn btn-sm btn-dark" type="button"
                             title="Italic">
                             <i class="fas fa-italic"></i>
                         </button>
                         <button @click="bodyEditor?.chain().focus().toggleStrike().run()"
-                            :class="{active: bodyEditor?.isActive('strike') }" class="btn btn-sm btn-dark" type="button"
+                            :class="{active: bodyEditor?.isActive('strike') }" 
+                            :disabled="isReadOnlyMode"
+                            class="btn btn-sm btn-dark" type="button"
                             title="Strikethrough">
                             <i class="fas fa-strikethrough"></i>
                         </button>
                         <button @click="bodyEditor?.chain().focus().toggleCode().run()"
-                            :class="{active: bodyEditor?.isActive('code') }" class="btn btn-sm btn-dark" type="button"
+                            :class="{active: bodyEditor?.isActive('code') }" 
+                            :disabled="isReadOnlyMode"
+                            class="btn btn-sm btn-dark" type="button"
                             title="Inline Code">
                             <i class="fas fa-code"></i>
                         </button>
@@ -3554,9 +3671,10 @@ export default {
                 <div class="input-group" style="width: 200px;">
                     <input v-model="tagInput" @keydown.enter="addTag"
                         class="form-control form-control-sm bg-dark text-white border-secondary"
-                        placeholder="Add a tag..." maxlength="50" :disabled="content.tags.length >= 10">
+                        placeholder="Add a tag..." maxlength="50" 
+                        :disabled="content.tags.length >= 10 || isReadOnlyMode">
                     <button @click="addTag" class="btn btn-sm btn-outline-primary"
-                        :disabled="content.tags.length >= 10 || !tagInput.trim()">
+                        :disabled="content.tags.length >= 10 || !tagInput.trim() || isReadOnlyMode">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
@@ -3565,7 +3683,7 @@ export default {
                 <span v-for="(tag, index) in content.tags" :key="index"
                     class="badge bg-primary d-flex align-items-center">
                     {{ tag }}
-                    <button @click="removeTag(index)" class="btn-close btn-close-white ms-2 small"></button>
+                    <button v-if="!isReadOnlyMode" @click="removeTag(index)" class="btn-close btn-close-white ms-2 small"></button>
                 </span>
             </div>
             <small v-if="content.tags.length >= 10" class="text-warning">
@@ -3818,10 +3936,10 @@ export default {
                         </div>
                     </div>
                     <div class="d-flex gap-2">
-                        <button v-if="localFiles.length > 0" @click="clearAllLocalFiles"
-                            class="btn btn-sm btn-outline-danger">
-                            <i class="fas fa-trash me-1"></i>Clear All Local Files
-                        </button>
+                    <button v-if="localFiles.length > 0" @click="clearAllLocalFiles"
+                        class="btn btn-sm btn-outline-danger">
+                        <i class="fas fa-trash me-1"></i>Clear All Local Files
+                    </button>
                         <button v-if="ownedCloudFiles.length > 0" @click="clearAllCloudFiles"
                             class="btn btn-sm btn-outline-warning">
                             <i class="fas fa-cloud me-1"></i>Clear My Cloud Files

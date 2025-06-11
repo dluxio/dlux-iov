@@ -15418,4 +15418,35 @@ body[data-touch=false] .dropdown-extra:hover {
 /* Tippy Tooltip Animation */
 .tippy-box[data-animation=fade][data-state=hidden] {
   opacity: 0;
+}
+
+/* Read-only editor styling */
+.ProseMirror[contenteditable=false] {
+  background-color: rgba(108, 117, 125, 0.1) !important;
+  cursor: default !important;
+  opacity: 0.8;
+}
+
+.ProseMirror[contenteditable=false]:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Read-only toolbar styling */
+.editor-toolbar[style*="pointer-events: none"] {
+  user-select: none;
+}
+
+/* Read-only warning banner animation */
+.alert-info {
+  animation: subtle-pulse 2s ease-in-out infinite;
+}
+
+@keyframes subtle-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.9;
+  }
 }/*# sourceMappingURL=custom.css.map */

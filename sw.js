@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.11.20",
-  "generated": "2025-06-11T21:09:19Z",
+  "version": "2025.06.11.14",
+  "generated": "2025-06-11T21:28:17Z",
   "files": {
-    "/js/trading-vue.min.js": {
-      "checksum": "6e6bb2f8dd6f94e2c8656759eafc1a26",
-      "size": 264037,
-      "priority": "important"
-    },
     "/js/upload-everywhere.js": {
       "checksum": "a0455b92bdad32d2e0679d651f05a48d",
       "size": 16936,
@@ -771,7 +766,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "4da306c839bf2c276cbfc711151a3797",
+      "checksum": "30c5c30e4a4486ba9814e39cfa351c1a",
       "size": 7300,
       "priority": "important"
     },
@@ -845,11 +840,6 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/playground/env_thumbs/none.png": {
-      "checksum": "f5dee31316fd9060eea8f8134918c28f",
-      "size": 35892,
-      "priority": "page-specific"
-    },
     "/playground/env_thumbs/osiris.png": {
       "checksum": "6e6d7f2537262ae090f61f1f967a8ee5",
       "size": 147567,
@@ -915,12 +905,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
