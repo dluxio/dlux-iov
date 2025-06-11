@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.11.10",
-  "generated": "2025-06-11T05:00:33Z",
+  "version": "2025.06.10.22",
+  "generated": "2025-06-11T05:03:24Z",
   "files": {
-    "/js/pop.js": {
-      "checksum": "679aed3281bcee07fb3942a985e7dbbe",
-      "size": 904,
-      "priority": "important"
-    },
     "/js/postvue.js": {
       "checksum": "9be19c09506b06d603390bce714d77b3",
       "size": 17552,
@@ -676,8 +671,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "1a845bd807be4afe713cf972ab5dfc21",
-      "size": 36316,
+      "checksum": "fb90d800706b14627993dfe591e64d50",
+      "size": 36317,
       "priority": "important"
     },
     "/js/tagify.min.js": {
@@ -866,8 +861,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "ed94a87ab5903a198fc9c585f44a9410",
-      "size": 7299,
+      "checksum": "afa11b1a058217dde62baa1a2c065c29",
+      "size": 7300,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -939,11 +934,6 @@ self.cacheManifest =
       "checksum": "6a79a38b2ea49ca30ff547563f9f1efd",
       "size": 1218,
       "priority": "important"
-    },
-    "/naf-playground/monaco-editor/vs/nls.messages.zh-tw.js": {
-      "checksum": "c2f89eb94f2e306e530fa37591fdc5a2",
-      "size": 161126,
-      "priority": "page-specific"
     },
     "/naf-playground/monaco-proxy.js": {
       "checksum": "412e79a5731df84cd19fb52ba8d5d1b0",
@@ -1105,12 +1095,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

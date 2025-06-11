@@ -1781,6 +1781,17 @@ export default {
                         console.log('✅ Connected to collaboration server');
                         this.connectionStatus = 'connected';
                         this.connectionMessage = 'Connected - Real-time collaboration active';
+                        
+                        // Update user list on connect
+                        if (this.provider && this.provider.awareness) {
+                            const states = Array.from(this.provider.awareness.getStates().entries());
+                            this.connectedUsers = states
+                                .filter(([_, state]) => state?.user?.name)
+                                .map(([_, state]) => ({
+                                    name: state.user.name,
+                                    color: state.user.color || this.generateUserColor(state.user.name)
+                                }));
+                        }
                     },
                     onDisconnect: ({ event }) => {
                         console.log('❌ Disconnected from collaboration server');
@@ -1804,18 +1815,20 @@ export default {
                 // Only add awareness if available
                 if (awareness) {
                     providerConfig.awareness = awareness;
-                    // Set up awareness change handler
-                    awareness.on('change', () => {
-                        console.log('👥 Awareness changed:', awareness.getStates());
-                        const states = Array.from(awareness.getStates().entries());
-                        this.connectedUsers = states
-                            .filter(([_, state]) => state?.user?.name)
-                            .map(([_, state]) => ({
-                                name: state.user.name,
-                                color: state.user.color || this.generateUserColor(state.user.name)
-                            }));
-                        console.log('👥 Connected users:', this.connectedUsers);
-                    });
+                    providerConfig.onAwarenessChange = () => {
+                        console.log('👥 Awareness changed');
+                        if (this.provider && this.provider.awareness) {
+                            const states = Array.from(this.provider.awareness.getStates().entries());
+                            console.log('Current awareness states:', states);
+                            this.connectedUsers = states
+                                .filter(([_, state]) => state?.user?.name)
+                                .map(([_, state]) => ({
+                                    name: state.user.name,
+                                    color: state.user.color || this.generateUserColor(state.user.name)
+                                }));
+                            console.log('Updated connected users:', this.connectedUsers);
+                        }
+                    };
                 }
 
                 this.provider = new HocuspocusProvider(providerConfig);
@@ -1824,12 +1837,12 @@ export default {
                     // Explicitly connect after setup
                     await this.provider.connect();
                     
-                    // Set initial awareness state
-                    if (awareness) {
-                        awareness.setLocalState({
+                    // Ensure awareness is initialized
+                    if (!this.provider.awareness.getLocalState()) {
+                        this.provider.awareness.setLocalState({
                             user: {
                                 name: this.username,
-                                color: userColor
+                                color: this.getUserColor
                             }
                         });
                     }
@@ -1960,17 +1973,6 @@ export default {
                         name: this.username,
                         color: userColor,
                     },
-                    render: true,
-                    onUpdate: (users) => {
-                        console.log('🖱️ Cursor users updated:', users);
-                        if (Array.isArray(users)) {
-                            this.connectedUsers = users.map(user => ({
-                                name: user.name,
-                                color: user.color || this.generateUserColor(user.name)
-                            }));
-                            console.log('👥 Connected users from cursor:', this.connectedUsers);
-                        }
-                    }
                 });
 
                 try {
