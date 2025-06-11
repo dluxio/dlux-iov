@@ -3029,10 +3029,17 @@ body[data-touch="false"] {
 /* Tiptap Placeholder */
 .ProseMirror .is-editor-empty:first-child::before {
     content: attr(data-placeholder);
-    position: absolute;
-    left: 1.5rem;
+    float: left;
+    height: 0;
     pointer-events: none;
     color: #adb5bd;
+    margin-bottom: 0;
+}
+
+.title-editor .ProseMirror {
+  display: flex;
+  align-items: center;
+  position: relative;
 }
 
 .row-collaborative {
@@ -3074,10 +3081,6 @@ body[data-touch="false"] {
 
 .title-editor {
     min-height: 60px;
-}
-
-.body-editor {
-    min-height: 300px;
 }
 
 .permlink-editor {
