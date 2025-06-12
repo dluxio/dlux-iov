@@ -3,6 +3,7 @@
 
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import * as Y from 'yjs';
+import { IndexeddbPersistence } from 'y-indexeddb';
 
 // Import all TipTap modules we need
 import { Editor } from '@tiptap/core';
@@ -36,6 +37,7 @@ const TiptapCollaboration = {
   // Core Y.js and provider
   HocuspocusProvider,
   Y,
+  IndexeddbPersistence,
   createCollaborativeDocument,
   
   // TipTap core
@@ -75,6 +77,7 @@ if (typeof window !== 'undefined') {
   console.log('📦 TiptapCollaboration bundle loaded with extensions:', {
     hasHocuspocusProvider: !!TiptapCollaboration.HocuspocusProvider,
     hasY: !!TiptapCollaboration.Y,
+    hasIndexeddbPersistence: !!TiptapCollaboration.IndexeddbPersistence,
     hasEditor: !!TiptapCollaboration.Editor,
     hasStarterKit: !!TiptapCollaboration.StarterKit,
     hasCollaboration: !!TiptapCollaboration.Collaboration,

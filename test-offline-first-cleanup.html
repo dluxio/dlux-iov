@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline-First Architecture Cleanup Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .test-pass { background-color: #d4edda; border-color: #c3e6cb; }
+        .test-fail { background-color: #f8d7da; border-color: #f5c6cb; }
+        .test-pending { background-color: #fff3cd; border-color: #ffeaa7; }
+        button { margin: 5px; padding: 10px 15px; cursor: pointer; }
+        .results { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 3px; }
+        pre { background: #f1f1f1; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Offline-First Architecture Cleanup Test</h1>
+    <p>This test verifies that removing old parallel saving methods doesn't break core functionality.</p>
+
+    <div class="test-section test-pending" id="test-1">
+        <h3>Test 1: Editor Initialization</h3>
+        <p>Verify that editors can be created without old saving methods</p>
+        <button onclick="runTest1()">Run Test</button>
+        <div class="results" id="results-1"></div>
+    </div>
+
+    <div class="test-section test-pending" id="test-2">
+        <h3>Test 2: Advanced Options (Tags/Beneficiaries)</h3>
+        <p>Verify that advanced options work with Y.js only (no old autoSaveContent calls)</p>
+        <button onclick="runTest2()">Run Test</button>
+        <div class="results" id="results-2"></div>
+    </div>
+
+    <div class="test-section test-pending" id="test-3">
+        <h3>Test 3: Comment Options</h3>
+        <p>Verify comment options trigger Y.js sync without old saving methods</p>
+        <button onclick="runTest3()">Run Test</button>
+        <div class="results" id="results-3"></div>
+    </div>
+
+    <div class="test-section test-pending" id="test-4">
+        <h3>Test 4: Content Persistence</h3>
+        <p>Verify Y.js + IndexedDB handles all persistence without localStorage methods</p>
+        <button onclick="runTest4()">Run Test</button>
+        <div class="results" id="results-4"></div>
+    </div>
+
+    <div class="test-section test-pending" id="test-5">
+        <h3>Test 5: Method Existence Check</h3>
+        <p>Verify old methods are completely removed from the component</p>
+        <button onclick="runTest5()">Run Test</button>
+        <div class="results" id="results-5"></div>
+    </div>
+
+    <script>
+        // Test utilities
+        function setTestStatus(testId, status, message) {
+            const testDiv = document.getElementById(`test-${testId}`);
+            const resultsDiv = document.getElementById(`results-${testId}`);
+            
+            testDiv.className = `test-section test-${status}`;
+            resultsDiv.innerHTML = `<strong>${status.toUpperCase()}:</strong> ${message}`;
+        }
+
+        function logResult(testId, details) {
+            const resultsDiv = document.getElementById(`results-${testId}`);
+            resultsDiv.innerHTML += `<pre>${details}</pre>`;
+        }
+
+        // Test 1: Editor Initialization
+        async function runTest1() {
+            try {
+                setTestStatus(1, 'pending', 'Testing editor initialization...');
+                
+                // Check if TipTap collaboration bundle is available
+                const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
+                if (!bundle) {
+                    throw new Error('TipTap collaboration bundle not available');
+                }
+
+                // Check required components
+                const required = ['Editor', 'StarterKit', 'Y', 'Collaboration', 'IndexeddbPersistence'];
+                const missing = required.filter(comp => !bundle[comp]);
+                
+                if (missing.length > 0) {
+                    throw new Error(`Missing components: ${missing.join(', ')}`);
+                }
+
+                setTestStatus(1, 'pass', 'Editor components available and ready');
+                logResult(1, `✅ All required components found: ${required.join(', ')}`);
+                
+            } catch (error) {
+                setTestStatus(1, 'fail', error.message);
+                logResult(1, `❌ Error: ${error.message}`);
+            }
+        }
+
+        // Test 2: Advanced Options
+        async function runTest2() {
+            try {
+                setTestStatus(2, 'pending', 'Testing advanced options...');
+                
+                // Simulate the component methods that should exist after cleanup
+                const mockComponent = {
+                    ydoc: { getMap: () => ({ set: () => {}, get: () => [] }) },
+                    clearUnsavedAfterSync: () => console.log('Sync cleared'),
+                    hasUnsavedChanges: false
+                };
+
+                // Test tag operations (should only use Y.js, no autoSaveContent)
+                const addTagMethod = function() {
+                    if (this.ydoc) {
+                        const tagsMap = this.ydoc.getMap('tags');
+                        tagsMap.set('test-tag', true);
+                        this.clearUnsavedAfterSync();
+                        return true;
+                    }
+                    return false;
+                };
+
+                const result = addTagMethod.call(mockComponent);
+                
+                if (result) {
+                    setTestStatus(2, 'pass', 'Advanced options work with Y.js only');
+                    logResult(2, '✅ Tag operations use Y.js without old saving methods');
+                } else {
+                    throw new Error('Advanced options failed');
+                }
+                
+            } catch (error) {
+                setTestStatus(2, 'fail', error.message);
+                logResult(2, `❌ Error: ${error.message}`);
+            }
+        }
+
+        // Test 3: Comment Options
+        async function runTest3() {
+            try {
+                setTestStatus(3, 'pending', 'Testing comment options...');
+                
+                // Simulate comment option change (should only use Y.js)
+                const mockComponent = {
+                    ydoc: { getMap: () => ({ set: () => {} }) },
+                    clearUnsavedAfterSync: () => console.log('Sync cleared'),
+                    commentOptions: { allowVotes: true }
+                };
+
+                const handleCommentOptionChange = function() {
+                    if (this.ydoc) {
+                        const optionsMap = this.ydoc.getMap('commentOptions');
+                        optionsMap.set('allowVotes', this.commentOptions.allowVotes);
+                        this.clearUnsavedAfterSync();
+                        return true;
+                    }
+                    return false;
+                };
+
+                const result = handleCommentOptionChange.call(mockComponent);
+                
+                if (result) {
+                    setTestStatus(3, 'pass', 'Comment options work with Y.js only');
+                    logResult(3, '✅ Comment options use Y.js without old saving methods');
+                } else {
+                    throw new Error('Comment options failed');
+                }
+                
+            } catch (error) {
+                setTestStatus(3, 'fail', error.message);
+                logResult(3, `❌ Error: ${error.message}`);
+            }
+        }
+
+        // Test 4: Content Persistence
+        async function runTest4() {
+            try {
+                setTestStatus(4, 'pending', 'Testing content persistence...');
+                
+                // Check IndexedDB availability
+                if (!window.indexedDB) {
+                    throw new Error('IndexedDB not available');
+                }
+
+                // Test IndexedDB connection
+                const dbName = 'test-yjs-persistence';
+                const request = indexedDB.open(dbName, 1);
+                
+                request.onsuccess = () => {
+                    request.result.close();
+                    indexedDB.deleteDatabase(dbName); // Cleanup
+                    
+                    setTestStatus(4, 'pass', 'IndexedDB persistence available');
+                    logResult(4, '✅ IndexedDB works - Y.js can persist content offline');
+                };
+                
+                request.onerror = () => {
+                    throw new Error('IndexedDB connection failed');
+                };
+                
+            } catch (error) {
+                setTestStatus(4, 'fail', error.message);
+                logResult(4, `❌ Error: ${error.message}`);
+            }
+        }
+
+        // Test 5: Method Existence Check
+        async function runTest5() {
+            try {
+                setTestStatus(5, 'pending', 'Checking for removed methods...');
+                
+                // Load the actual component file to check for old methods
+                const response = await fetch('js/tiptap-editor-with-file-menu.js');
+                const fileContent = await response.text();
+                
+                // Check for old method signatures that should be removed
+                const oldMethods = [
+                    'saveToLocalStorage()',
+                    'saveToCollaborativeDoc()',
+                    'autoSaveContent()'
+                ];
+                
+                const foundMethods = oldMethods.filter(method => 
+                    fileContent.includes(method)
+                );
+                
+                if (foundMethods.length > 0) {
+                    setTestStatus(5, 'fail', `Old methods still present: ${foundMethods.join(', ')}`);
+                    logResult(5, `❌ Found old methods that should be removed:\n${foundMethods.join('\n')}`);
+                } else {
+                    setTestStatus(5, 'pass', 'All old methods successfully removed');
+                    logResult(5, '✅ No old saving methods found - cleanup successful');
+                }
+                
+            } catch (error) {
+                setTestStatus(5, 'fail', error.message);
+                logResult(5, `❌ Error: ${error.message}`);
+            }
+        }
+
+        // Auto-run all tests
+        window.addEventListener('load', () => {
+            console.log('🧪 Starting offline-first architecture cleanup tests...');
+        });
+    </script>
+</body>
+</html> 

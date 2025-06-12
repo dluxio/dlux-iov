@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.11.23",
-  "generated": "2025-06-11T21:40:27Z",
+  "version": "2025.06.11.18",
+  "generated": "2025-06-12T01:50:58Z",
   "files": {
-    "/js/v3-dex.js": {
-      "checksum": "e4615048077bf0346e5be62a65600d20",
-      "size": 49482,
-      "priority": "important"
-    },
     "/js/v3-hub.js": {
       "checksum": "a25d9ccfccd050000ecc2e627619ff30",
       "size": 66867,
@@ -741,7 +736,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "66c2d5f4ff2d30ef187f647570dd3ca5",
+      "checksum": "9b04985080d96046a392e33aa0a8ded0",
       "size": 7300,
       "priority": "important"
     },
@@ -815,11 +810,6 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/playground/env_thumbs/volcano.png": {
-      "checksum": "651fe82ed29f36db7d40f8b2cf207b45",
-      "size": 141300,
-      "priority": "page-specific"
-    },
     "/playground/env_thumbs/yavapai.png": {
       "checksum": "2da358421be2ed384564de674057084a",
       "size": 163708,
@@ -855,12 +845,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

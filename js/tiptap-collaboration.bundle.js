@@ -18714,6 +18714,456 @@ class TiptapCollabProvider extends HocuspocusProvider {
 
 //# sourceMappingURL=hocuspocus-provider.esm.js.map
 
+;// ./node_modules/lib0/indexeddb.js
+/* eslint-env browser */
+
+/**
+ * Helpers to work with IndexedDB.
+ *
+ * @module indexeddb
+ */
+
+
+
+
+/* c8 ignore start */
+
+/**
+ * IDB Request to Promise transformer
+ *
+ * @param {IDBRequest} request
+ * @return {Promise<any>}
+ */
+const rtop = request => promise_create((resolve, reject) => {
+  // @ts-ignore
+  request.onerror = event => reject(new Error(event.target.error))
+  // @ts-ignore
+  request.onsuccess = event => resolve(event.target.result)
+})
+
+/**
+ * @param {string} name
+ * @param {function(IDBDatabase):any} initDB Called when the database is first created
+ * @return {Promise<IDBDatabase>}
+ */
+const openDB = (name, initDB) => promise_create((resolve, reject) => {
+  const request = indexedDB.open(name)
+  /**
+   * @param {any} event
+   */
+  request.onupgradeneeded = event => initDB(event.target.result)
+  /**
+   * @param {any} event
+   */
+  request.onerror = event => reject(error_create(event.target.error))
+  /**
+   * @param {any} event
+   */
+  request.onsuccess = event => {
+    /**
+     * @type {IDBDatabase}
+     */
+    const db = event.target.result
+    db.onversionchange = () => { db.close() }
+    resolve(db)
+  }
+})
+
+/**
+ * @param {string} name
+ */
+const deleteDB = name => rtop(indexedDB.deleteDatabase(name))
+
+/**
+ * @param {IDBDatabase} db
+ * @param {Array<Array<string>|Array<string|IDBObjectStoreParameters|undefined>>} definitions
+ */
+const createStores = (db, definitions) => definitions.forEach(d =>
+  // @ts-ignore
+  db.createObjectStore.apply(db, d)
+)
+
+/**
+ * @param {IDBDatabase} db
+ * @param {Array<string>} stores
+ * @param {"readwrite"|"readonly"} [access]
+ * @return {Array<IDBObjectStore>}
+ */
+const indexeddb_transact = (db, stores, access = 'readwrite') => {
+  const transaction = db.transaction(stores, access)
+  return stores.map(store => getStore(transaction, store))
+}
+
+/**
+ * @param {IDBObjectStore} store
+ * @param {IDBKeyRange} [range]
+ * @return {Promise<number>}
+ */
+const count = (store, range) =>
+  rtop(store.count(range))
+
+/**
+ * @param {IDBObjectStore} store
+ * @param {String | number | ArrayBuffer | Date | Array<any> } key
+ * @return {Promise<String | number | ArrayBuffer | Date | Array<any>>}
+ */
+const get = (store, key) =>
+  rtop(store.get(key))
+
+/**
+ * @param {IDBObjectStore} store
+ * @param {String | number | ArrayBuffer | Date | IDBKeyRange | Array<any> } key
+ */
+const del = (store, key) =>
+  rtop(store.delete(key))
+
+/**
+ * @param {IDBObjectStore} store
+ * @param {String | number | ArrayBuffer | Date | boolean} item
+ * @param {String | number | ArrayBuffer | Date | Array<any>} [key]
+ */
+const put = (store, item, key) =>
+  rtop(store.put(item, key))
+
+/**
+ * @param {IDBObjectStore} store
+ * @param {String | number | ArrayBuffer | Date | boolean}  item
+ * @param {String | number | ArrayBuffer | Date | Array<any>}  key
+ * @return {Promise<any>}
+ */
+const indexeddb_add = (store, item, key) =>
+  rtop(store.add(item, key))
+
+/**
+ * @param {IDBObjectStore} store
+ * @param {String | number | ArrayBuffer | Date}  item
+ * @return {Promise<number>} Returns the generated key
+ */
+const addAutoKey = (store, item) =>
+  rtop(store.add(item))
+
+/**
+ * @param {IDBObjectStore} store
+ * @param {IDBKeyRange} [range]
+ * @param {number} [limit]
+ * @return {Promise<Array<any>>}
+ */
+const getAll = (store, range, limit) =>
+  rtop(store.getAll(range, limit))
+
+/**
+ * @param {IDBObjectStore} store
+ * @param {IDBKeyRange} [range]
+ * @param {number} [limit]
+ * @return {Promise<Array<any>>}
+ */
+const getAllKeys = (store, range, limit) =>
+  rtop(store.getAllKeys(range, limit))
+
+/**
+ * @param {IDBObjectStore} store
+ * @param {IDBKeyRange|null} query
+ * @param {'next'|'prev'|'nextunique'|'prevunique'} direction
+ * @return {Promise<any>}
+ */
+const queryFirst = (store, query, direction) => {
+  /**
+   * @type {any}
+   */
+  let first = null
+  return iterateKeys(store, query, key => {
+    first = key
+    return false
+  }, direction).then(() => first)
+}
+
+/**
+ * @param {IDBObjectStore} store
+ * @param {IDBKeyRange?} [range]
+ * @return {Promise<any>}
+ */
+const getLastKey = (store, range = null) => queryFirst(store, range, 'prev')
+
+/**
+ * @param {IDBObjectStore} store
+ * @param {IDBKeyRange?} [range]
+ * @return {Promise<any>}
+ */
+const getFirstKey = (store, range = null) => queryFirst(store, range, 'next')
+
+/**
+ * @typedef KeyValuePair
+ * @type {Object}
+ * @property {any} k key
+ * @property {any} v Value
+ */
+
+/**
+ * @param {IDBObjectStore} store
+ * @param {IDBKeyRange} [range]
+ * @param {number} [limit]
+ * @return {Promise<Array<KeyValuePair>>}
+ */
+const getAllKeysValues = (store, range, limit) =>
+  // @ts-ignore
+  promise.all([getAllKeys(store, range, limit), getAll(store, range, limit)]).then(([ks, vs]) => ks.map((k, i) => ({ k, v: vs[i] })))
+
+/**
+ * @param {any} request
+ * @param {function(IDBCursorWithValue):void|boolean|Promise<void|boolean>} f
+ * @return {Promise<void>}
+ */
+const iterateOnRequest = (request, f) => promise_create((resolve, reject) => {
+  request.onerror = reject
+  /**
+   * @param {any} event
+   */
+  request.onsuccess = async event => {
+    const cursor = event.target.result
+    if (cursor === null || (await f(cursor)) === false) {
+      return resolve()
+    }
+    cursor.continue()
+  }
+})
+
+/**
+ * Iterate on keys and values
+ * @param {IDBObjectStore} store
+ * @param {IDBKeyRange|null} keyrange
+ * @param {function(any,any):void|boolean|Promise<void|boolean>} f Callback that receives (value, key)
+ * @param {'next'|'prev'|'nextunique'|'prevunique'} direction
+ */
+const iterate = (store, keyrange, f, direction = 'next') =>
+  iterateOnRequest(store.openCursor(keyrange, direction), cursor => f(cursor.value, cursor.key))
+
+/**
+ * Iterate on the keys (no values)
+ *
+ * @param {IDBObjectStore} store
+ * @param {IDBKeyRange|null} keyrange
+ * @param {function(any):void|boolean|Promise<void|boolean>} f callback that receives the key
+ * @param {'next'|'prev'|'nextunique'|'prevunique'} direction
+ */
+const iterateKeys = (store, keyrange, f, direction = 'next') =>
+  iterateOnRequest(store.openKeyCursor(keyrange, direction), cursor => f(cursor.key))
+
+/**
+ * Open store from transaction
+ * @param {IDBTransaction} t
+ * @param {String} store
+ * @returns {IDBObjectStore}
+ */
+const getStore = (t, store) => t.objectStore(store)
+
+/**
+ * @param {any} lower
+ * @param {any} upper
+ * @param {boolean} lowerOpen
+ * @param {boolean} upperOpen
+ */
+const createIDBKeyRangeBound = (lower, upper, lowerOpen, upperOpen) => IDBKeyRange.bound(lower, upper, lowerOpen, upperOpen)
+
+/**
+ * @param {any} upper
+ * @param {boolean} upperOpen
+ */
+const createIDBKeyRangeUpperBound = (upper, upperOpen) => IDBKeyRange.upperBound(upper, upperOpen)
+
+/**
+ * @param {any} lower
+ * @param {boolean} lowerOpen
+ */
+const createIDBKeyRangeLowerBound = (lower, lowerOpen) => IDBKeyRange.lowerBound(lower, lowerOpen)
+
+/* c8 ignore stop */
+
+;// ./node_modules/y-indexeddb/src/y-indexeddb.js
+
+
+
+
+
+const customStoreName = 'custom'
+const updatesStoreName = 'updates'
+
+const PREFERRED_TRIM_SIZE = 500
+
+/**
+ * @param {IndexeddbPersistence} idbPersistence
+ * @param {function(IDBObjectStore):void} [beforeApplyUpdatesCallback]
+ * @param {function(IDBObjectStore):void} [afterApplyUpdatesCallback]
+ */
+const fetchUpdates = (idbPersistence, beforeApplyUpdatesCallback = () => {}, afterApplyUpdatesCallback = () => {}) => {
+  const [updatesStore] = indexeddb_transact(/** @type {IDBDatabase} */ (idbPersistence.db), [updatesStoreName]) // , 'readonly')
+  return getAll(updatesStore, createIDBKeyRangeLowerBound(idbPersistence._dbref, false)).then(updates => {
+    if (!idbPersistence._destroyed) {
+      beforeApplyUpdatesCallback(updatesStore)
+      transact(idbPersistence.doc, () => {
+        updates.forEach(val => applyUpdate(idbPersistence.doc, val))
+      }, idbPersistence, false)
+      afterApplyUpdatesCallback(updatesStore)
+    }
+  })
+    .then(() => getLastKey(updatesStore).then(lastKey => { idbPersistence._dbref = lastKey + 1 }))
+    .then(() => count(updatesStore).then(cnt => { idbPersistence._dbsize = cnt }))
+    .then(() => updatesStore)
+}
+
+/**
+ * @param {IndexeddbPersistence} idbPersistence
+ * @param {boolean} forceStore
+ */
+const storeState = (idbPersistence, forceStore = true) =>
+  fetchUpdates(idbPersistence)
+    .then(updatesStore => {
+      if (forceStore || idbPersistence._dbsize >= PREFERRED_TRIM_SIZE) {
+        addAutoKey(updatesStore, encodeStateAsUpdate(idbPersistence.doc))
+          .then(() => del(updatesStore, createIDBKeyRangeUpperBound(idbPersistence._dbref, true)))
+          .then(() => count(updatesStore).then(cnt => { idbPersistence._dbsize = cnt }))
+      }
+    })
+
+/**
+ * @param {string} name
+ */
+const clearDocument = name => idb.deleteDB(name)
+
+/**
+ * @extends Observable<string>
+ */
+class IndexeddbPersistence extends Observable {
+  /**
+   * @param {string} name
+   * @param {Y.Doc} doc
+   */
+  constructor (name, doc) {
+    super()
+    this.doc = doc
+    this.name = name
+    this._dbref = 0
+    this._dbsize = 0
+    this._destroyed = false
+    /**
+     * @type {IDBDatabase|null}
+     */
+    this.db = null
+    this.synced = false
+    this._db = openDB(name, db =>
+      createStores(db, [
+        ['updates', { autoIncrement: true }],
+        ['custom']
+      ])
+    )
+    /**
+     * @type {Promise<IndexeddbPersistence>}
+     */
+    this.whenSynced = promise_create(resolve => this.on('synced', () => resolve(this)))
+
+    this._db.then(db => {
+      this.db = db
+      /**
+       * @param {IDBObjectStore} updatesStore
+       */
+      const beforeApplyUpdatesCallback = (updatesStore) => addAutoKey(updatesStore, encodeStateAsUpdate(doc))
+      const afterApplyUpdatesCallback = () => {
+        if (this._destroyed) return this
+        this.synced = true
+        this.emit('synced', [this])
+      }
+      fetchUpdates(this, beforeApplyUpdatesCallback, afterApplyUpdatesCallback)
+    })
+    /**
+     * Timeout in ms untill data is merged and persisted in idb.
+     */
+    this._storeTimeout = 1000
+    /**
+     * @type {any}
+     */
+    this._storeTimeoutId = null
+    /**
+     * @param {Uint8Array} update
+     * @param {any} origin
+     */
+    this._storeUpdate = (update, origin) => {
+      if (this.db && origin !== this) {
+        const [updatesStore] = indexeddb_transact(/** @type {IDBDatabase} */ (this.db), [updatesStoreName])
+        addAutoKey(updatesStore, update)
+        if (++this._dbsize >= PREFERRED_TRIM_SIZE) {
+          // debounce store call
+          if (this._storeTimeoutId !== null) {
+            clearTimeout(this._storeTimeoutId)
+          }
+          this._storeTimeoutId = setTimeout(() => {
+            storeState(this, false)
+            this._storeTimeoutId = null
+          }, this._storeTimeout)
+        }
+      }
+    }
+    doc.on('update', this._storeUpdate)
+    this.destroy = this.destroy.bind(this)
+    doc.on('destroy', this.destroy)
+  }
+
+  destroy () {
+    if (this._storeTimeoutId) {
+      clearTimeout(this._storeTimeoutId)
+    }
+    this.doc.off('update', this._storeUpdate)
+    this.doc.off('destroy', this.destroy)
+    this._destroyed = true
+    return this._db.then(db => {
+      db.close()
+    })
+  }
+
+  /**
+   * Destroys this instance and removes all data from indexeddb.
+   *
+   * @return {Promise<void>}
+   */
+  clearData () {
+    return this.destroy().then(() => {
+      deleteDB(this.name)
+    })
+  }
+
+  /**
+   * @param {String | number | ArrayBuffer | Date} key
+   * @return {Promise<String | number | ArrayBuffer | Date | any>}
+   */
+  get (key) {
+    return this._db.then(db => {
+      const [custom] = indexeddb_transact(db, [customStoreName], 'readonly')
+      return get(custom, key)
+    })
+  }
+
+  /**
+   * @param {String | number | ArrayBuffer | Date} key
+   * @param {String | number | ArrayBuffer | Date} value
+   * @return {Promise<String | number | ArrayBuffer | Date>}
+   */
+  set (key, value) {
+    return this._db.then(db => {
+      const [custom] = indexeddb_transact(db, [customStoreName])
+      return put(custom, value, key)
+    })
+  }
+
+  /**
+   * @param {String | number | ArrayBuffer | Date} key
+   * @return {Promise<undefined>}
+   */
+  del (key) {
+    return this._db.then(db => {
+      const [custom] = indexeddb_transact(db, [customStoreName])
+      return del(custom, key)
+    })
+  }
+}
+
 ;// ./node_modules/orderedmap/dist/index.js
 // ::- Persistent data structure representing an ordered mapping from
 // strings to values, with some convenient update methods.
@@ -32357,7 +32807,7 @@ function chainCommands(...commands) {
     };
 }
 let backspace = chainCommands(deleteSelection, joinBackward, selectNodeBackward);
-let del = chainCommands(deleteSelection, joinForward, selectNodeForward);
+let dist_del = chainCommands(deleteSelection, joinForward, selectNodeForward);
 /**
 A basic keymap containing bindings not specific to any schema.
 Binds the following keys (when multiple commands are listed, they
@@ -32376,8 +32826,8 @@ const pcBaseKeymap = {
     "Backspace": backspace,
     "Mod-Backspace": backspace,
     "Shift-Backspace": backspace,
-    "Delete": del,
-    "Mod-Delete": del,
+    "Delete": dist_del,
+    "Mod-Delete": dist_del,
     "Mod-a": selectAll
 };
 /**
@@ -43520,6 +43970,7 @@ const Placeholder = Extension.create({
 
 
 
+
 // Import all TipTap modules we need
 
 
@@ -43552,6 +44003,7 @@ var TiptapCollaboration = {
   // Core Y.js and provider
   HocuspocusProvider: HocuspocusProvider,
   Y: yjs_namespaceObject,
+  IndexeddbPersistence: IndexeddbPersistence,
   createCollaborativeDocument: createCollaborativeDocument,
   // TipTap core
   Editor: Editor,
@@ -43587,6 +44039,7 @@ if (typeof window !== 'undefined') {
   console.log('📦 TiptapCollaboration bundle loaded with extensions:', {
     hasHocuspocusProvider: !!TiptapCollaboration.HocuspocusProvider,
     hasY: !!TiptapCollaboration.Y,
+    hasIndexeddbPersistence: !!TiptapCollaboration.IndexeddbPersistence,
     hasEditor: !!TiptapCollaboration.Editor,
     hasStarterKit: !!TiptapCollaboration.StarterKit,
     hasCollaboration: !!TiptapCollaboration.Collaboration,

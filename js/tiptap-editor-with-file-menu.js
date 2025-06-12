@@ -3,7 +3,7 @@ import methodsCommon from './methods-common.js';
 export default {
     name: 'TipTapEditorWithFileMenu',
     
-    emits: ['contentChanged', 'publishPost', 'requestAuthHeaders', 'request-auth-headers', 'tosign', 'update:fileToAdd', 'document-converted'],
+    emits: ['contentChanged', 'publishPost', 'requestAuthHeaders', 'request-auth-headers', 'tosign', 'update:fileToAdd', 'document-converted', 'collaborative-data-changed'],
     
     props: {
         username: {
@@ -30,6 +30,17 @@ export default {
         postCustomJson: {
             type: Object,
             default: () => ({})
+        },
+        
+        // DLUX-specific props for collaborative synchronization
+        dluxPostType: {
+            type: String,
+            default: 'blog'
+        },
+        
+        dluxAssets: {
+            type: Array,
+            default: () => []
         }
     },
     
@@ -62,6 +73,7 @@ export default {
             connectionStatus: 'disconnected',
             connectionMessage: 'Not connected',
             lastDocumentLoaded: null,
+            schemaVersionMismatch: false,
             
             // Content
             content: {
@@ -83,6 +95,8 @@ export default {
             showShareModal: false,
             showHistoryModal: false,
             showPublishModal: false,
+            showJsonPreviewModal: false,
+            jsonPreviewTab: 'complete', // 'complete', 'comment', 'comment_options', 'metadata'
             
             // Local storage files
             localFiles: [],
@@ -167,7 +181,10 @@ export default {
             availableTags: ['dlux', 'blog', 'video', 'collaboration', 'dapp', '360', 'hive', 'blockchain', 'web3'],
             
             // File attachments
-            attachedFiles: []
+            attachedFiles: [],
+            
+            // Reactive trigger for Y.js data changes
+            collaborativeDataVersion: 0
         };
     },
     
@@ -450,6 +467,28 @@ export default {
             
             return isReadOnly;
         },
+
+        // Get beneficiaries from the appropriate source (collaborative or local)
+        displayBeneficiaries() {
+            // Depend on collaborativeDataVersion for reactivity
+            this.collaborativeDataVersion; // eslint-disable-line no-unused-expressions
+            
+            if (this.isCollaborativeMode && this.ydoc) {
+                return this.getBeneficiaries();
+            }
+            return this.publishForm.beneficiaries || [];
+        },
+
+        // Get tags from the appropriate source (collaborative or local)
+        displayTags() {
+            // Depend on collaborativeDataVersion for reactivity
+            this.collaborativeDataVersion; // eslint-disable-line no-unused-expressions
+            
+            if (this.isCollaborativeMode && this.ydoc) {
+                return this.getTags();
+            }
+            return this.content.tags || [];
+        },
     },
     
     methods: {
@@ -457,11 +496,21 @@ export default {
         addFileToPost(file) {
             if (!file) return;
             
-            // Add file to attachments
+            console.log('📎 Adding file to post:', file);
+            
+            // Add file to local attachments
             this.attachedFiles.push(file);
             
+            // If in collaborative mode, add to collaborative structures
+            let fileId = null;
+            if (this.isCollaborativeMode && this.ydoc) {
+                fileId = this.handleFileUpload(file);
+                // Sync collaborative data to parent component
+                this.syncToParent();
+            }
+            
             // Insert file reference into editor based on file type
-            if (this.editor) {
+            if (this.bodyEditor) {
                 let insertText = '';
                 
                 if (file.type && file.type.startsWith('image/')) {
@@ -476,11 +525,11 @@ export default {
                 }
                 
                 // Insert at current cursor position
-                this.editor.chain().focus().insertContent(insertText + '\n\n').run();
+                this.bodyEditor.chain().focus().insertContent(insertText + '\n\n').run();
                 this.hasUnsavedChanges = true;
             }
             
-            console.log('📎 File added to post:', file.name);
+            console.log('✅ File added to post:', file.name, fileId ? `(Collaborative ID: ${fileId})` : '');
         },
         
         removeAttachedFile(index) {
@@ -490,21 +539,40 @@ export default {
         
         // Tag management
         addTag() {
-            // Ensure tags is always an array
-            if (!Array.isArray(this.content.tags)) {
-                this.content.tags = [];
-            }
-            
-            if (this.tagInput.trim() && !this.content.tags.includes(this.tagInput.trim()) && this.content.tags.length < 10) {
-                this.content.tags.push(this.tagInput.trim().toLowerCase());
+            try {
+                const tagValue = this.tagInput.trim().toLowerCase();
+                
+                if (!tagValue) return;
+                
+                // ===== REFACTORED: Single Path - Always use Y.js =====
+                // Following offline-first architecture - Y.js is single source of truth
+                const tags = this.getTags();
+                if (!tags.includes(tagValue) && tags.length < 10) {
+                    this.addCollaborativeTag(tagValue);
+                    this.hasUnsavedChanges = true;
+                    this.clearUnsavedAfterSync();
+                }
+                
                 this.tagInput = '';
-                this.hasUnsavedChanges = true;
+            } catch (error) {
+                console.error('Error adding tag:', error);
+                alert('Error adding tag: ' + error.message);
             }
         },
         
         removeTag(index) {
-            this.content.tags.splice(index, 1);
-            this.hasUnsavedChanges = true;
+            try {
+                // ===== REFACTORED: Single Path - Always use Y.js =====
+                const tags = this.getTags();
+                if (index >= 0 && index < tags.length) {
+                    this.removeCollaborativeTag(tags[index]);
+                    this.hasUnsavedChanges = true;
+                    this.clearUnsavedAfterSync();
+                }
+            } catch (error) {
+                console.error('Error removing tag:', error);
+                alert('Error removing tag: ' + error.message);
+            }
         },
         
         addTagDirect(tag) {
@@ -516,63 +584,68 @@ export default {
             if (!this.content.tags.includes(tag) && this.content.tags.length < 10) {
                 this.content.tags.push(tag);
                 this.hasUnsavedChanges = true;
+                this.autoSaveContent(); // Trigger auto-save for local documents
             }
         },
         
         // Beneficiaries management
         addBeneficiary() {
-            // Don't allow changes in read-only mode
-            if (this.isReadOnlyMode) {
-                console.log('🔒 Beneficiary addition blocked: read-only mode');
-                return;
+            try {
+                const account = this.beneficiaryInput.account.replace('@', '').trim();
+                const percent = parseFloat(this.beneficiaryInput.percent);
+                
+                if (!account || !percent || percent <= 0 || percent > 100) {
+                    alert('Please enter a valid account name and percentage (0.01-100%)');
+                    return;
+                }
+                
+                const weight = Math.round(percent * 100);
+                
+                // ===== REFACTORED: Single Path - Always use Y.js =====
+                this.addCollaborativeBeneficiary(account, weight);
+                this.hasUnsavedChanges = true;
+                this.clearUnsavedAfterSync();
+                
+                // Reset input
+                this.beneficiaryInput.account = '';
+                this.beneficiaryInput.percent = 1.0;
+            } catch (error) {
+                console.error('Error adding beneficiary:', error);
+                alert('Error adding beneficiary: ' + error.message);
             }
-            
-            const account = this.beneficiaryInput.account.replace('@', '').trim();
-            const percent = parseFloat(this.beneficiaryInput.percent);
-            
-            if (!account || !percent || percent <= 0 || percent > 100) {
-                alert('Please enter a valid account name and percentage (0.01-100%)');
-                return;
-            }
-            
-            // Check if account already exists
-            const existing = this.publishForm.beneficiaries.find(b => b.account === account);
-            if (existing) {
-                existing.weight = Math.round(percent * 100);
-            } else {
-                this.publishForm.beneficiaries.push({
-                    account: account,
-                    weight: Math.round(percent * 100)
-                });
-            }
-            
-            // Reset input
-            this.beneficiaryInput.account = '';
-            this.beneficiaryInput.percent = 1.0;
-            this.hasUnsavedChanges = true;
         },
         
         removeBeneficiary(index) {
-            // Don't allow changes in read-only mode
-            if (this.isReadOnlyMode) {
-                console.log('🔒 Beneficiary removal blocked: read-only mode');
-                return;
+            try {
+                // ===== REFACTORED: Single Path - Always use Y.js =====
+                const beneficiaries = this.getBeneficiaries();
+                if (index >= 0 && index < beneficiaries.length) {
+                    this.removeCollaborativeBeneficiary(beneficiaries[index].id);
+                    this.hasUnsavedChanges = true;
+                    this.clearUnsavedAfterSync();
+                }
+            } catch (error) {
+                console.error('Error removing beneficiary:', error);
+                alert('Error removing beneficiary: ' + error.message);
             }
-            
-            this.publishForm.beneficiaries.splice(index, 1);
-            this.hasUnsavedChanges = true;
         },
         
+        // Comment options change handler
+        handleCommentOptionChange() {
+            this.hasUnsavedChanges = true;
+            
+            // ===== REFACTORED: Single Path - Always use Y.js =====
+            this.setPublishOption('allowVotes', this.commentOptions.allowVotes);
+            this.setPublishOption('allowCurationRewards', this.commentOptions.allowCurationRewards);
+            this.setPublishOption('maxAcceptedPayout', this.commentOptions.maxAcceptedPayout);
+            this.setPublishOption('percentHbd', this.commentOptions.percentHbd);
+            this.clearUnsavedAfterSync();
+        },
+
         // Custom JSON handling
         validateCustomJson() {
             if (!this.customJsonString.trim()) {
                 this.customJsonError = '';
-                return;
-            }
-            
-            // Don't allow changes in read-only mode
-            if (this.isReadOnlyMode) {
-                console.log('🔒 Custom JSON validation blocked: read-only mode');
                 return;
             }
             
@@ -581,6 +654,7 @@ export default {
                 this.customJsonError = '';
                 this.content.custom_json = JSON.parse(this.customJsonString);
                 this.hasUnsavedChanges = true;
+                this.autoSaveContent(); // Trigger auto-save for local documents
             } catch (error) {
                 this.customJsonError = error.message;
             }
@@ -588,12 +662,6 @@ export default {
         
         // Permlink management  
         togglePermlinkEditor() {
-            // Don't allow toggling in read-only mode
-            if (this.isReadOnlyMode) {
-                console.log('🔒 Permlink editing blocked: read-only mode');
-                return;
-            }
-            
             this.showPermlinkEditor = !this.showPermlinkEditor;
             if (this.showPermlinkEditor && this.permlinkEditor) {
                 this.$nextTick(() => {
@@ -603,17 +671,12 @@ export default {
         },
         
         useGeneratedPermlink() {
-            // Don't allow changes in read-only mode
-            if (this.isReadOnlyMode) {
-                console.log('🔒 Permlink generation blocked: read-only mode');
-                return;
-            }
-            
             this.content.permlink = this.generatedPermlink;
             if (this.permlinkEditor) {
                 this.permlinkEditor.commands.setContent(this.generatedPermlink);
             }
             this.hasUnsavedChanges = true;
+            this.autoSaveContent(); // Trigger auto-save for local documents
         },
         
         // Publishing
@@ -623,46 +686,544 @@ export default {
                 return;
             }
             
+            // Validate Hive-specific requirements
+            if (!this.validateHiveRequirements()) {
+                return;
+            }
+            
             this.showPublishModal = true;
+        },
+        
+        // Validate Hive broadcasting requirements
+        validateHiveRequirements() {
+            const errors = [];
+            
+            // Validate permlink format (Hive requirement: lowercase, no spaces, alphanumeric + hyphens)
+            const permlink = this.content.permlink || this.generatedPermlink;
+            if (!/^[a-z0-9-]+$/.test(permlink)) {
+                errors.push('Permlink must contain only lowercase letters, numbers, and hyphens');
+            }
+            
+            // Validate title length (Hive limit: 255 characters)
+            if (this.content.title.length > 255) {
+                errors.push('Title must be 255 characters or less');
+            }
+            
+            // Validate body length (Hive limit: ~64KB, but practical limit is lower)
+            if (this.content.body.length > 60000) {
+                errors.push('Post content is too long (max ~60,000 characters)');
+            }
+            
+            // Validate tags (Hive limit: 10 tags, each max 24 characters)
+            if (this.content.tags.length === 0) {
+                errors.push('At least one tag is required');
+            }
+            if (this.content.tags.length > 10) {
+                errors.push('Maximum 10 tags allowed');
+            }
+            this.content.tags.forEach(tag => {
+                if (tag.length > 24) {
+                    errors.push(`Tag "${tag}" is too long (max 24 characters)`);
+                }
+                if (!/^[a-z0-9-]+$/.test(tag)) {
+                    errors.push(`Tag "${tag}" contains invalid characters (use lowercase letters, numbers, hyphens only)`);
+                }
+            });
+            
+            // Validate beneficiaries (Hive limit: total weight <= 10000, max 8 beneficiaries)
+            if (this.publishForm.beneficiaries.length > 8) {
+                errors.push('Maximum 8 beneficiaries allowed');
+            }
+            const totalWeight = this.publishForm.beneficiaries.reduce((sum, ben) => sum + ben.weight, 0);
+            if (totalWeight > 10000) {
+                errors.push('Total beneficiary percentage cannot exceed 100%');
+            }
+            
+            // Validate JSON metadata size (practical limit for Hive)
+            try {
+                const jsonMetadata = JSON.stringify({
+                    app: 'dlux/0.1',
+                    format: 'markdown+html',
+                    tags: this.content.tags,
+                    dlux: this.isCollaborativeMode ? this.getCollaborativeData() : {},
+                    attachedFiles: this.attachedFiles,
+                    ...this.content.custom_json
+                });
+                
+                if (jsonMetadata.length > 8192) {
+                    errors.push('Post metadata is too large (reduce custom JSON or attached files)');
+                }
+            } catch (error) {
+                errors.push('Invalid custom JSON format');
+            }
+            
+            if (errors.length > 0) {
+                alert('Cannot publish post:\n\n' + errors.join('\n'));
+                return false;
+            }
+            
+            return true;
         },
         
         async performPublish() {
             this.publishing = true;
             
-            try {
-                const postData = {
-                    title: this.content.title,
-                    body: this.content.body,
-                    tags: this.content.tags,
-                    permlink: this.content.permlink || this.generatedPermlink,
-                    beneficiaries: this.publishForm.beneficiaries,
-                    custom_json: {
-                        ...this.postCustomJson,
-                        ...this.content.custom_json,
-                        attachedFiles: this.attachedFiles,
-                        collaborativeDoc: this.currentFile && this.currentFile.type === 'collaborative' ? {
-                            owner: this.currentFile.owner,
-                            permlink: this.currentFile.permlink
-                        } : null
+            // Check for operation locks in collaborative mode
+            if (this.isCollaborativeMode && this.ydoc) {
+                const locks = this.ydoc.getMap('_locks');
+                const existingLock = locks.get('publishing');
+                
+                if (existingLock && existingLock.user !== this.username) {
+                    const lockAge = Date.now() - existingLock.timestamp;
+                    if (lockAge < 30000) { // 30 second lock timeout
+                        throw new Error(`Another user (${existingLock.user}) is currently publishing. Please wait.`);
                     }
+                }
+                
+                // Set publish lock
+                locks.set('publishing', {
+                    user: this.username,
+                    timestamp: Date.now()
+                });
+            }
+            
+            try {
+                // Get current collaborative data if available
+                const collaborativeData = this.isCollaborativeMode ? this.getCollaborativeData() : null;
+                
+                // Get tags from collaborative document or local content
+                const sourceTags = collaborativeData?.tags || this.content.tags || [];
+                
+                // Format tags according to Hive best practices
+                const formattedTags = sourceTags
+                    .map(tag => tag.toLowerCase().replace(/[^a-z0-9-]/g, ''))
+                    .filter(tag => tag.length > 0 && tag.length <= 24)
+                    .slice(0, 10); // Max 10 tags per Hive rules
+                
+                // Add tags to body for blockchain indexing (Hive best practice)
+                const bodyWithTags = this.content.body + 
+                    (formattedTags.length > 0 ? '\n\n' + formattedTags.map(tag => `#${tag}`).join(' ') : '');
+                
+                // Extract links from content for json_metadata.links
+                const extractedLinks = this.extractLinksFromContent(this.content.body);
+                
+                // Get featured images for json_metadata.image
+                const featuredImages = collaborativeData?.images?.slice(0, 5).map(img => img.url) || 
+                                     this.attachedFiles.filter(f => f.type?.startsWith('image/')).slice(0, 5).map(f => f.url) || 
+                                     [];
+                
+                // Format data according to Hive comment operation requirements
+                // Reference: https://developers.hive.io/apidefinitions/#broadcast_ops_comment
+                const hivePostData = {
+                    // Required Hive comment operation parameters
+                    parent_author: '', // Empty for top-level posts
+                    parent_permlink: formattedTags[0] || 'dlux', // First tag as parent permlink, fallback to 'dlux'
+                    author: this.username || '', // Will be set by parent component
+                    permlink: this.content.permlink || this.generatedPermlink,
+                    title: this.content.title,
+                    body: bodyWithTags, // Include tags in body for blockchain indexing
+                    
+                    // Hive JSON metadata structure following best practices
+                    json_metadata: JSON.stringify({
+                        // Standard Hive metadata fields
+                        app: 'dlux/1.0.0',
+                        format: 'markdown+html',
+                        tags: formattedTags, // Primary tags storage
+                        image: featuredImages, // Featured images for previews
+                        links: extractedLinks, // External links from content
+                        
+                        // DLUX-specific metadata
+                        dlux: {
+                            type: collaborativeData?.config?.postType || 'blog',
+                            version: collaborativeData?.config?.version || '1.0.0',
+                            
+                            // Media assets from collaborative document
+                            images: collaborativeData?.images || [],
+                            videos: collaborativeData?.videos || [],
+                            assets360: collaborativeData?.assets360 || [],
+                            attachments: collaborativeData?.attachments || [],
+                            
+                            // Video transcoding data
+                            videoData: collaborativeData?.videoData || {},
+                            
+                            // SPK Network contract references
+                            spkContracts: [
+                                ...(collaborativeData?.images?.map(img => img.contract).filter(Boolean) || []),
+                                ...(collaborativeData?.videos?.map(vid => vid.contract).filter(Boolean) || [])
+                            ],
+                            
+                            // Collaborative document reference
+                            collaborative: this.currentFile && this.currentFile.type === 'collaborative' ? {
+                                owner: this.currentFile.owner,
+                                permlink: this.currentFile.permlink,
+                                documentName: this.currentFile.documentName
+                            } : null
+                        },
+                        
+                        // Legacy attached files for backward compatibility
+                        attachedFiles: this.attachedFiles,
+                        
+                        // Custom JSON from collaborative document or local content
+                        ...(collaborativeData?.customJson || this.content.custom_json || {})
+                    })
                 };
                 
-                // Emit publish event to parent
-                this.$emit('publish-post', postData);
+                // Get beneficiaries from collaborative document or local form
+                const sourceBeneficiaries = collaborativeData?.beneficiaries || this.publishForm.beneficiaries || [];
+                
+                // Get advanced options from collaborative document or defaults
+                const maxAcceptedPayout = collaborativeData?.publishOptions?.maxAcceptedPayout || '1000000.000 HBD';
+                const percentHbd = collaborativeData?.publishOptions?.percentHbd || 10000;
+                const allowVotes = collaborativeData?.publishOptions?.allowVotes !== false;
+                const allowCurationRewards = collaborativeData?.publishOptions?.allowCurationRewards !== false;
+                
+                // Comment options for beneficiaries and advanced settings (separate operation)
+                const commentOptions = sourceBeneficiaries.length > 0 || 
+                                     maxAcceptedPayout !== '1000000.000 HBD' || 
+                                     percentHbd !== 10000 || 
+                                     !allowVotes || 
+                                     !allowCurationRewards ? {
+                    author: hivePostData.author,
+                    permlink: hivePostData.permlink,
+                    max_accepted_payout: maxAcceptedPayout,
+                    percent_hbd: percentHbd,
+                    allow_votes: allowVotes,
+                    allow_curation_rewards: allowCurationRewards,
+                    extensions: sourceBeneficiaries.length > 0 ? [
+                        [0, {
+                            beneficiaries: sourceBeneficiaries.map(ben => ({
+                                account: ben.account,
+                                weight: ben.weight
+                            }))
+                        }]
+                    ] : []
+                } : null;
+                
+                // Emit properly formatted Hive operations to parent
+                this.$emit('publish-post', {
+                    operations: [
+                        ['comment', hivePostData],
+                        ...(commentOptions ? [['comment_options', commentOptions]] : [])
+                    ],
+                    // Additional metadata for parent component
+                    metadata: {
+                        isCollaborative: this.isCollaborativeMode,
+                        collaborativeData: collaborativeData,
+                        localAttachments: this.attachedFiles
+                    }
+                });
                 
                 this.showPublishModal = false;
                 this.hasUnsavedChanges = false;
                 
-                console.log('📰 Post published:', postData.title);
+                console.log('📰 Post formatted for Hive broadcast:', hivePostData.title);
                 
             } catch (error) {
-                console.error('Publish failed:', error);
+                console.error('Publish formatting failed:', error);
                 alert('Publish failed: ' + error.message);
             } finally {
+                // Clear publish lock in collaborative mode
+                if (this.isCollaborativeMode && this.ydoc) {
+                    const locks = this.ydoc.getMap('_locks');
+                    locks.delete('publishing');
+                }
                 this.publishing = false;
             }
         },
         
+        // Extract links from content for Hive json_metadata.links
+        extractLinksFromContent(content) {
+            if (!content) return [];
+            
+            // Regex to find URLs in content
+            const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
+            const links = content.match(urlRegex) || [];
+            
+            // Remove duplicates and limit to reasonable number
+            return [...new Set(links)].slice(0, 10);
+        },
+
+        // JSON Preview functionality
+        showJsonPreview() {
+            this.showJsonPreviewModal = true;
+            this.jsonPreviewTab = 'complete';
+        },
+
+        closeJsonPreview() {
+            this.showJsonPreviewModal = false;
+        },
+
+        setJsonPreviewTab(tab) {
+            this.jsonPreviewTab = tab;
+        },
+
+        getCompleteJsonPreview() {
+            try {
+                // Get current collaborative data if available
+                const collaborativeData = this.isCollaborativeMode ? this.getCollaborativeData() : null;
+                
+                // Get tags from collaborative document or local content
+                const sourceTags = collaborativeData?.tags || this.content.tags || [];
+                
+                // Format tags according to Hive best practices
+                const formattedTags = sourceTags
+                    .map(tag => tag.toLowerCase().replace(/[^a-z0-9-]/g, ''))
+                    .filter(tag => tag.length > 0 && tag.length <= 24)
+                    .slice(0, 10);
+                
+                // Add tags to body for blockchain indexing
+                const bodyWithTags = this.content.body + 
+                    (formattedTags.length > 0 ? '\n\n' + formattedTags.map(tag => `#${tag}`).join(' ') : '');
+                
+                // Extract links and get featured images
+                const extractedLinks = this.extractLinksFromContent(this.content.body);
+                const featuredImages = collaborativeData?.images?.slice(0, 5).map(img => img.url) || 
+                                     this.attachedFiles.filter(f => f.type?.startsWith('image/')).slice(0, 5).map(f => f.url) || 
+                                     [];
+                
+                // Build comment operation
+                const commentOperation = {
+                    parent_author: '',
+                    parent_permlink: formattedTags[0] || 'dlux',
+                    author: this.username || 'username',
+                    permlink: this.content.permlink || this.generatedPermlink,
+                    title: this.content.title,
+                    body: bodyWithTags,
+                    json_metadata: JSON.stringify({
+                        // Standard Hive metadata fields
+                        app: 'dlux/1.0.0',
+                        format: 'markdown+html',
+                        tags: formattedTags,
+                        image: featuredImages,
+                        links: extractedLinks,
+                        
+                        // DLUX-specific metadata
+                        dlux: {
+                            type: collaborativeData?.config?.postType || 'blog',
+                            version: collaborativeData?.config?.version || '1.0.0',
+                            images: collaborativeData?.images || [],
+                            videos: collaborativeData?.videos || [],
+                            assets360: collaborativeData?.assets360 || [],
+                            attachments: collaborativeData?.attachments || [],
+                            videoData: collaborativeData?.videoData || {},
+                            spkContracts: [
+                                ...(collaborativeData?.images?.map(img => img.contract).filter(Boolean) || []),
+                                ...(collaborativeData?.videos?.map(vid => vid.contract).filter(Boolean) || [])
+                            ],
+                            collaborative: this.currentFile && this.currentFile.type === 'collaborative' ? {
+                                owner: this.currentFile.owner,
+                                permlink: this.currentFile.permlink,
+                                documentName: this.currentFile.documentName
+                            } : null
+                        },
+                        
+                        // Legacy attached files for backward compatibility
+                        attachedFiles: this.attachedFiles,
+                        
+                        // Custom JSON from collaborative document or local content
+                        ...(collaborativeData?.customJson || this.content.custom_json || {})
+                    })
+                };
+                
+                // Get beneficiaries and advanced options
+                const sourceBeneficiaries = collaborativeData?.beneficiaries || this.publishForm.beneficiaries || [];
+                const maxAcceptedPayout = collaborativeData?.publishOptions?.maxAcceptedPayout || '1000000.000 HBD';
+                const percentHbd = collaborativeData?.publishOptions?.percentHbd || 10000;
+                const allowVotes = collaborativeData?.publishOptions?.allowVotes !== false;
+                const allowCurationRewards = collaborativeData?.publishOptions?.allowCurationRewards !== false;
+                
+                // Build comment options operation
+                const commentOptionsOperation = sourceBeneficiaries.length > 0 || 
+                                             maxAcceptedPayout !== '1000000.000 HBD' || 
+                                             percentHbd !== 10000 || 
+                                             !allowVotes || 
+                                             !allowCurationRewards ? {
+                    author: commentOperation.author,
+                    permlink: commentOperation.permlink,
+                    max_accepted_payout: maxAcceptedPayout,
+                    percent_hbd: percentHbd,
+                    allow_votes: allowVotes,
+                    allow_curation_rewards: allowCurationRewards,
+                    extensions: sourceBeneficiaries.length > 0 ? [
+                        [0, {
+                            beneficiaries: sourceBeneficiaries.map(ben => ({
+                                account: ben.account,
+                                weight: ben.weight
+                            }))
+                        }]
+                    ] : []
+                } : null;
+                
+                // Complete operations array
+                const operations = [
+                    ['comment', commentOperation],
+                    ...(commentOptionsOperation ? [['comment_options', commentOptionsOperation]] : [])
+                ];
+                
+                return {
+                    operations: operations,
+                    metadata: {
+                        isCollaborative: this.isCollaborativeMode,
+                        collaborativeData: collaborativeData,
+                        localAttachments: this.attachedFiles,
+                        generatedAt: new Date().toISOString()
+                    }
+                };
+                
+            } catch (error) {
+                console.error('Error generating JSON preview:', error);
+                return {
+                    error: error.message,
+                    stack: error.stack
+                };
+            }
+        },
+
+        getCommentOperationPreview() {
+            const complete = this.getCompleteJsonPreview();
+            if (complete.error) return complete;
+            
+            return complete.operations.find(op => op[0] === 'comment')?.[1] || {};
+        },
+
+        getCommentOptionsPreview() {
+            const complete = this.getCompleteJsonPreview();
+            if (complete.error) return complete;
+            
+            return complete.operations.find(op => op[0] === 'comment_options')?.[1] || null;
+        },
+
+        getMetadataPreview() {
+            const complete = this.getCompleteJsonPreview();
+            if (complete.error) return complete;
+            
+            return complete.metadata || {};
+        },
+
+        copyJsonToClipboard(jsonData) {
+            try {
+                const jsonString = JSON.stringify(jsonData, null, 2);
+                navigator.clipboard.writeText(jsonString).then(() => {
+                    // Show success feedback
+                    console.log('✅ JSON copied to clipboard');
+                    // You could add a toast notification here
+                }).catch(err => {
+                    console.error('Failed to copy JSON:', err);
+                    // Fallback: select text for manual copy
+                    this.selectJsonText(jsonString);
+                });
+            } catch (error) {
+                console.error('Error copying JSON:', error);
+            }
+        },
+
+        selectJsonText(jsonString) {
+            // Fallback method for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = jsonString;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+        },
+
+        validateJsonStructure() {
+            const complete = this.getCompleteJsonPreview();
+            if (complete.error) {
+                return {
+                    valid: false,
+                    errors: [complete.error]
+                };
+            }
+            
+            const errors = [];
+            const warnings = [];
+            
+            try {
+                const comment = this.getCommentOperationPreview();
+                
+                // Validate required fields
+                if (!comment.title || comment.title.length === 0) {
+                    errors.push('Title is required');
+                }
+                if (!comment.body || comment.body.length === 0) {
+                    errors.push('Body content is required');
+                }
+                if (!comment.author || comment.author.length === 0) {
+                    errors.push('Author is required');
+                }
+                if (!comment.permlink || comment.permlink.length === 0) {
+                    errors.push('Permlink is required');
+                }
+                
+                // Validate field lengths
+                if (comment.title && comment.title.length > 255) {
+                    errors.push('Title exceeds 255 character limit');
+                }
+                if (comment.body && comment.body.length > 60000) {
+                    warnings.push('Body content is very long (>60k chars)');
+                }
+                
+                // Validate permlink format
+                if (comment.permlink && !/^[a-z0-9-]+$/.test(comment.permlink)) {
+                    errors.push('Permlink must contain only lowercase letters, numbers, and hyphens');
+                }
+                
+                // Validate JSON metadata size
+                if (comment.json_metadata) {
+                    const jsonSize = new Blob([comment.json_metadata]).size;
+                    if (jsonSize > 8192) { // 8KB limit
+                        warnings.push(`JSON metadata is large (${(jsonSize/1024).toFixed(1)}KB). Consider reducing.`);
+                    }
+                }
+                
+                // Validate tags
+                const metadata = JSON.parse(comment.json_metadata || '{}');
+                if (metadata.tags) {
+                    if (metadata.tags.length === 0) {
+                        errors.push('At least one tag is required');
+                    }
+                    if (metadata.tags.length > 10) {
+                        errors.push('Maximum 10 tags allowed');
+                    }
+                    metadata.tags.forEach((tag, index) => {
+                        if (tag.length > 24) {
+                            errors.push(`Tag ${index + 1} exceeds 24 character limit`);
+                        }
+                        if (!/^[a-z0-9-]+$/.test(tag)) {
+                            errors.push(`Tag ${index + 1} contains invalid characters`);
+                        }
+                    });
+                }
+                
+                // Validate beneficiaries
+                const commentOptions = this.getCommentOptionsPreview();
+                if (commentOptions && commentOptions.extensions) {
+                    const beneficiaries = commentOptions.extensions[0]?.[1]?.beneficiaries || [];
+                    if (beneficiaries.length > 8) {
+                        errors.push('Maximum 8 beneficiaries allowed');
+                    }
+                    
+                    const totalWeight = beneficiaries.reduce((sum, ben) => sum + ben.weight, 0);
+                    if (totalWeight > 10000) {
+                        errors.push('Total beneficiary weight exceeds 100%');
+                    }
+                }
+                
+                return {
+                    valid: errors.length === 0,
+                    errors: errors,
+                    warnings: warnings
+                };
+                
+            } catch (error) {
+                return {
+                    valid: false,
+                    errors: ['JSON validation failed: ' + error.message]
+                };
+            }
+        },
+
         // Enhanced content update to emit changes
         updateContent() {
             // TEMPORARILY COMMENT OUT TO AVOID CONFLICTS
@@ -793,20 +1354,68 @@ export default {
         },
         
         async saveDocument() {
-            if (!this.hasUnsavedChanges && this.currentFile) {
-                // Quick save existing file
-                if (this.currentFile.type === 'local') {
-                    await this.saveToLocalStorage();
-                } else {
-                    await this.saveToCollaborativeDoc();
-                }
-            } else {
-                // Show save dialog
+            // ===== REFACTORED: Offline-First Architecture =====
+            // Following TipTap best practices - Y.js handles all persistence
+            // No more parallel saving paths
+            
+            if (!this.hasValidFilename && !this.currentFile) {
                 this.showSaveModal = true;
-                if (this.currentFile) {
-                    this.saveForm.filename = this.currentFile.name || this.currentFile.permlink || '';
-                }
+                return;
             }
+
+            this.saving = true;
+            
+            try {
+                const filename = this.saveForm.filename || this.currentFile?.name || `document_${Date.now()}`;
+                
+                // Update file metadata (Y.js + IndexedDB handles content)
+                this.currentFile = this.currentFile || {
+                    id: `local_${Date.now()}`,
+                    type: 'local'
+                };
+                
+                this.currentFile.name = filename;
+                this.currentFile.lastModified = new Date().toISOString();
+
+                // If user wants cloud sync, connect to collaboration server
+                if (this.saveForm.saveToDlux && this.showCollaborativeFeatures) {
+                    await this.connectToCollaborationServer();
+                }
+
+                // Update local file index (metadata only)
+                await this.updateLocalFileIndex();
+                
+                this.hasUnsavedChanges = false;
+                console.log('💾 Document saved using offline-first architecture');
+                
+            } catch (error) {
+                console.error('Save failed:', error);
+                alert('Save failed: ' + error.message);
+            } finally {
+                this.saving = false;
+            }
+        },
+
+        async updateLocalFileIndex() {
+            // Only save metadata to localStorage, not content (Y.js + IndexedDB handles content)
+            const files = JSON.parse(localStorage.getItem('dlux_tiptap_files') || '[]');
+            const existingIndex = files.findIndex(f => f.id === this.currentFile.id);
+            
+            const fileInfo = {
+                id: this.currentFile.id,
+                name: this.currentFile.name,
+                type: this.currentFile.type,
+                lastModified: this.currentFile.lastModified,
+                size: 0 // Size managed by IndexedDB
+            };
+            
+            if (existingIndex >= 0) {
+                files[existingIndex] = fileInfo;
+            } else {
+                files.push(fileInfo);
+            }
+            
+            localStorage.setItem('dlux_tiptap_files', JSON.stringify(files));
         },
         
         async saveAsDocument() {
@@ -1711,7 +2320,7 @@ export default {
         
         // Editor Management - TipTap Best Practice: Offline-First Collaborative
         async createStandardEditor() {
-            console.log('🏗️ Creating offline-first collaborative editors...');
+            console.log('🏗️ Creating offline-first collaborative editors (TipTap best practice)...');
             
             // Clean up any existing editor
             if (this.titleEditor) {
@@ -1726,20 +2335,18 @@ export default {
             // Wait for cleanup to complete
             await this.$nextTick();
             
-            // Try to get collaboration components first
+            // ===== REFACTORED: Always use offline-first collaborative approach =====
             const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
             
             if (bundle) {
-                // Use collaborative editors (offline-first approach)
-                await this.createOfflineCollaborativeEditors(bundle);
+                await this.createOfflineFirstCollaborativeEditors(bundle);
             } else {
-                // Fallback to basic editors if collaboration bundle not available
-                console.warn('⚠️ Collaboration bundle not available, using basic editors');
+                console.warn('⚠️ Collaboration bundle not available, falling back to basic editors');
                 await this.createBasicEditors();
             }
         },
 
-        async createOfflineCollaborativeEditors(bundle) {
+        async createOfflineFirstCollaborativeEditors(bundle) {
             // Get components from the bundle
             const Editor = bundle.Editor?.default || bundle.Editor;
             const StarterKit = bundle.StarterKit?.default || bundle.StarterKit;
@@ -1753,12 +2360,28 @@ export default {
                 return;
             }
 
-            // Create Y.js document for offline collaborative editing (no WebSocket provider)
+            // ===== STEP 1: Create Y.js document for offline collaborative editing =====
             this.ydoc = new Y.Doc();
             
-            // Initialize shared types
-            this.ydoc.get('title', Y.XmlFragment);
-            this.ydoc.get('body', Y.XmlFragment);
+            // ===== STEP 2: Add IndexedDB persistence (TipTap best practice) =====
+            const documentId = this.currentFile?.id || this.currentFile?.permlink || `local_${Date.now()}`;
+            const IndexeddbPersistence = bundle.IndexeddbPersistence?.default || bundle.IndexeddbPersistence;
+            
+            if (IndexeddbPersistence) {
+                try {
+                    this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc);
+                    console.log('💾 IndexedDB persistence enabled for offline-first editing');
+                } catch (error) {
+                    console.warn('⚠️ Failed to initialize IndexedDB persistence:', error.message);
+                    console.log('📝 Content will persist in memory only (until page refresh)');
+                }
+            } else {
+                console.warn('⚠️ IndexedDB persistence not available in bundle - content may not persist offline');
+                console.log('📝 Content will persist in memory only (until page refresh)');
+            }
+            
+            // ===== STEP 3: Initialize collaborative schema =====
+            this.initializeCollaborativeSchema(Y);
             
             // Create collaborative editors (offline mode - no WebSocket connection)
                 this.titleEditor = new Editor({
@@ -1775,7 +2398,7 @@ export default {
                     }),
                     Collaboration.configure({
                         document: this.ydoc,
-                        field: 'title'
+                        field: 'title' // Keep existing field names for backward compatibility
                         }),
                         Placeholder.configure({
                         placeholder: this.isReadOnlyMode ? 'Title (read-only)' : 'Enter title...'
@@ -1820,7 +2443,7 @@ export default {
                     }),
                     Collaboration.configure({
                         document: this.ydoc,
-                        field: 'body'
+                        field: 'body' // Keep existing field names for backward compatibility
                     }),
                     Placeholder.configure({
                         placeholder: this.isReadOnlyMode ? 'Content (read-only)' : 'Start writing...'
@@ -1863,6 +2486,620 @@ export default {
             this.fileType = 'local';           // Still local until published to server
 
             console.log('✅ Offline collaborative editors created successfully');
+        },
+
+        // CLEAN DLUX SCHEMA INITIALIZATION
+        initializeCollaborativeSchema(Y) {
+            console.log('🏗️ Initializing clean DLUX collaborative schema...');
+            
+            // Schema version tracking to prevent conflicts
+            // Reference: https://tiptap.dev/docs/hocuspocus/guides/collaborative-editing#schema-updates
+            const metadata = this.ydoc.getMap('_metadata');
+            const currentSchemaVersion = '1.0.0';
+            const existingVersion = metadata.get('schemaVersion');
+            
+            if (existingVersion && existingVersion !== currentSchemaVersion) {
+                console.warn(`⚠️ Schema version mismatch: current=${currentSchemaVersion}, document=${existingVersion}`);
+                // In production, you might want to disable editing or show a warning
+                this.schemaVersionMismatch = true;
+            } else {
+                metadata.set('schemaVersion', currentSchemaVersion);
+                metadata.set('lastUpdated', new Date().toISOString());
+                this.schemaVersionMismatch = false;
+            }
+            
+            // Core content (TipTap editors)
+            this.ydoc.get('title', Y.XmlFragment);
+            this.ydoc.get('body', Y.XmlFragment);
+            
+            // Post configuration
+            const config = this.ydoc.getMap('config');
+            if (!config.has('postType')) {
+                config.set('postType', 'blog');
+                config.set('version', '1.0.0');
+                config.set('appVersion', 'dlux/1.0.0');
+                config.set('createdBy', this.username || 'anonymous');
+                config.set('lastModified', new Date().toISOString());
+                config.set('initialContentLoaded', false); // TipTap best practice flag
+            }
+            
+            // Advanced publishing options (atomic values only for conflict-free collaboration)
+            const publishOptions = this.ydoc.getMap('publishOptions');
+            if (!publishOptions.has('initialized')) {
+                publishOptions.set('maxAcceptedPayout', '1000000.000 HBD'); // Default max
+                publishOptions.set('percentHbd', 10000); // 100% HBD
+                publishOptions.set('allowVotes', true);
+                publishOptions.set('allowCurationRewards', true);
+                publishOptions.set('initialized', true);
+            }
+            
+            // Conflict-free collaborative arrays and maps
+            this.ydoc.getArray('tags');           // Conflict-free tag management
+            this.ydoc.getArray('beneficiaries');  // Conflict-free beneficiary management
+            this.ydoc.getMap('customJson');       // Granular custom field updates
+            
+            // Operation coordination and schema versioning
+            this.ydoc.getMap('_locks');           // Operation locks (publishing, etc.)
+            
+            // Individual asset transform maps for conflict-free positioning
+            // These will be created dynamically as assets are added
+            
+            // Media arrays (flat structure for performance)
+            this.ydoc.getArray('images');
+            this.ydoc.getArray('videos');
+            this.ydoc.getArray('assets360');
+            this.ydoc.getArray('attachments');
+            
+            // Video transcoding data
+            this.ydoc.getMap('videoData');
+            
+            // User presence
+            this.ydoc.getMap('presence');
+            
+            console.log(`✅ Clean DLUX schema initialized (v${currentSchemaVersion})`);
+            
+            // Set up observers
+            this.setupObservers();
+        },
+
+        // Set up Y.js observers for real-time collaboration
+        setupObservers() {
+            if (!this.ydoc) return;
+            
+            console.log('🔍 Setting up collaborative observers...');
+            
+            try {
+                // Observe post configuration changes
+                const config = this.ydoc.getMap('config');
+                config.observe((event) => {
+                    console.log('⚙️ Post config changed:', event);
+                    this.syncToParent();
+                });
+                
+                // Observe publish options changes (atomic settings only)
+                const publishOptions = this.ydoc.getMap('publishOptions');
+                publishOptions.observe((event) => {
+                    console.log('📋 Publish options changed:', event);
+                    this.syncToParent();
+                });
+                
+                // Observe conflict-free collaborative arrays
+                const tags = this.ydoc.getArray('tags');
+                tags.observe((event) => {
+                    console.log('🏷️ Tags changed:', event);
+                    this.collaborativeDataVersion++; // Trigger Vue reactivity
+                    this.syncToParent();
+                });
+                
+                const beneficiaries = this.ydoc.getArray('beneficiaries');
+                beneficiaries.observe((event) => {
+                    console.log('💰 Beneficiaries changed:', event);
+                    this.collaborativeDataVersion++; // Trigger Vue reactivity
+                    this.syncToParent();
+                });
+                
+                const customJson = this.ydoc.getMap('customJson');
+                customJson.observe((event) => {
+                    console.log('⚙️ Custom JSON changed:', event);
+                    this.syncToParent();
+                });
+                
+                // Observe media changes
+                ['images', 'videos', 'assets360', 'attachments'].forEach(arrayName => {
+                    const array = this.ydoc.getArray(arrayName);
+                    array.observe((event) => {
+                        console.log(`📁 ${arrayName} changed:`, event);
+                        this.syncToParent();
+                    });
+                });
+                
+                // Observe video data changes
+                const videoData = this.ydoc.getMap('videoData');
+                videoData.observe((event) => {
+                    console.log('🎬 Video data changed:', event);
+                    this.syncToParent();
+                });
+                
+                // Observe user presence
+                const presence = this.ydoc.getMap('presence');
+                presence.observe((event) => {
+                    console.log('👥 User presence changed:', event);
+                    this.updatePresenceUI();
+                });
+                
+                console.log('✅ Collaborative observers set up');
+            } catch (error) {
+                console.error('❌ Failed to set up observers:', error);
+            }
+        },
+
+        // CLEAN DLUX COLLABORATIVE METHODS
+
+        // Post Type Management
+        setPostType(postType) {
+            if (!this.validatePermission('setPostType')) return false;
+            
+            const config = this.ydoc.getMap('config');
+            config.set('postType', postType);
+            config.set('lastModified', new Date().toISOString());
+            console.log(`📝 Post type set to: ${postType}`);
+            return true;
+        },
+
+        getPostType() {
+            const config = this.ydoc.getMap('config');
+            return config.get('postType') || 'blog';
+        },
+
+        // Conflict-Free Advanced Options Management
+        
+        // Tag Management (Y.Array for conflict-free collaboration)
+        addCollaborativeTag(tag) {
+            if (!this.validatePermission('addTag')) return false;
+            
+            // Format tag according to Hive rules
+            const formattedTag = tag.toLowerCase().replace(/[^a-z0-9-]/g, '');
+            if (formattedTag.length === 0 || formattedTag.length > 24) {
+                console.warn('⚠️ Invalid tag format:', tag);
+                return false;
+            }
+            
+            const tags = this.ydoc.getArray('tags');
+            const existingTags = tags.toArray();
+            
+            // Check limits and duplicates
+            if (existingTags.length >= 10) {
+                console.warn('⚠️ Maximum 10 tags allowed');
+                return false;
+            }
+            
+            if (!existingTags.includes(formattedTag)) {
+                tags.push([formattedTag]);
+                console.log('🏷️ Tag added:', formattedTag);
+                this.syncToParent(); // Emit collaborative-data-changed event
+                return true;
+            }
+            
+            return false;
+        },
+
+        removeCollaborativeTag(tag) {
+            if (!this.validatePermission('removeTag')) return false;
+            
+            const tags = this.ydoc.getArray('tags');
+            const index = tags.toArray().indexOf(tag);
+            if (index >= 0) {
+                tags.delete(index, 1);
+                console.log('🏷️ Tag removed:', tag);
+                this.syncToParent(); // Emit collaborative-data-changed event
+                return true;
+            }
+            return false;
+        },
+
+        setTags(tagArray) {
+            if (!this.validatePermission('setTags')) return false;
+            
+            // Clear existing tags
+            const tags = this.ydoc.getArray('tags');
+            tags.delete(0, tags.length);
+            
+            // Add new tags
+            const formattedTags = tagArray
+                .map(tag => tag.toLowerCase().replace(/[^a-z0-9-]/g, ''))
+                .filter(tag => tag.length > 0 && tag.length <= 24)
+                .slice(0, 10);
+            
+            formattedTags.forEach(tag => {
+                if (!tags.toArray().includes(tag)) {
+                    tags.push([tag]);
+                }
+            });
+            
+            console.log('🏷️ Tags set:', formattedTags);
+            this.syncToParent(); // Emit collaborative-data-changed event
+            return true;
+        },
+
+        getTags() {
+            if (!this.ydoc) return [];
+            const tags = this.ydoc.getArray('tags');
+            return tags.toArray();
+        },
+
+        // Beneficiary Management (Y.Array for conflict-free collaboration)
+        addCollaborativeBeneficiary(account, weight) {
+            if (!this.validatePermission('addBeneficiary')) return false;
+            
+            const beneficiaries = this.ydoc.getArray('beneficiaries');
+            const existing = beneficiaries.toArray();
+            
+            // Validate limits
+            if (existing.length >= 8) {
+                console.warn('⚠️ Maximum 8 beneficiaries allowed');
+                return false;
+            }
+            
+            // Check for duplicate account
+            if (existing.some(b => b.account === account)) {
+                console.warn('⚠️ Beneficiary already exists:', account);
+                return false;
+            }
+            
+            // Validate weight
+            const validWeight = Math.min(Math.max(weight, 1), 10000);
+            const totalWeight = existing.reduce((sum, b) => sum + b.weight, 0) + validWeight;
+            
+            if (totalWeight > 10000) {
+                console.warn('⚠️ Total beneficiary weight would exceed 100%');
+                return false;
+            }
+            
+            const beneficiary = {
+                account: account,
+                weight: validWeight,
+                id: `ben_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            };
+            
+            beneficiaries.push([beneficiary]);
+            console.log('💰 Beneficiary added:', beneficiary);
+            this.syncToParent(); // Emit collaborative-data-changed event
+            return beneficiary.id;
+        },
+
+        removeCollaborativeBeneficiary(id) {
+            if (!this.validatePermission('removeBeneficiary')) return false;
+            
+            const beneficiaries = this.ydoc.getArray('beneficiaries');
+            const index = beneficiaries.toArray().findIndex(b => b.id === id);
+            
+            if (index >= 0) {
+                const removed = beneficiaries.toArray()[index];
+                beneficiaries.delete(index, 1);
+                console.log('💰 Beneficiary removed:', removed.account);
+                this.syncToParent(); // Emit collaborative-data-changed event
+                return true;
+            }
+            return false;
+        },
+
+        updateBeneficiaryWeight(id, newWeight) {
+            if (!this.validatePermission('updateBeneficiary')) return false;
+            
+            const beneficiaries = this.ydoc.getArray('beneficiaries');
+            const existing = beneficiaries.toArray();
+            const index = existing.findIndex(b => b.id === id);
+            
+            if (index >= 0) {
+                const validWeight = Math.min(Math.max(newWeight, 1), 10000);
+                const otherWeight = existing.reduce((sum, b, i) => i === index ? sum : sum + b.weight, 0);
+                
+                if (otherWeight + validWeight > 10000) {
+                    console.warn('⚠️ Total beneficiary weight would exceed 100%');
+                    return false;
+                }
+                
+                const updated = { ...existing[index], weight: validWeight };
+                beneficiaries.delete(index, 1);
+                beneficiaries.insert(index, [updated]);
+                console.log('💰 Beneficiary weight updated:', updated);
+                return true;
+            }
+            return false;
+        },
+
+        getBeneficiaries() {
+            if (!this.ydoc) return [];
+            const beneficiaries = this.ydoc.getArray('beneficiaries');
+            return beneficiaries.toArray();
+        },
+
+        // Custom JSON Management (Y.Map for granular conflict-free updates)
+        setCustomJsonField(key, value) {
+            if (!this.validatePermission('setCustomJsonField')) return false;
+            
+            const customJson = this.ydoc.getMap('customJson');
+            customJson.set(key, value);
+            console.log('⚙️ Custom JSON field updated:', key);
+            return true;
+        },
+
+        removeCustomJsonField(key) {
+            if (!this.validatePermission('removeCustomJsonField')) return false;
+            
+            const customJson = this.ydoc.getMap('customJson');
+            if (customJson.has(key)) {
+                customJson.delete(key);
+                console.log('⚙️ Custom JSON field removed:', key);
+                return true;
+            }
+            return false;
+        },
+
+        getCustomJson() {
+            const customJson = this.ydoc.getMap('customJson');
+            return customJson.toJSON();
+        },
+
+        // Atomic Publish Options (simple values, conflict-free)
+        setPublishOption(key, value) {
+            if (!this.validatePermission('setPublishOption')) return false;
+            
+            const publishOptions = this.ydoc.getMap('publishOptions');
+            publishOptions.set(key, value);
+            console.log('📋 Publish option updated:', key, value);
+            return true;
+        },
+
+        getPublishOption(key, defaultValue = null) {
+            const publishOptions = this.ydoc.getMap('publishOptions');
+            return publishOptions.get(key) || defaultValue;
+        },
+
+        // Media Asset Management
+        addImage(imageData) {
+            if (!this.validatePermission('addImage')) return null;
+            
+            const images = this.ydoc.getArray('images');
+            const imageAsset = {
+                id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                hash: imageData.hash,
+                filename: imageData.filename || imageData.name,
+                type: imageData.type,
+                size: imageData.size,
+                url: `https://ipfs.dlux.io/ipfs/${imageData.hash}`,
+                uploadedBy: this.username,
+                uploadedAt: new Date().toISOString(),
+                contract: imageData.contract || null,
+                metadata: imageData.metadata || {}
+            };
+            
+            images.push([imageAsset]);
+            console.log('🖼️ Image added:', imageAsset.filename);
+            return imageAsset.id;
+        },
+
+        addVideo(videoData) {
+            if (!this.validatePermission('addVideo')) return null;
+            
+            const videos = this.ydoc.getArray('videos');
+            const videoAsset = {
+                id: `vid_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                hash: videoData.hash,
+                filename: videoData.filename || videoData.name,
+                type: videoData.type,
+                size: videoData.size,
+                url: `https://ipfs.dlux.io/ipfs/${videoData.hash}`,
+                uploadedBy: this.username,
+                uploadedAt: new Date().toISOString(),
+                contract: videoData.contract || null,
+                metadata: videoData.metadata || {},
+                transcoding: {
+                    status: 'pending',
+                    resolutions: [],
+                    playlist: null
+                }
+            };
+            
+            videos.push([videoAsset]);
+            console.log('🎥 Video added:', videoAsset.filename);
+            return videoAsset.id;
+        },
+
+        add360Asset(assetData) {
+            if (!this.validatePermission('add360Asset')) return null;
+            
+            const assets360 = this.ydoc.getArray('assets360');
+            const asset = {
+                id: `asset_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                hash: assetData.hash,
+                name: assetData.name,
+                type: assetData.type,
+                size: assetData.size,
+                uploadedBy: this.username,
+                uploadedAt: new Date().toISOString(),
+                contract: assetData.contract || null,
+                transform: assetData.transform || {
+                    position: { x: 0, y: 0, z: 0 },
+                    rotation: { x: 0, y: 0, z: 0 },
+                    scale: { x: 1, y: 1, z: 1 }
+                },
+                properties: assetData.properties || {},
+                lastModified: new Date().toISOString(),
+                modifiedBy: this.username
+            };
+            
+            assets360.push([asset]);
+            console.log('🌐 360° asset added:', asset.name);
+            return asset.id;
+        },
+
+        addAttachment(fileData) {
+            if (!this.validatePermission('addAttachment')) return null;
+            
+            const attachments = this.ydoc.getArray('attachments');
+            const attachment = {
+                id: `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                hash: fileData.hash,
+                filename: fileData.filename || fileData.name,
+                type: fileData.type,
+                size: fileData.size,
+                url: `https://ipfs.dlux.io/ipfs/${fileData.hash}`,
+                uploadedBy: this.username,
+                uploadedAt: new Date().toISOString(),
+                contract: fileData.contract || null,
+                description: fileData.description || ''
+            };
+            
+            attachments.push([attachment]);
+            console.log('📎 Attachment added:', attachment.filename);
+            return attachment.id;
+        },
+
+        // File Upload Integration
+        handleFileUpload(fileData) {
+            if (!fileData) return null;
+            
+            console.log('📎 Processing file upload:', fileData);
+            
+            // Route to appropriate handler based on file type
+            if (fileData.type && fileData.type.startsWith('image/')) {
+                return this.addImage(fileData);
+            } else if (fileData.type && fileData.type.startsWith('video/')) {
+                return this.addVideo(fileData);
+            } else {
+                return this.addAttachment(fileData);
+            }
+        },
+
+        // Video Transcoding Management
+        updateVideoTranscoding(videoId, transcodeData) {
+            if (!this.validatePermission('updateVideoTranscoding')) return false;
+            
+            const videos = this.ydoc.getArray('videos');
+            const videoArray = videos.toArray();
+            const videoIndex = videoArray.findIndex(v => v.id === videoId);
+            
+            if (videoIndex !== -1) {
+                const video = videoArray[videoIndex];
+                video.transcoding = {
+                    ...video.transcoding,
+                    ...transcodeData,
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                // Update the video in the Y.Array
+                videos.delete(videoIndex, 1);
+                videos.insert(videoIndex, [video]);
+                
+                console.log('🎬 Video transcoding updated:', videoId);
+                return true;
+            }
+            return false;
+        },
+
+        // Conflict-free asset transform management
+        updateAssetTransform(assetId, transformType, value) {
+            if (!this.validatePermission('updateAssetTransform')) return false;
+            
+            // Use individual transform maps for conflict-free updates
+            const transformMap = this.ydoc.getMap(`transform_${assetId}`);
+            transformMap.set(transformType, value);
+            transformMap.set('lastModified', new Date().toISOString());
+            transformMap.set('modifiedBy', this.username);
+            
+            console.log('🌐 Asset transform updated:', assetId, transformType, value);
+            return true;
+        },
+
+        getAssetTransform(assetId) {
+            const transformMap = this.ydoc.getMap(`transform_${assetId}`);
+            return transformMap.toJSON();
+        },
+
+        // Legacy method for backward compatibility (now conflict-free)
+        update360AssetTransform(assetId, transform) {
+            if (!this.validatePermission('update360AssetTransform')) return false;
+            
+            // Update using conflict-free individual properties
+            if (transform.position) {
+                this.updateAssetTransform(assetId, 'position', transform.position);
+            }
+            if (transform.rotation) {
+                this.updateAssetTransform(assetId, 'rotation', transform.rotation);
+            }
+            if (transform.scale) {
+                this.updateAssetTransform(assetId, 'scale', transform.scale);
+            }
+            
+            console.log('🎯 360° asset transform updated (legacy):', assetId);
+            return true;
+        },
+
+        // Get all collaborative data for parent sync
+        getCollaborativeData() {
+            return {
+                config: this.ydoc.getMap('config').toJSON(),
+                publishOptions: this.ydoc.getMap('publishOptions').toJSON(),
+                tags: this.ydoc.getArray('tags').toArray(),
+                beneficiaries: this.ydoc.getArray('beneficiaries').toArray(),
+                customJson: this.ydoc.getMap('customJson').toJSON(),
+                images: this.ydoc.getArray('images').toArray(),
+                videos: this.ydoc.getArray('videos').toArray(),
+                assets360: this.ydoc.getArray('assets360').toArray(),
+                attachments: this.ydoc.getArray('attachments').toArray(),
+                videoData: this.ydoc.getMap('videoData').toJSON()
+            };
+        },
+
+        // Sync collaborative data to parent component
+        syncToParent() {
+            const collaborativeData = this.getCollaborativeData();
+            this.$emit('collaborative-data-changed', collaborativeData);
+        },
+
+        // Handle updates from parent component
+        handlePostTypeChange(newPostType) {
+            if (this.isCollaborativeMode && this.ydoc) {
+                this.setPostType(newPostType);
+            }
+        },
+
+        handleAssetUpdate(assets) {
+            if (this.isCollaborativeMode && this.ydoc && Array.isArray(assets)) {
+                // Clear existing assets
+                const assets360 = this.ydoc.getArray('assets360');
+                assets360.delete(0, assets360.length);
+                
+                // Add new assets
+                assets.forEach(asset => {
+                    this.add360Asset(asset);
+                });
+                
+                console.log('🌐 Assets updated from parent:', assets.length);
+            }
+        },
+
+        // Permission validation
+        validatePermission(operation) {
+            if (this.isReadOnlyMode) {
+                console.warn(`🚫 Blocked ${operation}: read-only permissions`);
+                return false;
+            }
+            
+            // Block operations if schema version mismatch detected
+            if (this.schemaVersionMismatch) {
+                console.warn(`🚫 Blocked ${operation}: schema version mismatch - please refresh to update`);
+                return false;
+            }
+            
+            return true;
+        },
+
+        // User presence management
+        updatePresenceUI() {
+            // Update UI based on presence changes
+            // This method can be implemented based on UI requirements
         },
 
         async createBasicEditors() {
@@ -2014,20 +3251,24 @@ export default {
             this.updateEditorPermissions();
         },
 
-        // Clear unsaved changes flag after collaborative sync
+        // ===== UNIFIED SYNC INDICATOR: Offline-First Architecture =====
         clearUnsavedAfterSync() {
             if (this.syncTimeout) {
                 clearTimeout(this.syncTimeout);
             }
             
-            // Clear the flag after a short delay to allow Y.js to sync
-            // This simulates the auto-save behavior for collaborative docs
+            // Single unified sync indicator for Y.js + IndexedDB persistence
+            // Following TipTap offline-first best practices
             this.syncTimeout = setTimeout(() => {
-                if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
-                    console.log('💾 Clearing unsaved flag for collaborative document (simulated sync)');
-                    this.hasUnsavedChanges = false;
+                if (this.indexeddbProvider) {
+                    console.log('💾 Y.js + IndexedDB persistence complete (offline-first)');
+                } else if (this.connectionStatus === 'connected') {
+                    console.log('💾 Y.js + Cloud sync complete (online mode)');
+                } else {
+                    console.log('💾 Y.js persistence complete (memory only - will not persist after page refresh)');
                 }
-            }, 500); // Much faster than local autosave - 500ms
+                this.hasUnsavedChanges = false;
+            }, 1000); // 1 second delay to show sync indicator
         },
         
         async connectToCollaborationServer(serverDoc) {
@@ -2457,23 +3698,48 @@ export default {
                 permlink: this.permlinkEditor ? this.permlinkEditor.getText() : this.content.permlink,
                 tags: this.content.tags,
                 custom_json: this.content.custom_json,
-                beneficiaries: this.publishForm.beneficiaries
+                beneficiaries: this.publishForm.beneficiaries,
+                commentOptions: this.commentOptions // Include comment options for local storage
             };
         },
         
         setEditorContent(content) {
             try {
-                // For collaborative mode, avoid setting content directly
-                // Let the Y.js sync handle content loading
+                // For collaborative mode, use proper TipTap pattern with onSynced callback
+                // Reference: https://tiptap.dev/docs/editor/collaboration/install
                 if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
-                    console.log('🤝 Skipping direct content setting in collaborative mode - letting Y.js sync handle it');
+                    console.log('🤝 Using collaborative content initialization pattern');
                     
-                    // Only update the local content state for UI binding
+                    // Set initial content flag in Y.js document to prevent duplicate loading
+                    const config = this.ydoc.getMap('config');
+                    if (!config.get('initialContentLoaded')) {
+                        config.set('initialContentLoaded', true);
+                        
+                        // Use TipTap's setContent command for collaborative mode
+                        if (this.titleEditor && content.title) {
+                            this.titleEditor.commands.setContent(content.title);
+                        }
+                        if (this.bodyEditor && content.body) {
+                            this.bodyEditor.commands.setContent(content.body);
+                        }
+                        if (this.permlinkEditor && content.permlink) {
+                            this.permlinkEditor.commands.setContent(content.permlink);
+                        }
+                        
+                        console.log('✅ Initial collaborative content set via TipTap commands');
+                    }
+                    
+                    // Update local content state for UI binding
                     this.content = { ...this.content, ...content };
                     
                     // Set custom JSON string for editing
                     if (content.custom_json) {
                         this.customJsonString = JSON.stringify(content.custom_json, null, 2);
+                    }
+                    
+                    // Restore comment options if available
+                    if (content.commentOptions) {
+                        this.commentOptions = { ...this.commentOptions, ...content.commentOptions };
                     }
                     
                     return;
@@ -2517,6 +3783,11 @@ export default {
                     this.customJsonString = JSON.stringify(content.custom_json, null, 2);
                 }
                 
+                // Restore comment options if available
+                if (content.commentOptions) {
+                    this.commentOptions = { ...this.commentOptions, ...content.commentOptions };
+                }
+                
                 console.log('✅ Editor content set successfully');
                 
             } catch (error) {
@@ -2531,6 +3802,11 @@ export default {
                     permlink: content.permlink || '',
                     beneficiaries: content.beneficiaries || []
                 };
+                
+                // Restore comment options if available
+                if (content.commentOptions) {
+                    this.commentOptions = { ...this.commentOptions, ...content.commentOptions };
+                }
                 
                 // Set safe fallback content in editors
                 if (this.titleEditor) {
@@ -3240,6 +4516,25 @@ export default {
             }
         },
         
+        // Watch for DLUX post type changes from parent
+        dluxPostType: {
+            handler(newPostType) {
+                if (newPostType && this.isCollaborativeMode) {
+                    this.handlePostTypeChange(newPostType);
+                }
+            }
+        },
+        
+        // Watch for DLUX asset changes from parent
+        dluxAssets: {
+            handler(newAssets) {
+                if (newAssets && this.isCollaborativeMode) {
+                    this.handleAssetUpdate(newAssets);
+                }
+            },
+            deep: true
+        },
+        
         // COMMENTED OUT TO AVOID REACTIVE CONFLICTS
         // 'content.title': {
         //     handler() {
@@ -3308,34 +4603,6 @@ export default {
     },
     
     template: `<div class="collaborative-post-editor">
-    <style>
-        /* Read-only editor styling */
-        .ProseMirror[contenteditable="false"] {
-            background-color: rgba(108, 117, 125, 0.1) !important;
-            cursor: default !important;
-            opacity: 0.8;
-        }
-        
-        .ProseMirror[contenteditable="false"]:focus {
-            outline: none !important;
-            box-shadow: none !important;
-        }
-        
-        /* Read-only toolbar styling */
-        .editor-toolbar[style*="pointer-events: none"] {
-            user-select: none;
-        }
-        
-        /* Read-only warning banner animation */
-        .alert-info {
-            animation: subtle-pulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes subtle-pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.9; }
-        }
-    </style>
     <!-- File Menu Bar -->
     <div class="file-menu-bar bg-dark border-bottom border-secondary mb-3 p-05 d-flex">
         <div class="">
@@ -3800,22 +5067,25 @@ export default {
                     <input v-model="tagInput" @keydown.enter="addTag"
                         class="form-control form-control-sm bg-dark text-white border-secondary"
                         placeholder="Add a tag..." maxlength="50" 
-                        :disabled="content.tags.length >= 10 || isReadOnlyMode">
+                        :disabled="displayTags.length >= 10">
                     <button @click="addTag" class="btn btn-sm btn-outline-primary"
-                        :disabled="content.tags.length >= 10 || !tagInput.trim() || isReadOnlyMode">
+                        :disabled="displayTags.length >= 10 || !tagInput.trim()">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
 
                 <!-- Current tags -->
-                <span v-for="(tag, index) in content.tags" :key="index"
+                <span v-for="(tag, index) in displayTags" :key="index"
                     class="badge bg-primary d-flex align-items-center">
                     {{ tag }}
-                    <button v-if="!isReadOnlyMode" @click="removeTag(index)" class="btn-close btn-close-white ms-2 small"></button>
+                    <button @click="removeTag(index)" class="btn-close btn-close-white ms-2 small"></button>
                 </span>
             </div>
-            <small v-if="content.tags.length >= 10" class="text-warning">
+            <small v-if="displayTags.length >= 10" class="text-warning">
                 Maximum 10 tags allowed
+            </small>
+            <small v-if="currentFile?.type === 'collaborative'" class="text-info d-block mt-1">
+                <i class="fas fa-info-circle me-1"></i>Tags are personal to you and control how YOU would publish this content to Hive.
             </small>
         </div>
 
@@ -3823,20 +5093,19 @@ export default {
         <div class="mb-3">
             <button class="btn btn-lg p-2 btn-secondary bg-card d-flex align-items-center w-100 text-start"
                 type="button" data-bs-toggle="collapse" data-bs-target="#advancedOptions" aria-expanded="false"
-                aria-controls="advancedOptions"
-                :class="{ 'opacity-50': isReadOnlyMode }">
+                aria-controls="advancedOptions">
                 <i class="fas fa-cog me-2"></i>
                 Advanced Options
-                <span v-if="isReadOnlyMode" class="badge bg-warning text-dark ms-2">Read-Only</span>
+                <span v-if="isReadOnlyMode" class="badge bg-info text-white ms-2">Personal Settings</span>
                 <i class="fas fa-chevron-down ms-auto"></i>
             </button>
 
             <div class="collapse mt-3" id="advancedOptions">
-                <!-- Read-only notice for advanced options -->
-                <div v-if="isReadOnlyMode" class="alert alert-warning border-warning bg-dark text-warning mb-3">
-                    <i class="fas fa-lock me-2"></i>
-                    <strong>Advanced Options - Read-Only Mode</strong>
-                    <div class="small mt-1">These settings cannot be modified with your current permissions.</div>
+                <!-- Personal settings notice for collaborative docs -->
+                <div v-if="isReadOnlyMode" class="alert alert-info border-info bg-dark text-info mb-3">
+                    <i class="fas fa-user-cog me-2"></i>
+                    <strong>Personal Publishing Settings</strong>
+                    <div class="small mt-1">These settings are personal to you and don't affect the collaborative document content. They control how YOU would publish this content to Hive.</div>
                 </div>
                 
                 <!-- Permlink Field -->
@@ -3848,17 +5117,16 @@ export default {
                     <div class="d-flex align-items-center gap-2 mb-2">
                         <code class="text-info">/@{{ username }}/</code>
                         <div class="flex-grow-1 position-relative">
-                            <div v-if="!showPermlinkEditor" @click="!isReadOnlyMode && togglePermlinkEditor"
-                                class="bg-dark border border-secondary rounded p-2 text-white font-monospace"
-                                :class="{ 'cursor-pointer': !isReadOnlyMode, 'opacity-50': isReadOnlyMode }">
-                                {{ content.permlink || generatedPermlink || (isReadOnlyMode ? 'Permlink (read-only)' : 'Click to edit...') }}
+                            <div v-if="!showPermlinkEditor" @click="togglePermlinkEditor"
+                                class="bg-dark border border-secondary rounded p-2 cursor-pointer text-white font-monospace">
+                                {{ content.permlink || generatedPermlink || 'Click to edit...' }}
                             </div>
                             <div v-else class="editor-field bg-dark border border-secondary rounded">
                                 <div ref="permlinkEditor" class="permlink-editor"></div>
                             </div>
                         </div>
                         <button @click="useGeneratedPermlink" class="btn btn-sm btn-outline-secondary"
-                            :disabled="!generatedPermlink || isReadOnlyMode">
+                            :disabled="!generatedPermlink">
                             Auto-generate
                         </button>
                     </div>
@@ -3878,21 +5146,18 @@ export default {
                         </div>
                         <div class="d-flex align-items-center gap-2 mb-2">
                             <input type="text" class="form-control bg-dark text-white border-secondary"
-                                placeholder="@username" v-model="beneficiaryInput.account"
-                                :disabled="isReadOnlyMode">
+                                placeholder="@username" v-model="beneficiaryInput.account">
                             <input type="number" class="form-control bg-dark text-white border-secondary"
-                                placeholder="%" min="0.01" max="100" step="0.01" v-model="beneficiaryInput.percent"
-                                :disabled="isReadOnlyMode">
-                            <button @click="addBeneficiary" class="btn btn-outline-success"
-                                :disabled="isReadOnlyMode">
+                                placeholder="%" min="0.01" max="100" step="0.01" v-model="beneficiaryInput.percent">
+                            <button @click="addBeneficiary" class="btn btn-outline-success">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
-                        <div v-if="publishForm.beneficiaries.length > 0" class="mt-2">
-                            <div v-for="(ben, index) in publishForm.beneficiaries" :key="index"
+                        <div v-if="displayBeneficiaries.length > 0" class="mt-2">
+                            <div v-for="(ben, index) in displayBeneficiaries" :key="index"
                                 class="d-flex align-items-center justify-content-between bg-secondary rounded p-2 mb-1">
                                 <span>@{{ ben.account }} - {{ (ben.weight / 100).toFixed(2) }}%</span>
-                                <button v-if="!isReadOnlyMode" @click="removeBeneficiary(index)" class="btn btn-sm btn-outline-danger">
+                                <button @click="removeBeneficiary(index)" class="btn btn-sm btn-outline-danger">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -3908,8 +5173,7 @@ export default {
                     <div class="bg-dark border border-secondary rounded p-3">
                         <textarea v-model="customJsonString" @input="validateCustomJson"
                             class="form-control bg-dark text-white border-secondary font-monospace" rows="6"
-                            placeholder="Enter custom JSON metadata..."
-                            :disabled="isReadOnlyMode"></textarea>
+                            placeholder="Enter custom JSON metadata..."></textarea>
                         <div v-if="customJsonError" class="text-danger small mt-1">
                             <i class="fas fa-exclamation-triangle me-1"></i>{{ customJsonError }}
                         </div>
@@ -3921,7 +5185,7 @@ export default {
                 </div>
 
                 <!--Comment Options(Hive - specific)-->
-                <div class="">
+                <div class="mb-4">
                     <label class="form-label text-white fw-bold">
                         <i class="fas fa-cog me-2"></i>Comment Options
                     </label>
@@ -3930,18 +5194,15 @@ export default {
                             <div class="col-md-6">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" v-model="commentOptions.allowVotes"
-                                        id="allowVotes" :disabled="isReadOnlyMode">
-                                    <label class="form-check-label text-white" for="allowVotes"
-                                        :class="{ 'opacity-50': isReadOnlyMode }">
+                                        @change="handleCommentOptionChange" id="allowVotes">
+                                    <label class="form-check-label text-white" for="allowVotes">
                                         Allow votes
                                     </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox"
-                                        v-model="commentOptions.allowCurationRewards" id="allowCurationRewards"
-                                        :disabled="isReadOnlyMode">
-                                    <label class="form-check-label text-white" for="allowCurationRewards"
-                                        :class="{ 'opacity-50': isReadOnlyMode }">
+                                        v-model="commentOptions.allowCurationRewards" @change="handleCommentOptionChange" id="allowCurationRewards">
+                                    <label class="form-check-label text-white" for="allowCurationRewards">
                                         Allow curation rewards
                                     </label>
                                 </div>
@@ -3949,22 +5210,40 @@ export default {
                             <div class="col-md-6">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox"
-                                        v-model="commentOptions.maxAcceptedPayout" id="maxPayout"
-                                        :disabled="isReadOnlyMode">
-                                    <label class="form-check-label text-white" for="maxPayout"
-                                        :class="{ 'opacity-50': isReadOnlyMode }">
+                                        v-model="commentOptions.maxAcceptedPayout" @change="handleCommentOptionChange" id="maxPayout">
+                                    <label class="form-check-label text-white" for="maxPayout">
                                         Decline payout
                                     </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" v-model="commentOptions.percentHbd"
-                                        id="powerUp" :disabled="isReadOnlyMode">
-                                    <label class="form-check-label text-white" for="powerUp"
-                                        :class="{ 'opacity-50': isReadOnlyMode }">
+                                        @change="handleCommentOptionChange" id="powerUp">
+                                    <label class="form-check-label text-white" for="powerUp">
                                         100% Power Up
                                     </label>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- JSON Preview Section -->
+                <div class="mb-4">
+                    <label class="form-label text-white fw-bold">
+                        <i class="fas fa-code me-2"></i>JSON Preview & Validation
+                    </label>
+                    <div class="bg-dark border border-secondary rounded p-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="text-muted small">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Preview the complete Hive JSON structure that will be broadcast
+                            </div>
+                            <button @click="showJsonPreview" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-eye me-1"></i>Preview JSON
+                            </button>
+                        </div>
+                        <div class="small text-muted">
+                            View formatted comment operations, validate Hive compliance, and copy JSON for debugging.
                         </div>
                     </div>
                 </div>
@@ -3986,7 +5265,7 @@ export default {
                 <div class="mb-4">
                     <h6 class="text-info">{{ content.title || 'Untitled Post' }}</h6>
                     <p class="text-muted">
-                        <i class="fas fa-tags me-1"></i>{{ content.tags.join(', ') || 'No tags' }}
+                        <i class="fas fa-tags me-1"></i>{{ displayTags.join(', ') || 'No tags' }}
                     </p>
                     <p class="text-muted">
                         <i class="fas fa-link me-1"></i>/@{{ username }}/{{ content.permlink || generatedPermlink }}
@@ -3996,11 +5275,11 @@ export default {
                 <div class="row">
                     <div class="col-md-6">
                         <h6 class="text-white">Beneficiaries</h6>
-                        <div v-if="publishForm.beneficiaries.length === 0" class="text-muted small">
-                            No beneficiaries set - 100% rewards to author
-                        </div>
-                        <div v-else>
-                            <div v-for="ben in publishForm.beneficiaries" :key="ben.account"
+                                            <div v-if="displayBeneficiaries.length === 0" class="text-muted small">
+                        No beneficiaries set - 100% rewards to author
+                    </div>
+                    <div v-else>
+                        <div v-for="ben in displayBeneficiaries" :key="ben.account"
                                 class="d-flex justify-content-between small mb-1">
                                 <span>@{{ ben.account }}</span>
                                 <span>{{ (ben.weight / 100).toFixed(2)}}%</span>
@@ -4415,7 +5694,222 @@ export default {
             </div>
         </div>
     </div>
+</div>
+
+<!-- JSON Preview Modal -->
+<div v-if="showJsonPreviewModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.8)">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">
+                    <i class="fas fa-code me-2"></i>Hive JSON Preview & Validation
+                </h5>
+                <button @click="closeJsonPreview" class="btn-close btn-close-white"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Validation Status -->
+                <div class="mb-3">
+                    <div v-if="validateJsonStructure().valid" class="alert alert-success border-success bg-dark text-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Valid Hive Structure</strong> - Ready for broadcast
+                    </div>
+                    <div v-else class="alert alert-danger border-danger bg-dark text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Validation Issues Found</strong>
+                        <ul class="mb-0 mt-2">
+                            <li v-for="error in validateJsonStructure().errors" :key="error">{{ error }}</li>
+                        </ul>
+                    </div>
+                    <div v-if="validateJsonStructure().warnings && validateJsonStructure().warnings.length > 0" 
+                         class="alert alert-warning border-warning bg-dark text-warning mt-2">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>Warnings</strong>
+                        <ul class="mb-0 mt-2">
+                            <li v-for="warning in validateJsonStructure().warnings" :key="warning">{{ warning }}</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Tab Navigation -->
+                <ul class="nav nav-tabs nav-dark mb-3">
+                    <li class="nav-item">
+                        <button @click="setJsonPreviewTab('complete')" 
+                                :class="['nav-link', { active: jsonPreviewTab === 'complete' }]">
+                            <i class="fas fa-list me-1"></i>Complete Operations
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button @click="setJsonPreviewTab('comment')" 
+                                :class="['nav-link', { active: jsonPreviewTab === 'comment' }]">
+                            <i class="fas fa-comment me-1"></i>Comment Operation
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button @click="setJsonPreviewTab('comment_options')" 
+                                :class="['nav-link', { active: jsonPreviewTab === 'comment_options' }]">
+                            <i class="fas fa-cog me-1"></i>Comment Options
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button @click="setJsonPreviewTab('metadata')" 
+                                :class="['nav-link', { active: jsonPreviewTab === 'metadata' }]">
+                            <i class="fas fa-info-circle me-1"></i>Metadata
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Complete Operations Tab -->
+                    <div v-if="jsonPreviewTab === 'complete'" class="tab-pane active">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-info mb-0">Complete Hive Operations Array</h6>
+                            <button @click="copyJsonToClipboard(getCompleteJsonPreview())" 
+                                    class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-copy me-1"></i>Copy All
+                            </button>
+                        </div>
+                        <pre class="bg-secondary text-white p-3 rounded" style="max-height: 500px; overflow-y: auto; font-size: 0.85em;">{{ JSON.stringify(getCompleteJsonPreview(), null, 2) }}</pre>
+                    </div>
+
+                    <!-- Comment Operation Tab -->
+                    <div v-if="jsonPreviewTab === 'comment'" class="tab-pane active">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-info mb-0">Comment Operation</h6>
+                            <button @click="copyJsonToClipboard(getCommentOperationPreview())" 
+                                    class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-copy me-1"></i>Copy
+                            </button>
+                        </div>
+                        <div class="small text-muted mb-2">
+                            The main comment operation containing title, body, and json_metadata
+                        </div>
+                        <pre class="bg-secondary text-white p-3 rounded" style="max-height: 500px; overflow-y: auto; font-size: 0.85em;">{{ JSON.stringify(getCommentOperationPreview(), null, 2) }}</pre>
+                    </div>
+
+                    <!-- Comment Options Tab -->
+                    <div v-if="jsonPreviewTab === 'comment_options'" class="tab-pane active">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-info mb-0">Comment Options Operation</h6>
+                            <button @click="copyJsonToClipboard(getCommentOptionsPreview())" 
+                                    class="btn btn-sm btn-outline-success"
+                                    :disabled="!getCommentOptionsPreview()">
+                                <i class="fas fa-copy me-1"></i>Copy
+                            </button>
+                        </div>
+                        <div class="small text-muted mb-2">
+                            Advanced settings like beneficiaries, payout options, and voting preferences
+                        </div>
+                        <div v-if="!getCommentOptionsPreview()" class="alert alert-info border-info bg-dark text-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No comment options configured - using Hive defaults
+                        </div>
+                        <pre v-else class="bg-secondary text-white p-3 rounded" style="max-height: 500px; overflow-y: auto; font-size: 0.85em;">{{ JSON.stringify(getCommentOptionsPreview(), null, 2) }}</pre>
+                    </div>
+
+                    <!-- Metadata Tab -->
+                    <div v-if="jsonPreviewTab === 'metadata'" class="tab-pane active">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-info mb-0">Generation Metadata</h6>
+                            <button @click="copyJsonToClipboard(getMetadataPreview())" 
+                                    class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-copy me-1"></i>Copy
+                            </button>
+                        </div>
+                        <div class="small text-muted mb-2">
+                            Information about how this JSON was generated and collaborative data
+                        </div>
+                        <pre class="bg-secondary text-white p-3 rounded" style="max-height: 500px; overflow-y: auto; font-size: 0.85em;">{{ JSON.stringify(getMetadataPreview(), null, 2) }}</pre>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <div class="me-auto small text-muted">
+                    <i class="fas fa-clock me-1"></i>
+                    Generated: {{ new Date().toLocaleString() }}
+                </div>
+                <button @click="closeJsonPreview" class="btn btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
 </div>`,
     
-    style: ''
+    style: `
+        /* JSON Preview Modal Styles */
+        .nav-tabs .nav-link {
+            background-color: #343a40;
+            border-color: #495057;
+            color: #adb5bd;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: #495057;
+            border-color: #6c757d;
+            color: #fff;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            background-color: #495057;
+            border-color: #6c757d;
+            color: #fff;
+        }
+        
+        /* JSON syntax highlighting for better readability */
+        pre {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            line-height: 1.4;
+        }
+        
+        /* Modal backdrop for JSON preview */
+        .modal[style*="background: rgba(0,0,0,0.8)"] {
+            backdrop-filter: blur(2px);
+        }
+        
+        /* Scrollable JSON content */
+        .tab-pane pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        /* Copy button hover effect */
+        .btn-outline-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        /* Alert styling improvements */
+        .alert {
+            border-radius: 8px;
+        }
+        
+        .alert ul {
+            padding-left: 1.2rem;
+        }
+        
+        /* Tab content spacing */
+        .tab-content {
+            min-height: 400px;
+        }
+        
+        /* Modal size adjustments */
+        .modal-xl {
+            max-width: 90vw;
+        }
+        
+        @media (max-width: 768px) {
+            .modal-xl {
+                max-width: 95vw;
+                margin: 0.5rem;
+            }
+            
+            .nav-tabs .nav-link {
+                font-size: 0.875rem;
+                padding: 0.5rem 0.75rem;
+            }
+            
+            pre {
+                font-size: 0.75em;
+            }
+        }
+    `
 }; 
