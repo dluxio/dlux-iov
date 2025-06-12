@@ -1406,7 +1406,8 @@ export default {
                 name: this.currentFile.name,
                 type: this.currentFile.type,
                 lastModified: this.currentFile.lastModified,
-                size: 0 // Size managed by IndexedDB
+                isOfflineFirst: this.currentFile.isOfflineFirst || false, // Flag for Y.js + IndexedDB files
+                size: this.currentFile.isOfflineFirst ? 0 : (this.currentFile.size || 0) // Size managed by IndexedDB for offline-first files
             };
             
             if (existingIndex >= 0) {
@@ -1416,6 +1417,7 @@ export default {
             }
             
             localStorage.setItem('dlux_tiptap_files', JSON.stringify(files));
+            console.log('📝 Local file index updated:', fileInfo.name, fileInfo.isOfflineFirst ? '(Y.js + IndexedDB)' : '(localStorage)');
         },
         
         async saveAsDocument() {
@@ -1908,18 +1910,36 @@ export default {
         },
         
         async loadLocalFile(file) {
-            const content = JSON.parse(localStorage.getItem(`dlux_tiptap_file_${file.id}`) || '{}');
-            
             this.currentFile = file;
             this.fileType = 'local';
-            this.isCollaborativeMode = false;
-            this.content = content;
             
-            this.disconnectCollaboration();
-            await this.createStandardEditor();
-            this.setEditorContent(content);
-            
-            console.log('📂 Local file loaded:', file.name);
+            // Check if this is an offline-first file (uses Y.js + IndexedDB)
+            if (file.isOfflineFirst) {
+                console.log('📂 Loading offline-first local file:', file.name);
+                
+                // For offline-first files, content is in Y.js + IndexedDB
+                // Create collaborative editors which will load from IndexedDB automatically
+                this.isCollaborativeMode = true; // Use collaborative architecture
+                this.disconnectCollaboration();
+                await this.createStandardEditor(); // This creates offline collaborative editors
+                
+                // Content will be loaded automatically from IndexedDB by Y.js
+                console.log('📂 Offline-first local file loaded from IndexedDB:', file.name);
+                
+            } else {
+                console.log('📂 Loading legacy local file:', file.name);
+                
+                // Legacy local files stored in localStorage
+                const content = JSON.parse(localStorage.getItem(`dlux_tiptap_file_${file.id}`) || '{}');
+                this.isCollaborativeMode = false;
+                this.content = content;
+                
+                this.disconnectCollaboration();
+                await this.createStandardEditor();
+                this.setEditorContent(content);
+                
+                console.log('📂 Legacy local file loaded from localStorage:', file.name);
+            }
         },
         
 
@@ -1932,11 +1952,24 @@ export default {
                 return;
             }
             
-            // Remove file content
-            localStorage.removeItem(`dlux_tiptap_file_${targetFileId}`);
-            
-            // Remove from index
+            // Get file info to check if it's offline-first
             const files = JSON.parse(localStorage.getItem('dlux_tiptap_files') || '[]');
+            const fileInfo = files.find(f => f.id === targetFileId);
+            
+            if (fileInfo?.isOfflineFirst) {
+                // For offline-first files, content is in IndexedDB (managed by Y.js)
+                // We only remove the metadata entry
+                console.log('🗑️ Deleting offline-first file metadata:', targetFileId);
+                
+                // Note: IndexedDB content will be cleaned up by Y.js garbage collection
+                // or can be manually cleaned if needed in the future
+            } else {
+                // For legacy files, remove content from localStorage
+                localStorage.removeItem(`dlux_tiptap_file_${targetFileId}`);
+                console.log('🗑️ Deleted legacy file content from localStorage:', targetFileId);
+            }
+            
+            // Remove from index (both types)
             const updatedFiles = files.filter(f => f.id !== targetFileId);
             localStorage.setItem('dlux_tiptap_files', JSON.stringify(updatedFiles));
             
@@ -3122,7 +3155,7 @@ export default {
             
             // Single unified sync indicator for Y.js + IndexedDB persistence
             // Following TipTap offline-first best practices
-            this.syncTimeout = setTimeout(() => {
+            this.syncTimeout = setTimeout(async () => {
                 if (this.indexeddbProvider) {
                     console.log('💾 Y.js + IndexedDB persistence complete (offline-first)');
                 } else if (this.connectionStatus === 'connected') {
@@ -3130,8 +3163,56 @@ export default {
                 } else {
                     console.log('💾 Y.js persistence complete (memory only - will not persist after page refresh)');
                 }
+                
+                // ===== HYBRID APPROACH: Maintain local file index for UX =====
+                // Y.js handles content persistence, but we need local file entries for "Save to DLUX" workflow
+                await this.ensureLocalFileEntry();
+                
                 this.hasUnsavedChanges = false;
             }, 1000); // 1 second delay to show sync indicator
+        },
+
+        // Ensure local file entry exists for UX (Save to DLUX workflow)
+        async ensureLocalFileEntry() {
+            try {
+                // Only create local file entry if we don't have a current file or it's not collaborative
+                if (!this.currentFile || this.currentFile.type !== 'collaborative') {
+                    
+                    // Generate file info if needed
+                    if (!this.currentFile) {
+                        const timestamp = Date.now();
+                        const title = this.getPlainTextTitle() || 'Untitled Document';
+                        const filename = title.substring(0, 50).replace(/[^a-zA-Z0-9\s-]/g, '').trim() || `Document ${new Date().toLocaleDateString()}`;
+                        
+                        this.currentFile = {
+                            id: `local_${timestamp}`,
+                            name: filename,
+                            type: 'local',
+                            lastModified: new Date().toISOString(),
+                            isOfflineFirst: true // Flag to indicate this uses Y.js + IndexedDB
+                        };
+                        this.fileType = 'local';
+                    }
+                    
+                    // Update local file index (metadata only - content is in Y.js + IndexedDB)
+                    await this.updateLocalFileIndex();
+                    
+                    // Refresh local files list to show the new entry
+                    await this.loadLocalFiles();
+                    
+                    console.log('📝 Local file entry ensured for UX:', this.currentFile.name);
+                }
+            } catch (error) {
+                console.error('Error ensuring local file entry:', error);
+            }
+        },
+
+        // Helper method to get plain text title
+        getPlainTextTitle() {
+            if (this.titleEditor) {
+                return this.titleEditor.getText().trim();
+            }
+            return this.content.title?.replace(/<[^>]*>/g, '').trim() || '';
         },
         
         async connectToCollaborationServer(serverDoc) {

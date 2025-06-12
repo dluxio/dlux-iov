@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local File Workflow Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: white; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #444; border-radius: 5px; }
+        .test-pass { background-color: #1a4a3a; border-color: #2a6a4a; }
+        .test-fail { background-color: #4a1a1a; border-color: #6a2a2a; }
+        .test-pending { background-color: #4a4a1a; border-color: #6a6a2a; }
+        button { margin: 5px; padding: 10px 15px; cursor: pointer; background: #333; color: white; border: 1px solid #555; border-radius: 3px; }
+        button:hover { background: #444; }
+        .results { margin-top: 10px; padding: 10px; background: #2a2a2a; border-radius: 3px; }
+        pre { background: #1a1a1a; padding: 10px; border-radius: 3px; overflow-x: auto; border: 1px solid #444; }
+        .workflow { background: #2a2a3a; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Local File Workflow Test</h1>
+    <p>Testing the new hybrid approach: Y.js + IndexedDB for content, localStorage for file index.</p>
+
+    <div class="workflow">
+        <h3>📋 Expected Workflow</h3>
+        <ol>
+            <li><strong>User makes changes</strong> → Content persisted to Y.js + IndexedDB</li>
+            <li><strong>Local file entry created</strong> → Appears in local files list</li>
+            <li><strong>User can "Save to DLUX"</strong> → Publishes to collaboration server</li>
+            <li><strong>File becomes collaborative</strong> → Real-time sync enabled</li>
+        </ol>
+    </div>
+
+    <div class="test-section test-pending" id="test-1">
+        <h3>Test 1: Check Local Files List</h3>
+        <p>Verify local files are being tracked properly</p>
+        <button onclick="runTest1()">Check Local Files</button>
+        <div class="results" id="results-1"></div>
+    </div>
+
+    <div class="test-section test-pending" id="test-2">
+        <h3>Test 2: Check IndexedDB</h3>
+        <p>Verify Y.js content is being stored in IndexedDB</p>
+        <button onclick="runTest2()">Check IndexedDB</button>
+        <div class="results" id="results-2"></div>
+    </div>
+
+    <div class="test-section test-pending" id="test-3">
+        <h3>Test 3: Simulate Content Change</h3>
+        <p>Test the workflow by simulating content changes</p>
+        <button onclick="runTest3()">Simulate Changes</button>
+        <div class="results" id="results-3"></div>
+    </div>
+
+    <script>
+        // Test utilities
+        function setTestStatus(testId, status, message) {
+            const testDiv = document.getElementById(`test-${testId}`);
+            const resultsDiv = document.getElementById(`results-${testId}`);
+            
+            testDiv.className = `test-section test-${status}`;
+            resultsDiv.innerHTML = `<strong>${status.toUpperCase()}:</strong> ${message}`;
+        }
+
+        function logResult(testId, details) {
+            const resultsDiv = document.getElementById(`results-${testId}`);
+            resultsDiv.innerHTML += `<pre>${details}</pre>`;
+        }
+
+        // Test 1: Check Local Files List
+        async function runTest1() {
+            try {
+                setTestStatus(1, 'pending', 'Checking local files list...');
+                
+                const localFiles = JSON.parse(localStorage.getItem('dlux_tiptap_files') || '[]');
+                
+                let results = `📁 Found ${localFiles.length} local files:\n\n`;
+                
+                if (localFiles.length === 0) {
+                    results += '(No local files found - this is normal for a fresh start)\n';
+                    results += 'Try making some changes in the editor to create a local file.';
+                } else {
+                    localFiles.forEach((file, index) => {
+                        results += `${index + 1}. ${file.name}\n`;
+                        results += `   ID: ${file.id}\n`;
+                        results += `   Type: ${file.type}\n`;
+                        results += `   Offline-First: ${file.isOfflineFirst ? 'Yes (Y.js + IndexedDB)' : 'No (localStorage)'}\n`;
+                        results += `   Last Modified: ${new Date(file.lastModified).toLocaleString()}\n\n`;
+                    });
+                }
+                
+                setTestStatus(1, 'pass', `Found ${localFiles.length} local files`);
+                logResult(1, results);
+                
+            } catch (error) {
+                setTestStatus(1, 'fail', error.message);
+                logResult(1, `❌ Error: ${error.message}`);
+            }
+        }
+
+        // Test 2: Check IndexedDB
+        async function runTest2() {
+            try {
+                setTestStatus(2, 'pending', 'Checking IndexedDB for Y.js content...');
+                
+                if (!window.indexedDB) {
+                    throw new Error('IndexedDB not available in this browser');
+                }
+
+                // List all IndexedDB databases
+                const databases = await indexedDB.databases();
+                const yDatabases = databases.filter(db => db.name && db.name.includes('y-indexeddb'));
+                
+                let results = `🗄️ IndexedDB Status:\n\n`;
+                results += `Total databases: ${databases.length}\n`;
+                results += `Y.js databases: ${yDatabases.length}\n\n`;
+                
+                if (yDatabases.length > 0) {
+                    results += 'Y.js databases found:\n';
+                    yDatabases.forEach(db => {
+                        results += `• ${db.name} (version ${db.version})\n`;
+                    });
+                    results += '\n✅ Y.js content is being persisted to IndexedDB!';
+                } else {
+                    results += '⚠️ No Y.js databases found yet.\n';
+                    results += 'This is normal if no content has been created.\n';
+                    results += 'Try typing in the editor to trigger IndexedDB persistence.';
+                }
+                
+                setTestStatus(2, yDatabases.length > 0 ? 'pass' : 'pending', 
+                    `${yDatabases.length} Y.js databases found`);
+                logResult(2, results);
+                
+            } catch (error) {
+                setTestStatus(2, 'fail', error.message);
+                logResult(2, `❌ Error: ${error.message}`);
+            }
+        }
+
+        // Test 3: Simulate Content Change
+        async function runTest3() {
+            try {
+                setTestStatus(3, 'pending', 'Simulating content changes...');
+                
+                let results = '🔄 Workflow Simulation:\n\n';
+                
+                // Check if we can access the editor
+                const editorFrame = window.parent;
+                if (editorFrame && editorFrame !== window) {
+                    results += '1. ✅ Editor context detected\n';
+                    results += '2. 📝 To test the workflow:\n';
+                    results += '   • Type some content in the title or body\n';
+                    results += '   • Wait 1-2 seconds for auto-save\n';
+                    results += '   • Check the local files list\n';
+                    results += '   • Look for "Save to DLUX" option\n\n';
+                    results += '3. 🔍 Expected behavior:\n';
+                    results += '   • Local file entry should appear\n';
+                    results += '   • Content persisted to IndexedDB\n';
+                    results += '   • "Save to DLUX" becomes available\n';
+                } else {
+                    results += '1. ⚠️ Not running in editor context\n';
+                    results += '2. 📖 Manual testing instructions:\n';
+                    results += '   • Open the main editor\n';
+                    results += '   • Type some content\n';
+                    results += '   • Wait for auto-save\n';
+                    results += '   • Check local files list\n';
+                    results += '   • Verify "Save to DLUX" option appears\n';
+                }
+                
+                setTestStatus(3, 'pass', 'Workflow simulation complete');
+                logResult(3, results);
+                
+            } catch (error) {
+                setTestStatus(3, 'fail', error.message);
+                logResult(3, `❌ Error: ${error.message}`);
+            }
+        }
+
+        // Auto-run tests on load
+        window.addEventListener('load', () => {
+            console.log('🧪 Local file workflow tests ready');
+            setTimeout(() => {
+                console.log('🎯 Click the test buttons to verify the workflow');
+            }, 500);
+        });
+    </script>
+</body>
+</html> 

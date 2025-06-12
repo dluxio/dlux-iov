@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.12.2",
-  "generated": "2025-06-12T02:10:48Z",
+  "version": "2025.06.11.19",
+  "generated": "2025-06-12T02:30:31Z",
   "files": {
-    "/js/v3-qr.js": {
-      "checksum": "507d3d19db9c15dfabb4c3c7dd61bf2a",
-      "size": 131136,
-      "priority": "important"
-    },
     "/js/v3-user.js": {
       "checksum": "d825b0cf96255b2ad930e25fd2ac0659",
       "size": 227736,
@@ -721,7 +716,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "1769e2f6e0bd7fa99d8337a8324d5d2a",
+      "checksum": "0e89a041ba13df094549cdbfac54d376",
       "size": 7299,
       "priority": "important"
     },
@@ -795,11 +790,6 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/playground/index-monaco.html": {
-      "checksum": "47a6abd2dce5936141b91deceac7514e",
-      "size": 69240,
-      "priority": "page-specific"
-    },
     "/playground/index.html": {
       "checksum": "6325238a52aa1c7b365abfdd036696de",
       "size": 48605,
@@ -815,12 +805,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
