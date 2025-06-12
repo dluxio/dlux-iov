@@ -476,35 +476,35 @@ export default {
             });
         },
         // Self-contained reputation management
-        async getAuthorReputation() {
-            if (this.post.author && !this.authorInfo) {
-                try {
-                    const response = await fetch("https://hive-api.dlux.io", {
-                        body: JSON.stringify({
-                            "jsonrpc": "2.0", 
-                            "method": "condenser_api.get_accounts", 
-                            "params": [[this.post.author]], 
-                            "id": 1
-                        }),
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        method: "POST",
-                    });
-                    const data = await response.json();
-                    if (data.result && data.result.length > 0) {
-                        this.authorInfo = data.result[0];
-                        this.updateAuthorReputation();
-                    }
-                } catch (error) {
-                    console.error('Error fetching author reputation:', error);
-                    // Fallback to post reputation if available
-                    if (this.post.author_reputation) {
-                        this.authorRep = this.post.author_reputation;
-                    }
-                }
-            }
-        },
+        // async getAuthorReputation() {
+        //     if (this.post.author && !this.authorInfo) {
+        //         try {
+        //             const response = await fetch("https://hive-api.dlux.io", {
+        //                 body: JSON.stringify({
+        //                     "jsonrpc": "2.0", 
+        //                     "method": "condenser_api.get_accounts", 
+        //                     "params": [[this.post.author]], 
+        //                     "id": 1
+        //                 }),
+        //                 headers: {
+        //                     "Content-Type": "application/json",
+        //                 },
+        //                 method: "POST",
+        //             });
+        //             const data = await response.json();
+        //             if (data.result && data.result.length > 0) {
+        //                 this.authorInfo = data.result[0];
+        //                 this.updateAuthorReputation();
+        //             }
+        //         } catch (error) {
+        //             console.error('Error fetching author reputation:', error);
+        //             // Fallback to post reputation if available
+        //             if (this.post.author_reputation) {
+        //                 this.authorRep = this.post.author_reputation;
+        //             }
+        //         }
+        //     }
+        // },
         updateAuthorReputation() {
             // Use the same reputation source as other posts in v3-hub.js
             if (this.post.author_reputation) {
@@ -516,10 +516,10 @@ export default {
             } else {
                 // Fallback: try to get reputation from author if available
                 this.authorRep = "...";
-                if (this.post.author) {
-                    // Trigger reputation fetch if we don't have data yet
-                    this.getAuthorReputation();
-                }
+                // if (this.post.author) {
+                //     // Trigger reputation fetch if we don't have data yet
+                //     this.getAuthorReputation();
+                // }
             }
         },
         // Advanced image finding with carousel support
@@ -837,7 +837,7 @@ export default {
             // Initialize component
             console.log('CardVue mounted for post:', this.post.author + '/' + this.post.permlink);
             this.updateAuthorReputation();
-            this.getAuthorReputation();
+            //this.getAuthorReputation();
             this.findPostImages();
             this.hideLowRep();
             this.getContracts();

@@ -548,7 +548,7 @@ createApp({
           scrollPosition >= scrollHeight - window.innerHeight
         ) {
           if (this.currentTab === 'hub') {
-            this.getPosts();
+            this.getHubPosts();
           } else {
             this.getHivePosts();
           }
@@ -995,7 +995,7 @@ createApp({
         this.postSelect.new.p = false;
         this['new'] = [];
         this.postSelect.entry = 'new';
-        this.getPosts();
+        this.getHubPosts();
       } else {
         // Reset pagination for the new tab
         if (this.postSelect[tab]) {
@@ -1131,7 +1131,7 @@ createApp({
         this.getHivePosts();
       }
     },
-    getPosts() {
+    getHubPosts() {
       var bitMask = 0;
       for (var type in this.postSelect.types) {
         if (this.postSelect.types[type].checked)
@@ -1390,7 +1390,7 @@ createApp({
     getContent(a, p, modal) {
       if (a && p) {
         fetch(this.hapi, { // Use constant HIVE_API
-          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":["${a}", "${p}"], "id":1}`,
+          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_content", "params":{"author": "${a}", "permlink": "${p}", "observer": "${this.account}"}, "id":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
@@ -1417,9 +1417,9 @@ createApp({
                 i < this.posturls[key].active_votes.length;
                 i++
               ) {
-                if (this.posturls[key].active_votes[i].percent > 0) {
+                if (this.posturls[key].active_votes[i].rshares > 0) {
                   this.posturls[key].upVotes++;
-                } else if (this.posturls[key].active_votes[i].percent < 0) {
+                } else if ( this.posturls[key].active_votes[i].rshares < 0) {
                   this.posturls[key].downVotes++;
                 }
                 // Skip percent === 0 (neutral/no vote)
@@ -1900,7 +1900,7 @@ createApp({
     if (this.pagePermlink) {
       this.getContent(this.pageAccount, this.pagePermlink, true)
     } else {
-      this.getPosts();
+      this.getHubPosts();
       this.boundScrollHandler = this.handleScroll.bind(this); // Create bound handler
       document.body.addEventListener('scroll', this.boundScrollHandler); // Use bound handler
     }

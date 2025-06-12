@@ -7,6 +7,8 @@ import NFTCard from "/js/nftcard.js";
 import SetCard from "/js/setcard.js";
 import FTTransfer from "/js/fttransfer.js";
 import NFTDetail from "/js/nftdetail.js";
+import ContractVue from "/js/spkdrive.js";
+import GenerativeNftBuilder from "/js/generative-nft-builder.js";
 
 let url = location.href.replace(/\/$/, "");
 let lapi = "";
@@ -64,6 +66,23 @@ createApp({
       testmin: 0,
       testmax: 100,
       testnum: 0,
+      // NFT Image slots
+      nftImages: {
+        logo: null,
+        featured: null,
+        banner: null,
+        wrapped: null
+      },
+      // New script toggle
+      newScript: {
+        decent: 'false'
+      },
+      // NSFW toggle
+      notSfw: {
+        decent: false
+      },
+      // NFT Creation Type
+      nftCreationType: 'static',
       preScroll: [0,0],
       lastScroll: 0,
       lastLoad: 0,
@@ -356,6 +375,36 @@ createApp({
         },
       },
       accountinfo: {},
+      spkapi: { 
+        pubKey: 'NA',
+        spk: 0,
+        balance: 0,
+        gov: 0,
+        poweredUp: 0,
+        claim: 0,
+        granted: {},
+        granting: {},
+        file_contracts: []
+      },
+      spkStats: {},
+      protocol: {},
+      contracts: [],
+      mypfp: null,
+      // chains: {
+      //   dlux: {
+      //     enabled: false,
+      //     api: "https://token.dlux.io",
+      //     sets: {},
+      //     multisig: "dlux-cc",
+      //     dataAPI: "https://data.dlux.io"
+      //   },
+      //   duat: {
+      //     enabled: false,
+      //     api: "https://duat.hivehoneycomb.com",
+      //     sets: {},
+      //     multisig: "ragnarok-cc",
+      //   }
+      // },
       filterusers: {
         checked: true,
         value: "",
@@ -583,6 +632,69 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
         description: "Provide a detailed description of your collection.",
       },
       SLN: [],
+      // Icon Picker data
+      iconSearchTerm: '',
+      selectedIconCategory: 'all',
+      availableIcons: [
+        // Popular/Common icons
+        { name: 'Gem', class: 'fa-solid fa-gem', category: 'solid' },
+        { name: 'Star', class: 'fa-solid fa-star', category: 'solid' },
+        { name: 'Heart', class: 'fa-solid fa-heart', category: 'solid' },
+        { name: 'Diamond', class: 'fa-solid fa-diamond', category: 'solid' },
+        { name: 'Crown', class: 'fa-solid fa-crown', category: 'solid' },
+        { name: 'Fire', class: 'fa-solid fa-fire', category: 'solid' },
+        { name: 'Lightning', class: 'fa-solid fa-bolt', category: 'solid' },
+        { name: 'Shield', class: 'fa-solid fa-shield', category: 'solid' },
+        { name: 'Trophy', class: 'fa-solid fa-trophy', category: 'solid' },
+        { name: 'Magic', class: 'fa-solid fa-magic', category: 'solid' },
+        { name: 'Sparkles', class: 'fa-solid fa-sparkles', category: 'solid' },
+        { name: 'Rocket', class: 'fa-solid fa-rocket', category: 'solid' },
+        
+        // Business/Finance
+        { name: 'Coins', class: 'fa-solid fa-coins', category: 'business' },
+        { name: 'Chart', class: 'fa-solid fa-chart-line', category: 'business' },
+        { name: 'Building', class: 'fa-solid fa-building', category: 'business' },
+        { name: 'Briefcase', class: 'fa-solid fa-briefcase', category: 'business' },
+        { name: 'Handshake', class: 'fa-solid fa-handshake', category: 'business' },
+        { name: 'Bank', class: 'fa-solid fa-university', category: 'business' },
+        { name: 'Scale', class: 'fa-solid fa-balance-scale', category: 'business' },
+        { name: 'Gavel', class: 'fa-solid fa-gavel', category: 'business' },
+        
+        // Nature/Animals
+        { name: 'Tree', class: 'fa-solid fa-tree', category: 'nature' },
+        { name: 'Leaf', class: 'fa-solid fa-leaf', category: 'nature' },
+        { name: 'Sun', class: 'fa-solid fa-sun', category: 'nature' },
+        { name: 'Moon', class: 'fa-solid fa-moon', category: 'nature' },
+        { name: 'Mountain', class: 'fa-solid fa-mountain', category: 'nature' },
+        { name: 'Water', class: 'fa-solid fa-water', category: 'nature' },
+        { name: 'Flower', class: 'fa-solid fa-seedling', category: 'nature' },
+        { name: 'Butterfly', class: 'fa-solid fa-dove', category: 'nature' },
+        { name: 'Globe', class: 'fa-solid fa-globe', category: 'nature' },
+        
+        // Gaming/Entertainment  
+        { name: 'Dice', class: 'fa-solid fa-dice', category: 'gaming' },
+        { name: 'Gamepad', class: 'fa-solid fa-gamepad', category: 'gaming' },
+        { name: 'Puzzle', class: 'fa-solid fa-puzzle-piece', category: 'gaming' },
+        { name: 'Chess', class: 'fa-solid fa-chess', category: 'gaming' },
+        { name: 'Sword', class: 'fa-solid fa-sword', category: 'gaming' },
+        { name: 'Wand', class: 'fa-solid fa-magic', category: 'gaming' },
+        { name: 'Cards', class: 'fa-solid fa-playing-card', category: 'gaming' },
+        { name: 'Joystick', class: 'fa-solid fa-gamepad', category: 'gaming' },
+        
+        // Additional popular icons
+        { name: 'Music', class: 'fa-solid fa-music', category: 'solid' },
+        { name: 'Book', class: 'fa-solid fa-book', category: 'solid' },
+        { name: 'Camera', class: 'fa-solid fa-camera', category: 'solid' },
+        { name: 'Lock', class: 'fa-solid fa-lock', category: 'solid' },
+        { name: 'Key', class: 'fa-solid fa-key', category: 'solid' },
+        { name: 'Gift', class: 'fa-solid fa-gift', category: 'solid' },
+        { name: 'Bell', class: 'fa-solid fa-bell', category: 'solid' },
+        { name: 'Anchor', class: 'fa-solid fa-anchor', category: 'solid' },
+        { name: 'Feather', class: 'fa-solid fa-feather', category: 'solid' },
+        { name: 'Eye', class: 'fa-solid fa-eye', category: 'solid' },
+        { name: 'Clock', class: 'fa-solid fa-clock', category: 'solid' },
+        { name: 'Compass', class: 'fa-solid fa-compass', category: 'solid' }
+      ],
     };
   },
   components: {
@@ -593,6 +705,8 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
     "setcard": SetCard,
     "fttransfer": FTTransfer,
     "nftdetail": NFTDetail,
+    "contract-vue": ContractVue,
+    "generative-nft-builder": GenerativeNftBuilder,
   },
   methods: {
     breakIt(it, reset) {
@@ -623,6 +737,37 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
       )
         this.svgTag.replace("<style", "<style scoped");
       this.svgTagClose = it.substring(svgEnd);
+    },
+    getProtocol() {
+      fetch(this.lapi + "/api/protocol")
+        .then((response) => response.json())
+        .then((data) => {
+          this.protocol[data.jsontoken] = data
+          this.prefix = data.prefix;
+          this.multisig = data.multisig;
+          this.jsontoken = data.jsontoken;
+          this.TOKEN = data.jsontoken.toUpperCase();
+          //location.hash = data.jsontoken;
+          this.node = data.node;
+          this.features = data.features ? data.features : this.features;
+          this.behind = data.behind;
+          this.behindTitle = data.behind + " Blocks Behind Hive";
+        });
+      fetch(`https://spkinstant.hivehoneycomb.com` + "/api/protocol")
+        .then((response) => response.json())
+        .then((data) => {
+          this.protocol[data.jsontoken] = data
+        });
+      fetch(`https://spkinstant.hivehoneycomb.com` + "/spk/api/protocol")
+        .then((response) => response.json())
+        .then((data) => {
+          this.protocol[data.jsontoken] = data
+        });
+        fetch("https://spktest.dlux.io/broca/api/protocol")
+        .then((response) => response.json())
+        .then((data) => {
+          this.protocol[data.jsontoken] = data
+        });
     },
     compileScript() {
       return this.baseScript
@@ -1710,6 +1855,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         });
     },
     getProtocol(token) {
+      if (!this.chains[token]) return;
       return new Promise((resolve, reject) => {
         fetch(this.chains[token].api + "/api/protocol")
           .then((response) => response.json())
@@ -1828,6 +1974,158 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           });
       }
     },
+    handleFileSlot(slotType, fileData) {
+      console.log('File slot selected:', slotType, fileData);
+      
+      if (slotType === 'general') {
+        // Handle general file addition (existing behavior)
+        console.log('General file added:', fileData);
+        return;
+      }
+      
+      // Handle specific image slots
+      if (this.nftImages.hasOwnProperty(slotType)) {
+        this.nftImages[slotType] = {
+          hash: fileData.hash || fileData.cid,
+          filename: fileData.filename || fileData.name,
+          size: fileData.size,
+          type: fileData.type || fileData.mime,
+          url: `https://ipfs.dlux.io/ipfs/${fileData.hash || fileData.cid}`
+        };
+        
+        // Show success message
+        this.showToast(`${slotType.charAt(0).toUpperCase() + slotType.slice(1)} image set successfully!`, 'success');
+        
+        // Update the corresponding form field if it exists
+        this.updateImageField(slotType, fileData.hash || fileData.cid);
+      }
+    },
+    
+    updateImageField(slotType, hash) {
+      // Update the corresponding input field or data property
+      switch(slotType) {
+        case 'logo':
+          this.SA.logo = hash;
+          break;
+        case 'featured':
+          this.SA.featured = hash;
+          break;
+        case 'banner':
+          this.SA.banner = hash;
+          break;
+        case 'wrapped':
+          this.SA.wrapped = hash;
+          break;
+      }
+    },
+    
+    showToast(message, type = 'info') {
+      // Create a simple toast notification
+      const toast = document.createElement('div');
+      toast.className = `alert alert-${type} position-fixed`;
+      toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+      toast.innerHTML = `
+        <div class="d-flex align-items-center">
+          <i class="fa-solid fa-${type === 'success' ? 'check-circle' : 'info-circle'} fa-fw me-2"></i>
+          ${message}
+        </div>
+      `;
+      
+      document.body.appendChild(toast);
+      
+      // Auto remove after 3 seconds
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      }, 3000);
+    },
+    
+    sendIt(op) {
+      // Set the operation to be signed
+      this.toSign = op;
+    },
+    
+    handleScriptGenerated(data) {
+      // Handle the generated script from the generative NFT builder
+      this.testscript = data.hash;
+      this.testsetname = this.testsetname || "Generative Collection";
+      
+      // Calculate the range based on total supply
+      this.testmin = 0;
+      this.testmax = data.totalSupply - 1;
+      
+      this.showToast(`Generative script created! Hash: ${data.hash}`, 'success');
+      
+      // Auto-switch to preview tab
+      const previewTab = document.getElementById('nav-proof-tab');
+      if (previewTab) {
+        previewTab.click();
+      }
+    },
+    
+    // Color picker validation
+    validateHexColor(event, colorKey) {
+      let value = event.target.value;
+      // Ensure it starts with #
+      if (!value.startsWith('#')) {
+        value = '#' + value;
+      }
+      // Remove any non-hex characters after #
+      value = '#' + value.substring(1).replace(/[^0-9A-Fa-f]/g, '');
+      // Limit to 6 characters after #
+      if (value.length > 7) {
+        value = value.substring(0, 7);
+      }
+      // Update the model
+      if (colorKey === 'color1') {
+        this.SA.color1 = value;
+      } else if (colorKey === 'color2') {
+        this.SA.color2 = value;
+      }
+      event.target.value = value;
+    },
+    
+    // Icon picker methods
+    selectIcon(iconClass) {
+      this.SA.faicon = iconClass;
+    },
+    
+    filterIcons() {
+      // The filtering will be handled by the computed property
+    },
+    
+    filterIconsByCategory(category) {
+      this.selectedIconCategory = category;
+      this.iconSearchTerm = ''; // Clear search when changing category
+    },
+    
+    async getSapi(user = this.account, fu) {
+      if (!user || user === 'GUEST') return;
+      
+      try {
+        const response = await fetch(`https://spktest.dlux.io/@${user}`);
+        const data = await response.json();
+        this.spkapi = data;
+        console.log('SPK API data loaded:', data);
+      } catch (error) {
+        console.error('Error loading SPK API data:', error);
+        this.spkapi = { pubKey: 'NA' };
+      }
+    },
+    
+    async getSpkStats() {
+      try {
+        const response = await fetch('https://spktest.dlux.io/');
+        const data = await response.json();
+        this.spkStats = data.result;
+        console.log('SPK Stats loaded:', data.result);
+      } catch (error) {
+        console.error('Error loading SPK stats:', error);
+        this.spkStats = {};
+      }
+    },
+    
     buildTestItem() {
       const scrollPos = window.scrollY
       //this.debounceTestScript = 0
@@ -2606,6 +2904,11 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       for (var token in this.chains) {
         getUserData(this.chains[token].api + "/@" + user, token, user)
       }
+      
+      // Refresh SPK data when user data is loaded
+      if (user && user !== 'GUEST') {
+        this.getSapi(user);
+      }
       // fetch(this.lapi + "/@" + user)
       //   .then((response) => response.json())
       //   .then((data) => {
@@ -2674,7 +2977,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     getHiveUser(user) {
       if (user)
         fetch(hapi, {
-          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_accounts", "params":[["${user}"]], "id":1}`,
+          body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_accounts\", \"params\":[[\"${user}\"]], \"id\":1}`,
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
@@ -2691,7 +2994,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     },
     getHiveInfo() {
       fetch(hapi, {
-        body: `{"jsonrpc":"2.0", "method":"condenser_api.get_current_median_history_price", "params":[], "id":1}`,
+        body: `{\"jsonrpc\":\"2.0\", \"method\":\"condenser_api.get_current_median_history_price\", \"params\":[], \"id\":1}`,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
@@ -2728,11 +3031,14 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       );
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
       return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-    }
+    },
+    
+
   },
   mounted() {
     //get hash and set it
     this.getHiveInfo()
+    this.getProtocol()
     var setName = location.pathname.split("set/")[1] || location.hash.split(':')[1]
     this.setname = setName;
     if (setName) {
@@ -2757,8 +3063,12 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     this.getUserNFTs();
     //this.getQuotes();
     //this.getNodes();
-    if (user != "GUEST") this.getTokenUser();
-    if (user != "GUEST") this.getHiveUser();
+    this.getSpkStats();
+    if (user != "GUEST") {
+      this.getTokenUser();
+      this.getHiveUser();
+      this.getSapi();
+    }
     document.body.addEventListener('scroll', this.handleScroll);
   },
   unmounted() {
@@ -2772,6 +3082,28 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     }
   },
   computed: {
+    filteredIcons: {
+      get() {
+        let icons = this.availableIcons;
+        
+        // Filter by category
+        if (this.selectedIconCategory !== 'all') {
+          icons = icons.filter(icon => icon.category === this.selectedIconCategory);
+        }
+        
+        // Filter by search term
+        if (this.iconSearchTerm.trim()) {
+          const searchTerm = this.iconSearchTerm.toLowerCase().trim();
+          icons = icons.filter(icon => 
+            icon.name.toLowerCase().includes(searchTerm) ||
+            icon.class.toLowerCase().includes(searchTerm)
+          );
+        }
+        
+        return icons;
+      }
+    },
+
     location: {
       get() {
         return location;

@@ -281,8 +281,13 @@ export default {
                         @click="handleFileClick($event, file)"
                         @contextmenu.prevent.stop="showContextMenu($event, 'file', file)">
                         <td>
-                            <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
+                            <img v-if="newMeta[file.i][file.f].thumb && newMeta[file.i][file.f].thumb_loaded && isValidThumb(newMeta[file.i][file.f].thumb_data)"
                                 :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid" width="50" />
+                            <div v-else-if="newMeta[file.i][file.f].thumb && !newMeta[file.i][file.f].thumb_loaded" 
+                                class="d-flex align-items-center justify-content-center" 
+                                style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                                <i class="fa-solid fa-spinner fa-spin" style="color: #adb5bd;"></i>
+                            </div>
                             <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg"
                                 xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800"
                                 style="enable-background:new 0 0 800 800;" xml:space="preserve" width="50">
@@ -410,9 +415,14 @@ export default {
                         @mouseleave="$event.currentTarget.style.transform = ''; $event.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.2)'; $event.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'">
                         <div class="file-icon-container d-flex align-items-center justify-content-center"
                             style="height: 70px; width: 100%;">
-                            <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
+                            <img v-if="newMeta[file.i][file.f].thumb && newMeta[file.i][file.f].thumb_loaded && isValidThumb(newMeta[file.i][file.f].thumb_data)"
                                 :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid"
                                 style="max-height: 70px; max-width: 100%; object-fit: contain;" />
+                            <div v-else-if="newMeta[file.i][file.f].thumb && !newMeta[file.i][file.f].thumb_loaded" 
+                                class="d-flex align-items-center justify-content-center" 
+                                style="height: 70px; width: 100%; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                                <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: #adb5bd;"></i>
+                            </div>
                             <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg"
                                 xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800"
                                 style="enable-background:new 0 0 800 800;" xml:space="preserve" width="70">
@@ -498,9 +508,14 @@ export default {
                                 @dragstart="dragStartItem($event, file, 'file')" @click="handleFileClick($event, file)"
                                 @contextmenu.prevent.stop="showContextMenu($event, 'file', file)">
                                 <td>
-                                    <img v-if="newMeta[file.i][file.f].thumb && isValidThumb(newMeta[file.i][file.f].thumb_data)"
+                                    <img v-if="newMeta[file.i][file.f].thumb && newMeta[file.i][file.f].thumb_loaded && isValidThumb(newMeta[file.i][file.f].thumb_data)"
                                         :src="isValidThumb(newMeta[file.i][file.f].thumb_data)" class="img-fluid"
                                         width="50" />
+                                    <div v-else-if="newMeta[file.i][file.f].thumb && !newMeta[file.i][file.f].thumb_loaded" 
+                                        class="d-flex align-items-center justify-content-center" 
+                                        style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                                        <i class="fa-solid fa-spinner fa-spin" style="color: #adb5bd;"></i>
+                                    </div>
                                     <svg v-else version="1.1" xmlns="http://www.w3.org/2000/svg"
                                         xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 800 800"
                                         style="enable-background:new 0 0 800 800;" xml:space="preserve" width="50">
@@ -715,6 +730,16 @@ export default {
                 <li v-if="contextMenu.type === 'file' && postComponentAvailable">
                     <a class="dropdown-item py-1" href="#" @click="addToPost(contextMenu.item); hideContextMenu();">
                         <i class="fa-solid fa-plus fa-fw me-2"></i>Add to Post
+                    </a>
+                </li>
+                
+                <!-- File Slots - only show when fileSlots prop has values and it's an image file -->
+                <li v-if="contextMenu.type === 'file' && Object.keys(fileSlots).length > 0 && contextMenu.item && (isImageFile((newMeta[contextMenu.item.i] && newMeta[contextMenu.item.i][contextMenu.item.f] && newMeta[contextMenu.item.i][contextMenu.item.f].type) || '') || isImageFile(contextMenu.item.f))" class="dropdown-divider"></li>
+                <li v-for="(slotConfig, slotType) in fileSlots" :key="slotType" 
+                    v-if="contextMenu.type === 'file' && contextMenu.item && (isImageFile((newMeta[contextMenu.item.i] && newMeta[contextMenu.item.i][contextMenu.item.f] && newMeta[contextMenu.item.i][contextMenu.item.f].type) || '') || isImageFile(contextMenu.item.f))">
+                    <a class="dropdown-item py-1" href="#" @click="handleFileSlot(slotType, contextMenu.item); hideContextMenu();">
+                        <i :class="slotConfig.icon + ' fa-fw me-2'"></i>{{ slotConfig.label }}
+                        <small class="text-muted d-block ms-4" v-if="slotConfig.description">{{ slotConfig.description }}</small>
                     </a>
                 </li>
             </ul>
@@ -1045,6 +1070,12 @@ export default {
             type: Boolean,
             default: false,
         },
+        fileSlots: {
+            type: Object,
+            default: function () {
+                return {}
+            },
+        },
     },
     data() {
         return {
@@ -1177,7 +1208,7 @@ export default {
             },
         };
     },
-    emits: ["tosign", "addassets", 'update:externalDrop', 'update-contract'], // Ensure 'tosign', 'update:externalDrop', and 'update-contract' are included here
+    emits: ["tosign", "addassets", 'update:externalDrop', 'update-contract', 'add-to-post', 'set-logo', 'set-featured', 'set-banner', 'set-wrapped'], // Ensure 'tosign', 'update:externalDrop', and 'update-contract' are included here
     methods: {
         ...common,
         ...spk,
@@ -1618,6 +1649,11 @@ export default {
             // Update URL hash to reflect the current folder path
             const newHash = path ? `#drive/${path}` : '#drive';
             history.replaceState(null, null, newHash);
+
+            // Load thumbnails for the new folder
+            this.$nextTick(() => {
+                this.loadThumbnailsForCurrentFolder();
+            });
         },
         getSubfolders(user, path) {
             const folders = this.userFolderTrees[user] || [];
@@ -1660,6 +1696,18 @@ export default {
                 type,
                 item,
             };
+            
+            // Debug logging for file slots
+            if (type === 'file' && item) {
+                console.log('Context menu for file:', item);
+                console.log('File slots available:', Object.keys(this.fileSlots));
+                console.log('File metadata:', this.newMeta[item.i] && this.newMeta[item.i][item.f]);
+                const fileType = (this.newMeta[item.i] && this.newMeta[item.i][item.f] && this.newMeta[item.i][item.f].type) || '';
+                console.log('File type:', fileType);
+                console.log('Is image (by type):', this.isImageFile(fileType));
+                console.log('Is image (by filename):', this.isImageFile(item.f));
+            }
+            
             const hide = () => {
                 this.contextMenu.show = false;
                 document.removeEventListener("click", hide);
@@ -2952,12 +3000,27 @@ export default {
                 if (string.includes("https://")) fetch(string).then(response => response.text()).then(data => {
                     if (data.indexOf('data:image/') >= 0) this.newMeta[id][cid].thumb_data = data
                     else this.newMeta[id][cid].thumb_data = string
+                    this.newMeta[id][cid].thumb_loaded = true
                     resolve(this.newMeta[id][cid].thumb_data)
                 }).catch(e => {
                     this.newMeta[id][cid].thumb_data = string
+                    this.newMeta[id][cid].thumb_loaded = true
                     resolve(this.newMeta[id][cid].thumb_data)
                 })
             })
+        },
+        // Lazy load thumbnails for files in current folder
+        loadThumbnailsForCurrentFolder() {
+            const currentFiles = this.getFiles(this.selectedUser, this.currentFolderPath);
+            currentFiles.forEach(file => {
+                if (this.newMeta[file.i] && this.newMeta[file.i][file.f]) {
+                    const meta = this.newMeta[file.i][file.f];
+                    // Only load if has thumbnail and not already loaded
+                    if (meta.thumb && !meta.thumb_loaded) {
+                        this.getImgData(file.i, file.f);
+                    }
+                }
+            });
         },
         parseFolderList(folderListStr) {
             var folderEntries = folderListStr.split("|").filter(Boolean);
@@ -3266,14 +3329,16 @@ export default {
                             name,
                             type,
                             thumb,
-                            thumb_data: thumb,
+                            thumb_data: thumb, // Initialize with thumb URL, will be replaced with data when loaded
+                            thumb_loaded: false, // Track if thumbnail data has been loaded
                             is_thumb: false,
                             flags: this.Base64toNumber(flags.split("-")[0]),
                             folderPath,
                             license: flags.includes("-") ? flags.split("-")[1] : "",
                             labels: flags.includes("-") ? flags.split("-")[2] : flags.slice(1),
                         };
-                        if (thumb) this.getImgData(id, filesNames[j]);
+                        // Remove automatic thumbnail loading - we'll load lazily instead
+                        // if (thumb) this.getImgData(id, filesNames[j]);
                         if (this.newMeta[id][filesNames[j]].flags & 1) this.newMeta[id][filesNames[j]].encrypted = true;
                         if (this.newMeta[id][filesNames[j]].flags & 2) this.newMeta[id][filesNames[j]].is_thumb = true
 
@@ -3335,7 +3400,12 @@ export default {
             this.owners = [...new Set(this.owners)];
             this.buildFolderTrees();
             this.render();
-            this.setView('icon')
+            this.setView('icon');
+            
+            // Load thumbnails for initial folder view
+            this.$nextTick(() => {
+                this.loadThumbnailsForCurrentFolder();
+            });
         },
         dragOverBackground(event) {
             event.preventDefault();
@@ -5040,6 +5110,29 @@ export default {
                 fileType: fileType
             });
         },
+        
+        handleFileSlot(slotType, file) {
+            // Get file metadata
+            const meta = this.newMeta[file.i][file.f];
+            const fileName = meta.name || file.f;
+            const fileType = meta.type || '';
+            const cid = file.f;
+            const contractId = file.i;
+
+            // Emit the file slot event with the slot type
+            this.$emit(`set-${slotType}`, {
+                cid: cid,
+                hash: cid,
+                filename: fileName,
+                name: fileName,
+                size: file.s,
+                type: fileType,
+                mime: fileType,
+                contractId: contractId,
+                f: file.f,
+                i: file.i
+            });
+        },
     },
     computed: {
         hasFiles() {
@@ -5214,6 +5307,14 @@ export default {
                     );
                     this.extensionAmount = Math.max(cost, 1); // Ensure minimum of 1
                 }
+            }
+        },
+        'selectedUser': {
+            handler(newValue) {
+                // Load thumbnails when user selection changes
+                this.$nextTick(() => {
+                    this.loadThumbnailsForCurrentFolder();
+                });
             }
         },
     },

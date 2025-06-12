@@ -943,7 +943,7 @@ export default {
                                                                                                     v-model="localNewMeta[contract.i][cid].thumb"
                                                                                                     @change="getImgData(contract.i, cid)"
                                                                                                     placeholder="https://your-thumbnail-image.png"
-                                                                                                    pattern="(https://[a-z0-9.\-/]+)|(Qm[a-zA-Z0-9]+)"
+                                                                                                    pattern="(https://[a-z0-9.-/]+)|(Qm[a-zA-Z0-9]+)"
                                                                                                     class="form-control bg-dark border-0"
                                                                                                     :class="{'text-info': contract.t == account, 'text-white': contract.t != account}"
                                                                                                     :disabled="contract.t != account">

@@ -203,7 +203,12 @@ export default {
             <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center">
                 <files-vue ref="filesVue" :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" :computed-data="{usedBytes: usedBytes, availableBytes: availableBytes}"
                     @refresh-contracts="refreshContracts" @refresh-drive="handleRefreshDrive"
-                    @tosign="sendIt($event)" :signedtx="signedtx" :post-component-available="postpage" @add-to-post="handleAddToPost($event)"></files-vue>
+                    @tosign="sendIt($event)" :signedtx="signedtx" :post-component-available="postpage" @add-to-post="handleAddToPost($event)"
+                    :file-slots="fileSlots"
+                    @set-logo="handleFileSlot('logo', $event)"
+                    @set-featured="handleFileSlot('featured', $event)"
+                    @set-banner="handleFileSlot('banner', $event)"
+                    @set-wrapped="handleFileSlot('wrapped', $event)"></files-vue>
             </div>
         </div>
     </div>
@@ -292,6 +297,13 @@ export default {
             required: false
         },
         protocol: {
+            default: function () {
+                return {}
+            },
+            required: false
+        },
+        fileSlots: {
+            type: Object,
             default: function () {
                 return {}
             },
@@ -435,7 +447,7 @@ export default {
             }
         };
     },
-    emits: ['tosign', 'addasset', 'bens', 'done', 'add-to-post'],
+    emits: ['tosign', 'addasset', 'bens', 'done', 'add-to-post', 'set-logo', 'set-featured', 'set-banner', 'set-wrapped'],
     methods: {
         ...common,
         ...spk,
@@ -1613,6 +1625,16 @@ export default {
         handleAddToPost(fileData) {
             // Emit the file data to the parent so it can be passed to the post component
             this.$emit('add-to-post', fileData);
+        },
+        
+        handleFileSlot(slotType, fileData) {
+            // Emit the file slot event with the slot type
+            this.$emit(`set-${slotType}`, {
+                hash: fileData.cid || fileData.hash,
+                filename: fileData.filename || fileData.name || fileData.f,
+                size: fileData.size || fileData.s,
+                type: fileData.type || fileData.mime || 'application/octet-stream'
+            });
         },
     },
     watch: {

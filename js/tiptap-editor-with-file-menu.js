@@ -341,13 +341,39 @@ export default {
         
         // Generate permlink from title
         generatedPermlink() {
-            if (!this.content.title) return '';
-            return this.content.title
+            // Get title from content first (most reliable), then try editor
+            let title = '';
+            
+            if (this.content.title) {
+                // Primary source: content.title (strip HTML if present)
+                title = this.content.title.replace(/<[^>]*>/g, '').trim();
+            } else if (this.titleEditor) {
+                // Secondary source: titleEditor getText()
+                title = this.titleEditor.getText().trim();
+            }
+            
+            if (!title) return '';
+            
+            // Clean unwanted characters and format for permlink
+            title = title
+                .replace(/\u00A0/g, ' ')         // Non-breaking spaces
+                .replace(/\u200B/g, '')          // Zero-width spaces
+                .replace(/\uFEFF/g, '')          // Byte order marks
+                .replace(/[\u2000-\u206F]/g, ' ') // General punctuation spaces
+                .replace(/\s+/g, ' ')            // Multiple spaces to single
+                .trim();
+            
+            if (!title) return '';
+            
+            // Generate clean permlink
+            return title
                 .toLowerCase()
-                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
                 .trim()
-                .replace(/\s+/g, '-')
-                .substring(0, 255);
+                .replace(/\s+/g, '-')        // Replace spaces with hyphens
+                .replace(/-+/g, '-')         // Remove duplicate hyphens
+                .replace(/^-|-$/g, '')       // Remove leading/trailing hyphens
+                .substring(0, 255);          // Limit length
         },
         
         // Calculate save as progress based on current step
@@ -652,7 +678,7 @@ export default {
                 const tags = this.getTags();
                 if (!tags.includes(tagValue) && tags.length < 10) {
                     this.addCollaborativeTag(tagValue);
-                this.hasUnsavedChanges = true;
+            this.hasUnsavedChanges = true;
                     this.clearUnsavedAfterSync();
                 }
                 
@@ -2541,27 +2567,133 @@ export default {
             // ===== STEP 3: Initialize collaborative schema =====
             this.initializeCollaborativeSchema(Y);
             
-            // Create collaborative editors (offline mode - no WebSocket connection yet)
-            // Prepare base extensions for title editor
-            const titleExtensions = [
-                StarterKit.configure({
-                    history: false, // Collaboration handles history
-                    heading: false,
-                    bulletList: false,
-                    orderedList: false,
-                    blockquote: false,
-                    codeBlock: false,
-                    horizontalRule: false
-                }),
-                Collaboration.configure({
-                    document: this.ydoc,
-                    field: 'title' // Keep existing field names for backward compatibility
-                }),
-                Placeholder.configure({
-                    placeholder: this.isReadOnlyMode ? 'Title (read-only)' : 'Enter title...'
-                })
-            ];
+            // ===== ENHANCED EXTENSIONS: Add markdown shortcuts, emoji, and media support =====
+            const getEnhancedExtensions = (field) => {
+                const baseExtensions = [
+                    StarterKit.configure({
+                        history: false, // Collaboration handles history
+                        ...(field === 'title' ? {
+                            heading: false,
+                            bulletList: false,
+                            orderedList: false,
+                            blockquote: false,
+                            codeBlock: false,
+                            horizontalRule: false
+                        } : {})
+                    }),
+                    Collaboration.configure({
+                        document: this.ydoc,
+                        field: field
+                    }),
+                    Placeholder.configure({
+                        placeholder: this.isReadOnlyMode ? 
+                            `${field.charAt(0).toUpperCase() + field.slice(1)} (read-only)` : 
+                            field === 'title' ? 'Enter title...' : 'Start writing...'
+                    })
+                ];
+
+                // Add enhanced extensions if available in bundle
+                const enhancedExtensions = [];
+                
+                // Markdown shortcuts (built into StarterKit but let's ensure they're active)
+                console.log('✨ Markdown shortcuts enabled: **bold**, *italic*, ~~strike~~, `code`, > quotes, - lists');
+                
+                // Try to add emoji support if available
+                if (bundle.Emoji || window.TiptapEmoji) {
+                    const Emoji = bundle.Emoji?.default || bundle.Emoji || window.TiptapEmoji;
+                    enhancedExtensions.push(Emoji.configure({
+                        suggestion: {
+                            items: ({ query }) => {
+                                // Basic emoji set - expand this as needed
+                                const emojis = [
+                                    { name: 'smile', emoji: '😄' },
+                                    { name: 'heart', emoji: '❤️' },
+                                    { name: 'thumbsup', emoji: '👍' },
+                                    { name: 'fire', emoji: '🔥' },
+                                    { name: 'rocket', emoji: '🚀' },
+                                    { name: 'party', emoji: '🎉' },
+                                    { name: 'eyes', emoji: '👀' },
+                                    { name: 'thinking', emoji: '🤔' }
+                                ];
+                                return emojis.filter(item => 
+                                    item.name.toLowerCase().includes(query.toLowerCase())
+                                ).slice(0, 10);
+                            },
+                            render: () => {
+                                let component;
+                                return {
+                                    onStart: props => {
+                                        component = new VueRenderer(EmojiList, {
+                                            props,
+                                            editor: props.editor
+                                        });
+                                    },
+                                    onUpdate(props) {
+                                        component.updateProps(props);
+                                    },
+                                    onKeyDown(props) {
+                                        if (props.event.key === 'Escape') {
+                                            return true;
+                                        }
+                                        return component.ref?.onKeyDown(props);
+                                    },
+                                    onExit() {
+                                        component.destroy();
+                                    }
+                                };
+                            }
+                        }
+                    }));
+                    console.log('😄 Emoji extension added - use :emoji: syntax');
+                }
+                
+                // Add Image extension for better media handling
+                if (bundle.Image || window.TiptapImage) {
+                    const Image = bundle.Image?.default || bundle.Image || window.TiptapImage;
+                    enhancedExtensions.push(Image.configure({
+                        inline: true,
+                        allowBase64: true,
+                        HTMLAttributes: {
+                            class: 'img-fluid'
+                        }
+                    }));
+                    console.log('🖼️ Enhanced image support added');
+                }
+                
+                // Add Link extension for better URL handling
+                if (bundle.Link || window.TiptapLink) {
+                    const Link = bundle.Link?.default || bundle.Link || window.TiptapLink;
+                    enhancedExtensions.push(Link.configure({
+                        openOnClick: false,
+                        HTMLAttributes: {
+                            class: 'text-primary'
+                        }
+                    }));
+                    console.log('🔗 Enhanced link support added');
+                }
+                
+                // Add Typography extension for better markdown-like shortcuts
+                if (bundle.Typography || window.TiptapTypography) {
+                    const Typography = bundle.Typography?.default || bundle.Typography || window.TiptapTypography;
+                    enhancedExtensions.push(Typography.configure({
+                        openDoubleQuote: '"',
+                        closeDoubleQuote: '"',
+                                                 openSingleQuote: "'",
+                         closeSingleQuote: "'",
+                        ellipsis: '…',
+                        emDash: '—',
+                        enDash: '–'
+                    }));
+                    console.log('📝 Smart typography shortcuts added');
+                }
+
+                return [...baseExtensions, ...enhancedExtensions];
+            };
             
+            // Create collaborative editors with enhanced extensions
+            const titleExtensions = getEnhancedExtensions('title');
+            const bodyExtensions = getEnhancedExtensions('body');
+
             // Note: CollaborationCursor will be added dynamically when provider connects
             // This follows TipTap best practice for offline-first architecture
 
@@ -2581,7 +2713,7 @@ export default {
                         }
                     },
                 onCreate: ({ editor }) => {
-                    console.log(`✅ Offline collaborative title editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
+                    console.log(`✅ Enhanced collaborative title editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
                     },
                     onUpdate: ({ editor }) => {
                         // SECURITY: Block updates for read-only users
@@ -2590,7 +2722,16 @@ export default {
                             return;
                         }
                         
-                        this.content.title = editor.getHTML();
+                        // Store clean title text without artifacts
+                        let cleanTitle = editor.getText().trim();
+                        cleanTitle = cleanTitle
+                            .replace(/\u00A0/g, ' ')         // Non-breaking spaces
+                            .replace(/\u200B/g, '')          // Zero-width spaces  
+                            .replace(/\uFEFF/g, '')          // Byte order marks
+                            .replace(/[\u2000-\u206F]/g, ' ') // General punctuation spaces
+                            .replace(/\s+/g, ' ')            // Multiple spaces to single
+                            .trim();
+                        this.content.title = cleanTitle;
                     
                     // Always show unsaved indicator for user feedback
                     this.hasUnsavedChanges = true;
@@ -2598,25 +2739,30 @@ export default {
                     // Y.js + IndexedDB handles persistence automatically
                     // Just clear the unsaved indicator after a brief delay
                     this.clearUnsavedAfterSync();
+                },
+                // Add focus and blur handlers to debug cursor tracking
+                onFocus: ({ editor }) => {
+                    console.log('🎯 Title editor focused - cursor should be updated');
+                    // Force cursor update by getting selection
+                    const selection = editor.state.selection;
+                    console.log('🎯 Title editor selection:', { from: selection.from, to: selection.to });
+                    
+                    // Update awareness with cursor info manually if needed
+                    if (this.provider && this.provider.awareness) {
+                        setTimeout(() => {
+                            const currentState = this.provider.awareness.getLocalState();
+                            console.log('🎯 Local awareness state after title focus:', currentState);
+                        }, 100);
+                    }
+                },
+                onBlur: ({ editor }) => {
+                    console.log('🎯 Title editor blurred');
+                },
+                onSelectionUpdate: ({ editor }) => {
+                    const selection = editor.state.selection;
+                    console.log('🎯 Title cursor moved:', { from: selection.from, to: selection.to });
                 }
             });
-
-            // Prepare base extensions for body editor
-            const bodyExtensions = [
-                StarterKit.configure({
-                    history: false // Collaboration handles history
-                }),
-                Collaboration.configure({
-                    document: this.ydoc,
-                    field: 'body' // Keep existing field names for backward compatibility
-                }),
-                Placeholder.configure({
-                    placeholder: this.isReadOnlyMode ? 'Content (read-only)' : 'Start writing...'
-                })
-            ];
-            
-            // Note: CollaborationCursor will be added dynamically when provider connects
-            // This follows TipTap best practice for offline-first architecture
 
             this.bodyEditor = new Editor({
                 element: this.$refs.bodyEditor,
@@ -2634,7 +2780,7 @@ export default {
                         }
                     },
                 onCreate: ({ editor }) => {
-                    console.log(`✅ Offline collaborative body editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
+                    console.log(`✅ Enhanced collaborative body editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
                     },
                     onUpdate: ({ editor }) => {
                     // SECURITY: Block updates for read-only users
@@ -2651,6 +2797,28 @@ export default {
                     // Y.js + IndexedDB handles persistence automatically
                     // Just clear the unsaved indicator after a brief delay
                     this.clearUnsavedAfterSync();
+                },
+                // Add focus and blur handlers to debug cursor tracking
+                onFocus: ({ editor }) => {
+                    console.log('🎯 Body editor focused - cursor should be updated');
+                    // Force cursor update by getting selection
+                    const selection = editor.state.selection;
+                    console.log('🎯 Body editor selection:', { from: selection.from, to: selection.to });
+                    
+                    // Update awareness with cursor info manually if needed
+                    if (this.provider && this.provider.awareness) {
+                        setTimeout(() => {
+                            const currentState = this.provider.awareness.getLocalState();
+                            console.log('🎯 Local awareness state after body focus:', currentState);
+                        }, 100);
+                    }
+                },
+                onBlur: ({ editor }) => {
+                    console.log('🎯 Body editor blurred');
+                },
+                onSelectionUpdate: ({ editor }) => {
+                    const selection = editor.state.selection;
+                    console.log('🎯 Body cursor moved:', { from: selection.from, to: selection.to });
                 }
             });
 
@@ -2659,7 +2827,7 @@ export default {
             this.connectionStatus = 'offline'; // But offline until connected to server
             this.fileType = 'local';           // Still local until published to server
 
-            console.log('✅ Offline collaborative editors created successfully');
+            console.log('✅ Enhanced offline collaborative editors created successfully');
         },
 
         // CLEAN DLUX SCHEMA INITIALIZATION
@@ -3272,8 +3440,54 @@ export default {
 
         // User presence management
         updatePresenceUI() {
-            // Update UI based on presence changes
-            // This method can be implemented based on UI requirements
+            if (!this.provider || !this.provider.awareness) {
+                this.connectedUsers = [];
+                return;
+            }
+
+            try {
+                // Get all awareness states
+                const awarenessStates = this.provider.awareness.getStates();
+                const users = [];
+                
+                console.log('🔍 DEBUG: Raw awareness states:', awarenessStates);
+                console.log('🔍 DEBUG: Awareness states size:', awarenessStates.size);
+                
+                // Convert awareness states to user objects
+                awarenessStates.forEach((state, clientId) => {
+                    console.log('🔍 DEBUG: Processing state for client', clientId, ':', state);
+                    
+                    if (state && state.user && state.user.name) {
+                        // Only add if this client ID isn't already in the users array
+                        const existingUser = users.find(u => u.id === clientId);
+                        if (!existingUser) {
+                            users.push({
+                                id: clientId,
+                                name: state.user.name,
+                                color: state.user.color || this.generateUserColor(state.user.name)
+                            });
+                            console.log('✅ Added user:', state.user.name, 'with client ID:', clientId);
+                        } else {
+                            console.log('⚠️ Skipped duplicate client ID:', clientId, 'for user:', state.user.name);
+                        }
+                    } else {
+                        console.log('❌ Skipped state - missing user data:', {
+                            hasState: !!state,
+                            hasUser: !!(state && state.user),
+                            hasUserName: !!(state && state.user && state.user.name),
+                            state: state
+                        });
+                    }
+                });
+                
+                // Update connected users
+                this.connectedUsers = users;
+                console.log('👥 Connected users updated:', users.map(u => u.name));
+                
+            } catch (error) {
+                console.error('❌ Error updating presence UI:', error);
+                this.connectedUsers = [];
+            }
         },
 
         // REMOVED: Legacy createBasicEditors method
@@ -3310,29 +3524,45 @@ export default {
         // TipTap Best Practice: Add CollaborationCursor when provider becomes available
         // Following offline-first collaborative architecture pattern
         async addCollaborationCursor(provider) {
+            console.log('🎯 addCollaborationCursor called with provider:', !!provider);
+            console.log('🎯 titleEditor exists:', !!this.titleEditor);
+            console.log('🎯 bodyEditor exists:', !!this.bodyEditor);
+            
             if (!provider || !this.titleEditor || !this.bodyEditor) {
                 console.log('⚠️ Cannot add CollaborationCursor: missing provider or editors');
+                console.log('  - provider:', !!provider);
+                console.log('  - titleEditor:', !!this.titleEditor);
+                console.log('  - bodyEditor:', !!this.bodyEditor);
                 return;
             }
 
             try {
                 // Get CollaborationCursor from bundle
-                const bundle = window.tiptapBundle;
+                const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
+                console.log('🎯 TipTap bundle available:', !!bundle);
+                console.log('🎯 Bundle keys:', bundle ? Object.keys(bundle) : 'none');
+                
                 const CollaborationCursor = bundle?.CollaborationCursor?.default || bundle?.CollaborationCursor;
+                console.log('🎯 CollaborationCursor available:', !!CollaborationCursor);
                 
                 if (!CollaborationCursor) {
                     console.log('⚠️ CollaborationCursor extension not available in bundle');
+                    console.log('Available extensions:', bundle ? Object.keys(bundle).filter(k => k.includes('Cursor') || k.includes('Collaboration')) : 'none');
                     return;
                 }
 
                 console.log('🎯 Adding CollaborationCursor extension to editors...');
 
                 // Configure cursor extension with user info
+                const userName = this.username || 'Anonymous' + Math.floor(Math.random() * 1000);
+                // Simple random color generation - Math.random my dude!
+                const userColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+                
                 const cursorConfig = {
                     provider: provider,
                     user: {
-                        name: this.username || 'Anonymous',
-                        color: this.getUserColor()
+                        name: userName,
+                        color: userColor
                     }
                 };
 
@@ -3346,8 +3576,29 @@ export default {
                 
                 // Update user info in awareness for real-time presence
                 if (provider.awareness) {
+                    console.log('🔍 DEBUG: About to set awareness user data:', cursorConfig.user);
+                    console.log('🔍 DEBUG: Provider awareness exists:', !!provider.awareness);
+                    console.log('🔍 DEBUG: Provider awareness clientID:', provider.awareness.clientID);
+                    
+                    // Try both methods to set awareness state
                     provider.awareness.setLocalStateField('user', cursorConfig.user);
-                    console.log('👥 User awareness updated:', cursorConfig.user);
+                    console.log('👥 User awareness updated via setLocalStateField:', cursorConfig.user);
+                    
+                    // Alternative method - set entire local state
+                    provider.awareness.setLocalState({ user: cursorConfig.user });
+                    console.log('👥 User awareness updated via setLocalState:', cursorConfig.user);
+                    
+                    const localState = provider.awareness.getLocalState();
+                    console.log('🔍 DEBUG: Local awareness state after setting:', localState);
+                    console.log('🔍 DEBUG: Local state user field:', localState?.user);
+                    
+                    // Initial presence UI update
+                    setTimeout(() => {
+                        console.log('🔍 DEBUG: All awareness states after timeout:', provider.awareness.getStates());
+                        this.updatePresenceUI();
+                    }, 500); // Small delay to let awareness propagate
+                } else {
+                    console.error('❌ Provider awareness not available!');
                 }
 
             } catch (error) {
@@ -3363,7 +3614,7 @@ export default {
             }
 
             try {
-                const bundle = window.tiptapBundle;
+                const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
                 const Editor = bundle.Editor?.default || bundle.Editor;
                 const StarterKit = bundle.StarterKit?.default || bundle.StarterKit;
                 const Collaboration = bundle.Collaboration?.default || bundle.Collaboration;
@@ -3378,7 +3629,7 @@ export default {
                 console.log('🔄 Recreating editors with CollaborationCursor...');
 
                 // Store current content to preserve it
-                const titleContent = this.titleEditor ? this.titleEditor.getHTML() : '';
+                const titleContent = this.titleEditor ? this.titleEditor.getText() : '';
                 const bodyContent = this.bodyEditor ? this.bodyEditor.getHTML() : '';
 
                 // Destroy existing editors
@@ -3394,26 +3645,98 @@ export default {
                 // Wait a tick for DOM cleanup
                 await this.$nextTick();
 
-                // Recreate title editor with cursor
-                const titleExtensions = [
-                    StarterKit.configure({
-                        history: false,
-                        heading: false,
-                        bulletList: false,
-                        orderedList: false,
-                        blockquote: false,
-                        codeBlock: false,
-                        horizontalRule: false
-                    }),
-                    Collaboration.configure({
-                        document: this.ydoc,
-                        field: 'title'
-                    }),
-                    CollaborationCursor.configure(cursorConfig),
-                    Placeholder.configure({
-                        placeholder: this.isReadOnlyMode ? 'Title (read-only)' : 'Enter title...'
-                    })
-                ];
+                // Get enhanced extensions helper
+                const getEnhancedExtensions = (field) => {
+                    const baseExtensions = [
+                        StarterKit.configure({
+                            history: false,
+                            ...(field === 'title' ? {
+                                heading: false,
+                                bulletList: false,
+                                orderedList: false,
+                                blockquote: false,
+                                codeBlock: false,
+                                horizontalRule: false
+                            } : {})
+                        }),
+                        Collaboration.configure({
+                            document: this.ydoc,
+                            field: field
+                        }),
+                        // TEMPORARILY DISABLED: CollaborationCursor extension interfering with manual cursor tracking
+                        // CollaborationCursor.configure({
+                        //     provider: provider,
+                        //     user: cursorConfig.user,
+                        //     awareness: provider.awareness,
+                        // }),
+                        Placeholder.configure({
+                            placeholder: this.isReadOnlyMode ? 
+                                `${field.charAt(0).toUpperCase() + field.slice(1)} (read-only)` : 
+                                field === 'title' ? 'Enter title...' : 'Start writing...'
+                        })
+                    ];
+
+                    // Add the same enhanced extensions as in offline mode
+                    const enhancedExtensions = [];
+                    
+                    if (bundle.Emoji || window.TiptapEmoji) {
+                        const Emoji = bundle.Emoji?.default || bundle.Emoji || window.TiptapEmoji;
+                        enhancedExtensions.push(Emoji.configure({
+                            suggestion: {
+                                items: ({ query }) => {
+                                    const emojis = [
+                                        { name: 'smile', emoji: '😄' },
+                                        { name: 'heart', emoji: '❤️' },
+                                        { name: 'thumbsup', emoji: '👍' },
+                                        { name: 'fire', emoji: '🔥' },
+                                        { name: 'rocket', emoji: '🚀' },
+                                        { name: 'party', emoji: '🎉' },
+                                        { name: 'eyes', emoji: '👀' },
+                                        { name: 'thinking', emoji: '🤔' }
+                                    ];
+                                    return emojis.filter(item => 
+                                        item.name.toLowerCase().includes(query.toLowerCase())
+                                    ).slice(0, 10);
+                                }
+                            }
+                        }));
+                    }
+                    
+                    if (bundle.Image || window.TiptapImage) {
+                        const Image = bundle.Image?.default || bundle.Image || window.TiptapImage;
+                        enhancedExtensions.push(Image.configure({
+                            inline: true,
+                            allowBase64: true,
+                            HTMLAttributes: { class: 'img-fluid' }
+                        }));
+                    }
+                    
+                    if (bundle.Link || window.TiptapLink) {
+                        const Link = bundle.Link?.default || bundle.Link || window.TiptapLink;
+                        enhancedExtensions.push(Link.configure({
+                            openOnClick: false,
+                            HTMLAttributes: { class: 'text-primary' }
+                        }));
+                    }
+                    
+                    if (bundle.Typography || window.TiptapTypography) {
+                        const Typography = bundle.Typography?.default || bundle.Typography || window.TiptapTypography;
+                        enhancedExtensions.push(Typography.configure({
+                            openDoubleQuote: '"',
+                            closeDoubleQuote: '"',
+                            openSingleQuote: "'",
+                            closeSingleQuote: "'",
+                            ellipsis: '…',
+                            emDash: '—',
+                            enDash: '–'
+                        }));
+                    }
+
+                    return [...baseExtensions, ...enhancedExtensions];
+                };
+
+                // Recreate title editor with enhanced cursor extensions
+                const titleExtensions = getEnhancedExtensions('title');
 
                 this.titleEditor = new Editor({
                     element: this.$refs.titleEditor,
@@ -3424,23 +3747,57 @@ export default {
                             this.hasUnsavedChanges = true;
                             this.clearUnsavedAfterSync();
                         }
+                    },
+                    // Add focus and blur handlers to debug cursor tracking
+                    onFocus: ({ editor }) => {
+                        console.log('🎯 Title editor focused - cursor should be updated');
+                        // Force cursor update by getting selection
+                        const selection = editor.state.selection;
+                        console.log('🎯 Title editor selection:', { from: selection.from, to: selection.to });
+                        
+                        // Update awareness with cursor info manually if needed
+                        if (this.provider && this.provider.awareness) {
+                            setTimeout(() => {
+                                const currentState = this.provider.awareness.getLocalState();
+                                console.log('🎯 Local awareness state after title focus:', currentState);
+                            }, 100);
+                        }
+                    },
+                    onBlur: ({ editor }) => {
+                        console.log('🎯 Title editor blurred');
+                        // DIRECT: Clear cursor from awareness when editor loses focus
+                        if (this.provider && this.provider.awareness) {
+                            const currentState = this.provider.awareness.getLocalState();
+                            const newState = { ...currentState, cursor: null };
+                            console.log('🎯 DIRECT: Clearing cursor from awareness');
+                            this.provider.awareness.setLocalState(newState);
+                        }
+                    },
+                    onSelectionUpdate: ({ editor }) => {
+                        const selection = editor.state.selection;
+                        console.log('🎯 Title cursor moved:', { from: selection.from, to: selection.to });
+                        
+                        // DIRECT AWARENESS UPDATE - no method calls
+                        if (this.provider && this.provider.awareness && selection) {
+                            const currentState = this.provider.awareness.getLocalState();
+                            const newState = {
+                                ...currentState,
+                                cursor: {
+                                    anchor: selection.from,
+                                    head: selection.to,
+                                    field: 'title'
+                                }
+                            };
+                            console.log('🎯 DIRECT: Setting title cursor in awareness:', newState.cursor);
+                            this.provider.awareness.setLocalState(newState);
+                        } else {
+                            console.log('❌ DIRECT: Cannot update awareness - missing provider/awareness/selection');
+                        }
                     }
                 });
 
-                // Recreate body editor with cursor
-                const bodyExtensions = [
-                    StarterKit.configure({
-                        history: false
-                    }),
-                    Collaboration.configure({
-                        document: this.ydoc,
-                        field: 'body'
-                    }),
-                    CollaborationCursor.configure(cursorConfig),
-                    Placeholder.configure({
-                        placeholder: this.isReadOnlyMode ? 'Content (read-only)' : 'Start writing...'
-                    })
-                ];
+                // Recreate body editor with enhanced cursor extensions
+                const bodyExtensions = getEnhancedExtensions('body');
 
                 this.bodyEditor = new Editor({
                     element: this.$refs.bodyEditor,
@@ -3450,6 +3807,52 @@ export default {
                         if (this.validatePermission('edit')) {
                             this.hasUnsavedChanges = true;
                             this.clearUnsavedAfterSync();
+                        }
+                    },
+                    // Add focus and blur handlers to debug cursor tracking
+                    onFocus: ({ editor }) => {
+                        console.log('🎯 Body editor focused - cursor should be updated');
+                        // Force cursor update by getting selection
+                        const selection = editor.state.selection;
+                        console.log('🎯 Body editor selection:', { from: selection.from, to: selection.to });
+                        
+                        // Update awareness with cursor info manually if needed
+                        if (this.provider && this.provider.awareness) {
+                            setTimeout(() => {
+                                const currentState = this.provider.awareness.getLocalState();
+                                console.log('🎯 Local awareness state after body focus:', currentState);
+                            }, 100);
+                        }
+                    },
+                    onBlur: ({ editor }) => {
+                        console.log('🎯 Body editor blurred');
+                        // DIRECT: Clear cursor from awareness when editor loses focus
+                        if (this.provider && this.provider.awareness) {
+                            const currentState = this.provider.awareness.getLocalState();
+                            const newState = { ...currentState, cursor: null };
+                            console.log('🎯 DIRECT: Clearing cursor from awareness');
+                            this.provider.awareness.setLocalState(newState);
+                        }
+                    },
+                    onSelectionUpdate: ({ editor }) => {
+                        const selection = editor.state.selection;
+                        console.log('🎯 Body cursor moved:', { from: selection.from, to: selection.to });
+                        
+                        // DIRECT AWARENESS UPDATE - no method calls
+                        if (this.provider && this.provider.awareness && selection) {
+                            const currentState = this.provider.awareness.getLocalState();
+                            const newState = {
+                                ...currentState,
+                                cursor: {
+                                    anchor: selection.from,
+                                    head: selection.to,
+                                    field: 'body'
+                                }
+                            };
+                            console.log('🎯 DIRECT: Setting body cursor in awareness:', newState.cursor);
+                            this.provider.awareness.setLocalState(newState);
+                        } else {
+                            console.log('❌ DIRECT: Cannot update awareness - missing provider/awareness/selection');
                         }
                     }
                 });
@@ -3537,6 +3940,192 @@ export default {
             };
         },
 
+        // Debug collaborative cursor states and force cursor updates
+        debugCursors() {
+            console.log('🎯 DEBUG: Manual cursor check triggered');
+            
+            if (!this.provider || !this.provider.awareness) {
+                console.log('❌ No provider or awareness available');
+                return;
+            }
+            
+            // Log all awareness states
+            const awarenessStates = this.provider.awareness.getStates();
+            console.log('🎯 All awareness states:', awarenessStates);
+            
+            awarenessStates.forEach((state, clientId) => {
+                console.log(`🎯 Client ${clientId}:`, {
+                    user: state.user,
+                    cursor: state.cursor,
+                    hasCursor: !!state.cursor,
+                    cursorType: typeof state.cursor
+                });
+            });
+            
+            // Check local state
+            const localState = this.provider.awareness.getLocalState();
+            console.log('🎯 Local awareness state:', localState);
+            
+            // Check editor states
+            if (this.titleEditor) {
+                const titleSelection = this.titleEditor.state.selection;
+                console.log('🎯 Title editor selection:', {
+                    from: titleSelection.from,
+                    to: titleSelection.to,
+                    empty: titleSelection.empty,
+                    focused: this.titleEditor.isFocused
+                });
+            }
+            
+            if (this.bodyEditor) {
+                const bodySelection = this.bodyEditor.state.selection;
+                console.log('🎯 Body editor selection:', {
+                    from: bodySelection.from,
+                    to: bodySelection.to,
+                    empty: bodySelection.empty,
+                    focused: this.bodyEditor.isFocused
+                });
+            }
+            
+            // Try to manually trigger cursor update by briefly focusing and updating selection
+            console.log('🎯 Attempting to force cursor update...');
+            if (this.titleEditor && !this.titleEditor.isFocused) {
+                this.titleEditor.commands.focus();
+                setTimeout(() => {
+                    console.log('🎯 After focus - local state:', this.provider.awareness.getLocalState());
+                }, 200);
+            }
+            
+            // Also check Y.js document structure
+            if (this.ydoc) {
+                console.log('🎯 Y.js document info:', {
+                    clientID: this.ydoc.clientID,
+                    hasTitle: this.ydoc.getText('title').length,
+                    hasBody: this.ydoc.getText('body').length,
+                    titleContent: this.ydoc.getText('title').toString().substring(0, 50),
+                    bodyContent: this.ydoc.getText('body').toString().substring(0, 50)
+                });
+            }
+            
+            // Try to manually sync cursor to awareness
+            this.forceCursorSync();
+            
+            return {
+                awarenessStates: Array.from(awarenessStates.entries()),
+                localState,
+                editorsExist: {
+                    title: !!this.titleEditor,
+                    body: !!this.bodyEditor
+                }
+            };
+        },
+
+        // Manually update cursor position in awareness state
+        updateCursorInAwareness(field, selection) {
+            if (!this.provider || !this.provider.awareness) {
+                console.log('❌ No provider/awareness for cursor update');
+                return;
+            }
+            
+            // Always update cursor position - don't be restrictive
+            if (selection) {
+                const currentState = this.provider.awareness.getLocalState();
+                const cursorData = {
+                    anchor: selection.from,
+                    head: selection.to,
+                    field: field,
+                    timestamp: Date.now()
+                };
+                
+                const newState = {
+                    ...currentState,
+                    cursor: cursorData
+                };
+                
+                console.log(`🎯 Manually updating ${field} cursor:`, cursorData);
+                this.provider.awareness.setLocalState(newState);
+                
+                // Verify it was set
+                setTimeout(() => {
+                    const verifyState = this.provider.awareness.getLocalState();
+                    console.log(`🎯 Verified ${field} cursor state:`, verifyState.cursor);
+                }, 50);
+            } else {
+                console.log(`❌ No selection provided for ${field} cursor update`);
+            }
+        },
+
+        // Clear cursor from awareness when editor loses focus
+        clearCursorFromAwareness() {
+            if (!this.provider || !this.provider.awareness) {
+                return;
+            }
+            
+            const currentState = this.provider.awareness.getLocalState();
+            if (currentState.cursor) {
+                const newState = {
+                    ...currentState,
+                    cursor: null
+                };
+                
+                console.log('🎯 Clearing cursor from awareness');
+                this.provider.awareness.setLocalState(newState);
+            }
+        },
+
+        // Force cursor synchronization to awareness
+        forceCursorSync() {
+            console.log('🎯 Force cursor sync started');
+            
+            if (!this.provider || !this.provider.awareness) {
+                console.log('❌ No provider/awareness for cursor sync');
+                return;
+            }
+            
+            // Get current focused editor
+            let focusedEditor = null;
+            let fieldName = '';
+            
+            if (this.titleEditor && this.titleEditor.isFocused) {
+                focusedEditor = this.titleEditor;
+                fieldName = 'title';
+            } else if (this.bodyEditor && this.bodyEditor.isFocused) {
+                focusedEditor = this.bodyEditor;
+                fieldName = 'body';
+            }
+            
+            if (focusedEditor) {
+                const selection = focusedEditor.state.selection;
+                console.log(`🎯 Manually setting cursor for ${fieldName}:`, {
+                    from: selection.from,
+                    to: selection.to,
+                    fieldName
+                });
+                
+                // Try to manually set cursor in awareness
+                const currentState = this.provider.awareness.getLocalState();
+                const newState = {
+                    ...currentState,
+                    cursor: {
+                        anchor: selection.from,
+                        head: selection.to,
+                        field: fieldName
+                    }
+                };
+                
+                console.log('🎯 Setting manual cursor state:', newState);
+                this.provider.awareness.setLocalState(newState);
+                
+                // Verify it was set
+                setTimeout(() => {
+                    const verifyState = this.provider.awareness.getLocalState();
+                    console.log('🎯 Cursor state after manual setting:', verifyState);
+                }, 100);
+            } else {
+                console.log('🎯 No focused editor found for cursor sync');
+            }
+        },
+
         // ===== UNIFIED SYNC INDICATOR: Offline-First Architecture =====
         clearUnsavedAfterSync() {
             if (this.syncTimeout) {
@@ -3600,9 +4189,331 @@ export default {
         // Helper method to get plain text title
         getPlainTextTitle() {
             if (this.titleEditor) {
-                return this.titleEditor.getText().trim();
+                // Get text and clean it thoroughly
+                let text = this.titleEditor.getText().trim();
+                
+                // Remove any invisible characters or placeholder artifacts
+                text = text
+                    .replace(/\u00A0/g, ' ')      // Non-breaking spaces
+                    .replace(/\u200B/g, '')       // Zero-width spaces
+                    .replace(/\uFEFF/g, '')       // Byte order marks
+                    .replace(/[\u2000-\u206F]/g, ' ') // General punctuation spaces
+                    .replace(/\s+/g, ' ')         // Multiple spaces to single
+                    .trim();
+                
+                return text;
             }
             return this.content.title?.replace(/<[^>]*>/g, '').trim() || '';
+        },
+
+        // ===== ENHANCED EXPORT CAPABILITIES =====
+        
+        /**
+         * Generate markdown from editor content
+         * TipTap doesn't have built-in markdown export, but we can create one
+         */
+        getMarkdownContent() {
+            try {
+                const titleText = this.titleEditor ? this.titleEditor.getText().trim() : '';
+                const bodyHTML = this.bodyEditor ? this.bodyEditor.getHTML() : '';
+                
+                // Convert HTML to markdown-like format
+                let markdown = this.htmlToMarkdown(bodyHTML);
+                
+                // Add title if it exists
+                if (titleText) {
+                    markdown = `# ${titleText}\n\n${markdown}`;
+                }
+                
+                return markdown;
+            } catch (error) {
+                console.error('Error generating markdown:', error);
+                return this.getPlainTextContent();
+            }
+        },
+
+        /**
+         * Basic HTML to Markdown converter
+         * For more advanced conversion, consider using a library like turndown
+         */
+        htmlToMarkdown(html) {
+            if (!html) return '';
+            
+            return html
+                // Remove wrapper paragraphs for cleaner output
+                .replace(/<p><\/p>/g, '\n')
+                .replace(/<p>/g, '')
+                .replace(/<\/p>/g, '\n\n')
+                
+                // Convert headings
+                .replace(/<h1[^>]*>(.*?)<\/h1>/g, '# $1\n\n')
+                .replace(/<h2[^>]*>(.*?)<\/h2>/g, '## $1\n\n')
+                .replace(/<h3[^>]*>(.*?)<\/h3>/g, '### $1\n\n')
+                .replace(/<h4[^>]*>(.*?)<\/h4>/g, '#### $1\n\n')
+                .replace(/<h5[^>]*>(.*?)<\/h5>/g, '##### $1\n\n')
+                .replace(/<h6[^>]*>(.*?)<\/h6>/g, '###### $1\n\n')
+                
+                // Convert formatting
+                .replace(/<strong[^>]*>(.*?)<\/strong>/g, '**$1**')
+                .replace(/<b[^>]*>(.*?)<\/b>/g, '**$1**')
+                .replace(/<em[^>]*>(.*?)<\/em>/g, '*$1*')
+                .replace(/<i[^>]*>(.*?)<\/i>/g, '*$1*')
+                .replace(/<s[^>]*>(.*?)<\/s>/g, '~~$1~~')
+                .replace(/<del[^>]*>(.*?)<\/del>/g, '~~$1~~')
+                .replace(/<code[^>]*>(.*?)<\/code>/g, '`$1`')
+                
+                // Convert links
+                .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/g, '[$2]($1)')
+                
+                // Convert images
+                .replace(/<img[^>]*alt="([^"]*)"[^>]*src="([^"]*)"[^>]*\/?>/g, '![$1]($2)')
+                .replace(/<img[^>]*src="([^"]*)"[^>]*alt="([^"]*)"[^>]*\/?>/g, '![$2]($1)')
+                .replace(/<img[^>]*src="([^"]*)"[^>]*\/?>/g, '![]($1)')
+                
+                // Convert lists
+                .replace(/<ul[^>]*>/g, '')
+                .replace(/<\/ul>/g, '\n')
+                .replace(/<ol[^>]*>/g, '')
+                .replace(/<\/ol>/g, '\n')
+                .replace(/<li[^>]*>/g, '- ')
+                .replace(/<\/li>/g, '\n')
+                
+                // Convert blockquotes
+                .replace(/<blockquote[^>]*>/g, '> ')
+                .replace(/<\/blockquote>/g, '\n\n')
+                
+                // Convert code blocks
+                .replace(/<pre[^>]*><code[^>]*>(.*?)<\/code><\/pre>/gs, '```\n$1\n```\n\n')
+                
+                // Convert horizontal rules
+                .replace(/<hr[^>]*\/?>/g, '\n---\n\n')
+                
+                // Clean up line breaks
+                .replace(/\n\n\n+/g, '\n\n')
+                .replace(/^\n+/, '')
+                .replace(/\n+$/, '\n')
+                
+                // Decode HTML entities
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'");
+        },
+
+        /**
+         * Get plain text content from all editors
+         */
+        getPlainTextContent() {
+            const title = this.titleEditor ? this.titleEditor.getText().trim() : '';
+            const body = this.bodyEditor ? this.bodyEditor.getText().trim() : '';
+            
+            return title ? `${title}\n\n${body}` : body;
+        },
+
+        /**
+         * Debug method to inspect title content issues
+         */
+        debugTitleContent() {
+            console.log('🔍 Title Debug Info:');
+            console.log('titleEditor exists:', !!this.titleEditor);
+            if (this.titleEditor) {
+                const rawText = this.titleEditor.getText();
+                const rawHtml = this.titleEditor.getHTML();
+                console.log('Raw getText():', JSON.stringify(rawText));
+                console.log('Raw getHTML():', rawHtml);
+                console.log('Character codes:', [...rawText].map(c => ({ char: c, code: c.charCodeAt(0) })));
+                console.log('Clean title:', this.getPlainTextTitle());
+            }
+            console.log('content.title:', JSON.stringify(this.content.title));
+            console.log('Generated permlink:', this.generatedPermlink);
+        },
+
+        /**
+         * Export content in various formats
+         */
+        exportContent(format = 'markdown') {
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            const filename = this.currentFile?.title || this.getPlainTextTitle() || 'untitled';
+            const safeFilename = filename.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            
+            let content, mimeType, extension;
+            
+            switch (format) {
+                case 'markdown':
+                    content = this.getMarkdownContent();
+                    mimeType = 'text/markdown';
+                    extension = 'md';
+                    break;
+                    
+                case 'html':
+                    const titleHTML = this.titleEditor ? this.titleEditor.getText() : '';
+                    const bodyHTML = this.bodyEditor ? this.bodyEditor.getHTML() : '';
+                    content = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>${this.getPlainTextTitle() || 'Untitled'}</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 2rem; line-height: 1.6; }
+        h1, h2, h3, h4, h5, h6 { margin-top: 2rem; margin-bottom: 1rem; }
+        code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+        pre { background: #f4f4f4; padding: 1rem; border-radius: 5px; overflow-x: auto; }
+        blockquote { border-left: 4px solid #ddd; margin: 0; padding-left: 1rem; color: #666; }
+        img { max-width: 100%; height: auto; }
+    </style>
+</head>
+<body>
+    ${titleHTML ? `<h1>${titleHTML}</h1>` : ''}
+    ${bodyHTML}
+</body>
+</html>`;
+                    mimeType = 'text/html';
+                    extension = 'html';
+                    break;
+                    
+                case 'text':
+                    content = this.getPlainTextContent();
+                    mimeType = 'text/plain';
+                    extension = 'txt';
+                    break;
+                    
+                case 'json':
+                    content = JSON.stringify({
+                        title: this.getPlainTextTitle(),
+                        content: this.getEditorContent(),
+                        metadata: {
+                            created: this.currentFile?.created || new Date().toISOString(),
+                            modified: new Date().toISOString(),
+                            type: this.currentFile?.type || 'local',
+                            tags: this.content.tags || [],
+                            custom_json: this.content.custom_json || {}
+                        }
+                    }, null, 2);
+                    mimeType = 'application/json';
+                    extension = 'json';
+                    break;
+                    
+                default:
+                    throw new Error(`Unsupported export format: ${format}`);
+            }
+            
+            // Create and trigger download
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${safeFilename}_${timestamp}.${extension}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            console.log(`✅ Content exported as ${format.toUpperCase()}: ${link.download}`);
+            return content;
+        },
+
+        debugCollaborativeFeatures() {
+            console.log('🤝 Collaborative Features Debug:');
+            console.log('- isCollaborativeMode:', this.isCollaborativeMode);
+            console.log('- connectionStatus:', this.connectionStatus);
+            console.log('- provider exists:', !!this.provider);
+            console.log('- provider.awareness exists:', !!(this.provider && this.provider.awareness));
+            console.log('- titleEditor exists:', !!this.titleEditor);
+            console.log('- bodyEditor exists:', !!this.bodyEditor);
+            console.log('- connectedUsers:', this.connectedUsers);
+            console.log('- username:', this.username);
+            console.log('- userColor: (random generated)');
+            
+                        if (this.provider && this.provider.awareness) {
+                console.log('- awareness states:', this.provider.awareness.getStates());
+                console.log('- local awareness state:', this.provider.awareness.getLocalState());
+            }
+            
+            if (this.titleEditor) {
+                console.log('- titleEditor extensions:', this.titleEditor.extensionManager.extensions.map(e => e.name));
+            }
+            
+            if (this.bodyEditor) {
+                console.log('- bodyEditor extensions:', this.bodyEditor.extensionManager.extensions.map(e => e.name));
+            }
+        },
+
+        // ===== AUTO-CONNECT FUNCTIONALITY =====
+        
+        async checkAutoConnectParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const collabAuthor = urlParams.get('collabAuthor');
+            const permlink = urlParams.get('permlink');
+            
+            if (collabAuthor && permlink) {
+                console.log('🔗 Auto-connect parameters detected:', { collabAuthor, permlink });
+                
+                // Wait for authentication if needed
+                if (!this.isAuthenticated || this.isAuthExpired) {
+                    console.log('🔑 Authentication required for auto-connect, requesting...');
+                    await this.requestAuthentication();
+                    
+                    // Wait for authentication to complete
+                    try {
+                        await this.waitForAuthentication(10000); // 10 second timeout
+                    } catch (error) {
+                        console.error('❌ Auto-connect failed: Authentication timeout');
+                        return;
+                    }
+                }
+                
+                // Try to auto-connect to the collaborative document
+                try {
+                    await this.autoConnectToDocument(collabAuthor, permlink);
+                } catch (error) {
+                    console.error('❌ Auto-connect failed:', error);
+                }
+            }
+        },
+        
+        async autoConnectToDocument(owner, permlink) {
+            console.log('🚀 Auto-connecting to collaborative document:', { owner, permlink });
+            
+            // Create a mock document object for loading
+            const mockDoc = {
+                owner: owner,
+                permlink: permlink,
+                title: `${owner}/${permlink}`,
+                type: 'collaborative',
+                created: new Date().toISOString(),
+                modified: new Date().toISOString()
+            };
+            
+            try {
+                // Load the collaborative document
+                await this.loadDocument(mockDoc);
+                console.log('✅ Auto-connected to collaborative document successfully');
+                
+                // Update URL to include the parameters (for refresh persistence)
+                this.updateURLWithCollabParams(owner, permlink);
+                
+            } catch (error) {
+                console.error('❌ Failed to auto-connect to document:', error);
+                throw error;
+            }
+        },
+        
+        updateURLWithCollabParams(owner, permlink) {
+            const url = new URL(window.location);
+            url.searchParams.set('collabAuthor', owner);
+            url.searchParams.set('permlink', permlink);
+            
+            // Update URL without triggering a page reload
+            window.history.replaceState({}, '', url.toString());
+            console.log('🔗 URL updated with collaboration parameters for refresh persistence');
+        },
+        
+        // Call this when connecting to a collaborative document
+        setCollabURLParams() {
+            if (this.currentFile && this.currentFile.type === 'collaborative') {
+                this.updateURLWithCollabParams(this.currentFile.owner, this.currentFile.permlink);
+            }
         },
         
         async connectToCollaborationServer(serverDoc) {
@@ -3665,6 +4576,22 @@ export default {
                         console.log('✅ Connected to collaboration server');
                         this.connectionStatus = 'connected';
                         this.connectionMessage = 'Connected - Real-time collaboration active';
+                        
+                        // IMMEDIATE: Set user awareness state as soon as connected
+                        if (this.provider && this.provider.awareness) {
+                            const userName = this.username || 'Anonymous' + Math.floor(Math.random() * 1000);
+                            // Simple random color - Math.random my dude!
+                            const userColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+                            const userData = { name: userName, color: userColor };
+                            
+                            console.log('🔍 DEBUG onConnect: Setting immediate awareness:', userData);
+                            this.provider.awareness.setLocalState({ user: userData });
+                            
+                            // Force presence UI update
+                            setTimeout(() => {
+                                this.updatePresenceUI();
+                            }, 100);
+                        }
                     },
                     onDisconnect: ({ event }) => {
                     console.log('❌ Disconnected from collaboration server', {
@@ -3713,6 +4640,17 @@ export default {
                             this.handleAuthenticationFailure();
                         }, 1000);
                     }
+                },
+                // CRITICAL: Add awareness event handlers for real-time presence
+                onAwarenessUpdate: ({ states }) => {
+                    console.log('👥 Awareness update received:', states.length, 'users');
+                    console.log('🔍 DEBUG: Awareness update states:', states);
+                    this.updatePresenceUI();
+                },
+                onAwarenessChange: ({ states }) => {
+                    console.log('👥 Awareness change received:', states.length, 'users');
+                    console.log('🔍 DEBUG: Awareness change states:', states);
+                    this.updatePresenceUI();
                 }
             };
             
@@ -3748,6 +4686,33 @@ export default {
                     this.connectionStatus = 'connected';
                     connectionSuccess = true;
                     console.log('✅ WebSocket connected successfully');
+                    
+                    // CRITICAL: Set awareness state immediately upon connection detection
+                    if (this.provider && this.provider.awareness) {
+                        const userName = this.username || 'Anonymous' + Math.floor(Math.random() * 1000);
+                        // Simple random color - Math.random my dude!
+                        const userColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+                        const userData = { name: userName, color: userColor };
+                        
+                        console.log('🔍 DEBUG: Setting awareness immediately after connection:', userData);
+                        console.log('🔍 DEBUG: this.username =', JSON.stringify(this.username));
+                        console.log('🔍 DEBUG: userColor =', userColor);
+                        
+                        try {
+                            this.provider.awareness.setLocalState({ user: userData });
+                            console.log('✅ Awareness state set successfully');
+                            
+                            // Verify it was set
+                            const localState = this.provider.awareness.getLocalState();
+                            console.log('🔍 DEBUG: Local state after setting:', localState);
+
+            } catch (error) {
+                            console.error('❌ Error setting awareness state:', error);
+                        }
+                    } else {
+                        console.error('❌ Provider or awareness not available for setting user state');
+                    }
+                    
                     break;
                                 }
                                 
@@ -3795,6 +4760,31 @@ export default {
                     }
                     
             console.log('✅ Existing Y.js document successfully connected to collaboration server');
+            
+            // Update URL with collaboration parameters for refresh persistence
+            this.setCollabURLParams();
+            
+            // IMMEDIATE: Trigger collaborative features setup
+            if (this.provider && this.connectionStatus === 'connected') {
+                console.log('🎯 Setting up collaborative features...');
+                
+                // Force presence UI update
+                setTimeout(() => {
+                    this.updatePresenceUI();
+                }, 200);
+                
+                // Add collaboration cursor
+                if (this.currentFile?.type === 'collaborative') {
+                    setTimeout(() => {
+                        console.log('🎯 Adding CollaborationCursor after connection...');
+                        try {
+                            this.addCollaborationCursor(this.provider);
+                        } catch (error) {
+                            console.error('❌ Error adding CollaborationCursor:', error);
+                        }
+                    }, 300);
+                }
+            }
         },
 
         // REMOVED: Legacy initializeCollaboration method
@@ -4030,9 +5020,20 @@ export default {
 
             // 🎯 TipTap Best Practice: Add CollaborationCursor when provider connects
             // This follows the offline-first collaborative architecture pattern
+            console.log('🔍 DEBUG onConnect: provider exists:', !!this.provider);
+            console.log('🔍 DEBUG onConnect: currentFile type:', this.currentFile?.type);
+            console.log('🔍 DEBUG onConnect: isCollaborativeMode:', this.isCollaborativeMode);
+            
             if (this.provider && this.currentFile?.type === 'collaborative') {
                 console.log('🎯 WebSocket connected - adding CollaborationCursor extension...');
-                this.addCollaborationCursor(this.provider);
+                try {
+                    this.addCollaborationCursor(this.provider);
+                    console.log('✅ addCollaborationCursor called successfully');
+                } catch (error) {
+                    console.error('❌ Error calling addCollaborationCursor:', error);
+                }
+            } else {
+                console.log('⚠️ Skipping CollaborationCursor - conditions not met');
             }
         },
         
@@ -4826,6 +5827,9 @@ export default {
     
     async mounted() {
         try {
+            // Check for auto-connect query parameters first
+            await this.checkAutoConnectParams();
+            
             // Load initial data
             await this.loadLocalFiles();
             
@@ -4863,13 +5867,13 @@ export default {
         this.disconnectCollaboration();
         
         // Clean up all editors
-        if (this.titleEditor) {
+            if (this.titleEditor) {
             this.titleEditor.destroy();
         }
         if (this.permlinkEditor) {
             this.permlinkEditor.destroy();
         }
-        if (this.bodyEditor) {
+            if (this.bodyEditor) {
             this.bodyEditor.destroy();
         }
     },
@@ -5139,10 +6143,10 @@ export default {
                 </div>
 
                 <!--Other Connected Users-->
-                <div v-for="user in connectedUsers.filter(u => u.name !== username).slice(0, 3)" :key="user.name"
+                <div v-for="user in connectedUsers.filter(u => u.id !== (provider && provider.awareness ? provider.awareness.clientID : null)).slice(0, 3)" :key="user.id"
                     class="position-relative">
                     <img :src="'https://images.hive.blog/u/' + user.name + '/avatar/small'" :alt="user.name"
-                        class="user-avatar-small rounded-circle" :title="user.name"
+                        class="user-avatar-small rounded-circle" :title="user.name + ' (ID: ' + user.id + ')'"
                         @error="handleAvatarError($event, user)" :style="{ 
                                      width: '24px', 
                                      height: '24px', 
@@ -5151,9 +6155,9 @@ export default {
                                      boxShadow: '0 0 0 1px rgba(255,255,255,0.2)'
                                  }">
                 </div>
-                <span v-if="connectedUsers.filter(u => u.name !== username).length > 3"
+                <span v-if="connectedUsers.filter(u => u.id !== (provider && provider.awareness ? provider.awareness.clientID : null)).length > 3"
                     class="badge bg-light text-dark small">
-                    +{{ connectedUsers.filter(u => u.name !== username).length - 3 }}
+                    +{{ connectedUsers.filter(u => u.id !== (provider && provider.awareness ? provider.awareness.clientID : null)).length - 3 }}
                 </span>
             </div>
         </div>

@@ -22,8 +22,154 @@
     <script src="https://unpkg.com/ipfs-http-client@29.1.1/dist/index.min.js"></script>
     <script src="https://kit.fontawesome.com/0f693ffc58.js" crossorigin="anonymous"></script>
     <script src="https://bundle.run/buffer@5.2.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
     <script type="module" src="/js/v3-nfts.js"></script>
     <script src="/reg-sw.js"></script>
+    
+    <style>
+        .drop-zone {
+            border: 2px dashed #495057;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            background-color: #212529;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: #0d6efd;
+            background-color: #1e2329;
+        }
+        
+        .drop-zone-content {
+            color: #6c757d;
+        }
+        
+        .trait-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .trait-item {
+            background: #343a40;
+            border-radius: 8px;
+            padding: 0.5rem;
+            position: relative;
+        }
+        
+        .trait-preview {
+            position: relative;
+            width: 100%;
+            height: 120px;
+            border-radius: 4px;
+            overflow: hidden;
+            background: #495057;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .trait-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .trait-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            padding: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .rarity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .rarity-controls .form-range {
+            flex: 1;
+        }
+        
+        .generation-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .preview-item {
+            background: #343a40;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .preview-nft {
+            width: 100%;
+            height: 200px;
+            border-radius: 4px;
+            background: #495057;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .preview-layers {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .preview-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        
+        .upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            z-index: 10;
+        }
+        
+        .trait-status {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            z-index: 5;
+        }
+    </style>
 </head>
 
 <body id="explore" class="bg-dark-2">
@@ -38,6 +184,39 @@
                 <div class="alert alert-danger" role="alert">
                     This page is under construction.
                 </div>
+                
+                <!-- SPK Network IPFS Drive -->
+                <div class="accordion border-white-50 rounded mt-3" id="filesAccordion">
+                    <div class="accordion-item bg-img-none bg-dark-1">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button bg-card collapsed hero-subtitle fs-3 p-3" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#ipfsDrive" aria-expanded="false"
+                                aria-controls="ipfsDrive">
+                                <i class="fa-solid fa-hard-drive fa-fw me-2"></i>Your Files
+                            </button>
+                        </h2>
+                        <div id="ipfsDrive" class="accordion-collapse collapse" data-bs-parent="#filesAccordion">
+                            <div class="accordion-body">
+                                <contract-vue v-if="account" :nodeview="false" :account="account" :mypfp="mypfp"
+                                    :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
+                                    :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
+                                    @done="getSapi" :nftpage="true"
+                                    :file-slots="{
+                                        'logo': { label: 'Set as Logo Image', icon: 'fa-solid fa-id-badge', description: '350x350 recommended' },
+                                        'featured': { label: 'Set as Featured Image', icon: 'fa-solid fa-star', description: '600x400 recommended' },
+                                        'banner': { label: 'Set as Banner Image', icon: 'fa-solid fa-image', description: '1400x400 recommended' },
+                                        'wrapped': { label: 'Set as Wrapped Image', icon: 'fa-solid fa-gift', description: '350x350 recommended - shown before minting' }
+                                    }"
+                                    @set-logo="handleFileSlot('logo', $event)"
+                                    @set-featured="handleFileSlot('featured', $event)"
+                                    @set-banner="handleFileSlot('banner', $event)"
+                                    @set-wrapped="handleFileSlot('wrapped', $event)"
+                                    @add-to-post="handleFileSlot('general', $event)"></contract-vue>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <nav class="navbar navbar-dark navbar-expand-lg nav-blur">
                     <div class="">
                         <ul class="nav nav-tabs navbar" id="nav-tab" role="tablist">
@@ -75,92 +254,107 @@
                                 </div>
                                 <div class="ms-auto my-1">
                                     <div class="btn-group bg-dark">
-                                        <input type="radio" name="notSFW" id="setYesExisting" autocomplete="off"
-                                            model="newScript.decent" class="btn-check" value="true">
+                                        <input type="radio" name="existingScript" id="setYesExisting" autocomplete="off"
+                                            v-model="newScript.decent" class="btn-check" value="true">
                                         <label for="setYesExisting" class="btn btn-outline-primary">YES</label>
-                                        <input type="radio" name="notSFW" id="setNoExisting" autocomplete="off"
-                                            model="newScript.decent" value="false" class="btn-check">
+                                        <input type="radio" name="existingScript" id="setNoExisting" autocomplete="off"
+                                            v-model="newScript.decent" value="false" class="btn-check">
                                         <label for="setNoExisting" class="btn btn-outline-primary">NO</label>
                                     </div>
                                 </div>
                             </div>
                             <hr />
-                            <div show="!newScript.decent">
+                            <div v-show="newScript.decent == 'true'">
                                 <!-- Script Hash -->
                                 <div class="form-group mb-3">
                                     <label class="form-label lead">Enter the script hash</label>
-                                    <input type="text" class="form-control bg-darkg border-0 text-info" id=""
+                                    <input type="text" class="form-control bg-darkg border-0 text-info" 
+                                        v-model="testscript"
                                         placeholder="QmIPFShash">
                                 </div>
                             </div>
                             <!-- NEW SCRIPT -->
-                            <div show="newScript.decent">
+                            <div v-show="newScript.decent == 'false'">
+                                <!-- Generation Type Toggle -->
+                                <div class="d-flex align-items-center flex-wrap flex-md-nowrap mb-3">
+                                    <div class="my-1">
+                                        <label class="lead form-label">NFT Type</label>
+                                        <div class="form-text me-2">Choose between a simple static NFT or a generative collection</div>
+                                    </div>
+                                    <div class="ms-auto my-1">
+                                        <div class="btn-group bg-dark">
+                                            <input type="radio" name="nftType" id="setStatic" autocomplete="off"
+                                                v-model="nftCreationType" class="btn-check" value="static">
+                                            <label for="setStatic" class="btn btn-outline-primary">Static</label>
+                                            <input type="radio" name="nftType" id="setGenerative" autocomplete="off"
+                                                v-model="nftCreationType" value="generative" class="btn-check">
+                                            <label for="setGenerative" class="btn btn-outline-primary">Generative</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+
+                                <!-- Generative NFT Section -->
+                                <div v-show="nftCreationType === 'generative'" class="mb-4">
+                                    <generative-nft-builder
+                                        :account="account"
+                                        :spk-api="spkapi"
+                                        :set-attributes="SA"
+                                        @script-generated="handleScriptGenerated"
+                                        @tosign="sendIt($event)">
+                                    </generative-nft-builder>
+                                </div>
+
+                                <!-- Static NFT Section -->
+                                <div v-show="nftCreationType === 'static'">
                                 <form class="mb-2">
                                     <!-- Logo Image-->
-                                    <div class="d-flex align-items-center mb-3 flex-wrap flex-md-nowrap">
-                                        <div class="my-1">
-                                            <label for="existingScript" class="lead form-label">Logo Image
-                                            </label>
-                                            <div id="existingScriptHelp" class="form-text me-2">This image will also be
-                                                used
-                                                for
-                                                navigation. 350 x 350
-                                                recommended.</div>
+                                    <div class="form-group mb-3">
+                                        <label class="lead form-label">Logo Image CID</label>
+                                        <div class="form-text mb-2">
+                                            Upload your logo image to SPK Drive above (350x350 recommended)and insert or paste an IPFS CID here.
                                         </div>
-                                        <div class="ms-auto my-1">
-                                            <button type="button" class="btn btn-outline-primary text-nowrap"
-                                                data-bs-toggle="modal" data-bs-target="#spkModal">
-                                                Select Image
-                                            </button>
-                                        </div>
+                                        <input type="text" 
+                                            class="form-control bg-darkg border-0 text-info" 
+                                            v-model="SA.logo"
+                                            placeholder="QmYourImageCID"
+                                            pattern="(https://[a-z0-9.-/]+)|(Qm[a-zA-Z0-9]+)">
                                     </div>
                                     <!-- Featured Image-->
-                                    <div class="d-flex align-items-center mb-3 flex-wrap flex-md-nowrap">
-                                        <div class="my-1">
-                                            <label for="existingScript" class="lead form-label">Featured Image
-                                            </label>
-                                            <div id="existingScriptHelp" class="form-text me-2">This image will be used
-                                                for
-                                                featuring your collection on the
-                                                homepage, category pages, or other promotional areas of DLUX. 600 x 400
-                                                recommended.</div>
+                                    <div class="form-group mb-3">
+                                        <label class="lead form-label">Featured Image CID</label>
+                                        <div class="form-text mb-2">
+                                            Upload your featured image to SPK Drive above (600x400 recommended)and insert or paste an IPFS CID here.
                                         </div>
-                                        <div class="ms-auto my-1">
-                                            <div class="btn btn-outline-primary text-nowrap">Select Image</div>
-                                        </div>
+                                        <input type="text" 
+                                            class="form-control bg-darkg border-0 text-info" 
+                                            v-model="SA.featured"
+                                            placeholder="QmYourImageCID"
+                                            pattern="(https://[a-z0-9.-/]+)|(Qm[a-zA-Z0-9]+)">
                                     </div>
                                     <!-- Banner Image-->
-                                    <div class="d-flex align-items-center mb-3 flex-wrap flex-md-nowrap">
-                                        <div class="my-1">
-                                            <label for="existingScript" class="lead form-label">Banner Image
-                                            </label>
-                                            <div id="existingScriptHelp" class="form-text me-2">This image will appear
-                                                at
-                                                the top
-                                                of your collection page.
-                                                Avoid
-                                                including too much text in this banner image, as the dimensions change
-                                                on
-                                                different
-                                                devices. 1400 x 400 recommended.</div>
+                                    <div class="form-group mb-3">
+                                        <label class="lead form-label">Banner Image CID</label>
+                                        <div class="form-text mb-2">
+                                            Upload your banner image to SPK Drive above (1400x400 recommended)and insert or paste an IPFS CID here. Avoid too much text as dimensions change on different devices.
                                         </div>
-                                        <div class="ms-auto my-1">
-                                            <div class="btn btn-outline-primary text-nowrap">Select Image</div>
-                                        </div>
+                                        <input type="text" 
+                                            class="form-control bg-darkg border-0 text-info" 
+                                            v-model="SA.banner"
+                                            placeholder="QmYourImageCID"
+                                            pattern="(https://[a-z0-9.-/]+)|(Qm[a-zA-Z0-9]+)">
                                     </div>
                                     <!-- Wrapped Image-->
-                                    <div class="d-flex align-items-center mb-3 flex-wrap flex-md-nowrap">
-                                        <div class="my-1">
-                                            <label for="existingScript" class="lead form-label">Wrapped Image
-                                            </label>
-                                            <div id="existingScriptHelp" class="form-text me-2">This image will be
-                                                displayed
-                                                before the NFT is minted. It can be
-                                                thought of as a wrapper. 350 x 350 recommended</div>
+                                    <div class="form-group mb-3">
+                                        <label class="lead form-label">Wrapped Image CID</label>
+                                        <div class="form-text mb-2">
+                                            Upload your wrapped image to SPK Drive above (350x350 recommended)and insert or paste an IPFS CID here. This image is displayed before the NFT is minted.
                                         </div>
-                                        <div class="ms-auto my-1">
-                                            <div class="btn btn-outline-primary text-nowrap">Select Image</div>
-                                        </div>
+                                        <input type="text" 
+                                            class="form-control bg-darkg border-0 text-info" 
+                                            v-model="SA.wrapped"
+                                            placeholder="QmYourImageCID"
+                                            pattern="(https://[a-z0-9.-/]+)|(Qm[a-zA-Z0-9]+)">
                                     </div>
                                     <hr />
                                     <!-- Set Name -->
@@ -204,10 +398,10 @@
                                         <div class="ms-auto my-1">
                                             <div class="btn-group bg-dark">
                                                 <input type="radio" name="notSFW" id="setYesNsfw" autocomplete="off"
-                                                    model="notSfw.decent" class="btn-check" value="true">
+                                                    v-model="notSfw.decent" class="btn-check" value="true">
                                                 <label for="setYesNsfw" class="btn btn-outline-primary">YES</label>
                                                 <input type="radio" name="notSFW" id="setNoNsfw" autocomplete="off"
-                                                    model="notSfw.decent" value="false" class="btn-check">
+                                                    v-model="notSfw.decent" value="false" class="btn-check">
                                                 <label for="setNoNsfw" class="btn btn-outline-primary">NO</label>
                                             </div>
                                         </div>
@@ -224,8 +418,20 @@
                                                 </div>
                                             </div>
                                             <p class="form-text text-muted">Enter color 1 of your gradient</p>
-                                            <input type="text" class="form-control bg-darkg border-0" id=""
-                                                placeholder="#000000" v-model="SA.color1">
+                                            <!-- Enhanced color picker with both native and text input -->
+                                            <div class="d-flex gap-2 align-items-center">
+                                                <input type="color" 
+                                                    class="form-control form-control-color border-0" 
+                                                    :value="SA.color1" 
+                                                    @input="SA.color1 = $event.target.value"
+                                                    style="width: 50px; height: 38px; padding: 2px;">
+                                                <input type="text" 
+                                                    class="form-control bg-darkg border-0 flex-grow-1" 
+                                                    placeholder="#000000" 
+                                                    v-model="SA.color1"
+                                                    @input="validateHexColor($event, 'color1')"
+                                                    pattern="^#[0-9A-Fa-f]{6}$">
+                                            </div>
                                         </div>
                                         <!-- Color 2 -->
                                         <div class="form-group col-lg-4 mb-3">
@@ -237,8 +443,20 @@
                                                 </div>
                                             </div>
                                             <p class="form-text text-muted">Enter color 2 of your gradient</p>
-                                            <input type="text" class="form-control bg-darkg border-0" id=""
-                                                placeholder="#ffffff" v-model="SA.color2">
+                                            <!-- Enhanced color picker with both native and text input -->
+                                            <div class="d-flex gap-2 align-items-center">
+                                                <input type="color" 
+                                                    class="form-control form-control-color border-0" 
+                                                    :value="SA.color2" 
+                                                    @input="SA.color2 = $event.target.value"
+                                                    style="width: 50px; height: 38px; padding: 2px;">
+                                                <input type="text" 
+                                                    class="form-control bg-darkg border-0 flex-grow-1" 
+                                                    placeholder="#ffffff" 
+                                                    v-model="SA.color2"
+                                                    @input="validateHexColor($event, 'color2')"
+                                                    pattern="^#[0-9A-Fa-f]{6}$">
+                                            </div>
                                         </div>
                                         <!-- fa Icon -->
                                         <div class="form-group col-lg-4 mb-3">
@@ -249,11 +467,21 @@
                                                     <i :class="SA.faicon + ' fa-fw fs-3'"></i>
                                                 </div>
                                             </div>
-                                            <p class="form-text text-muted">Enter your fa icon (free only, <a
-                                                    href="https://fontawesome.com/search?ic=free" target="_blank"
-                                                    class="text-info no-decoration">list here</a>)</p>
-                                            <input type="text" class="form-control bg-darkg border-0" id=""
-                                                placeholder="fa fa-gem" v-model="SA.faicon">
+                                            <p class="form-text text-muted">Choose from popular Font Awesome icons (free only)</p>
+                                            <!-- Enhanced icon picker with button and text input -->
+                                            <div class="d-flex gap-2 align-items-center">
+                                                <button type="button" 
+                                                    class="btn btn-outline-primary d-flex align-items-center" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#iconPickerModal"
+                                                    style="min-width: 50px; height: 38px;">
+                                                    <i :class="SA.faicon + ' fa-fw'"></i>
+                                                </button>
+                                                <input type="text" 
+                                                    class="form-control bg-darkg border-0 flex-grow-1" 
+                                                    placeholder="fa fa-gem" 
+                                                    v-model="SA.faicon">
+                                            </div>
                                         </div>
                                     </div>
                                     <!-- Category (hidden)-->
@@ -283,6 +511,7 @@
                                         <button type="submit" class="btn btn-primary m-auto">Preview</button>
                                     </div>
                                 </form>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -316,7 +545,7 @@
                                     <div class="form-group row mb-2">
                                         <label for="testname" class="col-sm-2 col-form-label">Min</label>
                                         <div class="col-sm-10">
-                                            <input v-model="testmin" type="text" class="form-control" v-model="testuid">
+                                            <input v-model="testmin" type="text" class="form-control">
                                         </div>
                                     </div>
                                     <!-- max -->
@@ -646,9 +875,94 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <contract-vue :nodeview="false" :account="pageAccount" @tosign="sendIt($event)"
+                            <contract-vue :nodeview="false" :account="account" @tosign="sendIt($event)"
                                 :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
                                 @done="getSapi"></contract-vue>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ICON PICKER MODAL -->
+            <div class="modal fade" id="iconPickerModal" tabindex="-1" aria-labelledby="iconPickerModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content bg-darker text-white">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="iconPickerModalLabel">
+                                <i class="fa-solid fa-icons fa-fw me-2"></i>Choose Icon
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Search bar -->
+                            <div class="mb-3">
+                                <input type="text" 
+                                    class="form-control bg-dark text-white border-secondary" 
+                                    placeholder="Search icons..." 
+                                    v-model="iconSearchTerm"
+                                    @input="filterIcons">
+                            </div>
+                            
+                            <!-- Icon categories -->
+                            <div class="mb-3">
+                                <div class="btn-group flex-wrap" role="group">
+                                    <button type="button" 
+                                        :class="['btn btn-sm', selectedIconCategory === 'all' ? 'btn-primary' : 'btn-outline-secondary']"
+                                        @click="filterIconsByCategory('all')">
+                                        All
+                                    </button>
+                                    <button type="button" 
+                                        :class="['btn btn-sm', selectedIconCategory === 'solid' ? 'btn-primary' : 'btn-outline-secondary']"
+                                        @click="filterIconsByCategory('solid')">
+                                        Popular
+                                    </button>
+                                    <button type="button" 
+                                        :class="['btn btn-sm', selectedIconCategory === 'business' ? 'btn-primary' : 'btn-outline-secondary']"
+                                        @click="filterIconsByCategory('business')">
+                                        Business
+                                    </button>
+                                    <button type="button" 
+                                        :class="['btn btn-sm', selectedIconCategory === 'nature' ? 'btn-primary' : 'btn-outline-secondary']"
+                                        @click="filterIconsByCategory('nature')">
+                                        Nature
+                                    </button>
+                                    <button type="button" 
+                                        :class="['btn btn-sm', selectedIconCategory === 'gaming' ? 'btn-primary' : 'btn-outline-secondary']"
+                                        @click="filterIconsByCategory('gaming')">
+                                        Gaming
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Icon grid -->
+                            <div class="row g-2" style="max-height: 400px; overflow-y: auto;">
+                                <div v-for="icon in filteredIcons" :key="icon.class" class="col-auto">
+                                    <button type="button" 
+                                        class="btn btn-outline-light d-flex flex-column align-items-center p-2"
+                                        style="width: 80px; height: 80px; border-radius: 8px;"
+                                        :class="{ 'btn-primary': SA.faicon === icon.class }"
+                                        @click="selectIcon(icon.class)"
+                                        :title="icon.name">
+                                        <i :class="icon.class + ' fa-fw'" style="font-size: 1.5rem;"></i>
+                                        <small class="mt-1 text-truncate w-100 text-center" style="font-size: 0.7rem;">
+                                            {{ icon.name }}
+                                        </small>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- No results message -->
+                            <div v-if="filteredIcons.length === 0" class="text-center py-4">
+                                <i class="fa-solid fa-search fa-2x text-muted mb-2"></i>
+                                <p class="text-muted">No icons found matching your search.</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <div class="me-auto small text-muted">
+                                Selected: <code>{{ SA.faicon }}</code>
+                            </div>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Use Selected</button>
                         </div>
                     </div>
                 </div>
@@ -708,5 +1022,6 @@
         integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
 </html>

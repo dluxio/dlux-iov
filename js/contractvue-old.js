@@ -571,7 +571,7 @@ export default {
                                                                                                 <div class="mb-1">
                                                                                                     <label class="mb-1">Thumbnail</label>
                                                                                                     <div class="position-relative has-validation">
-                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][cid].thumb" @change="getImgData(contract.i, cid)" placeholder="https://your-thumbnail-image.png" pattern="(https://[a-z0-9.\-/]+)|(Qm[a-zA-Z0-9]+)" class="form-control">
+                                                                                                        <input autocapitalize="off" v-model="newMeta[contract.i][cid].thumb" @change="getImgData(contract.i, cid)" placeholder="https://your-thumbnail-image.png" pattern="(https://[a-z0-9.-/]+)|(Qm[a-zA-Z0-9]+)" class="form-control">
                                                                                                     </div>
                                                                                                 </div>
 
