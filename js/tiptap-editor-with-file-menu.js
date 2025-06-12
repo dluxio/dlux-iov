@@ -2504,12 +2504,18 @@ export default {
             const StarterKit = bundle.StarterKit?.default || bundle.StarterKit;
             const Y = bundle.Y?.default || bundle.Y;
             const Collaboration = bundle.Collaboration?.default || bundle.Collaboration;
+            const CollaborationCursor = bundle.CollaborationCursor?.default || bundle.CollaborationCursor;
             const Placeholder = bundle.Placeholder?.default || bundle.Placeholder;
 
             if (!Y || !Collaboration || !Editor || !StarterKit || !Placeholder) {
                 console.warn('⚠️ Required collaboration components missing, falling back to basic editors');
                 await this.createBasicEditors();
                 return;
+            }
+            
+            // CollaborationCursor is optional but recommended for better UX
+            if (!CollaborationCursor) {
+                console.warn('⚠️ CollaborationCursor not available - user presence and cursors will not be shown');
             }
 
             // ===== STEP 1: Create Y.js document for offline collaborative editing =====
@@ -2535,27 +2541,33 @@ export default {
             // ===== STEP 3: Initialize collaborative schema =====
             this.initializeCollaborativeSchema(Y);
             
-            // Create collaborative editors (offline mode - no WebSocket connection)
-                this.titleEditor = new Editor({
-                    element: this.$refs.titleEditor,
-                    extensions: [
-                        StarterKit.configure({
-                        history: false, // Collaboration handles history
-                            heading: false,
-                            bulletList: false,
-                            orderedList: false,
-                            blockquote: false,
-                            codeBlock: false,
-                        horizontalRule: false
-                    }),
-                    Collaboration.configure({
-                        document: this.ydoc,
-                        field: 'title' // Keep existing field names for backward compatibility
-                        }),
-                        Placeholder.configure({
-                        placeholder: this.isReadOnlyMode ? 'Title (read-only)' : 'Enter title...'
-                        })
-                    ],
+            // Create collaborative editors (offline mode - no WebSocket connection yet)
+            // Prepare base extensions for title editor
+            const titleExtensions = [
+                StarterKit.configure({
+                    history: false, // Collaboration handles history
+                    heading: false,
+                    bulletList: false,
+                    orderedList: false,
+                    blockquote: false,
+                    codeBlock: false,
+                    horizontalRule: false
+                }),
+                Collaboration.configure({
+                    document: this.ydoc,
+                    field: 'title' // Keep existing field names for backward compatibility
+                }),
+                Placeholder.configure({
+                    placeholder: this.isReadOnlyMode ? 'Title (read-only)' : 'Enter title...'
+                })
+            ];
+            
+            // Note: CollaborationCursor will be added dynamically when provider connects
+            // This follows TipTap best practice for offline-first architecture
+
+            this.titleEditor = new Editor({
+                element: this.$refs.titleEditor,
+                extensions: titleExtensions,
                     // TipTap Best Practice: Content validation for collaborative documents
                     enableContentCheck: true,
                     onContentError: ({ editor, error, disableCollaboration }) => {
@@ -2589,20 +2601,26 @@ export default {
                 }
             });
 
-                this.bodyEditor = new Editor({
-                    element: this.$refs.bodyEditor,
-                    extensions: [
-                        StarterKit.configure({
-                        history: false // Collaboration handles history
-                    }),
-                    Collaboration.configure({
-                        document: this.ydoc,
-                        field: 'body' // Keep existing field names for backward compatibility
-                    }),
-                    Placeholder.configure({
-                        placeholder: this.isReadOnlyMode ? 'Content (read-only)' : 'Start writing...'
-                    })
-                ],
+            // Prepare base extensions for body editor
+            const bodyExtensions = [
+                StarterKit.configure({
+                    history: false // Collaboration handles history
+                }),
+                Collaboration.configure({
+                    document: this.ydoc,
+                    field: 'body' // Keep existing field names for backward compatibility
+                }),
+                Placeholder.configure({
+                    placeholder: this.isReadOnlyMode ? 'Content (read-only)' : 'Start writing...'
+                })
+            ];
+            
+            // Note: CollaborationCursor will be added dynamically when provider connects
+            // This follows TipTap best practice for offline-first architecture
+
+            this.bodyEditor = new Editor({
+                element: this.$refs.bodyEditor,
+                extensions: bodyExtensions,
                 // TipTap Best Practice: Content validation for collaborative documents
                 enableContentCheck: true,
                 onContentError: ({ editor, error, disableCollaboration }) => {
@@ -3258,98 +3276,8 @@ export default {
             // This method can be implemented based on UI requirements
         },
 
-        async createBasicEditors() {
-            // Fallback to basic editors if collaboration not available
-            console.log('🏗️ Creating basic fallback editors...');
-            
-            // Import core TipTap modules
-            const { Editor } = await import('https://esm.sh/@tiptap/core@3.0.0');
-            const { default: StarterKit } = await import('https://esm.sh/@tiptap/starter-kit@3.0.0');
-            const { default: Placeholder } = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
-            
-                    this.titleEditor = new Editor({
-                        element: this.$refs.titleEditor,
-                        extensions: [
-                            StarterKit.configure({
-                            heading: false,
-                            bulletList: false,
-                            orderedList: false,
-                            blockquote: false,
-                            codeBlock: false,
-                        horizontalRule: false
-                        }),
-                        Placeholder.configure({
-                        placeholder: this.isReadOnlyMode ? 'Title (read-only)' : 'Enter title...'
-                        })
-                    ],
-                    // TipTap Best Practice: Content validation for all editors
-                    enableContentCheck: true,
-                    onContentError: ({ editor, error }) => {
-                        console.error('🚨 Basic title content validation error:', error);
-                        this.handleContentValidationError('title', error, null);
-                    },
-                    editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
-                        editorProps: {
-                            attributes: {
-                                class: 'form-control bg-transparent text-white border-0',
-                            }
-                        },
-                        onCreate: ({ editor }) => {
-                    console.log(`✅ Basic title editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
-                        },
-                        onUpdate: ({ editor }) => {
-                    // SECURITY: Block updates for read-only users
-                    if (this.isReadOnlyMode) {
-                        console.warn('🚫 Blocked title update: user has read-only permissions');
-                        return;
-                    }
-                    
-                    this.content.title = editor.getHTML();
-                    this.hasUnsavedChanges = true;
-                    this.clearUnsavedAfterSync();
-            }
-                });
-            
-                    this.bodyEditor = new Editor({
-                        element: this.$refs.bodyEditor,
-                        extensions: [
-                    StarterKit,
-                        Placeholder.configure({
-                        placeholder: this.isReadOnlyMode ? 'Content (read-only)' : 'Start writing...'
-                    })
-                    ],
-                    // TipTap Best Practice: Content validation for all editors
-                    enableContentCheck: true,
-                    onContentError: ({ editor, error }) => {
-                        console.error('🚨 Basic body content validation error:', error);
-                        this.handleContentValidationError('body', error, null);
-                    },
-                    editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
-                        editorProps: {
-                            attributes: {
-                                class: 'form-control bg-transparent text-white border-0',
-                            }
-                        },
-                        onCreate: ({ editor }) => {
-                    console.log(`✅ Basic body editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
-                        },
-                        onUpdate: ({ editor }) => {
-                        // SECURITY: Block updates for read-only users
-                        if (this.isReadOnlyMode) {
-                            console.warn('🚫 Blocked body update: user has read-only permissions');
-                            return;
-                        }
-                        
-                            this.content.body = editor.getHTML();
-                    this.hasUnsavedChanges = true;
-                    this.clearUnsavedAfterSync();
-                }
-            });
-
-            // Set to basic mode  
-            this.isCollaborativeMode = false;
-            this.fileType = 'local';
-        },
+        // REMOVED: Legacy createBasicEditors method
+        // Replaced by offline-first architecture - all editors are now collaborative by default
 
 
 
@@ -3377,6 +3305,160 @@ export default {
             
             // Force Vue to re-evaluate computed properties and update UI
             this.$forceUpdate();
+        },
+
+        // TipTap Best Practice: Add CollaborationCursor when provider becomes available
+        // Following offline-first collaborative architecture pattern
+        async addCollaborationCursor(provider) {
+            if (!provider || !this.titleEditor || !this.bodyEditor) {
+                console.log('⚠️ Cannot add CollaborationCursor: missing provider or editors');
+                return;
+            }
+
+            try {
+                // Get CollaborationCursor from bundle
+                const bundle = window.tiptapBundle;
+                const CollaborationCursor = bundle?.CollaborationCursor?.default || bundle?.CollaborationCursor;
+                
+                if (!CollaborationCursor) {
+                    console.log('⚠️ CollaborationCursor extension not available in bundle');
+                    return;
+                }
+
+                console.log('🎯 Adding CollaborationCursor extension to editors...');
+
+                // Configure cursor extension with user info
+                const cursorConfig = {
+                    provider: provider,
+                    user: {
+                        name: this.username || 'Anonymous',
+                        color: this.getUserColor()
+                    }
+                };
+
+                console.log('👤 Cursor user config:', cursorConfig.user);
+
+                // TipTap Best Practice: Recreate editors with CollaborationCursor
+                // This is more reliable than trying to add extensions dynamically
+                await this.recreateEditorsWithCursor(provider, cursorConfig);
+
+                console.log('✅ CollaborationCursor added successfully');
+                
+                // Update user info in awareness for real-time presence
+                if (provider.awareness) {
+                    provider.awareness.setLocalStateField('user', cursorConfig.user);
+                    console.log('👥 User awareness updated:', cursorConfig.user);
+                }
+
+            } catch (error) {
+                console.error('❌ Error adding CollaborationCursor:', error);
+            }
+        },
+
+        // Recreate editors with CollaborationCursor extension
+        async recreateEditorsWithCursor(provider, cursorConfig) {
+            if (!this.ydoc || !provider) {
+                console.error('Cannot recreate editors: missing Y.js document or provider');
+                return;
+            }
+
+            try {
+                const bundle = window.tiptapBundle;
+                const Editor = bundle.Editor?.default || bundle.Editor;
+                const StarterKit = bundle.StarterKit?.default || bundle.StarterKit;
+                const Collaboration = bundle.Collaboration?.default || bundle.Collaboration;
+                const CollaborationCursor = bundle.CollaborationCursor?.default || bundle.CollaborationCursor;
+                const Placeholder = bundle.Placeholder?.default || bundle.Placeholder;
+
+                if (!Editor || !StarterKit || !Collaboration || !CollaborationCursor || !Placeholder) {
+                    console.error('Missing required TipTap components for cursor recreation');
+                    return;
+                }
+
+                console.log('🔄 Recreating editors with CollaborationCursor...');
+
+                // Store current content to preserve it
+                const titleContent = this.titleEditor ? this.titleEditor.getHTML() : '';
+                const bodyContent = this.bodyEditor ? this.bodyEditor.getHTML() : '';
+
+                // Destroy existing editors
+                if (this.titleEditor) {
+                    this.titleEditor.destroy();
+                    this.titleEditor = null;
+                }
+                if (this.bodyEditor) {
+                    this.bodyEditor.destroy();
+                    this.bodyEditor = null;
+                }
+
+                // Wait a tick for DOM cleanup
+                await this.$nextTick();
+
+                // Recreate title editor with cursor
+                const titleExtensions = [
+                    StarterKit.configure({
+                        history: false,
+                        heading: false,
+                        bulletList: false,
+                        orderedList: false,
+                        blockquote: false,
+                        codeBlock: false,
+                        horizontalRule: false
+                    }),
+                    Collaboration.configure({
+                        document: this.ydoc,
+                        field: 'title'
+                    }),
+                    CollaborationCursor.configure(cursorConfig),
+                    Placeholder.configure({
+                        placeholder: this.isReadOnlyMode ? 'Title (read-only)' : 'Enter title...'
+                    })
+                ];
+
+                this.titleEditor = new Editor({
+                    element: this.$refs.titleEditor,
+                    extensions: titleExtensions,
+                    editable: !this.isReadOnlyMode,
+                    onUpdate: ({ editor }) => {
+                        if (this.validatePermission('edit')) {
+                            this.hasUnsavedChanges = true;
+                            this.clearUnsavedAfterSync();
+                        }
+                    }
+                });
+
+                // Recreate body editor with cursor
+                const bodyExtensions = [
+                    StarterKit.configure({
+                        history: false
+                    }),
+                    Collaboration.configure({
+                        document: this.ydoc,
+                        field: 'body'
+                    }),
+                    CollaborationCursor.configure(cursorConfig),
+                    Placeholder.configure({
+                        placeholder: this.isReadOnlyMode ? 'Content (read-only)' : 'Start writing...'
+                    })
+                ];
+
+                this.bodyEditor = new Editor({
+                    element: this.$refs.bodyEditor,
+                    extensions: bodyExtensions,
+                    editable: !this.isReadOnlyMode,
+                    onUpdate: ({ editor }) => {
+                        if (this.validatePermission('edit')) {
+                            this.hasUnsavedChanges = true;
+                            this.clearUnsavedAfterSync();
+                        }
+                    }
+                });
+
+                console.log('✅ Editors recreated with CollaborationCursor support');
+
+            } catch (error) {
+                console.error('❌ Error recreating editors with cursor:', error);
+            }
         },
 
         // TipTap Best Practice: Handle content validation errors gracefully
@@ -3715,12 +3797,8 @@ export default {
             console.log('✅ Existing Y.js document successfully connected to collaboration server');
         },
 
-        // Legacy method - replaced by connectToCollaborationServer for offline-first approach
-        // This method was used when we created editors on-demand, but now editors are always collaborative
-        async initializeCollaboration(doc) {
-            console.warn('⚠️ initializeCollaboration is deprecated - using connectToCollaborationServer instead');
-            return this.connectToCollaborationServer(doc);
-        },
+        // REMOVED: Legacy initializeCollaboration method
+        // Replaced by offline-first architecture with connectToCollaborationServer
         
         disconnectCollaboration() {
             console.log('🧹 Cleaning up collaborative editor connections...');
@@ -3948,6 +4026,13 @@ export default {
                 
                 // Update editor permissions immediately
                 this.updateEditorPermissions();
+            }
+
+            // 🎯 TipTap Best Practice: Add CollaborationCursor when provider connects
+            // This follows the offline-first collaborative architecture pattern
+            if (this.provider && this.currentFile?.type === 'collaborative') {
+                console.log('🎯 WebSocket connected - adding CollaborationCursor extension...');
+                this.addCollaborationCursor(this.provider);
             }
         },
         
@@ -4178,15 +4263,15 @@ export default {
             return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
         },
         
-        // History and diff (placeholder methods)
+        // Document history and diff functionality
         async loadDocumentHistory() {
-            // TODO: Implement document history loading
-            console.log('Loading document history...');
+            console.log('📚 Document history feature not yet implemented');
+            // Future: Integrate with Y.js document history or server-side versioning
         },
         
         async showDiff() {
-            // TODO: Implement diff functionality
-            console.log('Showing document diff...');
+            console.log('🔍 Document diff feature not yet implemented');
+            // Future: Show differences between document versions
         },
         
         toggleDropdown(name) {
@@ -4533,110 +4618,13 @@ export default {
             return `https://images.hive.blog/u/${account}/avatar/small`;
         },
         
-        async initializeEditor() {
-            // Clean up any existing editor
-            if (this.editor) {
-                this.editor.destroy();
-                this.editor = null;
-            }
-
-            // Import core TipTap modules
-            const { Editor } = await import('https://esm.sh/@tiptap/core@3.0.0');
-            const { default: StarterKit } = await import('https://esm.sh/@tiptap/starter-kit@3.0.0');
-            const { default: Placeholder } = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
-            
-            // Base extensions that are always included
-            const extensions = [
-                StarterKit.configure({
-                    history: !this.isCollaborative, // Only enable history for non-collaborative mode
-                }),
-                Placeholder.configure({
-                    placeholder: 'Start writing...'
-                })
-            ];
-
-            // If collaborative mode is enabled, add collaboration extensions
-            if (this.isCollaborative) {
-                try {
-                    // Initialize Y.js document and provider if not already done
-                    if (!this.ydoc || !this.provider) {
-                        await this.initializeCollaboration();
-                    }
-
-                    // Get collaboration extensions
-                    const bundle = window.TiptapCollaboration;
-                    const Collaboration = bundle.Collaboration;
-                    const CollaborationCursor = bundle.CollaborationCursor;
-
-                    if (!Collaboration || !CollaborationCursor) {
-                        throw new Error('Required collaboration extensions not found');
-                    }
-
-                    // Add collaboration extensions
-                    extensions.push(
-                        Collaboration.configure({
-                            document: this.ydoc,
-                            field: 'content',
-                            fragmentContent: true,
-                        }),
-                        CollaborationCursor.configure({
-                            provider: this.provider,
-                            user: {
-                                name: this.username,
-                                color: this.getUserColor
-                            }
-                        })
-                    );
-                } catch (error) {
-                    console.error('Failed to initialize collaborative mode:', error);
-                    // Fall back to non-collaborative mode
-                    this.isCollaborative = false;
-                    extensions[0] = StarterKit.configure({ history: true });
-                }
-            }
-
-            // Create the editor
-            this.editor = new Editor({
-                element: this.$refs.editor,
-                extensions,
-                content: this.content,
-                editorProps: {
-                    attributes: {
-                        class: 'form-control bg-transparent text-white border-0',
-                    }
-                },
-                onCreate: ({ editor }) => {
-                    console.log(`✅ Editor ready (${this.isCollaborative ? 'collaborative' : 'standard'} mode)`);
-                },
-                onUpdate: ({ editor }) => {
-                    this.content = editor.getHTML();
-                    if (!this.isCollaborative) {
-                        this.handleLocalUpdate();
-                    }
-                }
-            });
-        },
+        // REMOVED: Legacy initializeEditor method
+        // Replaced by offline-first architecture with createStandardEditor/createOfflineFirstCollaborativeEditors
 
 
 
-        // Method to toggle collaborative mode
-        async toggleCollaborativeMode() {
-            const wasCollaborative = this.isCollaborative;
-            this.isCollaborative = !wasCollaborative;
-            
-            // Store current content before switching
-            const currentContent = this.editor.getHTML();
-            
-            // Reinitialize editor with new mode
-            await this.initializeEditor();
-            
-            if (!wasCollaborative && this.isCollaborative) {
-                // If switching to collaborative mode, initialize the shared content
-                const yxml = this.ydoc.get('content', Y.XmlFragment);
-                yxml.delete(0, yxml.length);
-                yxml.insert(0, currentContent);
-            }
-        },
+        // REMOVED: Legacy toggleCollaborativeMode method
+        // All documents are now collaborative by default (offline-first architecture)
 
         async convertToCollaborative() {
             // TipTap Best Practice: All documents are already collaborative (offline-first)
