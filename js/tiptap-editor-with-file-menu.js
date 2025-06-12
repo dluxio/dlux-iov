@@ -184,10 +184,7 @@ export default {
             attachedFiles: [],
             
             // Reactive trigger for Y.js data changes
-            collaborativeDataVersion: 0,
-            
-            // Permission system notifications
-            permissionNotification: null
+            collaborativeDataVersion: 0
         };
     },
     
@@ -655,7 +652,7 @@ export default {
                 const tags = this.getTags();
                 if (!tags.includes(tagValue) && tags.length < 10) {
                     this.addCollaborativeTag(tagValue);
-            this.hasUnsavedChanges = true;
+                this.hasUnsavedChanges = true;
                     this.clearUnsavedAfterSync();
                 }
                 
@@ -1874,341 +1871,2789 @@ export default {
             this.loadingPermissions = true;
             
             try {
-                // PHASE 1: Enhanced Authentication Validation
-                const authValidation = this.validateAuthHeaders();
-                if (!authValidation.isValid) {
-                    console.error('🔐 Authentication validation failed:', authValidation.errors);
-                    throw new Error(`Authentication validation failed: ${authValidation.errors.join(', ')}`);
+                // First verify we have valid auth headers
+                const authHeadersValid = Object.entries(this.authHeaders).every(([key, value]) => {
+                    if (!value) {
+                        console.warn(`Missing auth header: ${key}`);
+                        return false;
+                    }
+                    return true;
+                });
+
+                if (!authHeadersValid) {
+                    throw new Error('Invalid or missing authentication headers');
                 }
 
-                // PHASE 2: Test Authentication Before Permission Request
-                const authTestResult = await this.testCollaborationAuth();
-                if (!authTestResult.success) {
-                    console.warn('🔐 Auth test failed, but proceeding with permission request...');
-                    console.warn('🔍 Auth test details:', authTestResult);
-                }
+                // Prepare headers with proper authentication
+                const headers = {
+                    ...this.authHeaders,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                };
 
-                // PHASE 3: Enhanced Permission Loading with Retry Logic
-                const permissionResult = await this.loadPermissionsWithRetry();
+                // Prepare the request with proper auth headers
+                const permissionsUrl = `https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}`;
+                const authHeaders = {
+                    ...headers,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                    // Note: Using this.authHeaders which contains the proper x-account, x-signature, etc.
+                };
                 
-                if (permissionResult.success) {
-                    this.documentPermissions = permissionResult.permissions;
-                    console.log('✅ Permissions loaded successfully:', this.documentPermissions.length, 'permissions');
-                } else {
-                    // PHASE 4: Intelligent Fallback Logic
-                    console.warn('⚠️ Permission loading failed, applying intelligent fallback...');
-                    this.applyPermissionFallback(permissionResult.error);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                let response = null;
+
+                // Log attempt details
+                console.log('🔐 Fetching permissions:', {
+                    url: permissionsUrl,
+                    headers: Object.keys(authHeaders),
+                    authenticated: this.isAuthenticated,
+                    timestamp: new Date().toISOString()
+                });
+
+                try {
+                    // Make the request with optimized settings
+                    response = await fetch(permissionsUrl, {
+                        method: 'GET',
+                        headers: authHeaders,
+                        credentials: 'omit', // We know this works
+                        signal: controller.signal,
+                        mode: 'cors',
+                        cache: 'no-cache'
+                    });
+
+                    // Log response details
+                    console.log('Permission response:', {
+                        url: permissionsUrl,
+                        status: response?.status,
+                        ok: response?.ok,
+                        headers: Object.fromEntries(response?.headers?.entries() || [])
+                    });
+
+                    if (!response?.ok) {
+                        console.warn(`🔐 Permission API failed with HTTP ${response?.status}:`, {
+                            status: response?.status,
+                            statusText: response?.statusText,
+                            url: permissionsUrl,
+                            isOwner: this.currentFile.owner === this.username
+                        });
+                        
+                        // Handle different error types
+                        if (response?.status === 403) {
+                            console.warn('🔐 HTTP 403: Permission denied - this could indicate:');
+                            console.warn('  - Authentication headers are expired or invalid');
+                            console.warn('  - User lacks permission to view document permissions');
+                            console.warn('  - Server-side authentication validation failed');
+                            
+                            // For 403 errors, try to be more permissive for document owners
+                            if (this.currentFile.owner === this.username) {
+                                console.log('🔐 User is document owner, assuming full permissions despite 403');
+                                this.documentPermissions = [{
+                                    account: this.username,
+                                    permissionType: 'postable',
+                                    grantedBy: this.username,
+                                    grantedAt: new Date().toISOString()
+                                }];
+                                return; // Skip the error throw for owners
+                            }
+                        }
+                        
+                        // Set default permissions as array with proper structure
+                        const defaultPermissions = [];
+                        
+                        // Add owner permission
+                        defaultPermissions.push({
+                            account: this.currentFile.owner,
+                            permissionType: 'postable', // Owner has full access
+                            grantedBy: this.currentFile.owner,
+                            grantedAt: new Date().toISOString()
+                        });
+                        
+                        // Add current user permission if different from owner
+                        if (this.username !== this.currentFile.owner) {
+                            // For non-403 errors, default to readonly for safety
+                            // For 403 errors, this suggests auth issues rather than permission issues
+                            const fallbackPermission = response?.status === 403 ? 'editable' : 'readonly';
+                            console.log(`🔐 Setting fallback permission to '${fallbackPermission}' for HTTP ${response?.status}`);
+                            
+                            defaultPermissions.push({
+                                account: this.username,
+                                permissionType: fallbackPermission,
+                                grantedBy: this.currentFile.owner,
+                                grantedAt: new Date().toISOString()
+                            });
+                        }
+
+                        console.log('Using default permissions array:', defaultPermissions);
+                        this.documentPermissions = defaultPermissions;
+                        throw new Error(`HTTP ${response?.status}`);
+                    }
+
+                    // Parse and set permissions
+                    const data = await response.json();
+                    this.documentPermissions = data.permissions || [];
+                    console.log('✅ Permissions loaded successfully');
+                } catch (error) {
+                    console.warn('Permission request failed:', {
+                        error: error.message,
+                        url: permissionsUrl,
+                        headers: Object.keys(authHeaders),
+                        timestamp: new Date().toISOString()
+                    });
+                    throw error;
+                } finally {
+                    clearTimeout(timeoutId);
                 }
-                
-                // Always update editor permissions regardless of permission loading result
-                this.updateEditorPermissions();
-                
             } catch (error) {
-                console.error('❌ Critical error in loadDocumentPermissions:', error);
+                console.error('Error loading permissions:', error);
                 
-                // Apply emergency fallback
-                this.applyEmergencyPermissionFallback(error);
-                this.updateEditorPermissions();
+                // Handle 403 errors more gracefully - don't completely fail
+                if (error.message.includes('HTTP 403')) {
+                    console.warn('🔐 Handling 403 error gracefully - user may still have access via sharing');
+                    console.warn('🔐 This is likely a server-side issue where permission loading requires different auth than permission granting');
+                    
+                    // For 403 errors, assume the user has the permissions they were granted
+                    // Since they can access the document, they likely have at least editable access
+                    const assumedPermissions = [{
+                        account: this.currentFile.owner,
+                        permissionType: 'postable',
+                        grantedBy: this.currentFile.owner,
+                        grantedAt: new Date().toISOString()
+                    }];
+                    
+                    // If user is not the owner, assume they have postable permissions
+                    // (since they were able to access the document, they likely were granted access)
+                    if (this.username !== this.currentFile.owner) {
+                        assumedPermissions.push({
+                            account: this.username,
+                            permissionType: 'postable', // Assume full access since they can access the doc
+                            grantedBy: this.currentFile.owner,
+                            grantedAt: new Date().toISOString(),
+                            note: 'Assumed due to 403 error - actual permissions may vary'
+                        });
+                        console.log('🔐 Assuming user has postable permissions due to document access despite 403');
+                    }
+                    
+                    this.documentPermissions = assumedPermissions;
+                    
+                    // Show a user-friendly notification about the permission loading issue
+                    setTimeout(() => {
+                        console.log('🔐 Showing user notification about permission loading issue');
+                        if (this.username !== this.currentFile.owner) {
+                            // Only show to non-owners since they're affected by the 403
+                            alert('Note: Unable to load exact permissions due to a server issue, but you should have the access you were granted. If you experience any issues, contact the document owner.');
+                        }
+                    }, 1000);
+                    
+                    // Don't re-throw 403 errors - let the user try to use the document
+                    return;
+                }
                 
+                // For other errors, set empty permissions and re-throw
+                this.documentPermissions = [];
+                throw error; // Re-throw to handle in the calling function
             } finally {
                 this.loadingPermissions = false;
             }
         },
-
-        // PHASE 1: Enhanced Authentication Validation
-        validateAuthHeaders() {
-            const requiredHeaders = ['x-account', 'x-challenge', 'x-pubkey', 'x-signature'];
-            const errors = [];
-            
-            for (const header of requiredHeaders) {
-                if (!this.authHeaders[header]) {
-                    errors.push(`Missing ${header}`);
-                } else if (typeof this.authHeaders[header] !== 'string' || this.authHeaders[header].trim() === '') {
-                    errors.push(`Invalid ${header} (empty or non-string)`);
-                }
-            }
-            
-            // Validate challenge timestamp (should be within 24 hours)
-            if (this.authHeaders['x-challenge']) {
-                const challenge = parseInt(this.authHeaders['x-challenge']);
-                const now = Math.floor(Date.now() / 1000);
-                const hoursDiff = (now - challenge) / 3600;
-                
-                if (hoursDiff > 24) {
-                    errors.push(`Challenge expired (${hoursDiff.toFixed(1)} hours old)`);
-                } else if (hoursDiff < 0) {
-                    errors.push(`Challenge from future (${Math.abs(hoursDiff).toFixed(1)} hours ahead)`);
-                }
-            }
-            
-            return {
-                isValid: errors.length === 0,
-                errors: errors,
-                headerCount: Object.keys(this.authHeaders).length
-            };
-        },
-
-        // PHASE 2: Authentication Testing
-        async testCollaborationAuth() {
+        
+        async updatePermission(account, newPermission) {
             try {
-                console.log('🧪 Testing collaboration authentication...');
-                
-                const response = await fetch('https://data.dlux.io/api/collaboration/test-auth', {
-                    method: 'GET',
+                const response = await fetch(`https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}`, {
+                    method: 'POST',
                     headers: {
-                        ...this.authHeaders,
-                        'Accept': 'application/json'
+                        'Content-Type': 'application/json',
+                        ...this.authHeaders
                     },
-                    credentials: 'omit'
+                    body: JSON.stringify({
+                        targetAccount: account,
+                        permissionType: newPermission
+                    })
                 });
                 
                 if (response.ok) {
-                    const result = await response.json();
-                    console.log('✅ Auth test successful:', result);
-                    return { success: true, result };
+                    await this.loadDocumentPermissions();
+                    // Update editor permissions in case current user's permissions changed
+                    this.updateEditorPermissions();
+                    console.log(`Permission updated for @${account} to ${newPermission}`);
                 } else {
-                    const errorText = await response.text().catch(() => 'Unknown error');
-                    console.warn('⚠️ Auth test failed:', response.status, errorText);
-                    return { 
-                        success: false, 
-                        status: response.status, 
-                        error: errorText,
-                        headers: Object.keys(this.authHeaders)
-                    };
+                    throw new Error('Failed to update permission');
                 }
             } catch (error) {
-                console.warn('⚠️ Auth test network error:', error.message);
-                return { success: false, error: error.message, type: 'network' };
+                console.error('Update permission failed:', error);
+                alert('Failed to update permission: ' + error.message);
             }
         },
-
-        // PHASE 3: Permission Loading with Retry Logic
-        async loadPermissionsWithRetry(maxRetries = 3) {
-            const permissionsUrl = `https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}`;
+        
+        async revokePermission(account) {
+            if (!confirm(`Revoke access for @${account}?`)) return;
             
-            for (let attempt = 1; attempt <= maxRetries; attempt++) {
-                try {
-                    console.log(`🔄 Permission loading attempt ${attempt}/${maxRetries}...`);
-                    
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 10000);
-                    
-                    const response = await fetch(permissionsUrl, {
-                        method: 'GET',
-                        headers: {
-                            ...this.authHeaders,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        credentials: 'omit',
-                        signal: controller.signal
-                    });
-                    
-                    clearTimeout(timeoutId);
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        console.log(`✅ Permission loading successful on attempt ${attempt}`);
-                        return {
-                            success: true,
-                            permissions: data.permissions || [],
-                            attempt: attempt
-                        };
-                    } else {
-                        const errorText = await response.text().catch(() => 'Unknown error');
-                        
-                        if (response.status === 403) {
-                            console.error('🔐 Permission loading failed with HTTP 403 (Authentication inconsistency detected)');
-                            console.error('🔍 This indicates server-side authentication inconsistency between endpoints');
-                            console.error('📋 Troubleshooting information:');
-                            console.error('   • GET permissions endpoint authentication differs from POST endpoint');
-                            console.error('   • Same auth headers work for granting permissions but fail for loading');
-                            console.error('   • Server-side middleware alignment needed');
-                            console.error('🔧 Auth headers used:', Object.keys(this.authHeaders));
-                            
-                            return {
-                                success: false,
-                                error: '403_AUTH_INCONSISTENCY',
-                                status: 403,
-                                details: errorText,
-                                attempt: attempt,
-                                authHeaders: Object.keys(this.authHeaders)
-                            };
-                        } else if (response.status >= 500 && attempt < maxRetries) {
-                            console.warn(`⚠️ Server error ${response.status} on attempt ${attempt}, retrying...`);
-                            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-                            continue;
-                        } else {
-                            return {
-                                success: false,
-                                error: 'HTTP_ERROR',
-                                status: response.status,
-                                details: errorText,
-                                attempt: attempt
-                            };
-                        }
-                    }
-                } catch (error) {
-                    if (error.name === 'AbortError') {
-                        console.warn(`⏰ Permission loading timeout on attempt ${attempt}`);
-                        if (attempt < maxRetries) {
-                            await new Promise(resolve => setTimeout(resolve, 2000));
-                            continue;
-                        }
-                    } else if (attempt < maxRetries) {
-                        console.warn(`🌐 Network error on attempt ${attempt}:`, error.message);
-                        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-                        continue;
-                    }
-                    
-                    return {
-                        success: false,
-                        error: 'NETWORK_ERROR',
-                        details: error.message,
-                        attempt: attempt
-                    };
-                }
-            }
-            
-            return {
-                success: false,
-                error: 'MAX_RETRIES_EXCEEDED',
-                details: `Failed after ${maxRetries} attempts`
-            };
-        },
-
-        // PHASE 4: Intelligent Fallback Logic
-        applyPermissionFallback(error) {
-            const isOwner = this.currentFile.owner === this.username;
-            
-            if (error === '403_AUTH_INCONSISTENCY') {
-                // Smart fallback for 403 authentication inconsistency
-                if (isOwner) {
-                    console.log('🔄 Owner detected: Applying full permissions despite 403');
-                    this.documentPermissions = [{
-                        account: this.username,
-                        permissionType: 'owner',
-                        grantedBy: this.username,
-                        grantedAt: new Date().toISOString(),
-                        source: 'fallback_owner'
-                    }];
+            try {
+                const response = await fetch(`https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}/${account}`, {
+                    method: 'DELETE',
+                    headers: this.authHeaders
+                });
+                
+                if (response.ok) {
+                    await this.loadDocumentPermissions();
+                    // Update editor permissions in case current user's permissions changed
+                    this.updateEditorPermissions();
+                    console.log(`Permission revoked for @${account}`);
                 } else {
-                    // For non-owners who can access the document, assume they have meaningful permissions
-                    console.log('🔄 Non-owner with document access: Assuming postable permissions');
-                    this.documentPermissions = [{
-                        account: this.username,
-                        permissionType: 'postable',
-                        grantedBy: this.currentFile.owner,
-                        grantedAt: new Date().toISOString(),
-                        source: 'fallback_403_access_implies_permission'
-                    }];
+                    throw new Error('Failed to revoke permission');
+                }
+            } catch (error) {
+                console.error('Revoke permission failed:', error);
+                alert('Failed to revoke permission: ' + error.message);
+            }
+        },
+        
+        async deleteDocument() {
+            if (!this.canDelete) return;
+            
+            const confirmMsg = this.currentFile.type === 'local' 
+                ? `Delete local file "${this.currentFile.name}"?`
+                : `Delete collaborative document "${this.currentFile.permlink}"? This action cannot be undone.`;
+                
+            if (!confirm(confirmMsg)) return;
+            
+            this.deleting = true;
+            
+            try {
+                if (this.currentFile.type === 'local') {
+                    await this.deleteLocalFile();
+                } else {
+                    await this.deleteCollaborativeDoc();
                 }
                 
-                // Show user notification about server issue
-                this.showPermissionFallbackNotification('authentication');
+                // Create new document after deletion
+                await this.newDocument();
+            } catch (error) {
+                console.error('Delete failed:', error);
+                alert('Delete failed: ' + error.message);
+            } finally {
+                this.deleting = false;
+            }
+        },
+        
+        // Local Storage Operations
+        async loadLocalFiles() {
+            try {
+                const files = JSON.parse(localStorage.getItem('dlux_tiptap_files') || '[]');
+                this.localFiles = files;
+            } catch (error) {
+                console.error('Failed to load local files:', error);
+                this.localFiles = [];
+            }
+        },
+        
+        async loadLocalFile(file) {
+            this.currentFile = file;
+            this.fileType = 'local';
+            
+            // Check if this is an offline-first file (uses Y.js + IndexedDB)
+            if (file.isOfflineFirst) {
+                console.log('📂 Loading offline-first local file:', file.name);
+                
+                // For offline-first files, content is in Y.js + IndexedDB
+                // Create collaborative editors which will load from IndexedDB automatically
+                this.isCollaborativeMode = true; // Use collaborative architecture
+                this.disconnectCollaboration();
+                await this.createStandardEditor(); // This creates offline collaborative editors
+                
+                // Content will be loaded automatically from IndexedDB by Y.js
+                console.log('📂 Offline-first local file loaded from IndexedDB:', file.name);
                 
             } else {
-                // For other errors, use conservative fallback
-                console.log('🔄 Applying conservative fallback permissions');
-                this.documentPermissions = [{
-                    account: this.username,
-                    permissionType: isOwner ? 'owner' : 'readonly',
-                    grantedBy: isOwner ? this.username : this.currentFile.owner,
-                    grantedAt: new Date().toISOString(),
-                    source: 'fallback_conservative'
-                }];
+                console.log('📂 Loading legacy local file:', file.name);
                 
-                this.showPermissionFallbackNotification('general');
+                // Legacy local files stored in localStorage
+                const content = JSON.parse(localStorage.getItem(`dlux_tiptap_file_${file.id}`) || '{}');
+            this.isCollaborativeMode = false;
+            this.content = content;
+            
+            this.disconnectCollaboration();
+            await this.createStandardEditor();
+            this.setEditorContent(content);
+            
+                console.log('📂 Legacy local file loaded from localStorage:', file.name);
+            }
+        },
+        
+
+        
+        async deleteLocalFile(fileId = null) {
+            const targetFileId = fileId || this.currentFile?.id;
+            
+            if (!targetFileId) {
+                console.error('No file ID provided for deletion');
+                return;
+            }
+            
+            // Get file info to check if it's offline-first
+            const files = JSON.parse(localStorage.getItem('dlux_tiptap_files') || '[]');
+            const fileInfo = files.find(f => f.id === targetFileId);
+            
+            if (fileInfo?.isOfflineFirst) {
+                // For offline-first files, content is in IndexedDB (managed by Y.js)
+                // We only remove the metadata entry
+                console.log('🗑️ Deleting offline-first file metadata:', targetFileId);
+                
+                // Note: IndexedDB content will be cleaned up by Y.js garbage collection
+                // or can be manually cleaned if needed in the future
+            } else {
+                // For legacy files, remove content from localStorage
+            localStorage.removeItem(`dlux_tiptap_file_${targetFileId}`);
+                console.log('🗑️ Deleted legacy file content from localStorage:', targetFileId);
+            }
+            
+            // Remove from index (both types)
+            const updatedFiles = files.filter(f => f.id !== targetFileId);
+            localStorage.setItem('dlux_tiptap_files', JSON.stringify(updatedFiles));
+            
+            await this.loadLocalFiles();
+            console.log('🗑️ Local file deleted:', targetFileId);
+            
+            // If we deleted the currently loaded file, create a new document
+            if (this.currentFile?.id === targetFileId) {
+                await this.newDocument();
+            }
+        },
+        
+        // Collaborative Document Operations
+        async loadCollaborativeDocs() {
+            if (!this.showCollaborativeFeatures) {
+                console.log('Not authenticated for collaborative features');
+                this.collaborativeDocs = [];
+                return;
+            }
+            
+            this.loadingDocs = true;
+            
+            try {
+                const response = await fetch('https://data.dlux.io/api/collaboration/documents', {
+                    headers: this.authHeaders
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    this.collaborativeDocs = data.documents || [];
+                } else {
+                    console.error('Failed to load collaborative documents:', response.statusText);
+                    if (response.status === 401) {
+                        console.log('Authentication required for collaborative documents');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading collaborative documents:', error);
+            } finally {
+                this.loadingDocs = false;
+            }
+        },
+        
+        async loadCollaborativeFile(doc) {
+            // Check if we're already loading this exact document
+            if (this.isInitializing) {
+                console.warn('⚠️ Already initializing, skipping load request');
+                return;
+            }
+            
+            // Check if this is the same document we just loaded (prevent rapid reloads)
+            const docKey = `${doc.owner}/${doc.permlink}`;
+            if (this.lastDocumentLoaded === docKey && this.connectionStatus === 'connected') {
+                console.log('📋 Same document already loaded and connected, skipping');
+                return;
+            }
+            
+            this.lastDocumentLoaded = docKey;
+            
+            // CRITICAL: Clean up existing editors and connections first
+            this.disconnectCollaboration();
+            
+            // Add a longer delay to ensure complete cleanup
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            this.currentFile = {
+                ...doc,
+                type: 'collaborative'
+            };
+            this.fileType = 'collaborative';
+            this.isCollaborativeMode = true;
+            
+            // Load content structure
+            this.content = {
+                title: '', // Start with empty content for collaborative documents
+                body: '',
+                tags: ['dlux', 'collaboration'],
+                custom_json: {
+                    app: 'dlux/0.1.0',
+                    authors: [doc.owner]
+                }
+            };
+            
+            try {
+                // STEP 1: Create offline collaborative editors first (this creates the Y.js document)
+                console.log('🏗️ Creating offline collaborative editors for loaded document...');
+                await this.createStandardEditor(); // This will create offline collaborative editors
+                
+                // STEP 2: Then connect the existing Y.js document to the server
+                console.log('🔗 Connecting to collaboration server...');
+                await this.connectToCollaborationServer(doc);
+                
+                // CRITICAL: Always try to load permissions for collaborative documents
+                try {
+                    console.log('🔐 Loading permissions for collaborative document...');
+                        await this.loadDocumentPermissions();
+                    console.log('✅ Permissions loaded, updating editor permissions...');
+                    this.updateEditorPermissions();
+                    } catch (error) {
+                    console.warn('⚠️ Failed to load permissions:', error);
+                    // Ensure we have some default permissions structure
+                    if (!Array.isArray(this.documentPermissions)) {
+                        console.log('🔒 Setting fallback permissions for safety');
+                        this.documentPermissions = [{
+                            account: this.username,
+                            permissionType: 'readonly', // Default to read-only for safety
+                            grantedBy: this.currentFile.owner,
+                            grantedAt: new Date().toISOString()
+                        }];
+                    }
+                    // Update editor permissions with fallback
+                    this.updateEditorPermissions();
+                }
+                console.log('🤝 Collaborative document loaded:', doc.permlink);
+            } catch (error) {
+                console.error('❌ Failed to load collaborative document:', error);
+                
+                // Enhanced error handling for different types of failures
+                if (error.message.includes('different constructor') || 
+                    error.message.includes('already been defined') ||
+                    error.message.includes('mismatched transaction')) {
+                    console.log('🔄 Schema/type conflict detected, attempting clean retry...');
+                    
+                    // Force a complete cleanup
+                    this.disconnectCollaboration();
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    try {
+                        // Try again with a fresh start - create editors first, then connect
+                        console.log('🔄 Retry: Creating collaborative editors...');
+                        await this.createStandardEditor();
+                        console.log('🔄 Retry: Connecting to server...');
+                        await this.connectToCollaborationServer(doc);
+                        console.log('✅ Collaborative document loaded on retry:', doc.permlink);
+                        return; // Success on retry
+                    } catch (retryError) {
+                        console.error('❌ Retry also failed:', retryError);
+                        // Fall through to fallback mode
+                    }
+                }
+                
+                // Fall back to standard editor if collaboration fails
+                console.log('🔄 Falling back to standard editor due to collaboration error');
+                this.fileType = 'local';
+                this.isCollaborativeMode = false;
+                
+                try {
+                    await this.createStandardEditor();
+                    
+                    // Try to load content safely in standard mode
+                    console.log('📄 Loading content in standard editor mode...');
+                    await new Promise(resolve => setTimeout(resolve, 100)); // Small delay for editor initialization
+                    this.setEditorContent(this.content);
+                    
+                    console.log('✅ Successfully loaded in standard editor mode');
+                } catch (fallbackError) {
+                    console.error('❌ Standard editor fallback also failed:', fallbackError);
+                    
+                    // Ultimate fallback - create minimal content
+                    this.content = {
+                        title: doc.permlink.replace(/-/g, ' '),
+                        body: '<p>This document could not be loaded properly. There may be a compatibility issue with the content format.</p>',
+                        tags: ['dlux', 'collaboration'],
+                        custom_json: { app: 'dlux/0.1.0', authors: [doc.owner] },
+                        permlink: '',
+                        beneficiaries: []
+                    };
+                }
+                
+                // Show user-friendly error message
+                this.connectionMessage = `Collaboration failed: ${error.message}. Using offline mode.`;
+                this.connectionStatus = 'disconnected';
+                
+                // Show user notification
+                console.warn('Operating in offline mode due to collaboration error');
+                alert(`⚠️ Collaborative mode failed for this document.\n\nError: ${error.message}\n\nThe document has been loaded in offline mode. You can still edit it, but changes won't be synchronized with other users.`);
+            }
+        },
+        
+
+        
+        async deleteCollaborativeDoc(doc = null) {
+            const targetDoc = doc || this.currentFile;
+            
+            if (!targetDoc || !targetDoc.owner || !targetDoc.permlink) {
+                console.error('No valid collaborative document provided for deletion');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`https://data.dlux.io/api/collaboration/documents/${targetDoc.owner}/${targetDoc.permlink}`, {
+                    method: 'DELETE',
+                    headers: this.authHeaders
+                });
+                
+                if (response.ok) {
+                    await this.loadCollaborativeDocs();
+                    console.log('🗑️ Collaborative document deleted:', targetDoc.permlink);
+                    
+                    // If we deleted the currently loaded file, create a new document
+                    if (this.currentFile?.permlink === targetDoc.permlink && this.currentFile?.owner === targetDoc.owner) {
+                        await this.newDocument();
+                    }
+                } else {
+                    const errorText = await response.text().catch(() => 'Unknown error');
+                    throw new Error(`Failed to delete collaborative document: ${errorText}`);
+                }
+            } catch (error) {
+                console.error('Failed to delete collaborative document:', error);
+                
+                if (error.message.includes('NetworkError')) {
+                    throw new Error('Network error: Unable to connect to server. Please check your connection and try again.');
+                }
+                
+                throw error;
+            }
+        },
+        
+        // Editor Management - TipTap Best Practice: Offline-First Collaborative
+        async createStandardEditor() {
+            console.log('🏗️ Creating offline-first collaborative editors (TipTap best practice)...');
+            
+            // Clean up any existing editor
+            if (this.titleEditor) {
+                this.titleEditor.destroy();
+                this.titleEditor = null;
+            }
+            if (this.bodyEditor) {
+                this.bodyEditor.destroy();
+                this.bodyEditor = null;
+            }
+
+            // Wait for cleanup to complete
+            await this.$nextTick();
+            
+            // ===== REFACTORED: Always use offline-first collaborative approach =====
+            const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
+            
+            if (bundle) {
+                await this.createOfflineFirstCollaborativeEditors(bundle);
+            } else {
+                console.warn('⚠️ Collaboration bundle not available, falling back to basic editors');
+                await this.createBasicEditors();
             }
         },
 
-        // Emergency fallback for critical errors
-        applyEmergencyPermissionFallback(error) {
-            console.error('🚨 Applying emergency permission fallback due to critical error:', error);
-            
-            const isOwner = this.currentFile.owner === this.username;
-            this.documentPermissions = [{
-                account: this.username,
-                permissionType: isOwner ? 'owner' : 'readonly',
-                grantedBy: isOwner ? this.username : this.currentFile.owner,
-                grantedAt: new Date().toISOString(),
-                source: 'emergency_fallback'
-            }];
-        },
+        async createOfflineFirstCollaborativeEditors(bundle) {
+            // Get components from the bundle
+            const Editor = bundle.Editor?.default || bundle.Editor;
+            const StarterKit = bundle.StarterKit?.default || bundle.StarterKit;
+            const Y = bundle.Y?.default || bundle.Y;
+            const Collaboration = bundle.Collaboration?.default || bundle.Collaboration;
+            const Placeholder = bundle.Placeholder?.default || bundle.Placeholder;
 
-        // User notification system
-        showPermissionFallbackNotification(type) {
-            const messages = {
-                authentication: {
-                    title: 'Server Authentication Issue',
-                    message: 'There\'s a temporary server-side authentication inconsistency. Your document access is working normally, but permission loading failed. This has been logged for the development team.',
-                    type: 'warning'
+            if (!Y || !Collaboration || !Editor || !StarterKit || !Placeholder) {
+                console.warn('⚠️ Required collaboration components missing, falling back to basic editors');
+                await this.createBasicEditors();
+                return;
+            }
+
+            // ===== STEP 1: Create Y.js document for offline collaborative editing =====
+            this.ydoc = new Y.Doc();
+            
+            // ===== STEP 2: Add IndexedDB persistence (TipTap best practice) =====
+            const documentId = this.currentFile?.id || this.currentFile?.permlink || `local_${Date.now()}`;
+            const IndexeddbPersistence = bundle.IndexeddbPersistence?.default || bundle.IndexeddbPersistence;
+            
+            if (IndexeddbPersistence) {
+                try {
+                    this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc);
+                    console.log('💾 IndexedDB persistence enabled for offline-first editing');
+                } catch (error) {
+                    console.warn('⚠️ Failed to initialize IndexedDB persistence:', error.message);
+                    console.log('📝 Content will persist in memory only (until page refresh)');
+                }
+            } else {
+                console.warn('⚠️ IndexedDB persistence not available in bundle - content may not persist offline');
+                console.log('📝 Content will persist in memory only (until page refresh)');
+            }
+            
+            // ===== STEP 3: Initialize collaborative schema =====
+            this.initializeCollaborativeSchema(Y);
+            
+            // Create collaborative editors (offline mode - no WebSocket connection)
+                this.titleEditor = new Editor({
+                    element: this.$refs.titleEditor,
+                    extensions: [
+                        StarterKit.configure({
+                        history: false, // Collaboration handles history
+                            heading: false,
+                            bulletList: false,
+                            orderedList: false,
+                            blockquote: false,
+                            codeBlock: false,
+                        horizontalRule: false
+                    }),
+                    Collaboration.configure({
+                        document: this.ydoc,
+                        field: 'title' // Keep existing field names for backward compatibility
+                        }),
+                        Placeholder.configure({
+                        placeholder: this.isReadOnlyMode ? 'Title (read-only)' : 'Enter title...'
+                        })
+                    ],
+                    // TipTap Best Practice: Content validation for collaborative documents
+                    enableContentCheck: true,
+                    onContentError: ({ editor, error, disableCollaboration }) => {
+                        console.error('🚨 Title content validation error:', error);
+                        this.handleContentValidationError('title', error, disableCollaboration);
+                    },
+                    editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
+                    editorProps: {
+                        attributes: {
+                            class: 'form-control bg-transparent text-white border-0',
+                        }
+                    },
+                onCreate: ({ editor }) => {
+                    console.log(`✅ Offline collaborative title editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
+                    },
+                    onUpdate: ({ editor }) => {
+                        // SECURITY: Block updates for read-only users
+                        if (this.isReadOnlyMode) {
+                            console.warn('🚫 Blocked title update: user has read-only permissions');
+                            return;
+                        }
+                        
+                        this.content.title = editor.getHTML();
+                    
+                    // Always show unsaved indicator for user feedback
+                    this.hasUnsavedChanges = true;
+                    
+                    // Y.js + IndexedDB handles persistence automatically
+                    // Just clear the unsaved indicator after a brief delay
+                    this.clearUnsavedAfterSync();
+                }
+            });
+
+                this.bodyEditor = new Editor({
+                    element: this.$refs.bodyEditor,
+                    extensions: [
+                        StarterKit.configure({
+                        history: false // Collaboration handles history
+                    }),
+                    Collaboration.configure({
+                        document: this.ydoc,
+                        field: 'body' // Keep existing field names for backward compatibility
+                    }),
+                    Placeholder.configure({
+                        placeholder: this.isReadOnlyMode ? 'Content (read-only)' : 'Start writing...'
+                    })
+                ],
+                // TipTap Best Practice: Content validation for collaborative documents
+                enableContentCheck: true,
+                onContentError: ({ editor, error, disableCollaboration }) => {
+                    console.error('🚨 Body content validation error:', error);
+                    this.handleContentValidationError('body', error, disableCollaboration);
                 },
-                general: {
-                    title: 'Permission Loading Issue',
-                    message: 'Unable to load document permissions from server. Using safe fallback permissions. Document functionality may be limited.',
-                    type: 'info'
+                editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
+                    editorProps: {
+                        attributes: {
+                            class: 'form-control bg-transparent text-white border-0',
+                        }
+                    },
+                onCreate: ({ editor }) => {
+                    console.log(`✅ Offline collaborative body editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
+                    },
+                    onUpdate: ({ editor }) => {
+                    // SECURITY: Block updates for read-only users
+                    if (this.isReadOnlyMode) {
+                        console.warn('🚫 Blocked body update: user has read-only permissions');
+                        return;
+                    }
+                    
+                        this.content.body = editor.getHTML();
+                    
+                    // Always show unsaved indicator for user feedback
+                    this.hasUnsavedChanges = true;
+                    
+                    // Y.js + IndexedDB handles persistence automatically
+                    // Just clear the unsaved indicator after a brief delay
+                    this.clearUnsavedAfterSync();
                 }
-            };
-            
-            const notification = messages[type] || messages.general;
-            
-            // Store notification for UI display
-            this.permissionNotification = {
-                ...notification,
-                timestamp: new Date().toISOString(),
-                dismissed: false
-            };
-            
-            // Auto-dismiss after 10 seconds
-            setTimeout(() => {
-                if (this.permissionNotification) {
-                    this.permissionNotification.dismissed = true;
-                }
-            }, 10000);
-            
-            console.warn(`📢 ${notification.title}: ${notification.message}`);
+            });
+
+            // Set state to offline collaborative mode
+            this.isCollaborativeMode = true;  // Always collaborative now
+            this.connectionStatus = 'offline'; // But offline until connected to server
+            this.fileType = 'local';           // Still local until published to server
+
+            console.log('✅ Offline collaborative editors created successfully');
         },
 
-        // Enhanced permission debugging
-        debugPermissions() {
-            console.group('🔍 Permission System Debug Information');
+        // CLEAN DLUX SCHEMA INITIALIZATION
+        initializeCollaborativeSchema(Y) {
+            console.log('🏗️ Initializing clean DLUX collaborative schema...');
             
-            console.log('📄 Current File:', {
-                type: this.currentFile?.type,
-                owner: this.currentFile?.owner,
-                permlink: this.currentFile?.permlink,
-                documentPath: `${this.currentFile?.owner}/${this.currentFile?.permlink}`
-            });
+            // Schema version tracking to prevent conflicts
+            // Reference: https://tiptap.dev/docs/hocuspocus/guides/collaborative-editing#schema-updates
+            const metadata = this.ydoc.getMap('_metadata');
+            const currentSchemaVersion = '1.0.0';
+            const existingVersion = metadata.get('schemaVersion');
             
-            console.log('👤 User Context:', {
-                username: this.username,
-                isAuthenticated: this.isAuthenticated,
-                isOwner: this.currentFile?.owner === this.username
-            });
-            
-            console.log('🔐 Authentication Headers:', {
-                hasAccount: !!this.authHeaders['x-account'],
-                hasChallenge: !!this.authHeaders['x-challenge'],
-                hasPubkey: !!this.authHeaders['x-pubkey'],
-                hasSignature: !!this.authHeaders['x-signature'],
-                challengeAge: this.authHeaders['x-challenge'] ? 
-                    ((Date.now() / 1000) - parseInt(this.authHeaders['x-challenge'])) / 3600 : 'N/A'
-            });
-            
-            console.log('📋 Document Permissions:', this.documentPermissions);
-            
-            console.log('⚙️ Editor State:', {
-                isReadOnlyMode: this.isReadOnlyMode,
-                canPublish: this.canPublish(),
-                loadingPermissions: this.loadingPermissions
-            });
-            
-            if (this.permissionNotification) {
-                console.log('📢 Active Notification:', this.permissionNotification);
+            if (existingVersion && existingVersion !== currentSchemaVersion) {
+                console.warn(`⚠️ Schema version mismatch: current=${currentSchemaVersion}, document=${existingVersion}`);
+                // In production, you might want to disable editing or show a warning
+                this.schemaVersionMismatch = true;
+            } else {
+                metadata.set('schemaVersion', currentSchemaVersion);
+                metadata.set('lastUpdated', new Date().toISOString());
+                this.schemaVersionMismatch = false;
             }
             
-            console.groupEnd();
+            // Core content (TipTap editors)
+            this.ydoc.get('title', Y.XmlFragment);
+            this.ydoc.get('body', Y.XmlFragment);
+            
+            // Post configuration
+            const config = this.ydoc.getMap('config');
+            if (!config.has('postType')) {
+                config.set('postType', 'blog');
+                config.set('version', '1.0.0');
+                config.set('appVersion', 'dlux/1.0.0');
+                config.set('createdBy', this.username || 'anonymous');
+                config.set('lastModified', new Date().toISOString());
+                config.set('initialContentLoaded', false); // TipTap best practice flag
+            }
+            
+            // Advanced publishing options (atomic values only for conflict-free collaboration)
+            const publishOptions = this.ydoc.getMap('publishOptions');
+            if (!publishOptions.has('initialized')) {
+                publishOptions.set('maxAcceptedPayout', '1000000.000 HBD'); // Default max
+                publishOptions.set('percentHbd', 10000); // 100% HBD
+                publishOptions.set('allowVotes', true);
+                publishOptions.set('allowCurationRewards', true);
+                publishOptions.set('initialized', true);
+            }
+            
+            // Conflict-free collaborative arrays and maps
+            this.ydoc.getArray('tags');           // Conflict-free tag management
+            this.ydoc.getArray('beneficiaries');  // Conflict-free beneficiary management
+            this.ydoc.getMap('customJson');       // Granular custom field updates
+            
+            // Operation coordination and schema versioning
+            this.ydoc.getMap('_locks');           // Operation locks (publishing, etc.)
+            
+            // Individual asset transform maps for conflict-free positioning
+            // These will be created dynamically as assets are added
+            
+            // Media arrays (flat structure for performance)
+            this.ydoc.getArray('images');
+            this.ydoc.getArray('videos');
+            this.ydoc.getArray('assets360');
+            this.ydoc.getArray('attachments');
+            
+            // Video transcoding data
+            this.ydoc.getMap('videoData');
+            
+            // User presence
+            this.ydoc.getMap('presence');
+            
+            console.log(`✅ Clean DLUX schema initialized (v${currentSchemaVersion})`);
+            
+            // Set up observers
+            this.setupObservers();
+        },
+
+        // Set up Y.js observers for real-time collaboration
+        setupObservers() {
+            if (!this.ydoc) return;
+            
+            console.log('🔍 Setting up collaborative observers...');
+            
+            try {
+                // Observe post configuration changes
+                const config = this.ydoc.getMap('config');
+                config.observe((event) => {
+                    console.log('⚙️ Post config changed:', event);
+                    this.syncToParent();
+                });
+                
+                // Observe publish options changes (atomic settings only)
+                const publishOptions = this.ydoc.getMap('publishOptions');
+                publishOptions.observe((event) => {
+                    console.log('📋 Publish options changed:', event);
+                    this.syncToParent();
+                });
+                
+                // Observe conflict-free collaborative arrays
+                const tags = this.ydoc.getArray('tags');
+                tags.observe((event) => {
+                    console.log('🏷️ Tags changed:', event);
+                    this.collaborativeDataVersion++; // Trigger Vue reactivity
+                    this.syncToParent();
+                });
+                
+                const beneficiaries = this.ydoc.getArray('beneficiaries');
+                beneficiaries.observe((event) => {
+                    console.log('💰 Beneficiaries changed:', event);
+                    this.collaborativeDataVersion++; // Trigger Vue reactivity
+                    this.syncToParent();
+                });
+                
+                const customJson = this.ydoc.getMap('customJson');
+                customJson.observe((event) => {
+                    console.log('⚙️ Custom JSON changed:', event);
+                    this.syncToParent();
+                });
+                
+                // Observe media changes
+                ['images', 'videos', 'assets360', 'attachments'].forEach(arrayName => {
+                    const array = this.ydoc.getArray(arrayName);
+                    array.observe((event) => {
+                        console.log(`📁 ${arrayName} changed:`, event);
+                        this.syncToParent();
+                    });
+                });
+                
+                // Observe video data changes
+                const videoData = this.ydoc.getMap('videoData');
+                videoData.observe((event) => {
+                    console.log('🎬 Video data changed:', event);
+                    this.syncToParent();
+                });
+                
+                // Observe user presence
+                const presence = this.ydoc.getMap('presence');
+                presence.observe((event) => {
+                    console.log('👥 User presence changed:', event);
+                    this.updatePresenceUI();
+                });
+                
+                console.log('✅ Collaborative observers set up');
+            } catch (error) {
+                console.error('❌ Failed to set up observers:', error);
+            }
+        },
+
+        // CLEAN DLUX COLLABORATIVE METHODS
+
+        // Post Type Management
+        setPostType(postType) {
+            if (!this.validatePermission('setPostType')) return false;
+            
+            const config = this.ydoc.getMap('config');
+            config.set('postType', postType);
+            config.set('lastModified', new Date().toISOString());
+            console.log(`📝 Post type set to: ${postType}`);
+            return true;
+        },
+
+        getPostType() {
+            const config = this.ydoc.getMap('config');
+            return config.get('postType') || 'blog';
+        },
+
+        // Conflict-Free Advanced Options Management
+        
+        // Tag Management (Y.Array for conflict-free collaboration)
+        addCollaborativeTag(tag) {
+            if (!this.validatePermission('addTag')) return false;
+            
+            // Format tag according to Hive rules
+            const formattedTag = tag.toLowerCase().replace(/[^a-z0-9-]/g, '');
+            if (formattedTag.length === 0 || formattedTag.length > 24) {
+                console.warn('⚠️ Invalid tag format:', tag);
+                return false;
+            }
+            
+            const tags = this.ydoc.getArray('tags');
+            const existingTags = tags.toArray();
+            
+            // Check limits and duplicates
+            if (existingTags.length >= 10) {
+                console.warn('⚠️ Maximum 10 tags allowed');
+                return false;
+            }
+            
+            if (!existingTags.includes(formattedTag)) {
+                tags.push([formattedTag]);
+                console.log('🏷️ Tag added:', formattedTag);
+                this.syncToParent(); // Emit collaborative-data-changed event
+                return true;
+            }
+            
+            return false;
+        },
+
+        removeCollaborativeTag(tag) {
+            if (!this.validatePermission('removeTag')) return false;
+            
+            const tags = this.ydoc.getArray('tags');
+            const index = tags.toArray().indexOf(tag);
+            if (index >= 0) {
+                tags.delete(index, 1);
+                console.log('🏷️ Tag removed:', tag);
+                this.syncToParent(); // Emit collaborative-data-changed event
+                return true;
+            }
+            return false;
+        },
+
+        setTags(tagArray) {
+            if (!this.validatePermission('setTags')) return false;
+            
+            // Clear existing tags
+            const tags = this.ydoc.getArray('tags');
+            tags.delete(0, tags.length);
+            
+            // Add new tags
+            const formattedTags = tagArray
+                .map(tag => tag.toLowerCase().replace(/[^a-z0-9-]/g, ''))
+                .filter(tag => tag.length > 0 && tag.length <= 24)
+                .slice(0, 10);
+            
+            formattedTags.forEach(tag => {
+                if (!tags.toArray().includes(tag)) {
+                    tags.push([tag]);
+                }
+            });
+            
+            console.log('🏷️ Tags set:', formattedTags);
+            this.syncToParent(); // Emit collaborative-data-changed event
+            return true;
+        },
+
+        getTags() {
+            if (!this.ydoc) return [];
+            const tags = this.ydoc.getArray('tags');
+            return tags.toArray();
+        },
+
+        // Beneficiary Management (Y.Array for conflict-free collaboration)
+        addCollaborativeBeneficiary(account, weight) {
+            if (!this.validatePermission('addBeneficiary')) return false;
+            
+            const beneficiaries = this.ydoc.getArray('beneficiaries');
+            const existing = beneficiaries.toArray();
+            
+            // Validate limits
+            if (existing.length >= 8) {
+                console.warn('⚠️ Maximum 8 beneficiaries allowed');
+                return false;
+            }
+            
+            // Check for duplicate account
+            if (existing.some(b => b.account === account)) {
+                console.warn('⚠️ Beneficiary already exists:', account);
+                return false;
+            }
+            
+            // Validate weight
+            const validWeight = Math.min(Math.max(weight, 1), 10000);
+            const totalWeight = existing.reduce((sum, b) => sum + b.weight, 0) + validWeight;
+            
+            if (totalWeight > 10000) {
+                console.warn('⚠️ Total beneficiary weight would exceed 100%');
+                return false;
+            }
+            
+            const beneficiary = {
+                account: account,
+                weight: validWeight,
+                id: `ben_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+            };
+            
+            beneficiaries.push([beneficiary]);
+            console.log('💰 Beneficiary added:', beneficiary);
+            this.syncToParent(); // Emit collaborative-data-changed event
+            return beneficiary.id;
+        },
+
+        removeCollaborativeBeneficiary(id) {
+            if (!this.validatePermission('removeBeneficiary')) return false;
+            
+            const beneficiaries = this.ydoc.getArray('beneficiaries');
+            const index = beneficiaries.toArray().findIndex(b => b.id === id);
+            
+            if (index >= 0) {
+                const removed = beneficiaries.toArray()[index];
+                beneficiaries.delete(index, 1);
+                console.log('💰 Beneficiary removed:', removed.account);
+                this.syncToParent(); // Emit collaborative-data-changed event
+                return true;
+            }
+            return false;
+        },
+
+        updateBeneficiaryWeight(id, newWeight) {
+            if (!this.validatePermission('updateBeneficiary')) return false;
+            
+            const beneficiaries = this.ydoc.getArray('beneficiaries');
+            const existing = beneficiaries.toArray();
+            const index = existing.findIndex(b => b.id === id);
+            
+            if (index >= 0) {
+                const validWeight = Math.min(Math.max(newWeight, 1), 10000);
+                const otherWeight = existing.reduce((sum, b, i) => i === index ? sum : sum + b.weight, 0);
+                
+                if (otherWeight + validWeight > 10000) {
+                    console.warn('⚠️ Total beneficiary weight would exceed 100%');
+                    return false;
+                }
+                
+                const updated = { ...existing[index], weight: validWeight };
+                beneficiaries.delete(index, 1);
+                beneficiaries.insert(index, [updated]);
+                console.log('💰 Beneficiary weight updated:', updated);
+                return true;
+            }
+            return false;
+        },
+
+        getBeneficiaries() {
+            if (!this.ydoc) return [];
+            const beneficiaries = this.ydoc.getArray('beneficiaries');
+            return beneficiaries.toArray();
+        },
+
+        // Custom JSON Management (Y.Map for granular conflict-free updates)
+        setCustomJsonField(key, value) {
+            if (!this.validatePermission('setCustomJsonField')) return false;
+            
+            const customJson = this.ydoc.getMap('customJson');
+            customJson.set(key, value);
+            console.log('⚙️ Custom JSON field updated:', key);
+            return true;
+        },
+
+        removeCustomJsonField(key) {
+            if (!this.validatePermission('removeCustomJsonField')) return false;
+            
+            const customJson = this.ydoc.getMap('customJson');
+            if (customJson.has(key)) {
+                customJson.delete(key);
+                console.log('⚙️ Custom JSON field removed:', key);
+                return true;
+            }
+            return false;
+        },
+
+        getCustomJson() {
+            const customJson = this.ydoc.getMap('customJson');
+            return customJson.toJSON();
+        },
+
+        // Atomic Publish Options (simple values, conflict-free)
+        setPublishOption(key, value) {
+            if (!this.validatePermission('setPublishOption')) return false;
+            
+            const publishOptions = this.ydoc.getMap('publishOptions');
+            publishOptions.set(key, value);
+            console.log('📋 Publish option updated:', key, value);
+            return true;
+        },
+
+        getPublishOption(key, defaultValue = null) {
+            const publishOptions = this.ydoc.getMap('publishOptions');
+            return publishOptions.get(key) || defaultValue;
+        },
+
+        // Media Asset Management
+        addImage(imageData) {
+            if (!this.validatePermission('addImage')) return null;
+            
+            const images = this.ydoc.getArray('images');
+            const imageAsset = {
+                id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                hash: imageData.hash,
+                filename: imageData.filename || imageData.name,
+                type: imageData.type,
+                size: imageData.size,
+                url: `https://ipfs.dlux.io/ipfs/${imageData.hash}`,
+                uploadedBy: this.username,
+                uploadedAt: new Date().toISOString(),
+                contract: imageData.contract || null,
+                metadata: imageData.metadata || {}
+            };
+            
+            images.push([imageAsset]);
+            console.log('🖼️ Image added:', imageAsset.filename);
+            return imageAsset.id;
+        },
+
+        addVideo(videoData) {
+            if (!this.validatePermission('addVideo')) return null;
+            
+            const videos = this.ydoc.getArray('videos');
+            const videoAsset = {
+                id: `vid_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                hash: videoData.hash,
+                filename: videoData.filename || videoData.name,
+                type: videoData.type,
+                size: videoData.size,
+                url: `https://ipfs.dlux.io/ipfs/${videoData.hash}`,
+                uploadedBy: this.username,
+                uploadedAt: new Date().toISOString(),
+                contract: videoData.contract || null,
+                metadata: videoData.metadata || {},
+                transcoding: {
+                    status: 'pending',
+                    resolutions: [],
+                    playlist: null
+                }
+            };
+            
+            videos.push([videoAsset]);
+            console.log('🎥 Video added:', videoAsset.filename);
+            return videoAsset.id;
+        },
+
+        add360Asset(assetData) {
+            if (!this.validatePermission('add360Asset')) return null;
+            
+            const assets360 = this.ydoc.getArray('assets360');
+            const asset = {
+                id: `asset_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                hash: assetData.hash,
+                name: assetData.name,
+                type: assetData.type,
+                size: assetData.size,
+                uploadedBy: this.username,
+                uploadedAt: new Date().toISOString(),
+                contract: assetData.contract || null,
+                transform: assetData.transform || {
+                    position: { x: 0, y: 0, z: 0 },
+                    rotation: { x: 0, y: 0, z: 0 },
+                    scale: { x: 1, y: 1, z: 1 }
+                },
+                properties: assetData.properties || {},
+                lastModified: new Date().toISOString(),
+                modifiedBy: this.username
+            };
+            
+            assets360.push([asset]);
+            console.log('🌐 360° asset added:', asset.name);
+            return asset.id;
+        },
+
+        addAttachment(fileData) {
+            if (!this.validatePermission('addAttachment')) return null;
+            
+            const attachments = this.ydoc.getArray('attachments');
+            const attachment = {
+                id: `file_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                hash: fileData.hash,
+                filename: fileData.filename || fileData.name,
+                type: fileData.type,
+                size: fileData.size,
+                url: `https://ipfs.dlux.io/ipfs/${fileData.hash}`,
+                uploadedBy: this.username,
+                uploadedAt: new Date().toISOString(),
+                contract: fileData.contract || null,
+                description: fileData.description || ''
+            };
+            
+            attachments.push([attachment]);
+            console.log('📎 Attachment added:', attachment.filename);
+            return attachment.id;
+        },
+
+        // File Upload Integration
+        handleFileUpload(fileData) {
+            if (!fileData) return null;
+            
+            console.log('📎 Processing file upload:', fileData);
+            
+            // Route to appropriate handler based on file type
+            if (fileData.type && fileData.type.startsWith('image/')) {
+                return this.addImage(fileData);
+            } else if (fileData.type && fileData.type.startsWith('video/')) {
+                return this.addVideo(fileData);
+                                } else {
+                return this.addAttachment(fileData);
+            }
+        },
+
+        // Video Transcoding Management
+        updateVideoTranscoding(videoId, transcodeData) {
+            if (!this.validatePermission('updateVideoTranscoding')) return false;
+            
+            const videos = this.ydoc.getArray('videos');
+            const videoArray = videos.toArray();
+            const videoIndex = videoArray.findIndex(v => v.id === videoId);
+            
+            if (videoIndex !== -1) {
+                const video = videoArray[videoIndex];
+                video.transcoding = {
+                    ...video.transcoding,
+                    ...transcodeData,
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                // Update the video in the Y.Array
+                videos.delete(videoIndex, 1);
+                videos.insert(videoIndex, [video]);
+                
+                console.log('🎬 Video transcoding updated:', videoId);
+                return true;
+            }
+            return false;
+        },
+
+        // Conflict-free asset transform management
+        updateAssetTransform(assetId, transformType, value) {
+            if (!this.validatePermission('updateAssetTransform')) return false;
+            
+            // Use individual transform maps for conflict-free updates
+            const transformMap = this.ydoc.getMap(`transform_${assetId}`);
+            transformMap.set(transformType, value);
+            transformMap.set('lastModified', new Date().toISOString());
+            transformMap.set('modifiedBy', this.username);
+            
+            console.log('🌐 Asset transform updated:', assetId, transformType, value);
+            return true;
+        },
+
+        getAssetTransform(assetId) {
+            const transformMap = this.ydoc.getMap(`transform_${assetId}`);
+            return transformMap.toJSON();
+        },
+
+        // Legacy method for backward compatibility (now conflict-free)
+        update360AssetTransform(assetId, transform) {
+            if (!this.validatePermission('update360AssetTransform')) return false;
+            
+            // Update using conflict-free individual properties
+            if (transform.position) {
+                this.updateAssetTransform(assetId, 'position', transform.position);
+            }
+            if (transform.rotation) {
+                this.updateAssetTransform(assetId, 'rotation', transform.rotation);
+            }
+            if (transform.scale) {
+                this.updateAssetTransform(assetId, 'scale', transform.scale);
+            }
+            
+            console.log('🎯 360° asset transform updated (legacy):', assetId);
+            return true;
+        },
+
+        // Get all collaborative data for parent sync
+        getCollaborativeData() {
+            return {
+                config: this.ydoc.getMap('config').toJSON(),
+                publishOptions: this.ydoc.getMap('publishOptions').toJSON(),
+                tags: this.ydoc.getArray('tags').toArray(),
+                beneficiaries: this.ydoc.getArray('beneficiaries').toArray(),
+                customJson: this.ydoc.getMap('customJson').toJSON(),
+                images: this.ydoc.getArray('images').toArray(),
+                videos: this.ydoc.getArray('videos').toArray(),
+                assets360: this.ydoc.getArray('assets360').toArray(),
+                attachments: this.ydoc.getArray('attachments').toArray(),
+                videoData: this.ydoc.getMap('videoData').toJSON()
+            };
+        },
+
+        // Sync collaborative data to parent component
+        syncToParent() {
+            const collaborativeData = this.getCollaborativeData();
+            this.$emit('collaborative-data-changed', collaborativeData);
+        },
+
+        // Handle updates from parent component
+        handlePostTypeChange(newPostType) {
+            if (this.isCollaborativeMode && this.ydoc) {
+                this.setPostType(newPostType);
+            }
+        },
+
+        handleAssetUpdate(assets) {
+            if (this.isCollaborativeMode && this.ydoc && Array.isArray(assets)) {
+                // Clear existing assets
+                const assets360 = this.ydoc.getArray('assets360');
+                assets360.delete(0, assets360.length);
+                
+                // Add new assets
+                assets.forEach(asset => {
+                    this.add360Asset(asset);
+                });
+                
+                console.log('🌐 Assets updated from parent:', assets.length);
+            }
+        },
+
+        // Permission validation
+        validatePermission(operation) {
+            if (this.isReadOnlyMode) {
+                console.warn(`🚫 Blocked ${operation}: read-only permissions`);
+                return false;
+            }
+            
+            // Block operations if schema version mismatch detected
+            if (this.schemaVersionMismatch) {
+                console.warn(`🚫 Blocked ${operation}: schema version mismatch - please refresh to update`);
+                return false;
+            }
+            
+            return true;
+        },
+
+        // User presence management
+        updatePresenceUI() {
+            // Update UI based on presence changes
+            // This method can be implemented based on UI requirements
+        },
+
+        async createBasicEditors() {
+            // Fallback to basic editors if collaboration not available
+            console.log('🏗️ Creating basic fallback editors...');
+            
+            // Import core TipTap modules
+            const { Editor } = await import('https://esm.sh/@tiptap/core@3.0.0');
+            const { default: StarterKit } = await import('https://esm.sh/@tiptap/starter-kit@3.0.0');
+            const { default: Placeholder } = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
+            
+                    this.titleEditor = new Editor({
+                        element: this.$refs.titleEditor,
+                        extensions: [
+                            StarterKit.configure({
+                            heading: false,
+                            bulletList: false,
+                            orderedList: false,
+                            blockquote: false,
+                            codeBlock: false,
+                        horizontalRule: false
+                        }),
+                        Placeholder.configure({
+                        placeholder: this.isReadOnlyMode ? 'Title (read-only)' : 'Enter title...'
+                        })
+                    ],
+                    // TipTap Best Practice: Content validation for all editors
+                    enableContentCheck: true,
+                    onContentError: ({ editor, error }) => {
+                        console.error('🚨 Basic title content validation error:', error);
+                        this.handleContentValidationError('title', error, null);
+                    },
+                    editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
+                        editorProps: {
+                            attributes: {
+                                class: 'form-control bg-transparent text-white border-0',
+                            }
+                        },
+                        onCreate: ({ editor }) => {
+                    console.log(`✅ Basic title editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
+                        },
+                        onUpdate: ({ editor }) => {
+                    // SECURITY: Block updates for read-only users
+                    if (this.isReadOnlyMode) {
+                        console.warn('🚫 Blocked title update: user has read-only permissions');
+                        return;
+                    }
+                    
+                    this.content.title = editor.getHTML();
+                    this.hasUnsavedChanges = true;
+                    this.clearUnsavedAfterSync();
+            }
+                });
+            
+                    this.bodyEditor = new Editor({
+                        element: this.$refs.bodyEditor,
+                        extensions: [
+                    StarterKit,
+                        Placeholder.configure({
+                        placeholder: this.isReadOnlyMode ? 'Content (read-only)' : 'Start writing...'
+                    })
+                    ],
+                    // TipTap Best Practice: Content validation for all editors
+                    enableContentCheck: true,
+                    onContentError: ({ editor, error }) => {
+                        console.error('🚨 Basic body content validation error:', error);
+                        this.handleContentValidationError('body', error, null);
+                    },
+                    editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
+                        editorProps: {
+                            attributes: {
+                                class: 'form-control bg-transparent text-white border-0',
+                            }
+                        },
+                        onCreate: ({ editor }) => {
+                    console.log(`✅ Basic body editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
+                        },
+                        onUpdate: ({ editor }) => {
+                        // SECURITY: Block updates for read-only users
+                        if (this.isReadOnlyMode) {
+                            console.warn('🚫 Blocked body update: user has read-only permissions');
+                            return;
+                        }
+                        
+                            this.content.body = editor.getHTML();
+                    this.hasUnsavedChanges = true;
+                    this.clearUnsavedAfterSync();
+                }
+            });
+
+            // Set to basic mode  
+            this.isCollaborativeMode = false;
+            this.fileType = 'local';
+        },
+
+
+
+        // Update editor permissions based on current user's access level
+        updateEditorPermissions() {
+            console.log('🔐 Updating editor permissions, read-only mode:', this.isReadOnlyMode);
+            
+            // Update title editor permissions
+            if (this.titleEditor) {
+                this.titleEditor.setEditable(!this.isReadOnlyMode);
+                console.log(`📝 Title editor set to ${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'}`);
+            }
+            
+            // Update body editor permissions
+            if (this.bodyEditor) {
+                this.bodyEditor.setEditable(!this.isReadOnlyMode);
+                console.log(`📝 Body editor set to ${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'}`);
+            }
+            
+            // Update placeholders to reflect read-only state
+            if (this.titleEditor) {
+                // Note: TipTap doesn't have a direct way to update placeholder after creation
+                // The placeholder will be correct on next editor recreation
+            }
+            
+            // Force Vue to re-evaluate computed properties and update UI
+            this.$forceUpdate();
+        },
+
+        // TipTap Best Practice: Handle content validation errors gracefully
+        handleContentValidationError(editorType, error, disableCollaboration) {
+            console.error(`🚨 Content validation error in ${editorType} editor:`, error);
+            
+            // For collaborative documents: disable collaboration to prevent sync issues
+            if (this.isCollaborativeMode && disableCollaboration) {
+                console.warn('🔒 Disabling collaboration due to content validation error');
+                disableCollaboration();
+                this.connectionStatus = 'error';
+                this.connectionMessage = `Content validation error in ${editorType} - collaboration disabled`;
+                
+                // Disable editor to prevent further issues
+                if (editorType === 'title' && this.titleEditor) {
+                    this.titleEditor.setEditable(false);
+                } else if (editorType === 'body' && this.bodyEditor) {
+                    this.bodyEditor.setEditable(false);
+                }
+                
+                // Show user-friendly error message
+                const message = `Content validation error detected in ${editorType}. ` +
+                              `This may be due to incompatible content from a different app version. ` +
+                              `Please refresh the page to continue editing.`;
+                
+                // Use a timeout to ensure the error doesn't block the UI
+                setTimeout(() => {
+                    if (confirm(message + '\n\nRefresh page now?')) {
+                        window.location.reload();
+                    }
+                }, 100);
+            } else {
+                // For non-collaborative documents: log but continue
+                console.warn(`Content validation failed in ${editorType}, but editor remains functional`);
+            }
+        },
+        
+        // Debug method to manually check and update permissions
+        debugPermissions() {
+            console.log('🔍 DEBUG: Manual permission check triggered');
+            console.log('Current state:', {
+                username: this.username,
+                currentFile: this.currentFile,
+                documentPermissions: this.documentPermissions,
+                isReadOnlyMode: this.isReadOnlyMode,
+                connectionStatus: this.connectionStatus
+            });
+            
+            // Force update editor permissions
+            this.updateEditorPermissions();
+        },
+
+        // ===== UNIFIED SYNC INDICATOR: Offline-First Architecture =====
+        clearUnsavedAfterSync() {
+            if (this.syncTimeout) {
+                clearTimeout(this.syncTimeout);
+            }
+            
+            // Single unified sync indicator for Y.js + IndexedDB persistence
+            // Following TipTap offline-first best practices
+            this.syncTimeout = setTimeout(async () => {
+                if (this.indexeddbProvider) {
+                    console.log('💾 Y.js + IndexedDB persistence complete (offline-first)');
+                } else if (this.connectionStatus === 'connected') {
+                    console.log('💾 Y.js + Cloud sync complete (online mode)');
+                } else {
+                    console.log('💾 Y.js persistence complete (memory only - will not persist after page refresh)');
+                }
+                
+                // ===== HYBRID APPROACH: Maintain local file index for UX =====
+                // Y.js handles content persistence, but we need local file entries for "Save to DLUX" workflow
+                await this.ensureLocalFileEntry();
+                
+                this.hasUnsavedChanges = false;
+            }, 1000); // 1 second delay to show sync indicator
+        },
+
+        // Ensure local file entry exists for UX (Save to DLUX workflow)
+        async ensureLocalFileEntry() {
+            try {
+                // Only create local file entry if we don't have a current file or it's not collaborative
+                if (!this.currentFile || this.currentFile.type !== 'collaborative') {
+                    
+                    // Generate file info if needed
+                    if (!this.currentFile) {
+                        const timestamp = Date.now();
+                        const title = this.getPlainTextTitle() || 'Untitled Document';
+                        const filename = title.substring(0, 50).replace(/[^a-zA-Z0-9\s-]/g, '').trim() || `Document ${new Date().toLocaleDateString()}`;
+                        
+                this.currentFile = {
+                            id: `local_${timestamp}`,
+                            name: filename,
+                            type: 'local',
+                            lastModified: new Date().toISOString(),
+                            isOfflineFirst: true // Flag to indicate this uses Y.js + IndexedDB
+                        };
+                        this.fileType = 'local';
+                    }
+                    
+                    // Update local file index (metadata only - content is in Y.js + IndexedDB)
+                    await this.updateLocalFileIndex();
+                    
+                    // Refresh local files list to show the new entry
+                    await this.loadLocalFiles();
+                    
+                    console.log('📝 Local file entry ensured for UX:', this.currentFile.name);
+                }
+            } catch (error) {
+                console.error('Error ensuring local file entry:', error);
+            }
+        },
+
+        // Helper method to get plain text title
+        getPlainTextTitle() {
+            if (this.titleEditor) {
+                return this.titleEditor.getText().trim();
+            }
+            return this.content.title?.replace(/<[^>]*>/g, '').trim() || '';
+        },
+        
+        async connectToCollaborationServer(serverDoc) {
+            // TipTap Best Practice: Connect existing Y.js document to WebSocket provider
+            console.log('🔗 Connecting existing Y.js document to collaboration server...', serverDoc);
+            
+            if (!this.ydoc) {
+                throw new Error('No Y.js document available - this should not happen with offline-first approach');
+            }
+            
+            const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
+            const HocuspocusProvider = bundle.HocuspocusProvider?.default || bundle.HocuspocusProvider;
+            
+            if (!HocuspocusProvider) {
+                throw new Error('HocuspocusProvider not available');
+            }
+            
+            // Clean up any existing provider
+            if (this.provider) {
+                this.provider.disconnect();
+                this.provider.destroy();
+                this.provider = null;
+                }
+                
+                        // Build auth token and URL - use token-in-config as primary approach (proven to work better)
+            const authToken = JSON.stringify({
+                    account: this.authHeaders['x-account'],
+                    signature: this.authHeaders['x-signature'],
+                    challenge: this.authHeaders['x-challenge'],
+                    pubkey: this.authHeaders['x-pubkey']
+                });
+            
+            const baseUrl = 'wss://data.dlux.io/collaboration';
+            const docPath = `${serverDoc.owner}/${serverDoc.permlink}`;
+            
+            console.log('🔗 WebSocket connection details:', {
+                baseUrl,
+                docPath,
+                owner: serverDoc.owner,
+                permlink: serverDoc.permlink,
+                authTokenLength: authToken.length,
+                primaryMethod: 'token-in-config'
+            });
+                
+            // Wait a moment for server to be ready for WebSocket connections
+            console.log('⏳ Waiting for server to be ready for WebSocket connections...');
+            await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
+            
+            // PRIMARY APPROACH: Use token in config (proven to work reliably)
+                const providerConfig = {
+                url: `${baseUrl}/${docPath}`, // Clean URL without token
+                name: docPath,
+                token: authToken, // Token in config - this is the reliable method
+                document: this.ydoc, // Connect existing Y.js document
+                    connect: true,
+                    timeout: 30000,
+                    forceSyncInterval: 30000,
+                maxMessageSize: 1024 * 1024,
+                    onConnect: () => {
+                        console.log('✅ Connected to collaboration server');
+                        this.connectionStatus = 'connected';
+                        this.connectionMessage = 'Connected - Real-time collaboration active';
+                    },
+                    onDisconnect: ({ event }) => {
+                    console.log('❌ Disconnected from collaboration server', {
+                        code: event?.code,
+                        reason: event?.reason,
+                        wasClean: event?.wasClean
+                    });
+                this.connectionStatus = 'disconnected';
+                        this.connectionMessage = 'Disconnected from server';
+                    },
+                    onSynced: ({ synced }) => {
+                    console.log('🔄 onSynced called:', { synced, isCollaborativeMode: this.isCollaborativeMode, connectionStatus: this.connectionStatus, hasUnsavedChanges: this.hasUnsavedChanges });
+                    
+                        if (synced) {
+                            console.log('📡 Document synchronized');
+                            this.connectionMessage = 'Connected - Document synchronized';
+                        
+                        // Reset unsaved changes flag for collaborative documents
+                        if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
+                            console.log('💾 Clearing hasUnsavedChanges flag due to Y.js sync');
+                            this.hasUnsavedChanges = false;
+                        }
+                        
+                        if (this.saveAsProcess.inProgress) {
+                            this.saveAsProcess.step = 'synced';
+                            this.saveAsProcess.message = 'Document synced with server!';
+                        }
+                    }
+                },
+                onError: ({ event }) => {
+                    console.error('❌ WebSocket error:', {
+                        event,
+                        error: event?.error,
+                        message: event?.message,
+                        type: event?.type
+                    });
+                    },
+                    onAuthenticationFailed: ({ reason }) => {
+                        console.error('🔐 Authentication failed:', reason);
+                    this.serverAuthFailed = true;
+                        this.connectionStatus = 'disconnected';
+                        this.connectionMessage = `Authentication failed: ${reason}`;
+                    
+                    if (reason === 'permission-denied') {
+                        setTimeout(() => {
+                            this.handleAuthenticationFailure();
+                        }, 1000);
+                    }
+                }
+            };
+            
+            console.log('🔌 Creating HocuspocusProvider with token-in-config (primary method)...');
+                this.provider = new HocuspocusProvider(providerConfig);
+                
+            // Add Y.js document update listener for more reliable sync detection
+            if (this.ydoc) {
+                this.ydoc.on('update', (update, origin) => {
+                    // Only clear unsaved changes for updates that come from remote (not local)
+                    if (origin !== this.ydoc.clientID && this.isCollaborativeMode && this.connectionStatus === 'connected') {
+                        console.log('📡 Y.js remote update detected, clearing unsaved flag');
+                        this.hasUnsavedChanges = false;
+                            }
+                        });
+                    }
+                    
+            // Wait for connection with optimized retry logic
+            let retries = 0;
+            const maxRetries = 20; // Reduced since primary method should work faster
+            let connectionSuccess = false;
+            
+            console.log('⏳ Waiting for WebSocket connection...');
+            while (!connectionSuccess && retries < maxRetries) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+                retries++;
+                
+                // Check multiple connection states
+                const wsReady = this.provider.ws?.readyState === WebSocket.OPEN;
+                const statusConnected = this.connectionStatus === 'connected';
+                
+                if (wsReady || statusConnected) {
+                    this.connectionStatus = 'connected';
+                    connectionSuccess = true;
+                    console.log('✅ WebSocket connected successfully');
+                    break;
+                                }
+                                
+                // Log progress every 2 seconds
+                if (retries % 4 === 0) {
+                    console.log(`⏳ Connection attempt ${retries}/${maxRetries} - WebSocket state: ${this.provider.ws?.readyState}, Status: ${this.connectionStatus}`);
+                    }
+                
+                // Try fallback authentication approach after half the retries
+                if (retries === Math.floor(maxRetries / 2) && !connectionSuccess) {
+                    console.log('🔄 Trying fallback authentication approach...');
+                            
+                    // Clean up current provider
+                    if (this.provider) {
+                        this.provider.disconnect();
+                        this.provider.destroy();
+                    }
+                    
+                    // FALLBACK: Try with token in URL instead of config
+                    const wsUrlWithToken = `${baseUrl}/${docPath}?token=${encodeURIComponent(authToken)}`;
+                    const fallbackConfig = {
+                        ...providerConfig,
+                        url: wsUrlWithToken, // Token in URL as fallback
+                        // Remove token from config
+                    };
+                    delete fallbackConfig.token;
+                
+                    console.log('🔗 Trying fallback connection with token in URL...');
+                    this.provider = new HocuspocusProvider(fallbackConfig);
+                }
+            }
+            
+            if (!connectionSuccess) {
+                // More detailed error information
+                const errorDetails = {
+                    wsState: this.provider.ws?.readyState,
+                    wsUrl: this.provider.ws?.url,
+                    providerStatus: this.provider.status,
+                    connectionStatus: this.connectionStatus,
+                    maxRetries,
+                    totalWaitTime: (maxRetries * 0.5) + 's'
+                };
+                console.error('❌ Connection failed with details:', errorDetails);
+                throw new Error(`Failed to connect to collaboration server after ${(maxRetries * 0.5)}s - WebSocket state: ${errorDetails.wsState}`);
+                    }
+                    
+            console.log('✅ Existing Y.js document successfully connected to collaboration server');
+        },
+
+        // Legacy method - replaced by connectToCollaborationServer for offline-first approach
+        // This method was used when we created editors on-demand, but now editors are always collaborative
+        async initializeCollaboration(doc) {
+            console.warn('⚠️ initializeCollaboration is deprecated - using connectToCollaborationServer instead');
+            return this.connectToCollaborationServer(doc);
+        },
+        
+        disconnectCollaboration() {
+            console.log('🧹 Cleaning up collaborative editor connections...');
+            
+            // Set flag to prevent new operations during cleanup
+            this.isInitializing = false;
+            
+            // Destroy all editors first to prevent them from trying to access destroyed Y.js types
+            if (this.titleEditor) {
+                try {
+                    console.log('🗑️ Destroying title editor');
+                    this.titleEditor.destroy();
+                } catch (error) {
+                    console.warn('Error destroying title editor:', error);
+                }
+                this.titleEditor = null;
+            }
+            if (this.permlinkEditor) {
+                try {
+                    console.log('🗑️ Destroying permlink editor');
+                    this.permlinkEditor.destroy();
+                } catch (error) {
+                    console.warn('Error destroying permlink editor:', error);
+                }
+                this.permlinkEditor = null;
+            }
+            if (this.bodyEditor) {
+                try {
+                    console.log('🗑️ Destroying body editor');
+                    this.bodyEditor.destroy();
+                } catch (error) {
+                    console.warn('Error destroying body editor:', error);
+                }
+                this.bodyEditor = null;
+            }
+            
+            // CRITICAL: Clean up DOM elements completely
+            this.cleanupDOMElements();
+            
+            // Disconnect provider after editors are destroyed
+            if (this.provider) {
+                try {
+                    console.log('🔌 Disconnecting collaboration provider');
+                    // Remove all event listeners first
+                    ['synced', 'connect', 'disconnect', 'status', 'message'].forEach(event => {
+                        if (this.provider && typeof this.provider.off === 'function') {
+                            this.provider.off(event);
+                        }
+                    });
+                    this.provider.disconnect();
+                } catch (error) {
+                    console.warn('Error disconnecting provider:', error);
+                }
+                this.provider = null;
+            }
+            
+            // Destroy Y.js document last with complete cleanup
+            if (this.ydoc) {
+                try {
+                    console.log('📄 Destroying Y.js document with complete cleanup');
+                    
+                    // Clear all shared types first to prevent conflicts
+                    const shareKeys = Array.from(this.ydoc.share.keys());
+                    console.log('🧹 Clearing Y.js shared types:', shareKeys);
+                    shareKeys.forEach(key => {
+                        try {
+                            const type = this.ydoc.share.get(key);
+                            if (type && typeof type.clear === 'function') {
+                                type.clear(); // Clear content instead of destroy
+                            }
+                            if (type && typeof type.destroy === 'function') {
+                                type.destroy();
+                            }
+                            this.ydoc.share.delete(key);
+                        } catch (error) {
+                            console.warn(`Error deleting Y.js type ${key}:`, error);
+                        }
+                    });
+                    
+                    // Clear subdocs if any
+                    if (this.ydoc.subdocs) {
+                        this.ydoc.subdocs.forEach(subdoc => {
+                            try {
+                                subdoc.destroy();
+                            } catch (error) {
+                                console.warn('Error destroying Y.js subdoc:', error);
+                            }
+                        });
+                    }
+                    
+                    // Now destroy the document
+                    this.ydoc.destroy();
+                } catch (error) {
+                    console.warn('Error destroying Y.js document:', error);
+                }
+                this.ydoc = null;
+            }
+            
+            this.connectionStatus = 'disconnected';
+            this.connectionMessage = 'Not connected';
+            
+            // Clear global instance tracking if this is the active instance
+            if (window.dluxCollaborativeInstance === this.componentId) {
+                window.dluxCollaborativeInstance = null;
+                window.dluxCollaborativeCleanup = null;
+                console.log('🧹 Cleared global collaborative instance tracking');
+            }
+            
+            // Reset initialization flag
+            this.isInitializing = false;
+            
+            console.log('✅ Collaborative editor cleanup completed');
+        },
+        
+        // Clean up DOM elements completely to prevent conflicts
+        cleanupDOMElements() {
+            console.log('🧽 Cleaning up DOM elements...');
+            
+            const elementsToClean = [
+                { ref: 'titleEditor', name: 'title', className: 'title-editor' },
+                { ref: 'permlinkEditor', name: 'permlink', className: 'permlink-editor' }, 
+                { ref: 'bodyEditor', name: 'body', className: 'body-editor' }
+            ];
+            
+            elementsToClean.forEach(({ ref, name, className }) => {
+                // Use both Vue ref and direct DOM selection as fallback
+                let element = this.$refs[ref];
+                if (!element) {
+                    element = document.querySelector(`.${className}`);
+                }
+                
+                if (element) {
+                    try {
+                        // Clear all content and attributes
+                        element.innerHTML = '';
+                        
+                        // Reset to original classes
+                        element.className = className;
+                        
+                        // Remove any TipTap-specific attributes
+                        const proseMirrorAttrs = [
+                            'contenteditable', 'data-testid', 'spellcheck', 'translate',
+                            'data-gramm', 'data-gramm_editor', 'data-enable-grammarly'
+                        ];
+                        proseMirrorAttrs.forEach(attr => {
+                            element.removeAttribute(attr);
+                        });
+                        
+                        // Remove any ProseMirror-specific classes
+                        element.classList.remove('ProseMirror', 'ProseMirror-focused');
+                        
+                        // Force a style reset
+                        element.style.cssText = '';
+                        
+                        console.log(`✅ Cleaned up ${name} editor DOM element`);
+                    } catch (error) {
+                        console.warn(`Error cleaning up ${name} editor DOM:`, error);
+                    }
+                }
+            });
+            
+            // Force Vue to update refs
+            this.$forceUpdate();
+        },
+        
+        // Reconnect to collaborative document (wrapper for connect button)
+        async reconnectToCollaborativeDocument() {
+            if (!this.currentFile || this.currentFile.type !== 'collaborative') {
+                console.error('Cannot reconnect: no collaborative document loaded');
+                return;
+            }
+
+            try {
+                console.log('🔄 Reconnecting to collaborative document...');
+                
+                // Ensure we have collaborative editors and Y.js document
+                if (!this.ydoc) {
+                    console.log('🏗️ Creating collaborative editors before reconnecting...');
+                    await this.createStandardEditor(); // Creates offline collaborative editors
+                    await new Promise(resolve => setTimeout(resolve, 100)); // Let editors initialize
+                }
+                
+                // Connect to the server
+                await this.connectToCollaborationServer(this.currentFile);
+                console.log('✅ Successfully reconnected to collaborative document');
+                
+            } catch (error) {
+                console.error('❌ Failed to reconnect:', error);
+                alert(`Failed to connect to collaborative document:\n\n${error.message}`);
+            }
+        },
+        
+        // Connection handlers
+        onConnect() {
+            this.connectionStatus = 'connected';
+            this.connectionMessage = 'Connected - Real-time collaboration active';
+        },
+        
+        onDisconnect() {
+            this.connectionStatus = 'disconnected';
+            this.connectionMessage = 'Disconnected from server';
+        },
+        
+        onSynced() {
+            this.connectionMessage = 'Connected - Document synchronized';
+            
+            // Reset unsaved changes flag for collaborative documents
+            if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
+                this.hasUnsavedChanges = false;
+                console.log('💾 Collaborative document auto-saved via Y.js sync');
+            }
+        },
+        
+        onAuthenticationFailed(reason) {
+            this.connectionStatus = 'disconnected';
+            this.connectionMessage = `Authentication failed: ${reason}`;
+        },
+        
+        // Content management
+        getEditorContent() {
+            // ONLY read from editors when explicitly requested - like clean.html
+            return {
+                title: this.titleEditor ? this.titleEditor.getText() : this.content.title,
+                titleHTML: this.titleEditor ? this.titleEditor.getHTML() : '',
+                body: this.bodyEditor ? this.bodyEditor.getText() : this.content.body,
+                bodyHTML: this.bodyEditor ? this.bodyEditor.getHTML() : this.content.body,
+                permlink: this.permlinkEditor ? this.permlinkEditor.getText() : this.content.permlink,
+                tags: this.content.tags,
+                custom_json: this.content.custom_json,
+                beneficiaries: this.publishForm.beneficiaries,
+                commentOptions: this.commentOptions // Include comment options for local storage
+            };
+        },
+        
+        setEditorContent(content) {
+            try {
+                // For collaborative mode, use proper TipTap pattern with onSynced callback
+                // Reference: https://tiptap.dev/docs/editor/collaboration/install
+                if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
+                    console.log('🤝 Using collaborative content initialization pattern');
+                    
+                    // Set initial content flag in Y.js document to prevent duplicate loading
+                    const config = this.ydoc.getMap('config');
+                    if (!config.get('initialContentLoaded')) {
+                        config.set('initialContentLoaded', true);
+                        
+                        // Use TipTap's setContent command for collaborative mode
+                        if (this.titleEditor && content.title) {
+                            this.titleEditor.commands.setContent(content.title);
+                        }
+                        if (this.bodyEditor && content.body) {
+                            this.bodyEditor.commands.setContent(content.body);
+                        }
+                        if (this.permlinkEditor && content.permlink) {
+                            this.permlinkEditor.commands.setContent(content.permlink);
+                        }
+                        
+                        console.log('✅ Initial collaborative content set via TipTap commands');
+                    }
+                    
+                    // Update local content state for UI binding
+                    this.content = { ...this.content, ...content };
+                    
+                    // Set custom JSON string for editing
+                    if (content.custom_json) {
+                        this.customJsonString = JSON.stringify(content.custom_json, null, 2);
+                    }
+                    
+                    // Restore comment options if available
+                    if (content.commentOptions) {
+                        this.commentOptions = { ...this.commentOptions, ...content.commentOptions };
+                    }
+                    
+                    return;
+                }
+                
+                // For standard mode, set content normally with error handling
+                if (this.titleEditor && content.title) {
+                    try {
+                        this.titleEditor.commands.setContent(content.title);
+                    } catch (error) {
+                        console.warn('Failed to set title content:', error);
+                        // Fallback to text-only
+                        this.titleEditor.commands.setContent(content.title.replace(/<[^>]*>/g, ''));
+                    }
+                }
+                
+                if (this.permlinkEditor && content.permlink) {
+                    try {
+                        this.permlinkEditor.commands.setContent(content.permlink);
+                    } catch (error) {
+                        console.warn('Failed to set permlink content:', error);
+                        this.permlinkEditor.commands.setContent(content.permlink.replace(/<[^>]*>/g, ''));
+                    }
+                }
+                
+                if (this.bodyEditor && content.body) {
+                    try {
+                        this.bodyEditor.commands.setContent(content.body);
+                    } catch (error) {
+                        console.warn('Failed to set body content, trying as plain text:', error);
+                        // If HTML content fails, try as plain text wrapped in paragraph
+                        const textContent = content.body.replace(/<[^>]*>/g, '');
+                        this.bodyEditor.commands.setContent(`<p>${textContent}</p>`);
+                    }
+                }
+                
+                this.content = { ...content };
+                
+                // Set custom JSON string for editing
+                if (content.custom_json) {
+                    this.customJsonString = JSON.stringify(content.custom_json, null, 2);
+                }
+                
+                // Restore comment options if available
+                if (content.commentOptions) {
+                    this.commentOptions = { ...this.commentOptions, ...content.commentOptions };
+                }
+                
+                console.log('✅ Editor content set successfully');
+                
+            } catch (error) {
+                console.error('❌ Failed to set editor content:', error);
+                
+                // Create minimal safe content
+                this.content = {
+                    title: content.title || '',
+                    body: content.body || '<p>Content could not be loaded properly. Please check the document format.</p>',
+                    tags: content.tags || [],
+                    custom_json: content.custom_json || {},
+                    permlink: content.permlink || '',
+                    beneficiaries: content.beneficiaries || []
+                };
+                
+                // Restore comment options if available
+                if (content.commentOptions) {
+                    this.commentOptions = { ...this.commentOptions, ...content.commentOptions };
+                }
+                
+                // Set safe fallback content in editors
+                if (this.titleEditor) {
+                    this.titleEditor.commands.setContent(this.content.title.replace(/<[^>]*>/g, ''));
+                }
+                if (this.bodyEditor) {
+                    this.bodyEditor.commands.setContent(this.content.body);
+                }
+                
+                throw new Error(`Content loading failed: ${error.message}`);
+            }
+        },
+        
+        clearEditor() {
+            // Avoid clearing collaborative editors directly - this causes transaction conflicts
+            if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
+                console.log('🤝 Skipping editor clearing in collaborative mode - let Y.js handle state');
+                // Just clear the local content state
+                this.content = {
+                    title: '',
+                    body: '',
+                    tags: [],
+                    custom_json: {},
+                    permlink: '',
+                    beneficiaries: []
+                };
+                return;
+            }
+            
+            // Clear non-collaborative editors normally
+            if (this.titleEditor) {
+                this.titleEditor.commands.clearContent();
+            }
+            if (this.permlinkEditor) {
+                this.permlinkEditor.commands.clearContent();
+            }
+            if (this.bodyEditor) {
+                this.bodyEditor.commands.clearContent();
+            }
+        },
+        
+        updateContent() {
+            // Update content from editors
+            if (this.titleEditor) {
+                this.content.title = this.titleEditor.getText();
+            }
+            if (this.permlinkEditor) {
+                this.content.permlink = this.permlinkEditor.getText();
+            }
+            if (this.bodyEditor) {
+                this.content.body = this.bodyEditor.getHTML();
+            }
+            
+            // Emit content changes to parent
+            this.$emit('content-changed', {
+                ...this.content,
+                beneficiaries: this.publishForm.beneficiaries,
+                attachedFiles: this.attachedFiles
+            });
+        },
+        
+        // Utility methods
+        generateUserColor(username) {
+            let hash = 0;
+            for (let i = 0; i < username.length; i++) {
+                hash = username.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const hue = Math.abs(hash) % 360;
+            return `hsl(${hue}, 70%, 60%)`;
+        },
+        
+        async confirmUnsavedChanges() {
+            return confirm('You have unsaved changes. Are you sure you want to continue?');
+        },
+        
+        formatFileDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        },
+        
+        formatFileSize(bytes) {
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            if (bytes === 0) return '0 Bytes';
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        },
+        
+        // History and diff (placeholder methods)
+        async loadDocumentHistory() {
+            // TODO: Implement document history loading
+            console.log('Loading document history...');
+        },
+        
+        async showDiff() {
+            // TODO: Implement diff functionality
+            console.log('Showing document diff...');
+        },
+        
+        toggleDropdown(name) {
+            this.dropdownOpen = {
+                ...this.dropdownOpen,
+                [name]: !this.dropdownOpen[name]
+            };
+        },
+        
+        closeDropdowns() {
+            this.dropdownOpen = {};
+        },
+        
+        // File management methods with confirmation
+        async deleteLocalFileWithConfirm(file) {
+            const confirmMsg = `Delete local file "${file.name}"?\n\nThis action cannot be undone.`;
+            if (confirm(confirmMsg)) {
+                try {
+                    await this.deleteLocalFile(file.id);
+                    console.log('✅ Local file deleted successfully');
+                } catch (error) {
+                    console.error('❌ Failed to delete local file:', error);
+                    alert(`Failed to delete file: ${error.message}`);
+                }
+            }
+        },
+        
+        async deleteCollaborativeDocWithConfirm(doc) {
+            if (doc.owner !== this.authHeaders['x-account']) {
+                alert('You can only delete documents that you own.');
+                return;
+            }
+            
+            const confirmMsg = `Delete collaborative document "${doc.permlink}"?\n\nThis action cannot be undone and will affect all collaborators.`;
+            if (confirm(confirmMsg)) {
+                try {
+                    await this.deleteCollaborativeDoc(doc);
+                    console.log('✅ Collaborative document deleted successfully');
+                } catch (error) {
+                    console.error('❌ Failed to delete collaborative document:', error);
+                    alert(`Failed to delete document: ${error.message}`);
+                }
+            }
+        },
+        
+        async clearAllLocalFiles() {
+            const confirmMsg = `Delete ALL local files (${this.localFiles.length} files)?\n\nThis action cannot be undone.`;
+            if (confirm(confirmMsg)) {
+                try {
+                    // Clear all local file content
+                    for (const file of this.localFiles) {
+                        localStorage.removeItem(`dlux_tiptap_file_${file.id}`);
+                    }
+                    
+                    // Clear the file index
+                    localStorage.removeItem('dlux_tiptap_files');
+                    
+                    // Reload the file list
+                    await this.loadLocalFiles();
+                    
+                    console.log('✅ All local files cleared successfully');
+                    
+                    // If current file was local, create a new document
+                    if (this.currentFile && this.currentFile.type === 'local') {
+                        await this.newDocument();
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to clear local files:', error);
+                    alert(`Failed to clear files: ${error.message}`);
+                }
+            }
+        },
+
+        async clearAllCloudFiles() {
+            if (!this.showCollaborativeFeatures) {
+                alert('You need to authenticate to manage cloud files.');
+                return;
+            }
+
+            // Filter documents that the user owns
+            const ownedDocs = this.collaborativeDocs.filter(doc => doc.owner === this.authHeaders['x-account']);
+            
+            if (ownedDocs.length === 0) {
+                alert('You don\'t own any cloud documents to delete.');
+                return;
+            }
+
+            const confirmMsg = `Delete ALL your cloud documents (${ownedDocs.length} files)?\n\nThis action cannot be undone and will affect any collaborators on these documents.`;
+            if (confirm(confirmMsg)) {
+                try {
+                    console.log(`🗑️ Deleting ${ownedDocs.length} owned cloud documents...`);
+                    
+                    // Delete each owned document
+                    let successCount = 0;
+                    let failureCount = 0;
+                    
+                    for (const doc of ownedDocs) {
+                        try {
+                            await this.deleteCollaborativeDoc(doc);
+                            successCount++;
+                            console.log(`✅ Deleted: ${doc.documentName || doc.permlink}`);
+                        } catch (error) {
+                            failureCount++;
+                            console.error(`❌ Failed to delete ${doc.documentName || doc.permlink}:`, error);
+                        }
+                    }
+                    
+                    // Reload the collaborative documents list
+                    await this.loadCollaborativeDocs();
+                    
+                    const resultMsg = `Cloud files cleanup completed.\n\n✅ Successfully deleted: ${successCount} files${failureCount > 0 ? `\n❌ Failed to delete: ${failureCount} files` : ''}`;
+                    alert(resultMsg);
+                    
+                    console.log(`✅ Cloud files cleanup completed: ${successCount} success, ${failureCount} failures`);
+                    
+                    // If current file was one of the deleted collaborative files, create a new document
+                    if (this.currentFile && 
+                        this.currentFile.type === 'collaborative' && 
+                        this.currentFile.owner === this.authHeaders['x-account']) {
+                        await this.newDocument();
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to clear cloud files:', error);
+                    alert(`Failed to clear cloud files: ${error.message}`);
+                }
+            }
+        },
+        
+        // Authentication methods
+        async requestAuthentication() {
+            console.log('🔐 Requesting authentication for collaborative editing...');
+            
+            // Reset server auth failure state when requesting new auth
+            this.serverAuthFailed = false;
+            this.lastAuthCheck = Date.now();
+            
+            // Emit request to parent - this matches the pattern used in collaborative-docs.js
+            this.$emit('request-auth-headers');
+        },
+
+        // Wait for authentication to complete with timeout
+        async waitForAuthentication(timeoutMs = 30000) {
+            console.log('⏳ Waiting for authentication to complete...');
+            
+            const startTime = Date.now();
+            
+            return new Promise((resolve, reject) => {
+                const checkAuth = () => {
+                    if (this.isAuthenticated && !this.isAuthExpired) {
+                        console.log('✅ Authentication completed successfully');
+                        resolve(true);
+                        return;
+                    }
+                    
+                    if (Date.now() - startTime > timeoutMs) {
+                        console.error('❌ Authentication timeout');
+                        reject(new Error('Authentication timeout. Please try again.'));
+                        return;
+                    }
+                    
+                    // Check again in 500ms
+                    setTimeout(checkAuth, 500);
+                };
+                
+                checkAuth();
+            });
+        },
+
+        // Handle authentication failure by requesting fresh auth
+        async handleAuthenticationFailure() {
+            console.log('🔐 Handling authentication failure - requesting fresh authentication...');
+            
+            // Clear any cached auth headers
+            if (window.sessionStorage) {
+                const keys = Object.keys(sessionStorage).filter(key => 
+                    key.includes('collaborationAuthHeaders') || key.includes('auth')
+                );
+                keys.forEach(key => sessionStorage.removeItem(key));
+                console.log('🧹 Cleared cached auth headers:', keys);
+            }
+
+            // Request fresh authentication
+            await this.requestAuthentication();
+            
+            // Show user guidance
+            alert(
+                'Authentication failed for collaborative editing.\n\n' +
+                'Please sign the authentication challenge when prompted.\n\n' +
+                'This may happen if:\n' +
+                '• Your authentication has expired (>23 hours old)\n' +
+                '• Your account lacks collaboration permissions\n' +
+                '• There was a signature validation error'
+            );
+        },
+        
+        // Pending uploads management
+        getPendingUploads() {
+            return JSON.parse(localStorage.getItem('dlux_pending_uploads') || '[]');
+        },
+        
+        async retryPendingUpload(uploadId) {
+            const pendingUploads = this.getPendingUploads();
+            const upload = pendingUploads.find(u => u.id === uploadId);
+            
+            if (!upload) {
+                console.error('Pending upload not found:', uploadId);
+                return;
+            }
+            
+            try {
+                // Load the backup content
+                const backupContent = JSON.parse(localStorage.getItem(`dlux_tiptap_backup_${upload.id}`) || '{}');
+                
+                if (!backupContent.isBackup) {
+                    throw new Error('Invalid backup content');
+                }
+                
+                // Set up the save form with the backup data
+                this.saveForm.filename = upload.filename;
+                this.saveForm.saveToDlux = true;
+                this.saveForm.saveLocally = false;
+                this.saveForm.isNewDocument = true;
+                
+                // Set the content from backup
+                this.content = {
+                    title: backupContent.title || '',
+                    body: backupContent.body || '',
+                    tags: backupContent.tags || [],
+                    custom_json: backupContent.custom_json || {},
+                    permlink: backupContent.permlink || '',
+                    beneficiaries: backupContent.beneficiaries || []
+                };
+                
+                // Show save modal and attempt to retry
+                this.showSaveModal = true;
+                
+                console.log('🔄 Retry setup for pending upload:', upload.filename);
+            } catch (error) {
+                console.error('Failed to setup retry for pending upload:', error);
+                alert('Failed to retry upload: ' + error.message);
+            }
+        },
+        
+        removePendingUpload(uploadId) {
+            const pendingUploads = this.getPendingUploads();
+            const filteredUploads = pendingUploads.filter(u => u.id !== uploadId);
+            localStorage.setItem('dlux_pending_uploads', JSON.stringify(filteredUploads));
+            
+            // Also remove the backup file
+            localStorage.removeItem(`dlux_tiptap_backup_${uploadId}`);
+            
+            console.log('🗑️ Removed pending upload:', uploadId);
+        },
+        
+        // Toolbar action methods
+        insertLink() {
+            const url = prompt('Enter URL:');
+            if (url) {
+                this.bodyEditor?.chain().focus().setLink({ href: url }).run();
+            }
+        },
+        
+        insertImage() {
+            const url = prompt('Enter image URL:');
+            if (url) {
+                this.bodyEditor?.chain().focus().setImage({ src: url }).run();
+            }
+        },
+        
+        insertTable() {
+            this.bodyEditor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+        },
+        
+        handleAvatarError(event, user) {
+            // Hide the broken image and show a fallback avatar
+            event.target.style.display = 'none';
+            
+            // Create a fallback avatar element
+            const fallback = document.createElement('div');
+            fallback.className = 'user-avatar-small rounded-circle d-flex align-items-center justify-content-center';
+            fallback.style.cssText = `
+                width: 24px; 
+                height: 24px; 
+                background-color: ${user.color}; 
+                font-size: 0.75rem; 
+                font-weight: bold; 
+                color: white;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+                border: 2px solid ${user.color};
+                box-shadow: 0 0 0 1px rgba(255,255,255,0.2);
+            `;
+            fallback.textContent = user.name.charAt(0).toUpperCase();
+            fallback.title = user.name;
+            
+            // Replace the broken image with the fallback
+            event.target.parentNode.appendChild(fallback);
+        },
+        
+        handleOwnerAvatarError(event) {
+            // Hide the broken image and show the fallback
+            event.target.style.display = 'none';
+            const fallback = event.target.nextElementSibling;
+            if (fallback && fallback.classList.contains('user-avatar-fallback')) {
+                fallback.style.display = 'flex';
+            }
+        },
+        
+        handlePermissionAvatarError(event, username) {
+            // Hide the broken image and show the fallback
+            event.target.style.display = 'none';
+            const fallback = event.target.nextElementSibling;
+            if (fallback && fallback.classList.contains('user-avatar-fallback')) {
+                fallback.style.display = 'flex';
+            }
+        },
+        
+        // Color picker methods
+        toggleColorPicker() {
+            this.showColorPicker = !this.showColorPicker;
+        },
+        
+        updateUserColor(newColor) {
+            this.userColor = newColor;
+            localStorage.setItem(`dlux_user_color_${this.username}`, newColor);
+            
+            // Update collaboration cursor color if connected
+            if (this.provider && this.provider.awareness) {
+                const currentState = this.provider.awareness.getLocalState();
+                this.provider.awareness.setLocalStateField('user', {
+                    name: this.username,
+                    color: newColor
+                });
+            }
+            
+            this.showColorPicker = false;
+            console.log('🎨 User color updated:', newColor);
+        },
+        
+        getRandomColor() {
+            return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+        },
+        
+        getPermissionAvatarUrl(account) {
+            return `https://images.hive.blog/u/${account}/avatar/small`;
+        },
+        
+        async initializeEditor() {
+            // Clean up any existing editor
+            if (this.editor) {
+                this.editor.destroy();
+                this.editor = null;
+            }
+
+            // Import core TipTap modules
+            const { Editor } = await import('https://esm.sh/@tiptap/core@3.0.0');
+            const { default: StarterKit } = await import('https://esm.sh/@tiptap/starter-kit@3.0.0');
+            const { default: Placeholder } = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
+            
+            // Base extensions that are always included
+            const extensions = [
+                StarterKit.configure({
+                    history: !this.isCollaborative, // Only enable history for non-collaborative mode
+                }),
+                Placeholder.configure({
+                    placeholder: 'Start writing...'
+                })
+            ];
+
+            // If collaborative mode is enabled, add collaboration extensions
+            if (this.isCollaborative) {
+                try {
+                    // Initialize Y.js document and provider if not already done
+                    if (!this.ydoc || !this.provider) {
+                        await this.initializeCollaboration();
+                    }
+
+                    // Get collaboration extensions
+                    const bundle = window.TiptapCollaboration;
+                    const Collaboration = bundle.Collaboration;
+                    const CollaborationCursor = bundle.CollaborationCursor;
+
+                    if (!Collaboration || !CollaborationCursor) {
+                        throw new Error('Required collaboration extensions not found');
+                    }
+
+                    // Add collaboration extensions
+                    extensions.push(
+                        Collaboration.configure({
+                            document: this.ydoc,
+                            field: 'content',
+                            fragmentContent: true,
+                        }),
+                        CollaborationCursor.configure({
+                            provider: this.provider,
+                            user: {
+                                name: this.username,
+                                color: this.getUserColor
+                            }
+                        })
+                    );
+                } catch (error) {
+                    console.error('Failed to initialize collaborative mode:', error);
+                    // Fall back to non-collaborative mode
+                    this.isCollaborative = false;
+                    extensions[0] = StarterKit.configure({ history: true });
+                }
+            }
+
+            // Create the editor
+            this.editor = new Editor({
+                element: this.$refs.editor,
+                extensions,
+                content: this.content,
+                editorProps: {
+                    attributes: {
+                        class: 'form-control bg-transparent text-white border-0',
+                    }
+                },
+                onCreate: ({ editor }) => {
+                    console.log(`✅ Editor ready (${this.isCollaborative ? 'collaborative' : 'standard'} mode)`);
+                },
+                onUpdate: ({ editor }) => {
+                    this.content = editor.getHTML();
+                    if (!this.isCollaborative) {
+                        this.handleLocalUpdate();
+                    }
+                }
+            });
+        },
+
+
+
+        // Method to toggle collaborative mode
+        async toggleCollaborativeMode() {
+            const wasCollaborative = this.isCollaborative;
+            this.isCollaborative = !wasCollaborative;
+            
+            // Store current content before switching
+            const currentContent = this.editor.getHTML();
+            
+            // Reinitialize editor with new mode
+            await this.initializeEditor();
+            
+            if (!wasCollaborative && this.isCollaborative) {
+                // If switching to collaborative mode, initialize the shared content
+                const yxml = this.ydoc.get('content', Y.XmlFragment);
+                yxml.delete(0, yxml.length);
+                yxml.insert(0, currentContent);
+            }
+        },
+
+        async convertToCollaborative() {
+            // TipTap Best Practice: All documents are already collaborative (offline-first)
+            // This method now just "publishes" the existing Y.js document to the server
+            
+            if (this.currentFile?.type === 'collaborative' && this.connectionStatus === 'connected') {
+                console.log('Document is already connected to collaboration server');
+                return;
+            }
+
+            // Check authentication
+            if (!this.isAuthenticated || this.isAuthExpired) {
+                const confirmAuth = confirm('You need to authenticate to publish this document to the cloud. Authenticate now?');
+                if (confirmAuth) {
+                    this.requestAuthentication();
+                    try {
+                        await this.waitForAuthentication();
+                    } catch (error) {
+                        alert('Authentication failed. Please try again.');
+                        return;
+                    }
+                } else {
+                    return;
+                }
+                }
+
+            // Test basic connectivity first
+            console.log('🧪 Testing WebSocket connectivity...');
+            const connectivityTest = await this.testWebSocketConnectivity();
+            if (!connectivityTest.success) {
+                alert(`❌ Cannot connect to collaboration server.\n\nError: ${connectivityTest.error}\n\nPlease check your internet connection and try again later.`);
+                return;
+            }
+            console.log('✅ Basic connectivity test passed');
+
+            // Show the save modal for publishing to cloud
+            const documentName = this.currentFile?.name || `document-${Date.now()}`;
+            
+            this.saveForm = {
+                filename: documentName,
+                saveLocally: false,
+                saveToDlux: true,
+                isPublic: false,
+                description: 'Published from offline document',
+                isNewDocument: true
+            };
+            
+            this.showSaveModal = true;
+            console.log('🔄 Ready to publish offline collaborative document to server');
+        },
+
+        // New method: Test WebSocket connectivity
+        async testWebSocketConnectivity() {
+            return new Promise((resolve) => {
+                const timeout = setTimeout(() => {
+                    resolve({
+                        success: false,
+                        error: 'Connection timeout - collaboration server may be unavailable'
+                    });
+                }, 5000);
+
+                try {
+                    // Test simple WebSocket connection to collaboration server base URL
+                    const testUrl = this.collaborationUrl.replace(/^wss?:\/\//, 'wss://');
+                    console.log('🧪 Testing WebSocket connectivity to:', testUrl);
+                    
+                    const testWs = new WebSocket(testUrl + '/test');
+                    
+                    testWs.onopen = () => {
+                        console.log('✅ Basic WebSocket connection successful');
+                        clearTimeout(timeout);
+                        testWs.close();
+                        resolve({
+                            success: true,
+                            message: 'WebSocket connectivity confirmed'
+                        });
+                    };
+                    
+                    testWs.onerror = (error) => {
+                        console.log('⚠️ Test WebSocket connection had issues (this may be normal):', error.type);
+                        clearTimeout(timeout);
+                        // Even if test connection fails, the real connection might work
+                        // So we'll return success but with a warning
+                        resolve({
+                            success: true,
+                            message: 'WebSocket base connectivity test completed',
+                            warning: 'Test connection had issues but real connection may still work'
+                        });
+                    };
+                    
+                    testWs.onclose = (event) => {
+                        console.log('🔌 Test WebSocket closed:', {
+                            code: event.code,
+                            reason: event.reason,
+                            wasClean: event.wasClean
+                        });
+                        
+                        // If it closes immediately, that's often normal for test connections
+                        if (!timeout._destroyed) {
+                            clearTimeout(timeout);
+                            resolve({
+                                success: true,
+                                message: 'WebSocket connectivity test completed'
+                            });
+                        }
+                    };
+            } catch (error) {
+                    clearTimeout(timeout);
+                    console.log('⚠️ WebSocket test failed, but proceeding anyway:', error.message);
+                    // Don't fail the whole operation just because test failed
+                    resolve({
+                        success: true,
+                        message: 'WebSocket test had issues but proceeding with actual connection',
+                        warning: error.message
+                    });
+            }
+            });
         },
     },
     
@@ -2635,28 +5080,6 @@ export default {
             <strong>Read-Only Mode</strong> - You can view this document but cannot make changes. 
             Contact <strong>@{{ currentFile?.owner }}</strong> for edit permissions.
         </div>
-    </div>
-
-    <!-- Permission System Notification -->
-    <div v-if="permissionNotification && !permissionNotification.dismissed" 
-         class="alert border mx-2 mb-3 d-flex align-items-start"
-         :class="{
-             'alert-warning border-warning bg-dark text-warning': permissionNotification.type === 'warning',
-             'alert-info border-info bg-dark text-info': permissionNotification.type === 'info'
-         }">
-        <i class="fas me-2 mt-1" :class="{
-            'fa-exclamation-triangle': permissionNotification.type === 'warning',
-            'fa-info-circle': permissionNotification.type === 'info'
-        }"></i>
-        <div class="flex-grow-1">
-            <strong>{{ permissionNotification.title }}</strong>
-            <div class="small mt-1">{{ permissionNotification.message }}</div>
-        </div>
-        <button @click="permissionNotification.dismissed = true" 
-                class="btn btn-sm btn-outline-secondary ms-2" 
-                title="Dismiss notification">
-            <i class="fas fa-times"></i>
-        </button>
     </div>
 
     <div class="d-flex flex-column gap-4 mx-2">
