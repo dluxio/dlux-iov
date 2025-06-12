@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Read-Only Permissions Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: #fff; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #333; border-radius: 5px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 3px; }
+        .pass { background: #2d5a2d; border-left: 4px solid #4caf50; }
+        .fail { background: #5a2d2d; border-left: 4px solid #f44336; }
+        .info { background: #2d4a5a; border-left: 4px solid #2196f3; }
+        button { margin: 5px; padding: 8px 16px; background: #333; color: #fff; border: 1px solid #555; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #444; }
+        .disabled { opacity: 0.5; cursor: not-allowed; }
+        input, textarea { background: #333; color: #fff; border: 1px solid #555; padding: 5px; margin: 5px; }
+        .readonly-badge { background: #ff9800; color: #000; padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>🔒 Read-Only Permissions Test Suite</h1>
+    <p>This test verifies that all advanced UI options properly enforce read-only permissions.</p>
+
+    <div class="test-section">
+        <h2>Test Environment Setup</h2>
+        <div id="setup-results"></div>
+        <button onclick="runSetupTests()">Run Setup Tests</button>
+    </div>
+
+    <div class="test-section">
+        <h2>UI Element Visibility Tests</h2>
+        <div id="ui-visibility-results"></div>
+        <button onclick="runUIVisibilityTests()">Test UI Elements</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Method Permission Enforcement Tests</h2>
+        <div id="method-enforcement-results"></div>
+        <button onclick="runMethodEnforcementTests()">Test Method Enforcement</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Interactive UI Behavior Tests</h2>
+        <div id="interactive-behavior-results"></div>
+        <button onclick="runInteractiveBehaviorTests()">Test Interactive Behavior</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Console Log Verification</h2>
+        <div id="console-log-results"></div>
+        <button onclick="runConsoleLogTests()">Test Console Logging</button>
+    </div>
+
+    <script>
+        let testResults = [];
+        let originalConsoleWarn = console.warn;
+        let capturedWarnings = [];
+
+        // Capture console warnings for testing
+        console.warn = function(...args) {
+            capturedWarnings.push(args.join(' '));
+            originalConsoleWarn.apply(console, args);
+        };
+
+        function addResult(section, testName, passed, message) {
+            const result = { section, testName, passed, message, timestamp: new Date() };
+            testResults.push(result);
+            
+            const resultDiv = document.getElementById(section + '-results');
+            const resultElement = document.createElement('div');
+            resultElement.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            resultElement.innerHTML = `
+                <strong>${passed ? '✅' : '❌'} ${testName}</strong><br>
+                ${message}
+            `;
+            resultDiv.appendChild(resultElement);
+        }
+
+        function addInfo(section, message) {
+            const resultDiv = document.getElementById(section + '-results');
+            const infoElement = document.createElement('div');
+            infoElement.className = 'test-result info';
+            infoElement.innerHTML = `<strong>ℹ️ Info:</strong> ${message}`;
+            resultDiv.appendChild(infoElement);
+        }
+
+        function clearResults(section) {
+            document.getElementById(section + '-results').innerHTML = '';
+        }
+
+        function runSetupTests() {
+            clearResults('setup');
+            addInfo('setup', 'Testing TipTap editor availability and read-only mode detection...');
+
+            // Test 1: Check if TipTap editor is available
+            const editorExists = typeof window.TipTapEditor !== 'undefined';
+            addResult('setup', 'TipTap Editor Availability', editorExists, 
+                editorExists ? 'TipTap editor class is available' : 'TipTap editor class not found');
+
+            // Test 2: Check if we can access the editor instance
+            const editorInstance = window.editorInstance || window.app;
+            const hasEditorInstance = !!editorInstance;
+            addResult('setup', 'Editor Instance Access', hasEditorInstance,
+                hasEditorInstance ? 'Editor instance is accessible' : 'Editor instance not found');
+
+            // Test 3: Check if isReadOnlyMode method exists
+            if (hasEditorInstance) {
+                const hasReadOnlyMethod = typeof editorInstance.isReadOnlyMode === 'function' || 
+                                        typeof editorInstance.isReadOnlyMode === 'boolean';
+                addResult('setup', 'Read-Only Mode Detection', hasReadOnlyMethod,
+                    hasReadOnlyMethod ? 'isReadOnlyMode property/method exists' : 'isReadOnlyMode not found');
+            }
+
+            // Test 4: Check current read-only status
+            if (hasEditorInstance && editorInstance.isReadOnlyMode !== undefined) {
+                const isCurrentlyReadOnly = typeof editorInstance.isReadOnlyMode === 'function' ? 
+                                          editorInstance.isReadOnlyMode() : editorInstance.isReadOnlyMode;
+                addResult('setup', 'Current Read-Only Status', true,
+                    `Current read-only mode: ${isCurrentlyReadOnly ? 'ENABLED' : 'DISABLED'}`);
+            }
+        }
+
+        function runUIVisibilityTests() {
+            clearResults('ui-visibility');
+            addInfo('ui-visibility', 'Testing UI element visibility and disabled states...');
+
+            const tests = [
+                {
+                    name: 'Tag Input Disabled State',
+                    selector: 'input[placeholder*="Add a tag"]',
+                    property: 'disabled'
+                },
+                {
+                    name: 'Add Tag Button Disabled State',
+                    selector: 'button:has(.fa-plus)',
+                    property: 'disabled'
+                },
+                {
+                    name: 'Beneficiary Account Input Disabled State',
+                    selector: 'input[placeholder*="@username"]',
+                    property: 'disabled'
+                },
+                {
+                    name: 'Beneficiary Percent Input Disabled State',
+                    selector: 'input[placeholder*="%"]',
+                    property: 'disabled'
+                },
+                {
+                    name: 'Add Beneficiary Button Disabled State',
+                    selector: 'button.btn-outline-success:has(.fa-plus)',
+                    property: 'disabled'
+                },
+                {
+                    name: 'Custom JSON Textarea Disabled State',
+                    selector: 'textarea[placeholder*="custom JSON"]',
+                    property: 'disabled'
+                },
+                {
+                    name: 'Comment Options Checkboxes Disabled State',
+                    selector: 'input[type="checkbox"][id*="allow"]',
+                    property: 'disabled'
+                },
+                {
+                    name: 'Read-Only Badges Visibility',
+                    selector: '.badge:contains("Read-Only")',
+                    property: 'visible'
+                }
+            ];
+
+            tests.forEach(test => {
+                try {
+                    const elements = document.querySelectorAll(test.selector);
+                    if (elements.length > 0) {
+                        const element = elements[0];
+                        let testPassed = false;
+                        let message = '';
+
+                        if (test.property === 'disabled') {
+                            testPassed = element.disabled === true;
+                            message = `Element ${testPassed ? 'is' : 'is not'} disabled as expected`;
+                        } else if (test.property === 'visible') {
+                            testPassed = elements.length > 0;
+                            message = `Found ${elements.length} read-only badge(s)`;
+                        }
+
+                        addResult('ui-visibility', test.name, testPassed, message);
+                    } else {
+                        addResult('ui-visibility', test.name, false, 'Element not found in DOM');
+                    }
+                } catch (error) {
+                    addResult('ui-visibility', test.name, false, `Error: ${error.message}`);
+                }
+            });
+        }
+
+        function runMethodEnforcementTests() {
+            clearResults('method-enforcement');
+            addInfo('method-enforcement', 'Testing method-level permission enforcement...');
+
+            const editorInstance = window.editorInstance || window.app;
+            if (!editorInstance) {
+                addResult('method-enforcement', 'Editor Instance', false, 'No editor instance available for testing');
+                return;
+            }
+
+            // Clear captured warnings
+            capturedWarnings = [];
+
+            const methodTests = [
+                { method: 'addTag', description: 'Add Tag Method' },
+                { method: 'removeTag', description: 'Remove Tag Method', args: [0] },
+                { method: 'addBeneficiary', description: 'Add Beneficiary Method' },
+                { method: 'removeBeneficiary', description: 'Remove Beneficiary Method', args: [0] },
+                { method: 'handleCommentOptionChange', description: 'Comment Options Change Method' },
+                { method: 'validateCustomJson', description: 'Custom JSON Validation Method' },
+                { method: 'togglePermlinkEditor', description: 'Toggle Permlink Editor Method' },
+                { method: 'useGeneratedPermlink', description: 'Use Generated Permlink Method' },
+                { method: 'addFileToPost', description: 'Add File to Post Method', args: [{ name: 'test.txt' }] },
+                { method: 'removeAttachedFile', description: 'Remove Attached File Method', args: [0] }
+            ];
+
+            methodTests.forEach(test => {
+                try {
+                    if (typeof editorInstance[test.method] === 'function') {
+                        // Call the method
+                        const args = test.args || [];
+                        editorInstance[test.method](...args);
+                        
+                        // Check if a warning was logged
+                        const warningLogged = capturedWarnings.some(warning => 
+                            warning.includes('🔒') && warning.includes('Read-only mode')
+                        );
+                        
+                        addResult('method-enforcement', test.description, warningLogged,
+                            warningLogged ? 'Method properly blocked with warning' : 'Method may not be properly protected');
+                    } else {
+                        addResult('method-enforcement', test.description, false, 'Method not found');
+                    }
+                } catch (error) {
+                    addResult('method-enforcement', test.description, false, `Error: ${error.message}`);
+                }
+            });
+        }
+
+        function runInteractiveBehaviorTests() {
+            clearResults('interactive-behavior');
+            addInfo('interactive-behavior', 'Testing interactive UI behavior in read-only mode...');
+
+            // Test click events on disabled elements
+            const clickTests = [
+                {
+                    name: 'Tag Remove Button Click',
+                    selector: '.btn-close',
+                    expectedBehavior: 'hidden or disabled'
+                },
+                {
+                    name: 'Beneficiary Remove Button Click',
+                    selector: '.btn-outline-danger:has(.fa-trash)',
+                    expectedBehavior: 'hidden or disabled'
+                },
+                {
+                    name: 'Permlink Editor Click',
+                    selector: '[class*="permlink"]',
+                    expectedBehavior: 'non-interactive'
+                }
+            ];
+
+            clickTests.forEach(test => {
+                try {
+                    const elements = document.querySelectorAll(test.selector);
+                    let testPassed = false;
+                    let message = '';
+
+                    if (elements.length > 0) {
+                        const element = elements[0];
+                        const isDisabled = element.disabled || element.style.pointerEvents === 'none' || 
+                                         element.style.display === 'none' || element.classList.contains('disabled');
+                        
+                        testPassed = isDisabled;
+                        message = `Element is ${isDisabled ? 'properly disabled/hidden' : 'still interactive'}`;
+                    } else {
+                        testPassed = true; // No elements found could mean they're hidden
+                        message = 'No interactive elements found (possibly hidden)';
+                    }
+
+                    addResult('interactive-behavior', test.name, testPassed, message);
+                } catch (error) {
+                    addResult('interactive-behavior', test.name, false, `Error: ${error.message}`);
+                }
+            });
+        }
+
+        function runConsoleLogTests() {
+            clearResults('console-log');
+            addInfo('console-log', 'Verifying console warning messages for read-only enforcement...');
+
+            // Display captured warnings
+            if (capturedWarnings.length > 0) {
+                addResult('console-log', 'Warning Messages Captured', true, 
+                    `Captured ${capturedWarnings.length} warning(s):`);
+                
+                capturedWarnings.forEach((warning, index) => {
+                    addInfo('console-log', `Warning ${index + 1}: ${warning}`);
+                });
+            } else {
+                addResult('console-log', 'Warning Messages Captured', false, 
+                    'No console warnings captured. This could mean read-only mode is not active or methods were not called.');
+            }
+
+            // Test specific warning patterns
+            const expectedPatterns = [
+                '🔒 Cannot add tag: Read-only mode',
+                '🔒 Cannot remove tag: Read-only mode',
+                '🔒 Cannot add beneficiary: Read-only mode',
+                '🔒 Cannot remove beneficiary: Read-only mode',
+                '🔒 Cannot change comment options: Read-only mode',
+                '🔒 Cannot modify custom JSON: Read-only mode',
+                '🔒 Cannot edit permlink: Read-only mode',
+                '🔒 Cannot use generated permlink: Read-only mode',
+                '🔒 Cannot add file to post: Read-only mode',
+                '🔒 Cannot remove attached file: Read-only mode'
+            ];
+
+            expectedPatterns.forEach(pattern => {
+                const found = capturedWarnings.some(warning => warning.includes(pattern));
+                addResult('console-log', `Pattern: "${pattern}"`, found,
+                    found ? 'Warning pattern found' : 'Warning pattern not found');
+            });
+        }
+
+        // Auto-run setup tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(runSetupTests, 1000);
+        });
+    </script>
+</body>
+</html> 

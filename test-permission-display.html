@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permission Level Display Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: #fff; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #333; border-radius: 5px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 3px; }
+        .pass { background: #2d5a2d; border-left: 4px solid #4caf50; }
+        .fail { background: #5a2d2d; border-left: 4px solid #f44336; }
+        .info { background: #2d4a5a; border-left: 4px solid #2196f3; }
+        button { margin: 5px; padding: 8px 16px; background: #333; color: #fff; border: 1px solid #555; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #444; }
+        .permission-demo { display: flex; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .bg-warning { background: #ffc107; color: #000; }
+        .bg-success { background: #198754; color: #fff; }
+        .bg-info { background: #0dcaf0; color: #000; }
+        .bg-secondary { background: #6c757d; color: #fff; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { padding: 8px; border: 1px solid #333; text-align: left; }
+        th { background: #333; }
+        .cursor-pointer { cursor: pointer; }
+        .cursor-pointer:hover { background: #2a2a2a; }
+    </style>
+</head>
+<body>
+    <h1>🔐 Permission Level Display Test</h1>
+    <p>This test verifies that permission levels are correctly displayed in the open document modal.</p>
+
+    <div class="test-section">
+        <h2>Permission Level Method Tests</h2>
+        <div id="method-results"></div>
+        <button onclick="runMethodTests()">Test Permission Methods</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Permission Display Info Tests</h2>
+        <div id="display-info-results"></div>
+        <button onclick="runDisplayInfoTests()">Test Display Info</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Mock Document Table</h2>
+        <div id="mock-table-results"></div>
+        <button onclick="createMockTable()">Create Mock Document Table</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Open Document Modal Integration</h2>
+        <div id="integration-results"></div>
+        <button onclick="runIntegrationTests()">Test Modal Integration</button>
+    </div>
+
+    <script>
+        let testResults = [];
+
+        function addResult(section, testName, passed, message) {
+            const result = { section, testName, passed, message, timestamp: new Date() };
+            testResults.push(result);
+            
+            const resultDiv = document.getElementById(section + '-results');
+            const resultElement = document.createElement('div');
+            resultElement.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            resultElement.innerHTML = `
+                <strong>${passed ? '✅' : '❌'} ${testName}</strong><br>
+                ${message}
+            `;
+            resultDiv.appendChild(resultElement);
+        }
+
+        function addInfo(section, message) {
+            const resultDiv = document.getElementById(section + '-results');
+            const infoElement = document.createElement('div');
+            infoElement.className = 'test-result info';
+            infoElement.innerHTML = `<strong>ℹ️ Info:</strong> ${message}`;
+            resultDiv.appendChild(infoElement);
+        }
+
+        function clearResults(section) {
+            document.getElementById(section + '-results').innerHTML = '';
+        }
+
+        // Mock editor instance for testing
+        const mockEditor = {
+            username: 'testuser',
+            isAuthenticated: true,
+            currentFile: {
+                type: 'collaborative',
+                owner: 'testuser',
+                permlink: 'test-doc'
+            },
+            documentPermissions: [
+                { account: 'testuser', permissionType: 'postable' },
+                { account: 'viewer1', permissionType: 'readonly' }
+            ],
+
+            getUserPermissionLevel(file) {
+                if (!file) return 'unknown';
+                
+                if (file.type === 'local') {
+                    return 'owner';
+                }
+                
+                if (file.type === 'collaborative') {
+                    if (file.owner === this.username) {
+                        return 'owner';
+                    }
+                    
+                    if (!this.isAuthenticated) {
+                        return 'readonly';
+                    }
+                    
+                    if (this.currentFile && 
+                        file.owner === this.currentFile.owner && 
+                        file.permlink === this.currentFile.permlink &&
+                        this.documentPermissions.length > 0) {
+                        
+                        const userPermission = this.documentPermissions.find(p => p.account === this.username);
+                        if (userPermission) {
+                            return userPermission.permissionType;
+                        }
+                    }
+                    
+                    return 'readonly';
+                }
+                
+                return 'unknown';
+            },
+
+            getPermissionDisplayInfo(permissionLevel) {
+                const permissionMap = {
+                    'owner': {
+                        label: 'Owner',
+                        icon: 'fas fa-crown',
+                        color: 'warning',
+                        description: 'Full control - can edit, share, and delete'
+                    },
+                    'postable': {
+                        label: 'Editor',
+                        icon: 'fas fa-edit',
+                        color: 'success',
+                        description: 'Can edit content and publish'
+                    },
+                    'readonly': {
+                        label: 'Viewer',
+                        icon: 'fas fa-eye',
+                        color: 'info',
+                        description: 'Can view content only'
+                    },
+                    'unknown': {
+                        label: 'Unknown',
+                        icon: 'fas fa-question',
+                        color: 'secondary',
+                        description: 'Permission level unknown'
+                    }
+                };
+                
+                return permissionMap[permissionLevel] || permissionMap['unknown'];
+            }
+        };
+
+        function runMethodTests() {
+            clearResults('method');
+            addInfo('method', 'Testing getUserPermissionLevel method with various file types...');
+
+            const testFiles = [
+                {
+                    name: 'Local File Test',
+                    file: { type: 'local', name: 'my-local-file.txt' },
+                    expectedPermission: 'owner'
+                },
+                {
+                    name: 'Owned Collaborative File Test',
+                    file: { type: 'collaborative', owner: 'testuser', permlink: 'my-doc' },
+                    expectedPermission: 'owner'
+                },
+                {
+                    name: 'Other User Collaborative File Test',
+                    file: { type: 'collaborative', owner: 'otheruser', permlink: 'their-doc' },
+                    expectedPermission: 'readonly'
+                },
+                {
+                    name: 'Current File Permission Test',
+                    file: { type: 'collaborative', owner: 'testuser', permlink: 'test-doc' },
+                    expectedPermission: 'postable'
+                },
+                {
+                    name: 'Null File Test',
+                    file: null,
+                    expectedPermission: 'unknown'
+                }
+            ];
+
+            testFiles.forEach(test => {
+                try {
+                    const actualPermission = mockEditor.getUserPermissionLevel(test.file);
+                    const passed = actualPermission === test.expectedPermission;
+                    
+                    addResult('method', test.name, passed,
+                        `Expected: ${test.expectedPermission}, Got: ${actualPermission}`);
+                } catch (error) {
+                    addResult('method', test.name, false, `Error: ${error.message}`);
+                }
+            });
+        }
+
+        function runDisplayInfoTests() {
+            clearResults('display-info');
+            addInfo('display-info', 'Testing getPermissionDisplayInfo method with all permission levels...');
+
+            const permissionLevels = ['owner', 'postable', 'readonly', 'unknown', 'invalid'];
+            const expectedResults = {
+                'owner': { label: 'Owner', icon: 'fas fa-crown', color: 'warning' },
+                'postable': { label: 'Editor', icon: 'fas fa-edit', color: 'success' },
+                'readonly': { label: 'Viewer', icon: 'fas fa-eye', color: 'info' },
+                'unknown': { label: 'Unknown', icon: 'fas fa-question', color: 'secondary' },
+                'invalid': { label: 'Unknown', icon: 'fas fa-question', color: 'secondary' }
+            };
+
+            permissionLevels.forEach(level => {
+                try {
+                    const displayInfo = mockEditor.getPermissionDisplayInfo(level);
+                    const expected = expectedResults[level];
+                    
+                    const passed = displayInfo.label === expected.label && 
+                                 displayInfo.icon === expected.icon && 
+                                 displayInfo.color === expected.color;
+                    
+                    addResult('display-info', `Permission Level: ${level}`, passed,
+                        `Label: ${displayInfo.label}, Icon: ${displayInfo.icon}, Color: ${displayInfo.color}`);
+                } catch (error) {
+                    addResult('display-info', `Permission Level: ${level}`, false, `Error: ${error.message}`);
+                }
+            });
+
+            // Create visual demo
+            const demoDiv = document.createElement('div');
+            demoDiv.innerHTML = '<h4>Visual Permission Badges:</h4><div class="permission-demo"></div>';
+            const permissionDemo = demoDiv.querySelector('.permission-demo');
+            
+            permissionLevels.slice(0, 4).forEach(level => {
+                const info = mockEditor.getPermissionDisplayInfo(level);
+                const badge = document.createElement('span');
+                badge.className = `badge bg-${info.color}`;
+                badge.title = info.description;
+                badge.innerHTML = `<i class="${info.icon}"></i> ${info.label}`;
+                permissionDemo.appendChild(badge);
+            });
+            
+            document.getElementById('display-info-results').appendChild(demoDiv);
+        }
+
+        function createMockTable() {
+            clearResults('mock-table');
+            addInfo('mock-table', 'Creating a mock document table with permission levels...');
+
+            const mockDocuments = [
+                { type: 'local', name: 'My Local Draft', size: 1024, lastModified: '2024-01-15' },
+                { type: 'collaborative', owner: 'testuser', permlink: 'my-shared-doc', documentName: 'My Shared Document', updatedAt: '2024-01-14' },
+                { type: 'collaborative', owner: 'otheruser', permlink: 'their-doc', documentName: 'Shared with Me', updatedAt: '2024-01-13' },
+                { type: 'collaborative', owner: 'testuser', permlink: 'test-doc', documentName: 'Current Document', updatedAt: '2024-01-12' }
+            ];
+
+            const table = document.createElement('table');
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th style="width: 35%;">Name</th>
+                        <th>Details</th>
+                        <th>Your Access</th>
+                        <th>Last Modified</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `;
+
+            const tbody = table.querySelector('tbody');
+            
+            mockDocuments.forEach(file => {
+                const permissionLevel = mockEditor.getUserPermissionLevel(file);
+                const displayInfo = mockEditor.getPermissionDisplayInfo(permissionLevel);
+                
+                const row = document.createElement('tr');
+                row.className = file.type === 'collaborative' ? 'row-collaborative' : 'row-local';
+                row.innerHTML = `
+                    <td class="cursor-pointer">
+                        <strong>${file.name || file.documentName || file.permlink}</strong>
+                        ${file.type === 'collaborative' && file.documentName && file.documentName !== file.permlink ? 
+                            `<br><small style="color: #888;">${file.permlink}</small>` : ''}
+                    </td>
+                    <td class="cursor-pointer">
+                        <small>${file.type === 'local' ? 
+                            `${(file.size / 1024).toFixed(1)} KB` : 
+                            `by @${file.owner}`}</small>
+                    </td>
+                    <td class="cursor-pointer">
+                        <span class="badge bg-${displayInfo.color}" title="${displayInfo.description}">
+                            <i class="${displayInfo.icon}"></i> ${displayInfo.label}
+                        </span>
+                    </td>
+                    <td class="cursor-pointer">
+                        <small>${file.lastModified || file.updatedAt}</small>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('mock-table-results').appendChild(table);
+            
+            addResult('mock-table', 'Mock Table Created', true, 
+                `Created table with ${mockDocuments.length} documents showing permission levels`);
+        }
+
+        function runIntegrationTests() {
+            clearResults('integration');
+            addInfo('integration', 'Testing integration with actual TipTap editor instance...');
+
+            // Check if editor instance exists
+            const editorInstance = window.editorInstance || window.app;
+            const hasEditor = !!editorInstance;
+            
+            addResult('integration', 'Editor Instance Available', hasEditor,
+                hasEditor ? 'Editor instance found' : 'No editor instance available');
+
+            if (hasEditor) {
+                // Test if methods exist
+                const hasPermissionMethod = typeof editorInstance.getUserPermissionLevel === 'function';
+                const hasDisplayMethod = typeof editorInstance.getPermissionDisplayInfo === 'function';
+                
+                addResult('integration', 'Permission Method Available', hasPermissionMethod,
+                    hasPermissionMethod ? 'getUserPermissionLevel method exists' : 'Method not found');
+                
+                addResult('integration', 'Display Info Method Available', hasDisplayMethod,
+                    hasDisplayMethod ? 'getPermissionDisplayInfo method exists' : 'Method not found');
+
+                // Test with actual data if available
+                if (hasPermissionMethod && hasDisplayMethod && editorInstance.allDocuments) {
+                    const docCount = editorInstance.allDocuments.length;
+                    addResult('integration', 'Document Count', true,
+                        `Found ${docCount} documents in editor instance`);
+                    
+                    if (docCount > 0) {
+                        const firstDoc = editorInstance.allDocuments[0];
+                        try {
+                            const permission = editorInstance.getUserPermissionLevel(firstDoc);
+                            const displayInfo = editorInstance.getPermissionDisplayInfo(permission);
+                            
+                            addResult('integration', 'Live Permission Test', true,
+                                `First document permission: ${displayInfo.label} (${permission})`);
+                        } catch (error) {
+                            addResult('integration', 'Live Permission Test', false,
+                                `Error testing with live data: ${error.message}`);
+                        }
+                    }
+                }
+
+                // Check if open document modal exists
+                const modalExists = document.querySelector('[class*="modal"]') !== null;
+                addResult('integration', 'Modal Elements Present', modalExists,
+                    modalExists ? 'Modal elements found in DOM' : 'No modal elements detected');
+            }
+        }
+
+        // Auto-run method tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(runMethodTests, 500);
+        });
+    </script>
+</body>
+</html> 

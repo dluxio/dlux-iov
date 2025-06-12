@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.12.3",
-  "generated": "2025-06-12T02:30:42Z",
+  "version": "2025.06.11.20",
+  "generated": "2025-06-12T03:19:30Z",
   "files": {
-    "/js/vote.js": {
-      "checksum": "1a7b77e81743317a96abae74a0ed4985",
-      "size": 6049,
-      "priority": "important"
-    },
     "/js/voting-modal.js": {
       "checksum": "10fae48422e8e57ca87422eeeae572e2",
       "size": 7220,
@@ -711,7 +706,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "0e89a041ba13df094549cdbfac54d376",
+      "checksum": "99cb23c592d7e55bcf2c689e586fbc24",
       "size": 7299,
       "priority": "important"
     },
@@ -785,22 +780,17 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/playground/last-try.html": {
-      "checksum": "a64809066d4ff41d60aebe9a57d17b72",
-      "size": 7021,
-      "priority": "page-specific"
-    },
     "/playground/new.html": {
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

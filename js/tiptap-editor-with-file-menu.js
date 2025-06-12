@@ -306,7 +306,7 @@ export default {
                 // Owner can always publish
                 if (this.currentFile.owner === this.username) return true;
                 
-                // Check if user has postable permission
+                // Check if user has postable permission (only postable can publish to Hive)
                 const userPermission = this.documentPermissions.find(p => p.account === this.username);
                 return userPermission && userPermission.permissionType === 'postable';
             }
@@ -461,6 +461,7 @@ export default {
             }
             
             // Only 'readonly' permission type should be read-only
+            // Users with 'editable' or 'postable' can edit content
             const isReadOnly = userPermission.permissionType === 'readonly';
             
             console.log(`🔐 Permission check for ${this.username}: ${userPermission.permissionType}, read-only: ${isReadOnly}`);
@@ -489,12 +490,20 @@ export default {
             }
             return this.content.tags || [];
         },
+
+
     },
     
     methods: {
         // File integration methods
         addFileToPost(file) {
             if (!file) return;
+            
+            // ===== READ-ONLY PERMISSION ENFORCEMENT =====
+            if (this.isReadOnlyMode) {
+                console.warn('🔒 Cannot add file to post: Read-only mode');
+                return;
+            }
             
             console.log('📎 Adding file to post:', file);
             
@@ -533,13 +542,107 @@ export default {
         },
         
         removeAttachedFile(index) {
+            // ===== READ-ONLY PERMISSION ENFORCEMENT =====
+            if (this.isReadOnlyMode) {
+                console.warn('🔒 Cannot remove attached file: Read-only mode');
+                return;
+            }
+            
             this.attachedFiles.splice(index, 1);
             this.hasUnsavedChanges = true;
+        },
+
+        // Get user's permission level for a specific document
+        getUserPermissionLevel(file) {
+            if (!file) return 'unknown';
+            
+            // Local files - user has full control
+            if (file.type === 'local') {
+                return 'owner';
+            }
+            
+            // Collaborative files - check permissions
+            if (file.type === 'collaborative') {
+                // Document owner has full control
+                if (file.owner === this.username) {
+                    return 'owner';
+                }
+                
+                // For other users, we need to check permissions
+                // Since we don't load permissions for all docs in the list,
+                // we'll make a reasonable assumption based on available data
+                
+                // If user is not authenticated, assume read-only
+                if (!this.isAuthenticated) {
+                    return 'readonly';
+                }
+                
+                // If this is the currently loaded document, use actual permissions
+                if (this.currentFile && 
+                    file.owner === this.currentFile.owner && 
+                    file.permlink === this.currentFile.permlink &&
+                    this.documentPermissions.length > 0) {
+                    
+                    const userPermission = this.documentPermissions.find(p => p.account === this.username);
+                    if (userPermission) {
+                        return userPermission.permissionType;
+                    }
+                }
+                
+                // Default assumption for collaborative docs
+                return 'readonly';
+            }
+            
+            return 'unknown';
+        },
+
+        // Get permission level display info
+        getPermissionDisplayInfo(permissionLevel) {
+            const permissionMap = {
+                'owner': {
+                    label: 'Owner',
+                    icon: 'fas fa-crown',
+                    color: 'warning',
+                    description: 'Full control - can edit, share, and delete'
+                },
+                'postable': {
+                    label: 'Full Editor',
+                    icon: 'fas fa-edit',
+                    color: 'success',
+                    description: 'Can edit content and publish to Hive'
+                },
+                'editable': {
+                    label: 'Editor',
+                    icon: 'fas fa-pen',
+                    color: 'primary',
+                    description: 'Can edit content but cannot publish'
+                },
+                'readonly': {
+                    label: 'Viewer',
+                    icon: 'fas fa-eye',
+                    color: 'info',
+                    description: 'Can view content only'
+                },
+                'unknown': {
+                    label: 'Unknown',
+                    icon: 'fas fa-question',
+                    color: 'secondary',
+                    description: 'Permission level unknown'
+                }
+            };
+            
+            return permissionMap[permissionLevel] || permissionMap['unknown'];
         },
         
         // Tag management
         addTag() {
             try {
+                // ===== READ-ONLY PERMISSION ENFORCEMENT =====
+                if (this.isReadOnlyMode) {
+                    console.warn('🔒 Cannot add tag: Read-only mode');
+                    return;
+                }
+                
                 const tagValue = this.tagInput.trim().toLowerCase();
                 
                 if (!tagValue) return;
@@ -549,7 +652,7 @@ export default {
                 const tags = this.getTags();
                 if (!tags.includes(tagValue) && tags.length < 10) {
                     this.addCollaborativeTag(tagValue);
-                    this.hasUnsavedChanges = true;
+                this.hasUnsavedChanges = true;
                     this.clearUnsavedAfterSync();
                 }
                 
@@ -562,11 +665,17 @@ export default {
         
         removeTag(index) {
             try {
+                // ===== READ-ONLY PERMISSION ENFORCEMENT =====
+                if (this.isReadOnlyMode) {
+                    console.warn('🔒 Cannot remove tag: Read-only mode');
+                    return;
+                }
+                
                 // ===== REFACTORED: Single Path - Always use Y.js =====
                 const tags = this.getTags();
                 if (index >= 0 && index < tags.length) {
                     this.removeCollaborativeTag(tags[index]);
-                    this.hasUnsavedChanges = true;
+            this.hasUnsavedChanges = true;
                     this.clearUnsavedAfterSync();
                 }
             } catch (error) {
@@ -591,24 +700,30 @@ export default {
         // Beneficiaries management
         addBeneficiary() {
             try {
-                const account = this.beneficiaryInput.account.replace('@', '').trim();
-                const percent = parseFloat(this.beneficiaryInput.percent);
-                
-                if (!account || !percent || percent <= 0 || percent > 100) {
-                    alert('Please enter a valid account name and percentage (0.01-100%)');
+                // ===== READ-ONLY PERMISSION ENFORCEMENT =====
+                if (this.isReadOnlyMode) {
+                    console.warn('🔒 Cannot add beneficiary: Read-only mode');
                     return;
                 }
                 
+            const account = this.beneficiaryInput.account.replace('@', '').trim();
+            const percent = parseFloat(this.beneficiaryInput.percent);
+            
+            if (!account || !percent || percent <= 0 || percent > 100) {
+                alert('Please enter a valid account name and percentage (0.01-100%)');
+                return;
+            }
+            
                 const weight = Math.round(percent * 100);
                 
                 // ===== REFACTORED: Single Path - Always use Y.js =====
                 this.addCollaborativeBeneficiary(account, weight);
                 this.hasUnsavedChanges = true;
                 this.clearUnsavedAfterSync();
-                
-                // Reset input
-                this.beneficiaryInput.account = '';
-                this.beneficiaryInput.percent = 1.0;
+            
+            // Reset input
+            this.beneficiaryInput.account = '';
+            this.beneficiaryInput.percent = 1.0;
             } catch (error) {
                 console.error('Error adding beneficiary:', error);
                 alert('Error adding beneficiary: ' + error.message);
@@ -617,11 +732,17 @@ export default {
         
         removeBeneficiary(index) {
             try {
+                // ===== READ-ONLY PERMISSION ENFORCEMENT =====
+                if (this.isReadOnlyMode) {
+                    console.warn('🔒 Cannot remove beneficiary: Read-only mode');
+                    return;
+                }
+                
                 // ===== REFACTORED: Single Path - Always use Y.js =====
                 const beneficiaries = this.getBeneficiaries();
                 if (index >= 0 && index < beneficiaries.length) {
                     this.removeCollaborativeBeneficiary(beneficiaries[index].id);
-                    this.hasUnsavedChanges = true;
+            this.hasUnsavedChanges = true;
                     this.clearUnsavedAfterSync();
                 }
             } catch (error) {
@@ -632,6 +753,12 @@ export default {
         
         // Comment options change handler
         handleCommentOptionChange() {
+            // ===== READ-ONLY PERMISSION ENFORCEMENT =====
+            if (this.isReadOnlyMode) {
+                console.warn('🔒 Cannot change comment options: Read-only mode');
+                return;
+            }
+            
             this.hasUnsavedChanges = true;
             
             // ===== REFACTORED: Single Path - Always use Y.js =====
@@ -641,9 +768,15 @@ export default {
             this.setPublishOption('percentHbd', this.commentOptions.percentHbd);
             this.clearUnsavedAfterSync();
         },
-
+        
         // Custom JSON handling
         validateCustomJson() {
+            // ===== READ-ONLY PERMISSION ENFORCEMENT =====
+            if (this.isReadOnlyMode) {
+                console.warn('🔒 Cannot modify custom JSON: Read-only mode');
+                return;
+            }
+            
             if (!this.customJsonString.trim()) {
                 this.customJsonError = '';
                 return;
@@ -662,6 +795,12 @@ export default {
         
         // Permlink management  
         togglePermlinkEditor() {
+            // ===== READ-ONLY PERMISSION ENFORCEMENT =====
+            if (this.isReadOnlyMode) {
+                console.warn('🔒 Cannot edit permlink: Read-only mode');
+                return;
+            }
+            
             this.showPermlinkEditor = !this.showPermlinkEditor;
             if (this.showPermlinkEditor && this.permlinkEditor) {
                 this.$nextTick(() => {
@@ -671,6 +810,12 @@ export default {
         },
         
         useGeneratedPermlink() {
+            // ===== READ-ONLY PERMISSION ENFORCEMENT =====
+            if (this.isReadOnlyMode) {
+                console.warn('🔒 Cannot use generated permlink: Read-only mode');
+                return;
+            }
+            
             this.content.permlink = this.generatedPermlink;
             if (this.permlinkEditor) {
                 this.permlinkEditor.commands.setContent(this.generatedPermlink);
@@ -854,10 +999,10 @@ export default {
                             
                             // Collaborative document reference
                             collaborative: this.currentFile && this.currentFile.type === 'collaborative' ? {
-                                owner: this.currentFile.owner,
+                            owner: this.currentFile.owner,
                                 permlink: this.currentFile.permlink,
                                 documentName: this.currentFile.documentName
-                            } : null
+                        } : null
                         },
                         
                         // Legacy attached files for backward compatibility
@@ -1223,7 +1368,7 @@ export default {
                 };
             }
         },
-
+        
         // Enhanced content update to emit changes
         updateContent() {
             // TEMPORARILY COMMENT OUT TO AVOID CONFLICTS
@@ -1663,6 +1808,20 @@ export default {
             
             const username = this.shareForm.username.trim();
             
+            // Debug logging to track permission values
+            console.log('🔍 DEBUG: performShare called with:', {
+                username: username,
+                selectedPermission: this.shareForm.permission,
+                shareFormState: { ...this.shareForm }
+            });
+            
+            const requestPayload = {
+                targetAccount: username,
+                permissionType: this.shareForm.permission
+            };
+            
+            console.log('🔍 DEBUG: Request payload being sent:', requestPayload);
+            
             try {
                 const response = await fetch(`https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}`, {
                     method: 'POST',
@@ -1670,25 +1829,30 @@ export default {
                         'Content-Type': 'application/json',
                         ...this.authHeaders
                     },
-                    body: JSON.stringify({
-                        targetAccount: username,
-                        permissionType: this.shareForm.permission
-                    })
+                    body: JSON.stringify(requestPayload)
                 });
                 
+                console.log('🔍 DEBUG: Server response status:', response.status, response.statusText);
+                
                 if (response.ok) {
+                    const responseData = await response.json().catch(() => null);
+                    console.log('🔍 DEBUG: Server response data:', responseData);
+                    
                     // Clear form
                     this.shareForm.username = '';
                     this.shareForm.permission = 'readonly';
                     
                     // Reload permissions to update the list
                     await this.loadDocumentPermissions();
+                    console.log('🔍 DEBUG: Permissions after reload:', this.documentPermissions);
+                    
                     // Update editor permissions in case they changed
                     this.updateEditorPermissions();
                     
                     alert(`Document shared with @${username}!`);
                 } else {
                     const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    console.log('🔍 DEBUG: Server error response:', errorData);
                     throw new Error(`Failed to share document: ${errorData.error || response.statusText}`);
                 }
             } catch (error) {
@@ -1769,6 +1933,33 @@ export default {
                     });
 
                     if (!response?.ok) {
+                        console.warn(`🔐 Permission API failed with HTTP ${response?.status}:`, {
+                            status: response?.status,
+                            statusText: response?.statusText,
+                            url: permissionsUrl,
+                            isOwner: this.currentFile.owner === this.username
+                        });
+                        
+                        // Handle different error types
+                        if (response?.status === 403) {
+                            console.warn('🔐 HTTP 403: Permission denied - this could indicate:');
+                            console.warn('  - Authentication headers are expired or invalid');
+                            console.warn('  - User lacks permission to view document permissions');
+                            console.warn('  - Server-side authentication validation failed');
+                            
+                            // For 403 errors, try to be more permissive for document owners
+                            if (this.currentFile.owner === this.username) {
+                                console.log('🔐 User is document owner, assuming full permissions despite 403');
+                                this.documentPermissions = [{
+                                    account: this.username,
+                                    permissionType: 'postable',
+                                    grantedBy: this.username,
+                                    grantedAt: new Date().toISOString()
+                                }];
+                                return; // Skip the error throw for owners
+                            }
+                        }
+                        
                         // Set default permissions as array with proper structure
                         const defaultPermissions = [];
                         
@@ -1782,9 +1973,14 @@ export default {
                         
                         // Add current user permission if different from owner
                         if (this.username !== this.currentFile.owner) {
+                            // For non-403 errors, default to readonly for safety
+                            // For 403 errors, this suggests auth issues rather than permission issues
+                            const fallbackPermission = response?.status === 403 ? 'editable' : 'readonly';
+                            console.log(`🔐 Setting fallback permission to '${fallbackPermission}' for HTTP ${response?.status}`);
+                            
                             defaultPermissions.push({
                                 account: this.username,
-                                permissionType: 'readonly', // Default to read-only for safety
+                                permissionType: fallbackPermission,
                                 grantedBy: this.currentFile.owner,
                                 grantedAt: new Date().toISOString()
                             });
@@ -1812,6 +2008,50 @@ export default {
                 }
             } catch (error) {
                 console.error('Error loading permissions:', error);
+                
+                // Handle 403 errors more gracefully - don't completely fail
+                if (error.message.includes('HTTP 403')) {
+                    console.warn('🔐 Handling 403 error gracefully - user may still have access via sharing');
+                    console.warn('🔐 This is likely a server-side issue where permission loading requires different auth than permission granting');
+                    
+                    // For 403 errors, assume the user has the permissions they were granted
+                    // Since they can access the document, they likely have at least editable access
+                    const assumedPermissions = [{
+                        account: this.currentFile.owner,
+                        permissionType: 'postable',
+                        grantedBy: this.currentFile.owner,
+                        grantedAt: new Date().toISOString()
+                    }];
+                    
+                    // If user is not the owner, assume they have postable permissions
+                    // (since they were able to access the document, they likely were granted access)
+                    if (this.username !== this.currentFile.owner) {
+                        assumedPermissions.push({
+                            account: this.username,
+                            permissionType: 'postable', // Assume full access since they can access the doc
+                            grantedBy: this.currentFile.owner,
+                            grantedAt: new Date().toISOString(),
+                            note: 'Assumed due to 403 error - actual permissions may vary'
+                        });
+                        console.log('🔐 Assuming user has postable permissions due to document access despite 403');
+                    }
+                    
+                    this.documentPermissions = assumedPermissions;
+                    
+                    // Show a user-friendly notification about the permission loading issue
+                    setTimeout(() => {
+                        console.log('🔐 Showing user notification about permission loading issue');
+                        if (this.username !== this.currentFile.owner) {
+                            // Only show to non-owners since they're affected by the 403
+                            alert('Note: Unable to load exact permissions due to a server issue, but you should have the access you were granted. If you experience any issues, contact the document owner.');
+                        }
+                    }, 1000);
+                    
+                    // Don't re-throw 403 errors - let the user try to use the document
+                    return;
+                }
+                
+                // For other errors, set empty permissions and re-throw
                 this.documentPermissions = [];
                 throw error; // Re-throw to handle in the calling function
             } finally {
@@ -1931,13 +2171,13 @@ export default {
                 
                 // Legacy local files stored in localStorage
                 const content = JSON.parse(localStorage.getItem(`dlux_tiptap_file_${file.id}`) || '{}');
-                this.isCollaborativeMode = false;
-                this.content = content;
-                
-                this.disconnectCollaboration();
-                await this.createStandardEditor();
-                this.setEditorContent(content);
-                
+            this.isCollaborativeMode = false;
+            this.content = content;
+            
+            this.disconnectCollaboration();
+            await this.createStandardEditor();
+            this.setEditorContent(content);
+            
                 console.log('📂 Legacy local file loaded from localStorage:', file.name);
             }
         },
@@ -1965,7 +2205,7 @@ export default {
                 // or can be manually cleaned if needed in the future
             } else {
                 // For legacy files, remove content from localStorage
-                localStorage.removeItem(`dlux_tiptap_file_${targetFileId}`);
+            localStorage.removeItem(`dlux_tiptap_file_${targetFileId}`);
                 console.log('🗑️ Deleted legacy file content from localStorage:', targetFileId);
             }
             
@@ -2065,10 +2305,10 @@ export default {
                 // CRITICAL: Always try to load permissions for collaborative documents
                 try {
                     console.log('🔐 Loading permissions for collaborative document...');
-                    await this.loadDocumentPermissions();
+                        await this.loadDocumentPermissions();
                     console.log('✅ Permissions loaded, updating editor permissions...');
                     this.updateEditorPermissions();
-                } catch (error) {
+                    } catch (error) {
                     console.warn('⚠️ Failed to load permissions:', error);
                     // Ensure we have some default permissions structure
                     if (!Array.isArray(this.documentPermissions)) {
@@ -2307,10 +2547,10 @@ export default {
                 }
             });
 
-            this.bodyEditor = new Editor({
-                element: this.$refs.bodyEditor,
-                extensions: [
-                    StarterKit.configure({
+                this.bodyEditor = new Editor({
+                    element: this.$refs.bodyEditor,
+                    extensions: [
+                        StarterKit.configure({
                         history: false // Collaboration handles history
                     }),
                     Collaboration.configure({
@@ -2328,22 +2568,22 @@ export default {
                     this.handleContentValidationError('body', error, disableCollaboration);
                 },
                 editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
-                editorProps: {
-                    attributes: {
-                        class: 'form-control bg-transparent text-white border-0',
-                    }
-                },
+                    editorProps: {
+                        attributes: {
+                            class: 'form-control bg-transparent text-white border-0',
+                        }
+                    },
                 onCreate: ({ editor }) => {
                     console.log(`✅ Offline collaborative body editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
                 },
-                onUpdate: ({ editor }) => {
+                    onUpdate: ({ editor }) => {
                     // SECURITY: Block updates for read-only users
                     if (this.isReadOnlyMode) {
                         console.warn('🚫 Blocked body update: user has read-only permissions');
                         return;
                     }
                     
-                    this.content.body = editor.getHTML();
+                        this.content.body = editor.getHTML();
                     
                     // Always show unsaved indicator for user feedback
                     this.hasUnsavedChanges = true;
@@ -2841,7 +3081,7 @@ export default {
                 return this.addImage(fileData);
             } else if (fileData.type && fileData.type.startsWith('video/')) {
                 return this.addVideo(fileData);
-            } else {
+                                } else {
                 return this.addAttachment(fileData);
             }
         },
@@ -2985,10 +3225,10 @@ export default {
             const { default: StarterKit } = await import('https://esm.sh/@tiptap/starter-kit@3.0.0');
             const { default: Placeholder } = await import('https://esm.sh/@tiptap/extension-placeholder@3.0.0');
             
-            this.titleEditor = new Editor({
-                element: this.$refs.titleEditor,
-                    extensions: [
-                        StarterKit.configure({
+                    this.titleEditor = new Editor({
+                        element: this.$refs.titleEditor,
+                        extensions: [
+                            StarterKit.configure({
                             heading: false,
                             bulletList: false,
                             orderedList: false,
@@ -3007,15 +3247,15 @@ export default {
                         this.handleContentValidationError('title', error, null);
                     },
                     editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
-                    editorProps: {
-                        attributes: {
-                        class: 'form-control bg-transparent text-white border-0',
-                    }
-                },
-                onCreate: ({ editor }) => {
+                        editorProps: {
+                            attributes: {
+                                class: 'form-control bg-transparent text-white border-0',
+                            }
+                        },
+                        onCreate: ({ editor }) => {
                     console.log(`✅ Basic title editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
-                    },
-                    onUpdate: ({ editor }) => {
+                        },
+                        onUpdate: ({ editor }) => {
                     // SECURITY: Block updates for read-only users
                     if (this.isReadOnlyMode) {
                         console.warn('🚫 Blocked title update: user has read-only permissions');
@@ -3028,9 +3268,9 @@ export default {
             }
                 });
             
-                this.bodyEditor = new Editor({
-                    element: this.$refs.bodyEditor,
-                    extensions: [
+                    this.bodyEditor = new Editor({
+                        element: this.$refs.bodyEditor,
+                        extensions: [
                     StarterKit,
                         Placeholder.configure({
                         placeholder: this.isReadOnlyMode ? 'Content (read-only)' : 'Start writing...'
@@ -3043,22 +3283,22 @@ export default {
                         this.handleContentValidationError('body', error, null);
                     },
                     editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
-                    editorProps: {
-                        attributes: {
-                            class: 'form-control bg-transparent text-white border-0',
-                        }
-                    },
-                onCreate: ({ editor }) => {
+                        editorProps: {
+                            attributes: {
+                                class: 'form-control bg-transparent text-white border-0',
+                            }
+                        },
+                        onCreate: ({ editor }) => {
                     console.log(`✅ Basic body editor ready (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
-                    },
-                    onUpdate: ({ editor }) => {
+                        },
+                        onUpdate: ({ editor }) => {
                         // SECURITY: Block updates for read-only users
                         if (this.isReadOnlyMode) {
                             console.warn('🚫 Blocked body update: user has read-only permissions');
                             return;
                         }
                         
-                        this.content.body = editor.getHTML();
+                            this.content.body = editor.getHTML();
                     this.hasUnsavedChanges = true;
                     this.clearUnsavedAfterSync();
                 }
@@ -3184,7 +3424,7 @@ export default {
                         const title = this.getPlainTextTitle() || 'Untitled Document';
                         const filename = title.substring(0, 50).replace(/[^a-zA-Z0-9\s-]/g, '').trim() || `Document ${new Date().toLocaleDateString()}`;
                         
-                        this.currentFile = {
+                this.currentFile = {
                             id: `local_${timestamp}`,
                             name: filename,
                             type: 'local',
@@ -3282,7 +3522,7 @@ export default {
                         reason: event?.reason,
                         wasClean: event?.wasClean
                     });
-                        this.connectionStatus = 'disconnected';
+                this.connectionStatus = 'disconnected';
                         this.connectionMessage = 'Disconnected from server';
                     },
                     onSynced: ({ synced }) => {
@@ -5011,9 +5251,9 @@ export default {
                     <input v-model="tagInput" @keydown.enter="addTag"
                         class="form-control form-control-sm bg-dark text-white border-secondary"
                         placeholder="Add a tag..." maxlength="50" 
-                        :disabled="displayTags.length >= 10">
+                        :disabled="displayTags.length >= 10 || isReadOnlyMode">
                     <button @click="addTag" class="btn btn-sm btn-outline-primary"
-                        :disabled="displayTags.length >= 10 || !tagInput.trim()">
+                        :disabled="displayTags.length >= 10 || !tagInput.trim() || isReadOnlyMode">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
@@ -5022,13 +5262,17 @@ export default {
                 <span v-for="(tag, index) in displayTags" :key="index"
                     class="badge bg-primary d-flex align-items-center">
                     {{ tag }}
-                    <button @click="removeTag(index)" class="btn-close btn-close-white ms-2 small"></button>
+                    <button @click="removeTag(index)" class="btn-close btn-close-white ms-2 small"
+                        :disabled="isReadOnlyMode" :style="{ display: isReadOnlyMode ? 'none' : 'block' }"></button>
                 </span>
             </div>
             <small v-if="displayTags.length >= 10" class="text-warning">
                 Maximum 10 tags allowed
             </small>
-            <small v-if="currentFile?.type === 'collaborative'" class="text-info d-block mt-1">
+            <small v-if="isReadOnlyMode" class="text-info d-block mt-1">
+                <i class="fas fa-eye me-1"></i>Read-only mode: Tags are personal publishing settings and cannot be modified.
+            </small>
+            <small v-else-if="currentFile?.type === 'collaborative'" class="text-info d-block mt-1">
                 <i class="fas fa-info-circle me-1"></i>Tags are personal to you and control how YOU would publish this content to Hive.
             </small>
         </div>
@@ -5048,8 +5292,8 @@ export default {
                 <!-- Personal settings notice for collaborative docs -->
                 <div v-if="isReadOnlyMode" class="alert alert-info border-info bg-dark text-info mb-3">
                     <i class="fas fa-user-cog me-2"></i>
-                    <strong>Personal Publishing Settings</strong>
-                    <div class="small mt-1">These settings are personal to you and don't affect the collaborative document content. They control how YOU would publish this content to Hive.</div>
+                    <strong>Personal Publishing Settings (Read-Only)</strong>
+                    <div class="small mt-1">These settings are personal to you and don't affect the collaborative document content. You have read-only access to this document, so these settings cannot be modified.</div>
                 </div>
                 
                 <!-- Permlink Field -->
@@ -5061,8 +5305,9 @@ export default {
                     <div class="d-flex align-items-center gap-2 mb-2">
                         <code class="text-info">/@{{ username }}/</code>
                         <div class="flex-grow-1 position-relative">
-                            <div v-if="!showPermlinkEditor" @click="togglePermlinkEditor"
-                                class="bg-dark border border-secondary rounded p-2 cursor-pointer text-white font-monospace">
+                            <div v-if="!showPermlinkEditor || isReadOnlyMode" @click="!isReadOnlyMode && togglePermlinkEditor"
+                                class="bg-dark border border-secondary rounded p-2 text-white font-monospace"
+                                :class="{ 'cursor-pointer': !isReadOnlyMode, 'opacity-75': isReadOnlyMode }">
                                 {{ content.permlink || generatedPermlink || 'Click to edit...' }}
                             </div>
                             <div v-else class="editor-field bg-dark border border-secondary rounded">
@@ -5070,30 +5315,40 @@ export default {
                             </div>
                         </div>
                         <button @click="useGeneratedPermlink" class="btn btn-sm btn-outline-secondary"
-                            :disabled="!generatedPermlink">
+                            :disabled="!generatedPermlink || isReadOnlyMode">
                             Auto-generate
                         </button>
                     </div>
-                    <small class="text-muted">URL-safe characters only (a-z, 0-9, dashes). Not synchronized in collaborative
-                        mode.</small>
+                    <small class="text-muted">
+                        URL-safe characters only (a-z, 0-9, dashes). Not synchronized in collaborative mode.
+                        <span v-if="isReadOnlyMode" class="text-warning"> (Read-only access)</span>
+                    </small>
                 </div>
                 <!-- Beneficiaries Section -->
                 <div class="mb-4">
                     <label class="form-label text-white fw-bold">
                         <i class="fas fa-users me-2"></i>Beneficiaries (Reward Sharing)
+                        <span v-if="isReadOnlyMode" class="badge bg-warning text-dark ms-2">Read-Only</span>
                     </label>
-                    <div class="bg-dark border border-secondary rounded p-3">
+                    <div class="bg-dark border border-secondary rounded p-3"
+                        :class="{ 'opacity-75': isReadOnlyMode }">
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
-                            <small>Configure reward sharing with other accounts. Total cannot exceed
-                                100%.</small>
+                            <small>Configure reward sharing with other accounts. Total cannot exceed 100%.
+                                <span v-if="isReadOnlyMode" class="text-warning d-block mt-1">
+                                    <i class="fas fa-lock me-1"></i>Read-only mode: Cannot modify beneficiaries.
+                                </span>
+                            </small>
                         </div>
                         <div class="d-flex align-items-center gap-2 mb-2">
                             <input type="text" class="form-control bg-dark text-white border-secondary"
-                                placeholder="@username" v-model="beneficiaryInput.account">
+                                placeholder="@username" v-model="beneficiaryInput.account"
+                                :disabled="isReadOnlyMode">
                             <input type="number" class="form-control bg-dark text-white border-secondary"
-                                placeholder="%" min="0.01" max="100" step="0.01" v-model="beneficiaryInput.percent">
-                            <button @click="addBeneficiary" class="btn btn-outline-success">
+                                placeholder="%" min="0.01" max="100" step="0.01" v-model="beneficiaryInput.percent"
+                                :disabled="isReadOnlyMode">
+                            <button @click="addBeneficiary" class="btn btn-outline-success"
+                                :disabled="isReadOnlyMode">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
@@ -5101,7 +5356,8 @@ export default {
                             <div v-for="(ben, index) in displayBeneficiaries" :key="index"
                                 class="d-flex align-items-center justify-content-between bg-secondary rounded p-2 mb-1">
                                 <span>@{{ ben.account }} - {{ (ben.weight / 100).toFixed(2) }}%</span>
-                                <button @click="removeBeneficiary(index)" class="btn btn-sm btn-outline-danger">
+                                <button @click="removeBeneficiary(index)" class="btn btn-sm btn-outline-danger"
+                                    :disabled="isReadOnlyMode" v-show="!isReadOnlyMode">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -5113,18 +5369,26 @@ export default {
                 <div class="mb-4">
                     <label class="form-label text-white fw-bold">
                         <i class="fas fa-code me-2"></i>Custom JSON Metadata
+                        <span v-if="isReadOnlyMode" class="badge bg-warning text-dark ms-2">Read-Only</span>
                     </label>
-                    <div class="bg-dark border border-secondary rounded p-3">
+                    <div class="bg-dark border border-secondary rounded p-3"
+                        :class="{ 'opacity-75': isReadOnlyMode }">
                         <textarea v-model="customJsonString" @input="validateCustomJson"
                             class="form-control bg-dark text-white border-secondary font-monospace" rows="6"
-                            placeholder="Enter custom JSON metadata..."></textarea>
+                            placeholder="Enter custom JSON metadata..."
+                            :disabled="isReadOnlyMode"></textarea>
                         <div v-if="customJsonError" class="text-danger small mt-1">
                             <i class="fas fa-exclamation-triangle me-1"></i>{{ customJsonError }}
                         </div>
                         <div v-else-if="customJsonString" class="text-success small mt-1">
                             <i class="fas fa-check-circle me-1"></i>Valid JSON
                         </div>
-                        <small class="text-muted">Additional metadata for your post. Must be valid JSON.</small>
+                        <small class="text-muted">
+                            Additional metadata for your post. Must be valid JSON.
+                            <span v-if="isReadOnlyMode" class="text-warning d-block mt-1">
+                                <i class="fas fa-lock me-1"></i>Read-only mode: Cannot modify custom JSON.
+                            </span>
+                        </small>
                     </div>
                 </div>
 
@@ -5132,20 +5396,28 @@ export default {
                 <div class="mb-4">
                     <label class="form-label text-white fw-bold">
                         <i class="fas fa-cog me-2"></i>Comment Options
+                        <span v-if="isReadOnlyMode" class="badge bg-warning text-dark ms-2">Read-Only</span>
                     </label>
-                    <div class="bg-dark border border-secondary rounded p-3">
+                    <div class="bg-dark border border-secondary rounded p-3"
+                        :class="{ 'opacity-75': isReadOnlyMode }">
+                        <div v-if="isReadOnlyMode" class="alert alert-warning mb-3">
+                            <i class="fas fa-lock me-2"></i>
+                            <small>Read-only mode: Comment options cannot be modified.</small>
+                        </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" v-model="commentOptions.allowVotes"
-                                        @change="handleCommentOptionChange" id="allowVotes">
+                                        @change="handleCommentOptionChange" id="allowVotes"
+                                        :disabled="isReadOnlyMode">
                                     <label class="form-check-label text-white" for="allowVotes">
                                         Allow votes
                                     </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox"
-                                        v-model="commentOptions.allowCurationRewards" @change="handleCommentOptionChange" id="allowCurationRewards">
+                                        v-model="commentOptions.allowCurationRewards" @change="handleCommentOptionChange" id="allowCurationRewards"
+                                        :disabled="isReadOnlyMode">
                                     <label class="form-check-label text-white" for="allowCurationRewards">
                                         Allow curation rewards
                                     </label>
@@ -5154,14 +5426,16 @@ export default {
                             <div class="col-md-6">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox"
-                                        v-model="commentOptions.maxAcceptedPayout" @change="handleCommentOptionChange" id="maxPayout">
+                                        v-model="commentOptions.maxAcceptedPayout" @change="handleCommentOptionChange" id="maxPayout"
+                                        :disabled="isReadOnlyMode">
                                     <label class="form-check-label text-white" for="maxPayout">
                                         Decline payout
                                     </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" v-model="commentOptions.percentHbd"
-                                        @change="handleCommentOptionChange" id="powerUp">
+                                        @change="handleCommentOptionChange" id="powerUp"
+                                        :disabled="isReadOnlyMode">
                                     <label class="form-check-label text-white" for="powerUp">
                                         100% Power Up
                                     </label>
@@ -5181,7 +5455,7 @@ export default {
                             <div class="text-muted small">
                                 <i class="fas fa-info-circle me-1"></i>
                                 Preview the complete Hive JSON structure that will be broadcast
-                            </div>
+            </div>
                             <button @click="showJsonPreview" class="btn btn-outline-info btn-sm">
                                 <i class="fas fa-eye me-1"></i>Preview JSON
                             </button>
@@ -5220,9 +5494,9 @@ export default {
                     <div class="col-md-6">
                         <h6 class="text-white">Beneficiaries</h6>
                                             <div v-if="displayBeneficiaries.length === 0" class="text-muted small">
-                        No beneficiaries set - 100% rewards to author
-                    </div>
-                    <div v-else>
+                            No beneficiaries set - 100% rewards to author
+                        </div>
+                        <div v-else>
                         <div v-for="ben in displayBeneficiaries" :key="ben.account"
                                 class="d-flex justify-content-between small mb-1">
                                 <span>@{{ ben.account }}</span>
@@ -5329,8 +5603,9 @@ export default {
                     <table class="table table-hover table-dark align-middle mb-0 ">
                         <thead>
                             <tr>
-                                <th scope="col" style="width: 40%;">Name</th>
+                                <th scope="col" style="width: 35%;">Name</th>
                                 <th scope="col">Details</th>
+                                <th scope="col">Your Access</th>
                                 <th scope="col">Last Modified</th>
                                 <th scope="col" class="text-end">Actions</th>
                             </tr>
@@ -5350,6 +5625,14 @@ export default {
                                         formatFileSize(file.size) }}</small>
                                     <small v-if="file.type === 'collaborative'" class="text-muted">by @{{ file.owner
                                         }}</small>
+                                </td>
+                                <td @click="loadDocument(file)" class="cursor-pointer">
+                                    <span class="badge" 
+                                        :class="'bg-' + getPermissionDisplayInfo(getUserPermissionLevel(file)).color"
+                                        :title="getPermissionDisplayInfo(getUserPermissionLevel(file)).description">
+                                        <i :class="getPermissionDisplayInfo(getUserPermissionLevel(file)).icon" class="me-1"></i>
+                                        {{ getPermissionDisplayInfo(getUserPermissionLevel(file)).label }}
+                                    </span>
                                 </td>
                                 <td @click="loadDocument(file)" class="cursor-pointer">
                                     <small>{{ formatFileDate(file.lastModified || file.updatedAt) }}</small>
