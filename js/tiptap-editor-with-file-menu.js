@@ -584,7 +584,7 @@ export default {
             if (!this.content.tags.includes(tag) && this.content.tags.length < 10) {
                 this.content.tags.push(tag);
                 this.hasUnsavedChanges = true;
-                this.autoSaveContent(); // Trigger auto-save for local documents
+                this.clearUnsavedAfterSync(); // Unified sync indicator
             }
         },
         
@@ -654,7 +654,7 @@ export default {
                 this.customJsonError = '';
                 this.content.custom_json = JSON.parse(this.customJsonString);
                 this.hasUnsavedChanges = true;
-                this.autoSaveContent(); // Trigger auto-save for local documents
+                this.clearUnsavedAfterSync(); // Unified sync indicator
             } catch (error) {
                 this.customJsonError = error.message;
             }
@@ -676,7 +676,7 @@ export default {
                 this.permlinkEditor.commands.setContent(this.generatedPermlink);
             }
             this.hasUnsavedChanges = true;
-            this.autoSaveContent(); // Trigger auto-save for local documents
+            this.clearUnsavedAfterSync(); // Trigger auto-save for local documents
         },
         
         // Publishing
@@ -1574,12 +1574,10 @@ export default {
                     await this.performSaveAs();
                 } else {
                     // Regular save
-                    if (this.saveForm.saveLocally) {
-                        await this.saveToLocalStorage();
-                    }
-                    
+                    // Y.js + IndexedDB handles all content persistence automatically
+                    // Only need to update metadata and connect to collaboration server if needed
                     if (this.saveForm.saveToDlux) {
-                        await this.saveToCollaborativeDoc();
+                        await this.connectToCollaborationServer();
                     }
                 }
                 
@@ -1924,42 +1922,7 @@ export default {
             console.log('📂 Local file loaded:', file.name);
         },
         
-        async saveToLocalStorage() {
-            const content = this.getEditorContent();
-            const filename = this.saveForm.filename || `document_${Date.now()}`;
-            
-            // Generate ID if new file
-            const fileId = this.currentFile?.id || `local_${Date.now()}`;
-            
-            // Save content
-            localStorage.setItem(`dlux_tiptap_file_${fileId}`, JSON.stringify(content));
-            
-            // Update file index
-            const files = JSON.parse(localStorage.getItem('dlux_tiptap_files') || '[]');
-            const existingIndex = files.findIndex(f => f.id === fileId);
-            
-            const fileInfo = {
-                id: fileId,
-                name: filename,
-                type: 'local',
-                lastModified: new Date().toISOString(),
-                size: JSON.stringify(content).length
-            };
-            
-            if (existingIndex >= 0) {
-                files[existingIndex] = fileInfo;
-            } else {
-                files.push(fileInfo);
-            }
-            
-            localStorage.setItem('dlux_tiptap_files', JSON.stringify(files));
-            
-            this.currentFile = fileInfo;
-            this.fileType = 'local';
-            await this.loadLocalFiles();
-            
-            console.log('💾 Saved to local storage:', filename);
-        },
+
         
         async deleteLocalFile(fileId = null) {
             const targetFileId = fileId || this.currentFile?.id;
@@ -2153,133 +2116,7 @@ export default {
             }
         },
         
-        async saveToCollaborativeDoc() {
-            if (!this.showCollaborativeFeatures) {
-                const confirmAuth = confirm('You need to authenticate to save collaborative documents. Authenticate now?');
-                if (confirmAuth) {
-                    this.requestAuthentication();
-                }
-                return;
-            }
-            
-            const content = this.getEditorContent();
-            const documentName = this.saveForm.filename || `document_${Date.now()}`;
-            
-            // Try saving with retry logic and better error handling
-            const maxRetries = 3;
-            let lastError = null;
-            
-            for (let attempt = 1; attempt <= maxRetries; attempt++) {
-                try {
-                    console.log(`💾 Attempting to save to collaborative documents (attempt ${attempt}/${maxRetries})`);
-                    
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
-                    
-                    const response = await fetch('https://data.dlux.io/api/collaboration/documents', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            ...this.authHeaders
-                        },
-                        body: JSON.stringify({
-                            documentName: documentName, // Changed from permlink to documentName
-                            isPublic: this.saveForm.isPublic,
-                            title: content.title || documentName,
-                            description: this.saveForm.description || 'Document created with DLUX TipTap Editor'
-                        }),
-                        signal: controller.signal
-                    });
-                    
-                    clearTimeout(timeoutId);
-                    
-                    if (response.ok) {
-                        const docData = await response.json();
-                        // The API now returns the document in docData.document
-                        const serverDoc = docData.document || docData;
-                        this.currentFile = {
-                            ...serverDoc,
-                            type: 'collaborative'
-                        };
-                        this.fileType = 'collaborative';
-                        this.isCollaborativeMode = true;
-                        
-                        await this.loadCollaborativeDocs();
-                        await this.connectToCollaborationServer(this.currentFile);
-                        
-                        console.log('☁️ Saved to collaborative documents:', documentName);
-                        return; // Success - exit retry loop
-                        
-                    } else {
-                        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-                        
-                        if (response.status === 401) {
-                            throw new Error('Authentication expired. Please authenticate again.');
-                        } else if (response.status === 503 || response.status === 502) {
-                            throw new Error('Server temporarily unavailable. Please try again.');
-                        } else if (response.status >= 500) {
-                            throw new Error(`Server error (${response.status}). Please try again.`);
-                        } else {
-                            throw new Error(`Failed to create collaborative document: ${errorData.error || response.statusText}`);
-                        }
-                    }
-                    
-                } catch (error) {
-                    lastError = error;
-                    console.error(`❌ Save attempt ${attempt} failed:`, error);
-                    
-                    // Don't retry authentication errors
-                    if (error.message.includes('Authentication')) {
-                        const confirmAuth = confirm('Authentication required. Authenticate now?');
-                        if (confirmAuth) {
-                            this.requestAuthentication();
-                        }
-                        throw error;
-                    }
-                    
-                    // Don't retry client errors (400-499 except 401)
-                    if (error.name === 'TypeError' && error.message.includes('NetworkError')) {
-                        // Network error - could be temporary, continue retrying
-                    } else if (error.message.includes('Server temporarily unavailable') || 
-                              error.message.includes('Server error') ||
-                              error.name === 'AbortError') {
-                        // Server errors or timeouts - continue retrying
-                    } else {
-                        // Other errors - don't retry
-                        throw error;
-                    }
-                    
-                    // Wait before retry (exponential backoff)
-                    if (attempt < maxRetries) {
-                        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000); // 1s, 2s, 4s max
-                        console.log(`⏳ Waiting ${delay}ms before retry...`);
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                    }
-                }
-            }
-            
-            // If we get here, all retries failed
-            console.error('❌ All save attempts failed');
-            
-            // Offer fallback to local storage
-            const fallbackToLocal = confirm(
-                `Failed to save to collaborative documents after ${maxRetries} attempts.\n\n` +
-                `Error: ${lastError.message}\n\n` +
-                `Would you like to save locally instead?`
-            );
-            
-            if (fallbackToLocal) {
-                console.log('💾 Falling back to local storage save');
-                this.saveForm.saveLocally = true;
-                this.saveForm.saveToDlux = false;
-                await this.saveToLocalStorage();
-                
-                // Show success message with warning
-                alert(`Document saved locally as "${documentName}".\n\nNote: This is not a collaborative document. You can try saving to DLUX later when the service is available.`);
-            } else {
-                throw lastError;
-            }
-        },
+
         
         async deleteCollaborativeDoc(doc = null) {
             const targetDoc = doc || this.currentFile;
@@ -2404,6 +2241,12 @@ export default {
                         placeholder: this.isReadOnlyMode ? 'Title (read-only)' : 'Enter title...'
                         })
                     ],
+                    // TipTap Best Practice: Content validation for collaborative documents
+                    enableContentCheck: true,
+                    onContentError: ({ editor, error, disableCollaboration }) => {
+                        console.error('🚨 Title content validation error:', error);
+                        this.handleContentValidationError('title', error, disableCollaboration);
+                    },
                     editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
                     editorProps: {
                         attributes: {
@@ -2425,13 +2268,9 @@ export default {
                     // Always show unsaved indicator for user feedback
                     this.hasUnsavedChanges = true;
                     
-                    // For collaborative docs, clear unsaved flag quickly (they auto-sync)
-                    // For local docs, use autosave
-                    if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
-                        this.clearUnsavedAfterSync();
-                    } else {
-                        this.autoSaveContent();
-                    }
+                    // Y.js + IndexedDB handles persistence automatically
+                    // Just clear the unsaved indicator after a brief delay
+                    this.clearUnsavedAfterSync();
                 }
             });
 
@@ -2449,6 +2288,12 @@ export default {
                         placeholder: this.isReadOnlyMode ? 'Content (read-only)' : 'Start writing...'
                     })
                 ],
+                // TipTap Best Practice: Content validation for collaborative documents
+                enableContentCheck: true,
+                onContentError: ({ editor, error, disableCollaboration }) => {
+                    console.error('🚨 Body content validation error:', error);
+                    this.handleContentValidationError('body', error, disableCollaboration);
+                },
                 editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
                 editorProps: {
                     attributes: {
@@ -2470,13 +2315,9 @@ export default {
                     // Always show unsaved indicator for user feedback
                     this.hasUnsavedChanges = true;
                     
-                    // For collaborative docs, clear unsaved flag quickly (they auto-sync)
-                    // For local docs, use autosave
-                    if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
-                        this.clearUnsavedAfterSync();
-                    } else {
-                        this.autoSaveContent();
-                    }
+                    // Y.js + IndexedDB handles persistence automatically
+                    // Just clear the unsaved indicator after a brief delay
+                    this.clearUnsavedAfterSync();
                 }
             });
 
@@ -3126,6 +2967,12 @@ export default {
                         placeholder: this.isReadOnlyMode ? 'Title (read-only)' : 'Enter title...'
                         })
                     ],
+                    // TipTap Best Practice: Content validation for all editors
+                    enableContentCheck: true,
+                    onContentError: ({ editor, error }) => {
+                        console.error('🚨 Basic title content validation error:', error);
+                        this.handleContentValidationError('title', error, null);
+                    },
                     editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
                     editorProps: {
                         attributes: {
@@ -3144,7 +2991,7 @@ export default {
                     
                     this.content.title = editor.getHTML();
                     this.hasUnsavedChanges = true;
-                    this.autoSaveContent();
+                    this.clearUnsavedAfterSync();
             }
                 });
             
@@ -3156,6 +3003,12 @@ export default {
                         placeholder: this.isReadOnlyMode ? 'Content (read-only)' : 'Start writing...'
                     })
                     ],
+                    // TipTap Best Practice: Content validation for all editors
+                    enableContentCheck: true,
+                    onContentError: ({ editor, error }) => {
+                        console.error('🚨 Basic body content validation error:', error);
+                        this.handleContentValidationError('body', error, null);
+                    },
                     editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
                     editorProps: {
                         attributes: {
@@ -3174,7 +3027,7 @@ export default {
                         
                         this.content.body = editor.getHTML();
                     this.hasUnsavedChanges = true;
-                    this.autoSaveContent();
+                    this.clearUnsavedAfterSync();
                 }
             });
 
@@ -3183,32 +3036,7 @@ export default {
             this.fileType = 'local';
         },
 
-        // Autosave functionality
-        autoSaveContent() {
-            if (this.autoSaveTimeout) {
-                clearTimeout(this.autoSaveTimeout);
-            }
-            
-            this.autoSaveTimeout = setTimeout(async () => {
-                if (!this.currentFile) {
-                    // Create a new local file if none exists
-                    const timestamp = Date.now();
-                    const fileId = `local_${timestamp}`;
-                    this.currentFile = {
-                        id: fileId,
-                        name: `Untitled ${new Date().toLocaleDateString()}`,
-                        type: 'local',
-                        lastModified: new Date().toISOString()
-                    };
-                    this.fileType = 'local';
-                }
-                
-                if (this.currentFile.type === 'local') {
-                    await this.saveToLocalStorage();
-                    this.hasUnsavedChanges = false;
-                }
-            }, 2000); // Autosave 2 seconds after last edit
-        },
+
 
         // Update editor permissions based on current user's access level
         updateEditorPermissions() {
@@ -3234,6 +3062,41 @@ export default {
             
             // Force Vue to re-evaluate computed properties and update UI
             this.$forceUpdate();
+        },
+
+        // TipTap Best Practice: Handle content validation errors gracefully
+        handleContentValidationError(editorType, error, disableCollaboration) {
+            console.error(`🚨 Content validation error in ${editorType} editor:`, error);
+            
+            // For collaborative documents: disable collaboration to prevent sync issues
+            if (this.isCollaborativeMode && disableCollaboration) {
+                console.warn('🔒 Disabling collaboration due to content validation error');
+                disableCollaboration();
+                this.connectionStatus = 'error';
+                this.connectionMessage = `Content validation error in ${editorType} - collaboration disabled`;
+                
+                // Disable editor to prevent further issues
+                if (editorType === 'title' && this.titleEditor) {
+                    this.titleEditor.setEditable(false);
+                } else if (editorType === 'body' && this.bodyEditor) {
+                    this.bodyEditor.setEditable(false);
+                }
+                
+                // Show user-friendly error message
+                const message = `Content validation error detected in ${editorType}. ` +
+                              `This may be due to incompatible content from a different app version. ` +
+                              `Please refresh the page to continue editing.`;
+                
+                // Use a timeout to ensure the error doesn't block the UI
+                setTimeout(() => {
+                    if (confirm(message + '\n\nRefresh page now?')) {
+                        window.location.reload();
+                    }
+                }, 100);
+            } else {
+                // For non-collaborative documents: log but continue
+                console.warn(`Content validation failed in ${editorType}, but editor remains functional`);
+            }
         },
         
         // Debug method to manually check and update permissions
