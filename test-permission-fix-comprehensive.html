@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Permission Fix Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .test-section {
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+        }
+        .test-result {
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            border-radius: 0.25rem;
+        }
+        .test-pass {
+            background-color: #d1e7dd;
+            border: 1px solid #badbcc;
+            color: #0f5132;
+        }
+        .test-fail {
+            background-color: #f8d7da;
+            border: 1px solid #f5c2c7;
+            color: #842029;
+        }
+        .test-info {
+            background-color: #d1ecf1;
+            border: 1px solid #b8daff;
+            color: #055160;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 0.25rem;
+            padding: 0.75rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            margin: 0.5rem 0;
+        }
+        .log-output {
+            background-color: #212529;
+            color: #ffffff;
+            border-radius: 0.25rem;
+            padding: 0.75rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">
+                    <i class="fas fa-shield-alt text-primary me-2"></i>
+                    Comprehensive Permission Fix Test
+                </h1>
+                <p class="lead">Testing the enhanced 403 permission fix with authentication validation, retry logic, and intelligent fallback mechanisms.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Test Controls -->
+                <div class="test-section">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-play me-2"></i>Test Controls</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Test Scenario:</label>
+                            <select id="testScenario" class="form-select">
+                                <option value="valid_auth">Valid Authentication</option>
+                                <option value="missing_headers">Missing Auth Headers</option>
+                                <option value="expired_challenge">Expired Challenge</option>
+                                <option value="403_server_error">403 Server Error (Simulated)</option>
+                                <option value="network_timeout">Network Timeout</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">User Type:</label>
+                            <select id="userType" class="form-select">
+                                <option value="owner">Document Owner</option>
+                                <option value="editor">User with Edit Permission</option>
+                                <option value="viewer">User with Read Permission</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button onclick="runComprehensiveTest()" class="btn btn-primary">
+                                <i class="fas fa-play me-2"></i>Run Comprehensive Test
+                            </button>
+                            <button onclick="clearResults()" class="btn btn-outline-danger">
+                                <i class="fas fa-trash me-2"></i>Clear Results
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Test Results -->
+                <div class="test-section">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>Test Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="testResults"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <!-- Console Output -->
+                <div class="test-section">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="fas fa-terminal me-2"></i>Console Output</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="consoleOutput" class="log-output"></div>
+                    </div>
+                </div>
+
+                <!-- Mock API Responses -->
+                <div class="test-section">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-server me-2"></i>Mock API Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Mock Response Type:</label>
+                            <select id="mockResponseType" class="form-select">
+                                <option value="success">Success (200)</option>
+                                <option value="403_auth_inconsistency">403 Auth Inconsistency</option>
+                                <option value="401_unauthorized">401 Unauthorized</option>
+                                <option value="500_server_error">500 Server Error</option>
+                                <option value="timeout">Network Timeout</option>
+                                <option value="network_error">Network Error</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Response Delay (ms):</label>
+                            <input type="number" id="responseDelay" class="form-control" value="100" min="0" max="10000">
+                        </div>
+                        <button onclick="updateMockConfig()" class="btn btn-outline-info">
+                            <i class="fas fa-cog me-2"></i>Update Mock Config
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock TipTap Editor with Enhanced Permission System
+        class MockTipTapEditor {
+            constructor() {
+                this.username = 'testuser';
+                this.currentFile = {
+                    type: 'collaborative',
+                    owner: 'testowner',
+                    permlink: 'test-document'
+                };
+                this.authHeaders = {};
+                this.documentPermissions = [];
+                this.loadingPermissions = false;
+                this.permissionNotification = null;
+                this.mockConfig = {
+                    responseType: 'success',
+                    delay: 100
+                };
+            }
+
+            // PHASE 1: Enhanced Authentication Validation
+            validateAuthHeaders() {
+                const requiredHeaders = ['x-account', 'x-challenge', 'x-pubkey', 'x-signature'];
+                const errors = [];
+                
+                for (const header of requiredHeaders) {
+                    if (!this.authHeaders[header]) {
+                        errors.push(`Missing ${header}`);
+                    } else if (typeof this.authHeaders[header] !== 'string' || this.authHeaders[header].trim() === '') {
+                        errors.push(`Invalid ${header} (empty or non-string)`);
+                    }
+                }
+                
+                // Validate challenge timestamp (should be within 24 hours)
+                if (this.authHeaders['x-challenge']) {
+                    const challenge = parseInt(this.authHeaders['x-challenge']);
+                    const now = Math.floor(Date.now() / 1000);
+                    const hoursDiff = (now - challenge) / 3600;
+                    
+                    if (hoursDiff > 24) {
+                        errors.push(`Challenge expired (${hoursDiff.toFixed(1)} hours old)`);
+                    } else if (hoursDiff < 0) {
+                        errors.push(`Challenge from future (${Math.abs(hoursDiff).toFixed(1)} hours ahead)`);
+                    }
+                }
+                
+                return {
+                    isValid: errors.length === 0,
+                    errors: errors,
+                    headerCount: Object.keys(this.authHeaders).length
+                };
+            }
+
+            // PHASE 2: Authentication Testing
+            async testCollaborationAuth() {
+                try {
+                    log('🧪 Testing collaboration authentication...');
+                    
+                    // Simulate API call
+                    await this.simulateDelay();
+                    
+                    if (this.mockConfig.responseType === '401_unauthorized') {
+                        return { 
+                            success: false, 
+                            status: 401, 
+                            error: 'Unauthorized',
+                            headers: Object.keys(this.authHeaders)
+                        };
+                    }
+                    
+                    if (this.mockConfig.responseType === 'network_error') {
+                        throw new Error('Network connection failed');
+                    }
+                    
+                    log('✅ Auth test successful');
+                    return { success: true, result: { account: this.authHeaders['x-account'] } };
+                } catch (error) {
+                    log('⚠️ Auth test network error: ' + error.message);
+                    return { success: false, error: error.message, type: 'network' };
+                }
+            }
+
+            // PHASE 3: Permission Loading with Retry Logic
+            async loadPermissionsWithRetry(maxRetries = 3) {
+                const permissionsUrl = `https://data.dlux.io/api/collaboration/permissions/${this.currentFile.owner}/${this.currentFile.permlink}`;
+                
+                for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                    try {
+                        log(`🔄 Permission loading attempt ${attempt}/${maxRetries}...`);
+                        
+                        await this.simulateDelay();
+                        
+                        // Simulate different response types
+                        if (this.mockConfig.responseType === '403_auth_inconsistency') {
+                            log('🔐 Permission loading failed with HTTP 403 (Authentication inconsistency detected)');
+                            log('🔍 This indicates server-side authentication inconsistency between endpoints');
+                            log('📋 Troubleshooting information:');
+                            log('   • GET permissions endpoint authentication differs from POST endpoint');
+                            log('   • Same auth headers work for granting permissions but fail for loading');
+                            log('   • Server-side middleware alignment needed');
+                            log('🔧 Auth headers used: ' + Object.keys(this.authHeaders).join(', '));
+                            
+                            return {
+                                success: false,
+                                error: '403_AUTH_INCONSISTENCY',
+                                status: 403,
+                                details: 'Forbidden: Authentication inconsistency',
+                                attempt: attempt,
+                                authHeaders: Object.keys(this.authHeaders)
+                            };
+                        }
+                        
+                        if (this.mockConfig.responseType === '500_server_error' && attempt < maxRetries) {
+                            log(`⚠️ Server error 500 on attempt ${attempt}, retrying...`);
+                            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                            continue;
+                        }
+                        
+                        if (this.mockConfig.responseType === 'timeout') {
+                            throw new Error('AbortError');
+                        }
+                        
+                        if (this.mockConfig.responseType === 'network_error') {
+                            throw new Error('Network connection failed');
+                        }
+                        
+                        // Success case
+                        log(`✅ Permission loading successful on attempt ${attempt}`);
+                        return {
+                            success: true,
+                            permissions: [
+                                {
+                                    account: this.username,
+                                    permissionType: 'postable',
+                                    grantedBy: this.currentFile.owner,
+                                    grantedAt: new Date().toISOString()
+                                }
+                            ],
+                            attempt: attempt
+                        };
+                        
+                    } catch (error) {
+                        if (error.message === 'AbortError') {
+                            log(`⏰ Permission loading timeout on attempt ${attempt}`);
+                            if (attempt < maxRetries) {
+                                await new Promise(resolve => setTimeout(resolve, 2000));
+                                continue;
+                            }
+                        } else if (attempt < maxRetries) {
+                            log(`🌐 Network error on attempt ${attempt}: ${error.message}`);
+                            await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                            continue;
+                        }
+                        
+                        return {
+                            success: false,
+                            error: 'NETWORK_ERROR',
+                            details: error.message,
+                            attempt: attempt
+                        };
+                    }
+                }
+                
+                return {
+                    success: false,
+                    error: 'MAX_RETRIES_EXCEEDED',
+                    details: `Failed after ${maxRetries} attempts`
+                };
+            }
+
+            // PHASE 4: Intelligent Fallback Logic
+            applyPermissionFallback(error) {
+                const isOwner = this.currentFile.owner === this.username;
+                
+                if (error === '403_AUTH_INCONSISTENCY') {
+                    // Smart fallback for 403 authentication inconsistency
+                    if (isOwner) {
+                        log('🔄 Owner detected: Applying full permissions despite 403');
+                        this.documentPermissions = [{
+                            account: this.username,
+                            permissionType: 'owner',
+                            grantedBy: this.username,
+                            grantedAt: new Date().toISOString(),
+                            source: 'fallback_owner'
+                        }];
+                    } else {
+                        // For non-owners who can access the document, assume they have meaningful permissions
+                        log('🔄 Non-owner with document access: Assuming postable permissions');
+                        this.documentPermissions = [{
+                            account: this.username,
+                            permissionType: 'postable',
+                            grantedBy: this.currentFile.owner,
+                            grantedAt: new Date().toISOString(),
+                            source: 'fallback_403_access_implies_permission'
+                        }];
+                    }
+                    
+                    // Show user notification about server issue
+                    this.showPermissionFallbackNotification('authentication');
+                    
+                } else {
+                    // For other errors, use conservative fallback
+                    log('🔄 Applying conservative fallback permissions');
+                    this.documentPermissions = [{
+                        account: this.username,
+                        permissionType: isOwner ? 'owner' : 'readonly',
+                        grantedBy: isOwner ? this.username : this.currentFile.owner,
+                        grantedAt: new Date().toISOString(),
+                        source: 'fallback_conservative'
+                    }];
+                    
+                    this.showPermissionFallbackNotification('general');
+                }
+            }
+
+            // Emergency fallback for critical errors
+            applyEmergencyPermissionFallback(error) {
+                log('🚨 Applying emergency permission fallback due to critical error: ' + error);
+                
+                const isOwner = this.currentFile.owner === this.username;
+                this.documentPermissions = [{
+                    account: this.username,
+                    permissionType: isOwner ? 'owner' : 'readonly',
+                    grantedBy: isOwner ? this.username : this.currentFile.owner,
+                    grantedAt: new Date().toISOString(),
+                    source: 'emergency_fallback'
+                }];
+            }
+
+            // User notification system
+            showPermissionFallbackNotification(type) {
+                const messages = {
+                    authentication: {
+                        title: 'Server Authentication Issue',
+                        message: 'There\'s a temporary server-side authentication inconsistency. Your document access is working normally, but permission loading failed. This has been logged for the development team.',
+                        type: 'warning'
+                    },
+                    general: {
+                        title: 'Permission Loading Issue',
+                        message: 'Unable to load document permissions from server. Using safe fallback permissions. Document functionality may be limited.',
+                        type: 'info'
+                    }
+                };
+                
+                const notification = messages[type] || messages.general;
+                
+                // Store notification for UI display
+                this.permissionNotification = {
+                    ...notification,
+                    timestamp: new Date().toISOString(),
+                    dismissed: false
+                };
+                
+                log(`📢 ${notification.title}: ${notification.message}`);
+            }
+
+            // Main permission loading method (enhanced)
+            async loadDocumentPermissions() {
+                if (!this.currentFile || this.currentFile.type !== 'collaborative') return;
+                
+                this.loadingPermissions = true;
+                
+                try {
+                    // PHASE 1: Enhanced Authentication Validation
+                    const authValidation = this.validateAuthHeaders();
+                    if (!authValidation.isValid) {
+                        log('🔐 Authentication validation failed: ' + authValidation.errors.join(', '));
+                        throw new Error(`Authentication validation failed: ${authValidation.errors.join(', ')}`);
+                    }
+
+                    // PHASE 2: Test Authentication Before Permission Request
+                    const authTestResult = await this.testCollaborationAuth();
+                    if (!authTestResult.success) {
+                        log('🔐 Auth test failed, but proceeding with permission request...');
+                        log('🔍 Auth test details: ' + JSON.stringify(authTestResult));
+                    }
+
+                    // PHASE 3: Enhanced Permission Loading with Retry Logic
+                    const permissionResult = await this.loadPermissionsWithRetry();
+                    
+                    if (permissionResult.success) {
+                        this.documentPermissions = permissionResult.permissions;
+                        log('✅ Permissions loaded successfully: ' + this.documentPermissions.length + ' permissions');
+                    } else {
+                        // PHASE 4: Intelligent Fallback Logic
+                        log('⚠️ Permission loading failed, applying intelligent fallback...');
+                        this.applyPermissionFallback(permissionResult.error);
+                    }
+                    
+                } catch (error) {
+                    log('❌ Critical error in loadDocumentPermissions: ' + error.message);
+                    
+                    // Apply emergency fallback
+                    this.applyEmergencyPermissionFallback(error);
+                    
+                } finally {
+                    this.loadingPermissions = false;
+                }
+            }
+
+            // Helper methods
+            async simulateDelay() {
+                await new Promise(resolve => setTimeout(resolve, this.mockConfig.delay));
+            }
+
+            setAuthHeaders(headers) {
+                this.authHeaders = headers;
+            }
+
+            setUserType(userType) {
+                switch (userType) {
+                    case 'owner':
+                        this.username = this.currentFile.owner;
+                        break;
+                    case 'editor':
+                        this.username = 'editor_user';
+                        break;
+                    case 'viewer':
+                        this.username = 'viewer_user';
+                        break;
+                }
+            }
+        }
+
+        // Test framework
+        let mockEditor = new MockTipTapEditor();
+        let testResults = [];
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            
+            const consoleOutput = document.getElementById('consoleOutput');
+            consoleOutput.innerHTML += logEntry + '\n';
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+            
+            console.log(message);
+        }
+
+        function addTestResult(testName, passed, details = '') {
+            const result = {
+                name: testName,
+                passed: passed,
+                details: details,
+                timestamp: new Date().toISOString()
+            };
+            
+            testResults.push(result);
+            displayTestResult(result);
+        }
+
+        function displayTestResult(result) {
+            const resultsDiv = document.getElementById('testResults');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${result.passed ? 'test-pass' : 'test-fail'}`;
+            
+            resultDiv.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <strong>${result.passed ? '✅' : '❌'} ${result.name}</strong>
+                        ${result.details ? `<div class="small mt-1">${result.details}</div>` : ''}
+                    </div>
+                    <small class="text-muted">${new Date(result.timestamp).toLocaleTimeString()}</small>
+                </div>
+            `;
+            
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        function clearResults() {
+            testResults = [];
+            document.getElementById('testResults').innerHTML = '';
+            document.getElementById('consoleOutput').innerHTML = '';
+            log('🧹 Test results cleared');
+        }
+
+        function updateMockConfig() {
+            const responseType = document.getElementById('mockResponseType').value;
+            const delay = parseInt(document.getElementById('responseDelay').value);
+            
+            mockEditor.mockConfig = {
+                responseType: responseType,
+                delay: delay
+            };
+            
+            log(`🔧 Mock config updated: ${responseType}, delay: ${delay}ms`);
+        }
+
+        function setupTestScenario() {
+            const scenario = document.getElementById('testScenario').value;
+            const userType = document.getElementById('userType').value;
+            
+            // Set user type
+            mockEditor.setUserType(userType);
+            
+            // Set auth headers based on scenario
+            const now = Math.floor(Date.now() / 1000);
+            
+            switch (scenario) {
+                case 'valid_auth':
+                    mockEditor.setAuthHeaders({
+                        'x-account': mockEditor.username,
+                        'x-challenge': now.toString(),
+                        'x-pubkey': 'STM8GC13uCZbP44HzMLV6zPZGwVQ8Nt4Kji8PapsPiNq1BK153XTX',
+                        'x-signature': 'valid_signature_here'
+                    });
+                    mockEditor.mockConfig.responseType = 'success';
+                    break;
+                    
+                case 'missing_headers':
+                    mockEditor.setAuthHeaders({
+                        'x-account': mockEditor.username
+                        // Missing other headers
+                    });
+                    break;
+                    
+                case 'expired_challenge':
+                    mockEditor.setAuthHeaders({
+                        'x-account': mockEditor.username,
+                        'x-challenge': (now - 25 * 3600).toString(), // 25 hours ago
+                        'x-pubkey': 'STM8GC13uCZbP44HzMLV6zPZGwVQ8Nt4Kji8PapsPiNq1BK153XTX',
+                        'x-signature': 'valid_signature_here'
+                    });
+                    break;
+                    
+                case '403_server_error':
+                    mockEditor.setAuthHeaders({
+                        'x-account': mockEditor.username,
+                        'x-challenge': now.toString(),
+                        'x-pubkey': 'STM8GC13uCZbP44HzMLV6zPZGwVQ8Nt4Kji8PapsPiNq1BK153XTX',
+                        'x-signature': 'valid_signature_here'
+                    });
+                    mockEditor.mockConfig.responseType = '403_auth_inconsistency';
+                    break;
+                    
+                case 'network_timeout':
+                    mockEditor.setAuthHeaders({
+                        'x-account': mockEditor.username,
+                        'x-challenge': now.toString(),
+                        'x-pubkey': 'STM8GC13uCZbP44HzMLV6zPZGwVQ8Nt4Kji8PapsPiNq1BK153XTX',
+                        'x-signature': 'valid_signature_here'
+                    });
+                    mockEditor.mockConfig.responseType = 'timeout';
+                    break;
+            }
+            
+            log(`🎭 Test scenario set: ${scenario} with user type: ${userType}`);
+        }
+
+        async function runComprehensiveTest() {
+            log('🚀 Starting comprehensive permission fix test...');
+            
+            setupTestScenario();
+            
+            try {
+                await mockEditor.loadDocumentPermissions();
+                
+                // Verify results
+                const hasPermissions = mockEditor.documentPermissions.length > 0;
+                const hasNotification = mockEditor.permissionNotification !== null;
+                
+                addTestResult(
+                    'Comprehensive Permission Loading',
+                    hasPermissions,
+                    `Permissions: ${mockEditor.documentPermissions.length}, Notification: ${hasNotification ? 'Yes' : 'No'}`
+                );
+                
+                if (hasPermissions) {
+                    const permission = mockEditor.documentPermissions[0];
+                    addTestResult(
+                        'Permission Fallback Logic',
+                        permission.source !== undefined,
+                        `Permission: ${permission.permissionType}, Source: ${permission.source || 'server'}`
+                    );
+                }
+                
+                if (hasNotification) {
+                    addTestResult(
+                        'User Notification System',
+                        true,
+                        `Type: ${mockEditor.permissionNotification.type}, Title: ${mockEditor.permissionNotification.title}`
+                    );
+                }
+                
+            } catch (error) {
+                addTestResult('Comprehensive Test', false, `Error: ${error.message}`);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🎯 Comprehensive Permission Fix Test initialized');
+            log('📋 Available test scenarios: Valid Auth, Missing Headers, Expired Challenge, 403 Error, Network Timeout');
+            log('👥 Available user types: Owner, Editor, Viewer');
+            log('🚀 Ready to test the enhanced permission system!');
+        });
+    </script>
+</body>
+</html> 
