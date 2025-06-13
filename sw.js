@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.13.1",
-  "generated": "2025-06-13T00:49:10Z",
+  "version": "2025.06.13.12",
+  "generated": "2025-06-13T19:24:26Z",
   "files": {
-    "/nfts/create/index.html": {
-      "checksum": "731c1ebc3712880d93646f0201652d24",
-      "size": 66780,
-      "priority": "important"
-    },
     "/nfts/index.html": {
       "checksum": "b30cfe79674b3b7e91f5392fe9635294",
       "size": 59063,
@@ -646,7 +641,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "0560f18bb4a2228ed482e3586312cb4f",
+      "checksum": "83b1a0803ab8cb89bd3c7bf0371f3828",
       "size": 7299,
       "priority": "important"
     },
@@ -720,12 +715,12 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
