@@ -729,7 +729,7 @@ export default {
                 <li v-if="contextMenu.type === 'file' && postComponentAvailable" class="dropdown-divider"></li>
                 <li v-if="contextMenu.type === 'file' && postComponentAvailable">
                     <a class="dropdown-item py-1" href="#" @click="addToPost(contextMenu.item); hideContextMenu();">
-                        <i class="fa-solid fa-plus fa-fw me-2"></i>Add to Post
+                        <i class="fa-solid fa-plus fa-fw me-2"></i>{{ postType === 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k' ? 'Add to 360 Gallery' : 'Add to Post' }}
                     </a>
                 </li>
                 
@@ -1075,6 +1075,10 @@ export default {
             default: function () {
                 return {}
             },
+        },
+        postType: {
+            type: String,
+            default: 'blog',
         },
     },
     data() {

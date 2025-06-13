@@ -203,7 +203,7 @@ export default {
             <div v-if="contracts.length" class="d-flex flex-wrap justify-content-center">
                 <files-vue ref="filesVue" :assets="assets" @addassets="addAssets($event)" :account="account" :saccountapi="saccountapi" :computed-data="{usedBytes: usedBytes, availableBytes: availableBytes}"
                     @refresh-contracts="refreshContracts" @refresh-drive="handleRefreshDrive"
-                    @tosign="sendIt($event)" :signedtx="signedtx" :post-component-available="postpage" @add-to-post="handleAddToPost($event)"
+                    @tosign="sendIt($event)" :signedtx="signedtx" :post-component-available="postpage" :post-type="postType" @add-to-post="handleAddToPost($event)"
                     :file-slots="fileSlots"
                     @set-logo="handleFileSlot('logo', $event)"
                     @set-featured="handleFileSlot('featured', $event)"
@@ -307,6 +307,11 @@ export default {
             default: function () {
                 return {}
             },
+            required: false
+        },
+        postType: {
+            type: String,
+            default: 'blog',
             required: false
         }
     },

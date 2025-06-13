@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>360&deg; Image Gallery VR</title>
+    <meta name="description" content="360&deg; Image Gallery VR - A-Frame with full VR support">
+    
+    <!-- A-Frame and VR Components -->
+    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@5/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-layout-component@5.3.0/dist/aframe-layout-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-template-component@3.2.1/dist/aframe-template-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-proxy-event-component@2.1.0/dist/aframe-proxy-event-component.min.js"></script>
+    
+    <!-- VR Interaction Components -->
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.5.x/dist/aframe-extras.min.js"></script>
+    
+    <!-- Fix grabbable component conflict before loading super-hands -->
+    <script>
+      // Delete A-Frame's default grabbable component to avoid conflict with super-hands
+      if (typeof AFRAME !== 'undefined' && AFRAME.components && AFRAME.components.grabbable) {
+        delete AFRAME.components.grabbable;
+      }
+    </script>
+    
+    <script src="https://unpkg.com/super-hands@^3.0.5/dist/super-hands.min.js"></script>
+    
+    <!-- DLUX Integration -->
+    <script src="https://cdn.jsdelivr.net/npm/@hiveio/hive-js/dist/hive.min.js"></script>
+    <script src="/js/dlux-wallet.js"></script>
+    
+    <!-- Custom Components for VR UI -->
+    <script>
+      // Custom component for VR-friendly floating UI
+      AFRAME.registerComponent('vr-ui-panel', {
+        schema: {
+          visible: { type: 'boolean', default: false },
+          width: { type: 'number', default: 2 },
+          height: { type: 'number', default: 1.5 },
+          distance: { type: 'number', default: 1.5 }
+        },
+        
+        init: function() {
+          this.el.setAttribute('geometry', {
+            primitive: 'plane',
+            width: this.data.width,
+            height: this.data.height
+          });
+          this.el.setAttribute('material', {
+            color: '#000000',
+            opacity: 0.8,
+            transparent: true
+          });
+          this.el.setAttribute('visible', this.data.visible);
+          
+          // Position panel in front of user
+          this.positionPanel();
+        },
+        
+        positionPanel: function() {
+          const camera = document.querySelector('[camera]');
+          if (camera) {
+            const cameraPos = camera.getAttribute('position');
+            const cameraRot = camera.getAttribute('rotation');
+            
+            // Calculate position in front of camera
+            const distance = this.data.distance;
+            const radY = THREE.MathUtils.degToRad(cameraRot.y);
+            
+            this.el.setAttribute('position', {
+              x: cameraPos.x + Math.sin(radY) * distance,
+              y: cameraPos.y,
+              z: cameraPos.z - Math.cos(radY) * distance
+            });
+            
+            this.el.setAttribute('rotation', {
+              x: 0,
+              y: cameraRot.y,
+              z: 0
+            });
+          }
+        },
+        
+        toggle: function() {
+          const visible = this.el.getAttribute('visible');
+          this.el.setAttribute('visible', !visible);
+          if (!visible) {
+            this.positionPanel();
+          }
+        }
+      });
+
+      // Component for VR-friendly buttons
+      AFRAME.registerComponent('vr-button', {
+        schema: {
+          color: { type: 'color', default: '#4CC3D9' },
+          hoverColor: { type: 'color', default: '#7BC8A4' },
+          text: { type: 'string', default: 'Button' }
+        },
+        
+        init: function() {
+          this.el.setAttribute('geometry', {
+            primitive: 'box',
+            width: 0.3,
+            height: 0.1,
+            depth: 0.05
+          });
+          this.el.setAttribute('material', {
+            color: this.data.color
+          });
+          this.el.setAttribute('text', {
+            value: this.data.text,
+            align: 'center',
+            width: 6,
+            color: 'white'
+          });
+          
+          // Make it interactive
+          this.el.classList.add('clickable');
+          this.el.setAttribute('hoverable', '');
+          this.el.setAttribute('grabbable', '');
+          
+          // Add hover effects
+          this.el.addEventListener('hover-start', () => {
+            this.el.setAttribute('material', 'color', this.data.hoverColor);
+            this.el.setAttribute('scale', '1.1 1.1 1.1');
+          });
+          
+          this.el.addEventListener('hover-end', () => {
+            this.el.setAttribute('material', 'color', this.data.color);
+            this.el.setAttribute('scale', '1 1 1');
+          });
+        }
+      });
+
+
+
+      // Modular 3D Positioning System for Comments and Navigation
+      AFRAME.registerComponent('polar-position', {
+        schema: {
+          radius: { type: 'number', default: 8 },
+          phi: { type: 'number', default: 0 }, // Horizontal angle (azimuth)
+          theta: { type: 'number', default: 90 }, // Vertical angle (elevation)
+          photoIndex: { type: 'number', default: 0 }
+        },
+        
+        init: function() {
+          this.updatePosition();
+        },
+        
+        update: function() {
+          this.updatePosition();
+        },
+        
+        updatePosition: function() {
+          const phi = THREE.MathUtils.degToRad(this.data.phi);
+          const theta = THREE.MathUtils.degToRad(this.data.theta);
+          const radius = this.data.radius;
+          
+          // Convert spherical coordinates to Cartesian
+          const x = radius * Math.sin(theta) * Math.cos(phi);
+          const y = radius * Math.cos(theta);
+          const z = radius * Math.sin(theta) * Math.sin(phi);
+          
+          this.el.setAttribute('position', { x, y, z });
+          
+          // Face the center (camera)
+          this.el.setAttribute('look-at', '0 0 0');
+        },
+        
+        // Get polar coordinates from world position
+        getPos: function() {
+          return {
+            phi: this.data.phi,
+            theta: this.data.theta,
+            radius: this.data.radius,
+            photoIndex: this.data.photoIndex
+          };
+        }
+      });
+
+      // 3D Comment Marker Component
+      AFRAME.registerComponent('comment-marker', {
+        schema: {
+          commentId: { type: 'string' },
+          author: { type: 'string' },
+          content: { type: 'string' },
+          timestamp: { type: 'string' },
+          replies: { type: 'number', default: 0 }
+        },
+        
+        init: function() {
+          this.createMarker();
+          this.setupInteractions();
+        },
+        
+        createMarker: function() {
+          // Create the visual marker
+          this.el.setAttribute('geometry', {
+            primitive: 'sphere',
+            radius: 0.1
+          });
+          this.el.setAttribute('material', {
+            color: '#FF6B6B',
+            emissive: '#FF6B6B',
+            emissiveIntensity: 0.3,
+            transparent: true,
+            opacity: 0.8
+          });
+          
+          // Add pulsing animation
+          this.el.setAttribute('animation__pulse', {
+            property: 'scale',
+            to: '1.2 1.2 1.2',
+            direction: 'alternate',
+            loop: true,
+            dur: 2000,
+            easing: 'easeInOutSine'
+          });
+          
+          // Make it interactive
+          this.el.classList.add('clickable', 'comment-marker');
+          this.el.setAttribute('hoverable', '');
+          this.el.setAttribute('grabbable', '');
+          
+          // Create text preview (shows on hover)
+          this.textEl = document.createElement('a-text');
+          this.textEl.setAttribute('value', this.getPreviewText());
+          this.textEl.setAttribute('align', 'center');
+          this.textEl.setAttribute('color', 'white');
+          this.textEl.setAttribute('background-color', 'rgba(0,0,0,0.8)');
+          this.textEl.setAttribute('scale', '0.5 0.5 0.5');
+          this.textEl.setAttribute('position', '0 0.3 0');
+          this.textEl.setAttribute('visible', false);
+          this.el.appendChild(this.textEl);
+        },
+        
+        setupInteractions: function() {
+          this.el.addEventListener('hover-start', () => {
+            this.textEl.setAttribute('visible', true);
+            this.el.setAttribute('material', 'emissiveIntensity', 0.6);
+          });
+          
+          this.el.addEventListener('hover-end', () => {
+            this.textEl.setAttribute('visible', false);
+            this.el.setAttribute('material', 'emissiveIntensity', 0.3);
+          });
+          
+          this.el.addEventListener('click', () => {
+            this.openCommentDetail();
+          });
+        },
+        
+        getPreviewText: function() {
+          const content = this.processMarkdown(this.data.content);
+          const preview = content.length > 50 ? content.substring(0, 50) + '...' : content;
+          return `@${this.data.author}\n${preview}`;
+        },
+        
+        processMarkdown: function(text) {
+          if (!text) return '';
+          
+          return text
+            // Remove images completely
+            .replace(/!\[.*?\]\(.*?\)/g, '')
+            // Convert links to just the text
+            .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+            // Remove other markdown formatting
+            .replace(/\*\*(.*?)\*\*/g, '$1')
+            .replace(/\*(.*?)\*/g, '$1')
+            .replace(/~~(.*?)~~/g, '$1')
+            // Clean up multiple spaces and newlines
+            .replace(/\n+/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+        },
+        
+        openCommentDetail: function() {
+          // Trigger comment detail panel
+          document.dispatchEvent(new CustomEvent('show-comment-detail', {
+            detail: {
+              commentId: this.data.commentId,
+              author: this.data.author,
+              content: this.data.content,
+              timestamp: this.data.timestamp,
+              replies: this.data.replies,
+              position: this.el.components['polar-position'].getPos()
+            }
+          }));
+        }
+      });
+
+      // Navigation Point Component - Now uses spheres with thumbnails
+      AFRAME.registerComponent('nav-point', {
+        schema: {
+          targetIndex: { type: 'number' },
+          targetUrl: { type: 'string' },
+          thumbUrl: { type: 'string' },
+          label: { type: 'string' },
+          description: { type: 'string' }
+        },
+        
+        init: function() {
+          this.createNavPoint();
+          this.setupInteractions();
+        },
+        
+        createNavPoint: function() {
+          // Create the visual marker as a sphere with thumbnail texture
+          this.el.setAttribute('geometry', {
+            primitive: 'sphere',
+            radius: 0.15
+          });
+          this.el.setAttribute('material', {
+            src: this.data.thumbUrl,
+            transparent: true,
+            opacity: 0.8
+          });
+          
+          // Add floating animation
+          this.el.setAttribute('animation__float', {
+            property: 'position',
+            to: `${this.el.getAttribute('position').x} ${this.el.getAttribute('position').y + 0.1} ${this.el.getAttribute('position').z}`,
+            direction: 'alternate',
+            loop: true,
+            dur: 3000,
+            easing: 'easeInOutSine'
+          });
+          
+          // Add pulsing glow
+          this.el.setAttribute('animation__pulse', {
+            property: 'material.emissiveIntensity',
+            to: '0.3',
+            direction: 'alternate',
+            loop: true,
+            dur: 2000,
+            easing: 'easeInOutSine'
+          });
+          
+          // Make it interactive
+          this.el.classList.add('clickable', 'nav-point');
+          this.el.setAttribute('hoverable', '');
+          this.el.setAttribute('grabbable', '');
+          
+          // Create label
+          this.labelEl = document.createElement('a-text');
+          this.labelEl.setAttribute('value', this.data.label);
+          this.labelEl.setAttribute('align', 'center');
+          this.labelEl.setAttribute('color', 'white');
+          this.labelEl.setAttribute('background-color', 'rgba(0,0,0,0.8)');
+          this.labelEl.setAttribute('scale', '0.5 0.5 0.5');
+          this.labelEl.setAttribute('position', '0 0.3 0');
+          this.labelEl.setAttribute('look-at', '#head');
+          this.el.appendChild(this.labelEl);
+        },
+        
+        setupInteractions: function() {
+          this.el.addEventListener('hover-start', () => {
+            this.el.setAttribute('material', 'emissiveIntensity', 0.5);
+            this.el.setAttribute('scale', '1.3 1.3 1.3');
+          });
+          
+          this.el.addEventListener('hover-end', () => {
+            this.el.setAttribute('material', 'emissiveIntensity', 0.1);
+            this.el.setAttribute('scale', '1 1 1');
+          });
+          
+          this.el.addEventListener('click', () => {
+            this.navigateToPhoto();
+          });
+        },
+        
+        navigateToPhoto: function() {
+          // Switch to the target photo
+          switchToPhoto(this.data.targetIndex);
+        }
+      });
+
+      // Comment Creation Tool
+      AFRAME.registerComponent('comment-creator', {
+        init: function() {
+          this.isActive = false;
+          this.setupEventListeners();
+        },
+        
+        setupEventListeners: function() {
+          document.addEventListener('toggle-comment-mode', (e) => {
+            this.isActive = e.detail.active;
+            this.updateCursor();
+          });
+          
+          // Listen for clicks on the sky sphere
+          const sky = document.querySelector('#image-360');
+          if (sky) {
+            sky.addEventListener('click', (e) => {
+              if (this.isActive) {
+                this.createCommentAtPoint(e);
+              }
+            });
+          }
+        },
+        
+        updateCursor: function() {
+          const cursor = document.querySelector('#cursor');
+          if (cursor) {
+            const color = this.isActive ? '#FF6B6B' : '#4CC3D9';
+            cursor.setAttribute('material', 'color', color);
+          }
+        },
+        
+        createCommentAtPoint: function(event) {
+          console.log('[Comment Creator] Click detected on sky, event:', event);
+          
+          // Get intersection point from raycaster
+          const intersection = event.detail.intersection;
+          if (!intersection || !intersection.point) {
+            console.log('[Comment Creator] No intersection point found');
+            return;
+          }
+          
+          const point = intersection.point;
+          console.log('[Comment Creator] Intersection point:', point);
+          
+          // Convert world position to spherical coordinates
+          // The sky sphere has radius 10, but we want comments at radius 8
+          const commentRadius = 8;
+          
+          // Normalize the intersection point to our comment radius
+          const distance = Math.sqrt(point.x * point.x + point.y * point.y + point.z * point.z);
+          const normalizedPoint = {
+            x: (point.x / distance) * commentRadius,
+            y: (point.y / distance) * commentRadius,
+            z: (point.z / distance) * commentRadius
+          };
+          
+          // Convert to spherical coordinates (phi = azimuth, theta = elevation)
+          const phi = Math.atan2(normalizedPoint.z, normalizedPoint.x) * 180 / Math.PI;
+          const theta = Math.acos(normalizedPoint.y / commentRadius) * 180 / Math.PI;
+          
+          console.log('[Comment Creator] Calculated position - phi:', phi, 'theta:', theta, 'radius:', commentRadius);
+          
+          // Show comment creation dialog
+          this.showCommentDialog({ phi, theta, radius: commentRadius });
+        },
+        
+        showCommentDialog: function(position) {
+          console.log('[Comment Creator] Showing comment dialog at position:', position);
+          document.dispatchEvent(new CustomEvent('show-comment-dialog', {
+            detail: { position }
+          }));
+        }
+      });
+    </script>
+
+
+  </head>
+  <body>
+    <a-scene 
+      background="color: #001122"
+      vr-mode-ui="enabled: true"
+      renderer="antialias: true; colorManagement: true; sortObjects: true"
+      webxr="requiredFeatures: local-floor; optionalFeatures: bounded-floor, hand-tracking">
+      
+      <a-assets>
+        <audio id="click-sound" crossorigin="anonymous" src="https://cdn.aframe.io/360-image-gallery-boilerplate/audio/click.ogg"></audio>
+        <audio id="teleport-sound" crossorigin="anonymous" src="https://cdn.aframe.io/basic-guide/audio/backgroundnoise.wav"></audio>
+      </a-assets>
+
+      <!-- 360-degree image with fade animation -->
+      <a-sky id="image-360" 
+             radius="10"
+             material="shader: flat"
+             class="clickable"
+             animation__fade="property: components.material.material.color; type: color; from: #FFF; to: #000; dur: 300; startEvents: fade"
+             animation__fadeback="property: components.material.material.color; type: color; from: #000; to: #FFF; dur: 300; startEvents: animationcomplete__fade"></a-sky>
+
+
+
+      <!-- Camera Rig with VR Controls -->
+      <a-entity id="cameraRig" 
+                position="0 0 0">
+        
+        <!-- Camera - Fixed at center, no movement -->
+        <a-entity id="head" 
+                  camera="active: true; fov: 80; near: 0.1; far: 1000"
+                  look-controls="pointerLockEnabled: false; reverseMouseDrag: true"
+                  position="0 0 0">
+          
+          <!-- Desktop/Mobile cursor -->
+          <a-cursor id="cursor"
+                    visible="false"
+                    geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
+                    material="color: #4CC3D9; shader: flat"
+                    animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
+                    animation__fusing="property: scale; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
+                    raycaster="objects: .clickable, .link, .key, #image-360"
+                    cursor="fuse: true; fuseTimeout: 1500"></a-cursor>
+        </a-entity>
+
+        <!-- Left Hand Controller - No teleportation -->
+        <a-entity id="leftHand" 
+                  hand-controls="hand: left; handModelStyle: lowPoly; color: #15ACCF"
+                  sphere-collider="objects: .clickable, .link; radius: 0.02"
+                  super-hands="colliderEvent: hit; colliderEventProperty: el; colliderEndEvent: hitend; colliderEndEventProperty: el"
+                  visible="true">
+        </a-entity>
+
+        <!-- Right Hand Controller -->
+        <a-entity id="rightHand" 
+                  hand-controls="hand: right; handModelStyle: lowPoly; color: #15ACCF"
+                  laser-controls="hand: right"
+                  raycaster="showLine: true; far: 15; interval: 0; objects: .clickable, .link, .key, #image-360"
+                  line="color: #7cfc00; opacity: 0.5"
+                  sphere-collider="objects: .clickable, .link, .key, #image-360; radius: 0.02"
+                  super-hands="colliderEvent: hit; colliderEventProperty: el; colliderEndEvent: hitend; colliderEndEventProperty: el"
+                  visible="true">
+        </a-entity>
+
+        <!-- Hand Tracking Support -->
+        <a-entity id="leftHandTracking"
+                  hand-tracking-controls="hand: left; modelColor: #15ACCF"
+                  sphere-collider="objects: .clickable, .link; radius: 0.02"
+                  super-hands="colliderEvent: hit; colliderEventProperty: el; colliderEndEvent: hitend; colliderEndEventProperty: el"
+                  visible="false">
+        </a-entity>
+
+        <a-entity id="rightHandTracking"
+                  hand-tracking-controls="hand: right; modelColor: #15ACCF" 
+                  sphere-collider="objects: .clickable, .link; radius: 0.02"
+                  super-hands="colliderEvent: hit; colliderEventProperty: el; colliderEndEvent: hitend; colliderEndEventProperty: el"
+                  visible="false">
+        </a-entity>
+      </a-entity>
+
+      <!-- Remove teleportation ground plane - not needed -->
+
+      <!-- Simplified VR UI Panels - Always positioned relative to center -->
+      <!-- Vote Panel -->
+      <a-entity id="vote-panel" 
+                geometry="primitive: plane; width: 1.5; height: 0.8"
+                material="color: #000000; opacity: 0.8; transparent: true"
+                position="0 1.8 -2"
+                visible="false">
+        <a-entity id="vote-button-vr" 
+                  vr-button="color: #2196F3; text: Vote"
+                  position="0 0.1 0.01"
+                  class="clickable">
+        </a-entity>
+        <a-text id="vote-info" 
+                value="Please log in to vote"
+                align="center"
+                color="white"
+                position="0 -0.1 0.01"
+                scale="0.8 0.8 0.8">
+        </a-text>
+      </a-entity>
+
+      <!-- Post Content Panel -->
+      <a-entity id="post-panel" 
+                geometry="primitive: plane; width: 2.5; height: 2"
+                material="color: #000000; opacity: 0.8; transparent: true"
+                position="0 1.8 -2.5"
+                visible="false">
+        <a-text id="post-title" 
+                value="Post Title"
+                align="center"
+                color="#FFD700"
+                position="0 0.8 0.01"
+                scale="0.6 0.6 0.6">
+        </a-text>
+        <a-text id="post-content-text" 
+                value="Loading post content..."
+                align="left"
+                wrap-count="50"
+                color="white"
+                position="-1.1 0.2 0.01"
+                scale="0.4 0.4 0.4">
+        </a-text>
+        <a-text id="post-stats" 
+                value="Stats loading..."
+                align="center"
+                color="#CCCCCC"
+                position="0 -0.8 0.01"
+                scale="0.5 0.5 0.5">
+        </a-text>
+      </a-entity>
+
+      <!-- Comments Panel -->
+      <a-entity id="comments-panel" 
+                geometry="primitive: plane; width: 2.5; height: 2"
+                material="color: #000000; opacity: 0.8; transparent: true"
+                position="0 1.8 -2.5"
+                visible="false">
+        <a-text id="comments-title" 
+                value="3D Comments"
+                align="center"
+                color="#FFD700"
+                position="0 0.8 0.01"
+                scale="0.6 0.6 0.6">
+        </a-text>
+        
+        <!-- Comment Mode Toggle -->
+        <a-entity id="comment-mode-toggle" 
+                  vr-button="color: #FF6B6B; text: Create Comment"
+                  position="0 0.4 0.01"
+                  scale="0.8 0.8 0.8"
+                  class="clickable">
+        </a-entity>
+        
+        <a-text id="comments-instructions" 
+                value="Click 'Create Comment' then click anywhere on the image to place a comment"
+                align="center"
+                wrap-count="40"
+                color="#CCCCCC"
+                position="0 0.1 0.01"
+                scale="0.35 0.35 0.35">
+        </a-text>
+        
+        <a-text id="comments-list" 
+                value="No comments yet. Be the first!"
+                align="left"
+                wrap-count="50"
+                color="white"
+                position="-1.1 -0.2 0.01"
+                scale="0.4 0.4 0.4">
+        </a-text>
+      </a-entity>
+
+      <!-- Comment Detail Panel -->
+      <a-entity id="comment-detail-panel" 
+                geometry="primitive: plane; width: 2.5; height: 2"
+                material="color: #000000; opacity: 0.8; transparent: true"
+                position="0 1.8 -2.5"
+                visible="false">
+        <a-text id="comment-detail-author" 
+                value="@author"
+                align="center"
+                color="#FFD700"
+                position="0 0.8 0.01"
+                scale="0.5 0.5 0.5">
+        </a-text>
+        <a-text id="comment-detail-content" 
+                value="Comment content..."
+                align="left"
+                wrap-count="50"
+                color="white"
+                position="-1.1 0.2 0.01"
+                scale="0.4 0.4 0.4">
+        </a-text>
+        <a-text id="comment-detail-timestamp" 
+                value="timestamp"
+                align="center"
+                color="#CCCCCC"
+                position="0 -0.6 0.01"
+                scale="0.35 0.35 0.35">
+        </a-text>
+        
+        <!-- Reply Button -->
+        <a-entity id="comment-reply-btn" 
+                  vr-button="color: #4CAF50; text: Reply"
+                  position="-0.6 -0.8 0.01"
+                  scale="0.7 0.7 0.7"
+                  class="clickable">
+        </a-entity>
+        
+        <!-- Close Button -->
+        <a-entity id="comment-close-btn" 
+                  vr-button="color: #757575; text: Close"
+                  position="0.6 -0.8 0.01"
+                  scale="0.7 0.7 0.7"
+                  class="clickable">
+        </a-entity>
+      </a-entity>
+
+      <!-- Comment Creation Panel with Virtual Keyboard -->
+      <a-entity id="comment-create-panel" 
+                geometry="primitive: plane; width: 3; height: 2.5"
+                material="color: #000000; opacity: 0.9; transparent: true"
+                position="0 1.8 -2.5"
+                visible="false">
+        <a-text id="comment-create-title" 
+                value="Create Comment"
+                align="center"
+                color="#FFD700"
+                position="0 1 0.01"
+                scale="0.6 0.6 0.6">
+        </a-text>
+        
+        <a-text id="comment-create-instructions" 
+                value="What do you see at this spot?"
+                align="center"
+                color="white"
+                position="0 0.7 0.01"
+                scale="0.4 0.4 0.4">
+        </a-text>
+        
+        <!-- Text Input Display -->
+        <a-plane id="comment-input-field"
+                 width="2.5" height="0.6"
+                 color="#222222"
+                 opacity="0.9"
+                 position="0 0.3 0.01"
+                 class="clickable">
+          <a-text id="comment-input-text" 
+                  value="Click to type your comment..."
+                  align="left"
+                  wrap-count="45"
+                  color="#FFFFFF"
+                  position="-1.1 0 0.01"
+                  scale="0.35 0.35 0.35">
+          </a-text>
+        </a-plane>
+        
+        <!-- Virtual Keyboard for VR -->
+        <a-entity id="virtual-keyboard" position="0 -0.3 0.01" visible="false">
+          <!-- Row 1 -->
+          <a-entity id="kb-row1" position="0 0.3 0">
+            <a-entity class="key clickable" vr-button="color: #444444; text: Q" position="-1.0 0 0" scale="0.15 0.15 0.15" data-key="q"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: W" position="-0.8 0 0" scale="0.15 0.15 0.15" data-key="w"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: E" position="-0.6 0 0" scale="0.15 0.15 0.15" data-key="e"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: R" position="-0.4 0 0" scale="0.15 0.15 0.15" data-key="r"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: T" position="-0.2 0 0" scale="0.15 0.15 0.15" data-key="t"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: Y" position="0.0 0 0" scale="0.15 0.15 0.15" data-key="y"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: U" position="0.2 0 0" scale="0.15 0.15 0.15" data-key="u"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: I" position="0.4 0 0" scale="0.15 0.15 0.15" data-key="i"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: O" position="0.6 0 0" scale="0.15 0.15 0.15" data-key="o"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: P" position="0.8 0 0" scale="0.15 0.15 0.15" data-key="p"></a-entity>
+          </a-entity>
+          
+          <!-- Row 2 -->
+          <a-entity id="kb-row2" position="0 0.1 0">
+            <a-entity class="key clickable" vr-button="color: #444444; text: A" position="-0.9 0 0" scale="0.15 0.15 0.15" data-key="a"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: S" position="-0.7 0 0" scale="0.15 0.15 0.15" data-key="s"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: D" position="-0.5 0 0" scale="0.15 0.15 0.15" data-key="d"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: F" position="-0.3 0 0" scale="0.15 0.15 0.15" data-key="f"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: G" position="-0.1 0 0" scale="0.15 0.15 0.15" data-key="g"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: H" position="0.1 0 0" scale="0.15 0.15 0.15" data-key="h"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: J" position="0.3 0 0" scale="0.15 0.15 0.15" data-key="j"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: K" position="0.5 0 0" scale="0.15 0.15 0.15" data-key="k"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: L" position="0.7 0 0" scale="0.15 0.15 0.15" data-key="l"></a-entity>
+          </a-entity>
+          
+          <!-- Row 3 -->
+          <a-entity id="kb-row3" position="0 -0.1 0">
+            <a-entity class="key clickable" vr-button="color: #444444; text: Z" position="-0.8 0 0" scale="0.15 0.15 0.15" data-key="z"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: X" position="-0.6 0 0" scale="0.15 0.15 0.15" data-key="x"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: C" position="-0.4 0 0" scale="0.15 0.15 0.15" data-key="c"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: V" position="-0.2 0 0" scale="0.15 0.15 0.15" data-key="v"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: B" position="0.0 0 0" scale="0.15 0.15 0.15" data-key="b"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: N" position="0.2 0 0" scale="0.15 0.15 0.15" data-key="n"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #444444; text: M" position="0.4 0 0" scale="0.15 0.15 0.15" data-key="m"></a-entity>
+            <a-entity class="key clickable" vr-button="color: #666666; text: ⌫" position="0.6 0 0" scale="0.15 0.15 0.15" data-key="backspace"></a-entity>
+          </a-entity>
+          
+          <!-- Row 4 - Space and special keys -->
+          <a-entity id="kb-row4" position="0 -0.3 0">
+            <a-entity class="key clickable" vr-button="color: #555555; text: Space" position="0 0 0" scale="0.4 0.15 0.15" data-key="space"></a-entity>
+          </a-entity>
+        </a-entity>
+        
+        <!-- Submit Button -->
+        <a-entity id="comment-submit-btn" 
+                  vr-button="color: #4CAF50; text: Post Comment"
+                  position="-0.6 -1 0.01"
+                  scale="0.8 0.8 0.8"
+                  class="clickable">
+        </a-entity>
+        
+        <!-- Cancel Button -->
+        <a-entity id="comment-cancel-btn" 
+                  vr-button="color: #757575; text: Cancel"
+                  position="0.6 -1 0.01"
+                  scale="0.8 0.8 0.8"
+                  class="clickable">
+        </a-entity>
+      </a-entity>
+
+      <!-- Simplified VR Control Menu -->
+      <a-entity id="vr-menu" position="0 1.2 -1.2">
+        <a-entity id="menu-vote" 
+                  vr-button="color: #2196F3; text: Vote"
+                  position="-0.6 0 0"
+                  class="clickable">
+        </a-entity>
+
+        <a-entity id="menu-post" 
+                  vr-button="color: #9C27B0; text: Post"
+                  position="-0.2 0 0"
+                  class="clickable">
+        </a-entity>
+
+        <a-entity id="menu-comments" 
+                  vr-button="color: #4CAF50; text: Comments"
+                  position="0.2 0 0"
+                  class="clickable">
+        </a-entity>
+
+        <a-entity id="menu-nav" 
+                  vr-button="color: #E91E63; text: Navigation"
+                  position="0.6 0 0"
+                  class="clickable">
+        </a-entity>
+
+        <a-entity id="menu-info" 
+                  vr-button="color: #FF9800; text: Info"
+                  position="1.0 0 0"
+                  class="clickable">
+        </a-entity>
+      </a-entity>
+
+      <!-- Navigation Panel -->
+      <a-entity id="nav-panel" 
+                geometry="primitive: plane; width: 2.5; height: 2"
+                material="color: #000000; opacity: 0.8; transparent: true"
+                position="0 1.8 -2.5"
+                visible="false">
+        <a-text id="nav-title" 
+                value="Photo Navigation"
+                align="center"
+                color="#FFD700"
+                position="0 0.8 0.01"
+                scale="0.6 0.6 0.6">
+        </a-text>
+        
+        <a-text id="nav-current-photo" 
+                value="Current: Photo 1"
+                align="center"
+                color="white"
+                position="0 0.4 0.01"
+                scale="0.45 0.45 0.45">
+        </a-text>
+        
+        <a-text id="nav-instructions" 
+                value="Click navigation spheres to move between photos"
+                align="center"
+                wrap-count="40"
+                color="#CCCCCC"
+                position="0 0.1 0.01"
+                scale="0.35 0.35 0.35">
+        </a-text>
+        
+        <a-text id="nav-list" 
+                value="No navigation points available"
+                align="left"
+                wrap-count="50"
+                color="white"
+                position="-1.1 -0.2 0.01"
+                scale="0.4 0.4 0.4">
+        </a-text>
+      </a-entity>
+
+      <!-- Comment and Navigation Markers Container -->
+      <a-entity id="spatial-markers" comment-creator></a-entity>
+
+      <!-- Information Panel -->
+      <a-entity id="info-panel" 
+                geometry="primitive: plane; width: 2; height: 1.5"
+                material="color: #000000; opacity: 0.8; transparent: true"
+                position="0 1.8 -2"
+                visible="false">
+        <a-text id="info-text" 
+                value="360° Gallery Controls:\n\n• Look around to explore\n• Click navigation spheres\n• Use menu buttons for features\n• Camera stays centered"
+                align="left"
+                wrap-count="40"
+                color="white"
+                position="-0.9 0.2 0.01"
+                scale="0.4 0.4 0.4">
+        </a-text>
+      </a-entity>
+
+      <!-- Debug info (hidden in VR) -->
+      <a-entity id="debug-info"
+                geometry="primitive: plane; height: 1.5; width: 3"
+                material="shader: flat; color: rgba(0,0,0,0.7)"
+                position="3 1 -2"
+                text="value: Debug Info; align: left; color: white; width: 6"
+                scale="0.5 0.5 0.5"
+                visible="false">
+      </a-entity>
+    </a-scene>
+
+    <script>
+      // Initialize DLUX wallet
+      const wallet = window.dluxWallet;
+      let currentUser = null;
+      let currentPost = null;
+      let isVRMode = false;
+      let currentPhotoIndex = 0;
+      let photos = [];
+      let comments = [];
+      let navPoints = [];
+      let isCommentMode = false;
+      let isNavMode = false;
+      let currentCommentPosition = null;
+
+      // VR/AR mode detection
+      document.querySelector('a-scene').addEventListener('enter-vr', () => {
+        isVRMode = true;
+        setupVRMode();
+      });
+
+      document.querySelector('a-scene').addEventListener('exit-vr', () => {
+        isVRMode = false;
+        setupDesktopMode();
+      });
+
+      // Setup VR mode
+      function setupVRMode() {
+        console.log('[VR] Entering VR mode');
+        
+        // Hide desktop cursor, show VR controllers
+        document.querySelector('#cursor').setAttribute('visible', false);
+        document.querySelector('#leftHand').setAttribute('visible', true);
+        document.querySelector('#rightHand').setAttribute('visible', true);
+        
+        // Enable hand tracking if available
+        enableHandTracking();
+        
+        // Position UI for VR
+        positionVRUI();
+      }
+
+      // Setup desktop mode
+      function setupDesktopMode() {
+        console.log('[VR] Entering desktop mode');
+        
+        // Show desktop cursor, hide VR controllers
+        document.querySelector('#cursor').setAttribute('visible', true);
+        document.querySelector('#leftHand').setAttribute('visible', false);
+        document.querySelector('#rightHand').setAttribute('visible', false);
+        document.querySelector('#leftHandTracking').setAttribute('visible', false);
+        document.querySelector('#rightHandTracking').setAttribute('visible', false);
+      }
+
+      // Enable hand tracking when available
+      function enableHandTracking() {
+        if (navigator.xr) {
+          navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
+            if (supported) {
+              // Check for hand tracking support
+              const session = document.querySelector('a-scene').xrSession;
+              if (session && session.enabledFeatures && session.enabledFeatures.includes('hand-tracking')) {
+                console.log('[VR] Hand tracking enabled');
+                document.querySelector('#leftHandTracking').setAttribute('visible', true);
+                document.querySelector('#rightHandTracking').setAttribute('visible', true);
+              }
+            }
+          });
+        }
+      }
+
+      // Position UI elements for VR
+      function positionVRUI() {
+        const camera = document.querySelector('#head');
+        if (camera) {
+          // Position menu in comfortable VR location
+          const menu = document.querySelector('#vr-menu');
+          menu.setAttribute('position', '0 1.2 -1.2');
+        }
+      }
+
+      // Simplified Panel management
+      let currentPanel = null;
+
+      function showPanel(panelId) {
+        // Hide current panel
+        if (currentPanel) {
+          currentPanel.setAttribute('visible', false);
+        }
+        
+        // Show new panel
+        const panel = document.querySelector(`#${panelId}`);
+        if (panel) {
+          panel.setAttribute('visible', true);
+          currentPanel = panel;
+        }
+      }
+
+      function hideAllPanels() {
+        ['vote-panel', 'post-panel', 'comments-panel', 'nav-panel', 'info-panel', 'comment-detail-panel', 'comment-create-panel'].forEach(id => {
+          const panel = document.querySelector(`#${id}`);
+          if (panel && panel.getAttribute('visible')) {
+            panel.setAttribute('visible', false);
+          }
+        });
+        currentPanel = null;
+      }
+
+      // Core Photo Switching Functionality
+      function switchToPhoto(photoIndex) {
+        if (!currentPost || !currentPost.json_metadata) {
+          console.log('[Navigation] No post data available');
+          return;
+        }
+
+        const metadata = typeof currentPost.json_metadata === 'string' 
+          ? JSON.parse(currentPost.json_metadata)
+          : currentPost.json_metadata;
+
+        if (!metadata.assets || !metadata.assets[photoIndex]) {
+          console.log('[Navigation] Photo index not found:', photoIndex);
+          return;
+        }
+
+        const newPhoto = metadata.assets[photoIndex];
+        currentPhotoIndex = photoIndex;
+
+        console.log('[Navigation] Switching to photo:', photoIndex, newPhoto);
+
+        // Update the sky material
+        const sky = document.querySelector('#image-360');
+        sky.setAttribute('material', 'src', newPhoto.url);
+
+        // Apply rotation if specified
+        if (newPhoto.rotation) {
+          sky.setAttribute('rotation', `${newPhoto.rotation.x} ${newPhoto.rotation.y} ${newPhoto.rotation.z}`);
+        } else {
+          sky.setAttribute('rotation', '0 0 0');
+        }
+
+        // Update navigation points for this photo
+        updateNavigationPoints();
+        
+        // Update comments for this photo
+        updateCommentsForPhoto();
+        
+        // Update navigation panel info
+        updateNavigationPanel();
+
+        console.log('[Navigation] Photo switched successfully to index:', photoIndex);
+      }
+
+      // Update navigation points based on current photo
+      function updateNavigationPoints() {
+        if (!currentPost || !currentPost.json_metadata) return;
+
+        const metadata = typeof currentPost.json_metadata === 'string' 
+          ? JSON.parse(currentPost.json_metadata)
+          : currentPost.json_metadata;
+
+        // Clear existing nav points
+        const existingNavPoints = document.querySelectorAll('.nav-point');
+        existingNavPoints.forEach(point => point.remove());
+
+        // Get navigation points for current photo
+        if (metadata.navigation) {
+          const currentNavPoints = metadata.navigation.filter(nav => nav.fromIndex === currentPhotoIndex);
+          
+          currentNavPoints.forEach(navPoint => {
+            const targetAsset = metadata.assets[navPoint.toIndex];
+            if (!targetAsset) return;
+
+            const marker = document.createElement('a-entity');
+            marker.setAttribute('polar-position', 
+              `phi: ${navPoint.position.phi}; theta: ${navPoint.position.theta}; radius: ${navPoint.position.radius}; photoIndex: ${currentPhotoIndex}`
+            );
+            marker.setAttribute('nav-point', {
+              targetIndex: navPoint.toIndex,
+              targetUrl: targetAsset.url,
+              thumbUrl: targetAsset.thumb || targetAsset.url,
+              label: navPoint.label,
+              description: navPoint.description || `Go to ${targetAsset.title || 'Photo ' + (navPoint.toIndex + 1)}`
+            });
+            
+            document.querySelector('#spatial-markers').appendChild(marker);
+          });
+
+          console.log('[Navigation] Updated nav points for photo', currentPhotoIndex, ':', currentNavPoints.length, 'points');
+        }
+      }
+
+      // Update comments display for current photo
+      function updateCommentsForPhoto() {
+        // Clear existing comment markers
+        const existingComments = document.querySelectorAll('.comment-marker');
+        existingComments.forEach(comment => comment.remove());
+
+        // Recreate markers for current photo
+        const currentPhotoComments = comments.filter(c => c.position.photoIndex === currentPhotoIndex);
+        currentPhotoComments.forEach(comment => {
+          addCommentMarker(comment, comment.position);
+        });
+
+        updateCommentsDisplay();
+        console.log('[Comments] Updated comments for photo', currentPhotoIndex, ':', currentPhotoComments.length, 'comments');
+      }
+
+      // Update navigation panel with current photo info
+      function updateNavigationPanel() {
+        if (!currentPost || !currentPost.json_metadata) return;
+
+        const metadata = typeof currentPost.json_metadata === 'string' 
+          ? JSON.parse(currentPost.json_metadata)
+          : currentPost.json_metadata;
+
+        const currentAsset = metadata.assets[currentPhotoIndex];
+        const navCurrentPhoto = document.querySelector('#nav-current-photo');
+        const navList = document.querySelector('#nav-list');
+
+        if (navCurrentPhoto && currentAsset) {
+          navCurrentPhoto.setAttribute('text', 'value', 
+            `Current: ${currentAsset.title || 'Photo ' + (currentPhotoIndex + 1)}`
+          );
+        }
+
+        // Update available navigation options
+        if (navList && metadata.navigation) {
+          const availableNavs = metadata.navigation.filter(nav => nav.fromIndex === currentPhotoIndex);
+          
+          if (availableNavs.length === 0) {
+            navList.setAttribute('text', 'value', 'No navigation points from this photo');
+          } else {
+            const navText = availableNavs.map(nav => {
+              const targetAsset = metadata.assets[nav.toIndex];
+              return `→ ${nav.label || (targetAsset ? targetAsset.title : 'Unknown')}`;
+            }).join('\n');
+            navList.setAttribute('text', 'value', navText);
+          }
+        }
+      }
+
+      // 3D Comment System Functions
+      function toggleCommentMode() {
+        isCommentMode = !isCommentMode;
+        
+        const commentBtn = document.querySelector('#comment-mode-toggle');
+        
+        if (commentBtn) {
+          commentBtn.setAttribute('vr-button', `color: ${isCommentMode ? '#4CAF50' : '#FF6B6B'}; text: ${isCommentMode ? 'Exit Create Mode' : 'Create Comment'}`);
+        }
+        
+        // Notify comment creator component
+        document.dispatchEvent(new CustomEvent('toggle-comment-mode', {
+          detail: { active: isCommentMode }
+        }));
+        
+        updateInstructions();
+        
+        console.log('[Comment Mode] Toggled to:', isCommentMode);
+      }
+
+      function updateInstructions() {
+        const commentInstructions = document.querySelector('#comments-instructions');
+        
+        if (commentInstructions) {
+          if (isCommentMode) {
+            commentInstructions.setAttribute('text', 'value', 'Now click anywhere on the 360° image to place your comment');
+          } else {
+            commentInstructions.setAttribute('text', 'value', "Click 'Create Comment' then click anywhere on the image to place a comment");
+          }
+        }
+      }
+
+      // Comment Creation Functions
+      function showCommentDialog(position) {
+        console.log('[Comment Dialog] Showing dialog at position:', position);
+        currentCommentPosition = position;
+        showPanel('comment-create-panel');
+        
+        // Reset input field
+        const inputText = document.querySelector('#comment-input-text');
+        if (inputText) {
+          inputText.setAttribute('text', 'value', 'Click to type your comment...');
+        }
+        
+        // Show virtual keyboard in VR mode
+        if (isVRMode) {
+          const keyboard = document.querySelector('#virtual-keyboard');
+          if (keyboard) {
+            keyboard.setAttribute('visible', true);
+          }
+        }
+        
+        // Initialize virtual keyboard if not already done
+        initializeVirtualKeyboard();
+      }
+
+      // Virtual Keyboard System
+      let currentCommentText = '';
+
+      function initializeVirtualKeyboard() {
+        const keys = document.querySelectorAll('.key');
+        keys.forEach(key => {
+          // Remove existing listeners to avoid duplicates
+          key.removeEventListener('click', handleKeyPress);
+          key.addEventListener('click', handleKeyPress);
+        });
+
+        // Text input field click handler
+        const inputField = document.querySelector('#comment-input-field');
+        if (inputField) {
+          inputField.removeEventListener('click', handleInputFieldClick);
+          inputField.addEventListener('click', handleInputFieldClick);
+        }
+      }
+
+      function handleKeyPress(event) {
+        const key = event.target.getAttribute('data-key');
+        console.log('[Virtual Keyboard] Key pressed:', key);
+        
+        if (key === 'backspace') {
+          currentCommentText = currentCommentText.slice(0, -1);
+        } else if (key === 'space') {
+          currentCommentText += ' ';
+        } else if (key) {
+          currentCommentText += key;
+        }
+        
+        updateCommentInputDisplay();
+      }
+
+      function handleInputFieldClick() {
+        console.log('[Input Field] Clicked');
+        
+        if (isVRMode) {
+          // In VR, show virtual keyboard
+          const keyboard = document.querySelector('#virtual-keyboard');
+          if (keyboard) {
+            const isVisible = keyboard.getAttribute('visible');
+            keyboard.setAttribute('visible', !isVisible);
+          }
+        } else {
+          // On desktop/mobile, use browser prompt
+          const prompt = window.prompt('Enter your comment:', currentCommentText);
+          if (prompt !== null) {
+            currentCommentText = prompt;
+            updateCommentInputDisplay();
+          }
+        }
+      }
+
+      function updateCommentInputDisplay() {
+        const inputText = document.querySelector('#comment-input-text');
+        if (inputText) {
+          const displayText = currentCommentText || 'Click to type your comment...';
+          inputText.setAttribute('text', 'value', displayText);
+          inputText.setAttribute('text', 'color', currentCommentText ? '#FFFFFF' : '#CCCCCC');
+        }
+      }
+
+      function createComment() {
+        if (!currentCommentPosition || !window.dluxWallet.currentUser) {
+          console.log('[Comments] Cannot create comment: missing position or user');
+          return;
+        }
+        
+        const commentText = currentCommentText.trim();
+        
+        if (!commentText || commentText === 'Click to type your comment...') {
+          console.log('[Comments] Please enter a comment');
+          return;
+        }
+        
+        // Create comment data for Hive blockchain
+        const commentData = {
+          body: commentText,
+          json_metadata: JSON.stringify({
+            app: 'dlux/360gallery',
+            format: 'markdown',
+            spatial: {
+              phi: currentCommentPosition.phi,
+              theta: currentCommentPosition.theta,
+              radius: currentCommentPosition.radius,
+              photoIndex: currentPhotoIndex
+            }
+          }),
+          parent_author: window.dluxWallet.currentPost.author,
+          parent_permlink: window.dluxWallet.currentPost.permlink,
+          author: window.dluxWallet.currentUser,
+          permlink: `re-${window.dluxWallet.currentPost.permlink}-${Date.now()}`,
+          title: ''
+        };
+        
+        // Send comment to DLUX wallet for posting
+        const commentOp = {
+          type: 'comment',
+          txid: `comment_${Date.now()}`,
+          msg: 'Please sign to post your comment',
+          delay: 250,
+          commentData: commentData,
+          onSuccess: (result) => {
+            console.log('[Comments] Comment posted successfully:', result);
+            addCommentMarker(commentData, currentCommentPosition);
+            hideAllPanels();
+            isCommentMode = false;
+            toggleCommentMode();
+          },
+          onError: (error) => {
+            console.error('[Comments] Error posting comment:', error);
+          }
+        };
+        
+        // Emit to parent for signing
+        if (window.opener) {
+          window.opener.postMessage({
+            id: Date.now(),
+            type: 'sign-transaction',
+            source: 'dlux-wallet',
+            data: {
+              transaction: [
+                commentData.author,
+                [['comment', commentData]],
+                'posting'
+              ]
+            }
+          }, '*');
+        }
+        
+        hideAllPanels();
+      }
+
+      function addCommentMarker(commentData, position) {
+        const marker = document.createElement('a-entity');
+        marker.setAttribute('polar-position', `phi: ${position.phi}; theta: ${position.theta}; radius: ${position.radius}; photoIndex: ${currentPhotoIndex}`);
+        marker.setAttribute('comment-marker', {
+          commentId: commentData.permlink,
+          author: commentData.author,
+          content: commentData.body,
+          timestamp: new Date().toISOString()
+        });
+        
+        document.querySelector('#spatial-markers').appendChild(marker);
+        
+        // Add to local comments array
+        comments.push({
+          ...commentData,
+          position: position,
+          timestamp: new Date().toISOString()
+        });
+        
+        updateCommentsDisplay();
+      }
+
+      function addNavPoint(position, targetPhoto, label) {
+        const marker = document.createElement('a-entity');
+        marker.setAttribute('polar-position', `phi: ${position.phi}; theta: ${position.theta}; radius: ${position.radius}; photoIndex: ${currentPhotoIndex}`);
+        marker.setAttribute('nav-point', {
+          targetPhoto: targetPhoto,
+          label: label,
+          description: `Navigate to ${label}`
+        });
+        
+        document.querySelector('#spatial-markers').appendChild(marker);
+        
+        // Add to local nav points array
+        navPoints.push({
+          position: position,
+          targetPhoto: targetPhoto,
+          label: label,
+          photoIndex: currentPhotoIndex
+        });
+        
+        updateNavDisplay();
+      }
+
+      function updateCommentsDisplay() {
+        const commentsList = document.querySelector('#comments-list');
+        if (!commentsList) return;
+        
+        const currentPhotoComments = comments.filter(c => c.position.photoIndex === currentPhotoIndex);
+        
+        if (currentPhotoComments.length === 0) {
+          commentsList.setAttribute('text', 'value', 'No comments for this photo yet. Be the first!');
+        } else {
+          const commentText = currentPhotoComments.map(c => 
+            `@${c.author}: ${c.body.substring(0, 50)}${c.body.length > 50 ? '...' : ''}`
+          ).join('\n\n');
+          commentsList.setAttribute('text', 'value', commentText);
+        }
+      }
+
+      function updateNavDisplay() {
+        const navList = document.querySelector('#nav-list');
+        if (!navList) return;
+        
+        const currentPhotoNavs = navPoints.filter(n => n.photoIndex === currentPhotoIndex);
+        
+        if (currentPhotoNavs.length === 0) {
+          navList.setAttribute('text', 'value', 'No navigation points for this photo yet');
+        } else {
+          const navText = currentPhotoNavs.map(n => `→ ${n.label}`).join('\n');
+          navList.setAttribute('text', 'value', navText);
+        }
+      }
+
+      // Load comments for current photo (now handled by updateCommentsForPhoto)
+      async function loadCommentsForPhoto() {
+        updateCommentsForPhoto();
+      }
+
+
+
+      // Event listeners for comment system
+      document.addEventListener('show-comment-detail', (event) => {
+        const comment = event.detail;
+        
+        document.querySelector('#comment-detail-author').setAttribute('text', 'value', `@${comment.author}`);
+        document.querySelector('#comment-detail-content').setAttribute('text', 'value', comment.content);
+        document.querySelector('#comment-detail-timestamp').setAttribute('text', 'value', new Date(comment.timestamp).toLocaleDateString());
+        
+        showPanel('comment-detail-panel');
+      });
+
+      // Event listener for comment creation dialog
+      document.addEventListener('show-comment-dialog', (event) => {
+        const position = event.detail.position;
+        console.log('[Comment System] Received comment dialog request at position:', position);
+        showCommentDialog(position);
+      });
+
+      // Update debug info
+      function updateDebugInfo() {
+        const debugInfo = document.querySelector('#debug-info');
+        if (!debugInfo) return;
+
+        const url = window.location.pathname;
+        const postData = getPostDataFromUrl();
+        const walletReady = wallet && wallet.isWalletReady();
+        const hasUser = !!currentUser;
+        const hasPost = !!currentPost;
+
+        debugInfo.setAttribute('text', {
+          value: `URL: ${url}\nPost Data: ${JSON.stringify(postData)}\nWallet Ready: ${walletReady}\nHas User: ${hasUser}\nHas Post: ${hasPost}\nVR Mode: ${isVRMode}`,
+          align: 'left',
+          color: 'white',
+          width: 6
+        });
+      }
+
+      // Extract post data from URL
+      function getPostDataFromUrl() {
+        const path = window.location.pathname;
+        console.log('[Debug] Current path:', path);
+        const match = path.match(/\/(@[\w.-]+)\/([\w-]+)/);
+        console.log('[Debug] URL match:', match);
+        if (match) {
+          return {
+            author: match[1].substring(1), // Remove @ symbol
+            permlink: match[2]
+          };
+        }
+        return null;
+      }
+
+      // Update post info display
+      function updatePostInfo() {
+        if (!wallet || !wallet.currentPost) return;
+
+        const post = wallet.currentPost;
+        const title = post.title || 'Untitled Post';
+        const author = post.author || 'Unknown Author';
+        const votes = post.net_votes || 0;
+        const payout = post.pending_payout_value || '0.000 HBD';
+
+        // Update post panel
+        const postTitle = document.querySelector('#post-title');
+        const postStats = document.querySelector('#post-stats');
+        
+        if (postTitle) {
+          postTitle.setAttribute('text', 'value', title);
+        }
+        
+        if (postStats) {
+          postStats.setAttribute('text', 'value', `by ${author} | Votes: ${votes} | Payout: ${payout}`);
+        }
+
+        // Update post content
+        updatePostContent();
+      }
+
+      // Update vote button state
+      function updateVoteButton() {
+        const voteButton = document.querySelector('#vote-button-vr');
+        const voteInfo = document.querySelector('#vote-info');
+        const menuVote = document.querySelector('#menu-vote');
+        
+        if (!wallet || !wallet.currentUser) {
+          if (voteInfo) voteInfo.setAttribute('text', 'value', 'Please log in to vote');
+          if (menuVote) menuVote.setAttribute('vr-button', 'color', '#666666');
+          return;
+        }
+
+        if (voteInfo) voteInfo.setAttribute('text', 'value', `Logged in as: ${wallet.currentUser}`);
+
+        // Check if user has already voted
+        const hasVoted = wallet.currentPost && 
+                        wallet.currentPost.active_votes && 
+                        wallet.currentPost.active_votes.some(vote => 
+                          vote.voter === wallet.currentUser
+                        );
+
+        const color = hasVoted ? '#4CAF50' : '#2196F3';
+        const text = hasVoted ? 'Voted' : 'Vote';
+        
+        if (voteButton) {
+          voteButton.setAttribute('vr-button', `color: ${color}; text: ${text}`);
+        }
+        if (menuVote) {
+          menuVote.setAttribute('vr-button', `color: ${color}; text: ${text}`);
+        }
+      }
+
+      // Handle vote action
+      async function handleVote() {
+        console.log('[Debug] Starting vote process');
+        
+        if (!window.dluxWallet.currentUser) {
+          console.log('[Debug] No user logged in, cannot vote');
+          return;
+        }
+
+        if (!window.dluxWallet.currentPost) {
+          console.log('[Debug] No post data available');
+          return;
+        }
+
+        try {
+          console.log('[Debug] Sending vote request to parent window');
+          const voteOp = {
+            voter: window.dluxWallet.currentUser,
+            author: window.dluxWallet.currentPost.author,
+            permlink: window.dluxWallet.currentPost.permlink,
+            weight: 10000 // 100%
+          };
+
+          // Send vote request to parent window in the correct format
+          window.opener.postMessage({
+            id: Date.now(),
+            type: 'sign-transaction',
+            source: 'dlux-wallet',
+            data: {
+              transaction: [
+                window.dluxWallet.currentUser,
+                [['vote', voteOp]],
+                'posting'
+              ]
+            }
+          }, '*');
+
+          console.log('[Debug] Vote request sent:', voteOp);
+        } catch (error) {
+          console.error('[Debug] Error sending vote:', error);
+        }
+      }
+
+      // Initialize gallery from post metadata
+      function initializeGallery() {
+        console.log('[Debug] Initializing gallery with post:', currentPost);
+        
+        if (!currentPost || !currentPost.json_metadata) {
+          console.log('[Debug] No post data or metadata available');
+          return;
+        }
+
+        try {
+          const metadata = typeof currentPost.json_metadata === 'string' 
+            ? JSON.parse(currentPost.json_metadata)
+            : currentPost.json_metadata;
+
+          console.log('[Debug] Parsed metadata:', metadata);
+
+          if (!metadata.assets || !Array.isArray(metadata.assets)) {
+            console.log('[Debug] No assets found in metadata');
+            return;
+          }
+
+          // Set initial photo (first asset)
+          if (metadata.assets.length > 0) {
+            currentPhotoIndex = 0;
+            const sky = document.querySelector('#image-360');
+            sky.setAttribute('material', 'src', metadata.assets[0].url);
+            
+            // Apply initial rotation
+            if (metadata.assets[0].rotation) {
+              sky.setAttribute('rotation', `${metadata.assets[0].rotation.x} ${metadata.assets[0].rotation.y} ${metadata.assets[0].rotation.z}`);
+            }
+          }
+
+          // Initialize navigation points and comments for the first photo
+          updateNavigationPoints();
+          updateCommentsForPhoto();
+          updateNavigationPanel();
+
+          console.log('[Gallery] Initialized successfully with', metadata.assets.length, 'photos');
+        } catch (error) {
+          console.error('[Debug] Error initializing gallery:', error);
+        }
+      }
+
+      // Update post content
+      function updatePostContent() {
+        const postText = document.querySelector('#post-content-text');
+        if (!postText || !window.dluxWallet.currentPost) return;
+
+        const content = window.dluxWallet.currentPost.body || 'No content available';
+        // Simple text processing for VR display
+        const processedContent = content
+          .replace(/\n\n/g, '\n')
+          .substring(0, 500) + (content.length > 500 ? '...' : '');
+        
+        postText.setAttribute('text', 'value', processedContent);
+      }
+
+      // Initialize the scene
+      window.addEventListener('load', async () => {
+        console.log('[Debug] Starting initialization');
+        
+        // Wait for wallet to be ready
+        if (!window.dluxWallet) {
+          console.log('[Debug] Waiting for wallet ready event');
+          await new Promise(resolve => {
+            window.addEventListener('dlux-wallet-ready', resolve, { once: true });
+          });
+        }
+
+        // Get post data from URL
+        const postData = getPostDataFromUrl();
+        console.log('[Debug] Post data from URL:', postData);
+
+        if (postData) {
+          try {
+            // Get post data from blockchain
+            const post = await window.dluxWallet.getPostData(postData.author, postData.permlink);
+            console.log('[Debug] Post data from blockchain:', post);
+            
+            if (post) {
+              window.dluxWallet.currentPost = post;
+              currentPost = post;
+              updatePostInfo();
+              updateVoteButton();
+              initializeGallery();
+            }
+          } catch (error) {
+            console.error('[Debug] Error getting post data:', error);
+          }
+        }
+
+        // Get current user
+        try {
+          const user = await window.dluxWallet.getCurrentUser();
+          console.log('[Debug] Current user:', user);
+          currentUser = user;
+          updateVoteButton();
+        } catch (error) {
+          console.error('[Debug] Error getting current user:', error);
+        }
+
+        // Add VR menu event listeners with null checks
+        const menuVote = document.querySelector('#menu-vote');
+        if (menuVote) {
+          menuVote.addEventListener('click', () => {
+            if (currentPanel && currentPanel.id === 'vote-panel') {
+              hideAllPanels();
+            } else {
+              showPanel('vote-panel');
+            }
+          });
+        }
+
+        const menuPost = document.querySelector('#menu-post');
+        if (menuPost) {
+          menuPost.addEventListener('click', () => {
+            if (currentPanel && currentPanel.id === 'post-panel') {
+              hideAllPanels();
+            } else {
+              showPanel('post-panel');
+            }
+          });
+        }
+
+        const menuComments = document.querySelector('#menu-comments');
+        if (menuComments) {
+          menuComments.addEventListener('click', () => {
+            if (currentPanel && currentPanel.id === 'comments-panel') {
+              hideAllPanels();
+            } else {
+              showPanel('comments-panel');
+            }
+          });
+        }
+
+        const menuNav = document.querySelector('#menu-nav');
+        if (menuNav) {
+          menuNav.addEventListener('click', () => {
+            if (currentPanel && currentPanel.id === 'nav-panel') {
+              hideAllPanels();
+            } else {
+              showPanel('nav-panel');
+            }
+          });
+        }
+
+        const menuInfo = document.querySelector('#menu-info');
+        if (menuInfo) {
+          menuInfo.addEventListener('click', () => {
+            if (currentPanel && currentPanel.id === 'info-panel') {
+              hideAllPanels();
+            } else {
+              showPanel('info-panel');
+            }
+          });
+        }
+
+        // Comment system event listeners with null checks
+        const commentModeToggle = document.querySelector('#comment-mode-toggle');
+        if (commentModeToggle) {
+          commentModeToggle.addEventListener('click', toggleCommentMode);
+        }
+        
+        const commentSubmitBtn = document.querySelector('#comment-submit-btn');
+        if (commentSubmitBtn) {
+          commentSubmitBtn.addEventListener('click', createComment);
+        }
+        
+        const commentCancelBtn = document.querySelector('#comment-cancel-btn');
+        if (commentCancelBtn) {
+          commentCancelBtn.addEventListener('click', () => {
+            // Reset comment text and hide keyboard
+            currentCommentText = '';
+            const keyboard = document.querySelector('#virtual-keyboard');
+            if (keyboard) {
+              keyboard.setAttribute('visible', false);
+            }
+            hideAllPanels();
+            isCommentMode = false;
+            toggleCommentMode();
+          });
+        }
+        
+        const commentCloseBtn = document.querySelector('#comment-close-btn');
+        if (commentCloseBtn) {
+          commentCloseBtn.addEventListener('click', hideAllPanels);
+        }
+        
+        // Initialize virtual keyboard
+        initializeVirtualKeyboard();
+
+        // Vote button handlers with null checks
+        const voteButtonVr = document.querySelector('#vote-button-vr');
+        if (voteButtonVr) {
+          voteButtonVr.addEventListener('click', handleVote);
+        }
+        
+        if (menuVote) {
+          menuVote.addEventListener('click', handleVote);
+        }
+        
+        // Load comments for initial photo
+        loadCommentsForPhoto();
+
+        // Setup initial mode
+        setupDesktopMode();
+        
+        // Update debug info periodically
+        setInterval(updateDebugInfo, 1000);
+      });
+
+      // Handle controller events for better VR interaction
+      document.addEventListener('controllerconnected', (event) => {
+        console.log('[VR] Controller connected:', event.detail);
+      });
+
+      document.addEventListener('controllerdisconnected', (event) => {
+        console.log('[VR] Controller disconnected:', event.detail);
+      });
+    </script>
+  </body>
+</html>

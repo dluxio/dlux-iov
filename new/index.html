@@ -82,6 +82,8 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <!-- Vue Controller -->
     <script type="module" src="/js/v3-user.js"></script>
+    <!-- 360° Asset Manager Component -->
+    <script type="module" src="/js/components/360-asset-manager.js"></script>
     <style>
         .form-switch.form-switch-lg .form-check-input {
             height: 2rem;
@@ -176,6 +178,48 @@
             z-index: 0;
         }
         /* Page-specific styles that should remain here */
+        
+        /* 360° Asset Manager Styles */
+        .asset-360-manager .drop-zone {
+            border: 2px dashed #495057;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            background-color: #212529;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .asset-360-manager .drop-zone:hover,
+        .asset-360-manager .drop-zone.dragover {
+            border-color: #4ECDC4;
+            background-color: #1e2329;
+        }
+        
+        .asset-360-manager .drop-zone-content {
+            color: #6c757d;
+        }
+        
+        .asset-360-manager .list-group-item.active {
+            background-color: #4ECDC4;
+            border-color: #4ECDC4;
+            color: #000;
+        }
+        
+        .asset-360-manager canvas {
+            display: block;
+            margin: 0 auto;
+            background-color: #000;
+        }
+        
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        
+        .asset-360-manager .card:hover {
+            transform: scale(1.02);
+            border-color: #4ECDC4;
+        }
    
     </style>
 </head>
@@ -456,8 +500,8 @@
                                 <contract-vue v-if="account" :nodeview="false" :account="account" :mypfp="mypfp"
                                     :protocol="protocol.broca" :stats="spkStats" @tosign="toSign = $event"
                                     :prop_contracts="contracts" :accountinfo="accountinfo" :spkapi="spkapi"
-                                    @done="getSapi" :postpage="true"
-                                    @add-to-post="fileToAddToPost = $event"></contract-vue>
+                                    @done="getSapi" :postpage="true" :post-type="postCustom_json.vrHash"
+                                    @add-to-post="handleSPKFileForAssets = $event"></contract-vue>
                             </div>
                         </div>
                     </div>
@@ -711,7 +755,7 @@
                     </div>
                 </div>
 
-                <!-- 360 dApp Asset Management (Only show for 360 posts) -->
+                <!-- 360° Asset Management (Only show for 360 posts) -->
                 <div v-if="postCustom_json.vrHash == 'QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k'"
                     class="accordion border-white-50 rounded mt-3" id="assetAccordion">
                     <div class="accordion-item bg-img-none bg-dark-1">
@@ -719,43 +763,37 @@
                             <button class="accordion-button bg-card hero-subtitle fs-3 p-3" type="button"
                                 data-bs-toggle="collapse" data-bs-target="#assetManager" aria-expanded="true"
                                 aria-controls="assetManager">
-                                <i class="fa-solid fa-shapes fa-fw me-2"></i>360 Asset Management
+                                <i class="fa-solid fa-globe fa-fw me-2"></i>360° Gallery Builder
                             </button>
                         </h2>
                         <div id="assetManager" class="accordion-collapse collapse show"
                             data-bs-parent="#assetAccordion">
                             <div class="accordion-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <assets-vue :assets="postCustom_json.assets"
-                                            @updateassets="postCustom_json.assets = $event;dluxMock()"
-                                            @setdapp="postCustom_json.vrHash = $event" :types="types" />
-                                    </div>
-                                    <div class="col-md-6">
-                                        <!-- 360 Preview -->
-                                        <div class="position-relative">
-                                            <div
-                                                class="d-flex w-100 justify-content-end align-items-center p-2 overlay position-absolute top-0 start-50 translate-middle-x">
-                                                <div class="form-check form-switch form-switch-lg me-2">
-                                                    <input class="form-check-input bg-blur-darkg" type="checkbox"
-                                                        role="switch" id="flexSwitchCheckChecked" v-model="showLine"
-                                                        title="Horizon Line">
-                                                </div>
-                                                <button class="btn btn-dark bg-blur-darkg border-0" title="Reset Camera"
-                                                    @click="resetCamera()"><i
-                                                        class="fa-solid fa-camera-rotate"></i></button>
-                                            </div>
-                                            <hr style="border: 5px solid red;" :class="{'invisible': !showLine}"
-                                                class="overlay m-0 w-100 position-absolute top-50 start-0 translate-middle-y" />
-                                            <div class="ratio ratio-1x1 frame-360">
-                                                <iframe ref="aframePreview" id="aframePreview"
-                                                    :src="'https://ipfs.dlux.io/ipfs/' + postCustom_json.vrHash"
-                                                    frameborder="0"
-                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                    allowfullscreen></iframe>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <!-- New 360° Asset Manager Component -->
+                                <!-- 
+                                    Integration Notes:
+                                    - This component manages 360° images with canvas-based editing for focus/horizon adjustment
+                                    - Integrates with SPK Drive for file selection and upload
+                                    - Outputs assets and navigation data according to the 360° gallery format (see readme)
+                                    - Data is passed to TipTap editor via @assets-updated event for blockchain posting
+                                    - SPK contract IDs are preserved for proper asset referencing in posts
+                                -->
+                                <asset-360-manager
+                                    v-if="account"
+                                    :account="account"
+                                    :spk-api="spkapi"
+                                    :initial-assets="postCustom_json.assets || []"
+                                    :initial-navigation="postCustom_json.navigation || []"
+                                    :spk-file-to-add="handleSPKFileForAssets"
+                                    @assets-updated="handle360AssetsUpdated($event)"
+                                    @tosign="sendIt($event)">
+                                </asset-360-manager>
+                                
+                                <!-- Fallback when not logged in -->
+                                <div v-else class="text-center text-muted py-5">
+                                    <i class="fas fa-sign-in-alt fa-3x mb-3"></i>
+                                    <h5>Please Log In</h5>
+                                    <p>You need to log in to manage 360° gallery assets.</p>
                                 </div>
                             </div>
                         </div>

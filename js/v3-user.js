@@ -30,6 +30,7 @@ import Assets from "/js/assets.js"
 import MFI from "/js/mfi-vue.js";
 import UploadEverywhere from "/js/upload-everywhere.js";
 import TiptapEditorWithFileMenu from "/js/tiptap-editor-with-file-menu.js";
+import Asset360Manager from "/js/components/360-asset-manager.js";
 import MCommon from '/js/methods-common.js'
 
 let url = location.href.replace(/\/$/, "");
@@ -1050,6 +1051,7 @@ PORT=3000
       postOptions: {},
       serviceWorkerPromises: {},
       fileToAddToPost: null,
+      handleSPKFileForAssets: null,
       playlistUpdates: {},
       videoFilesToUpload: [],
       ffmpegReady: false,
@@ -1110,6 +1112,7 @@ PORT=3000
     "mfi-vue": MFI,
     "upload-everywhere": UploadEverywhere,
     "tiptap-editor-with-file-menu": TiptapEditorWithFileMenu,
+    "asset-360-manager": Asset360Manager,
   },
   methods: {
     ...MCommon,
@@ -1637,6 +1640,12 @@ PORT=3000
       this.dluxMock()
     },
     resetCamera() {
+      // Skip if aframePreview reference doesn't exist (when using new 360° component)
+      if (!this.$refs.aframePreview) {
+        console.log('360° A-Frame preview not available - using new Asset Manager');
+        return;
+      }
+      
       var target = this.$refs.aframePreview.contentWindow
       target.postMessage({
         'func': 'resetCamera',
@@ -1644,6 +1653,12 @@ PORT=3000
       }, "*");
     },
     dluxMock() {
+      // Skip if aframePreview reference doesn't exist (when using new 360° component)
+      if (!this.$refs.aframePreview) {
+        console.log('360° A-Frame preview not available - using new Asset Manager');
+        return;
+      }
+      
       var result = {
         author: this.account,
         permlink: this.postPermlink,
@@ -6307,6 +6322,45 @@ function buyNFT(setname, uid, price, type, callback){
       
       // Call the existing post method to handle the actual publishing
       this.post();
+    },
+
+    // 360° Asset Manager Integration Methods
+    handle360AssetsUpdated(data) {
+      // Integration Point: 360° Asset Manager Data Handler
+      // This method receives the complete 360° gallery data from the Asset Manager including:
+      // - assets: array with index, url, thumb, rotation, title, description, contractId
+      // - navigation: array with fromIndex, toIndex, position (phi, theta, radius), label, description
+      
+      console.log('🌍 360° Assets updated:', data);
+      
+      // Update the post's custom JSON with the new 360° gallery data
+      this.postCustom_json.assets = data.assets || [];
+      this.postCustom_json.navigation = data.navigation || [];
+      
+      // Trigger mock update for preview
+      this.dluxMock();
+      
+      // Log the structure for debugging
+      console.log('📝 Updated postCustom_json.assets:', this.postCustom_json.assets);
+      console.log('🧭 Updated postCustom_json.navigation:', this.postCustom_json.navigation);
+    },
+
+    // Handle file selection from SPK Drive for 360° assets
+    handleSPKFileForAssets(fileData) {
+      // This method receives file data when users drag/select files from SPK Drive
+      // and passes it to the 360° asset manager component
+      console.log('📁 SPK file selected for 360° assets:', fileData);
+      
+      // If this is from drag/drop, we need to look up the actual file metadata
+      if (fileData.fromDragDrop && fileData.cid && fileData.contractId) {
+        console.log('🔍 Looking up metadata for dragged file:', fileData.cid);
+        
+        // For now, just pass the data as-is and let the component handle the metadata lookup
+        // The context menu approach should provide better metadata
+        console.log('🎯 Passing drag/drop data to 360° manager for processing:', fileData);
+      }
+      
+      this.handleSPKFileForAssets = fileData;
     }
   },
   mounted() {

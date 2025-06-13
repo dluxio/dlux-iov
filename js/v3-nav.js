@@ -519,99 +519,84 @@ export default {
     },
 
     handleWalletMessage(event) {
-      // Validate message structure
-      const message = event.data;
-      if (!message || message.source !== 'dlux-wallet') {
-        return;
-      }
+      // Log all incoming messages for debugging
+      console.log('[NavVue] Received wallet message:', event.data);
 
-      console.log('[NavVue] Received wallet message:', message);
-
-      // Validate origin - only allow subdomain origins
-      const origin = new URL(event.origin);
-      const validSubdomains = [
-        /^[\w-]+\.ipfs\.dlux\.io$/,
-        /^[\w-]+\.dlux\.io$/,
-        /^[\w-]+\.test\.dlux\.io$/
+      // Validate origin
+      const validOrigins = [
+        'https://www.dlux.io',
+        'https://dlux.io',
+        'https://vue.dlux.io',
+        'http://localhost:5508'  // Add localhost for development
       ];
 
-      const isValidSubdomain = validSubdomains.some(pattern => pattern.test(origin.hostname));
-      if (!isValidSubdomain) {
-        console.log('[NavVue] Ignoring message from unauthorized origin:', event.origin);
+      if (!validOrigins.includes(event.origin)) {
+        console.warn('[NavVue] Ignoring message from unauthorized origin:', event.origin);
         return;
       }
 
-      // Handle different message types
-      switch (message.type) {
+      // Validate message structure
+      if (!event.data || typeof event.data !== 'object') {
+        console.warn('[NavVue] Ignoring invalid message format:', event.data);
+        return;
+      }
+
+      // Check if this is a wallet message
+      if (!event.data.source || event.data.source !== 'dlux-wallet') {
+        console.warn('[NavVue] Ignoring non-wallet message:', event.data);
+        return;
+      }
+
+      // Validate required fields
+      if (!event.data.id || !event.data.type) {
+        console.warn('[NavVue] Ignoring message with missing required fields:', event.data);
+        return;
+      }
+
+      console.log('[NavVue] Processing wallet message:', event.data);
+
+      // Handle message based on type
+      switch (event.data.type) {
         case 'get-user':
-          this.handleGetUserRequest(message, event.source, event.origin);
-          break;
-        case 'request-navigation':
-          this.handleNavigationRequest(message, event.source, event.origin);
+          this.handleGetUserRequest(event.data, event.source, event.origin);
           break;
         case 'sign-transaction':
-          this.handleSignTransactionRequest(message, event.source, event.origin);
-          break;
-        case 'sign-only':
-          this.handleSignOnlyRequest(message, event.source, event.origin);
-          break;
-        case 'sign-challenge':
-          this.handleSignChallengeRequest(message, event.source, event.origin);
-          break;
-        case 'request-device-pairing':
-          this.handleDevicePairingRequest(message, event.source, event.origin);
-          break;
-        case 'connect-to-device':
-          this.handleDeviceConnectionRequest(message, event.source, event.origin);
-          break;
-        case 'disconnect-device':
-          this.handleDeviceDisconnectionRequest(message, event.source, event.origin);
-          break;
-        case 'request-remote-sign':
-          this.handleRemoteSignRequest(message, event.source, event.origin);
-          break;
-        case 'request-remote-sign-challenge':
-          this.handleRemoteSignChallengeRequest(message, event.source, event.origin);
-          break;
-        case 'poll-device-requests':
-          this.handleDeviceRequestsPolling(message, event.source, event.origin);
-          break;
-        case 'respond-to-device-request':
-          this.handleDeviceRequestResponse(message, event.source, event.origin);
+          this.handleSignTransactionRequest(event.data, event.source, event.origin);
           break;
         default:
-          console.log('[NavVue] Unknown wallet message type:', message.type);
+          console.warn('[NavVue] Unhandled message type:', event.data.type);
+      }
+    },
+
+    async handleGetUserRequest(message, sourceWindow, sourceOrigin) {
+      try {
+        const userData = {
+          user: this.user || null,
+          isLoggedIn: !!this.user,
+          signerType: this.getActiveSignerType()
+        };
+        
+        console.log('[NavVue] Sending user data:', userData);
+        this.sendWalletResponse(message.id, userData, null, sourceWindow, sourceOrigin);
+      } catch (error) {
+        console.error('[NavVue] Error handling get-user request:', error);
+        this.sendWalletResponse(message.id, null, error.message, sourceWindow, sourceOrigin);
       }
     },
 
     sendWalletResponse(messageId, data, error, targetWindow, targetOrigin) {
       const response = {
         id: messageId,
-        source: 'dlux-nav',
+        type: 'response',
+        source: 'dlux-wallet',
+        origin: window.location.origin,
         timestamp: Date.now(),
-        data: error ? null : data,
-        error: error || null
+        data,
+        error
       };
 
-      try {
-        targetWindow.postMessage(response, targetOrigin);
-        console.log('[NavVue] Sent wallet response:', response);
-      } catch (err) {
-        console.error('[NavVue] Failed to send wallet response:', err);
-      }
-    },
-
-    // Handle get user request (unrestricted)
-    handleGetUserRequest(message, sourceWindow, sourceOrigin) {
-      console.log('[NavVue] Handling get-user request from:', sourceOrigin);
-      
-      const userData = {
-        user: this.user || null,
-        isLoggedIn: !!this.user,
-        signerType: this.getActiveSignerType()
-      };
-
-      this.sendWalletResponse(message.id, userData, null, sourceWindow, sourceOrigin);
+      console.log('[NavVue] Sending response to', targetOrigin, response);
+      targetWindow.postMessage(response, '*');  // Use '*' to allow any origin in development
     },
 
     // Handle navigation request (requires confirmation)

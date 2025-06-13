@@ -5,12 +5,18 @@
 
 class DluxWallet {
   constructor() {
-    this.masterDomains = ['vue.dlux.io', 'dlux.io', 'www.dlux.io'];
+    this.masterDomains = [
+      'www.dlux.io',
+      'dlux.io',
+      'vue.dlux.io',
+      'localhost:5508'
+    ];
     this.activeMaster = null;
-    this.messageId = 0;
     this.pendingMessages = new Map();
-    this.isReady = false;
     this.currentUser = null;
+    this.currentPost = null;
+    this.ipfsAssets = [];
+    this.isLocalhost = window.location.hostname === 'localhost';
     
     // Device connection properties
     this.deviceConnection = {
@@ -25,23 +31,38 @@ class DluxWallet {
   }
 
   async init() {
-    console.log('[DluxWallet] Initializing wallet communication...');
-    
-    // Listen for messages from parent domains
-    window.addEventListener('message', this.handleMessage.bind(this));
-    
-    // Find available master domain
-    await this.findMasterDomain();
-    
-    if (this.activeMaster) {
+    try {
+      console.log('[DluxWallet] Starting initialization');
+      
+      // Find available master domain
+      this.activeMaster = await this.findMasterDomain();
+      
+      if (!this.activeMaster) {
+        throw new Error('No master domain available');
+      }
+      
       console.log('[DluxWallet] Connected to master domain:', this.activeMaster);
-      // Get current user on initialization
-      await this.getCurrentUser();
-      this.isReady = true;
-      this.dispatchEvent('ready', { master: this.activeMaster, user: this.currentUser });
-    } else {
-      console.log('[DluxWallet] No master domain available, offering user option to open secure window');
-      await this.offerSecureWindowOption();
+
+      // Set up message listener
+      window.addEventListener('message', this.handleMessage.bind(this));
+
+      // Get current user
+      try {
+        this.currentUser = await this.getCurrentUser();
+        console.log('[DluxWallet] Current user:', this.currentUser);
+      } catch (error) {
+        console.error('[DluxWallet] Failed to get current user:', error);
+        // Don't throw here, allow initialization to continue
+      }
+
+      // Dispatch ready event
+      this.dispatchEvent('ready', { 
+        master: this.activeMaster,
+        user: this.currentUser
+      });
+    } catch (error) {
+      console.error('[DluxWallet] Initialization error:', error);
+      throw error;
     }
   }
 
@@ -50,41 +71,58 @@ class DluxWallet {
       try {
         console.log('[DluxWallet] Checking domain:', domain);
         
-        // Try to open a connection to the domain
-        const testFrame = document.createElement('iframe');
-        testFrame.style.display = 'none';
-        testFrame.src = `https://${domain}`;
+        // Use appropriate protocol based on environment
+        const protocol = this.isLocalhost ? 'http' : 'https';
+        const walletUrl = `${protocol}://${domain}`;
         
-        document.body.appendChild(testFrame);
+        // Try to find existing wallet window
+        const existingWindow = window.opener || window.parent;
+        if (existingWindow && existingWindow !== window) {
+          try {
+            // Test communication with existing window
+            const testMessage = {
+              id: this.generateMessageId(),
+              type: 'test-connection',
+              source: 'dlux-wallet',
+              origin: window.location.origin,
+              timestamp: Date.now()
+            };
+            
+            existingWindow.postMessage(testMessage, walletUrl);
+            
+            // If we get here, the window exists and accepts our origin
+            console.log('[DluxWallet] Found existing wallet window');
+            return domain;
+          } catch (error) {
+            console.log('[DluxWallet] Existing window not available:', error);
+          }
+        }
+
+        // Try to find any window with the target origin
+        const windows = window.opener ? [window.opener] : [];
+        if (window.parent !== window) {
+          windows.push(window.parent);
+        }
         
-        // Wait for frame to load and test communication
-        const available = await new Promise((resolve) => {
-          const timeout = setTimeout(() => {
-            resolve(false);
-          }, 3000);
-          
-          testFrame.onload = () => {
-            clearTimeout(timeout);
-            resolve(true);
-          };
-          
-          testFrame.onerror = () => {
-            clearTimeout(timeout);
-            resolve(false);
-          };
-        });
-        
-        document.body.removeChild(testFrame);
-        
-        if (available) {
-          this.activeMaster = domain;
-          console.log('[DluxWallet] Found available master:', domain);
-          break;
+        for (const win of windows) {
+          try {
+            if (win.location.origin === walletUrl) {
+              console.log('[DluxWallet] Found window with matching origin:', walletUrl);
+              return domain;
+            }
+          } catch (error) {
+            // Ignore cross-origin errors
+            console.log('[DluxWallet] Could not access window origin:', error);
+          }
         }
       } catch (error) {
         console.log('[DluxWallet] Domain not available:', domain, error);
       }
     }
+
+    // If we get here, no domain was available
+    console.error('[DluxWallet] No available master domains found');
+    return null;
   }
 
   generateMessageId() {
@@ -93,11 +131,6 @@ class DluxWallet {
 
   sendMessage(type, data = {}) {
     return new Promise((resolve, reject) => {
-      if (!this.activeMaster) {
-        reject(new Error('No master domain available'));
-        return;
-      }
-
       const messageId = this.generateMessageId();
       const message = {
         id: messageId,
@@ -111,30 +144,22 @@ class DluxWallet {
       // Store pending message for response handling
       this.pendingMessages.set(messageId, { resolve, reject, timestamp: Date.now() });
 
-      // Clean up old pending messages (timeout after 60 seconds)
+      // Clean up old pending messages
       this.cleanupPendingMessages();
 
       try {
-        // Send message to master domain
-        const targetOrigin = `https://${this.activeMaster}`;
-        console.log('[DluxWallet] Sending message to', targetOrigin, message);
-        
-        // Use parent window or open new window if needed
-        if (window.parent !== window) {
-          window.parent.postMessage(message, targetOrigin);
-        } else {
-          // If not in iframe, try to open connection
-          const popup = window.open(`${targetOrigin}?wallet=true`, '_blank', 'width=1,height=1,left=-1000,top=-1000');
-          if (popup) {
-            setTimeout(() => {
-              popup.postMessage(message, targetOrigin);
-              popup.close();
-            }, 1000);
-          } else {
-            reject(new Error('Unable to establish communication with master domain'));
-          }
+        // Get the parent window that opened this one
+        const parentWindow = window.opener;
+        if (!parentWindow) {
+          console.error('[DluxWallet] No parent window found');
+          reject(new Error('No parent window available'));
+          return;
         }
+
+        console.log('[DluxWallet] Sending message to parent window:', message);
+        parentWindow.postMessage(message, '*');  // Use '*' to allow any origin in development
       } catch (error) {
+        console.error('[DluxWallet] Error sending message:', error);
         this.pendingMessages.delete(messageId);
         reject(error);
       }
@@ -142,41 +167,88 @@ class DluxWallet {
   }
 
   handleMessage(event) {
-    // Validate origin
-    const allowedOrigins = this.masterDomains.map(domain => `https://${domain}`);
-    if (!allowedOrigins.includes(event.origin)) {
-      console.log('[DluxWallet] Ignoring message from unauthorized origin:', event.origin);
+    // Ignore extension bridge messages
+    if (event.data && event.data.cmd === '__crx_bridge_verify_listening') {
       return;
     }
 
-    const message = event.data;
-    if (!message || message.source !== 'dlux-nav') {
+    // Validate message structure
+    if (!event.data || typeof event.data !== 'object') {
+      console.log('[DluxWallet] Ignoring invalid message format:', event.data);
       return;
     }
 
-    console.log('[DluxWallet] Received message:', message);
+    // Check if this is a wallet message
+    if (!event.data.source || event.data.source !== 'dlux-wallet') {
+      console.log('[DluxWallet] Ignoring non-wallet message:', event.data);
+      return;
+    }
 
-    // Handle response to pending message
-    if (message.id && this.pendingMessages.has(message.id)) {
-      const { resolve, reject } = this.pendingMessages.get(message.id);
-      this.pendingMessages.delete(message.id);
+    // Validate required fields
+    if (!event.data.id || !event.data.type) {
+      console.log('[DluxWallet] Ignoring message with missing required fields:', event.data);
+      return;
+    }
 
-      if (message.error) {
-        reject(new Error(message.error));
-      } else {
-        resolve(message.data);
+    console.log('[DluxWallet] Processing wallet message:', event.data);
+
+    // Handle response messages
+    if (event.data.type === 'response') {
+      const pendingMessage = this.pendingMessages.get(event.data.id);
+      if (pendingMessage) {
+        this.pendingMessages.delete(event.data.id);
+        if (event.data.error) {
+          pendingMessage.reject(new Error(event.data.error));
+        } else {
+          pendingMessage.resolve(event.data.data);
+        }
       }
       return;
     }
 
-    // Handle events from master
-    if (message.type === 'user-changed') {
-      this.currentUser = message.data.user;
-      this.dispatchEvent('userChanged', { user: this.currentUser });
-    } else if (message.type === 'logout') {
-      this.currentUser = null;
-      this.dispatchEvent('logout');
+    // Handle other message types
+    switch (event.data.type) {
+      case 'get-user':
+        this.handleGetUserRequest(event.data, event.source, event.origin);
+        break;
+      default:
+        console.log('[DluxWallet] Unhandled message type:', event.data.type);
     }
+  }
+
+  async handleGetUserRequest(message, sourceWindow, sourceOrigin) {
+    try {
+      const user = await this.getCurrentUser();
+      this.sendWalletResponse(message.id, user, null, sourceWindow, sourceOrigin);
+    } catch (error) {
+      console.error('[DluxWallet] Error handling get-user request:', error);
+      this.sendWalletResponse(message.id, null, error.message, sourceWindow, sourceOrigin);
+    }
+  }
+
+  async handleGetPostRequest(message, sourceWindow, sourceOrigin) {
+    try {
+      const postData = await this.getPostData(message.data.author, message.data.permlink);
+      this.sendWalletResponse(message.id, postData, null, sourceWindow, sourceOrigin);
+    } catch (error) {
+      console.error('[DluxWallet] Error handling get-post request:', error);
+      this.sendWalletResponse(message.id, null, error.message, sourceWindow, sourceOrigin);
+    }
+  }
+
+  sendWalletResponse(messageId, data, error, targetWindow, targetOrigin) {
+    const response = {
+      id: messageId,
+      type: 'response',
+      source: 'dlux-wallet',
+      origin: window.location.origin,
+      timestamp: Date.now(),
+      data,
+      error
+    };
+
+    console.log('[DluxWallet] Sending response to parent window:', response);
+    targetWindow.postMessage(response, '*');  // Use '*' to allow any origin in development
   }
 
   cleanupPendingMessages() {
@@ -237,14 +309,10 @@ class DluxWallet {
     
     if (this.activeMaster) {
       console.log('[DluxWallet] Reconnected to master domain:', this.activeMaster);
-      await this.getCurrentUser();
-      this.isReady = true;
-      this.dispatchEvent('ready', { master: this.activeMaster, user: this.currentUser });
-    } else {
-      this.dispatchEvent('error', { 
-        message: 'Still unable to connect to DLUX master domain after retry.' 
-      });
+      this.createIframe();
+      return true;
     }
+    return false;
   }
 
   dispatchEvent(type, data) {
@@ -258,12 +326,32 @@ class DluxWallet {
    * Get current logged in user (unrestricted)
    */
   async getCurrentUser() {
+    console.log('[DluxWallet] Getting current user');
     try {
-      const result = await this.sendMessage('get-user');
-      this.currentUser = result.user;
-      return this.currentUser;
+      const userData = await this.sendMessage('get-user');
+      console.log('[DluxWallet] Received user data:', userData);
+      
+      if (!userData) {
+        console.log('[DluxWallet] No user data received');
+        return null;
+      }
+
+      this.currentUser = userData.user;
+      this.isLoggedIn = userData.isLoggedIn;
+      this.signerType = userData.signerType;
+
+      console.log('[DluxWallet] Updated user state:', {
+        user: this.currentUser,
+        isLoggedIn: this.isLoggedIn,
+        signerType: this.signerType
+      });
+
+      return userData;
     } catch (error) {
-      console.error('[DluxWallet] Failed to get current user:', error);
+      console.error('[DluxWallet] Error getting current user:', error);
+      this.currentUser = null;
+      this.isLoggedIn = false;
+      this.signerType = null;
       return null;
     }
   }
@@ -623,6 +711,90 @@ class DluxWallet {
    */
   off(event, callback) {
     window.removeEventListener(`dlux-wallet-${event}`, callback);
+  }
+
+  /**
+   * Get post data from URL and fetch content
+   */
+  async getPostData(author, permlink) {
+    try {
+      console.log('[DluxWallet] Fetching post data for', author, permlink);
+      const response = await fetch(`https://api.hive.blog`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'condenser_api.get_content',
+          params: [author, permlink]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch post data');
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error.message || 'Failed to fetch post data');
+      }
+
+      console.log('[DluxWallet] Post data received:', data.result);
+      return data.result;
+    } catch (error) {
+      console.error('[DluxWallet] Error fetching post data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Process post assets from JSON metadata
+   */
+  processPostAssets(post) {
+    if (!post || !post.json_metadata) {
+      this.ipfsAssets = [];
+      return;
+    }
+
+    try {
+      const metadata = typeof post.json_metadata === 'string' 
+        ? JSON.parse(post.json_metadata)
+        : post.json_metadata;
+
+      if (metadata.assets && Array.isArray(metadata.assets)) {
+        this.ipfsAssets = metadata.assets.map(asset => ({
+          ...asset,
+          fullUrl: `/ipfs/${asset.hash}`,
+          thumbUrl: `/ipfs/${asset.thumbHash || asset.hash}`,
+          rotation: {
+            x: parseFloat(asset.rx || 0),
+            y: parseFloat(asset.ry || 0),
+            z: parseFloat(asset.rz || 0)
+          }
+        }));
+      } else {
+        this.ipfsAssets = [];
+      }
+    } catch (error) {
+      console.error('[DluxWallet] Failed to process post assets:', error);
+      this.ipfsAssets = [];
+    }
+  }
+
+  /**
+   * Get current post data
+   */
+  getCurrentPost() {
+    return this.currentPost;
+  }
+
+  /**
+   * Get processed IPFS assets
+   */
+  getIpfsAssets() {
+    return this.ipfsAssets;
   }
 }
 
