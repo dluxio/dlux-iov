@@ -42,6 +42,12 @@ const Asset360Manager = {
             navSpheresVisible: true,
             selectedNavIndex: -1,
             
+            // Navigation dragging state
+            isDraggingNavSphere: false,
+            draggedNavIndex: -1,
+            draggedNavGlobalIndex: -1, // Index in the full navigation array
+            hoveringOverSphere: false, // Track if mouse is over a sphere
+            
             // File type filters for 360° images
             acceptedTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
         }
@@ -57,8 +63,12 @@ const Asset360Manager = {
             let cursor = 'grab';
             if (this.editMode === 'navigation' && this.isPlacingNavigation) {
                 cursor = 'crosshair';
+            } else if (this.editMode === 'navigation' && this.hoveringOverSphere) {
+                cursor = 'pointer';
             } else if (this.editMode === 'focus') {
                 cursor = this.mouseDown ? 'grabbing' : 'grab';
+            } else if (this.isDraggingNavSphere) {
+                cursor = 'move';
             }
             
             return {
@@ -231,8 +241,8 @@ const Asset360Manager = {
             // Draw horizon line if enabled
             this.drawHorizonLine();
             
-            // Draw navigation spheres
-            if (this.navSpheresVisible && this.editMode === 'navigation') {
+            // Always draw navigation spheres when they exist (not just in navigation mode)
+            if (this.navSpheresVisible && this.navigationForCurrentAsset.length > 0) {
                 this.drawNavigationSpheres();
             }
             
@@ -314,36 +324,97 @@ const Asset360Manager = {
             this.navigationForCurrentAsset.forEach((nav, index) => {
                 const pos = this.sphericalToCanvas(nav.position);
                 
+                // Skip if position is outside visible area
+                if (pos.x < 0 || pos.x > canvas.width || pos.y < 0 || pos.y > canvas.height) {
+                    return;
+                }
+                
                 ctx.save();
                 
-                // Draw sphere
+                const isSelected = index === this.selectedNavIndex;
+                const isDragging = this.isDraggingNavSphere && index === this.draggedNavIndex;
+                
+                // Draw glow effect (larger when dragging)
                 ctx.beginPath();
-                ctx.arc(pos.x, pos.y, 12, 0, 2 * Math.PI);
-                ctx.fillStyle = index === this.selectedNavIndex ? '#E91E63' : '#4ECDC4';
+                ctx.arc(pos.x, pos.y, isDragging ? 25 : 20, 0, 2 * Math.PI);
+                let glowColor = 'rgba(78, 205, 196, 0.2)';
+                if (isSelected) glowColor = 'rgba(233, 30, 99, 0.2)';
+                if (isDragging) glowColor = 'rgba(255, 193, 7, 0.3)'; // Yellow when dragging
+                ctx.fillStyle = glowColor;
+                ctx.fill();
+                
+                // Draw outer ring (thicker when dragging)
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, isDragging ? 18 : 15, 0, 2 * Math.PI);
+                let ringColor = '#4ECDC4';
+                if (isSelected) ringColor = '#E91E63';
+                if (isDragging) ringColor = '#FFC107'; // Yellow when dragging
+                ctx.strokeStyle = ringColor;
+                ctx.lineWidth = isDragging ? 4 : 3;
+                ctx.stroke();
+                
+                // Draw inner sphere
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, isDragging ? 10 : 8, 0, 2 * Math.PI);
+                let fillColor = '#4ECDC4';
+                if (isSelected) fillColor = '#E91E63';
+                if (isDragging) fillColor = '#FFC107'; // Yellow when dragging
+                ctx.fillStyle = fillColor;
                 ctx.fill();
                 ctx.strokeStyle = '#fff';
                 ctx.lineWidth = 2;
                 ctx.stroke();
                 
-                // Draw label
+                // Draw label with better visibility
                 if (nav.label) {
-                    ctx.fillStyle = '#fff';
-                    ctx.font = '12px Arial';
+                    ctx.fillStyle = '#000';
+                    ctx.font = isDragging ? 'bold 14px Arial' : 'bold 12px Arial';
                     ctx.textAlign = 'center';
-                    ctx.fillText(nav.label, pos.x, pos.y - 18);
+                    
+                    // Draw background for text
+                    const textWidth = ctx.measureText(nav.label).width;
+                    const textHeight = isDragging ? 18 : 16;
+                    const textY = isDragging ? pos.y - 35 : pos.y - 32;
+                    
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+                    ctx.fillRect(pos.x - textWidth/2 - 4, textY - textHeight + 4, textWidth + 8, textHeight);
+                    
+                    // Draw text
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText(nav.label, pos.x, textY);
+                }
+                
+                // Draw auto-generated indicator
+                if (nav.autoGenerated) {
+                    ctx.fillStyle = '#FFA500';
+                    ctx.font = isDragging ? '12px Arial' : '10px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('AUTO', pos.x, pos.y + (isDragging ? 28 : 25));
+                }
+                
+                // Draw drag cursor indicator when dragging
+                if (isDragging) {
+                    ctx.fillStyle = '#FFC107';
+                    ctx.font = '16px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('↔', pos.x, pos.y + 45);
                 }
                 
                 ctx.restore();
             });
         },
         
-        // Convert spherical coordinates to canvas position
+        // Convert spherical coordinates to canvas position with rotation compensation
         sphericalToCanvas(sphericalPos) {
             const { phi, theta, radius } = sphericalPos;
             
-            // Convert spherical coordinates to equirectangular projection
-            const x = ((phi + 180) / 360) * this.canvasWidth;
-            const y = ((theta) / 180) * this.canvasHeight;
+            // Apply rotation compensation to get the visual position
+            const adjustedPhi = phi - this.currentRotation.y; // Compensate for Y rotation (panning)
+            const adjustedTheta = theta + this.currentRotation.x; // Compensate for X rotation (pitch)
+            
+            // Convert adjusted spherical coordinates to equirectangular projection
+            const x = ((adjustedPhi + 180) / 360) * this.canvasWidth;
+            const y = ((Math.max(0, Math.min(180, adjustedTheta))) / 180) * this.canvasHeight;
             
             return { x: Math.max(0, Math.min(this.canvasWidth, x)), 
                      y: Math.max(0, Math.min(this.canvasHeight, y)) };
@@ -354,35 +425,119 @@ const Asset360Manager = {
             const phi = (canvasPos.x / this.canvasWidth) * 360 - 180;
             const theta = (canvasPos.y / this.canvasHeight) * 180;
             
+            // Apply inverse rotation compensation to store the "neutral" position
+            // This way, navigation points are stored relative to the unrotated image
+            const neutralPhi = phi + this.currentRotation.y; // Add back Y rotation
+            const neutralTheta = theta - this.currentRotation.x; // Subtract X rotation
+            
             return {
-                phi: parseFloat(Math.max(-180, Math.min(180, phi)).toFixed(1)),
-                theta: parseFloat(Math.max(0, Math.min(180, theta)).toFixed(1)),
+                phi: parseFloat(Math.max(-180, Math.min(180, neutralPhi)).toFixed(1)),
+                theta: parseFloat(Math.max(0, Math.min(180, neutralTheta)).toFixed(1)),
                 radius: 8 // Default radius
             };
         },
         
+        // Check if mouse position hits a navigation sphere
+        getNavigationSphereAt(mousePos) {
+            if (!this.navSpheresVisible || this.navigationForCurrentAsset.length === 0) {
+                return null;
+            }
+            
+            for (let i = 0; i < this.navigationForCurrentAsset.length; i++) {
+                const nav = this.navigationForCurrentAsset[i];
+                const spherePos = this.sphericalToCanvas(nav.position);
+                
+                // Check if click is within sphere radius (with some tolerance)
+                const distance = Math.sqrt(
+                    Math.pow(mousePos.x - spherePos.x, 2) + 
+                    Math.pow(mousePos.y - spherePos.y, 2)
+                );
+                
+                if (distance <= 20) { // 20px hit radius (larger than visual radius for easier clicking)
+                    // Find the global index in the full navigation array
+                    const globalIndex = this.navigation.findIndex(globalNav => 
+                        globalNav.fromIndex === nav.fromIndex && 
+                        globalNav.toIndex === nav.toIndex &&
+                        globalNav.position.phi === nav.position.phi &&
+                        globalNav.position.theta === nav.position.theta
+                    );
+                    
+                    return {
+                        localIndex: i,
+                        globalIndex: globalIndex,
+                        navigation: nav,
+                        position: spherePos
+                    };
+                }
+            }
+            
+            return null;
+        },
+        
         // Canvas mouse event handlers
         onCanvasMouseDown(event) {
-            console.log('🖱️ Canvas mouse down');
-            this.mouseDown = true;
             const rect = event.target.getBoundingClientRect();
-            this.lastMousePos = {
+            const mousePos = {
                 x: event.clientX - rect.left,
                 y: event.clientY - rect.top
             };
+            
+            // Check if clicking on a navigation sphere first (works in any mode)
+            const hitSphere = this.getNavigationSphereAt(mousePos);
+            
+            if (hitSphere) {
+                if (this.editMode === 'navigation') {
+                    // Start dragging navigation sphere in navigation mode
+                    this.isDraggingNavSphere = true;
+                    this.draggedNavIndex = hitSphere.localIndex;
+                    this.draggedNavGlobalIndex = hitSphere.globalIndex;
+                    this.selectedNavIndex = hitSphere.localIndex;
+                    this.redrawCanvas(); // Redraw to show selection
+                } else {
+                    // In focus mode, just select the sphere (don't drag, but show it's interactive)
+                    this.selectedNavIndex = hitSphere.localIndex;
+                    this.redrawCanvas();
+                }
+                
+                // Prevent default image dragging in BOTH modes when clicking spheres
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            
+            // Normal mouse down for image dragging (only if no sphere was hit)
+            this.mouseDown = true;
+            this.lastMousePos = mousePos;
         },
         
         onCanvasMouseMove(event) {
-            if (!this.mouseDown) return;
-            if (this.editMode !== 'focus') return;
-            
-            console.log('🖱️ Canvas mouse move - dragging');
-            
             const rect = event.target.getBoundingClientRect();
             const currentPos = {
                 x: event.clientX - rect.left,
                 y: event.clientY - rect.top
             };
+            
+            // Check for sphere hover (for cursor changes)
+            const hitSphere = this.getNavigationSphereAt(currentPos);
+            this.hoveringOverSphere = !!hitSphere;
+            
+            // Handle navigation sphere dragging (only in navigation mode)
+            if (this.isDraggingNavSphere && this.editMode === 'navigation' && this.draggedNavGlobalIndex >= 0) {
+                // Convert mouse position to spherical coordinates
+                const newSphericalPos = this.canvasToSpherical(currentPos);
+                
+                // Update the navigation position in real-time
+                if (this.navigation[this.draggedNavGlobalIndex]) {
+                    this.navigation[this.draggedNavGlobalIndex].position = newSphericalPos;
+                    this.redrawCanvas(); // Redraw to show new position
+                }
+                
+                return;
+            }
+            
+            // Handle normal image dragging (only if not dragging a sphere)
+            if (!this.mouseDown || this.isDraggingNavSphere) return;
+            if (this.editMode !== 'focus') return;
             
             // Calculate rotation delta
             const deltaX = currentPos.x - this.lastMousePos.x;
@@ -400,7 +555,19 @@ const Asset360Manager = {
         },
         
         onCanvasMouseUp() {
-            console.log('🖱️ Canvas mouse up');
+            // Handle navigation sphere drag end
+            if (this.isDraggingNavSphere) {
+                this.isDraggingNavSphere = false;
+                this.draggedNavIndex = -1;
+                this.draggedNavGlobalIndex = -1;
+                
+                // Emit data update to save changes
+                this.emitDataUpdate();
+                
+                return;
+            }
+            
+            // Handle normal mouse up
             this.mouseDown = false;
         },
         
@@ -408,13 +575,14 @@ const Asset360Manager = {
             console.log('🖱️ Canvas clicked! Event received:', event.type, {
                 editMode: this.editMode,
                 isPlacingNavigation: this.isPlacingNavigation,
+                isDraggingNavSphere: this.isDraggingNavSphere,
                 pendingNavigation: this.pendingNavigation,
                 target: event.target.tagName,
                 timestamp: Date.now()
             });
             
-            if (this.editMode !== 'navigation' || !this.isPlacingNavigation) {
-                console.log('❌ Not in navigation placement mode');
+            // Don't process click if we were just dragging a sphere
+            if (this.isDraggingNavSphere) {
                 return;
             }
             
@@ -423,6 +591,27 @@ const Asset360Manager = {
                 x: event.clientX - rect.left,
                 y: event.clientY - rect.top
             };
+            
+            // Check if clicking on existing navigation sphere (for selection, not placement)
+            const hitSphere = this.getNavigationSphereAt(canvasPos);
+            if (hitSphere && this.editMode === 'navigation' && !this.isPlacingNavigation) {
+                this.selectedNavIndex = hitSphere.localIndex;
+                this.redrawCanvas();
+                console.log('🔵 Selected navigation sphere:', hitSphere.localIndex);
+                return;
+            }
+            
+            // Handle new navigation placement
+            if (this.editMode !== 'navigation' || !this.isPlacingNavigation) {
+                console.log('❌ Not in navigation placement mode');
+                return;
+            }
+            
+            // Don't place navigation on existing spheres
+            if (hitSphere) {
+                console.log('❌ Cannot place navigation on existing sphere');
+                return;
+            }
             
             const sphericalPos = this.canvasToSpherical(canvasPos);
             console.log('🌐 Canvas position converted to spherical:', { canvasPos, sphericalPos });
@@ -645,8 +834,23 @@ const Asset360Manager = {
         updateAssetTitle(index, title) {
             if (this.assets[index]) {
                 this.assets[index].title = title;
+                // Update navigation labels that reference this asset
+                this.updateNavigationLabels();
                 this.emitDataUpdate();
             }
+        },
+        
+        // Update navigation labels to use current asset titles
+        updateNavigationLabels() {
+            this.navigation.forEach(nav => {
+                const targetAsset = this.assets[nav.toIndex];
+                if (targetAsset && targetAsset.title) {
+                    // Only update auto-generated labels or labels that look like CIDs
+                    if (nav.autoGenerated || nav.label.startsWith('Qm') || nav.label.includes('To Qm')) {
+                        nav.label = `To ${targetAsset.title}`;
+                    }
+                }
+            });
         },
         
         updateAssetDescription(index, description) {
@@ -739,16 +943,12 @@ const Asset360Manager = {
         // Ensure complete navigation connectivity
         ensureNavigationConnectivity() {
             if (this.assets.length < 2) return; // Need at least 2 assets for navigation
-
-            console.log('🔗 Checking navigation connectivity...');
             
             // Step 1: Ensure every asset has at least one outgoing link
             this.ensureEveryAssetHasNavigation();
             
             // Step 2: Ensure the navigation graph is connected (you can reach any photo from any other)
             this.ensureNetworkConnectivity();
-            
-            console.log('✅ Navigation connectivity ensured');
         },
 
         // Ensure every asset has at least one outgoing navigation link
@@ -770,7 +970,6 @@ const Asset360Manager = {
                     };
                     
                     this.navigation.push(autoNav);
-                    console.log(`🔗 Auto-generated navigation from asset ${i} to ${targetIndex}`);
                 }
             }
         },
@@ -795,7 +994,6 @@ const Asset360Manager = {
             const isConnected = this.isGraphConnected(adjacencyList);
             
             if (!isConnected) {
-                console.log('⚠️ Navigation graph is not fully connected, adding missing links...');
                 this.addMissingConnections(adjacencyList);
             }
         },
@@ -855,7 +1053,6 @@ const Asset360Manager = {
                 };
                 
                 this.navigation.push(connectingNav);
-                console.log(`🔗 Added connecting navigation from asset ${fromIndex} to ${toIndex}`);
             }
         },
 
@@ -892,31 +1089,7 @@ const Asset360Manager = {
         },
         
         // Handle assets selected from SPK drive
-        // Debug method to test canvas events
-        testCanvasEvents() {
-            console.log('🔧 Testing canvas events...');
-            const canvas = this.$refs.canvas;
-            if (!canvas) {
-                console.error('❌ Canvas ref not found!');
-                return;
-            }
-            
-            console.log('✅ Canvas found:', canvas);
-            console.log('✅ Canvas dimensions:', canvas.width, 'x', canvas.height);
-            console.log('✅ Canvas style:', canvas.style.cursor);
-            
-            // Test simulated click
-            const rect = canvas.getBoundingClientRect();
-            const simulatedEvent = {
-                target: canvas,
-                clientX: rect.left + rect.width / 2,
-                clientY: rect.top + rect.height / 2,
-                type: 'click'
-            };
-            
-            console.log('🖱️ Simulating canvas click at center...');
-            this.onCanvasClick(simulatedEvent);
-        },
+
         
         addAssetFromSPK(spkFile) {
             // Handle proxy object and extract actual data
@@ -934,13 +1107,23 @@ const Asset360Manager = {
             const cid = fileData.cid || fileData.hash || fileData.url;
             const contractId = fileData.contractId || fileData.id || fileData.contract;
             
+            // Clean up the file name to remove extension and make it more readable
+            let cleanTitle = fileName;
+            if (cleanTitle.includes('.')) {
+                cleanTitle = cleanTitle.substring(0, cleanTitle.lastIndexOf('.'));
+            }
+            // If it still looks like a CID, make a better title
+            if (cleanTitle.startsWith('Qm') && cleanTitle.length > 20) {
+                cleanTitle = `360° Photo ${this.assets.length + 1}`;
+            }
+            
             const newAsset = {
                 index: this.assets.length,
                 url: cid,
                 thumb: fileData.thumb || cid, // Generate thumbnail if needed
                 rotation: { x: 0, y: 0, z: 0 },
-                title: fileName,
-                description: fileData.description || `${fileType} file`,
+                title: cleanTitle, // Use the cleaned title
+                description: fileData.description || '',
                 contractId: contractId // Store contract ID for blockchain integration
             };
             
@@ -948,6 +1131,9 @@ const Asset360Manager = {
             
             this.assets.push(newAsset);
             this.selectedAssetIndex = this.assets.length - 1;
+            
+            // Update any existing navigation labels that might reference CIDs
+            this.updateNavigationLabels();
             
             // Load the new asset on canvas
             this.$nextTick(() => {
@@ -968,40 +1154,7 @@ const Asset360Manager = {
             });
         },
         
-        // Test method to verify connectivity functionality (remove in production)
-        testConnectivity() {
-            console.log('🧪 Testing navigation connectivity...');
-            
-            // Test with sample data
-            const testAssets = [
-                { index: 0, title: 'Photo 1' },
-                { index: 1, title: 'Photo 2' },
-                { index: 2, title: 'Photo 3' }
-            ];
-            
-            const testNavigation = [
-                { fromIndex: 0, toIndex: 1, position: { phi: 45.0, theta: 90.0, radius: 8 } }
-                // Missing links: 1->?, 2->?
-            ];
-            
-            // Temporarily use test data
-            const originalAssets = [...this.assets];
-            const originalNavigation = [...this.navigation];
-            
-            this.assets = testAssets;
-            this.navigation = testNavigation;
-            
-            console.log('Before connectivity check:', this.navigation.length, 'links');
-            this.ensureNavigationConnectivity();
-            console.log('After connectivity check:', this.navigation.length, 'links');
-            console.log('Navigation links:', this.navigation.map(nav => `${nav.fromIndex}->${nav.toIndex}`));
-            
-            // Restore original data
-            this.assets = originalAssets;
-            this.navigation = originalNavigation;
-            
-            console.log('✅ Connectivity test completed');
-        }
+
     },
     
     template: `
@@ -1025,14 +1178,6 @@ const Asset360Manager = {
                         :class="editMode === 'navigation' ? 'btn-primary' : 'btn-outline-primary'"
                         @click="editMode = 'navigation'">
                         <i class="fa-solid fa-route fa-fw me-1"></i>Navigation
-                    </button>
-                    <!-- Temporary test button -->
-                    <button 
-                        type="button" 
-                        class="btn btn-sm btn-outline-info"
-                        @click="testConnectivity()"
-                        title="Test navigation connectivity">
-                        <i class="fa-solid fa-flask fa-fw"></i>
                     </button>
                 </div>
             </div>
@@ -1142,6 +1287,17 @@ const Asset360Manager = {
                                     @click="cancelNavigationPlacement()">
                                     <i class="fa-solid fa-times fa-fw me-1"></i>Cancel
                                 </button>
+                                <!-- Navigation visibility toggle -->
+                                <button 
+                                    v-if="navigationForCurrentAsset.length > 0"
+                                    type="button" 
+                                    class="btn btn-sm"
+                                    :class="navSpheresVisible ? 'btn-success' : 'btn-outline-secondary'"
+                                    @click="navSpheresVisible = !navSpheresVisible; redrawCanvas()"
+                                    :title="navSpheresVisible ? 'Hide navigation spheres' : 'Show navigation spheres'">
+                                    <i class="fa-solid fa-eye fa-fw" v-if="navSpheresVisible"></i>
+                                    <i class="fa-solid fa-eye-slash fa-fw" v-else></i>
+                                </button>
                             </div>
                         </div>
                         
@@ -1186,11 +1342,7 @@ const Asset360Manager = {
                             </div>
                         </div>
                         
-                        <!-- Canvas Debug Info -->
-                        <div class="small text-muted mb-1">
-                            Debug: editMode={{editMode}}, isPlacingNavigation={{isPlacingNavigation}}, mouseDown={{mouseDown}}
-                            <button @click="testCanvasEvents()" class="btn btn-sm btn-outline-info ms-2">Test Canvas Events</button>
-                        </div>
+
                         
                         <!-- Canvas -->
                         <canvas
@@ -1209,19 +1361,32 @@ const Asset360Manager = {
                         <div class="small text-muted mb-2">
                             <div v-if="editMode === 'focus'">
                                 <i class="fa-solid fa-info-circle fa-fw me-1"></i>
-                                Drag to adjust initial view direction. Red line shows horizon.
+                                Drag to adjust initial view direction. Use Tilt and Roll controls below to align the horizon.
+                                <div v-if="navigationForCurrentAsset.length > 0" class="mt-1">
+                                    <i class="fa-solid fa-route fa-fw me-1"></i>
+                                    {{ navigationForCurrentAsset.length }} navigation link(s) visible. 
+                                    <strong>Click spheres to select</strong> • Switch to Navigation mode to drag them.
+                                </div>
                             </div>
                             <div v-else-if="editMode === 'navigation' && isPlacingNavigation">
                                 <i class="fa-solid fa-crosshairs fa-fw me-1"></i>
                                 <strong>Click on the canvas</strong> to place navigation link to "{{ assets[pendingNavigation?.toIndex]?.title }}"
                                 <div class="mt-1 small">
                                     <i class="fa-solid fa-info-circle fa-fw me-1"></i>
-                                    The click position will be converted to polar coordinates for the 360° space
+                                    Position will be stored relative to the current rotation (φ{{ currentRotation.y.toFixed(1) }}°, θ{{ currentRotation.x.toFixed(1) }}°)
                                 </div>
                             </div>
                             <div v-else-if="editMode === 'navigation'">
                                 <i class="fa-solid fa-route fa-fw me-1"></i>
-                                Navigation spheres shown. Click "Add Link" to place new navigation points.
+                                Navigation mode active. Existing spheres track the current rotation.
+                                <div v-if="navigationForCurrentAsset.length === 0" class="mt-1">
+                                    <i class="fa-solid fa-plus fa-fw me-1"></i>
+                                    Click "Add Link" to place new navigation points.
+                                </div>
+                                <div v-else class="mt-1">
+                                    <i class="fa-solid fa-hand-pointer fa-fw me-1"></i>
+                                    <strong>Click and drag</strong> navigation spheres to reposition them. Click spheres to select.
+                                </div>
                             </div>
                         </div>
                         
