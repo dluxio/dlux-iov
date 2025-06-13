@@ -3280,7 +3280,7 @@ body[data-touch="false"] {
     transform: scale(1.1);
 }
 
-.position-absolute {
+.box-shadow-1 {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
@@ -3320,3 +3320,183 @@ body[data-touch="false"] {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.9; }
 }
+/* JSON Preview Modal Styles */
+        .nav-tabs .nav-link {
+            background-color: #343a40;
+            border-color: #495057;
+            color: #adb5bd;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: #495057;
+            border-color: #6c757d;
+            color: #fff;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            background-color: #495057;
+            border-color: #6c757d;
+            color: #fff;
+        }
+        
+        /* JSON syntax highlighting for better readability */
+        pre {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            line-height: 1.4;
+        }
+        
+        /* Modal backdrop for JSON preview */
+        .modal[style*="background: rgba(0,0,0,0.8)"] {
+            backdrop-filter: blur(2px);
+        }
+        
+        /* Scrollable JSON content */
+        .tab-pane pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        /* Copy button hover effect */
+        .btn-outline-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        /* Alert styling improvements */
+        .alert {
+            border-radius: 8px;
+        }
+        
+        .alert ul {
+            padding-left: 1.2rem;
+        }
+        
+        /* Tab content spacing */
+        .tab-content {
+            min-height: 400px;
+        }
+        
+        /* Modal size adjustments */
+        .modal-xl {
+            max-width: 90vw;
+        }
+        
+        @media (max-width: 768px) {
+            .modal-xl {
+                max-width: 95vw;
+                margin: 0.5rem;
+            }
+            
+            .nav-tabs .nav-link {
+                font-size: 0.875rem;
+                padding: 0.5rem 0.75rem;
+            }
+            
+            pre {
+                font-size: 0.75em;
+            }
+        }
+        
+/* Dropdown submenu styles for sharing */
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu > .dropdown-menu {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    margin-top: -1px;
+    margin-left: -1px;
+    display: none;
+    z-index: 1051; /* Higher than parent dropdown */
+}
+
+.dropdown-submenu:hover > .dropdown-menu {
+    display: block;
+}
+
+.dropdown-submenu > .dropdown-item::after {
+    display: inline-block;
+    margin-left: auto;
+    content: "▶";
+    font-size: 0.8em;
+    color: #ffffff;
+    float: right;
+    border-top: none;
+}
+
+/* Allow overflow for dropdown menus with submenus */
+.dropdown-menu:has(.dropdown-submenu) {
+    overflow: visible !important;
+}
+
+/* Alternative fallback for browsers that don't support :has() */
+.dropdown-menu.has-submenu {
+    overflow: visible !important;
+}
+
+/* Ensure submenu appears on the correct side for dropend */
+.dropend .dropdown-submenu > .dropdown-menu {
+    left: 100%;
+    right: auto;
+}
+
+/* For dropdown-menu-end, position submenu to the left */
+.dropdown-menu-end .dropdown-submenu > .dropdown-menu {
+    left: -100%;
+    right: 0;
+}
+
+/* Enhanced Button Hover Effects */
+.btn-outline-success:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Modal Backdrop Enhancements */
+.modal[style*="background: rgba(0,0,0,0.8)"] {
+    backdrop-filter: blur(2px);
+}
+
+/* Enhanced Alert Styling */
+.alert {
+    border-radius: 8px;
+}
+
+.alert ul {
+    padding-left: 1.2rem;
+}
+
+/* Tab Content Improvements */
+.tab-content {
+    min-height: 400px;
+}
+
+/* Scrollable Content */
+.tab-pane pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Enhanced Modal Sizing */
+.modal-xl {
+    max-width: 90vw;
+}
+
+@media (max-width: 768px) {
+    .modal-xl {
+        max-width: 95vw;
+        margin: 0.5rem;
+    }
+    
+    .nav-tabs .nav-link {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    pre {
+        font-size: 0.75em;
+    }
+}
+   

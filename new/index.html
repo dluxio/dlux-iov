@@ -175,6 +175,8 @@
             position: relative;
             z-index: 0;
         }
+        /* Page-specific styles that should remain here */
+   
     </style>
 </head>
 
@@ -493,7 +495,8 @@
                                                     <!-- alert title -->
                                                     <h5 class="hero-subtitle fs-4 mb-1 text-center text-lg-start">FFmpeg
                                                         Component</h5>
-                                                    <h6 class="lead text-center text-lg-start text-danger fw-bold">Status: <strong>Not
+                                                    <h6 class="lead text-center text-lg-start text-danger fw-bold">
+                                                        Status: <strong>Not
                                                             Loaded</strong></h6>
                                                     <p class="text-center text-lg-start">FFmpeg is required to transcode
                                                         video files to M3U8 playlists for streaming.</p>
@@ -767,33 +770,26 @@
                     <div class="accordion-item bg-img-none bg-dark-1">
                         <h2 class="accordion-header">
                             <button class="accordion-button bg-card hero-subtitle fs-3 p-3" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#postEditor" aria-expanded="true" 
+                                data-bs-toggle="collapse" data-bs-target="#postEditor" aria-expanded="true"
                                 aria-controls="postEditor">
                                 <i class="fa-solid fa-pen-to-square fa-fw me-2"></i>Post Editor
                             </button>
                         </h2>
-                        <div id="postEditor" class="accordion-collapse collapse show" data-bs-parent="#postEditorAccordion">
+                        <div id="postEditor" class="accordion-collapse collapse show"
+                            data-bs-parent="#postEditorAccordion">
                             <div class="accordion-body p-0">
-                                <tiptap-editor-with-file-menu 
-                                    v-if="account"
-                                    :username="account"
-                                    :auth-headers="collaborationAuthHeaders"
-                                    :file-to-add="fileToAddToPost"
-                                    :post-custom-json="postCustom_json"
-                                    :initial-content="{
+                                <tiptap-editor-with-file-menu v-if="account" :username="account"
+                                    :auth-headers="collaborationAuthHeaders" :file-to-add="fileToAddToPost"
+                                    :post-custom-json="postCustom_json" :initial-content="{
                                         title: postTitle,
                                         body: postBody,
                                         tags: postTags,
                                         permlink: postPermlink,
                                         beneficiaries: postBens,
                                         custom_json: postCustom_json
-                                    }"
-                                    @content-changed="handlePostContentChanged"
-                                    @publish-post="handlePostPublish"
-                                    @update:file-to-add="fileToAddToPost = null"
-                                    @tosign="sendIt($event)"
-                                    @request-auth-headers="ensureCollaborationAuth"
-                                ></tiptap-editor-with-file-menu>
+                                    }" @content-changed="handlePostContentChanged" @publish-post="handlePostPublish"
+                                    @update:file-to-add="fileToAddToPost = null" @tosign="sendIt($event)"
+                                    @request-auth-headers="ensureCollaborationAuth"></tiptap-editor-with-file-menu>
                                 <div v-else class="text-center text-muted py-5">
                                     <i class="fas fa-sign-in-alt fa-3x mb-3"></i>
                                     <h5>Please Log In</h5>
@@ -886,7 +882,7 @@
         // Verify that the TipTap collaboration bundle is loaded
         setTimeout(() => {
             console.log('TiptapCollaboration bundle available:', !!window.TiptapCollaboration);
-            
+
             if (window.TiptapCollaboration) {
                 const bundle = window.TiptapCollaboration.default || window.TiptapCollaboration;
                 console.log('TipTap bundle contents:', Object.keys(bundle || {}));
@@ -896,13 +892,13 @@
                 console.log('HocuspocusProvider available:', typeof bundle?.HocuspocusProvider);
                 console.log('Collaboration extension available:', typeof bundle?.Collaboration);
                 console.log('CollaborationCursor available:', typeof bundle?.CollaborationCursor);
-                
+
                 // Make Y.js globally available for compatibility
                 if (bundle?.Y && !window.Y) {
                     window.Y = bundle.Y;
                     console.log('✅ Y.js made available globally from TipTap bundle');
                 }
-                
+
                 console.log('✅ TipTap collaboration bundle loaded successfully');
             } else {
                 console.error('❌ TiptapCollaboration bundle not loaded - collaboration will not work');

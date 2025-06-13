@@ -88,6 +88,11 @@ export default {
             // UI state
             showPermlinkEditor: false,
             showAdvancedOptions: false,
+            showStatusDetails: false,
+            
+            // Document name editing
+            isEditingDocumentName: false,
+            documentNameInput: '',
             
             // Modals & UI state
             showLoadModal: false,
@@ -114,8 +119,7 @@ export default {
             // Save/Load forms
             saveForm: {
                 filename: '',
-                saveLocally: true,
-                saveToDlux: false,
+                storageType: 'local', // 'local' or 'cloud'
                 isPublic: false,
                 description: '',
                 isNewDocument: false
@@ -189,6 +193,145 @@ export default {
     },
     
     computed: {
+        unifiedStatusInfo() {
+            // Base status object
+            const status = {
+                state: 'unknown',
+                icon: '❓',
+                message: 'Unknown Status',
+                details: '',
+                actions: [],
+                class: 'status-unknown'
+            };
+
+            // Stable action objects to prevent infinite recursion
+            const reconnectAction = { label: 'Try Reconnecting', actionType: 'reconnect' };
+
+            // Local Document States
+            if (!this.isCollaborativeMode) {
+                if (this.hasUnsavedChanges) {
+                    return {
+                        state: 'saving-local',
+                        icon: '💾',
+                        message: 'Saving locally...',
+                        details: 'Changes are being saved to browser storage',
+                        actions: [],
+                        class: 'status-saving'
+                    };
+                }
+                return {
+                    state: 'saved-local',
+                    icon: '✅',
+                    message: 'All changes saved locally',
+                    details: 'Document is stored in browser',
+                    actions: [],
+                    class: 'status-saved'
+                };
+            }
+
+            // Cloud Document States
+            if (this.connectionStatus === 'disconnected') {
+                if (this.hasUnsavedChanges) {
+                    return {
+                        state: 'unsynced-changes',
+                        icon: '⚠️',
+                        message: 'Unsynced Changes',
+                        details: 'Working offline - changes will sync when reconnected',
+                        actions: [reconnectAction],
+                        class: 'status-warning'
+                    };
+                }
+                return {
+                    state: 'offline',
+                    icon: '📡',
+                    message: 'Offline Mode',
+                    details: 'Changes are saved locally',
+                    actions: [reconnectAction],
+                    class: 'status-offline'
+                };
+            }
+
+            if (this.connectionStatus === 'offline') {
+                if (this.hasUnsavedChanges) {
+                    return {
+                        state: 'offline-saving',
+                        icon: '💾',
+                        message: 'Saving offline...',
+                        details: 'Changes are being saved locally with Y.js persistence',
+                        actions: [],
+                        class: 'status-saving'
+                    };
+                }
+                return {
+                    state: 'offline-ready',
+                    icon: '📱',
+                    message: 'Offline Mode',
+                    details: 'Working offline - changes saved locally',
+                    actions: [],
+                    class: 'status-offline'
+                };
+            }
+
+            if (this.connectionStatus === 'connecting') {
+                return {
+                    state: 'connecting',
+                    icon: '🔄',
+                    message: 'Connecting...',
+                    details: 'Establishing connection to server',
+                    actions: [],
+                    class: 'status-connecting'
+                };
+            }
+
+            if (this.connectionStatus === 'connected') {
+                if (this.hasUnsavedChanges) {
+                    return {
+                        state: 'syncing',
+                        icon: '🔄',
+                        message: 'Syncing changes...',
+                        details: 'Real-time collaboration active',
+                        actions: [],
+                        class: 'status-syncing'
+                    };
+                }
+                
+                // Use cached collaborator count to prevent infinite recursion
+                const collaborators = this.connectedUsers.length;
+                if (collaborators > 1) {
+                    return {
+                        state: 'collaborating',
+                        icon: '👥',
+                        message: `${collaborators} users collaborating`,
+                        details: 'Real-time collaboration active',
+                        actions: [],
+                        class: 'status-collaborating'
+                    };
+                }
+                
+                return {
+                    state: 'synced',
+                    icon: '✅',
+                    message: 'All changes synced',
+                    details: 'Connected to server',
+                    actions: [],
+                    class: 'status-synced'
+                };
+            }
+
+            if (this.connectionStatus === 'error') {
+                return {
+                    state: 'error',
+                    icon: '❌',
+                    message: this.connectionMessage || 'Connection Error',
+                    details: 'Check your connection and try again',
+                    actions: [reconnectAction],
+                    class: 'status-error'
+                };
+            }
+
+            return status;
+        },
+
         isConnected() {
             return this.connectionStatus === 'connected';
         },
@@ -279,14 +422,11 @@ export default {
             return isExpired;
         },
         
-        canSave() {
-            // For collaborative documents that are connected, don't show save option since they auto-sync
-            if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
-                return false; // Auto-syncing via Y.js, no manual save needed
-            }
-            
-            return this.hasUnsavedChanges && !this.saving;
-        },
+        // REMOVED: canSave() - No longer needed with auto-save architecture
+        // Traditional manual save replaced with:
+        // - Auto-save indicators in File menu
+        // - "Publish to Cloud" for offline documents
+        // - "Duplicate Document" replaces "Save As"
         
         canShare() {
             return this.currentFile && this.currentFile.type === 'collaborative' && this.isAuthenticated;
@@ -410,11 +550,15 @@ export default {
             if (this.saving || this.saveAsProcess.inProgress) {
                 return 'Saving...';
             }
-            return this.saveForm.isNewDocument ? 'Save As' : 'Save';
+            return this.saveForm.isNewDocument ? 'Save' : 'Save';
         },
 
         saveButtonDisabled() {
-            return !this.hasValidFilename || this.saving || this.saveAsProcess.inProgress;
+            if (this.saveAsProcess.inProgress) return true;
+            if (!this.hasValidFilename) return true;
+            if (this.saving) return true;
+            if (this.saveForm.storageType === 'cloud' && (!this.isAuthenticated || this.isAuthExpired)) return true;
+            return false;
         },
 
         cancelButtonText() {
@@ -1410,57 +1554,63 @@ export default {
             });
         },
         
-        // File Menu Actions
+        // File Menu Actions (Y.js Offline-First Architecture)
         async newDocument() {
             if (this.hasUnsavedChanges) {
                 const confirmResult = await this.confirmUnsavedChanges();
                 if (!confirmResult) return;
             }
             
-            // Reset all document state
-            this.currentFile = null;
-            this.isCollaborativeMode = false;
-            this.fileType = 'local';
-            this.content = {
-                title: '',
-                body: '',
-                tags: [],
-                custom_json: {},
-                permlink: '',
-                beneficiaries: []
-            };
-            this.attachedFiles = [];
-            
-            // Reset save form
-            this.saveForm = {
-                filename: '',
-                saveLocally: true,
-                saveToDlux: false,
-                isPublic: false,
-                description: '',
-                isNewDocument: false
-            };
-            
-            // Clean up any collaborative connections
-            this.disconnectCollaboration();
-            
-            // Wait for cleanup to complete
-            await this.$nextTick();
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            // Create fresh standard editor
-            await this.createStandardEditor();
-            this.clearEditor();
-            this.hasUnsavedChanges = false;
-            
-            // Focus on title editor if available
-            if (this.titleEditor) {
-                this.$nextTick(() => {
-                    this.titleEditor.commands.focus();
-                });
+            try {
+                console.log('📄 Creating new Y.js document (offline-first architecture)...');
+                
+                // Clean up any existing collaborative connections first
+                this.disconnectCollaboration();
+                
+                // Wait for complete cleanup
+                await this.$nextTick();
+                await new Promise(resolve => setTimeout(resolve, 200));
+                
+                // Reset document state for new Y.js document
+                this.currentFile = null;
+                this.fileType = 'local';
+                this.content = {
+                    title: '',
+                    body: '',
+                    tags: [],
+                    custom_json: {},
+                    permlink: '',
+                    beneficiaries: []
+                };
+                this.attachedFiles = [];
+                
+                // Reset save form
+                this.saveForm = {
+                    filename: '',
+                    storageType: 'local', // 'local' or 'cloud'
+                    isPublic: false,
+                    description: '',
+                    isNewDocument: false
+                };
+                
+                // Create fresh Y.js collaborative editors (always-collaborative architecture)
+                await this.createStandardEditor();
+                
+                // Don't call clearEditor() on fresh editors - they're already empty
+                // Instead, just reset content state
+                this.hasUnsavedChanges = false;
+                
+                // CRITICAL: TipTap Best Practice - NO automatic focus after Y.js editor creation
+                // Let users focus manually to avoid transaction mismatch errors
+                // Focus will happen naturally when user clicks in the editor
+                console.log('✅ Editors ready - awaiting user interaction for focus');
+                
+                console.log('✅ New Y.js document created successfully (offline-first)');
+                
+            } catch (error) {
+                console.error('❌ Failed to create new document:', error);
+                alert('Failed to create new document: ' + error.message);
             }
-            
-            console.log('📄 New local document created - ready for editing');
         },
         
         async newCollaborativeDocument() {
@@ -1488,8 +1638,7 @@ export default {
             // Show save modal for new collaborative document
             this.saveForm = {
                 filename: `collaboration-${new Date().toISOString().split('T')[0]}`,
-                saveLocally: false,
-                saveToDlux: true,
+                storageType: 'cloud',
                 isPublic: false,
                 description: 'New collaborative document',
                 isNewDocument: true
@@ -1524,48 +1673,12 @@ export default {
             }
         },
         
-        async saveDocument() {
-            // ===== REFACTORED: Offline-First Architecture =====
-            // Following TipTap best practices - Y.js handles all persistence
-            // No more parallel saving paths
-            
-            if (!this.hasValidFilename && !this.currentFile) {
-                this.showSaveModal = true;
-                return;
-            }
-
-            this.saving = true;
-            
-            try {
-                const filename = this.saveForm.filename || this.currentFile?.name || `document_${Date.now()}`;
-                
-                // Update file metadata (Y.js + IndexedDB handles content)
-                this.currentFile = this.currentFile || {
-                    id: `local_${Date.now()}`,
-                    type: 'local'
-                };
-                
-                this.currentFile.name = filename;
-                this.currentFile.lastModified = new Date().toISOString();
-
-                // If user wants cloud sync, connect to collaboration server
-                if (this.saveForm.saveToDlux && this.showCollaborativeFeatures) {
-                    await this.connectToCollaborationServer();
-                }
-
-                // Update local file index (metadata only)
-                await this.updateLocalFileIndex();
-                
-                this.hasUnsavedChanges = false;
-                console.log('💾 Document saved using offline-first architecture');
-                
-            } catch (error) {
-                console.error('Save failed:', error);
-                alert('Save failed: ' + error.message);
-            } finally {
-                this.saving = false;
-            }
-        },
+        // REMOVED: saveDocument() - Replaced by auto-save architecture
+        // Y.js + IndexedDB handles all content persistence automatically
+        // Users can:
+        // - Name documents via clickable titles
+        // - Publish to cloud via "Publish to Cloud" 
+        // - Duplicate via "Duplicate Document"
 
         async updateLocalFileIndex() {
             // Only save metadata to localStorage, not content (Y.js + IndexedDB handles content)
@@ -1598,11 +1711,26 @@ export default {
             // For collaborative documents, pre-fill current name for rename
             if (this.currentFile && this.currentFile.type === 'collaborative') {
                 this.saveForm.filename = this.currentFile.documentName || this.currentFile.permlink || '';
-                this.saveForm.saveLocally = false;
-                this.saveForm.saveToDlux = true;
+                this.saveForm.storageType = 'cloud';
                 this.saveForm.isNewDocument = false; // This is a rename, not new document
+            } else if (this.currentFile && (this.currentFile.name || this.currentFile.documentName || this.currentFile.permlink)) {
+                // If there's a current file with a name, this is a duplication
+                const originalName = this.currentFile.name || 
+                                   this.currentFile.documentName || 
+                                   this.currentFile.permlink;
+                this.saveForm.filename = `Copy of ${originalName}`;
+                this.saveForm.storageType = 'local'; // Default to local for copies
+                this.saveForm.isNewDocument = true; // This creates a new document
+            } else if (this.ydoc && (this.getPlainTextTitle()?.trim() && this.getPlainTextTitle().trim() !== '')) {
+                // If there's a Y.js doc with actual content, this is a duplication
+                const titleFromContent = this.getPlainTextTitle().trim();
+                this.saveForm.filename = `Copy of ${titleFromContent}`;
+                this.saveForm.storageType = 'local'; // Default to local for copies
+                this.saveForm.isNewDocument = true; // This creates a new document
             } else {
+                // No existing document or content - this is creating a new document from scratch
                 this.saveForm.filename = ''; // Clear filename to force new name
+                this.saveForm.storageType = 'local'; // Default to local for new documents
                 this.saveForm.isNewDocument = true; // Flag to indicate this is a "Save As"
             }
         },
@@ -1613,109 +1741,69 @@ export default {
             // Initialize save as process
             this.saveAsProcess = {
                 inProgress: true,
-                step: 'saving_local',
-                message: 'Creating local backup...',
+                step: 'creating_document',
+                message: 'Creating new document...',
                 localBackupId: null,
                 serverDocId: null,
                 error: null
             };
             
             try {
-                // Step 1: Save content locally as backup (Y.js content already in collaborative format)
-                const content = this.getEditorContent();
-                const backupId = `backup_${Date.now()}_${documentName}`;
+                // Step 1: Create new local document using offline-first pattern
+                await this.createNewDocumentFromName(documentName);
                 
-                localStorage.setItem(`dlux_tiptap_backup_${backupId}`, JSON.stringify({
-                    ...content,
-                    originalFile: this.currentFile,
-                    timestamp: new Date().toISOString(),
-                    isBackup: true
-                }));
-                
-                this.saveAsProcess.localBackupId = backupId;
-                this.saveAsProcess.step = 'creating_server';
-                this.saveAsProcess.message = 'Creating document on server...';
-                
-                // Step 2: Create new document on server
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 30000);
-                
-                const response = await fetch('https://data.dlux.io/api/collaboration/documents', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...this.authHeaders
-                    },
-                    body: JSON.stringify({
-                        documentName: documentName,
-                        isPublic: this.saveForm.isPublic,
-                        title: content.title || documentName,
-                        description: this.saveForm.description || 'Document created with DLUX TipTap Editor'
-                    }),
-                    signal: controller.signal
-                });
-                
-                clearTimeout(timeoutId);
-                
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-                    throw new Error(`Failed to create server document: ${errorData.error || response.statusText}`);
+                // Step 2: If saving to cloud, create server document
+                if (this.saveForm.storageType === 'cloud') {
+                    this.saveAsProcess.step = 'creating_server';
+                    this.saveAsProcess.message = 'Creating document on server...';
+                    
+                    const response = await fetch('https://data.dlux.io/api/collaboration/documents', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...this.authHeaders
+                        },
+                        body: JSON.stringify({
+                            documentName: documentName,
+                            isPublic: this.saveForm.isPublic,
+                            title: this.getPlainTextTitle() || documentName,
+                            description: this.saveForm.description || 'Document created with DLUX TipTap Editor'
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                        throw new Error(`Failed to create server document: ${errorData.error || response.statusText}`);
+                    }
+                    
+                    const docData = await response.json();
+                    const serverDoc = docData.document || docData;
+                    
+                    this.saveAsProcess.step = 'connecting';
+                    this.saveAsProcess.message = 'Connecting to collaboration server...';
+                    
+                    // Connect existing Y.js document to server
+                    await this.connectToCollaborationServer(serverDoc);
+                    
+                    // Update current file to collaborative
+                    this.currentFile = {
+                        ...serverDoc,
+                        type: 'collaborative'
+                    };
+                    this.fileType = 'collaborative';
+                    
+                    // Reload collaborative documents list
+                    await this.loadCollaborativeDocs();
                 }
-                
-                const docData = await response.json();
-                console.log('📄 Server response:', docData);
-                
-                const serverDoc = docData.document || docData;
-                this.saveAsProcess.serverDocId = serverDoc;
-                this.saveAsProcess.step = 'connecting';
-                this.saveAsProcess.message = 'Connecting existing document to server...';
-                        
-                // Step 3: TipTap Best Practice - Connect existing Y.js document to WebSocket provider
-                // No content transfer needed - the Y.js document already contains all content
-                
-                await this.connectToCollaborationServer(serverDoc);
-                
-                // Update current file and state
-                this.currentFile = {
-                    ...serverDoc,
-                    type: 'collaborative'
-                };
-                this.fileType = 'collaborative';
-                // isCollaborativeMode already true from offline-first approach
                 
                 this.saveAsProcess.step = 'finalizing';
                 this.saveAsProcess.message = 'Finalizing...';
                 
-                // Reload collaborative documents list
-                await this.loadCollaborativeDocs();
-                
-                // Remove local backup since everything succeeded
-                localStorage.removeItem(`dlux_tiptap_backup_${backupId}`);
-                
-                console.log('✅ Offline-first document successfully published to collaboration server:', documentName);
+                console.log('✅ Document saved successfully:', documentName);
                 
             } catch (error) {
-                console.error('❌ Publishing to collaboration server failed:', error);
-                
-                // Store error for display
+                console.error('❌ Save failed:', error);
                 this.saveAsProcess.error = error.message;
-                
-                // Keep local backup since server operation failed
-                if (this.saveAsProcess.localBackupId) {
-                    console.log('💾 Local backup preserved:', this.saveAsProcess.localBackupId);
-                    
-                    // Add backup to pending uploads list
-                    const pendingBackups = JSON.parse(localStorage.getItem('dlux_pending_uploads') || '[]');
-                    pendingBackups.push({
-                        id: this.saveAsProcess.localBackupId,
-                        filename: documentName,
-                        timestamp: new Date().toISOString(),
-                        type: 'collaborative_backup',
-                        error: error.message
-                    });
-                    localStorage.setItem('dlux_pending_uploads', JSON.stringify(pendingBackups));
-                }
-                
                 throw error;
             } finally {
                 // Reset save as process state
@@ -1728,7 +1816,7 @@ export default {
                         serverDocId: null,
                         error: null
                     };
-                }, 3000); // Keep visible for 3 seconds
+                }, 3000);
             }
         },
         
@@ -1743,13 +1831,52 @@ export default {
                     await this.renameCollaborativeDocument();
                 }
                 // Check if this is a "Save As" to collaborative doc
-                else if (this.saveForm.isNewDocument && this.saveForm.saveToDlux) {
+                else if (this.saveForm.isNewDocument && this.saveForm.storageType === 'cloud') {
                     await this.performSaveAs();
+                }
+                // Check if we need to create a new local document (no current file or no Y.js doc)
+                else if (!this.currentFile || (!this.ydoc && this.saveForm.storageType === 'local')) {
+                    // Use createNewDocumentFromName to create a new local Y.js document
+                    await this.createNewDocumentFromName(this.saveForm.filename);
+                    
+                    // If also saving to cloud, connect to server
+                    if (this.saveForm.storageType === 'cloud') {
+                        const response = await fetch('https://data.dlux.io/api/collaboration/documents', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                ...this.authHeaders
+                            },
+                            body: JSON.stringify({
+                                documentName: this.saveForm.filename,
+                                isPublic: this.saveForm.isPublic,
+                                title: this.getPlainTextTitle() || this.saveForm.filename,
+                                description: this.saveForm.description || 'Document created with DLUX TipTap Editor'
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                            throw new Error(`Failed to create server document: ${errorData.error || response.statusText}`);
+                        }
+                        
+                        const docData = await response.json();
+                        const serverDoc = docData.document || docData;
+                        
+                        // Connect existing Y.js document to server
+                        await this.connectToCollaborationServer(serverDoc);
+                        
+                        // Update current file to collaborative
+                        this.currentFile = {
+                            ...serverDoc,
+                            type: 'collaborative'
+                        };
+                        this.fileType = 'collaborative';
+                    }
                 } else {
-                    // Regular save
-                    // Y.js + IndexedDB handles all content persistence automatically
+                    // Regular save - Y.js + IndexedDB handles all content persistence automatically
                     // Only need to update metadata and connect to collaboration server if needed
-                    if (this.saveForm.saveToDlux) {
+                    if (this.saveForm.storageType === 'cloud') {
                         await this.connectToCollaborationServer();
                     }
                 }
@@ -1802,31 +1929,28 @@ export default {
         },
         
         async shareDocument() {
-            if (!this.canShare) {
-                // If not authenticated, prompt to authenticate
-                if (!this.isAuthenticated || this.isAuthExpired) {
-                    const confirmAuth = confirm('You need to authenticate to access collaborative features. Authenticate now?');
-                    if (confirmAuth) {
-                        this.requestAuthentication();
+            // If local file, prompt to publish to cloud first
+            if (this.currentFile && this.currentFile.type === 'local') {
+                const confirmPublish = confirm('This document needs to be published to the cloud before sharing. Publish now?');
+                if (confirmPublish) {
+                    await this.convertToCollaborative();
+                    // After publishing, continue to share modal
+                    if (this.currentFile?.type === 'collaborative') {
+                        await this.loadDocumentPermissions();
+                        this.showShareModal = true;
                     }
-                    return;
                 }
-                
-                // If local file, prompt to save to DLUX first
-                if (this.currentFile && this.currentFile.type === 'local') {
-                    this.saveForm.saveToDlux = true;
-                    this.saveForm.saveLocally = false;
-                    this.showSaveModal = true;
-                    return;
-                }
-                
-                alert('Please save to DLUX collaborative documents first to enable sharing.');
                 return;
             }
             
-            // Load current permissions before showing modal
-            await this.loadDocumentPermissions();
-            this.showShareModal = true;
+            // For collaborative documents, show share modal directly
+            if (this.currentFile?.type === 'collaborative') {
+                await this.loadDocumentPermissions();
+                this.showShareModal = true;
+                return;
+            }
+            
+            alert('Please create or load a document first to enable sharing.');
         },
         
         async performShare() {
@@ -2500,15 +2624,8 @@ export default {
         async createStandardEditor() {
             console.log('🏗️ Creating offline-first collaborative editors (TipTap best practice)...');
             
-            // Clean up any existing editor
-            if (this.titleEditor) {
-                this.titleEditor.destroy();
-                this.titleEditor = null;
-            }
-            if (this.bodyEditor) {
-                this.bodyEditor.destroy();
-                this.bodyEditor = null;
-            }
+            // Properly clean up any existing resources
+            await this.cleanupCurrentDocument();
 
             // Wait for cleanup to complete
             await this.$nextTick();
@@ -2521,6 +2638,63 @@ export default {
             } else {
                 console.warn('⚠️ Collaboration bundle not available, falling back to basic editors');
                 await this.createBasicEditors();
+            }
+        },
+
+        // CRITICAL: Proper cleanup method to prevent transaction mismatch errors
+        async cleanupCurrentDocument() {
+            console.log('🧹 Cleaning up current document resources...');
+            
+            try {
+                // Disconnect collaboration provider first
+                if (this.provider) {
+                    this.provider.disconnect();
+                    this.provider.destroy();
+                    this.provider = null;
+                }
+                
+                // Destroy IndexedDB persistence
+                if (this.indexeddbProvider) {
+                    this.indexeddbProvider.destroy();
+                    this.indexeddbProvider = null;
+                }
+                
+                // Destroy editors safely
+                if (this.titleEditor) {
+                    this.titleEditor.destroy();
+                    this.titleEditor = null;
+                }
+                if (this.bodyEditor) {
+                    this.bodyEditor.destroy();
+                    this.bodyEditor = null;
+                }
+                if (this.permlinkEditor) {
+                    this.permlinkEditor.destroy();
+                    this.permlinkEditor = null;
+                }
+                
+                // Destroy Y.js document last
+                if (this.ydoc) {
+                    this.ydoc.destroy();
+                    this.ydoc = null;
+                }
+                
+                // Reset collaboration state
+                this.connectionStatus = 'disconnected';
+                this.connectionMessage = '';
+                this.isCollaborativeMode = false;
+                
+                console.log('✅ Document cleanup completed successfully');
+                
+            } catch (error) {
+                console.error('❌ Error during document cleanup:', error);
+                // Force reset to prevent stuck state
+                this.provider = null;
+                this.indexeddbProvider = null;
+                this.titleEditor = null;
+                this.bodyEditor = null;
+                this.permlinkEditor = null;
+                this.ydoc = null;
             }
         },
 
@@ -3899,46 +4073,7 @@ export default {
             }
         },
         
-        // Debug method to manually check and update permissions
-        debugPermissions() {
-            console.log('🔍 DEBUG: Manual permission check triggered');
-            console.log('Current state:', {
-                username: this.username,
-                currentFile: this.currentFile,
-                documentPermissions: this.documentPermissions,
-                isReadOnlyMode: this.isReadOnlyMode,
-                connectionStatus: this.connectionStatus,
-                authHeaders: Object.keys(this.authHeaders || {}),
-                hasValidAuth: this.isAuthenticated && !this.isAuthExpired,
-                permissionCheckResults: {
-                    canEdit: !this.isReadOnlyMode,
-                    canSave: this.canSave,
-                    canShare: this.canShare,
-                    canDelete: this.canDelete,
-                    canPublish: this.canPublish
-                }
-            });
-            
-            // Also check WebSocket connection details
-            if (this.provider) {
-                console.log('🔍 WebSocket Debug Info:', {
-                    wsReadyState: this.provider.ws?.readyState,
-                    wsUrl: this.provider.ws?.url,
-                    providerStatus: this.provider.status,
-                    awarenessUsers: this.provider.awareness ? Array.from(this.provider.awareness.states.keys()) : []
-                });
-            }
-            
-            // Force update editor permissions
-            this.updateEditorPermissions();
-            
-            return {
-                permissions: this.documentPermissions,
-                readonly: this.isReadOnlyMode,
-                connected: this.connectionStatus === 'connected',
-                authenticated: this.isAuthenticated
-            };
-        },
+
 
         // Debug collaborative cursor states and force cursor updates
         debugCursors() {
@@ -4160,8 +4295,19 @@ export default {
                     // Generate file info if needed
                     if (!this.currentFile) {
                         const timestamp = Date.now();
-                        const title = this.getPlainTextTitle() || 'Untitled Document';
-                        const filename = title.substring(0, 50).replace(/[^a-zA-Z0-9\s-]/g, '').trim() || `Document ${new Date().toLocaleDateString()}`;
+                        const title = this.getPlainTextTitle();
+                        let filename;
+                        
+                        if (title && title.trim()) {
+                            // Use the actual title if it exists
+                            filename = title.substring(0, 50).replace(/[^a-zA-Z0-9\s-]/g, '').trim();
+                        } else {
+                            // Create "untitled - date time" format to match UI display
+                            const now = new Date();
+                            const dateStr = now.toLocaleDateString();
+                            const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                            filename = `Untitled - ${dateStr} ${timeStr}`;
+                        }
                         
                 this.currentFile = {
                             id: `local_${timestamp}`,
@@ -4791,104 +4937,10 @@ export default {
         // Replaced by offline-first architecture with connectToCollaborationServer
         
         disconnectCollaboration() {
-            console.log('🧹 Cleaning up collaborative editor connections...');
+            console.log('🔌 Disconnecting collaboration (using unified cleanup)...');
             
-            // Set flag to prevent new operations during cleanup
-            this.isInitializing = false;
-            
-            // Destroy all editors first to prevent them from trying to access destroyed Y.js types
-            if (this.titleEditor) {
-                try {
-                    console.log('🗑️ Destroying title editor');
-                    this.titleEditor.destroy();
-                } catch (error) {
-                    console.warn('Error destroying title editor:', error);
-                }
-                this.titleEditor = null;
-            }
-            if (this.permlinkEditor) {
-                try {
-                    console.log('🗑️ Destroying permlink editor');
-                    this.permlinkEditor.destroy();
-                } catch (error) {
-                    console.warn('Error destroying permlink editor:', error);
-                }
-                this.permlinkEditor = null;
-            }
-            if (this.bodyEditor) {
-                try {
-                    console.log('🗑️ Destroying body editor');
-                    this.bodyEditor.destroy();
-                } catch (error) {
-                    console.warn('Error destroying body editor:', error);
-                }
-                this.bodyEditor = null;
-            }
-            
-            // CRITICAL: Clean up DOM elements completely
-            this.cleanupDOMElements();
-            
-            // Disconnect provider after editors are destroyed
-            if (this.provider) {
-                try {
-                    console.log('🔌 Disconnecting collaboration provider');
-                    // Remove all event listeners first
-                    ['synced', 'connect', 'disconnect', 'status', 'message'].forEach(event => {
-                        if (this.provider && typeof this.provider.off === 'function') {
-                            this.provider.off(event);
-                        }
-                    });
-                    this.provider.disconnect();
-                } catch (error) {
-                    console.warn('Error disconnecting provider:', error);
-                }
-                this.provider = null;
-            }
-            
-            // Destroy Y.js document last with complete cleanup
-            if (this.ydoc) {
-                try {
-                    console.log('📄 Destroying Y.js document with complete cleanup');
-                    
-                    // Clear all shared types first to prevent conflicts
-                    const shareKeys = Array.from(this.ydoc.share.keys());
-                    console.log('🧹 Clearing Y.js shared types:', shareKeys);
-                    shareKeys.forEach(key => {
-                        try {
-                            const type = this.ydoc.share.get(key);
-                            if (type && typeof type.clear === 'function') {
-                                type.clear(); // Clear content instead of destroy
-                            }
-                            if (type && typeof type.destroy === 'function') {
-                                type.destroy();
-                            }
-                            this.ydoc.share.delete(key);
-                        } catch (error) {
-                            console.warn(`Error deleting Y.js type ${key}:`, error);
-                        }
-                    });
-                    
-                    // Clear subdocs if any
-                    if (this.ydoc.subdocs) {
-                        this.ydoc.subdocs.forEach(subdoc => {
-                            try {
-                                subdoc.destroy();
-                            } catch (error) {
-                                console.warn('Error destroying Y.js subdoc:', error);
-                            }
-                        });
-                    }
-                    
-                    // Now destroy the document
-                    this.ydoc.destroy();
-                } catch (error) {
-                    console.warn('Error destroying Y.js document:', error);
-                }
-                this.ydoc = null;
-            }
-            
-            this.connectionStatus = 'disconnected';
-            this.connectionMessage = 'Not connected';
+            // Use the unified cleanup method to prevent transaction mismatch errors
+            this.cleanupCurrentDocument();
             
             // Clear global instance tracking if this is the active instance
             if (window.dluxCollaborativeInstance === this.componentId) {
@@ -4900,7 +4952,7 @@ export default {
             // Reset initialization flag
             this.isInitializing = false;
             
-            console.log('✅ Collaborative editor cleanup completed');
+            console.log('✅ Collaboration disconnected successfully');
         },
         
         // Clean up DOM elements completely to prevent conflicts
@@ -5191,10 +5243,23 @@ export default {
         },
         
         clearEditor() {
-            // Avoid clearing collaborative editors directly - this causes transaction conflicts
-            if (this.isCollaborativeMode && this.connectionStatus === 'connected') {
-                console.log('🤝 Skipping editor clearing in collaborative mode - let Y.js handle state');
-                // Just clear the local content state
+            try {
+                console.log('🧹 Clearing editor content (Y.js safe method)...');
+                
+                // CRITICAL: Never manipulate Y.js fragments directly during editor lifecycle
+                // This causes transaction mismatch errors - let TipTap handle content clearing
+                
+                if (this.titleEditor && this.titleEditor.commands) {
+                    this.titleEditor.commands.clearContent();
+                }
+                if (this.bodyEditor && this.bodyEditor.commands) {
+                    this.bodyEditor.commands.clearContent();
+                }
+                if (this.permlinkEditor && this.permlinkEditor.commands) {
+                    this.permlinkEditor.commands.clearContent();
+                }
+                
+                // Only clear local content state - Y.js will sync automatically
                 this.content = {
                     title: '',
                     body: '',
@@ -5203,18 +5268,23 @@ export default {
                     permlink: '',
                     beneficiaries: []
                 };
-                return;
-            }
-            
-            // Clear non-collaborative editors normally
-            if (this.titleEditor) {
-                this.titleEditor.commands.clearContent();
-            }
-            if (this.permlinkEditor) {
-                this.permlinkEditor.commands.clearContent();
-            }
-            if (this.bodyEditor) {
-                this.bodyEditor.commands.clearContent();
+                
+                console.log('✅ Editor content cleared successfully (TipTap best practice)');
+                
+            } catch (error) {
+                console.error('❌ Error clearing editor content:', error);
+                
+                // Fallback: just clear the local content state
+                this.content = {
+                    title: '',
+                    body: '',
+                    tags: [],
+                    custom_json: {},
+                    permlink: '',
+                    beneficiaries: []
+                };
+                
+                console.log('🔄 Used fallback content clearing');
             }
         },
         
@@ -5247,6 +5317,70 @@ export default {
             const hue = Math.abs(hash) % 360;
             return `hsl(${hue}, 70%, 60%)`;
         },
+
+        // Status indicator styling methods (matching autosave banner style)
+        getStatusStyle(state) {
+            const styles = {
+                'saving-local': 'background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;',
+                'saved-local': 'background: rgba(25, 135, 84, 0.1); border-left: 3px solid #198754;',
+                'offline-saving': 'background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;',
+                'offline-ready': 'background: rgba(13, 202, 240, 0.1); border-left: 3px solid #0dcaf0;',
+                'unsynced-changes': 'background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;',
+                'offline': 'background: rgba(13, 202, 240, 0.1); border-left: 3px solid #0dcaf0;',
+                'connecting': 'background: rgba(13, 110, 253, 0.1); border-left: 3px solid #0d6efd;',
+                'syncing': 'background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;',
+                'collaborating': 'background: rgba(25, 135, 84, 0.1); border-left: 3px solid #198754;',
+                'synced': 'background: rgba(25, 135, 84, 0.1); border-left: 3px solid #198754;',
+                'error': 'background: rgba(220, 53, 69, 0.1); border-left: 3px solid #dc3545;',
+                'unknown': 'background: rgba(108, 117, 125, 0.1); border-left: 3px solid #6c757d;'
+            };
+            return styles[state] || styles.unknown;
+        },
+
+        getStatusIconClass(state) {
+            const icons = {
+                'saving-local': 'fas fa-circle-notch fa-spin text-warning',
+                'saved-local': 'fas fa-check text-success',
+                'offline-saving': 'fas fa-circle-notch fa-spin text-warning',
+                'offline-ready': 'fas fa-hard-drive text-info',
+                'unsynced-changes': 'fas fa-exclamation-triangle text-warning',
+                'offline': 'fas fa-wifi-slash text-info',
+                'connecting': 'fas fa-circle-notch fa-spin text-primary',
+                'syncing': 'fas fa-sync fa-spin text-warning',
+                'collaborating': 'fas fa-users text-success',
+                'synced': 'fas fa-cloud-check text-success',
+                'error': 'fas fa-exclamation-circle text-danger',
+                'unknown': 'fas fa-question-circle text-muted'
+            };
+            return icons[state] || icons.unknown;
+        },
+
+        getStatusTextClass(state) {
+            const textClasses = {
+                'saving-local': 'text-warning',
+                'saved-local': 'text-success',
+                'offline-saving': 'text-warning',
+                'offline-ready': 'text-info',
+                'unsynced-changes': 'text-warning',
+                'offline': 'text-info',
+                'connecting': 'text-primary',
+                'syncing': 'text-warning',
+                'collaborating': 'text-success',
+                'synced': 'text-success',
+                'error': 'text-danger',
+                'unknown': 'text-muted'
+            };
+            return textClasses[state] || textClasses.unknown;
+        },
+
+        // Handle status actions safely
+        handleStatusAction(action) {
+            if (action.actionType === 'reconnect') {
+                this.reconnectToCollaborativeDocument();
+            }
+        },
+
+
         
         async confirmUnsavedChanges() {
             return confirm('You have unsaved changes. Are you sure you want to continue?');
@@ -5492,8 +5626,7 @@ export default {
                 
                 // Set up the save form with the backup data
                 this.saveForm.filename = upload.filename;
-                this.saveForm.saveToDlux = true;
-                this.saveForm.saveLocally = false;
+                this.saveForm.storageType = 'cloud';
                 this.saveForm.isNewDocument = true;
                 
                 // Set the content from backup
@@ -5618,14 +5751,154 @@ export default {
         getPermissionAvatarUrl(account) {
             return `https://images.hive.blog/u/${account}/avatar/small`;
         },
-        
-        // REMOVED: Legacy initializeEditor method
-        // Replaced by offline-first architecture with createStandardEditor/createOfflineFirstCollaborativeEditors
 
+        // Document Name Editing (Collaborative Feature)
+        startEditingDocumentName() {
+            // Check read-only permissions for collaborative docs
+            if (this.isReadOnlyMode) {
+                console.warn('🚫 Cannot edit document name: user has read-only permissions');
+                return;
+            }
+            
+            this.documentNameInput = this.currentFile?.name || this.currentFile?.documentName || this.currentFile?.permlink || '';
+            this.isEditingDocumentName = true;
+            
+            // Focus the input on next tick
+            this.$nextTick(() => {
+                const input = this.$refs.documentNameInput;
+                if (input) {
+                    input.focus();
+                    input.select();
+                }
+            });
+        },
 
+        async saveDocumentName() {
+            const newName = this.documentNameInput.trim();
+            
+            if (!newName) {
+                this.cancelEditingDocumentName();
+                return;
+            }
 
-        // REMOVED: Legacy toggleCollaborativeMode method
-        // All documents are now collaborative by default (offline-first architecture)
+            // Check read-only permissions for collaborative docs
+            if (this.isReadOnlyMode) {
+                console.warn('🚫 Cannot save document name: user has read-only permissions');
+                this.cancelEditingDocumentName();
+                return;
+            }
+
+            try {
+                // If no current file exists, create a new local ydoc (same as when user enters data)
+                if (!this.currentFile) {
+                    await this.createNewDocumentFromName(newName);
+                } else {
+                    await this.renameCurrentDocument(newName);
+                }
+                
+                this.isEditingDocumentName = false;
+                console.log('📝 Document name saved:', newName);
+                
+            } catch (error) {
+                console.error('Failed to save document name:', error);
+                alert('Failed to save document name: ' + error.message);
+            }
+        },
+
+        cancelEditingDocumentName() {
+            this.isEditingDocumentName = false;
+            this.documentNameInput = '';
+        },
+
+        async createNewDocumentFromName(name) {
+            // Create new local ydoc with the specified name (following offline-first architecture)
+            const timestamp = Date.now();
+            
+            this.currentFile = {
+                id: `local_${timestamp}`,
+                name: name,
+                type: 'local',
+                lastModified: new Date().toISOString(),
+                isOfflineFirst: true // Flag to indicate this uses Y.js + IndexedDB
+            };
+            this.fileType = 'local';
+            
+            // Create offline-first collaborative editors (same as data entry trigger)
+            if (!this.ydoc) {
+                await this.createStandardEditor();
+            }
+            
+            // Update local file index and refresh UI (following unified sync pattern)
+            await this.updateLocalFileIndex();
+            await this.loadLocalFiles();
+            
+            // Set unsaved changes flag to trigger unified sync
+            this.hasUnsavedChanges = true;
+            this.clearUnsavedAfterSync();
+            
+            console.log('📄 New local ydoc created from document name (offline-first architecture):', name);
+        },
+
+        async renameCurrentDocument(newName) {
+            if (this.currentFile.type === 'collaborative') {
+                // For collaborative docs, use the existing rename functionality
+                this.saveForm.filename = newName;
+                await this.renameCollaborativeDocument();
+            } else {
+                // For local documents, update the name directly
+                this.currentFile.name = newName;
+                this.currentFile.lastModified = new Date().toISOString();
+                
+                // Update local file index (following offline-first pattern)
+                await this.updateLocalFileIndex();
+                await this.loadLocalFiles();
+                
+                // Set unsaved changes flag to trigger unified sync
+                this.hasUnsavedChanges = true;
+                this.clearUnsavedAfterSync();
+            }
+        },
+
+        handleDocumentNameKeydown(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                this.saveDocumentName();
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                this.cancelEditingDocumentName();
+            }
+        },
+
+        // Y.js Undo/Redo Commands (TipTap Best Practice)
+        canUndo() {
+            return this.titleEditor?.can().undo() || this.bodyEditor?.can().undo() || false;
+        },
+
+        canRedo() {
+            return this.titleEditor?.can().redo() || this.bodyEditor?.can().redo() || false;
+        },
+
+        performUndo() {
+            if (this.titleEditor?.isFocused) {
+                this.titleEditor.commands.undo();
+            } else if (this.bodyEditor?.isFocused) {
+                this.bodyEditor.commands.undo();
+            } else {
+                // Default to body editor if no editor is focused
+                this.bodyEditor?.commands.undo();
+            }
+        },
+
+        performRedo() {
+            if (this.titleEditor?.isFocused) {
+                this.titleEditor.commands.redo();
+            } else if (this.bodyEditor?.isFocused) {
+                this.bodyEditor.commands.redo();
+            } else {
+                // Default to body editor if no editor is focused
+                this.bodyEditor?.commands.redo();
+            }
+        },
 
         async convertToCollaborative() {
             // TipTap Best Practice: All documents are already collaborative (offline-first)
@@ -5647,7 +5920,7 @@ export default {
                         alert('Authentication failed. Please try again.');
                         return;
                     }
-                } else {
+            } else {
                     return;
                 }
                 }
@@ -5661,20 +5934,65 @@ export default {
             }
             console.log('✅ Basic connectivity test passed');
 
-            // Show the save modal for publishing to cloud
-            const documentName = this.currentFile?.name || `document-${Date.now()}`;
+            // Generate document name and publish directly (streamlined UX)
+            let documentName = this.currentFile?.name;
             
-            this.saveForm = {
-                filename: documentName,
-                saveLocally: false,
-                saveToDlux: true,
-                isPublic: false,
-                description: 'Published from offline document',
-                isNewDocument: true
-            };
-            
-            this.showSaveModal = true;
-            console.log('🔄 Ready to publish offline collaborative document to server');
+            if (!documentName) {
+                const title = this.getPlainTextTitle()?.trim();
+                if (title) {
+                    documentName = title;
+                } else {
+                    // Create "untitled - date time" format to match UI display
+                    const now = new Date();
+                    const dateStr = now.toLocaleDateString();
+                    const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    documentName = `Untitled - ${dateStr} ${timeStr}`;
+                }
+            }
+
+            try {
+                // Create server document directly (skip modal for streamlined UX)
+                const response = await fetch('https://data.dlux.io/api/collaboration/documents', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...this.authHeaders
+                    },
+                    body: JSON.stringify({
+                        documentName: documentName,
+                        isPublic: false, // Default to private, can be changed later
+                        title: this.getPlainTextTitle() || documentName,
+                        description: 'Published from offline document'
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    throw new Error(`Failed to create server document: ${errorData.error || response.statusText}`);
+                }
+
+                const docData = await response.json();
+                const serverDoc = docData.document || docData;
+
+                // Connect existing Y.js document to server
+                await this.connectToCollaborationServer(serverDoc);
+
+                // Update current file to collaborative
+                this.currentFile = {
+                    ...serverDoc,
+                    type: 'collaborative'
+                };
+                this.fileType = 'collaborative';
+
+                // Reload collaborative documents list
+                await this.loadCollaborativeDocs();
+
+                console.log('✅ Document published to cloud successfully:', documentName);
+                
+            } catch (error) {
+                console.error('❌ Failed to publish to cloud:', error);
+                alert('Failed to publish to cloud: ' + error.message);
+            }
         },
 
         // New method: Test WebSocket connectivity
@@ -5858,73 +6176,112 @@ export default {
                     this.showColorPicker = false;
                 }
             });
-        } catch (error) {
+            } catch (error) {
             console.error('Error in mounted hook:', error);
         }
-    },
-    
-    beforeUnmount() {
-        this.disconnectCollaboration();
+        },
         
-        // Clean up all editors
+        beforeUnmount() {
+            this.disconnectCollaboration();
+            
+            // Clean up all editors
             if (this.titleEditor) {
-            this.titleEditor.destroy();
-        }
-        if (this.permlinkEditor) {
-            this.permlinkEditor.destroy();
-        }
+                this.titleEditor.destroy();
+            }
+            if (this.permlinkEditor) {
+                this.permlinkEditor.destroy();
+            }
             if (this.bodyEditor) {
-            this.bodyEditor.destroy();
-        }
-    },
-    
-    template: `<div class="collaborative-post-editor">
+                this.bodyEditor.destroy();
+            }
+        },
+        
+        template: `<div class="collaborative-post-editor">
     <!-- File Menu Bar -->
     <div class="file-menu-bar bg-dark border-bottom border-secondary mb-3 p-05 d-flex">
-        <div class="">
+
             <!-- File Menu -->
             <div class="btn-group">
                 <button class="btn btn-dark no-caret dropdown-toggle" type="button" data-bs-toggle="dropdown"
                     aria-expanded="false">
-                    <i class="fas fa-file me-sm-1 d-none"></i><span class="d-none d-sm-inline ">File</span>
+                    <i class="fas fa-file me-sm-1 d-none"></i><span class="">File</span>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-dark bg-dark">
+                <ul class="dropdown-menu dropdown-menu-dark bg-dark has-submenu">
+                    <!-- Consolidated Document Creation (Y.js Offline-First) -->
                     <li><a class="dropdown-item" href="#" @click.prevent="newDocument">
-                            <i class="fas fa-file-circle-plus me-2"></i>New Local Document
+                            <i class="fas fa-file-circle-plus me-2"></i>New
+                           
                         </a></li>
-                    <li v-if="showCollaborativeFeatures">
-                        <a class="dropdown-item" href="#" @click.prevent="newCollaborativeDocument">
-                            <i class="fas fa-users me-2"></i>New Collaborative Document
-                        </a>
-                    </li>
-                    <li v-else-if="!isAuthenticated || isAuthExpired">
-                        <a class="dropdown-item text-muted" href="#" @click.prevent="requestAuthentication">
-                            <i class="fas fa-users me-2"></i>New Collaborative Document
-                            <small class="d-block text-warning">Authentication required</small>
-                        </a>
-                    </li>
                     <li>
-                        <hr class="dropdown-divider">
+
                     </li>
                     <li><a class="dropdown-item" href="#" @click.prevent="showLoadModal = true">
-                            <i class="fas fa-folder-open me-2"></i>Open Document...
-                        </a></li>
+                            <i class="fas fa-folder-open me-2"></i>Open
+                        </a>
+                    </li>
+               
+                    
                     <li>
                         <hr class="dropdown-divider">
                     </li>
-                    <li><a class="dropdown-item" href="#" @click.prevent="saveDocument" :class="{ disabled: !canSave }">
-                            <i class="fas fa-save me-2"></i>Save
-                        </a></li>
+                         <!-- Save As (traditional naming for user familiarity) -->
                     <li><a class="dropdown-item" href="#" @click.prevent="saveAsDocument">
                             <i class="fas fa-copy me-2"></i>Save As...
                         </a></li>
+                                         <li>
+                         <hr class="dropdown-divider">
+                     </li>
+                     <!-- Sharing submenu -->
+                     <li class="dropdown-submenu">
+                         <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                             <i class="fas fa-share me-2"></i>Share
+                         </a>
+                         <ul class="dropdown-menu bg-dark">
+                              <li v-if="currentFile?.type === 'collaborative'"><a class="dropdown-item" href="#" @click.prevent="shareDocument"
+                             :class="{ disabled: !canShare }">
+                             <i class="fas fa-user-plus me-2"></i>Share Document
+                             <small v-if="!canShare && (!isAuthenticated || isAuthExpired)" class="d-block text-muted">Authentication required</small>
+                            </a></li>
+                            <li v-else><a class="dropdown-item d-flex align-items-center gap-2" href="#" @click="!isAuthenticated ? requestAuthentication() : convertToCollaborative()"
+                                >
+                                <div class="position-relative">
+                    <i class="fas fa-cloud fa-fw fs-2"></i>  
+                    <div class="position-absolute top-50 start-50 translate-middle">
+                        <i class="fas fa-sync fa-fw text-dark"></i>  
+                    </div>
+                </div>
+                <div class="d-flex flex-column align-items-start">
+                Enable Collaboration
+                                <small v-if="!isAuthenticated || isAuthExpired" class="d-block text-muted">Authentication required</small>
+                                </div>
+                            </a>
+                            </li>
+                         </ul>
+                     </li>
+                     <li>
+
+                     </li>
+                     <!-- Export Options -->
+                     <li class="dropdown-submenu">
+                        <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                            <i class="fas fa-file-export me-2"></i>Export
+                        </a>
+                        <ul class="dropdown-menu bg-dark">
+                            <li>
+                                <a class="dropdown-item" href="#" @click.prevent="exportDocument('markdown')">
+                                    <i class="fas fa-file-text me-2"></i>Export as Markdown
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" @click.prevent="exportDocument('html')">
+                                    <i class="fas fa-file-code me-2"></i>Export as HTML
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     <li>
                         <hr class="dropdown-divider">
                     </li>
-                    <li><a class="dropdown-item" href="#" @click.prevent="shareDocument"
-                            :class="{ disabled: !canShare }">
-                            <i class="fas fa-share me-2"></i>Share...
-                        </a></li>
                     <li><a class="dropdown-item" href="#" @click.prevent="deleteDocument"
                             :class="{disabled: !canDelete }">
                             <i class="fas fa-trash me-2"></i>Delete
@@ -5936,126 +6293,81 @@ export default {
                             :class="{ disabled: !canPublish }">
                             <i class="fas fa-paper-plane me-2"></i>Publish to Hive
                         </a></li>
-                    <li v-if="pendingUploads.length > 0">
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li v-if="pendingUploads.length > 0" class="dropdown-header">
-                        <i class="fas fa-clock me-1"></i>Pending Uploads ({{ pendingUploads.length }})
-                    </li>
-                    <li v-for="upload in pendingUploads" :key="upload.id" class="dropdown-item-text small">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="flex-grow-1">
-                                <div class="text-warning">{{ upload.filename }}</div>
-                                <div class="text-muted small">{{ upload.error }}</div>
-                            </div>
-                            <div class="btn-group btn-group-sm">
-                                <button @click.stop="retryPendingUpload(upload.id)"
-                                    class="btn btn-outline-primary btn-xs" title="Retry upload">
-                                    <i class="fas fa-redo fa-xs"></i>
-                                </button>
-                                <button @click.stop="removePendingUpload(upload.id)"
-                                    class="btn btn-outline-danger btn-xs" title="Remove from pending">
-                                    <i class="fas fa-trash fa-xs"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </li>
                 </ul>
             </div>
 
-            
 
-            <!-- Collaboration Menu -->
-            <div class="btn-group">
-                <button class="btn btn-dark no-caret dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                    :class="{
-                        'btn-outline-warning': !isAuthenticated || isAuthExpired,
-                        'btn-outline-success': isAuthenticated && !isAuthExpired && connectionStatus === 'connected',
-                        'btn-outline-primary': isAuthenticated && !isAuthExpired && connectionStatus !== 'connected'
-                    }">
-                    <i class="fas me-sm-1 d-none" :class="{
-                        'fa-key text-warning': !isAuthenticated || isAuthExpired,
-                        'fa-users text-success': isAuthenticated && !isAuthExpired && connectionStatus === 'connected',
-                        'fa-users text-primary': isAuthenticated && !isAuthExpired && connectionStatus !== 'connected'
-                    }"></i>
-                    <span class="d-none d-sm-inline">Collaboration</span>
-                    <!-- Auth status indicator -->
-                    <i v-if="!isAuthenticated || isAuthExpired" class="fas fa-exclamation-triangle text-warning ms-1" title="Authentication required"></i>
-                    <i v-else-if="connectionStatus === 'connected'" class="fas fa-check-circle text-success ms-1" title="Connected and authenticated"></i>
-                    <i v-else class="fas fa-shield-alt text-primary ms-1" title="Authenticated"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-dark bg-dark">
-                    <!-- Authentication Status Header -->
-                    <li class="dropdown-header d-flex align-items-center justify-content-between">
-                        <span>Authentication Status</span>
-                        <span v-if="!isAuthenticated || isAuthExpired" class="badge bg-warning text-dark">
-                            <i class="fas fa-key me-1"></i>{{ isAuthExpired ? 'Expired' : 'Required' }}
-                        </span>
-                        <span v-else class="badge bg-success">
-                            <i class="fas fa-check me-1"></i>Authenticated
-                        </span>
-                    </li>
-                    
-                    <!-- Authentication Actions -->
-                    <li v-if="!isAuthenticated || isAuthExpired">
-                        <a class="dropdown-item text-warning fw-bold" href="#" @click.prevent="requestAuthentication">
-                            <i class="fas fa-key me-2"></i>{{ isAuthExpired ? 'Re-authenticate' : 'Authenticate Now' }}
-                        </a>
-                    </li>
-                    <li v-else>
-                        <a class="dropdown-item text-muted" href="#" @click.prevent="requestAuthentication">
-                            <i class="fas fa-redo me-2"></i>Refresh Authentication
-                        </a>
-                    </li>
-                    
-                    <li><hr class="dropdown-divider"></li>
-                    
-                    <!-- Connection Actions -->
-                    <li v-if="connectionStatus === 'disconnected' && currentFile?.type === 'collaborative'">
-                        <a class="dropdown-item" href="#" @click.prevent="reconnectToCollaborativeDocument()">
-                            <i class="fas fa-plug me-2"></i>Connect to Document
-                        </a>
-                    </li>
-                    
-                    <!-- Debug option for testing permissions -->
-                    <li v-if="currentFile?.type === 'collaborative'">
-                        <a class="dropdown-item text-info" href="#" @click.prevent="debugPermissions()">
-                            <i class="fas fa-bug me-2"></i>Debug Permissions
-                        </a>
-                    </li>
-                    <li v-if="currentFile && currentFile.type !== 'collaborative'">
-                        <a class="dropdown-item" href="#" @click.prevent="!isAuthenticated ? requestAuthentication() : convertToCollaborative()">
-                            <i class="fas fa-cloud-upload-alt me-2"></i>Publish to Cloud
-                            <small v-if="!isAuthenticated" class="d-block text-muted">Authentication required</small>
-                        </a>
-                    </li>
-                    <li v-else-if="connectionStatus === 'connected'">
-                        <a class="dropdown-item" href="#" @click.prevent="disconnectCollaboration">
-                            <i class="fas fa-unlink me-2"></i>Disconnect
-                        </a>
-                    </li>
-                    
-                    <li><hr class="dropdown-divider"></li>
-                    
-                    <!-- Document Actions -->
-                    <li><a class="dropdown-item" href="#" @click.prevent="shareDocument"
-                            :class="{ disabled: !canShare }">
-                            <i class="fas fa-user-plus me-2"></i>Share Document
-                            <small v-if="!canShare && (!isAuthenticated || isAuthExpired)" class="d-block text-muted">Authentication required</small>
-                        </a></li>
-                    <li><a class="dropdown-item" href="#" @click.prevent="showLoadModal = true">
-                            <i class="fas fa-folder me-2"></i>Browse Documents
-                        </a></li>
-                </ul>
-            </div>
+        <!-- Edit Menu -->
+        <div class="btn-group me-2">
+            <button class="btn btn-dark no-caret dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                <i class="fas fa-edit me-sm-1 d-none"></i><span class="">Edit</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark bg-dark">
+                <!-- Y.js Undo/Redo (TipTap Best Practice) -->
+                <li><a class="dropdown-item" href="#" @click.prevent="performUndo" :class="{ disabled: !canUndo() }">
+                        <i class="fas fa-undo me-2"></i>Undo
+                        <small class="d-block text-muted">Cmd+Z</small>
+                    </a></li>
+                <li><a class="dropdown-item" href="#" @click.prevent="performRedo" :class="{ disabled: !canRedo() }">
+                        <i class="fas fa-redo me-2"></i>Redo
+                        <small class="d-block text-muted">Cmd+Y</small>
+                    </a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <!-- Insert Operations -->
+                <li class="dropdown-header">Insert</li>
+                <li><a class="dropdown-item" href="#" @click.prevent="insertLink" :class="{ disabled: isReadOnlyMode }">
+                        <i class="fas fa-link me-2"></i>Link
+                    </a></li>
+                <li><a class="dropdown-item" href="#" @click.prevent="insertImage" :class="{ disabled: isReadOnlyMode }">
+                        <i class="fas fa-image me-2"></i>Image
+                    </a></li>
+                <li><a class="dropdown-item" href="#" @click.prevent="insertTable" :class="{ disabled: isReadOnlyMode }">
+                        <i class="fas fa-table me-2"></i>Table
+                    </a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <!-- View Options -->
+                <li class="dropdown-header">View</li>
+                <li><a class="dropdown-item" href="#" @click.prevent="showJsonPreview">
+                        <i class="fas fa-code me-2"></i>JSON Preview
+                    </a></li>
+
+            </ul>
         </div>
+                
+        <div class=" mx-auto d-flex align-items-center">
 
         <!--File Status-->
-        <div class="ms-auto d-flex align-items-center gap-2">
-            <span v-if="currentFile" class="text-light small">
-                <i class="fas fa-file me-1"></i>{{ currentFile.name || currentFile.documentName ||
-                currentFile.permlink }}
+        <div class="d-flex align-items-center gap-2">
+            <a class="no-decoration text-muted" href="#" @click.prevent="showLoadModal = true">
+                <i class="fas fa-folder-open fa-fw me-1"></i>Drafts
+            </a>
+            <i class="fa-solid fa-chevron-right fa-fw"></i>
+            <div>
+             <i class="fas fa-file fa-fw"></i>
+            <span v-if="currentFile" class="">
+               
+                <!-- Editable document name -->
+                <span v-if="!isEditingDocumentName" 
+                      @click="startEditingDocumentName"
+                      :class="{ 'cursor-pointer text-decoration-underline': !isReadOnlyMode }"
+                      :title="isReadOnlyMode ? 'Document name (read-only)' : 'Click to edit document name'"
+                      class="user-select-none">
+                    {{ currentFile.name || currentFile.documentName || currentFile.permlink }}
+                </span>
+                <!-- Document name input field -->
+                <input v-else
+                       ref="documentNameInput"
+                       v-model="documentNameInput"
+                       @keydown="handleDocumentNameKeydown"
+                       @blur="saveDocumentName"
+                       class="form-control form-control-sm d-inline-block bg-dark text-white border-secondary"
+                       style="width: auto; min-width: 150px; max-width: 300px;"
+                       placeholder="Enter document name">
                 <span v-if="hasUnsavedChanges" class="text-warning ms-1">●</span>
                 <!-- Permission indicator for collaborative docs -->
                 <span v-if="currentFile.type === 'collaborative'" class="ms-2">
@@ -6067,34 +6379,27 @@ export default {
                     </span>
                 </span>
             </span>
-            <span v-else class="text-muted small">
-                <i class="fas fa-file-plus me-1"></i>Untitled
+            <span v-else class="">
+                <!-- Clickable "Untitled" for new documents -->
+                <i class="fas fa-file-plus me-1"></i>
+                <span v-if="!isEditingDocumentName"
+                      @click="startEditingDocumentName"
+                      class="cursor-pointer text-decoration-underline user-select-none"
+                      title="Click to name this document">Untitled - {{ new Date().toLocaleDateString() }} {{ new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }}</span>
+                <!-- Document name input field for new documents -->
+                <input v-else
+                       ref="documentNameInput"
+                       v-model="documentNameInput"
+                       @keydown="handleDocumentNameKeydown"
+                       @blur="saveDocumentName"
+                       class="form-control form-control-sm d-inline-block bg-dark text-white border-secondary"
+                       style="width: auto; min-width: 150px; max-width: 300px;"
+                       placeholder="Enter document name">
                 <span v-if="hasUnsavedChanges" class="text-warning ms-1">●</span>
             </span>
-
-            <!-- Connection Status Badge -->
-            <span v-if="currentFile?.type === 'collaborative'" class="badge" :class="{
-            'bg-success': connectionStatus === 'connected' && !isReadOnlyMode,
-            'bg-info': connectionStatus === 'connected' && isReadOnlyMode,
-        'bg-warning': connectionStatus === 'connecting',
-        'bg-secondary': connectionStatus === 'disconnected',
-        'bg-danger': connectionStatus === 'error'
-                    }">
-                <i class="fas fa-fw me-1" :class="{
-            'fa-check-circle': connectionStatus === 'connected' && !isReadOnlyMode,
-            'fa-eye': connectionStatus === 'connected' && isReadOnlyMode,
-        'fa-spinner fa-spin': connectionStatus === 'connecting',
-        'fa-circle': connectionStatus === 'disconnected',
-        'fa-exclamation-circle': connectionStatus === 'error'
-                        }"></i>
-                {{ connectionStatus === 'connected' && isReadOnlyMode ? 'Read-Only' :
-                   connectionStatus === 'connected' ? 'Live' :
-                   connectionStatus === 'connecting' ? 'Connecting' :
-                   connectionStatus === 'error' ? 'Error' : 'Offline' }}
-            </span>
-            <span v-else-if="currentFile?.type === 'local'" class="badge bg-secondary">
-                <i class="fas fa-file me-1"></i>Local
-            </span>
+        </div>
+        <div>
+           </div>
 
             <!--Current User(in collaborative mode)-->
             <div v-if="currentFile?.type === 'collaborative'" class="d-flex align-items-center gap-1">
@@ -6115,7 +6420,7 @@ export default {
 
                         <!-- Color picker dropdown -->
                         <div v-if="showColorPicker"
-                            class="position-absolute bg-dark border border-secondary rounded p-2 shadow-lg"
+                            class="box-shadow-1 position-absolute bg-dark border border-secondary rounded p-2 shadow-lg"
                             style="top: 30px; right: 0; z-index: 1000; width: 200px;">
                             <div class="mb-2">
                                 <small class="text-white fw-bold">Choose your cursor color:</small>
@@ -6163,6 +6468,100 @@ export default {
         </div>
     </div>
 
+           
+
+         <!-- Cloud Menu -->
+            <div class="btn-group">
+                <button class="btn btn-dark no-caret dropdown-toggle"  :style="getStatusStyle(unifiedStatusInfo.state)" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+
+               
+                            <!-- Unified Status Indicator -->
+
+                         <div class="d-flex align-items-center">
+                             <i :class="getStatusIconClass(unifiedStatusInfo.state)" class="me-2 small"></i>
+                             <span :class="getStatusTextClass(unifiedStatusInfo.state)" class="small fw-medium">
+                                 {{ unifiedStatusInfo.message }}
+                             </span>
+                         </div>
+
+                 
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-dark">
+                    <!-- Authentication Status Header -->
+                    <li class="dropdown-header d-flex align-items-center justify-content-between">
+                        <span>Authentication Status</span>
+                        <span v-if="!isAuthenticated || isAuthExpired" class="badge bg-warning text-dark">
+                            <i class="fas fa-key me-1"></i>{{ isAuthExpired ? 'Expired' : 'Required' }}
+                        </span>
+                        <span v-else class="badge bg-success">
+                            <i class="fas fa-check me-1"></i>Authenticated
+                        </span>
+                    </li>
+                    
+                    <!-- Authentication Actions -->
+                    <li v-if="!isAuthenticated || isAuthExpired">
+                        <a class="dropdown-item text-warning fw-bold" href="#" @click.prevent="requestAuthentication">
+                            <i class="fas fa-key me-2"></i>{{ isAuthExpired ? 'Re-authenticate' : 'Authenticate Now' }}
+                        </a>
+                    </li>
+                    <li v-else>
+                        <a class="dropdown-item text-muted" href="#" @click.prevent="requestAuthentication">
+                            <i class="fas fa-redo me-2"></i>Refresh Authentication
+                        </a>
+                    </li>
+                    
+                    <li><hr class="dropdown-divider"></li>
+                    
+
+                    <!-- Document Publishing & Connection -->
+                     <li v-if="currentFile && currentFile.type !== 'collaborative'">
+                         <a class="dropdown-item" href="#" @click.prevent="!isAuthenticated ? requestAuthentication() : convertToCollaborative()">
+                             <i class="fas fa-cloud-upload-alt me-2"></i>Save to Cloud
+                             <small v-if="!isAuthenticated" class="d-block text-muted">Authentication required</small>
+                         </a>
+                     </li>
+                     <li v-else-if="connectionStatus === 'connected'">
+                         <a class="dropdown-item" href="#" @click.prevent="disconnectCollaboration">
+                             <i class="fas fa-unlink me-2"></i>Disconnect from Cloud
+                         </a>
+                     </li>
+                     <li v-else-if="currentFile?.type === 'collaborative' && connectionStatus === 'disconnected'">
+                         <a class="dropdown-item text-warning" href="#" @click.prevent="reconnectToCollaborativeDocument()">
+                             <i class="fas fa-plug me-2"></i>Reconnect to Cloud
+                             <small class="d-block text-muted">Working offline - changes saved locally</small>
+                         </a>
+                     </li>
+                     
+                     <li><hr class="dropdown-divider"></li>
+                     
+                     <!-- Document Sharing & Collaboration -->
+                     <li class="dropdown-header">Collaboration</li>
+                     <li><a class="dropdown-item" href="#" @click.prevent="shareDocument"
+                             :class="{ disabled: !canShare }">
+                             <i class="fas fa-user-plus me-2"></i>Share Document
+                                                           <small v-if="!isCollaborativeMode" class="d-block text-muted">Cloud collaboration required</small>
+                             <small v-if="!canShare && (!isAuthenticated || isAuthExpired)" class="d-block text-muted">Authentication required</small>
+                         </a></li>
+                                                   <li>
+                          <div class="mt-2 pt-2 border-top border-light border-opacity-25">
+                      <p class="small text-white-50 mb-2">{{ unifiedStatusInfo.details }}</p>
+                      <div v-if="unifiedStatusInfo.actions.length" class="d-flex gap-1">
+                          <button 
+                              v-for="action in unifiedStatusInfo.actions" 
+                              :key="action.label"
+                              @click.stop="handleStatusAction(action)"
+                              class="btn btn-sm btn-outline-light"
+                          >
+                              {{ action.label }}
+                          </button>
+                      </div>
+                  </div></li>
+                </ul>
+            </div>
+        
+
+</div>
 
 
     <!-- Read-Only Mode Warning Banner -->
@@ -6561,9 +6960,11 @@ export default {
         </div>
     </div>
 </div>
+<!-- teleport TipTap Modals to new index.html body -->
+<teleport to="body">
 <!--Publish Modal-->
 <div v-if="showPublishModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
-    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content bg-dark text-white">
             <div class="modal-header border-secondary">
                 <h5 class="modal-title">
@@ -6636,7 +7037,7 @@ export default {
 
 <!--Load Modal-->
 <div v-if="showLoadModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
-    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content bg-dark text-white">
             <div class="modal-header border-secondary">
                 <h5 class="modal-title">
@@ -6760,7 +7161,7 @@ export default {
 
 <!--Save Modal-->
 <div v-if="showSaveModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
-    <div class="modal-dialog modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -6800,14 +7201,14 @@ export default {
                 <div v-if="!saveAsProcess.inProgress">
                     <div class="mb-3">
                         <label class="form-label">
-                            {{ saveForm.saveToDlux ? 'Document Name' : 'Filename' }}
-                            <span v-if="saveForm.saveToDlux" class="small text-muted">(Display name for
+                            {{ saveForm.storageType === 'cloud' ? 'Document Name' : 'Filename' }}
+                            <span v-if="saveForm.storageType === 'cloud'" class="small text-muted">(Display name for
                                 collaborative document)</span>
                         </label>
-                        <input v-model="saveForm.filename" class="form-control"
-                            :placeholder="saveForm.saveToDlux ? 'Enter document name...' : 'Enter filename...'"
+                        <input v-model="saveForm.filename" class="form-control bg-dark"
+                            :placeholder="saveForm.storageType === 'cloud' ? 'Enter document name...' : 'Enter filename...'"
                             @keyup.enter="performSave">
-                        <div v-if="saveForm.saveToDlux" class="form-text">
+                        <div v-if="saveForm.storageType === 'cloud'" class="form-text">
                             <small class="text-muted">
                                 <i class="fas fa-info-circle me-1"></i>
                                 A unique technical ID will be auto-generated for this document
@@ -6817,35 +7218,34 @@ export default {
 
                     <div class="mb-3">
                         <div class="form-check">
-                            <input v-model="saveForm.saveLocally" class="form-check-input" type="checkbox"
-                                id="saveLocally">
+                            <input v-model="saveForm.storageType" class="form-check-input" type="radio"
+                                id="saveLocally" value="local">
                             <label class="form-check-label" for="saveLocally">
-                                <i class="fas fa-file me-1"></i>Save locally
+                                <i class="fas fa-file ms-1 me-1 fa-fw"></i>Save locally
                             </label>
                         </div>
                         <div class="form-check">
-                            <input v-model="saveForm.saveToDlux" class="form-check-input" type="checkbox"
-                                id="saveToDlux" :disabled="!isAuthenticated || isAuthExpired">
-                            <label class="form-check-label" for="saveToDlux"
-                                :class="{'text-muted': !isAuthenticated || isAuthExpired }">
-                                <i class="fas fa-users me-1"></i>Save to DLUX collaborative documents
-                                <span v-if="!isAuthenticated || isAuthExpired" class="small text-warning ms-1">
-                                    (Authentication required)
-                                </span>
+                            <input v-model="saveForm.storageType" class="form-check-input" type="radio"
+                                id="saveToDlux" value="cloud">
+                            <label class="form-check-label" for="saveToDlux">
+                                <i class="fas fa-cloud ms-1 me-1 fa-fw"></i>Save to DLUX for collaboration
                             </label>
                         </div>
-                        <div v-if="(!isAuthenticated || isAuthExpired) && saveForm.saveToDlux"
-                            class="alert alert-warning small mt-2">
-                            <i class="fas fa-exclamation-triangle me-1"></i>
-                            You need to authenticate to save collaborative documents.
-                            <button @click="requestAuthentication(); showSaveModal = false"
-                                class="btn btn-link btn-sm p-0 ms-1">
-                                Authenticate now
+                        <div v-if="saveForm.storageType === 'cloud' && (!isAuthenticated || isAuthExpired)"
+                            class="alert alert-warning mt-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Authentication Required</strong>
+                            </div>
+                            <p class="mb-2">You need to authenticate with Hive to save documents to the cloud.</p>
+                            <button @click="requestAuthentication()" 
+                                class="btn btn-primary btn-sm">
+                                <i class="fas fa-key me-2"></i>Authenticate with Hive
                             </button>
                         </div>
                     </div>
 
-                    <div v-if="saveForm.saveToDlux" class="mb-3">
+                    <div v-if="saveForm.storageType === 'cloud'" class="mb-3">
                         <div class="form-check">
                             <input v-model="saveForm.isPublic" class="form-check-input" type="checkbox" id="isPublic">
                             <label class="form-check-label" for="isPublic">
@@ -6864,7 +7264,7 @@ export default {
                             This will change the display name of the current collaborative document. The
                             technical document ID will remain the same.
                         </div>
-                        <div v-else-if="saveForm.isNewDocument && saveForm.saveToDlux"
+                        <div v-else-if="saveForm.isNewDocument && saveForm.storageType === 'cloud'"
                             class="alert alert-info small mt-2">
                             <i class="fas fa-info-circle me-1"></i>
                             <strong>{{ saveForm.filename ? 'Save As' : 'New Collaborative Document' }}:</strong>
@@ -6894,7 +7294,7 @@ export default {
 
 <!--Share Modal-->
 <div v-if="showShareModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5)">
-    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
@@ -7017,7 +7417,7 @@ export default {
 
 <!-- JSON Preview Modal -->
 <div v-if="showJsonPreviewModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.8)">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content bg-dark text-white">
             <div class="modal-header border-secondary">
                 <h5 class="modal-title">
@@ -7151,9 +7551,120 @@ export default {
             </div>
         </div>
     </div>
-</div>`,
+</div>
+</teleport>`,
     
     style: `
+        /* Unified Status Indicator */
+        .unified-status-indicator {
+            position: relative;
+            margin-left: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .unified-status-indicator:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .status-main {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-icon {
+            font-size: 1.1em;
+        }
+
+        .status-message {
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+
+        .status-details {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            padding: 1rem;
+            background: var(--bs-dark);
+            border: 1px solid var(--bs-secondary);
+            border-radius: 0.375rem;
+            min-width: 250px;
+            z-index: 1000;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        .details-text {
+            font-size: 0.875rem;
+            color: var(--bs-light);
+            margin-bottom: 0.75rem;
+        }
+
+        .status-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .status-action-btn {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            color: var(--bs-light);
+            background: transparent;
+            border: 1px solid var(--bs-secondary);
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .status-action-btn:hover {
+            background: var(--bs-secondary);
+        }
+
+        /* Status-specific styles */
+        .status-saving {
+            color: var(--bs-warning);
+        }
+
+        .status-saved {
+            color: var(--bs-success);
+        }
+
+        .status-warning {
+            color: var(--bs-warning);
+        }
+
+        .status-offline {
+            color: var(--bs-secondary);
+        }
+
+        .status-connecting {
+            color: var(--bs-info);
+        }
+
+        .status-syncing {
+            color: var(--bs-info);
+        }
+
+        .status-collaborating {
+            color: var(--bs-primary);
+        }
+
+        .status-synced {
+            color: var(--bs-success);
+        }
+
+        .status-error {
+            color: var(--bs-danger);
+        }
+
+        .status-unknown {
+            color: var(--bs-secondary);
+        }
+
         /* JSON Preview Modal Styles */
         .nav-tabs .nav-link {
             background-color: #343a40;
@@ -7230,5 +7741,7 @@ export default {
                 font-size: 0.75em;
             }
         }
+        
+        /* Dropdown submenu styles are now in global custom.scss */
     `
 }; 
