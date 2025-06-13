@@ -1,4 +1,4 @@
-this.version = "2025.06.13.3";
+this.version = "2025.06.13.4";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.13.3",
-  "generated": "2025-06-13T20:20:35Z",
+  "version": "2025.06.13.4",
+  "generated": "2025-06-13T20:52:18Z",
   "files": {
-    "/nfts/set/index.html": {
-      "checksum": "54f1eb73c26f7480edb19e21fa64a57d",
-      "size": 43225,
-      "priority": "important"
-    },
     "/nfts/sets/index.html": {
       "checksum": "f8522bbadcf9ac6f4d8112b8bca63b9b",
       "size": 9939,
@@ -631,7 +626,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "76c25ba65a31493a90d79fc76010c2ff",
+      "checksum": "ef0a1aeb93f3b56e160e33491b9110e5",
       "size": 7299,
       "priority": "important"
     },
@@ -705,12 +700,12 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
