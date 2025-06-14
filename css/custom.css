@@ -15623,4 +15623,188 @@ pre {
   pre {
     font-size: 0.75em;
   }
+}
+/* Unified Status Indicator */
+.unified-status-indicator {
+  position: relative;
+  margin-left: 1rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.unified-status-indicator:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.status-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-icon {
+  font-size: 1.1em;
+}
+
+.status-message {
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.status-details {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background: var(--bs-dark);
+  border: 1px solid var(--bs-secondary);
+  border-radius: 0.375rem;
+  min-width: 250px;
+  z-index: 1000;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.details-text {
+  font-size: 0.875rem;
+  color: var(--bs-light);
+  margin-bottom: 0.75rem;
+}
+
+.status-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.status-action-btn {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--bs-light);
+  background: transparent;
+  border: 1px solid var(--bs-secondary);
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-action-btn:hover {
+  background: var(--bs-secondary);
+}
+
+/* Status-specific styles */
+.status-saving {
+  color: var(--bs-warning);
+}
+
+.status-saved {
+  color: var(--bs-success);
+}
+
+.status-warning {
+  color: var(--bs-warning);
+}
+
+.status-offline {
+  color: var(--bs-secondary);
+}
+
+.status-connecting {
+  color: var(--bs-info);
+}
+
+.status-syncing {
+  color: var(--bs-info);
+}
+
+.status-collaborating {
+  color: var(--bs-primary);
+}
+
+.status-synced {
+  color: var(--bs-success);
+}
+
+.status-error {
+  color: var(--bs-danger);
+}
+
+.status-unknown {
+  color: var(--bs-secondary);
+}
+
+/* JSON Preview Modal Styles */
+.nav-tabs .nav-link {
+  background-color: #343a40;
+  border-color: #495057;
+  color: #adb5bd;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: #495057;
+  border-color: #6c757d;
+  color: #fff;
+}
+
+.nav-tabs .nav-link:hover {
+  background-color: #495057;
+  border-color: #6c757d;
+  color: #fff;
+}
+
+/* JSON syntax highlighting for better readability */
+pre {
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  line-height: 1.4;
+}
+
+/* Modal backdrop for JSON preview */
+.modal[style*="background: rgba(0,0,0,0.8)"] {
+  backdrop-filter: blur(2px);
+}
+
+/* Scrollable JSON content */
+.tab-pane pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Copy button hover effect */
+.btn-outline-success:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Alert styling improvements */
+.alert {
+  border-radius: 8px;
+}
+
+.alert ul {
+  padding-left: 1.2rem;
+}
+
+/* Tab content spacing */
+.tab-content {
+  min-height: 400px;
+}
+
+/* Modal size adjustments */
+.modal-xl {
+  max-width: 90vw;
+}
+
+@media (max-width: 768px) {
+  .modal-xl {
+    max-width: 95vw;
+    margin: 0.5rem;
+  }
+  .nav-tabs .nav-link {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+  }
+  pre {
+    font-size: 0.75em;
+  }
 }/*# sourceMappingURL=custom.css.map */

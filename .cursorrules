@@ -1,0 +1,79 @@
+# Cursor AI Rules for DLUX IOV Project
+
+## TipTap Editor Validation Rules
+
+### CRITICAL: Always Consult TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md
+
+When making ANY changes to `js/tiptap-editor-with-file-menu.js`, you MUST:
+
+1. **Read TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md first**
+2. **Validate changes against the decision tree**
+3. **Follow the three-phase architecture**
+4. **Never violate TipTap best practices**
+
+### TipTap Editor Change Validation Checklist
+
+Before making changes to `js/tiptap-editor-with-file-menu.js`, verify:
+
+#### ✅ Editor Lifecycle Rules
+- [ ] Are you creating editors with static extension configuration?
+- [ ] Are you destroying editors only when switching modes or documents?
+- [ ] Are you avoiding dynamic extension addition/removal?
+- [ ] Are you following the offline-first loading pattern?
+
+#### ✅ Y.js Document Rules  
+- [ ] Are you creating Y.js documents before editors (when collaborative)?
+- [ ] Are you using consistent Y.js types (XmlFragment for TipTap)?
+- [ ] Are you implementing lazy Y.js creation for basic editors?
+- [ ] Are you avoiding Y.js type conflicts?
+
+#### ✅ Architecture Compliance
+- [ ] Does this follow the three-phase architecture?
+  - Phase 1: Basic Editor (offline-first)
+  - Phase 2: Lazy Y.js (after user input)  
+  - Phase 3: Collaborative Mode (cloud connection)
+- [ ] Are you loading collaborative editors only for collaborative docs/author links?
+- [ ] Are you preserving content during editor transitions?
+
+#### ✅ Performance Rules
+- [ ] Are you avoiding unnecessary editor re-creation?
+- [ ] Are you cleaning up resources properly?
+- [ ] Are you using lightweight sync for basic+Y.js mode?
+- [ ] Are you avoiding editor destruction for content updates?
+
+### Enforcement Actions
+
+If changes violate these rules:
+1. **STOP** - Do not proceed with the change
+2. **CONSULT** - Read TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md
+3. **REDESIGN** - Modify approach to comply with best practices
+4. **VALIDATE** - Ensure all checklist items are satisfied
+
+### Quick Reference Decision Tree
+
+```
+Change Request for tiptap-editor-with-file-menu.js
+├── Editor Creation/Destruction? ──> Check Editor Lifecycle Rules
+├── Y.js Document Changes? ──> Check Y.js Document Rules  
+├── Mode Switching Logic? ──> Check Architecture Compliance
+├── Performance Impact? ──> Check Performance Rules
+└── Any TipTap Change ──> ALWAYS consult TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md
+```
+
+## General Project Rules
+
+### Code Organization
+- Use methods-common for any code that will be in more than one location
+- Consolidate duplicate code appropriately
+- This project has an active live server at port 5508 - no need to manage the server
+
+### File Modification Priority
+1. Always check if functionality exists in methods-common first
+2. Prefer editing existing files over creating new ones
+3. Never create documentation files unless explicitly requested
+
+### TipTap-Specific Patterns
+- Follow the offline-first collaborative architecture
+- Implement proper editor lifecycle management
+- Use lazy Y.js creation patterns
+- Maintain TipTap/ProseMirror best practices compliance 
