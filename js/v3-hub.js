@@ -269,6 +269,7 @@ createApp({
       postSelect: {
         sort: "time",
         searchTerm: "",
+        lastSearchTerm: "",
         bitMask: 0,
         entry: "new",
         search: {
@@ -392,6 +393,10 @@ createApp({
         },
       },
       displayPosts: [],
+      masonryColumns: [],
+      columnCount: 3,
+      resizeTimeout: null,
+      newPostsCount: 0,
       displayPost: {
         index: 0,
         item: {
@@ -420,6 +425,7 @@ createApp({
       },
       authors: {},
       boundScrollHandler: null, // Initialize scroll handler reference
+      boundResizeHandler: null, // Initialize resize handler reference
       videoObserver: null,
     };
   },
@@ -442,6 +448,82 @@ createApp({
   },
   methods: {
     ...MCommon,
+    calculateColumnCount() {
+      const width = window.innerWidth;
+      let columns;
+      if (width < 576) columns = 1;
+      else if (width < 992) columns = 2;
+      else columns = 3;
+      
+      console.log('calculateColumnCount:', { width, columns });
+      return columns;
+    },
+    initializeMasonryColumns() {
+      this.columnCount = this.calculateColumnCount();
+      this.masonryColumns = Array.from({ length: this.columnCount }, () => []);
+      console.log('initializeMasonryColumns:', { columnCount: this.columnCount, columnsLength: this.masonryColumns.length });
+    },
+    getShortestColumnIndex() {
+      if (!this.masonryColumns.length) return 0;
+      
+      let shortestIndex = 0;
+      let shortestHeight = this.masonryColumns[0].length;
+      
+      for (let i = 1; i < this.masonryColumns.length; i++) {
+        if (this.masonryColumns[i].length < shortestHeight) {
+          shortestHeight = this.masonryColumns[i].length;
+          shortestIndex = i;
+        }
+      }
+      return shortestIndex;
+    },
+    addPostToMasonry(post, isNew = false) {
+      if (!post || !this.masonryColumns.length) return;
+      
+      const postWithFlag = { ...post, isNew };
+      const shortestColumn = this.getShortestColumnIndex();
+      this.masonryColumns[shortestColumn].push(postWithFlag);
+      
+      console.log('addPostToMasonry:', { post: post.title || post.author, column: shortestColumn, isNew });
+      
+      if (isNew) {
+        // Remove isNew flag after animation
+        setTimeout(() => {
+          postWithFlag.isNew = false;
+        }, 600);
+      }
+    },
+    rebuildMasonry() {
+      // Store all posts
+      const allPosts = [];
+      this.masonryColumns.forEach(column => {
+        column.forEach(post => {
+          const cleanPost = { ...post };
+          delete cleanPost.isNew;
+          allPosts.push(cleanPost);
+        });
+      });
+      
+      // Recalculate columns
+      this.initializeMasonryColumns();
+      
+      // Redistribute posts
+      allPosts.forEach(post => {
+        this.addPostToMasonry(post, false);
+      });
+    },
+    handleResize() {
+      // Debounce resize events
+      clearTimeout(this.resizeTimeout);
+      this.resizeTimeout = setTimeout(() => {
+        const newColumnCount = this.calculateColumnCount();
+        console.log('Resize detected:', { currentColumns: this.columnCount, newColumns: newColumnCount, width: window.innerWidth });
+        if (newColumnCount !== this.columnCount) {
+          console.log('Rebuilding masonry due to column count change');
+          this.rebuildMasonry();
+        }
+      }, 100);
+    },
     reply(deets) {
       console.log('getReply:', deets)
       if (!deets.json_metadata) deets.json_metadata = JSON.stringify({})
@@ -987,6 +1069,8 @@ createApp({
     switchTab(tab) {
       this.currentTab = tab;
       this.displayPosts = [];
+      this.initializeMasonryColumns();
+      this.newPostsCount = 0;
 
       if (tab === 'hub') {
         // Reset pagination for hub (new posts)
@@ -1124,6 +1208,8 @@ createApp({
         this.postSelect.communities.p = false;
         this.communities = [];
         this.displayPosts = [];
+        this.initializeMasonryColumns();
+        this.newPostsCount = 0;
 
         // Optionally get community info (for future use)
         this.getCommunityInfo(this.selectedCommunity);
@@ -1137,9 +1223,16 @@ createApp({
         if (this.postSelect.types[type].checked)
           bitMask += this.postSelect.types[type].bitFlag;
       }
-      if (this.postSelect.bitMask != bitMask) {
+      
+      // Check if filter or search term changed
+      var searchChanged = this.postSelect.lastSearchTerm !== this.postSelect.searchTerm;
+      
+      if (this.postSelect.bitMask != bitMask || searchChanged) {
         this.postSelect.bitMask = bitMask;
+        this.postSelect.lastSearchTerm = this.postSelect.searchTerm;
         this.displayPosts = [];
+        this.initializeMasonryColumns();
+        this.newPostsCount = 0;
         this[this.postSelect.entry] = [];
         this.postSelect[this.postSelect.entry].o = 0;
         this.postSelect[this.postSelect.entry].e = false;
@@ -1163,33 +1256,216 @@ createApp({
               this.postSelect[this.postSelect.entry].a;
             if (res.result.length < this.postSelect[this.postSelect.entry].a)
               this.postSelect[this.postSelect.entry].e = true;
+            
+            // Collect posts that need full details
+            var postsNeedingDetails = [];
+            
             for (var i = 0; i < res.result.length; i++) {
               const key = `/@${res.result[i].author}/${res.result[i].permlink}`;
               if (!this.posturls[key]) {
                 this.posturls[key] = res.result[i];
               }
               this[this.postSelect.entry].push(key);
-            }
-            var called = false;
-            for (var post in this.posturls) {
-              if (!this.posturls[post].created) {
-                this.getContent(
-                  this.posturls[post].author,
-                  this.posturls[post].permlink
-                );
-                called = true;
+              
+              // Check if this post needs full details from bridge API
+              if (!this.posturls[key].created) {
+                postsNeedingDetails.push({
+                  author: res.result[i].author,
+                  permlink: res.result[i].permlink,
+                  key: key
+                });
               }
-              authors.push(this.posturls[post].author);
+              authors.push(res.result[i].author);
             }
-            if (!called) this.selectPosts();
+            
+            // Get full post details using bridge API in batches
+            if (postsNeedingDetails.length > 0) {
+              this.getHubPostDetails(postsNeedingDetails);
+            } else {
+              this.selectPosts();
+            }
+            
             authors = [...new Set(authors)];
             this.getHiveAuthors(authors);
           })
-          .catch(error => { // Add catch
+          .catch(error => {
             console.error('Error fetching posts:', error);
-            this.postSelect[this.postSelect.entry].p = false; // Reset pending flag on error
+            this.postSelect[this.postSelect.entry].p = false;
           });
       }
+    },
+    getHubPostDetails(postsNeedingDetails) {
+      // Process posts in batches to avoid overwhelming the API
+      const batchSize = 5; // Process 5 posts at a time
+      let currentBatch = 0;
+      
+      const processBatch = async () => {
+        const startIndex = currentBatch * batchSize;
+        const endIndex = Math.min(startIndex + batchSize, postsNeedingDetails.length);
+        const batch = postsNeedingDetails.slice(startIndex, endIndex);
+        
+        if (batch.length === 0) {
+          // All batches processed, update UI
+          this.selectPosts();
+          return;
+        }
+        
+        // Create promises for all posts in this batch
+        const promises = batch.map(post => this.getPostWithBridge(post.author, post.permlink, post.key));
+        
+        try {
+          await Promise.all(promises);
+        } catch (error) {
+          console.error('Error in batch processing:', error);
+        }
+        
+        // Process next batch after a short delay
+        currentBatch++;
+        if (currentBatch * batchSize < postsNeedingDetails.length) {
+          setTimeout(() => processBatch(), 100); // Small delay between batches
+        } else {
+          // All done, update UI
+          this.selectPosts();
+        }
+      };
+      
+      processBatch();
+    },
+    getPostWithBridge(author, permlink, key) {
+      return new Promise((resolve, reject) => {
+        fetch(this.hapi, {
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            method: "bridge.get_post",
+            params: {
+              author: author,
+              permlink: permlink,
+              observer: this.account || ""
+            },
+            id: 1
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          method: "POST",
+        })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res.result) {
+              const post = res.result;
+              
+              // Update the post with full details, keeping existing DLUX-specific data
+              this.posturls[key] = {
+                ...this.posturls[key], // Keep DLUX data from data.dlux.io
+                ...post, // Add Hive post data
+                slider: 10000,
+                flag: false,
+                upVotes: 0,
+                downVotes: 0,
+                edit: false,
+                hasVoted: false,
+                contract: {},
+              };
+              
+              // Process vote data
+              if (post.active_votes && post.active_votes.length > 0) {
+                for (var j = 0; j < post.active_votes.length; j++) {
+                  if (post.active_votes[j].rshares > 0) {
+                    this.posturls[key].upVotes++;
+                  } else if (post.active_votes[j].rshares < 0) {
+                    this.posturls[key].downVotes++;
+                  }
+
+                  if (post.active_votes[j].voter === this.account) {
+                    this.posturls[key].slider = post.active_votes[j].percent;
+                    this.posturls[key].hasVoted = true;
+                  }
+                }
+              }
+
+              if (this.posturls[key].slider < 0) {
+                this.posturls[key].slider = this.posturls[key].slider * -1;
+                this.posturls[key].flag = true;
+              }
+
+              // Process JSON metadata
+              try {
+                if (typeof post.json_metadata === 'string') {
+                  this.posturls[key].json_metadata = JSON.parse(post.json_metadata);
+                }
+                this.posturls[key].pic = this.picFind(this.posturls[key].json_metadata);
+              } catch (e) {
+                console.log(key, "no JSON?");
+                this.posturls[key].json_metadata = {};
+              }
+
+              // Determine post type based on DLUX metadata
+              var contracts = false;
+              var type = "Blog";
+              if (this.posturls[key].json_metadata.assets) {
+                for (var i = 0; i < this.posturls[key].json_metadata.assets.length; i++) {
+                  if (this.posturls[key].json_metadata.assets[i].contract) {
+                    this.posturls[key].contract[this.posturls[key].json_metadata.assets[i].contract] = {};
+                    contracts = true;
+                  }
+                }
+              }
+              
+              try {
+                if (
+                  "QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k" ==
+                  this.posturls[key].json_metadata.vrHash ||
+                  "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
+                  this.posturls[key].json_metadata.vrHash ||
+                  "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV" ==
+                  this.posturls[key].json_metadata.vrHash ||
+                  "Qma4dk3mWP325HrHYBDz3UdL9h1A6q8CSvZdc8JhqfgiMp" == this.posturls[key].json_metadata.vrHash
+                )
+                  type = "360";
+                else if (this.posturls[key].json_metadata.vrHash)
+                  type = "VR";
+                else if (this.posturls[key].json_metadata.arHash)
+                  type = "AR";
+                else if (this.posturls[key].json_metadata.appHash)
+                  type = "APP";
+                else if (this.posturls[key].json_metadata.audHash)
+                  type = "Audio";
+                else if (this.posturls[key].json_metadata.vidHash)
+                  type = "Video";
+              } catch (e) {
+                console.log(key, e, "no JSON?");
+              }
+              this.posturls[key].type = type;
+              
+              if (contracts) {
+                this.getContracts(key);
+              }
+
+              // Set reputation using post data
+              if (post.author_reputation) {
+                this.posturls[key].rep = post.author_reputation;
+              } else if (this.authors[post.author] && this.authors[post.author].reputation) {
+                this.posturls[key].rep = this.authors[post.author].reputation;
+              } else {
+                this.posturls[key].rep = "...";
+                this.rep(key);
+              }
+
+              this.posturls[key].preview = this.removeMD(post.body).substr(0, 250);
+              this.posturls[key].ago = this.timeSince(post.created);
+              this.posturls[key].url = `/dlux${key}`;
+              
+              resolve();
+            } else {
+              console.error('No result from bridge.get_post for', author, permlink);
+              reject(new Error('No result from bridge.get_post'));
+            }
+          })
+          .catch(error => {
+            console.error(`Error fetching post details @${author}/${permlink}:`, error);
+            reject(error);
+          });
+      });
     },
     getHivePosts() {
       if (
@@ -1376,11 +1652,36 @@ createApp({
       }
     },
     selectPosts(modal) {
-      var arr = [];
+      // Track which posts are already displayed to avoid reorganization
+      var existingKeys = new Set();
+      this.masonryColumns.forEach(column => {
+        column.forEach(post => {
+          existingKeys.add(`/@${post.author}/${post.permlink}`);
+        });
+      });
+      
+      var newPosts = [];
+      
       for (var i = 0; i < this[this.postSelect.entry].length; i++) {
-        if (this.posturls[this[this.postSelect.entry][i]]) arr.push(this.posturls[this[this.postSelect.entry][i]]);
+        var postKey = this[this.postSelect.entry][i];
+        if (this.posturls[postKey] && !existingKeys.has(postKey)) {
+          newPosts.push(this.posturls[postKey]);
+        }
       }
-      this.displayPosts = arr
+      
+      // Add new posts to masonry columns
+      if (newPosts.length > 0) {
+        newPosts.forEach(post => {
+          this.addPostToMasonry(post, true);
+        });
+        
+        // Update displayPosts for compatibility
+        this.displayPosts = [];
+        this.masonryColumns.forEach(column => {
+          this.displayPosts.push(...column);
+        });
+      }
+      
       if (modal) {
         this[modal[0]].items = this.displayPosts;
         this[modal[0]].item = this[modal[0]].items[modal[1]];
@@ -1880,8 +2181,34 @@ createApp({
         this.updateReputationForPosts(existingAuthors);
       }
     },
+    updateReputationForPosts(authors) {
+      console.log('Updating reputation for', authors.length, 'authors');
+      for (const author of authors) {
+        if (author && author.name && author.reputation) {
+          let updatedCount = 0;
+          for (const postKey in this.posturls) {
+            if (this.posturls[postKey].author === author.name && this.posturls[postKey].rep === "...") {
+              // Try to use author_reputation from post first, then fall back to author reputation
+              const post = this.posturls[postKey];
+              if (post.author_reputation) {
+                post.rep = post.author_reputation;
+              } else {
+                post.rep = author.reputation;
+              }
+              updatedCount++;
+            }
+          }
+          if (updatedCount > 0) {
+            console.log(`Updated ${updatedCount} posts for ${author.name}`);
+          }
+        }
+      }
+    },
   },
   mounted() {
+    // Initialize masonry system
+    this.initializeMasonryColumns();
+    
     // Initialize with hub tab as default
     this.currentTab = 'hub';
     this.postSelect.entry = 'new';
@@ -1902,7 +2229,9 @@ createApp({
     } else {
       this.getHubPosts();
       this.boundScrollHandler = this.handleScroll.bind(this); // Create bound handler
+      this.boundResizeHandler = this.handleResize.bind(this); // Create bound resize handler
       document.body.addEventListener('scroll', this.boundScrollHandler); // Use bound handler
+      window.addEventListener('resize', this.boundResizeHandler); // Add resize listener
     }
     this.getStats()
     this.getSPKStats()
@@ -1919,6 +2248,12 @@ createApp({
   unmounted() {
     if (this.boundScrollHandler) { // Check if handler exists before removing
       document.body.removeEventListener('scroll', this.boundScrollHandler); // Use bound handler
+    }
+    if (this.boundResizeHandler) { // Check if resize handler exists before removing
+      window.removeEventListener('resize', this.boundResizeHandler); // Remove resize handler
+    }
+    if (this.resizeTimeout) { // Clear any pending resize timeout
+      clearTimeout(this.resizeTimeout);
     }
 
     // Clean up video observer and HLS instances
@@ -1939,6 +2274,7 @@ createApp({
       if (a.searchTerm != b.searchTerm || a.bitMask != b.bitMask) {
         console.log('Watched')
         this.displayPosts = []
+        this.initializeMasonryColumns()
         this[this.postSelect.entry] = []
         this.postSelect[this.postSelect.entry].o = 0
         this.postSelect[this.postSelect.entry].e = false;

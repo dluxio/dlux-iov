@@ -40,31 +40,86 @@
     <link href="/css/smde-comment.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
     <script src="/reg-sw.js"></script>
-    <!-- Masonry Layout CSS -->
+    <!-- JavaScript Masonry Layout CSS -->
     <style>
         .masonry-grid {
-            column-count: 3;
-            column-gap: 1rem;
-            column-fill: balance;
-        }
-        
-        .masonry-item {
-            break-inside: avoid;
-            margin-bottom: 1rem;
-            display: inline-block;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
             width: 100%;
         }
         
-        @media (max-width: 991px) {
-            .masonry-grid {
-                column-count: 2;
+        .masonry-column {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-width: 0; /* Prevent flex items from overflowing */
+            overflow: hidden; /* Prevent content from breaking layout */
+        }
+        
+        /* Fixed column widths based on column count */
+        .masonry-grid.columns-1 .masonry-column {
+            width: 100%;
+        }
+        
+        .masonry-grid.columns-2 .masonry-column {
+            width: calc(50% - 0.5rem);
+        }
+        
+        .masonry-grid.columns-3 .masonry-column {
+            width: calc(33.333% - 0.667rem);
+        }
+        
+        .masonry-item {
+            width: 100%;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            overflow: hidden; /* Prevent card content from breaking layout */
+        }
+        
+        .masonry-item.entering {
+            opacity: 0;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
         
-        @media (max-width: 575px) {
-            .masonry-grid {
-                column-count: 1;
-            }
+        /* Ensure cards and their content don't break layout */
+        .masonry-item .card {
+            max-width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .masonry-item .card img {
+            max-width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+        
+        .masonry-item .card .card-body,
+        .masonry-item .card .card-header {
+            min-width: 0;
+            overflow: hidden;
+        }
+        
+        .masonry-item .card .imagebox {
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .masonry-item .card .imagebox img {
+            width: 100% !important;
+            max-width: 100% !important;
         }
     </style>
 
@@ -200,8 +255,8 @@
                                         </span>
                                         <input type="search" class="ps-4 form-control text-info border-light"
                                             placeholder="Search" v-model="postSelect.searchTerm"
-                                            @keyup.enter="postSelect.entry = 'search';getPosts()"
-                                            @search="postSelect.entry = 'search';getPosts()">
+                                            @keyup.enter="postSelect.entry = 'search';displayPosts = [];getHubPosts()"
+                                            @search="postSelect.entry = 'search';displayPosts = [];getHubPosts()">
                                     </div>
                                 </div>
 
@@ -287,7 +342,7 @@
 
             <!--main view-->
             <div class="container-fluid d-flex flex-grow-1 mt-4 mb-3 align-items-center justify-content-center"
-                v-if="displayPosts.length == 0">
+                v-if="masonryColumns.length == 0 || masonryColumns.every(col => col.length == 0)">
                 <div class="card" style="max-width: 600px;">
                     <div class="card-body text-center">
                         <div style="font-size: 10em;" class="text-white-50 ">
@@ -297,14 +352,17 @@
                     </div>
                 </div>
             </div>
-            <div class="container-fluid flex-grow-1 pt-4" v-if="displayPosts.length != 0">
-                <div class="masonry-grid">
-                    <div class="masonry-item" v-for="post in displayPosts" :key="post.url">
-                        <card-vue :post="post" :account="account" :has_ipfs="spkapi.storage?.length ? true : false"
-                            :post_select="postSelect" :voteval="voteVal" :head_block="spkapi.head_block"
-                            :broca_refill="sstats.broca_refill" :broca="spkapi.broca" :spk_power="spkapi.spk_power"
-                            :contracts="contracts" :extendcost="extendcost" @tosign="sendIt($event)"
-                            @modalselect="modalSelect($event)" @vote="vote($event)"></card-vue>
+            <div class="container-fluid flex-grow-1 pt-4" v-if="masonryColumns.length > 0">
+                <div class="masonry-grid" :class="`columns-${columnCount}`">
+                    <div class="masonry-column" v-for="(column, columnIndex) in masonryColumns" :key="columnIndex">
+                        <div class="masonry-item" v-for="post in column" :key="post.url"
+                             :class="{ 'entering': post.isNew }">
+                            <card-vue :post="post" :account="account" :has_ipfs="spkapi.storage?.length ? true : false"
+                                :post_select="postSelect" :voteval="voteVal" :head_block="spkapi.head_block"
+                                :broca_refill="sstats.broca_refill" :broca="spkapi.broca" :spk_power="spkapi.spk_power"
+                                :contracts="contracts" :extendcost="extendcost" @tosign="sendIt($event)"
+                                @modalselect="modalSelect($event)" @vote="vote($event)"></card-vue>
+                        </div>
                     </div>
                 </div>
             </div>
