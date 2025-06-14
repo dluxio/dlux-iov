@@ -63,7 +63,7 @@ export default {
           class="img-fluid w-100"
           :src="displayImage || '/img/dlux-logo-icon.png'"
           style="height: 360px; object-fit: cover;" />
-        <div class="caption text-white w-100 h-100 d-flex position-absolute top-0 start-0">
+        <div class="caption text-white d-flex">
           <div class="m-auto p-3 text-center">
             <p class="mb-3">
               <i :class="post_select.types[post.type].icon"></i>
@@ -78,7 +78,7 @@ export default {
     </a>
   </div>
 
-  <!-- Blog posts: image carousel or single image -->
+  <!-- Blog posts: image carousel or single image (no overlay) -->
   <div v-if="post.type === 'Blog' && (displayImages.length > 0 || displayImage)" 
     class="position-relative overflow-hidden" 
     :id="'imageSection-' + post.author + '-' + post.permlink">
@@ -90,16 +90,6 @@ export default {
           :src="currentImageUrl"
           @error="hideBlogImage($event, post.author, post.permlink)"
           style="height: 360px; object-fit: cover;" />
-        <div class="caption text-white w-100 h-100 d-flex position-absolute top-0 start-0">
-          <div class="m-auto p-3 text-center">
-            <p class="mb-3">
-              <i class="fa-solid fa-book me-2"></i>Read Full Post
-            </p>
-            <button class="btn btn-lg btn-primary px-4 rounded-pill">
-              Read<i class="ms-2 fas fa-eye"></i>
-            </button>
-          </div>
-        </div>
       </div>
     </a>
 
