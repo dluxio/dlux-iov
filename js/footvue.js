@@ -32,7 +32,7 @@ export default {
   <div class="footer-copyright text-center text-white-50 pb-1"> 
   <a href="/about#terms" class="text-white-50 text-decoration-none">Terms of Service</a> | 
     <a href="/about#privacy" class="text-white-50 text-decoration-none">Privacy Policy</a></div>
-    <a href="https://dlux.io/m/c" class="text-white-50 text-decoration-none">Test 360</a> 
+    <a href="https://vue.dlux.io/m/c" class="text-white-50 text-decoration-none">Test 360</a> 
   </footer>
   `,
 };
