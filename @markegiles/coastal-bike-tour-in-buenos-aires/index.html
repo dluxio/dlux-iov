@@ -90,6 +90,16 @@
         }
       });
 
+      // Billboard component to make text always face camera
+      AFRAME.registerComponent('billboard', {
+        tick: function() {
+          const camera = document.querySelector('#head');
+          if (camera) {
+            this.el.object3D.lookAt(camera.object3D.position);
+          }
+        }
+      });
+
       // Component for VR-friendly buttons
       AFRAME.registerComponent('vr-button', {
         schema: {
@@ -311,29 +321,24 @@
             primitive: 'sphere',
             radius: 0.15
           });
+          
+          // Add IPFS prefix to thumbnail URL if needed
+          const thumbUrl = this.data.thumbUrl.startsWith('Qm') ? `https://ipfs.dlux.io/ipfs/${this.data.thumbUrl}` : this.data.thumbUrl;
           this.el.setAttribute('material', {
-            src: this.data.thumbUrl,
+            src: thumbUrl,
             transparent: true,
-            opacity: 0.8
+            opacity: 0.8,
+            emissive: '#4CC3D9',
+            emissiveIntensity: 0.2
           });
           
-          // Add floating animation
-          this.el.setAttribute('animation__float', {
-            property: 'position',
-            to: `${this.el.getAttribute('position').x} ${this.el.getAttribute('position').y + 0.1} ${this.el.getAttribute('position').z}`,
+          // Add subtle pulsing glow only
+          this.el.setAttribute('animation__pulse', {
+            property: 'material.emissiveIntensity',
+            to: '0.4',
             direction: 'alternate',
             loop: true,
             dur: 3000,
-            easing: 'easeInOutSine'
-          });
-          
-          // Add pulsing glow
-          this.el.setAttribute('animation__pulse', {
-            property: 'material.emissiveIntensity',
-            to: '0.3',
-            direction: 'alternate',
-            loop: true,
-            dur: 2000,
             easing: 'easeInOutSine'
           });
           
@@ -342,15 +347,16 @@
           this.el.setAttribute('hoverable', '');
           this.el.setAttribute('grabbable', '');
           
-          // Create label
+          // Create label that always faces camera
           this.labelEl = document.createElement('a-text');
           this.labelEl.setAttribute('value', this.data.label);
           this.labelEl.setAttribute('align', 'center');
           this.labelEl.setAttribute('color', 'white');
           this.labelEl.setAttribute('background-color', 'rgba(0,0,0,0.8)');
-          this.labelEl.setAttribute('scale', '0.5 0.5 0.5');
-          this.labelEl.setAttribute('position', '0 0.3 0');
+          this.labelEl.setAttribute('scale', '0.6 0.6 0.6');
+          this.labelEl.setAttribute('position', '0 0.35 0');
           this.labelEl.setAttribute('look-at', '#head');
+          this.labelEl.setAttribute('billboard', '');
           this.el.appendChild(this.labelEl);
         },
         
@@ -433,9 +439,13 @@
             z: (point.z / distance) * commentRadius
           };
           
-          // Convert to spherical coordinates (phi = azimuth, theta = elevation)
-          const phi = Math.atan2(normalizedPoint.z, normalizedPoint.x) * 180 / Math.PI;
-          const theta = Math.acos(normalizedPoint.y / commentRadius) * 180 / Math.PI;
+                  // Convert to spherical coordinates (phi = azimuth, theta = elevation)
+        // Note: This creates coordinates directly in the viewer's coordinate system
+        let phi = Math.atan2(normalizedPoint.z, normalizedPoint.x) * 180 / Math.PI;
+        const theta = Math.acos(normalizedPoint.y / commentRadius) * 180 / Math.PI;
+        
+        // Apply the same 90-degree offset as the canvas editor for consistency
+        phi = phi - 90;
           
           console.log('[Comment Creator] Calculated position - phi:', phi, 'theta:', theta, 'radius:', commentRadius);
           
@@ -478,7 +488,8 @@
 
       <!-- Camera Rig with VR Controls -->
       <a-entity id="cameraRig" 
-                position="0 0 0">
+                position="0 0 0"
+                rotation="0 90 0">
         
         <!-- Camera - Fixed at center, no movement -->
         <a-entity id="head" 
@@ -488,7 +499,7 @@
           
           <!-- Desktop/Mobile cursor -->
           <a-cursor id="cursor"
-                    visible="false"
+                    visible="true"
                     geometry="primitive: ring; radiusInner: 0.02; radiusOuter: 0.03"
                     material="color: #4CC3D9; shader: flat"
                     animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
@@ -925,11 +936,21 @@
         console.log('[VR] Entering desktop mode');
         
         // Show desktop cursor, hide VR controllers
-        document.querySelector('#cursor').setAttribute('visible', true);
-        document.querySelector('#leftHand').setAttribute('visible', false);
-        document.querySelector('#rightHand').setAttribute('visible', false);
-        document.querySelector('#leftHandTracking').setAttribute('visible', false);
-        document.querySelector('#rightHandTracking').setAttribute('visible', false);
+        const cursor = document.querySelector('#cursor');
+        if (cursor) {
+          cursor.setAttribute('visible', true);
+          console.log('[VR] Desktop cursor made visible');
+        }
+        
+        const leftHand = document.querySelector('#leftHand');
+        const rightHand = document.querySelector('#rightHand');
+        const leftHandTracking = document.querySelector('#leftHandTracking');
+        const rightHandTracking = document.querySelector('#rightHandTracking');
+        
+        if (leftHand) leftHand.setAttribute('visible', false);
+        if (rightHand) rightHand.setAttribute('visible', false);
+        if (leftHandTracking) leftHandTracking.setAttribute('visible', false);
+        if (rightHandTracking) rightHandTracking.setAttribute('visible', false);
       }
 
       // Enable hand tracking when available
@@ -1007,13 +1028,16 @@
 
         console.log('[Navigation] Switching to photo:', photoIndex, newPhoto);
 
-        // Update the sky material
+        // Update the sky material - add IPFS prefix if needed
         const sky = document.querySelector('#image-360');
-        sky.setAttribute('material', 'src', newPhoto.url);
+        const imageUrl = newPhoto.url.startsWith('Qm') ? `https://ipfs.dlux.io/ipfs/${newPhoto.url}` : newPhoto.url;
+        sky.setAttribute('material', 'src', imageUrl);
 
-        // Apply rotation if specified
+        // Apply rotation if specified (now stored in A-Frame format)
         if (newPhoto.rotation) {
-          sky.setAttribute('rotation', `${newPhoto.rotation.x} ${newPhoto.rotation.y} ${newPhoto.rotation.z}`);
+          // Handle both direct rotation and Vue devtools format
+          const rotation = newPhoto.rotation._custom ? newPhoto.rotation._custom.value : newPhoto.rotation;
+          sky.setAttribute('rotation', `${rotation.x || 0} ${rotation.y || 0} ${rotation.z || 0}`);
         } else {
           sky.setAttribute('rotation', '0 0 0');
         }
@@ -1045,14 +1069,16 @@
         // Get navigation points for current photo
         if (metadata.navigation) {
           const currentNavPoints = metadata.navigation.filter(nav => nav.fromIndex === currentPhotoIndex);
+          const currentAsset = metadata.assets[currentPhotoIndex];
           
           currentNavPoints.forEach(navPoint => {
             const targetAsset = metadata.assets[navPoint.toIndex];
             if (!targetAsset) return;
 
+            // Use navigation positions directly - coordinate alignment handled in manager
             const marker = document.createElement('a-entity');
             marker.setAttribute('polar-position', 
-              `phi: ${navPoint.position.phi}; theta: ${navPoint.position.theta}; radius: ${navPoint.position.radius}; photoIndex: ${currentPhotoIndex}`
+              `phi: ${navPoint.position.phi + 180}; theta: ${navPoint.position.theta}; radius: ${navPoint.position.radius}; photoIndex: ${currentPhotoIndex}`
             );
             marker.setAttribute('nav-point', {
               targetIndex: navPoint.toIndex,
@@ -1069,13 +1095,15 @@
         }
       }
 
+             
+
       // Update comments display for current photo
       function updateCommentsForPhoto() {
         // Clear existing comment markers
         const existingComments = document.querySelectorAll('.comment-marker');
         existingComments.forEach(comment => comment.remove());
 
-        // Recreate markers for current photo
+        // Recreate markers for current photo with direct positions
         const currentPhotoComments = comments.filter(c => c.position.photoIndex === currentPhotoIndex);
         currentPhotoComments.forEach(comment => {
           addCommentMarker(comment, comment.position);
@@ -1310,6 +1338,7 @@
       }
 
       function addCommentMarker(commentData, position) {
+        // Use position directly - coordinate alignment handled in manager
         const marker = document.createElement('a-entity');
         marker.setAttribute('polar-position', `phi: ${position.phi}; theta: ${position.theta}; radius: ${position.radius}; photoIndex: ${currentPhotoIndex}`);
         marker.setAttribute('comment-marker', {
@@ -1333,6 +1362,7 @@
 
       function addNavPoint(position, targetPhoto, label) {
         const marker = document.createElement('a-entity');
+        //const phi = position.phi + 180;
         marker.setAttribute('polar-position', `phi: ${position.phi}; theta: ${position.theta}; radius: ${position.radius}; photoIndex: ${currentPhotoIndex}`);
         marker.setAttribute('nav-point', {
           targetPhoto: targetPhoto,
@@ -1553,12 +1583,12 @@
         }
 
         try {
-          const metadata = typeof currentPost.json_metadata === 'string' 
-            ? JSON.parse(currentPost.json_metadata)
-            : currentPost.json_metadata;
-
+          // const metadata = typeof currentPost.json_metadata === 'string' 
+          //   ? JSON.parse(currentPost.json_metadata)
+          //   : currentPost.json_metadata;
+          const metadata = {"app":"dlux/0.1.0","xr":true,"Hash360":"","format":"markdown","assets":[{"index":0,"url":"QmWTgdKgG5Hps5voAvpvV4prZsEvnanCzYMDPTR8LVRPeM","thumb":"QmWTgdKgG5Hps5voAvpvV4prZsEvnanCzYMDPTR8LVRPeM","rotation":{"_custom":{"type":"reactive","stateTypeName":"Reactive","value":{"x":0,"y":0,"z":0}}},"title":"360° Photo 1","description":"","contractId":"dlux-io:0:96729312-53c43d84ce77ec6da0f5f3e9bd1211dfab99488e","uploadId":"__vue_devtool_undefined__","status":"__vue_devtool_undefined__"},{"index":1,"url":"QmYVUfDUr3CRJjiq65r6b4esHKQe4EtVXLB46MxYqEpmAz","thumb":"QmYVUfDUr3CRJjiq65r6b4esHKQe4EtVXLB46MxYqEpmAz","rotation":{"_custom":{"type":"reactive","stateTypeName":"Reactive","value":{"x":0,"y":0,"z":0}}},"title":"360° Photo 2","description":"","contractId":"dlux-io:0:96729312-53c43d84ce77ec6da0f5f3e9bd1211dfab99488e","uploadId":"__vue_devtool_undefined__","status":"__vue_devtool_undefined__"},{"index":2,"url":"QmYuhY9qrH6PcmU8Qog2hNtFSj1JHmwZDNZ6w1psMBe43L","thumb":"QmYuhY9qrH6PcmU8Qog2hNtFSj1JHmwZDNZ6w1psMBe43L","rotation":{"_custom":{"type":"reactive","stateTypeName":"Reactive","value":{"x":0,"y":0,"z":0}}},"title":"360° Photo 3","description":"","contractId":"dlux-io:0:96729312-53c43d84ce77ec6da0f5f3e9bd1211dfab99488e","uploadId":"__vue_devtool_undefined__","status":"__vue_devtool_undefined__"}],"tags":["dlux"],"vrHash":"QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k","navigation":[{"fromIndex":0,"toIndex":1,"position":{"phi":82.3,"theta":74.3,"radius":8},"label":"To 360° Photo 2","description":"Auto-generated navigation","autoGenerated":true},{"fromIndex":1,"toIndex":0,"position":{"phi":-90,"theta":90,"radius":8},"label":"To 360° Photo 1","description":"Auto-generated navigation","autoGenerated":true},{"fromIndex":2,"toIndex":0,"position":{"phi":-90,"theta":90,"radius":8},"label":"To 360° Photo 1","description":"Auto-generated navigation","autoGenerated":true},{"fromIndex":1,"toIndex":2,"position":{"phi":30,"theta":110,"radius":8},"label":"To 360° Photo 3","description":"Auto-generated connection","autoGenerated":true}]}
           console.log('[Debug] Parsed metadata:', metadata);
-
+          currentPost.json_metadata = metadata;
           if (!metadata.assets || !Array.isArray(metadata.assets)) {
             console.log('[Debug] No assets found in metadata');
             return;
@@ -1568,12 +1598,24 @@
           if (metadata.assets.length > 0) {
             currentPhotoIndex = 0;
             const sky = document.querySelector('#image-360');
-            sky.setAttribute('material', 'src', metadata.assets[0].url);
+            const imageUrl = metadata.assets[0].url.startsWith('Qm') ? `https://ipfs.dlux.io/ipfs/${metadata.assets[0].url}` : metadata.assets[0].url;
             
-            // Apply initial rotation
+            console.log('[Gallery] Setting initial photo:', imageUrl);
+            sky.setAttribute('material', 'src', imageUrl);
+            
+            // Apply initial rotation (now stored in A-Frame format)
             if (metadata.assets[0].rotation) {
-              sky.setAttribute('rotation', `${metadata.assets[0].rotation.x} ${metadata.assets[0].rotation.y} ${metadata.assets[0].rotation.z}`);
+              // Handle both direct rotation and Vue devtools format
+              const rotation = metadata.assets[0].rotation._custom ? metadata.assets[0].rotation._custom.value : metadata.assets[0].rotation;
+              console.log('[Gallery] Setting initial rotation:', rotation);
+              sky.setAttribute('rotation', `${rotation.x || 0} ${rotation.y || 0} ${rotation.z || 0}`);
+            } else {
+              sky.setAttribute('rotation', '0 0 0');
             }
+            
+            console.log('[Gallery] Initial photo set successfully');
+          } else {
+            console.log('[Gallery] No assets found in metadata');
           }
 
           // Initialize navigation points and comments for the first photo
@@ -1604,6 +1646,9 @@
       // Initialize the scene
       window.addEventListener('load', async () => {
         console.log('[Debug] Starting initialization');
+        
+        // Setup initial mode first to ensure cursor is visible
+        setupDesktopMode();
         
         // Wait for wallet to be ready
         if (!window.dluxWallet) {
@@ -1747,9 +1792,6 @@
         
         // Load comments for initial photo
         loadCommentsForPhoto();
-
-        // Setup initial mode
-        setupDesktopMode();
         
         // Update debug info periodically
         setInterval(updateDebugInfo, 1000);

@@ -169,7 +169,16 @@ const Asset360Manager = {
                 img.onload = () => {
                     // Store image for redraws
                     this.currentImage = img;
-                    this.currentRotation = asset.rotation || { x: 0, y: 0, z: 0 };
+                    // Convert from stored A-Frame format back to canvas format:
+                    // A-Frame X (pitch) -> Canvas Z (roll) with negative sign
+                    // A-Frame Y (yaw) -> Canvas Y (pan)
+                    // A-Frame Z (roll) -> Canvas X (tilt)
+                    const storedRotation = asset.rotation || { x: 0, y: 0, z: 0 };
+                    this.currentRotation = {
+                        x: storedRotation.z,  // A-Frame roll becomes canvas tilt
+                        y: storedRotation.y,  // A-Frame yaw stays as canvas pan
+                        z: -storedRotation.x  // A-Frame pitch becomes canvas roll (negated)
+                    };
                     this.redrawCanvas();
                 };
                 
@@ -206,33 +215,18 @@ const Asset360Manager = {
             // Save context state
             ctx.save();
             
-            // Apply 3D rotation transforms (X, Y, Z)
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            
-            ctx.translate(centerX, centerY);
-            
-            // Apply rotations properly for 360° image viewing
-            // Note: Y rotation (panning) is now handled in drawWrappedImage for seamless wrapping
-            
-            // Z rotation (roll) - rotate the entire view
+            // Apply Z rotation (roll) - rotate the entire view around center
             if (this.currentRotation.z) {
-                ctx.rotate(this.currentRotation.z * Math.PI / 180);
-            }
-            
-            // X rotation (pitch) - simulate up/down tilt
-            if (this.currentRotation.x) {
-                const pitchRadians = this.currentRotation.x * Math.PI / 180;
-                const offsetY = Math.sin(pitchRadians) * canvas.height * 0.3;
-                const scaleY = Math.cos(pitchRadians);
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
                 
-                ctx.translate(0, offsetY);
-                ctx.scale(1, Math.max(0.1, scaleY)); // Prevent negative scaling
+                ctx.translate(centerX, centerY);
+                ctx.rotate(this.currentRotation.z * Math.PI / 180);
+                ctx.translate(-centerX, -centerY);
             }
-            
-            ctx.translate(-centerX, -centerY);
             
             // Draw the equirectangular image with wrapping/tiling for seamless 360° experience
+            // X and Y rotations are now handled as offsets in drawWrappedImage
             this.drawWrappedImage(ctx, canvas);
             
             // Restore context
@@ -252,29 +246,56 @@ const Asset360Manager = {
             }
         },
         
-        // Draw wrapped/tiled image for seamless 360° panning
+        // Draw wrapped/tiled image for seamless 360° panning and tilting
         drawWrappedImage(ctx, canvas) {
             if (!this.currentImage) return;
             
             const imageWidth = canvas.width;
             const imageHeight = canvas.height;
             
-            // For 360° images, we want seamless horizontal wrapping
-            // Calculate the pan offset based on Y rotation
-            const normalizedRotation = ((this.currentRotation.y % 360) + 360) % 360;
-            const panOffset = (normalizedRotation / 360) * imageWidth;
+            // Calculate horizontal pan offset based on Y rotation
+            const normalizedYRotation = ((this.currentRotation.y % 360) + 360) % 360;
+            const panOffset = (normalizedYRotation / 360) * imageWidth;
             
-            // Draw the main image
-            ctx.drawImage(this.currentImage, -panOffset, 0, imageWidth, imageHeight);
+            // Calculate vertical tilt offset based on X rotation (like horizontal panning but vertical)
+            const normalizedXRotation = ((this.currentRotation.x % 360) + 360) % 360;
+            const tiltOffset = (normalizedXRotation / 360) * imageHeight;
             
-            // Draw wrapped copies for seamless transition
+            // Draw the main image with both horizontal and vertical offsets
+            ctx.drawImage(this.currentImage, -panOffset, -tiltOffset, imageWidth, imageHeight);
+            
+            // Draw horizontal wrapped copies for seamless horizontal transition
             if (panOffset > 0) {
                 // If panned to the right, draw image on the left side
-                ctx.drawImage(this.currentImage, -panOffset + imageWidth, 0, imageWidth, imageHeight);
+                ctx.drawImage(this.currentImage, -panOffset + imageWidth, -tiltOffset, imageWidth, imageHeight);
             }
             if (panOffset < imageWidth) {
                 // If there's space on the right, draw image on the right side
-                ctx.drawImage(this.currentImage, -panOffset - imageWidth, 0, imageWidth, imageHeight);
+                ctx.drawImage(this.currentImage, -panOffset - imageWidth, -tiltOffset, imageWidth, imageHeight);
+            }
+            
+            // Draw vertical wrapped copies for seamless vertical transition
+            if (tiltOffset > 0) {
+                // If tilted up, draw image below
+                ctx.drawImage(this.currentImage, -panOffset, -tiltOffset + imageHeight, imageWidth, imageHeight);
+                // Also draw horizontal wraps for the vertical copy
+                if (panOffset > 0) {
+                    ctx.drawImage(this.currentImage, -panOffset + imageWidth, -tiltOffset + imageHeight, imageWidth, imageHeight);
+                }
+                if (panOffset < imageWidth) {
+                    ctx.drawImage(this.currentImage, -panOffset - imageWidth, -tiltOffset + imageHeight, imageWidth, imageHeight);
+                }
+            }
+            if (tiltOffset < imageHeight) {
+                // If there's space below, draw image above
+                ctx.drawImage(this.currentImage, -panOffset, -tiltOffset - imageHeight, imageWidth, imageHeight);
+                // Also draw horizontal wraps for the vertical copy
+                if (panOffset > 0) {
+                    ctx.drawImage(this.currentImage, -panOffset + imageWidth, -tiltOffset - imageHeight, imageWidth, imageHeight);
+                }
+                if (panOffset < imageWidth) {
+                    ctx.drawImage(this.currentImage, -panOffset - imageWidth, -tiltOffset - imageHeight, imageWidth, imageHeight);
+                }
             }
         },
         
@@ -324,8 +345,8 @@ const Asset360Manager = {
             this.navigationForCurrentAsset.forEach((nav, index) => {
                 const pos = this.sphericalToCanvas(nav.position);
                 
-                // Skip if position is outside visible area
-                if (pos.x < 0 || pos.x > canvas.width || pos.y < 0 || pos.y > canvas.height) {
+                // Skip if position is outside visible area (but be more lenient with Y bounds for tilting)
+                if (pos.x < -50 || pos.x > canvas.width + 50 || pos.y < -50 || pos.y > canvas.height + 50) {
                     return;
                 }
                 
@@ -408,31 +429,66 @@ const Asset360Manager = {
         sphericalToCanvas(sphericalPos) {
             const { phi, theta, radius } = sphericalPos;
             
-            // Apply rotation compensation to get the visual position
+            // Apply rotation compensation to get the visual position  
             const adjustedPhi = phi - this.currentRotation.y; // Compensate for Y rotation (panning)
-            const adjustedTheta = theta + this.currentRotation.x; // Compensate for X rotation (pitch)
             
-            // Convert adjusted spherical coordinates to equirectangular projection
-            const x = ((adjustedPhi + 180) / 360) * this.canvasWidth;
-            const y = ((Math.max(0, Math.min(180, adjustedTheta))) / 180) * this.canvasHeight;
+            // Convert to equirectangular projection first
+            // Apply 90-degree offset to align coordinate systems (phi=0 should be at center of canvas)
+            let x = ((adjustedPhi + 180) / 360) * this.canvasWidth;
+            let y = ((theta / 180) * this.canvasHeight);
             
-            return { x: Math.max(0, Math.min(this.canvasWidth, x)), 
-                     y: Math.max(0, Math.min(this.canvasHeight, y)) };
+            // Apply tilt offset (similar to how panning affects X, tilting affects Y)
+            y -= (this.currentRotation.x / 360) * this.canvasHeight;
+            
+            const centerX = this.canvasWidth / 2;
+            const centerY = this.canvasHeight / 2;
+            
+            // Apply the same transformations that are applied to the image in the exact same order
+            
+            // 1. Apply Z rotation (roll) around center - same as image
+            if (this.currentRotation.z) {
+                // Translate to center
+                x -= centerX;
+                y -= centerY;
+                
+                const rollRadians = this.currentRotation.z * Math.PI / 180;
+                const cos = Math.cos(rollRadians);
+                const sin = Math.sin(rollRadians);
+                
+                const rotatedX = x * cos - y * sin;
+                const rotatedY = x * sin + y * cos;
+                
+                x = rotatedX;
+                y = rotatedY;
+                
+                // Translate back from center
+                x += centerX;
+                y += centerY;
+            }
+            
+            // Normalize X coordinates (allow wrapping for horizontal panning)
+            const normalizedX = ((x % this.canvasWidth) + this.canvasWidth) % this.canvasWidth;
+            
+            return { 
+                x: normalizedX, 
+                y: y // Allow Y to go off-screen when tilted/rolled
+            };
         },
         
         // Convert canvas position to spherical coordinates
         canvasToSpherical(canvasPos) {
-            const phi = (canvasPos.x / this.canvasWidth) * 360 - 180;
+            // Apply inverse 90-degree offset to align coordinate systems
+            const phi = (canvasPos.x / this.canvasWidth) * 360 -180;
             const theta = (canvasPos.y / this.canvasHeight) * 180;
             
             // Apply inverse rotation compensation to store the "neutral" position
             // This way, navigation points are stored relative to the unrotated image
             const neutralPhi = phi + this.currentRotation.y; // Add back Y rotation
-            const neutralTheta = theta - this.currentRotation.x; // Subtract X rotation
+            const neutralTheta = theta + this.currentRotation.x; // Add back X rotation
             
             return {
-                phi: parseFloat(Math.max(-180, Math.min(180, neutralPhi)).toFixed(1)),
-                theta: parseFloat(Math.max(0, Math.min(180, neutralTheta)).toFixed(1)),
+                phi: parseFloat(Math.max(-180, Math.min(180, neutralPhi)).toFixed(1)), // Store coordinates directly without offset
+                theta: parseFloat(Math.max(-180, Math.min(180, neutralTheta)).toFixed(1)),
                 radius: 8 // Default radius
             };
         },
@@ -826,7 +882,15 @@ const Asset360Manager = {
         
         updateAssetRotation() {
             if (this.currentAsset) {
-                this.currentAsset.rotation = { ...this.currentRotation };
+                // Convert canvas editor coordinates to A-Frame coordinates when storing:
+                // Canvas Roll (Z) -> A-Frame X (pitch) with negative sign
+                // Canvas Pan (Y) -> A-Frame Y (yaw) 
+                // Canvas Tilt (X) -> A-Frame Z (roll)
+                this.currentAsset.rotation = {
+                    x: -this.currentRotation.z, // Roll becomes negative pitch
+                    y: this.currentRotation.y,  // Pan stays as yaw
+                    z: this.currentRotation.x   // Tilt becomes roll
+                };
                 this.emitDataUpdate();
             }
         },
