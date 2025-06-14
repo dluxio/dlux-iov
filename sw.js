@@ -1,4 +1,4 @@
-this.version = "2025.06.14.7";
+this.version = "2025.06.14.8";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.14.7",
-  "generated": "2025-06-14T17:42:30Z",
+  "version": "2025.06.14.8",
+  "generated": "2025-06-14T19:29:11Z",
   "files": {
-    "/user/detailmodal.html": {
-      "checksum": "262ab96e38f539f099642c426038e677",
-      "size": 88809,
-      "priority": "important"
-    },
     "/user/index.html": {
       "checksum": "7832b7e321488e5d4071d14e297952ce",
       "size": 301087,
@@ -655,12 +650,12 @@ self.cacheManifest =
       "size": 1218,
       "priority": "important"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
