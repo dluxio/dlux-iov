@@ -200,8 +200,13 @@
         },
         
         init: function() {
+          this.isRead = false;
+          this.baseScale = 1.0;
           this.createMarker();
           this.setupInteractions();
+          
+          // Hide by default
+          this.el.setAttribute('visible', false);
         },
         
         createMarker: function() {
@@ -218,14 +223,15 @@
             opacity: 0.8
           });
           
-          // Add pulsing animation
-          this.el.setAttribute('animation__pulse', {
+          // Add smooth pulsing animation (grow and shrink smoothly)
+          this.el.setAttribute('animation__pulse-grow', {
             property: 'scale',
+            from: '1 1 1',
             to: '1.2 1.2 1.2',
-            direction: 'alternate',
             loop: true,
-            dur: 2000,
-            easing: 'easeInOutSine'
+            dur: 1000,
+            easing: 'easeInOutSine',
+            dir: 'alternate'
           });
           
           // Make it interactive
@@ -233,38 +239,77 @@
           this.el.setAttribute('hoverable', '');
           this.el.setAttribute('grabbable', '');
           
-          // Create text preview (shows on hover)
+          // Create text plane positioned above and to the left
+          this.textPlane = document.createElement('a-plane');
+          this.textPlane.setAttribute('width', '1.5');
+          this.textPlane.setAttribute('height', '0.4');
+          this.textPlane.setAttribute('position', '-0.8 0.3 0');
+          this.textPlane.setAttribute('material', {
+            color: '#000000',
+            opacity: 0.8,
+            transparent: true
+          });
+          this.textPlane.setAttribute('look-at', '#head');
+          this.textPlane.setAttribute('billboard', '');
+          
+          // Create text on the plane
           this.textEl = document.createElement('a-text');
-          this.textEl.setAttribute('value', this.getPreviewText());
-          this.textEl.setAttribute('align', 'center');
+          this.textEl.setAttribute('value', this.getDisplayText());
+          this.textEl.setAttribute('align', 'left');
           this.textEl.setAttribute('color', 'white');
-          this.textEl.setAttribute('background-color', 'rgba(0,0,0,0.8)');
-          this.textEl.setAttribute('scale', '0.5 0.5 0.5');
-          this.textEl.setAttribute('position', '0 0.3 0');
-          this.textEl.setAttribute('visible', false);
-          this.el.appendChild(this.textEl);
+          this.textEl.setAttribute('scale', '0.6 0.6 0.6');
+          this.textEl.setAttribute('position', '-0.7 0 0.01');
+          this.textEl.setAttribute('wrap-count', '25');
+          
+          this.textPlane.appendChild(this.textEl);
+          this.el.appendChild(this.textPlane);
+          
+          // Hide text plane until comment is read
+          this.textPlane.setAttribute('visible', false);
         },
         
         setupInteractions: function() {
           this.el.addEventListener('hover-start', () => {
-            this.textEl.setAttribute('visible', true);
             this.el.setAttribute('material', 'emissiveIntensity', 0.6);
           });
           
           this.el.addEventListener('hover-end', () => {
-            this.textEl.setAttribute('visible', false);
             this.el.setAttribute('material', 'emissiveIntensity', 0.3);
           });
           
           this.el.addEventListener('click', () => {
+            this.markAsRead();
             this.openCommentDetail();
           });
         },
         
-        getPreviewText: function() {
+        getDisplayText: function() {
           const content = this.processMarkdown(this.data.content);
-          const preview = content.length > 50 ? content.substring(0, 50) + '...' : content;
+          const preview = content.length > 60 ? content.substring(0, 60) + '...' : content;
           return `@${this.data.author}\n${preview}`;
+        },
+        
+        markAsRead: function() {
+          if (!this.isRead) {
+            this.isRead = true;
+            this.baseScale *= 0.99; // Reduce by 1%
+            
+            // Show text plane now that comment is read
+            this.textPlane.setAttribute('visible', true);
+            
+            // Update the scale while maintaining the smooth pulsing animation
+            this.el.setAttribute('animation__pulse-grow', {
+              property: 'scale',
+              from: `${this.baseScale} ${this.baseScale} ${this.baseScale}`,
+              to: `${this.baseScale * 1.2} ${this.baseScale * 1.2} ${this.baseScale * 1.2}`,
+              loop: true,
+              dur: 1000,
+              easing: 'easeInOutSine',
+              dir: 'alternate'
+            });
+            
+            console.log(`[Comment] Marked comment ${this.data.commentId} as read, new scale: ${this.baseScale}`);
+          }
         },
         
         processMarkdown: function(text) {
@@ -610,16 +655,24 @@
                 scale="0.6 0.6 0.6">
         </a-text>
         
+        <!-- Comment Visibility Toggle -->
+        <a-entity id="comment-visibility-toggle" 
+                  vr-button="color: #4CAF50; text: Show Comments"
+                  position="-0.6 0.4 0.01"
+                  scale="0.7 0.7 0.7"
+                  class="clickable">
+        </a-entity>
+        
         <!-- Comment Mode Toggle -->
         <a-entity id="comment-mode-toggle" 
                   vr-button="color: #FF6B6B; text: Create Comment"
-                  position="0 0.4 0.01"
-                  scale="0.8 0.8 0.8"
+                  position="0.6 0.4 0.01"
+                  scale="0.7 0.7 0.7"
                   class="clickable">
         </a-entity>
         
         <a-text id="comments-instructions" 
-                value="Click 'Create Comment' then click anywhere on the image to place a comment"
+                value="Click 'Show Comments' to see comment markers, or 'Create Comment' to add new ones"
                 align="center"
                 wrap-count="40"
                 color="#CCCCCC"
@@ -669,8 +722,16 @@
         <!-- Reply Button -->
         <a-entity id="comment-reply-btn" 
                   vr-button="color: #4CAF50; text: Reply"
-                  position="-0.6 -0.8 0.01"
-                  scale="0.7 0.7 0.7"
+                  position="-0.8 -0.8 0.01"
+                  scale="0.6 0.6 0.6"
+                  class="clickable">
+        </a-entity>
+        
+        <!-- Vote Button -->
+        <a-entity id="comment-vote-btn" 
+                  vr-button="color: #2196F3; text: Vote"
+                  position="-0.2 -0.8 0.01"
+                  scale="0.6 0.6 0.6"
                   class="clickable">
         </a-entity>
         
@@ -678,7 +739,7 @@
         <a-entity id="comment-close-btn" 
                   vr-button="color: #757575; text: Close"
                   position="0.6 -0.8 0.01"
-                  scale="0.7 0.7 0.7"
+                  scale="0.6 0.6 0.6"
                   class="clickable">
         </a-entity>
       </a-entity>
@@ -863,6 +924,97 @@
       <!-- Comment and Navigation Markers Container -->
       <a-entity id="spatial-markers" comment-creator></a-entity>
 
+      <!-- Vote Weight Selection Panel -->
+      <a-entity id="vote-weight-panel" 
+                geometry="primitive: plane; width: 2.5; height: 2"
+                material="color: #000000; opacity: 0.9; transparent: true"
+                position="0 1.8 -2.5"
+                visible="false">
+        <a-text id="vote-weight-title" 
+                value="Select Vote Weight"
+                align="center"
+                color="#FFD700"
+                position="0 0.8 0.01"
+                scale="0.6 0.6 0.6">
+        </a-text>
+        
+        <a-text id="vote-weight-current" 
+                value="Current: +100%"
+                align="center"
+                color="white"
+                position="0 0.5 0.01"
+                scale="0.45 0.45 0.45">
+        </a-text>
+        
+        <!-- Weight slider representation -->
+        <a-text id="vote-weight-scale" 
+                value="-100%    -50%     0%     +50%    +100%"
+                align="center"
+                color="#CCCCCC"
+                position="0 0.2 0.01"
+                scale="0.3 0.3 0.3">
+        </a-text>
+        
+        <!-- Weight adjustment buttons -->
+        <a-entity id="vote-weight-minus-big" 
+                  vr-button="color: #f44336; text: --"
+                  position="-1 -0.1 0.01"
+                  scale="0.6 0.6 0.6"
+                  class="clickable">
+        </a-entity>
+        
+        <a-entity id="vote-weight-minus" 
+                  vr-button="color: #ff9800; text: -"
+                  position="-0.5 -0.1 0.01"
+                  scale="0.6 0.6 0.6"
+                  class="clickable">
+        </a-entity>
+        
+        <a-entity id="vote-weight-plus" 
+                  vr-button="color: #4CAF50; text: +"
+                  position="0.5 -0.1 0.01"
+                  scale="0.6 0.6 0.6"
+                  class="clickable">
+        </a-entity>
+        
+        <a-entity id="vote-weight-plus-big" 
+                  vr-button="color: #4CAF50; text: ++"
+                  position="1 -0.1 0.01"
+                  scale="0.6 0.6 0.6"
+                  class="clickable">
+        </a-entity>
+        
+        <!-- Preset buttons -->
+        <a-entity id="vote-downvote" 
+                  vr-button="color: #f44336; text: Downvote (-100%)"
+                  position="-0.6 -0.5 0.01"
+                  scale="0.5 0.5 0.5"
+                  class="clickable">
+        </a-entity>
+        
+        <a-entity id="vote-upvote" 
+                  vr-button="color: #4CAF50; text: Upvote (+100%)"
+                  position="0.6 -0.5 0.01"
+                  scale="0.5 0.5 0.5"
+                  class="clickable">
+        </a-entity>
+        
+        <!-- Action buttons -->
+        <a-entity id="vote-confirm-btn" 
+                  vr-button="color: #2196F3; text: Cast Vote"
+                  position="-0.6 -0.8 0.01"
+                  scale="0.7 0.7 0.7"
+                  class="clickable">
+        </a-entity>
+        
+        <a-entity id="vote-cancel-btn" 
+                  vr-button="color: #757575; text: Cancel"
+                  position="0.6 -0.8 0.01"
+                  scale="0.7 0.7 0.7"
+                  class="clickable">
+        </a-entity>
+      </a-entity>
+
       <!-- Information Panel -->
       <a-entity id="info-panel" 
                 geometry="primitive: plane; width: 2; height: 1.5"
@@ -903,6 +1055,9 @@
       let isCommentMode = false;
       let isNavMode = false;
       let currentCommentPosition = null;
+      let commentsVisible = false;
+      let currentVoteWeight = 100; // Default to +100%
+      let currentVoteTarget = null; // {author, permlink} for voting
 
       // VR/AR mode detection
       document.querySelector('a-scene').addEventListener('enter-vr', () => {
@@ -998,13 +1153,44 @@
       }
 
       function hideAllPanels() {
-        ['vote-panel', 'post-panel', 'comments-panel', 'nav-panel', 'info-panel', 'comment-detail-panel', 'comment-create-panel'].forEach(id => {
+        ['vote-panel', 'post-panel', 'comments-panel', 'nav-panel', 'info-panel', 'comment-detail-panel', 'comment-create-panel', 'vote-weight-panel'].forEach(id => {
           const panel = document.querySelector(`#${id}`);
           if (panel && panel.getAttribute('visible')) {
             panel.setAttribute('visible', false);
           }
         });
         currentPanel = null;
+      }
+
+      // Vote Weight Management
+      function showVoteWeightPanel(target) {
+        currentVoteTarget = target;
+        showPanel('vote-weight-panel');
+        updateVoteWeightDisplay();
+      }
+
+      function updateVoteWeightDisplay() {
+        const currentText = document.querySelector('#vote-weight-current');
+        if (currentText) {
+          const sign = currentVoteWeight >= 0 ? '+' : '';
+          currentText.setAttribute('text', 'value', `Current: ${sign}${currentVoteWeight}%`);
+        }
+      }
+
+      function adjustVoteWeight(change) {
+        const newWeight = Math.max(-100, Math.min(100, currentVoteWeight + change));
+        // Skip 0 - not allowed
+        if (newWeight === 0) {
+          currentVoteWeight = change > 0 ? 1 : -1;
+        } else {
+          currentVoteWeight = newWeight;
+        }
+        updateVoteWeightDisplay();
+      }
+
+      function setVoteWeight(weight) {
+        currentVoteWeight = weight;
+        updateVoteWeightDisplay();
       }
 
       // Core Photo Switching Functionality
@@ -1106,7 +1292,16 @@
         // Recreate markers for current photo with direct positions
         const currentPhotoComments = comments.filter(c => c.position.photoIndex === currentPhotoIndex);
         currentPhotoComments.forEach(comment => {
-          addCommentMarker(comment, comment.position);
+          const marker = document.createElement('a-entity');
+          marker.setAttribute('polar-position', `phi: ${comment.position.phi + 90}; theta: ${comment.position.theta}; radius: ${comment.position.radius}; photoIndex: ${currentPhotoIndex}`);
+          marker.setAttribute('comment-marker', {
+            commentId: comment.permlink,
+            author: comment.author,
+            content: comment.body,
+            timestamp: comment.timestamp
+          });
+          
+          document.querySelector('#spatial-markers').appendChild(marker);
         });
 
         updateCommentsDisplay();
@@ -1340,7 +1535,7 @@
       function addCommentMarker(commentData, position) {
         // Use position directly - coordinate alignment handled in manager
         const marker = document.createElement('a-entity');
-        marker.setAttribute('polar-position', `phi: ${position.phi}; theta: ${position.theta}; radius: ${position.radius}; photoIndex: ${currentPhotoIndex}`);
+        marker.setAttribute('polar-position', `phi: ${position.phi + 90}; theta: ${position.theta}; radius: ${position.radius}; photoIndex: ${currentPhotoIndex}`);
         marker.setAttribute('comment-marker', {
           commentId: commentData.permlink,
           author: commentData.author,
@@ -1399,6 +1594,28 @@
         }
       }
 
+      function toggleCommentsVisibility() {
+        commentsVisible = !commentsVisible;
+        
+        // Toggle visibility of all comment markers
+        const commentMarkers = document.querySelectorAll('.comment-marker');
+        commentMarkers.forEach(marker => {
+          marker.setAttribute('visible', commentsVisible);
+        });
+        
+        // Update comments panel instructions
+        const commentsInstructions = document.querySelector('#comments-instructions');
+        if (commentsInstructions) {
+          if (commentsVisible) {
+            commentsInstructions.setAttribute('text', 'value', 'Comment markers are now visible! Click them to read. Red spheres shrink 1% when read.');
+          } else {
+            commentsInstructions.setAttribute('text', 'value', "Click 'Create Comment' then click anywhere on the image to place a comment");
+          }
+        }
+        
+        console.log(`[Comments] Visibility toggled to: ${commentsVisible}`);
+      }
+
       function updateNavDisplay() {
         const navList = document.querySelector('#nav-list');
         if (!navList) return;
@@ -1411,6 +1628,31 @@
           const navText = currentPhotoNavs.map(n => `→ ${n.label}`).join('\n');
           navList.setAttribute('text', 'value', navText);
         }
+      }
+
+      // Load test comment for coordinate testing
+      function loadTestComment() {
+        const testCommentData = {
+          body: "a",
+          json_metadata: "{\"app\":\"dlux/360gallery\",\"format\":\"markdown\",\"spatial\":{\"phi\":-156.64771348451973,\"theta\":77.73870318420036,\"radius\":8,\"photoIndex\":1}}",
+          parent_author: "markegiles",
+          parent_permlink: "coastal-bike-tour-in-buenos-aires",
+          author: "disregardfiat",
+          permlink: "re-coastal-bike-tour-in-buenos-aires-1749872824399",
+          title: ""
+        };
+        
+        const metadata = JSON.parse(testCommentData.json_metadata);
+        const position = metadata.spatial;
+        
+        // Add to comments array
+        comments.push({
+          ...testCommentData,
+          position: position,
+          timestamp: new Date().toISOString()
+        });
+        
+        console.log('[Test Comment] Added test comment at position:', position);
       }
 
       // Load comments for current photo (now handled by updateCommentsForPhoto)
@@ -1530,8 +1772,8 @@
         }
       }
 
-      // Handle vote action
-      async function handleVote() {
+      // Handle vote action - now shows weight selection first
+      async function handleVote(target = null) {
         console.log('[Debug] Starting vote process');
         
         if (!window.dluxWallet.currentUser) {
@@ -1539,18 +1781,35 @@
           return;
         }
 
-        if (!window.dluxWallet.currentPost) {
-          console.log('[Debug] No post data available');
+        // Use provided target or default to current post
+        const voteTarget = target || {
+          author: window.dluxWallet.currentPost?.author,
+          permlink: window.dluxWallet.currentPost?.permlink
+        };
+
+        if (!voteTarget.author || !voteTarget.permlink) {
+          console.log('[Debug] No vote target available');
+          return;
+        }
+
+        // Show weight selection panel
+        showVoteWeightPanel(voteTarget);
+      }
+
+      // Execute the actual vote with selected weight
+      async function executeVote() {
+        if (!currentVoteTarget || !window.dluxWallet.currentUser) {
+          console.log('[Debug] Cannot execute vote: missing target or user');
           return;
         }
 
         try {
-          console.log('[Debug] Sending vote request to parent window');
+          console.log('[Debug] Executing vote with weight:', currentVoteWeight);
           const voteOp = {
             voter: window.dluxWallet.currentUser,
-            author: window.dluxWallet.currentPost.author,
-            permlink: window.dluxWallet.currentPost.permlink,
-            weight: 10000 // 100%
+            author: currentVoteTarget.author,
+            permlink: currentVoteTarget.permlink,
+            weight: currentVoteWeight * 100 // Convert percentage to Hive weight (10000 = 100%)
           };
 
           // Send vote request to parent window in the correct format
@@ -1568,6 +1827,7 @@
           }, '*');
 
           console.log('[Debug] Vote request sent:', voteOp);
+          hideAllPanels();
         } catch (error) {
           console.error('[Debug] Error sending vote:', error);
         }
@@ -1718,8 +1978,16 @@
           menuComments.addEventListener('click', () => {
             if (currentPanel && currentPanel.id === 'comments-panel') {
               hideAllPanels();
+              // Hide comments when closing panel
+              if (commentsVisible) {
+                toggleCommentsVisibility();
+              }
             } else {
               showPanel('comments-panel');
+              // Show comments when opening panel
+              if (!commentsVisible) {
+                toggleCommentsVisibility();
+              }
             }
           });
         }
@@ -1747,6 +2015,17 @@
         }
 
         // Comment system event listeners with null checks
+        const commentVisibilityToggle = document.querySelector('#comment-visibility-toggle');
+        if (commentVisibilityToggle) {
+          commentVisibilityToggle.addEventListener('click', () => {
+            toggleCommentsVisibility();
+            // Update button text
+            const buttonText = commentsVisible ? 'Hide Comments' : 'Show Comments';
+            const buttonColor = commentsVisible ? '#757575' : '#4CAF50';
+            commentVisibilityToggle.setAttribute('vr-button', `color: ${buttonColor}; text: ${buttonText}`);
+          });
+        }
+        
         const commentModeToggle = document.querySelector('#comment-mode-toggle');
         if (commentModeToggle) {
           commentModeToggle.addEventListener('click', toggleCommentMode);
@@ -1789,6 +2068,67 @@
         if (menuVote) {
           menuVote.addEventListener('click', handleVote);
         }
+
+        // Comment vote button
+        const commentVoteBtn = document.querySelector('#comment-vote-btn');
+        if (commentVoteBtn) {
+          commentVoteBtn.addEventListener('click', () => {
+            // Get current comment data from detail panel
+            const authorEl = document.querySelector('#comment-detail-author');
+            if (authorEl) {
+              const authorText = authorEl.getAttribute('text').value;
+              const author = authorText.replace('@', '');
+              // For comments, we need to construct permlink from the current comment
+              // This is a simplified approach - in real implementation you'd store the permlink
+              const permlink = `re-${window.dluxWallet.currentPost?.permlink}-comment`;
+              handleVote({ author, permlink });
+            }
+          });
+        }
+
+        // Vote weight panel event listeners
+        const voteWeightMinusBig = document.querySelector('#vote-weight-minus-big');
+        if (voteWeightMinusBig) {
+          voteWeightMinusBig.addEventListener('click', () => adjustVoteWeight(-25));
+        }
+
+        const voteWeightMinus = document.querySelector('#vote-weight-minus');
+        if (voteWeightMinus) {
+          voteWeightMinus.addEventListener('click', () => adjustVoteWeight(-5));
+        }
+
+        const voteWeightPlus = document.querySelector('#vote-weight-plus');
+        if (voteWeightPlus) {
+          voteWeightPlus.addEventListener('click', () => adjustVoteWeight(5));
+        }
+
+        const voteWeightPlusBig = document.querySelector('#vote-weight-plus-big');
+        if (voteWeightPlusBig) {
+          voteWeightPlusBig.addEventListener('click', () => adjustVoteWeight(25));
+        }
+
+        const voteDownvote = document.querySelector('#vote-downvote');
+        if (voteDownvote) {
+          voteDownvote.addEventListener('click', () => setVoteWeight(-100));
+        }
+
+        const voteUpvote = document.querySelector('#vote-upvote');
+        if (voteUpvote) {
+          voteUpvote.addEventListener('click', () => setVoteWeight(100));
+        }
+
+        const voteConfirmBtn = document.querySelector('#vote-confirm-btn');
+        if (voteConfirmBtn) {
+          voteConfirmBtn.addEventListener('click', executeVote);
+        }
+
+        const voteCancelBtn = document.querySelector('#vote-cancel-btn');
+        if (voteCancelBtn) {
+          voteCancelBtn.addEventListener('click', hideAllPanels);
+        }
+        
+        // Load test comment for coordinate testing
+        loadTestComment();
         
         // Load comments for initial photo
         loadCommentsForPhoto();
