@@ -56,7 +56,21 @@ export default {
           )
         : this.text;
       
-      const rawHtml = marked.parse(markdownToParse);
+      // Create marked instance with KaTeX support if available
+      let markedInstance = marked;
+      if (typeof markedKatex !== 'undefined') {
+        // Create a new Marked instance with KaTeX support
+        const { Marked } = globalThis.marked || { Marked: marked.constructor };
+        markedInstance = new Marked();
+        
+        // Add KaTeX extension
+        markedInstance.use(markedKatex({
+          throwOnError: false,
+          displayMode: false, // Use inline mode by default, block mode for $$
+        }));
+      }
+      
+      const rawHtml = markedInstance.parse(markdownToParse);
 
       // Comprehensive sanitization to prevent XSS attacks
       const sanitizedHtml = DOMPurify.sanitize(rawHtml, { 
@@ -83,21 +97,40 @@ export default {
           ],
           // Only allow safe protocols
           ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp|ipfs):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
-          // Allow classes for syntax highlighting
-          ADD_ATTR: ['class'],
-          // Keep only safe HTML elements
+          // Allow classes for syntax highlighting and math rendering
+          ADD_ATTR: ['class', 'aria-hidden', 'role'],
+          // Keep only safe HTML elements (including KaTeX math elements)
           ALLOWED_TAGS: [
             'a', 'b', 'blockquote', 'br', 'code', 'div', 'em', 'h1', 'h2', 'h3', 
             'h4', 'h5', 'h6', 'hr', 'i', 'img', 'li', 'ol', 'p', 'pre', 'span', 
             'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'th', 'thead', 'tr', 
             'u', 'ul', 'del', 'ins', 'small', 'mark', 'q', 'cite', 'abbr', 'dfn', 
-            'time', 'address', 'figure', 'figcaption', 'kbd', 'samp', 'var', 'video'
+            'time', 'address', 'figure', 'figcaption', 'kbd', 'samp', 'var', 'video',
+            // KaTeX math rendering elements
+            'math', 'semantics', 'mrow', 'mi', 'mn', 'mo', 'mfrac', 'msup', 'msub', 
+            'msubsup', 'munder', 'mover', 'munderover', 'msqrt', 'mroot', 'mtext', 
+            'menclose', 'annotation', 'annotation-xml', 'mspace', 'mpadded', 'mphantom',
+            'mfenced', 'mtable', 'mtr', 'mtd', 'mlabeledtr', 'maligngroup', 'malignmark',
+            'mstyle', 'merror', 'maction'
           ],
-          // Keep only safe attributes
+          // Keep only safe attributes (including math-specific attributes)
           ALLOWED_ATTR: [
             'href', 'title', 'alt', 'src', 'width', 'height', 'class', 'id',
             'target', 'rel', 'type', 'datetime', 'cite', 'start', 'reversed',
-            'controls', 'autoplay', 'loop', 'muted', 'poster', 'preload'
+            'controls', 'autoplay', 'loop', 'muted', 'poster', 'preload',
+            // KaTeX and math-specific attributes
+            'aria-hidden', 'role', 'data-lexical-text', 'mathvariant', 'mathcolor',
+            'mathbackground', 'mathsize', 'dir', 'fontfamily', 'fontweight',
+            'fontstyle', 'fontsize', 'color', 'background', 'display', 'displaystyle',
+            'scriptlevel', 'scriptsizemultiplier', 'scriptminsize', 'infixlinebreakstyle',
+            'decimalpoint', 'rspace', 'lspace', 'linethickness', 'munalign',
+            'denomalign', 'numalign', 'align', 'rowalign', 'columnalign',
+            'groupalign', 'alignmentscope', 'columnwidth', 'width', 'rowspacing',
+            'columnspacing', 'rowlines', 'columnlines', 'frame', 'framespacing',
+            'equalrows', 'equalcolumns', 'side', 'minlabelspacing', 'rowspan',
+            'columnspan', 'accent', 'accentunder', 'bevelled', 'close', 'open',
+            'separators', 'stretchy', 'symmetric', 'maxsize', 'minsize', 'largeop',
+            'movablelimits', 'form', 'fence', 'separator', 'selection'
           ]
       });
 

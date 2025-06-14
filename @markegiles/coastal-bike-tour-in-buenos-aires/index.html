@@ -375,10 +375,10 @@
         },
         
         createNavPoint: function() {
-          // Create the visual marker as a sphere with thumbnail texture
+          // Create the visual marker as a sphere with thumbnail texture (100% bigger)
           this.el.setAttribute('geometry', {
             primitive: 'sphere',
-            radius: 0.15
+            radius: 0.30
           });
           
           // Add IPFS prefix to thumbnail URL if needed
@@ -452,13 +452,20 @@
           document.addEventListener('toggle-comment-mode', (e) => {
             this.isActive = e.detail.active;
             this.updateCursor();
+            console.log('[Comment Creator] Mode toggled to:', this.isActive);
           });
           
-          // Listen for clicks on the sky sphere
+          // Listen for clicks on the sky sphere ONLY
           const sky = document.querySelector('#image-360');
           if (sky) {
             sky.addEventListener('click', (e) => {
-              if (this.isActive) {
+              console.log('[Comment Creator] Sky clicked, comment mode active:', this.isActive);
+              console.log('[Comment Creator] Event target:', e.target.id);
+              
+              // Only handle sky clicks when in comment mode
+              // Make sure we're actually clicking the sky, not a child element
+              if (this.isActive && (e.target === sky || e.target.id === 'image-360')) {
+                console.log('[Comment Creator] Processing comment creation');
                 this.createCommentAtPoint(e);
               }
             });
@@ -498,13 +505,13 @@
             z: (point.z / distance) * commentRadius
           };
           
-                  // Convert to spherical coordinates (phi = azimuth, theta = elevation)
-        // Note: This creates coordinates directly in the viewer's coordinate system
-        let phi = Math.atan2(normalizedPoint.z, normalizedPoint.x) * 180 / Math.PI;
-        const theta = Math.acos(normalizedPoint.y / commentRadius) * 180 / Math.PI;
-        
-        // Apply the same 90-degree offset as the canvas editor for consistency
-        phi = phi - 90;
+          // Convert to spherical coordinates (phi = azimuth, theta = elevation)
+          // Note: This creates coordinates directly in the viewer's coordinate system
+          let phi = Math.atan2(normalizedPoint.z, normalizedPoint.x) * 180 / Math.PI;
+          const theta = Math.acos(normalizedPoint.y / commentRadius) * 180 / Math.PI;
+          
+          // Apply the same 90-degree offset as the canvas editor for consistency
+          phi = phi - 90;
           
           console.log('[Comment Creator] Calculated position - phi:', phi, 'theta:', theta, 'radius:', commentRadius);
           
@@ -717,27 +724,6 @@
                   vr-button="color: #2196F3; text: Vote"
                   rotation="-45 -90 0"
                   class="clickable">
-          <!-- Vote Panel as child -->
-          <a-entity id="vote-panel" 
-                    geometry="primitive: plane; width: 1.5; height: 0.8"
-                    material="color: #000000; opacity: 0.8; transparent: true"
-                    position="0 1.5 0"
-                    rotation="45 0 0"
-                    visible="false">
-            <a-entity id="vote-button-vr" 
-                      vr-button="color: #2196F3; text: Vote"
-                      position="0 0.1 0"
-                      scale="0.6 0.6 0.6"
-                      class="clickable">
-            </a-entity>
-            <a-text id="vote-info" 
-                    value="Please log in to vote"
-                    align="center"
-                    color="white"
-                    position="0 -0.1 0.01"
-                    scale="0.5 0.5 0.5">
-            </a-text>
-          </a-entity>
         </a-entity>
 
         <a-entity id="menu-post" 
@@ -748,7 +734,7 @@
           <a-entity id="post-panel" 
                     geometry="primitive: plane; width: 2.5; height: 2"
                     material="color: #000000; opacity: 0.8; transparent: true"
-                    position="0 1.5 0"
+                    position="0 2 0"
                     rotation="45 0 0"
                     visible="false">
             <a-text id="post-title" 
@@ -784,7 +770,7 @@
           <a-entity id="comments-panel" 
                     geometry="primitive: plane; width: 2.5; height: 2"
                     material="color: #000000; opacity: 0.8; transparent: true"
-                    position="0 1.5 0"
+                    position="0 2 0"
                     rotation="45 0 0"
                     visible="false">
             <a-text id="comments-title" 
@@ -829,13 +815,7 @@
                     scale="0.5 0.5 0.5">
             </a-text>
             
-            <!-- Close Button -->
-            <a-entity id="comments-close-btn" 
-                      vr-button="color: #757575; text: Close"
-                      position="0 -0.8 0.01"
-                      scale="0.5 0.5 0.5"
-                      class="clickable">
-            </a-entity>
+
           </a-entity>
         </a-entity>
 
@@ -847,7 +827,7 @@
           <a-entity id="nav-panel" 
                     geometry="primitive: plane; width: 2.5; height: 2"
                     material="color: #000000; opacity: 0.8; transparent: true"
-                    position="0 1.5 0"
+                    position="0 2 0"
                     rotation="45 0 0"
                     visible="false">
             <a-text id="nav-title" 
@@ -866,12 +846,20 @@
                     scale="0.6 0.6 0.6">
             </a-text>
             
+            <!-- Navigation Spheres Visibility Toggle -->
+            <a-entity id="nav-spheres-toggle" 
+                      vr-button="color: #4CAF50; text: Show Nav Spheres"
+                      position="0 0.15 0.01"
+                      scale="0.6 0.6 0.6"
+                      class="clickable">
+            </a-entity>
+            
             <a-text id="nav-instructions" 
-                    value="Click navigation spheres to move between photos"
+                    value="Toggle navigation spheres visibility above"
                     align="center"
                     wrap-count="40"
                     color="#CCCCCC"
-                    position="0 0.1 0.01"
+                    position="0 -0.05 0.01"
                     scale="0.45 0.45 0.45">
             </a-text>
             
@@ -894,7 +882,7 @@
           <a-entity id="info-panel" 
                     geometry="primitive: plane; width: 2; height: 1.5"
                     material="color: #000000; opacity: 0.8; transparent: true"
-                    position="0 1.5 0"
+                    position="0 2 0"
                     rotation="45 0 0"
                     visible="false">
             <a-text id="info-text" 
@@ -913,6 +901,75 @@
 
       <!-- Comment and Navigation Markers Container -->
       <a-entity id="spatial-markers" comment-creator></a-entity>
+
+      <!-- Reusable Vote Panel - Positions Dynamically -->
+      <a-entity id="vote-panel" 
+                geometry="primitive: plane; width: 1.5; height: 1.2"
+                material="color: #000000; opacity: 0.8; transparent: true"
+                position="0 0 -1.5"
+                visible="false">
+        
+        <a-text id="vote-weight-label" 
+                value="Vote Weight"
+                align="center"
+                color="#FFD700"
+                position="0 0.4 0.01"
+                scale="0.4 0.4 0.4">
+        </a-text>
+        
+        <a-text id="vote-weight-display" 
+                value="+100%"
+                align="center"
+                color="white"
+                position="0 0.25 0.01"
+                scale="0.5 0.5 0.5">
+        </a-text>
+        
+        <!-- Vote weight adjustment buttons -->
+        <a-entity id="vote-weight-minus" 
+                  vr-button="color: #ff9800; text: -"
+                  position="-0.4 0.05 0.01"
+                  scale="0.4 0.4 0.4"
+                  class="clickable">
+        </a-entity>
+        
+        <a-entity id="vote-weight-plus" 
+                  vr-button="color: #4CAF50; text: +"
+                  position="0.4 0.05 0.01"
+                  scale="0.4 0.4 0.4"
+                  class="clickable">
+        </a-entity>
+        
+        <!-- Preset buttons -->
+        <a-entity id="vote-downvote-preset" 
+                  vr-button="color: #f44336; text: Downvote"
+                  position="-0.3 -0.15 0.01"
+                  scale="0.4 0.4 0.4"
+                  class="clickable">
+        </a-entity>
+        
+        <a-entity id="vote-upvote-preset" 
+                  vr-button="color: #4CAF50; text: Upvote"
+                  position="0.3 -0.15 0.01"
+                  scale="0.4 0.4 0.4"
+                  class="clickable">
+        </a-entity>
+        
+        <a-entity id="vote-button-vr" 
+                  vr-button="color: #2196F3; text: Cast Vote"
+                  position="0 -0.35 0.01"
+                  scale="0.6 0.6 0.6"
+                  class="clickable">
+        </a-entity>
+        
+        <a-text id="vote-info" 
+                value="Please log in to vote"
+                align="center"
+                color="white"
+                position="0 -0.5 0.01"
+                scale="0.35 0.35 0.35">
+        </a-text>
+      </a-entity>
 
       <!-- Vote Weight Selection Panel -->
       <a-entity id="vote-weight-panel" 
@@ -1139,63 +1196,69 @@
 
       // Simplified Panel management
       let currentPanel = null;
+      let navSpheresVisible = true; // Track navigation spheres visibility
+
+      function togglePanel(panelId) {
+        console.log('[Panel] Toggling panel:', panelId);
+        
+        const panel = document.querySelector(`#${panelId}`);
+        if (!panel) {
+          console.error('[Panel] Panel not found:', panelId);
+          return;
+        }
+        
+        const isCurrentlyVisible = panel.getAttribute('visible');
+        
+        if (isCurrentlyVisible && currentPanel === panel) {
+          // Hide the current panel
+          panel.setAttribute('visible', false);
+          currentPanel = null;
+          console.log('[Panel] Panel hidden:', panelId);
+        } else {
+          // Hide current panel if different
+          if (currentPanel && currentPanel !== panel) {
+            currentPanel.setAttribute('visible', false);
+          }
+          
+          // Show the new panel
+          panel.setAttribute('visible', true);
+          currentPanel = panel;
+          console.log('[Panel] Panel shown:', panelId);
+        }
+      }
 
       function showPanel(panelId) {
+        console.log('[Panel] Showing panel:', panelId);
+        
         // Hide current panel
         if (currentPanel) {
           currentPanel.setAttribute('visible', false);
         }
         
-        // Show new panel - now panels are children of buttons
+        // Show new panel
         const panel = document.querySelector(`#${panelId}`);
         if (panel) {
-          // Panels are now positioned relative to their parent buttons
-          // No need to reposition, just toggle visibility
           panel.setAttribute('visible', true);
           currentPanel = panel;
+          console.log('[Panel] Panel shown successfully:', panelId);
+        } else {
+          console.error('[Panel] Panel not found:', panelId);
         }
       }
 
       function hideAllPanels() {
+        console.log('[Panel] Hiding all panels');
         ['vote-panel', 'post-panel', 'comments-panel', 'nav-panel', 'info-panel', 'comment-detail-panel', 'comment-create-panel', 'vote-weight-panel'].forEach(id => {
           const panel = document.querySelector(`#${id}`);
           if (panel && panel.getAttribute('visible')) {
             panel.setAttribute('visible', false);
+            console.log('[Panel] Hidden panel:', id);
           }
         });
         currentPanel = null;
       }
 
-      // Vote Weight Management
-      function showVoteWeightPanel(target) {
-        currentVoteTarget = target;
-        showPanel('vote-weight-panel');
-        updateVoteWeightDisplay();
-      }
 
-      function updateVoteWeightDisplay() {
-        const currentText = document.querySelector('#vote-weight-current');
-        if (currentText) {
-          const sign = currentVoteWeight >= 0 ? '+' : '';
-          currentText.setAttribute('text', 'value', `Current: ${sign}${currentVoteWeight}%`);
-        }
-      }
-
-      function adjustVoteWeight(change) {
-        const newWeight = Math.max(-100, Math.min(100, currentVoteWeight + change));
-        // Skip 0 - not allowed
-        if (newWeight === 0) {
-          currentVoteWeight = change > 0 ? 1 : -1;
-        } else {
-          currentVoteWeight = newWeight;
-        }
-        updateVoteWeightDisplay();
-      }
-
-      function setVoteWeight(weight) {
-        currentVoteWeight = weight;
-        updateVoteWeightDisplay();
-      }
 
       // Core Photo Switching Functionality
       function switchToPhoto(photoIndex) {
@@ -1714,22 +1777,80 @@
                         );
 
         const color = hasVoted ? '#4CAF50' : '#2196F3';
-        const text = hasVoted ? 'Voted' : 'Vote';
+        const text = hasVoted ? 'Voted' : 'Cast Vote';
         
         if (voteButton) {
           voteButton.setAttribute('vr-button', `color: ${color}; text: ${text}`);
         }
         if (menuVote) {
-          menuVote.setAttribute('vr-button', `color: ${color}; text: ${text}`);
+          menuVote.setAttribute('vr-button', `color: ${color}; text: Vote`);
         }
+      }
+
+      // Toggle navigation spheres visibility
+      function toggleNavSpheresVisibility() {
+        navSpheresVisible = !navSpheresVisible;
+        
+        // Toggle visibility of all navigation spheres
+        const navSpheres = document.querySelectorAll('.nav-point');
+        navSpheres.forEach(sphere => {
+          sphere.setAttribute('visible', navSpheresVisible);
+        });
+        
+        // Update button text and color
+        const navToggleBtn = document.querySelector('#nav-spheres-toggle');
+        if (navToggleBtn) {
+          const buttonText = navSpheresVisible ? 'Hide Nav Spheres' : 'Show Nav Spheres';
+          const buttonColor = navSpheresVisible ? '#757575' : '#4CAF50';
+          navToggleBtn.setAttribute('vr-button', `color: ${buttonColor}; text: ${buttonText}`);
+        }
+        
+        // Update instructions
+        const navInstructions = document.querySelector('#nav-instructions');
+        if (navInstructions) {
+          if (navSpheresVisible) {
+            navInstructions.setAttribute('text', 'value', 'Navigation spheres are visible. Click them to move between photos.');
+          } else {
+            navInstructions.setAttribute('text', 'value', 'Navigation spheres are hidden. Click above to show them.');
+          }
+        }
+        
+        console.log(`[Navigation] Navigation spheres visibility toggled to: ${navSpheresVisible}`);
+      }
+
+      // Update vote weight display
+      function updateVoteWeightDisplay() {
+        const voteWeightDisplay = document.querySelector('#vote-weight-display');
+        if (voteWeightDisplay) {
+          const sign = currentVoteWeight >= 0 ? '+' : '';
+          voteWeightDisplay.setAttribute('text', 'value', `${sign}${currentVoteWeight}%`);
+        }
+      }
+
+      // Adjust vote weight
+      function adjustVoteWeight(change) {
+        const newWeight = Math.max(-100, Math.min(100, currentVoteWeight + change));
+        // Skip 0 - not allowed
+        if (newWeight === 0) {
+          currentVoteWeight = change > 0 ? 1 : -1;
+        } else {
+          currentVoteWeight = newWeight;
+        }
+        updateVoteWeightDisplay();
+      }
+
+      // Set vote weight to specific value
+      function setVoteWeight(weight) {
+        currentVoteWeight = weight;
+        updateVoteWeightDisplay();
       }
 
       // Handle vote action - now shows weight selection first
       async function handleVote(target = null) {
-        console.log('[Debug] Starting vote process');
+        console.log('[Vote] Starting vote process for target:', target);
         
         if (!window.dluxWallet.currentUser) {
-          console.log('[Debug] No user logged in, cannot vote');
+          console.log('[Vote] No user logged in, cannot vote');
           return;
         }
 
@@ -1740,23 +1861,76 @@
         };
 
         if (!voteTarget.author || !voteTarget.permlink) {
-          console.log('[Debug] No vote target available');
+          console.log('[Vote] No vote target available');
           return;
         }
 
-        // Show weight selection panel
-        showVoteWeightPanel(voteTarget);
+        // Set the current vote target
+        currentVoteTarget = voteTarget;
+        
+        // Position the vote panel near the triggering element
+        positionVotePanel(target ? 'comment' : 'menu');
+        
+        // Show the vote panel
+        showPanel('vote-panel');
+        updateVoteWeightDisplay();
+        
+        // Update vote panel title based on target type
+        const voteWeightLabel = document.querySelector('#vote-weight-label');
+        if (voteWeightLabel) {
+          const isComment = target && target !== null;
+          const labelText = isComment ? `Vote on @${voteTarget.author}'s Comment` : 'Vote on Post';
+          voteWeightLabel.setAttribute('text', 'value', labelText);
+        }
+      }
+
+      // Position vote panel near the triggering element
+      function positionVotePanel(triggerType) {
+        const votePanel = document.querySelector('#vote-panel');
+        if (!votePanel) return;
+
+        if (triggerType === 'menu') {
+          // Position near the vote menu button
+          const menuVote = document.querySelector('#menu-vote');
+          if (menuVote) {
+            // Get the menu button's world position
+            const menuPosition = menuVote.getAttribute('position');
+            const menuRotation = menuVote.getAttribute('rotation');
+            
+            // Position the panel above and slightly forward from the menu button
+            votePanel.setAttribute('position', {
+              x: menuPosition.x,
+              y: menuPosition.y + 1.5,
+              z: menuPosition.z + 0.5
+            });
+            votePanel.setAttribute('rotation', '0 0 0');
+            console.log('[Vote Panel] Positioned near menu button');
+          } else {
+            // Fallback to default position
+            votePanel.setAttribute('position', '0 0 -1.5');
+            votePanel.setAttribute('rotation', '0 0 0');
+          }
+        } else if (triggerType === 'comment') {
+          // Position near the comment detail panel location
+          votePanel.setAttribute('position', '0 0.5 -1.5');
+          votePanel.setAttribute('rotation', '0 0 0');
+          console.log('[Vote Panel] Positioned near comment detail panel');
+        } else {
+          // Default center position
+          votePanel.setAttribute('position', '0 0 -1.5');
+          votePanel.setAttribute('rotation', '0 0 0');
+        }
       }
 
       // Execute the actual vote with selected weight
       async function executeVote() {
         if (!currentVoteTarget || !window.dluxWallet.currentUser) {
-          console.log('[Debug] Cannot execute vote: missing target or user');
+          console.log('[Vote] Cannot execute vote: missing target or user');
           return;
         }
 
         try {
-          console.log('[Debug] Executing vote with weight:', currentVoteWeight);
+          console.log('[Vote] Executing vote with weight:', currentVoteWeight, 'for target:', currentVoteTarget);
           const voteOp = {
             voter: window.dluxWallet.currentUser,
             author: currentVoteTarget.author,
@@ -1765,23 +1939,28 @@
           };
 
           // Send vote request to parent window in the correct format
-          window.opener.postMessage({
-            id: Date.now(),
-            type: 'sign-transaction',
-            source: 'dlux-wallet',
-            data: {
-              transaction: [
-                window.dluxWallet.currentUser,
-                [['vote', voteOp]],
-                'posting'
-              ]
-            }
-          }, '*');
+          if (window.opener) {
+            window.opener.postMessage({
+              id: Date.now(),
+              type: 'sign-transaction',
+              source: 'dlux-wallet',
+              data: {
+                transaction: [
+                  window.dluxWallet.currentUser,
+                  [['vote', voteOp]],
+                  'posting'
+                ]
+              }
+            }, '*');
+          }
 
-          console.log('[Debug] Vote request sent:', voteOp);
+          console.log('[Vote] Vote request sent:', voteOp);
           hideAllPanels();
+          
+          // Reset vote target
+          currentVoteTarget = null;
         } catch (error) {
-          console.error('[Debug] Error sending vote:', error);
+          console.error('[Vote] Error sending vote:', error);
         }
       }
 
@@ -1907,7 +2086,9 @@
         if (menuVote) {
           menuVote.addEventListener('click', (e) => {
             e.stopPropagation();
-            showPanel('vote-panel');
+            e.preventDefault();
+            console.log('[Menu] Vote button clicked');
+            togglePanel('vote-panel');
           });
         }
 
@@ -1915,7 +2096,9 @@
         if (menuPost) {
           menuPost.addEventListener('click', (e) => {
             e.stopPropagation();
-            showPanel('post-panel');
+            e.preventDefault();
+            console.log('[Menu] Post button clicked');
+            togglePanel('post-panel');
           });
         }
 
@@ -1923,7 +2106,9 @@
         if (menuComments) {
           menuComments.addEventListener('click', (e) => {
             e.stopPropagation();
-            showPanel('comments-panel');
+            e.preventDefault();
+            console.log('[Menu] Comments button clicked');
+            togglePanel('comments-panel');
             // Auto-show comments when opening panel
             if (!commentsVisible) {
               toggleCommentsVisibility();
@@ -1935,7 +2120,9 @@
         if (menuNav) {
           menuNav.addEventListener('click', (e) => {
             e.stopPropagation();
-            showPanel('nav-panel');
+            e.preventDefault();
+            console.log('[Menu] Navigation button clicked');
+            togglePanel('nav-panel');
           });
         }
 
@@ -1943,7 +2130,9 @@
         if (menuInfo) {
           menuInfo.addEventListener('click', (e) => {
             e.stopPropagation();
-            showPanel('info-panel');
+            e.preventDefault();
+            console.log('[Menu] Info button clicked');
+            togglePanel('info-panel');
           });
         }
 
@@ -1990,13 +2179,7 @@
           commentCloseBtn.addEventListener('click', hideAllPanels);
         }
         
-        const commentsCloseBtn = document.querySelector('#comments-close-btn');
-        if (commentsCloseBtn) {
-          commentsCloseBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            hideAllPanels();
-          });
-        }
+
         
         // Initialize virtual keyboard
         initializeVirtualKeyboard();
@@ -2006,14 +2189,15 @@
         if (voteButtonVr) {
           voteButtonVr.addEventListener('click', (e) => {
             e.stopPropagation();
-            handleVote();
+            executeVote(); // Use executeVote directly since weight is already set
           });
         }
 
-        // Comment vote button
+        // Comment vote button - now uses reusable vote panel
         const commentVoteBtn = document.querySelector('#comment-vote-btn');
         if (commentVoteBtn) {
-          commentVoteBtn.addEventListener('click', () => {
+          commentVoteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             // Get current comment data from detail panel
             const authorEl = document.querySelector('#comment-detail-author');
             if (authorEl) {
@@ -2022,50 +2206,54 @@
               // For comments, we need to construct permlink from the current comment
               // This is a simplified approach - in real implementation you'd store the permlink
               const permlink = `re-${window.dluxWallet.currentPost?.permlink}-comment`;
+              
+              // Hide comment detail panel and show vote panel
+              hideAllPanels();
               handleVote({ author, permlink });
             }
           });
         }
 
-        // Vote weight panel event listeners
-        const voteWeightMinusBig = document.querySelector('#vote-weight-minus-big');
-        if (voteWeightMinusBig) {
-          voteWeightMinusBig.addEventListener('click', () => adjustVoteWeight(-25));
-        }
-
+        // Vote weight panel event listeners for new controls
         const voteWeightMinus = document.querySelector('#vote-weight-minus');
         if (voteWeightMinus) {
-          voteWeightMinus.addEventListener('click', () => adjustVoteWeight(-5));
+          voteWeightMinus.addEventListener('click', (e) => {
+            e.stopPropagation();
+            adjustVoteWeight(-5);
+          });
         }
 
         const voteWeightPlus = document.querySelector('#vote-weight-plus');
         if (voteWeightPlus) {
-          voteWeightPlus.addEventListener('click', () => adjustVoteWeight(5));
+          voteWeightPlus.addEventListener('click', (e) => {
+            e.stopPropagation();
+            adjustVoteWeight(5);
+          });
         }
 
-        const voteWeightPlusBig = document.querySelector('#vote-weight-plus-big');
-        if (voteWeightPlusBig) {
-          voteWeightPlusBig.addEventListener('click', () => adjustVoteWeight(25));
+        const voteDownvotePreset = document.querySelector('#vote-downvote-preset');
+        if (voteDownvotePreset) {
+          voteDownvotePreset.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setVoteWeight(-100);
+          });
         }
 
-        const voteDownvote = document.querySelector('#vote-downvote');
-        if (voteDownvote) {
-          voteDownvote.addEventListener('click', () => setVoteWeight(-100));
+        const voteUpvotePreset = document.querySelector('#vote-upvote-preset');
+        if (voteUpvotePreset) {
+          voteUpvotePreset.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setVoteWeight(100);
+          });
         }
 
-        const voteUpvote = document.querySelector('#vote-upvote');
-        if (voteUpvote) {
-          voteUpvote.addEventListener('click', () => setVoteWeight(100));
-        }
-
-        const voteConfirmBtn = document.querySelector('#vote-confirm-btn');
-        if (voteConfirmBtn) {
-          voteConfirmBtn.addEventListener('click', executeVote);
-        }
-
-        const voteCancelBtn = document.querySelector('#vote-cancel-btn');
-        if (voteCancelBtn) {
-          voteCancelBtn.addEventListener('click', hideAllPanels);
+        // Navigation sphere toggle
+        const navSpheresToggle = document.querySelector('#nav-spheres-toggle');
+        if (navSpheresToggle) {
+          navSpheresToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleNavSpheresVisibility();
+          });
         }
         
         // Load test comment for coordinate testing
@@ -2073,6 +2261,12 @@
         
         // Load comments for initial photo
         loadCommentsForPhoto();
+        
+        // Initialize vote weight display
+        updateVoteWeightDisplay();
+        
+        // Initialize navigation spheres (make sure they start visible)
+        navSpheresVisible = true;
         
         // Update debug info periodically
         setInterval(updateDebugInfo, 1000);
