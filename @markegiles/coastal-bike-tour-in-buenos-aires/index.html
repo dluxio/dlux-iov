@@ -828,6 +828,14 @@
                     position="-1.1 -0.2 0.01"
                     scale="0.5 0.5 0.5">
             </a-text>
+            
+            <!-- Close Button -->
+            <a-entity id="comments-close-btn" 
+                      vr-button="color: #757575; text: Close"
+                      position="0 -0.8 0.01"
+                      scale="0.5 0.5 0.5"
+                      class="clickable">
+            </a-entity>
           </a-entity>
         </a-entity>
 
@@ -1897,71 +1905,53 @@
         // Add VR menu event listeners with null checks
         const menuVote = document.querySelector('#menu-vote');
         if (menuVote) {
-          menuVote.addEventListener('click', () => {
-            if (currentPanel && currentPanel.id === 'vote-panel') {
-              hideAllPanels();
-            } else {
-              showPanel('vote-panel');
-            }
+          menuVote.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showPanel('vote-panel');
           });
         }
 
         const menuPost = document.querySelector('#menu-post');
         if (menuPost) {
-          menuPost.addEventListener('click', () => {
-            if (currentPanel && currentPanel.id === 'post-panel') {
-              hideAllPanels();
-            } else {
-              showPanel('post-panel');
-            }
+          menuPost.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showPanel('post-panel');
           });
         }
 
         const menuComments = document.querySelector('#menu-comments');
         if (menuComments) {
-          menuComments.addEventListener('click', () => {
-            if (currentPanel && currentPanel.id === 'comments-panel') {
-              hideAllPanels();
-              // Hide comments when closing panel
-              if (commentsVisible) {
-                toggleCommentsVisibility();
-              }
-            } else {
-              showPanel('comments-panel');
-              // Show comments when opening panel
-              if (!commentsVisible) {
-                toggleCommentsVisibility();
-              }
+          menuComments.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showPanel('comments-panel');
+            // Auto-show comments when opening panel
+            if (!commentsVisible) {
+              toggleCommentsVisibility();
             }
           });
         }
 
         const menuNav = document.querySelector('#menu-nav');
         if (menuNav) {
-          menuNav.addEventListener('click', () => {
-            if (currentPanel && currentPanel.id === 'nav-panel') {
-              hideAllPanels();
-            } else {
-              showPanel('nav-panel');
-            }
+          menuNav.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showPanel('nav-panel');
           });
         }
 
         const menuInfo = document.querySelector('#menu-info');
         if (menuInfo) {
-          menuInfo.addEventListener('click', () => {
-            if (currentPanel && currentPanel.id === 'info-panel') {
-              hideAllPanels();
-            } else {
-              showPanel('info-panel');
-            }
+          menuInfo.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showPanel('info-panel');
           });
         }
 
         // Comment system event listeners with null checks
         const commentVisibilityToggle = document.querySelector('#comment-visibility-toggle');
         if (commentVisibilityToggle) {
-          commentVisibilityToggle.addEventListener('click', () => {
+          commentVisibilityToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
             toggleCommentsVisibility();
             // Update button text
             const buttonText = commentsVisible ? 'Hide' : 'Show';
@@ -1972,7 +1962,10 @@
         
         const commentModeToggle = document.querySelector('#comment-mode-toggle');
         if (commentModeToggle) {
-          commentModeToggle.addEventListener('click', toggleCommentMode);
+          commentModeToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleCommentMode();
+          });
         }
         
         const commentSubmitBtn = document.querySelector('#comment-submit-btn');
@@ -1997,17 +1990,24 @@
           commentCloseBtn.addEventListener('click', hideAllPanels);
         }
         
+        const commentsCloseBtn = document.querySelector('#comments-close-btn');
+        if (commentsCloseBtn) {
+          commentsCloseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            hideAllPanels();
+          });
+        }
+        
         // Initialize virtual keyboard
         initializeVirtualKeyboard();
 
         // Vote button handlers with null checks
         const voteButtonVr = document.querySelector('#vote-button-vr');
         if (voteButtonVr) {
-          voteButtonVr.addEventListener('click', handleVote);
-        }
-        
-        if (menuVote) {
-          menuVote.addEventListener('click', handleVote);
+          voteButtonVr.addEventListener('click', (e) => {
+            e.stopPropagation();
+            handleVote();
+          });
         }
 
         // Comment vote button
