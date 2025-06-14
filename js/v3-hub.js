@@ -1354,6 +1354,18 @@ createApp({
             if (res.result) {
               const post = res.result;
               
+              // Calculate total payout correctly
+              let totalPayout = 0;
+              const pendingPayout = parseFloat(post.pending_payout_value?.split(' ')[0] || '0');
+              const authorPayout = parseFloat(post.author_payout_value?.split(' ')[0] || '0');
+              const curatorPayout = parseFloat(post.curator_payout_value?.split(' ')[0] || '0');
+              
+              if (pendingPayout > 0) {
+                totalPayout = pendingPayout;
+              } else {
+                totalPayout = authorPayout + curatorPayout;
+              }
+              
               // Update the post with full details, keeping existing DLUX-specific data
               this.posturls[key] = {
                 ...this.posturls[key], // Keep DLUX data from data.dlux.io
@@ -1364,7 +1376,10 @@ createApp({
                 downVotes: 0,
                 edit: false,
                 hasVoted: false,
+                hasMoreVotes: false,
                 contract: {},
+                // Set calculated total payout
+                total_payout_value: totalPayout.toFixed(3) + " HBD",
               };
               
               // Process vote data
@@ -1375,12 +1390,22 @@ createApp({
                   } else if (post.active_votes[j].rshares < 0) {
                     this.posturls[key].downVotes++;
                   }
+                  // Skip rshares === 0 (neutral/no vote)
 
                   if (post.active_votes[j].voter === this.account) {
                     this.posturls[key].slider = post.active_votes[j].percent;
                     this.posturls[key].hasVoted = true;
                   }
                 }
+                
+                // Add "+" indicator if we hit the API limit of 1000 votes
+                if (post.active_votes.length >= 1000) {
+                  this.posturls[key].hasMoreVotes = true;
+                } else {
+                  this.posturls[key].hasMoreVotes = false;
+                }
+                
+                console.log(`Vote count for ${key}: ${this.posturls[key].upVotes} up, ${this.posturls[key].downVotes} down, total: ${post.active_votes.length}, hasMore: ${this.posturls[key].hasMoreVotes}`);
               }
 
               if (this.posturls[key].slider < 0) {
@@ -1581,6 +1606,7 @@ createApp({
                   downVotes: 0,
                   edit: false,
                   hasVoted: false,
+                  hasMoreVotes: false,
                   contract: {},
                   type: 'Blog',
                   url: `/blog${key}`,
@@ -1592,18 +1618,27 @@ createApp({
                 // Process vote data
                 if (post.active_votes && post.active_votes.length > 0) {
                   for (var j = 0; j < post.active_votes.length; j++) {
-                    if (post.active_votes[j].percent > 0) {
+                    if (post.active_votes[j].rshares > 0) {
                       this.posturls[key].upVotes++;
-                    } else if (post.active_votes[j].percent < 0) {
+                    } else if (post.active_votes[j].rshares < 0) {
                       this.posturls[key].downVotes++;
                     }
-                    // Skip percent === 0 (neutral/no vote)
+                    // Skip rshares === 0 (neutral/no vote)
 
                     if (post.active_votes[j].voter === this.account) {
                       this.posturls[key].slider = post.active_votes[j].percent;
                       this.posturls[key].hasVoted = true;
                     }
                   }
+                  
+                  // Add "+" indicator if we hit the API limit of 1000 votes
+                  if (post.active_votes.length >= 1000) {
+                    this.posturls[key].hasMoreVotes = true;
+                  } else {
+                    this.posturls[key].hasMoreVotes = false;
+                  }
+                  
+                  console.log(`Vote count for ${key}: ${this.posturls[key].upVotes} up, ${this.posturls[key].downVotes} down, total: ${post.active_votes.length}, hasMore: ${this.posturls[key].hasMoreVotes}`);
                 }
 
                 if (this.posturls[key].slider < 0) {
@@ -1616,12 +1651,27 @@ createApp({
                   if (typeof post.json_metadata === 'string') {
                     this.posturls[key].json_metadata = JSON.parse(post.json_metadata);
                   }
-                  // Use different image finding logic for blog posts vs DLUX posts
-                  if (this.posturls[key].type === 'Blog') {
-                    this.posturls[key].pic = this.blogPicFind(this.posturls[key].json_metadata, post.body);
-                  } else {
-                    this.posturls[key].pic = this.picFind(this.posturls[key].json_metadata);
-                  }
+                                  // Calculate total payout correctly
+                let totalPayout = 0;
+                const pendingPayout = parseFloat(post.pending_payout_value?.split(' ')[0] || '0');
+                const authorPayout = parseFloat(post.author_payout_value?.split(' ')[0] || '0');
+                const curatorPayout = parseFloat(post.curator_payout_value?.split(' ')[0] || '0');
+                
+                if (pendingPayout > 0) {
+                  totalPayout = pendingPayout;
+                } else {
+                  totalPayout = authorPayout + curatorPayout;
+                }
+                
+                // Set calculated total payout
+                this.posturls[key].total_payout_value = totalPayout.toFixed(3) + " HBD";
+                
+                // Use different image finding logic for blog posts vs DLUX posts
+                if (this.posturls[key].type === 'Blog') {
+                  this.posturls[key].pic = this.blogPicFind(this.posturls[key].json_metadata, post.body);
+                } else {
+                  this.posturls[key].pic = this.picFind(this.posturls[key].json_metadata);
+                }
                 } catch (e) {
                   console.log(key, "no JSON?");
                   this.posturls[key].json_metadata = {};
@@ -1701,18 +1751,19 @@ createApp({
           .then((res) => {
             if (res.result) {
               const key = `/@${res.result.author}/${res.result.permlink}`
-              this.posturls[key] = {
-                ...this.posturls[key],
-                ...res.result,
-                slider: 10000,
-                flag: false,
-                upVotes: 0,
-                downVotes: 0,
-                edit: false,
-                hasVoted: false,
-                contract: {},
-                type: 'Blog',
-              };
+                              this.posturls[key] = {
+                  ...this.posturls[key],
+                  ...res.result,
+                  slider: 10000,
+                  flag: false,
+                  upVotes: 0,
+                  downVotes: 0,
+                  edit: false,
+                  hasVoted: false,
+                  hasMoreVotes: false,
+                  contract: {},
+                  type: 'Blog',
+                };
               for (
                 var i = 0;
                 i < this.posturls[key].active_votes.length;
@@ -1720,16 +1771,25 @@ createApp({
               ) {
                 if (this.posturls[key].active_votes[i].rshares > 0) {
                   this.posturls[key].upVotes++;
-                } else if ( this.posturls[key].active_votes[i].rshares < 0) {
+                } else if (this.posturls[key].active_votes[i].rshares < 0) {
                   this.posturls[key].downVotes++;
                 }
-                // Skip percent === 0 (neutral/no vote)
+                // Skip rshares === 0 (neutral/no vote)
 
                 if (this.posturls[key].active_votes[i].voter == this.account) {
                   this.posturls[key].slider = this.posturls[key].active_votes[i].percent
                   this.posturls[key].hasVoted = true
                 }
               }
+              
+              // Add "+" indicator if we hit the API limit of 1000 votes
+              if (this.posturls[key].active_votes.length >= 1000) {
+                this.posturls[key].hasMoreVotes = true;
+              } else {
+                this.posturls[key].hasMoreVotes = false;
+              }
+              
+              console.log(`Vote count for ${key}: ${this.posturls[key].upVotes} up, ${this.posturls[key].downVotes} down, total: ${this.posturls[key].active_votes.length}, hasMore: ${this.posturls[key].hasMoreVotes}`);
               try {
                 this.posturls[key].json_metadata = JSON.parse(
                   this.posturls[key].json_metadata
