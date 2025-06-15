@@ -10024,7 +10024,7 @@ export default {
             await this.loadDocumentWithoutCloudConnection(file);
             
             // Wait for Y.js document name to be available
-            const documentName = await this.waitForDocumentName(file, 10000); // 10 second timeout
+            const documentName = await this.waitForDocumentName(file, 5000); // 5 second timeout
             
             if (documentName) {
                 console.log('✅ Document name received from Y.js:', documentName);
@@ -10051,7 +10051,7 @@ export default {
                 // Now connect to cloud in background (non-blocking)
                 if (file.type === 'collaborative') {
                     console.log('🔗 Connecting to cloud in background...');
-                    this.connectToCollaborationServer(file).catch(error => {
+                    this.connectToCloudInBackground(file).catch(error => {
                         console.error('❌ Background cloud connection failed:', error);
                     });
                 }
@@ -10077,10 +10077,10 @@ export default {
                 // Clear initializing state even for fallback case
                 this.isInitializing = false;
                 
-                // Still try cloud connection in background for collaborative docs
+                // Still try to connect to cloud in background
                 if (file.type === 'collaborative') {
                     console.log('🔗 Connecting to cloud in background (fallback case)...');
-                    this.connectToCollaborationServer(file).catch(error => {
+                    this.connectToCloudInBackground(file).catch(error => {
                         console.error('❌ Background cloud connection failed:', error);
                     });
                 }
@@ -10089,10 +10089,124 @@ export default {
         
         /**
          * Load document without cloud connection (internal method)
-         * TIPTAP BEST PRACTICE: Separate document loading from cloud connection
+         * TIPTAP BEST PRACTICE: Load content first, connect to cloud later
          */
         async loadDocumentWithoutCloudConnection(file) {
             console.log('📋 Loading document without cloud connection...');
+            
+            try {
+                // Clean up any existing resources
+                await this.cleanupCurrentDocument();
+                await this.$nextTick();
+                
+                // Determine tier requirements
+                const requiresCloudTier = this.shouldUseCloudTier(file);
+                const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
+                
+                if (!bundle) {
+                    throw new Error('TipTap collaboration bundle is required');
+                }
+                
+                // Create Y.js document + IndexedDB immediately 
+                this.ydoc = new Y.Doc();
+                const documentId = file.id || file.permlink || `temp_${Date.now()}`;
+                const IndexeddbPersistence = bundle.IndexeddbPersistence?.default || bundle.IndexeddbPersistence;
+                
+                if (IndexeddbPersistence) {
+                    this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc);
+                    
+                    // Wait for IndexedDB sync (critical for content loading)
+                    await new Promise(resolve => {
+                        this.indexeddbProvider.on('synced', resolve);
+                    });
+                    
+                    console.log('💾 IndexedDB persistence synced for document');
+                    
+                    // Update custom JSON display after sync
+                    this.updateCustomJsonDisplay();
+                }
+                
+                // Initialize collaborative schema
+                this.initializeCollaborativeSchema(bundle.Y?.default || bundle.Y);
+                
+                // Create appropriate tier editor (but don't connect to cloud yet)
+                if (requiresCloudTier) {
+                    // Create local editors first, will upgrade to cloud later
+                    await this.createOfflineFirstCollaborativeEditors(bundle);
+                    this.isCollaborativeMode = true;
+                    this.fileType = 'collaborative';
+                } else {
+                    await this.createOfflineFirstCollaborativeEditors(bundle);
+                    this.isCollaborativeMode = false;
+                    this.fileType = 'local';
+                }
+                
+                this.showLoadModal = false;
+                this.hasUnsavedChanges = false;
+                
+                console.log('✅ Document loaded without cloud connection');
+                
+            } catch (error) {
+                console.error('Failed to load document without cloud connection:', error);
+                throw error;
+            }
+        },
+        
+        /**
+         * Connect to cloud in background (non-blocking)
+         * TIPTAP BEST PRACTICE: Separate cloud connection from content loading
+         */
+        async connectToCloudInBackground(file) {
+            console.log('🔗 Starting background cloud connection...');
+            
+            try {
+                // Initialize permissions immediately to prevent read-only mode during loading
+                console.log('🔐 Initializing permissions for collaborative document...');
+                this.documentPermissions = [{
+                    account: file.owner,
+                    permissionType: 'postable', // Owner always has full access
+                    grantedBy: file.owner,
+                    grantedAt: new Date().toISOString()
+                }];
+                
+                // If user is not the owner, give them editable permissions by default
+                if (this.username !== file.owner) {
+                    this.documentPermissions.push({
+                        account: this.username,
+                        permissionType: 'editable', // Default to editable, will be refined later
+                        grantedBy: file.owner,
+                        grantedAt: new Date().toISOString(),
+                        source: 'initial-assumption'
+                    });
+                    console.log('🔐 Initial assumption: User has editable permissions (will be refined)');
+                }
+                
+                // Update URL with collaborative parameters for shareability
+                console.log('🔗 Updating URL with collaborative parameters...', { owner: file.owner, permlink: file.permlink });
+                try {
+                    this.updateURLWithCollabParams(file.owner, file.permlink);
+                    console.log('✅ URL update completed successfully');
+                } catch (urlError) {
+                    console.error('❌ URL update failed:', urlError);
+                }
+                
+                // Connect to collaboration server
+                await this.connectToCollaborationServer(file);
+                
+                console.log('✅ Background cloud connection completed');
+                
+            } catch (error) {
+                console.error('❌ Background cloud connection failed:', error);
+                throw error;
+            }
+        },
+        
+        /**
+         * Load document without updating UI state (internal method)
+         * TIPTAP BEST PRACTICE: Separate document loading from UI updates
+         */
+        async loadDocumentWithoutUIUpdate(file) {
+            console.log('📋 Loading document without UI update...');
             
             try {
                 // Clean up any existing resources
@@ -10140,7 +10254,7 @@ export default {
                     this.fileType = 'local';
                 }
                 
-                // For cloud documents, initialize permissions (but don't connect yet)
+                // For cloud documents, initialize permissions and connect WebSocket
                 if (requiresCloudTier && file.type === 'collaborative') {
                     // Initialize permissions immediately to prevent read-only mode during loading
                     console.log('🔐 Initializing permissions for collaborative document...');
@@ -10172,17 +10286,16 @@ export default {
                         console.error('❌ URL update failed:', urlError);
                     }
                     
-                    // Cloud connection will happen later in background
-                    console.log('🔗 Cloud connection deferred to background');
+                    await this.connectToCollaborationServer(file);
                 }
                 
                 this.showLoadModal = false;
                 this.hasUnsavedChanges = false;
                 
-                console.log('✅ Document loaded without cloud connection');
+                console.log('✅ Document loaded without UI update');
                 
             } catch (error) {
-                console.error('Failed to load document without cloud connection:', error);
+                console.error('Failed to load document without UI update:', error);
                 throw error;
             }
         },
