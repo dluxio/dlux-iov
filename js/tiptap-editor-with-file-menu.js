@@ -105,15 +105,13 @@ export default {
             // Instance management
             componentId: `tiptap_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             isInitializing: false,
+            creatingEditors: false, // RACE CONDITION FIX: Prevent multiple editor creation calls
+            isCleaningUp: false, // RACE CONDITION FIX: Prevent multiple cleanup operations
             
             // TIPTAP BEST PRACTICE: Debounced auto-save
             debouncedAutoSave: null,
             
-            // TIPTAP BEST PRACTICE: Debounced Y.js document creation
-            debouncedYjsCreation: null,
-        debouncedPersistentYjsCreation: null,  // NEW: Debounced method for persistent Y.js creation
-        tempYDoc: null,  // NEW: Reference to temporary Y.js document
-            isCreatingYjsDocument: false,
+            // Y.js creation is now immediate - no debouncing needed
             
             // Authentication state
             serverAuthFailed: false,
@@ -138,8 +136,7 @@ export default {
             lastDocumentLoaded: null,
             schemaVersionMismatch: false,
             
-            // TIPTAP BEST PRACTICE: Lazy Y.js document creation components
-            lazyYjsComponents: null,
+            // Y.js components no longer needed as separate storage
             
             // Content
             content: {
@@ -266,7 +263,16 @@ export default {
             currentDocumentInfo: null,
             
             // Enhanced IndexedDB persistence
-            indexeddbProvider: null
+            indexeddbProvider: null,
+            
+            // Temp document tracking (prevents draft clutter)
+            isTemporaryDocument: false,
+            tempDocumentId: null,
+            isInitializingEditors: false,
+            isUpdatingPermissions: false,
+            isCleaningUp: false,
+            tempDocumentCreationTimer: null,
+            schemaVersionMismatch: false
         };
     },
     
@@ -291,10 +297,12 @@ export default {
             const isConnectedToServer = this.connectionStatus === 'connected';
             const hasWebSocketProvider = !!this.provider;
 
-            // OFFLINE-FIRST COLLABORATIVE MODE (Y.js document exists)
+
+
+            // TIPTAP BEST PRACTICE: Distinguish between local Y.js and collaborative Y.js
             if (hasYjsDocument) {
-                // Connected to server - full collaborative mode
-                if (isConnectedToServer && hasWebSocketProvider) {
+                // COLLABORATIVE MODE: Y.js + WebSocket provider (cloud documents)
+                if (hasWebSocketProvider && isConnectedToServer) {
                 if (this.hasUnsavedChanges) {
                     return {
                             state: 'syncing',
@@ -329,8 +337,8 @@ export default {
                     };
                 }
 
-                // Offline-first mode (Y.js document exists but not connected to server)
-                if (this.connectionStatus === 'connecting') {
+                // COLLABORATIVE MODE: Y.js + WebSocket provider but not connected
+                if (hasWebSocketProvider && this.connectionStatus === 'connecting') {
                 return {
                         state: 'connecting',
                         icon: '🔄',
@@ -341,7 +349,7 @@ export default {
                     };
                 }
 
-                if (this.connectionStatus === 'disconnected' || this.connectionStatus === 'offline') {
+                if (hasWebSocketProvider && (this.connectionStatus === 'disconnected' || this.connectionStatus === 'offline')) {
                 if (this.hasUnsavedChanges) {
                     return {
                         state: 'offline-saving',
@@ -362,7 +370,7 @@ export default {
                 };
             }
 
-                if (this.connectionStatus === 'error') {
+                if (hasWebSocketProvider && this.connectionStatus === 'error') {
                 return {
                         state: 'error',
                         icon: '❌',
@@ -373,24 +381,39 @@ export default {
                     };
                 }
 
-                // Fallback for Y.js document without connection attempt
+                // LOCAL MODE: Y.js + IndexedDB only (no WebSocket provider)
+                // This is the dotted cloud condition - local documents with Y.js persistence
+                
+                // TEMP DOCUMENT: Show saving state when changes are being saved
+                if (this.isTemporaryDocument) {
+                    if (this.hasUnsavedChanges) {
                     return {
-                    state: 'offline-ready',
-                    icon: '📄',
-                    message: 'Document ready',
-                    details: 'Offline-first: Y.js document loaded, ready for collaboration',
+                            state: 'saving-local',
+                            icon: '💾',
+                            message: 'Saving locally...',
+                            details: 'Creating draft document - changes will be saved to browser storage',
                         actions: [],
-                    class: 'status-offline'
+                            class: 'status-saving'
                     };
                 }
                 
-            // PURE LOCAL MODE (No Y.js document - traditional local editing)
+                    return {
+                        state: 'temp-ready',
+                        icon: '📝',
+                        message: 'Ready to edit',
+                        details: 'Temporary document - will become a draft when you make changes',
+                        actions: [],
+                        class: 'status-temp'
+                    };
+                }
+                
+                // ACTUAL LOCAL DOCUMENT: Color-coded save states
             if (this.hasUnsavedChanges) {
                     return {
                     state: 'saving-local',
                     icon: '💾',
                     message: 'Saving locally...',
-                    details: 'Local document - changes saved to browser storage',
+                        details: 'Local document with Y.js persistence - changes saved to browser storage',
                         actions: [],
                     class: 'status-saving'
                     };
@@ -400,9 +423,58 @@ export default {
                 state: 'saved-local',
                     icon: '✅',
                 message: 'Saved locally',
-                details: 'Local document - stored in browser storage only',
+                    details: 'Local document with Y.js persistence - stored in browser storage',
                     actions: [],
                 class: 'status-saved'
+                };
+            }
+                
+            // FALLBACK: No Y.js document (can happen during initialization or cleanup)
+            if (this.isInitializingEditors) {
+                // During initialization, show temp status
+                return {
+                    state: 'initializing',
+                    icon: '⏳',
+                    message: 'Initializing...',
+                    details: 'Editor is starting up',
+                    actions: [],
+                    class: 'status-temp'
+                };
+            }
+            
+            // During cleanup operations, show cleanup status instead of warning
+            if (this.isCleaningUp) {
+                return {
+                    state: 'cleaning-up',
+                    icon: '🧹',
+                    message: 'Cleaning up...',
+                    details: 'Document cleanup in progress',
+                    actions: [],
+                    class: 'status-temp'
+                };
+            }
+            
+            // Check if no editors exist yet (normal state before any document is loaded)
+            if (!this.titleEditor && !this.bodyEditor) {
+                return {
+                    state: 'no-document',
+                    icon: '📄',
+                    message: 'No document loaded',
+                    details: 'Create a new document or open an existing one to start editing',
+                    actions: [],
+                    class: 'status-temp'
+                };
+            }
+            
+            // Only show warning if editors exist but Y.js document is missing (unexpected state)
+            console.warn('⚠️ No Y.js document found - this may indicate an initialization issue');
+            return {
+                state: 'unknown',
+                icon: '❓',
+                message: 'Unknown Status',
+                details: 'No Y.js document found - please refresh the page',
+                actions: [{ label: 'Refresh Page', actionType: 'refresh' }],
+                class: 'status-unknown'
             };
         },
 
@@ -716,6 +788,15 @@ export default {
                 connectionStatus: this.connectionStatus
             });
             
+            // ENHANCED DEBUG: Log each permission in detail
+            if (Array.isArray(this.documentPermissions)) {
+                console.log('🔐 Detailed permissions:', this.documentPermissions.map(p => ({
+                    account: p.account,
+                    permissionType: p.permissionType,
+                    isCurrentUser: p.account === this.username
+                })));
+            }
+            
             // Ensure documentPermissions is an array
             if (!Array.isArray(this.documentPermissions)) {
                 console.warn('🔒 documentPermissions is not an array, defaulting to read-only mode');
@@ -724,6 +805,13 @@ export default {
             
             // Check user's permission level
             const userPermission = this.documentPermissions.find(p => p.account === this.username);
+            
+            // ENHANCED DEBUG: Log permission search result
+            console.log('🔐 Permission search result:', {
+                searchingFor: this.username,
+                foundPermission: userPermission,
+                allAccounts: this.documentPermissions.map(p => p.account)
+            });
             
             // If no permission found, default to read-only for safety (when online)
             if (!userPermission) {
@@ -740,36 +828,43 @@ export default {
             return isReadOnly;
         },
 
-        // Get beneficiaries from the appropriate source (collaborative or local)
+        // FIXED: Get beneficiaries using same logic as add/remove methods
         displayBeneficiaries() {
             // Depend on collaborativeDataVersion for reactivity
             this.collaborativeDataVersion; // eslint-disable-line no-unused-expressions
             
-            if (this.isCollaborativeMode && this.ydoc) {
+            // Use the same logic as addCollaborativeBeneficiary/removeBeneficiary
                 return this.getBeneficiaries();
-            }
-            return this.publishForm.beneficiaries || [];
         },
 
-        // Get tags from the appropriate source (collaborative or local)
+        // FIXED: Get tags using same logic as add/remove methods  
         displayTags() {
             // Depend on collaborativeDataVersion for reactivity
             this.collaborativeDataVersion; // eslint-disable-line no-unused-expressions
             
-            if (this.isCollaborativeMode && this.ydoc) {
+            // Use the same logic as addCollaborativeTag/removeTag
                 return this.getTags();
-            }
-            return this.content.tags || [];
+        },
+
+        // FIXED: Get custom JSON for display (computed property without setter to avoid cursor issues)
+        displayCustomJson() {
+            // Depend on collaborativeDataVersion for reactivity
+            this.collaborativeDataVersion; // eslint-disable-line no-unused-expressions
+            
+            // Use the same logic as setCustomJsonField/removeCustomJsonField
+            const customJson = this.getCustomJson();
+            return Object.keys(customJson).length > 0 ? JSON.stringify(customJson, null, 2) : '';
         },
 
         // TIPTAP UNIFIED ARCHITECTURE: Cloud icon system for all documents
         documentTitleIndicator() {
-            // FIXED: Determine if document is cloud-enabled more robustly
-            // Check both isCollaborativeMode AND currentFile type to handle error scenarios
-            const isCloudEnabled = this.isCollaborativeMode || this.currentFile?.type === 'collaborative';
+            // TIPTAP BEST PRACTICE: Check for WebSocket provider to determine cloud vs local
+            // Local documents: Y.js + IndexedDB only (dotted cloud)
+            // Collaborative documents: Y.js + IndexedDB + WebSocket provider (solid/slashed cloud)
+            const hasWebSocketProvider = !!this.provider;
             
-            if (!isCloudEnabled) {
-                // Local-only document (dotted cloud)
+            if (!hasWebSocketProvider) {
+                // Local document with Y.js persistence (dotted cloud)
                 return `
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-muted" style="opacity: 0.6;">
                         <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" stroke-dasharray="2,2"/>
@@ -777,7 +872,7 @@ export default {
                 `;
             }
             
-            // Cloud-enabled document - check connection status
+            // Collaborative document with WebSocket provider - check connection status
             if (this.connectionStatus === 'connecting') {
                 // Spinner cloud (connecting)
                 return `
@@ -865,68 +960,54 @@ export default {
             const {
                 includeCursor = false,
                 includeEnhanced = false,
-                cursorConfig = null,
-                tempYDoc = null  // NEW: Support for temporary Y.js document
+                cursorConfig = null
             } = options;
 
-            // Get components from bundle
-            const Editor = bundle?.Editor?.default || bundle?.Editor;
-            const StarterKit = bundle?.StarterKit?.default || bundle?.StarterKit;
-            const Collaboration = bundle?.Collaboration?.default || bundle?.Collaboration;
-            const CollaborationCursor = bundle?.CollaborationCursor?.default || bundle?.CollaborationCursor;
-            const Placeholder = bundle?.Placeholder?.default || bundle?.Placeholder;
-
-            // TIPTAP BEST PRACTICE: Use Y.js document if available (persistent or temporary)
-            const useYDoc = this.ydoc || tempYDoc;
-
-            const baseExtensions = [
-                StarterKit.configure({
-                    history: useYDoc ? false : true, // Use Y.js history if document exists, otherwise local history
-                    ...(field === 'title' ? {
-                        heading: false,
-                        bulletList: false,
-                        orderedList: false,
-                        blockquote: false,
-                        codeBlock: false,
-                        horizontalRule: false
-                    } : {})
-                }),
-                Placeholder.configure({
-                    placeholder: this.isReadOnlyMode ? 
-                        `${field.charAt(0).toUpperCase() + field.slice(1)} (read-only)` : 
-                        field === 'title' ? 'Enter title...' : 
-                        field === 'body' ? 'Start writing...' : 
-                        'Auto-generated from title'
-                })
-            ];
-
-            // Add Collaboration extension if Y.js document exists (persistent or temporary)
-            if (useYDoc && Collaboration) {
-                baseExtensions.push(Collaboration.configure({
-                    document: useYDoc,
-                    field: field
-                }));
-            }
-
-            // Add CollaborationCursor if requested and available
-            if (includeCursor && CollaborationCursor && this.provider) {
-                const userConfig = cursorConfig || {
-                    name: this.user?.username || 'Anonymous',
-                    color: this.generateUserColor(this.user?.username || 'Anonymous'),
-                };
-                
-                baseExtensions.push(CollaborationCursor.configure({
-                    provider: this.provider,
-                    user: userConfig,
-                }));
-            }
-
-            // Add enhanced extensions if requested
+            // Enhanced extensions for consistent UX across both tiers
             if (includeEnhanced) {
                 const enhancedExtensions = [];
                 
-                // Try to add emoji support if available
-                if (bundle?.Emoji || window.TiptapEmoji) {
+                // Add Link extension (NOT part of StarterKit - must be added explicitly)
+                if (bundle?.Link || window.TiptapLink) {
+                    const Link = bundle.Link?.default || bundle.Link || window.TiptapLink;
+                    enhancedExtensions.push(Link.configure({
+                        openOnClick: false,
+                        HTMLAttributes: {
+                            class: 'text-primary',
+                            target: '_blank',
+                            rel: 'noopener noreferrer'
+                        }
+                    }));
+                }
+                
+                // Add Typography extension for better markdown-like shortcuts
+                if (bundle?.Typography || window.TiptapTypography) {
+                    const Typography = bundle.Typography?.default || bundle.Typography || window.TiptapTypography;
+                    enhancedExtensions.push(Typography.configure({
+                        openDoubleQuote: '"',
+                        closeDoubleQuote: '"',
+                        openSingleQuote: "'",
+                        closeSingleQuote: "'",
+                        ellipsis: '…',
+                        emDash: '—',
+                        enDash: '–'
+                }));
+            }
+
+                // Add Image extension for better media handling (body editor only)
+                if (field === 'body' && (bundle?.Image || window.TiptapImage)) {
+                    const Image = bundle.Image?.default || bundle.Image || window.TiptapImage;
+                    enhancedExtensions.push(Image.configure({
+                        inline: true,
+                        allowBase64: true,
+                        HTMLAttributes: {
+                            class: 'img-fluid'
+                        }
+                }));
+            }
+
+                // Add Emoji support if available (body editor only)
+                if (field === 'body' && (bundle?.Emoji || window.TiptapEmoji)) {
                     const Emoji = bundle.Emoji?.default || bundle.Emoji || window.TiptapEmoji;
                     enhancedExtensions.push(Emoji.configure({
                         suggestion: {
@@ -949,47 +1030,27 @@ export default {
                     }));
                 }
                 
-                // Add Image extension for better media handling
-                if (bundle?.Image || window.TiptapImage) {
-                    const Image = bundle.Image?.default || bundle.Image || window.TiptapImage;
-                    enhancedExtensions.push(Image.configure({
-                        inline: true,
-                        allowBase64: true,
-                        HTMLAttributes: {
-                            class: 'img-fluid'
-                        }
-                    }));
-                }
-                
-                // Add Link extension for better URL handling
-                if (bundle?.Link || window.TiptapLink) {
-                    const Link = bundle.Link?.default || bundle.Link || window.TiptapLink;
-                    enhancedExtensions.push(Link.configure({
-                        openOnClick: false,
-                        HTMLAttributes: {
-                            class: 'text-primary'
-                        }
-                    }));
-                }
-                
-                // Add Typography extension for better markdown-like shortcuts
-                if (bundle?.Typography || window.TiptapTypography) {
-                    const Typography = bundle.Typography?.default || bundle.Typography || window.TiptapTypography;
-                    enhancedExtensions.push(Typography.configure({
-                        openDoubleQuote: '"',
-                        closeDoubleQuote: '"',
-                        openSingleQuote: "'",
-                        closeSingleQuote: "'",
-                        ellipsis: '…',
-                        emDash: '—',
-                        enDash: '–'
-                    }));
-                }
-
-                return [...baseExtensions, ...enhancedExtensions];
+                return enhancedExtensions;
             }
 
-            return baseExtensions;
+            // CollaborationCursor extension (Tier 2 only)
+            if (includeCursor) {
+                const CollaborationCursor = bundle?.CollaborationCursor?.default || bundle?.CollaborationCursor;
+                
+                if (CollaborationCursor && this.provider) {
+                    const userConfig = cursorConfig || {
+                        name: this.username || 'Anonymous',
+                        color: this.generateUserColor(this.username || 'Anonymous'),
+                    };
+                    
+                    return [CollaborationCursor.configure({
+                        provider: this.provider,
+                        user: userConfig,
+                    })];
+                }
+            }
+
+            return [];
         },
 
         // File integration methods
@@ -1290,7 +1351,30 @@ export default {
             this.clearUnsavedAfterSync();
         },
         
-        // Custom JSON handling
+        // Custom JSON input handling - triggers on every keystroke
+        handleCustomJsonInput() {
+            // ===== READ-ONLY PERMISSION ENFORCEMENT =====
+            if (this.isReadOnlyMode) {
+                console.warn('🔒 Cannot modify custom JSON: Read-only mode');
+                return;
+            }
+            
+            console.log('⚙️ Custom JSON input detected - triggering status update');
+            
+            // ALWAYS trigger status updates when user types (even with invalid JSON)
+            this.hasUnsavedChanges = true;
+            
+            // Trigger Y.js document creation if needed (for temp documents)
+            if (!this.ydoc && this.lazyYjsComponents) {
+                console.log('🚀 Triggering Y.js document creation due to custom JSON input');
+                this.debouncedYjsCreation();
+            }
+            
+            // Debounced validation and Y.js sync (only for valid JSON)
+            this.debouncedValidateCustomJson();
+        },
+
+        // Custom JSON validation and Y.js sync - debounced to avoid excessive updates
         validateCustomJson() {
             // ===== READ-ONLY PERMISSION ENFORCEMENT =====
             if (this.isReadOnlyMode) {
@@ -1298,19 +1382,44 @@ export default {
                 return;
             }
             
+            console.log('⚙️ Validating custom JSON and syncing to Y.js...');
+            
             if (!this.customJsonString.trim()) {
                 this.customJsonError = '';
+                // Clear custom JSON when empty using collaborative methods
+                const existingKeys = Object.keys(this.getCustomJson());
+                existingKeys.forEach(key => {
+                    this.removeCustomJsonField(key);
+                });
+                
+                // Trigger autosave for empty JSON
+                this.debouncedAutoSave();
                 return;
             }
             
             try {
-                JSON.parse(this.customJsonString);
+                const parsedJson = JSON.parse(this.customJsonString);
                 this.customJsonError = '';
-                this.content.custom_json = JSON.parse(this.customJsonString);
-                this.hasUnsavedChanges = true;
-                this.clearUnsavedAfterSync(); // Unified sync indicator
+                
+                // Follow same pattern as tags/beneficiaries - use collaborative methods
+                // Clear existing custom JSON first
+                const existingKeys = Object.keys(this.getCustomJson());
+                existingKeys.forEach(key => {
+                    this.removeCustomJsonField(key);
+                });
+                
+                // Set new custom JSON fields using collaborative methods
+                Object.entries(parsedJson).forEach(([key, value]) => {
+                    this.setCustomJsonField(key, value);
+                });
+                
+                // Trigger autosave for valid JSON
+                this.debouncedAutoSave();
+                
             } catch (error) {
                 this.customJsonError = error.message;
+                // Don't sync invalid JSON to Y.js, but keep hasUnsavedChanges = true
+                // This shows the user that they have unsaved changes (invalid JSON)
             }
         },
         
@@ -1933,6 +2042,15 @@ export default {
                 };
                 this.attachedFiles = [];
                 
+                // Reset temp document flags
+                this.isTemporaryDocument = false;
+                this.tempDocumentId = null;
+                this.isInitializingEditors = false;
+                
+                // CRITICAL FIX: Ensure collaborative mode is reset for new documents
+                // This prevents shouldUseCloudTier() from incorrectly choosing Cloud Tier
+                this.isCollaborativeMode = false;
+                
                 // Reset save form
                 this.saveForm = {
                     filename: '',
@@ -1995,7 +2113,20 @@ export default {
             console.log('🤝 Creating new collaborative document...');
         },
         
+        // ✅ CORRECT: Universal Document Loading Pattern (following TipTap best practices)
         async loadDocument(file) {
+            // RACE CONDITION FIX: Prevent multiple simultaneous document loading
+            // BUT allow loading during initialization for auto-connect
+            if (this.loading) {
+                console.log('⚠️ Document loading already in progress, skipping duplicate call');
+                return;
+            }
+            
+            // During initialization, only allow auto-connect document loading
+            if (this.isInitializing) {
+                console.log('📋 Loading document during initialization (auto-connect)');
+            }
+            
             if (this.hasUnsavedChanges) {
                 const confirm = await this.confirmUnsavedChanges();
                 if (!confirm) return;
@@ -2004,13 +2135,102 @@ export default {
             this.loading = true;
             
             try {
-                if (file.type === 'local') {
-                    await this.loadLocalFile(file);
-                } else {
-                    await this.loadCollaborativeFile(file);
+                // STEP 1: Always destroy existing editors first (TipTap best practice)
+                await this.cleanupCurrentDocument();
+                await this.$nextTick();
+                
+                // STEP 2: Determine correct tier based on content type
+                const requiresCloudTier = this.shouldUseCloudTier(file);
+                const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
+                
+                if (!bundle) {
+                    throw new Error('TipTap collaboration bundle is required');
                 }
+                
+                // STEP 3: Create Y.js document + IndexedDB immediately 
+                this.ydoc = new Y.Doc();
+                const documentId = file.id || file.permlink || `temp_${Date.now()}`;
+                const IndexeddbPersistence = bundle.IndexeddbPersistence?.default || bundle.IndexeddbPersistence;
+                
+                if (IndexeddbPersistence) {
+                    this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc);
+                    
+                    // STEP 4: Wait for IndexedDB sync (critical for content loading)
+                    await new Promise(resolve => {
+                        this.indexeddbProvider.on('synced', resolve);
+                    });
+                    
+                    console.log('💾 IndexedDB persistence synced for document');
+                    
+                    // Update custom JSON display after sync
+                    this.updateCustomJsonDisplay();
+                }
+                
+                // Initialize collaborative schema
+                this.initializeCollaborativeSchema(bundle.Y?.default || bundle.Y);
+                
+                // STEP 5: Create appropriate tier editor
+                if (requiresCloudTier) {
+                    await this.createCloudEditorsWithCursors(bundle); // Tier 2
+                    this.isCollaborativeMode = true;
+                    this.fileType = 'collaborative';
+                } else {
+                    await this.createOfflineFirstCollaborativeEditors(bundle); // Tier 1
+                    this.isCollaborativeMode = false;
+                    this.fileType = 'local';
+                }
+                
+                // STEP 6: TipTap automatically loads content from Y.js/IndexedDB
+                // NO manual content setting needed!
+                
+                // STEP 7: For cloud documents, initialize permissions and connect WebSocket
+                if (requiresCloudTier && file.type === 'collaborative') {
+                    // Initialize permissions immediately to prevent read-only mode during loading
+                    console.log('🔐 Initializing permissions for collaborative document...');
+                    this.documentPermissions = [{
+                        account: file.owner,
+                        permissionType: 'postable', // Owner always has full access
+                        grantedBy: file.owner,
+                        grantedAt: new Date().toISOString()
+                    }];
+                    
+                    // If user is not the owner, give them editable permissions by default
+                    if (this.username !== file.owner) {
+                        this.documentPermissions.push({
+                            account: this.username,
+                            permissionType: 'editable', // Default to editable, will be refined later
+                            grantedBy: file.owner,
+                            grantedAt: new Date().toISOString(),
+                            source: 'initial-assumption'
+                        });
+                        console.log('🔐 Initial assumption: User has editable permissions (will be refined)');
+                    }
+                    
+                    // Update URL with collaborative parameters for shareability
+                    console.log('🔗 Updating URL with collaborative parameters...', { owner: file.owner, permlink: file.permlink });
+                    try {
+                        this.updateURLWithCollabParams(file.owner, file.permlink);
+                        console.log('✅ URL update completed successfully');
+                    } catch (urlError) {
+                        console.error('❌ URL update failed:', urlError);
+                    }
+                    
+                    await this.connectToCollaborationServer(file);
+                }
+                
+                // Set current file info - preserve title for collaborative documents
+                this.currentFile = {
+                    ...file,
+                    // Ensure name/title is preserved for collaborative documents
+                    name: file.name || file.documentName || file.title || `${file.owner}/${file.permlink}`,
+                    title: file.title || file.documentName || file.name || `${file.owner}/${file.permlink}`
+                };
+                
                 this.showLoadModal = false;
                 this.hasUnsavedChanges = false;
+                
+                console.log(`✅ Document loaded using ${requiresCloudTier ? 'Tier 2 (Cloud)' : 'Tier 1 (Local)'} editors`);
+                
             } catch (error) {
                 console.error('Failed to load document:', error);
                 alert('Failed to load document: ' + error.message);
@@ -2217,9 +2437,8 @@ export default {
                         };
                         this.fileType = 'collaborative';
                         
-                        // Load collaboration components and upgrade editors with cursors
-                        const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
-                        await this.upgradeLocalToCloudWithCursors(bundle);
+                        // Upgrade to cloud tier with full collaborative features
+                        await this.upgradeLocalToCloudWithCursors();
                     }
                 } else {
                     // Regular save - Y.js + IndexedDB handles all content persistence automatically
@@ -2259,9 +2478,8 @@ export default {
                             };
                             this.fileType = 'collaborative';
                             
-                            // Load collaboration components and upgrade editors with cursors
-                            const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
-                            await this.upgradeLocalToCloudWithCursors(bundle);
+                            // Upgrade to cloud tier with full collaborative features
+                            await this.upgradeLocalToCloudWithCursors();
                         } else {
                             // Already collaborative, just ensure connection
                             await this.connectToCollaborationServer();
@@ -2302,8 +2520,14 @@ export default {
                     // Update current file reference
                     this.currentFile.documentName = this.saveForm.filename;
                     
+                    // TRIGGER SAVE INDICATOR: Show saving state for collaborative rename
+                    this.hasUnsavedChanges = true;
+                    
                     // Reload collaborative docs list to reflect the change
                     await this.loadCollaborativeDocs();
+                    
+                    // CLEAR SAVE INDICATOR: Document rename completed successfully
+                    this.hasUnsavedChanges = false;
                     
                     console.log('📝 Document renamed successfully:', this.saveForm.filename);
                 } else {
@@ -2668,14 +2892,54 @@ export default {
             if (file.isOfflineFirst) {
                 console.log('📂 Loading offline-first local file:', file.name);
                 
+                // CRITICAL FIX: Local files should NOT use collaborative mode
+                // They use Y.js for persistence but remain local (no WebSocket)
+                this.isCollaborativeMode = false;
+                
+                // Clean up any existing state first
+                this.fullCleanupCollaboration();
+                
                 // TIPTAP BEST PRACTICE: Pre-load Y.js document before editor creation
                 await this.preloadYjsDocument(file);
                 
-                // For offline-first files, content is in Y.js + IndexedDB
-                // Create collaborative editors which will load from IndexedDB automatically
-                this.isCollaborativeMode = true; // Use collaborative architecture
-                this.fullCleanupCollaboration();
-                await this.createWorkingEditors(); // TIPTAP BEST PRACTICE: Create collaborative editors
+                // Create local editors with Y.js persistence (Tier 1)
+                await this.createWorkingEditors(); // Will choose Local Tier due to isCollaborativeMode = false
+                
+                // ✅ CORRECT: TipTap automatically loads content from Y.js/IndexedDB
+                // But we need to sync editor content to Vue component state for UI elements
+                await this.$nextTick(); // Wait for editors to be fully initialized
+                
+                // CRITICAL: Sync editor content to Vue component state for UI reactivity
+                // Add delay to allow TipTap to fully load content from Y.js
+                setTimeout(async () => {
+                    await this.syncEditorContentToVueState();
+                    
+                    // If still no content, try again after a longer delay
+                    if (!this.content.title && !this.content.body) {
+                        console.log('⏳ Content not loaded yet, retrying in 500ms...');
+                        setTimeout(async () => {
+                            await this.syncEditorContentToVueState();
+                            
+                            // ✅ TIPTAP BEST PRACTICE: Use editor methods instead of direct Y.js access
+                            if (!this.content.title && !this.content.body) {
+                                console.log('🔍 DEBUGGING: Testing if content exists using TipTap editor methods...');
+                                if (this.titleEditor && this.bodyEditor) {
+                                    const titleContent = this.titleEditor.getHTML() || '';
+                                    const bodyContent = this.bodyEditor.getHTML() || '';
+                                    const titleText = this.titleEditor.getText() || '';
+                                    const bodyText = this.bodyEditor.getText() || '';
+                                    
+                                    console.log('🔍 Title editor has content:', !!titleContent);
+                                    console.log('🔍 Body editor has content:', !!bodyContent);
+                                    console.log('🔍 Title text length:', titleText.length);
+                                    console.log('🔍 Body text length:', bodyText.length);
+                                    console.log('🔍 Y.js document state vector:', this.ydoc?.getStateVector());
+                                    console.log('🔍 IndexedDB provider status:', this.indexeddbProvider?.synced);
+                                }
+                            }
+                        }, 500);
+                    }
+                }, 100);
                 
                 console.log('📂 Offline-first local file loaded from IndexedDB:', file.name);
                 
@@ -2743,6 +3007,11 @@ export default {
                 return;
             }
             
+            // RACE CONDITION FIX: Skip if already initializing to prevent double loading
+            if (this.isInitializing) {
+                console.log('📋 Loading collaborative documents during initialization...');
+            }
+            
             this.loadingDocs = true;
             
             try {
@@ -2753,6 +3022,7 @@ export default {
                 if (response.ok) {
                     const data = await response.json();
                     this.collaborativeDocs = data.documents || [];
+                    console.log('✅ Loaded collaborative documents:', this.collaborativeDocs.length);
                 } else {
                     console.error('Failed to load collaborative documents:', response.statusText);
                     if (response.status === 401) {
@@ -2764,15 +3034,10 @@ export default {
             } finally {
                 this.loadingDocs = false;
                 
-                // COMPREHENSIVE SOLUTION: Check for URL-based document loading after docs are loaded
-                const urlParams = new URLSearchParams(window.location.search);
-                const collabOwner = urlParams.get('collab_owner');
-                const collabPermlink = urlParams.get('collab_permlink');
-                
-                if (collabOwner && collabPermlink && this.collaborativeDocs.length > 0) {
-                    console.log(`🔗 Loading collaborative document from URL: ${collabOwner}/${collabPermlink}`);
-                    this.loadDocumentFromURL(collabOwner, collabPermlink);
-                }
+                // RACE CONDITION FIX: Remove URL check from here
+                // URL-based document loading is now handled by the new initialization flow
+                // This prevents the race condition between checkAutoConnectParams() and loadCollaborativeDocs()
+                console.log('📋 Collaborative documents loaded successfully');
             }
         },
         
@@ -2801,6 +3066,7 @@ export default {
             
             this.currentFile = {
                 ...doc,
+                name: doc.documentName || doc.name || doc.title || `${doc.owner}/${doc.permlink}`, // Ensure name field is set
                 type: 'collaborative'
             };
             this.fileType = 'collaborative';
@@ -2814,9 +3080,18 @@ export default {
                 description: doc.description
             };
             
-            // Load content structure
+            // STEP 1: Update URL with collaborative parameters immediately for shareability
+            console.log('🔗 Updating URL with collaborative parameters...', { owner: doc.owner, permlink: doc.permlink });
+            try {
+                this.updateURLWithCollabParams(doc.owner, doc.permlink);
+                console.log('✅ URL update completed successfully');
+            } catch (urlError) {
+                console.error('❌ URL update failed:', urlError);
+            }
+            
+            // Load content structure - PRESERVE DOCUMENT TITLE
             this.content = {
-                title: '', // Start with empty content for collaborative documents
+                title: doc.title || doc.permlink.replace(/-/g, ' '), // Use actual document title, fallback to formatted permlink
                 body: '',
                 tags: ['dlux', 'collaboration'],
                 custom_json: {
@@ -2825,43 +3100,72 @@ export default {
                 }
             };
             
+            // STEP 2: Initialize permissions immediately to prevent read-only mode during loading
+            console.log('🔐 Initializing permissions for collaborative document...');
+            this.documentPermissions = [{
+                account: this.currentFile.owner,
+                permissionType: 'postable', // Owner always has full access
+                grantedBy: this.currentFile.owner,
+                grantedAt: new Date().toISOString()
+            }];
+            
+            // If user is not the owner, give them editable permissions by default
+            // This will be refined after WebSocket connection or API call
+            if (this.username !== this.currentFile.owner) {
+                this.documentPermissions.push({
+                    account: this.username,
+                    permissionType: 'editable', // Default to editable, will be refined later
+                    grantedBy: this.currentFile.owner,
+                    grantedAt: new Date().toISOString(),
+                    source: 'initial-assumption'
+                });
+                console.log('🔐 Initial assumption: User has editable permissions (will be refined)');
+            }
+            
             try {
-                // STEP 1: Create or reuse offline collaborative editors (preserves Y.js document)
-                console.log('🏗️ Creating/reusing offline collaborative editors for loaded document...');
-                await this.createWorkingEditors(); // TIPTAP BEST PRACTICE: Create collaborative editors
+                // UNIFIED APPROACH: Use the single entry point for editor creation
+                console.log('🏗️ Creating collaborative editors using unified approach...');
+                await this.createWorkingEditors(); // Will automatically use Tier 2 (Cloud) for collaborative docs
                 
-                // STEP 2: Then connect the existing Y.js document to the server
+                // ✅ TIPTAP BEST PRACTICE: Store document name in Y.js config BEFORE connection
+                const documentName = doc.documentName || doc.name || doc.title || `${doc.owner}/${doc.permlink}`;
+                console.log('🔍 DEBUG: About to call setDocumentName with:', documentName);
+                console.log('🔍 DEBUG: Y.js document exists:', !!this.ydoc);
+                const setResult = this.setDocumentName(documentName);
+                console.log('📄 Document name stored in Y.js config before collaborative connection:', documentName, 'Result:', setResult);
+                
+                // STEP 3: Then connect the existing Y.js document to the server
                 console.log('🔗 Connecting to collaboration server...');
                 await this.connectToCollaborationServer(doc);
                 
-                // STEP 3: Infer permissions from successful connection
-                console.log('🔐 Inferring permissions from WebSocket connection...');
+                // STEP 4: Refine permissions based on successful connection
+                console.log('🔐 Refining permissions based on WebSocket connection...');
                 if (this.connectionStatus === 'connected') {
-                    console.log('✅ WebSocket connected successfully - user has valid access');
+                    console.log('✅ WebSocket connected successfully - confirming user access');
                     
-                    // If user can connect to the document, they have at least some permissions
-                    const inferredPermissions = [{
+                    // WebSocket connection successful - confirm/upgrade permissions
+                    const refinedPermissions = [{
                         account: this.currentFile.owner,
                         permissionType: 'postable', // Owner always has full access
                         grantedBy: this.currentFile.owner,
                         grantedAt: new Date().toISOString()
                     }];
                     
-                    // For non-owners who can connect, assume they have meaningful access
+                    // For non-owners who can connect, confirm they have meaningful access
                     if (this.username !== this.currentFile.owner) {
                         // Since they successfully connected to WebSocket, they likely have edit access
-                        inferredPermissions.push({
+                        refinedPermissions.push({
                             account: this.username,
-                            permissionType: 'editable', // Reasonable assumption for connected users
+                            permissionType: 'editable', // Confirmed by successful connection
                             grantedBy: this.currentFile.owner,
                             grantedAt: new Date().toISOString(),
-                            source: 'inferred-from-websocket-connection'
+                            source: 'confirmed-by-websocket-connection'
                         });
-                        console.log('🔗 Non-owner successfully connected - assuming editable permissions');
+                        console.log('🔗 Non-owner successfully connected - confirming editable permissions');
                     }
                     
-                    this.documentPermissions = inferredPermissions;
-                    console.log('✅ Permissions inferred from successful WebSocket connection');
+                    this.documentPermissions = refinedPermissions;
+                    console.log('✅ Permissions confirmed by successful WebSocket connection');
                     this.updateEditorPermissions();
                 } else {
                     console.warn('⚠️ WebSocket not connected - falling back to permission API');
@@ -3006,104 +3310,551 @@ export default {
             }
         },
         
-        // Editor Management - TipTap Best Practice: Offline-First Collaborative
-        // TIPTAP BEST PRACTICE: Create default offline editor (ready state, no document)
-        // TIPTAP BEST PRACTICE: Create Y.js collaborative editors from start with lazy document creation
+        // ===== UNIFIED EDITOR CREATION: SINGLE ENTRY POINT =====
+        // ✅ CORRECT: Unified editor creation following TipTap best practices
         async createWorkingEditors() {
-            console.log('🏗️ Creating editors following TipTap.dev best practices...');
+            // RACE CONDITION FIX: Prevent multiple simultaneous editor creation calls
+            if (this.creatingEditors) {
+                console.log('⚠️ Editors are already being created, skipping duplicate call');
+                return;
+            }
+            
+            this.creatingEditors = true;
+            console.log('🏗️ Creating editors using unified 2-tier approach...');
             
             try {
                 const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
                 
                 if (!bundle) {
-                    console.warn('⚠️ Collaboration bundle not available, creating basic editors');
-                    await this.createBasicEditors();
-                    return;
+                    throw new Error('TipTap collaboration bundle is required');
                 }
                 
-                // TIPTAP BEST PRACTICE: Determine editor type based on document state
-                if (this.currentFile?.type === 'collaborative' || this.isCollaborativeMode) {
-                    // For collaborative documents, create Y.js document first, then editors
-                    await this.createCollaborativeEditorsWithProperLifecycle(bundle);
+                // CRITICAL: Clean up any corrupted Y.js state before creating editors
+                await this.cleanupCorruptedCollaborativeState();
+                
+                // ===== DECISION TREE: TIER 1 (LOCAL) vs TIER 2 (CLOUD) =====
+                const shouldUseCloudTier = this.shouldUseCloudTier();
+                
+                if (shouldUseCloudTier) {
+                    console.log('☁️ Using Tier 2: Cloud editors with full collaborative features');
+                    await this.createCloudEditorsWithCursors(bundle);
                 } else {
-                    // For local documents, use TipTap's official offline-first approach
+                    console.log('💻 Using Tier 1: Offline-first collaborative editors');
                     await this.createOfflineFirstCollaborativeEditors(bundle);
                 }
                 
-                console.log('✅ Editors created successfully following TipTap.dev best practices');
+                console.log('✅ Unified editor creation completed successfully');
                 
             } catch (error) {
                 console.error('❌ Failed to create editors:', error);
-                // Fallback to basic editors
-                await this.createBasicEditors();
+                
+                // ENHANCED ERROR HANDLING: Check for specific Y.js collaboration errors
+                if (error.message.includes('Unexpected case') || 
+                    error.message.includes('mismatched transaction') ||
+                    error.message.includes('different constructor')) {
+                    console.log('🔄 Y.js collaboration error detected, attempting recovery...');
+                    
+                    try {
+                        // Force complete cleanup and retry
+                        await this.forceCleanupAndRetry(bundle);
+                        console.log('✅ Editor creation succeeded on retry after cleanup');
+                        return;
+                    } catch (retryError) {
+                        console.error('❌ Retry also failed:', retryError);
+                        // Fall through to basic editor fallback
+                    }
+                }
+                
+                // FALLBACK: Create basic editors without Y.js collaboration
+                console.log('🔄 Creating fallback basic editors without collaboration...');
+                await this.createBasicEditorsAsFallback(bundle);
+                
+                // Show user notification about collaboration being disabled
+                setTimeout(() => {
+                    alert('⚠️ Collaborative features are temporarily disabled due to a technical issue. Your document will work normally, but real-time collaboration is not available. Please refresh the page to restore collaborative features.');
+                }, 1000);
+            } finally {
+                // RACE CONDITION FIX: Always clear the creating flag
+                this.creatingEditors = false;
             }
         },
 
-
-
-        // Fallback method for basic editors when collaboration bundle is not available
-        async createBasicEditors() {
-            console.log('🏗️ Creating basic fallback editors...');
+        // ===== TIPTAP BEST PRACTICE: CORRUPTED STATE CLEANUP =====
+        async cleanupCorruptedCollaborativeState() {
+            console.log('🧹 Cleaning up potentially corrupted collaborative state...');
             
             try {
-                // Wait for Vue to mount the DOM elements
-                await this.$nextTick();
+                // STEP 1: Clean up existing editors (preserve Y.js document if valid)
+                await this.cleanupEditorsOnly();
                 
-                // Simple fallback editors using Vue refs
-                if (this.$refs.titleEditor) {
-                    this.$refs.titleEditor.innerHTML = '<div contenteditable="true" style="min-height: 40px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Enter title..."></div>';
+                // STEP 2: Check for corrupted Y.js document
+                if (this.ydoc) {
+                    try {
+                        // Test Y.js document integrity
+                        const testMap = this.ydoc.getMap('test');
+                        testMap.set('integrity_check', Date.now());
+                        testMap.delete('integrity_check');
+                        console.log('✅ Y.js document integrity check passed');
+                    } catch (yjsError) {
+                        console.warn('⚠️ Y.js document corrupted, destroying:', yjsError.message);
+                        this.ydoc.destroy();
+                        this.ydoc = null;
+                    }
                 }
                 
-                if (this.$refs.bodyEditor) {
-                    this.$refs.bodyEditor.innerHTML = '<div contenteditable="true" style="min-height: 200px; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Start writing your content..."></div>';
+                // STEP 3: Clean up IndexedDB provider if corrupted
+                if (this.indexeddbProvider) {
+                    try {
+                        // Test IndexedDB provider
+                        if (this.indexeddbProvider.synced === false) {
+                            console.warn('⚠️ IndexedDB provider not synced, recreating...');
+                            this.indexeddbProvider.destroy();
+                            this.indexeddbProvider = null;
+                        }
+                    } catch (idbError) {
+                        console.warn('⚠️ IndexedDB provider corrupted:', idbError.message);
+                        this.indexeddbProvider = null;
+                    }
                 }
                 
-                if (this.$refs.permlinkEditor) {
-                    this.$refs.permlinkEditor.innerHTML = '<div style="min-height: 30px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; background: #f5f5f5; color: #666;" placeholder="Auto-generated from title">Auto-generated from title</div>';
+                // STEP 4: Clear any corrupted WebSocket provider
+                if (this.provider) {
+                    try {
+                        this.provider.disconnect();
+                        this.provider.destroy();
+                    } catch (providerError) {
+                        console.warn('⚠️ Error cleaning up WebSocket provider:', providerError.message);
+                    }
+                    this.provider = null;
                 }
                 
-                console.log('✅ Basic fallback editors created');
+                // STEP 5: Reset collaborative state flags
+                this.connectionStatus = 'offline';
+                this.isInitializing = false;
+                this.schemaVersionMismatch = false;
+                
+                console.log('✅ Corrupted state cleanup completed');
                 
             } catch (error) {
-                console.error('❌ Failed to create basic editors:', error);
+                console.error('❌ Error during corrupted state cleanup:', error);
+                // Continue anyway - we'll handle this in the retry logic
             }
         },
 
-        async createStandardEditor() {
-            console.log('🏗️ Creating offline-first collaborative editors (TipTap best practice)...');
+        // ===== TIPTAP BEST PRACTICE: FORCE CLEANUP AND RETRY =====
+        async forceCleanupAndRetry(bundle) {
+            console.log('🔄 Performing force cleanup and retry...');
             
-            // TIPTAP BEST PRACTICE: Only clean up if we don't have a Y.js document
-            // This preserves the document and IndexedDB persistence across reconnections
-            if (!this.ydoc) {
-                console.log('🧹 No existing Y.js document - performing full cleanup...');
-                await this.cleanupCurrentDocument();
-                await this.$nextTick();
+            // STEP 1: Complete collaborative cleanup
+            this.fullCleanupCollaboration();
+            
+            // STEP 2: Wait for cleanup to complete
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // STEP 3: Clear DOM elements completely
+            this.cleanupDOMElements();
+            
+            // STEP 4: Force Vue to update refs
+            await this.$nextTick();
+            
+            // STEP 5: Retry editor creation with fresh state
+            const shouldUseCloudTier = this.shouldUseCloudTier();
+            
+            if (shouldUseCloudTier) {
+                console.log('🔄 Retry: Creating cloud editors...');
+                await this.createCloudEditorsWithCursors(bundle);
             } else {
-                console.log('✅ Reusing existing Y.js document and IndexedDB persistence');
-                // Only clean up editors, preserve Y.js document and IndexedDB
-                if (this.titleEditor) {
-                    this.titleEditor.destroy();
-                    this.titleEditor = null;
-                }
-                if (this.bodyEditor) {
-                    this.bodyEditor.destroy();
-                    this.bodyEditor = null;
-                }
-                if (this.permlinkEditor) {
-                    this.permlinkEditor.destroy();
-                    this.permlinkEditor = null;
-                }
+                console.log('🔄 Retry: Creating offline-first editors...');
+                await this.createOfflineFirstCollaborativeEditors(bundle);
+            }
+        },
+
+        // ===== TIPTAP BEST PRACTICE: BASIC EDITOR FALLBACK =====
+        async createBasicEditorsAsFallback(bundle) {
+            console.log('🔄 Creating basic editors as fallback (no Y.js collaboration)...');
+            
+            try {
+                // Clean up any remaining collaborative state
+                await this.cleanupEditorsOnly();
                 await this.$nextTick();
+                
+                const Editor = bundle.Editor?.default || bundle.Editor;
+                const StarterKit = bundle.StarterKit?.default || bundle.StarterKit;
+                const Placeholder = bundle.Placeholder?.default || bundle.Placeholder;
+                
+                if (!Editor || !StarterKit || !Placeholder) {
+                    throw new Error('Required components missing for basic editors');
+                }
+                
+                // Create basic extensions without Y.js collaboration
+                const getBasicExtensions = (field) => {
+                    return [
+                        StarterKit.configure({
+                            // Enable history for basic editors (no Y.js conflict)
+                            history: true,
+                            ...(field === 'title' ? {
+                                heading: false,
+                                bulletList: false,
+                                orderedList: false,
+                                blockquote: false,
+                                codeBlock: false,
+                                horizontalRule: false
+                            } : {})
+                        }),
+                        Placeholder.configure({ 
+                            placeholder: field === 'title' ? 'Enter title...' : 
+                                       field === 'body' ? 'Start writing...' : 
+                                       'Auto-generated from title'
+                        }),
+                        // Enhanced extensions for consistent UX
+                        ...this.getEnhancedExtensions(field, bundle, { includeEnhanced: true })
+                    ];
+                };
+                
+                // Create basic editors with localStorage persistence
+                this.titleEditor = new Editor({
+                    element: this.$refs.titleEditor,
+                    extensions: getBasicExtensions('title'),
+                    editable: !this.isReadOnlyMode,
+                    onUpdate: ({ editor }) => {
+                        if (this.validatePermission('edit')) {
+                            this.content.title = editor.getText();
+                            this.hasUnsavedChanges = true;
+                            this.debouncedAutoSave();
+                        }
+                    }
+                });
+                
+                this.bodyEditor = new Editor({
+                    element: this.$refs.bodyEditor,
+                    extensions: getBasicExtensions('body'),
+                    editable: !this.isReadOnlyMode,
+                    onUpdate: ({ editor }) => {
+                        if (this.validatePermission('edit')) {
+                            this.content.body = editor.getHTML();
+                            this.hasUnsavedChanges = true;
+                            this.debouncedAutoSave();
+                        }
+                    }
+                });
+                
+                this.permlinkEditor = new Editor({
+                    element: this.$refs.permlinkEditor,
+                    extensions: [
+                        StarterKit.configure({ history: true }),
+                        Placeholder.configure({ placeholder: 'Auto-generated from title' })
+                    ],
+                    editable: false
+                });
+                
+                // Set fallback mode flags
+                this.isCollaborativeMode = false;
+                this.fileType = 'local';
+                this.connectionStatus = 'offline';
+                this.connectionMessage = 'Offline Mode - Collaborative features disabled';
+                
+                // Load existing content if available
+                if (this.content && Object.keys(this.content).length > 0) {
+                    this.setEditorContent(this.content);
+                }
+                
+                console.log('✅ Basic fallback editors created successfully');
+                
+            } catch (fallbackError) {
+                console.error('❌ Even basic editor fallback failed:', fallbackError);
+                throw new Error('Complete editor initialization failure - please refresh the page');
+            }
+        },
+
+        // ✅ CORRECT: Determine which editor tier to use
+        shouldUseCloudTier(file = null) {
+            const targetFile = file || this.currentFile;
+            
+            console.log('🔍 Tier decision - file type:', targetFile?.type, 'isCollaborativeMode:', this.isCollaborativeMode);
+            
+            // Tier 2 (Cloud with CollaborationCursor) for:
+            // - Collaborative documents from server
+            // - Author links (?owner=user&permlink=doc)
+            // - Documents being actively shared
+            if (targetFile?.type === 'collaborative') {
+                console.log('📄 Collaborative document detected → Cloud Tier');
+                return true;
+            }
+            if (targetFile?.owner && targetFile?.permlink) {
+                console.log('👤 Document with owner/permlink → Cloud Tier');
+                return true;
+            }
+            if (this.isCollaborativeMode) {
+                console.log('🤝 Collaborative mode active → Cloud Tier');
+                return true;
             }
             
-            // ===== REFACTORED: Always use offline-first collaborative approach =====
+            // Check for URL parameters (author links)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('owner') && urlParams.get('permlink')) {
+                console.log('🔗 Author link detected → Cloud Tier');
+                return true;
+            }
+            
+            // Tier 1 (Local with Y.js persistence) for:
+            // - New documents
+            // - Local documents
+            // - Offline-first editing
+            console.log('🏠 Local document → Local Tier');
+            return false;
+        },
+
+        // ===== TIER 1: LOCAL EDITORS WITH TEMP Y.JS DOCUMENTS =====
+        async createLocalEditorsWithUpgradeCapability(bundle) {
+            console.log('💻 Creating Tier 1: Local editors with temp Y.js documents (offline-first)');
+            
+            // Set flag to prevent temp document creation during initialization
+            this.isInitializingEditors = true;
+            
+            // Clean up existing editors only (preserve Y.js if exists)
+            await this.cleanupEditorsOnly();
+            await this.$nextTick();
+            
+            // Get components
+            const Editor = bundle.Editor?.default || bundle.Editor;
+            const StarterKit = bundle.StarterKit?.default || bundle.StarterKit;
+            const Placeholder = bundle.Placeholder?.default || bundle.Placeholder;
+            const Y = bundle.Y?.default || bundle.Y;
+            const Collaboration = bundle.Collaboration?.default || bundle.Collaboration;
+            const IndexeddbPersistence = bundle.IndexeddbPersistence?.default || bundle.IndexeddbPersistence;
+            
+            if (!Editor || !StarterKit || !Placeholder || !Y || !Collaboration) {
+                throw new Error('Required components missing for local editors with Y.js');
+            }
+            
+            // TIPTAP BEST PRACTICE: Create Y.js document immediately (if not already loaded)
+            if (!this.ydoc) {
+                this.ydoc = new Y.Doc();
+                console.log('✅ Y.js document created for Tier 1');
+                
+                // Initialize collaborative schema
+                this.initializeCollaborativeSchema(Y);
+                
+                // TEMP DOCUMENT STRATEGY: Set up temp document flags (no IndexedDB yet)
+                if (!this.currentFile) {
+                    this.isTemporaryDocument = true;
+                    this.tempDocumentId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                    console.log('✅ Temp document strategy enabled - IndexedDB will be created on user input');
+                } else {
+                    // Existing file - create IndexedDB immediately
+                if (IndexeddbPersistence && !this.indexeddbProvider) {
+                        this.indexeddbProvider = new IndexeddbPersistence(this.currentFile.id, this.ydoc);
+                        console.log('✅ IndexedDB persistence created for existing file:', this.currentFile.id);
+                    }
+                }
+            } else {
+                console.log('✅ Using existing Y.js document (loaded from preloadYjsDocument)');
+            }
+            
+            // Create extensions with Y.js collaboration (NO CollaborationCursor for Tier 1)
+            const getLocalExtensions = (field) => {
+                return [
+                    StarterKit.configure({ 
+                        history: false, // Y.js handles history
+                        ...(field === 'title' ? {
+                            heading: false,
+                            bulletList: false,
+                            orderedList: false,
+                            blockquote: false,
+                            codeBlock: false,
+                            horizontalRule: false
+                        } : {})
+                    }),
+                    Collaboration.configure({
+                        document: this.ydoc,
+                        field: field
+                    }),
+                    Placeholder.configure({ 
+                        placeholder: field === 'title' ? 'Enter title...' : 
+                                   field === 'body' ? 'Start writing...' : 
+                                   'Auto-generated from title'
+                    }),
+                    // Enhanced extensions (Link, Typography, etc.) for consistent UX
+                    ...this.getEnhancedExtensions(field, bundle, { includeEnhanced: true })
+                ];
+            };
+            
+            // Create editors with Y.js collaboration
+            this.titleEditor = new Editor({
+                element: this.$refs.titleEditor,
+                extensions: getLocalExtensions('title'),
+                editable: !this.isReadOnlyMode,
+                onUpdate: ({ editor }) => {
+                    if (this.validatePermission('edit')) {
+                        // TEMP DOCUMENT STRATEGY: Debounced IndexedDB persistence creation
+                        // Only create temp document after user stops typing for 2 seconds
+                        if (this.isTemporaryDocument && !this.indexeddbProvider) {
+                            this.debouncedCreateIndexedDBForTempDocument();
+                        }
+                        
+                        this.hasUnsavedChanges = true;
+                        this.clearUnsavedAfterSync();
+                    }
+                }
+            });
+            
+            this.bodyEditor = new Editor({
+                element: this.$refs.bodyEditor,
+                extensions: getLocalExtensions('body'),
+                editable: !this.isReadOnlyMode,
+                onUpdate: ({ editor }) => {
+                    if (this.validatePermission('edit')) {
+                        // TEMP DOCUMENT STRATEGY: Debounced IndexedDB persistence creation
+                        // Only create temp document after user stops typing for 2 seconds
+                        if (this.isTemporaryDocument && !this.indexeddbProvider) {
+                            this.debouncedCreateIndexedDBForTempDocument();
+                        }
+                        
+                        this.hasUnsavedChanges = true;
+                        this.clearUnsavedAfterSync();
+                    }
+                }
+            });
+            
+            this.permlinkEditor = new Editor({
+                element: this.$refs.permlinkEditor,
+                extensions: [
+                    StarterKit.configure({ history: false }),
+                    Placeholder.configure({ placeholder: 'Auto-generated from title' })
+                ],
+                editable: false // Permlink is auto-generated
+            });
+            
+            // Document is NOT added to drafts list yet (temp document strategy)
+            this.isCollaborativeMode = false; // Local mode (no WebSocket provider)
+            
+            console.log('✅ Tier 1 local editors created with temp Y.js documents');
+            
+            // Clear initialization flag after a delay to allow TipTap's async initialization events to complete
+            setTimeout(() => {
+                this.isInitializingEditors = false;
+                console.log('🎯 Tier 1 editor initialization complete - ready for real user edits');
+            }, 500); // 500ms delay to ensure all TipTap initialization events have fired
+        },
+
+        // Setup triggers for draft persistence (only when user shows intent)
+        setupDraftPersistenceTriggers() {
+            // Debounced function to add document to drafts when user shows intent
+            if (!this.debouncedDraftPersistence) {
+                this.debouncedDraftPersistence = this.debounce(() => {
+                    if (this.hasContentToSave() && !this.currentFile) {
+                        console.log('📝 User has meaningful content, adding to drafts...');
+                        this.ensureLocalFileEntry();
+                    }
+                }, 2000); // 2 second delay
+            }
+            
+            this.debouncedDraftPersistence();
+        },
+
+        // Utility: Debounce function
+        debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        },
+
+        // ===== CLEAN EDITOR CLEANUP (PRESERVE Y.JS) =====
+        async cleanupEditorsOnly() {
+            console.log('🧹 Cleaning up editors only (preserving Y.js document)...');
+            
+            // Only destroy editors, preserve Y.js document and provider
+            if (this.titleEditor) {
+                try {
+                    this.titleEditor.destroy();
+                } catch (error) {
+                    console.warn('⚠️ Error destroying title editor:', error.message);
+                }
+                this.titleEditor = null;
+            }
+            
+            if (this.bodyEditor) {
+                try {
+                    this.bodyEditor.destroy();
+                } catch (error) {
+                    console.warn('⚠️ Error destroying body editor:', error.message);
+                }
+                this.bodyEditor = null;
+            }
+            
+            if (this.permlinkEditor) {
+                try {
+                    this.permlinkEditor.destroy();
+                } catch (error) {
+                    console.warn('⚠️ Error destroying permlink editor:', error.message);
+                }
+                this.permlinkEditor = null;
+            }
+            
+            console.log('✅ Editors cleaned up, Y.js document preserved');
+        },
+
+        // ===== UPGRADE PATH: TIER 1 → TIER 2 =====
+        async upgradeLocalToCloudWithCursors() {
+            console.log('🔄 Upgrading from Tier 1 (Local) to Tier 2 (Cloud with CollaborationCursor)...');
+            
+            try {
+                // TIPTAP BEST PRACTICE: Preserve content before editor recreation
+                const preservedContent = this.getEditorContent();
+                
+                // Get collaboration bundle
+                const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
+                if (!bundle) {
+                    throw new Error('Collaboration bundle not available for cloud upgrade');
+                }
+                
+                // TIPTAP BEST PRACTICE: Destroy and recreate editors with CollaborationCursor
+                // (CollaborationCursor cannot be added dynamically to existing editors)
+                console.log('🧹 Destroying Tier 1 editors for CollaborationCursor upgrade...');
+                await this.cleanupEditorsOnly();
+                
+                // Create Tier 2 editors with CollaborationCursor
+                await this.createCloudEditorsWithCursors(bundle);
+                
+                // Restore content to new editors
+                if (preservedContent) {
+                    this.setEditorContent(preservedContent);
+                }
+                
+                console.log('✅ Successfully upgraded to Tier 2 with CollaborationCursor support');
+                
+            } catch (error) {
+                console.error('❌ Failed to upgrade to cloud with cursors:', error);
+                throw error;
+            }
+        },
+
+
+
+        // REMOVED: createBasicEditors() - No longer needed per TipTap best practices
+        // TipTap collaboration bundle is required for all editor operations
+
+        async createStandardEditor() {
+            console.log('🏗️ Creating offline-first collaborative editors (TipTap official pattern)...');
+            
+            // Clean up existing editors and create fresh ones
+            await this.cleanupCurrentDocument();
+            await this.$nextTick();
+            
+            // TIPTAP OFFICIAL PATTERN: Always create Y.js + Collaboration extension immediately
             const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
             
             if (bundle) {
                 await this.createOfflineFirstCollaborativeEditors(bundle);
             } else {
-                console.warn('⚠️ Collaboration bundle not available, falling back to basic editors');
-                await this.createBasicEditors();
+                console.error('❌ Collaboration bundle required for TipTap editors - fallback removed per TipTap.dev guidelines');
+                throw new Error('TipTap collaboration bundle is required');
             }
         },
 
@@ -3255,17 +4006,26 @@ export default {
 
         // CRITICAL: Proper cleanup method to prevent transaction mismatch errors
         async cleanupCurrentDocument() {
+            // RACE CONDITION FIX: Prevent multiple simultaneous cleanup operations
+            if (this.isCleaningUp) {
+                console.log('⚠️ Cleanup already in progress, skipping duplicate call');
+                return;
+            }
+            
             console.log('🧹 Cleaning up current document resources...');
+            
+            // Set cleanup flag to prevent status warnings during cleanup
+            this.isCleaningUp = true;
             
             try {
                 // TIPTAP BEST PRACTICE: Disconnect collaboration provider first with null safety
                 if (this.provider) {
                     try {
                         if (this.provider.disconnect) {
-                            this.provider.disconnect();
+                    this.provider.disconnect();
                         }
                         if (this.provider.destroy) {
-                            this.provider.destroy();
+                    this.provider.destroy();
                         }
                     } catch (providerError) {
                         console.warn('⚠️ Error during provider cleanup:', providerError.message);
@@ -3276,7 +4036,7 @@ export default {
                 // Destroy IndexedDB persistence
                 if (this.indexeddbProvider) {
                     try {
-                        this.indexeddbProvider.destroy();
+                    this.indexeddbProvider.destroy();
                     } catch (indexeddbError) {
                         console.warn('⚠️ Error during IndexedDB cleanup:', indexeddbError.message);
                     }
@@ -3286,7 +4046,7 @@ export default {
                 // Destroy editors safely with individual error handling
                 if (this.titleEditor) {
                     try {
-                        this.titleEditor.destroy();
+                    this.titleEditor.destroy();
                     } catch (titleError) {
                         console.warn('⚠️ Error destroying title editor:', titleError.message);
                     }
@@ -3294,7 +4054,7 @@ export default {
                 }
                 if (this.bodyEditor) {
                     try {
-                        this.bodyEditor.destroy();
+                    this.bodyEditor.destroy();
                     } catch (bodyError) {
                         console.warn('⚠️ Error destroying body editor:', bodyError.message);
                     }
@@ -3302,7 +4062,7 @@ export default {
                 }
                 if (this.permlinkEditor) {
                     try {
-                        this.permlinkEditor.destroy();
+                    this.permlinkEditor.destroy();
                     } catch (permlinkError) {
                         console.warn('⚠️ Error destroying permlink editor:', permlinkError.message);
                     }
@@ -3312,7 +4072,7 @@ export default {
                 // Destroy Y.js document last
                 if (this.ydoc) {
                     try {
-                        this.ydoc.destroy();
+                    this.ydoc.destroy();
                     } catch (ydocError) {
                         console.warn('⚠️ Error destroying Y.js document:', ydocError.message);
                     }
@@ -3322,7 +4082,13 @@ export default {
                 // Reset collaboration state and arrays
                 this.connectionStatus = 'disconnected';
                 this.connectionMessage = '';
+                
+                // CRITICAL: Don't reset isCollaborativeMode if we're loading a collaborative file
+                // This preserves the collaborative mode flag set by loadCollaborativeFile()
+                if (this.currentFile?.type !== 'collaborative') {
                 this.isCollaborativeMode = false;
+                }
+                
                 this.isCreatingYjsDocument = false;
                 this.lazyYjsComponents = null;
                 
@@ -3360,12 +4126,15 @@ export default {
                     window.dluxCollaborativeInstance = null;
                     window.dluxCollaborativeCleanup = null;
                 }
+            } finally {
+                // Always clear cleanup flag
+                this.isCleaningUp = false;
             }
         },
 
         // TIER 2: Create cloud editors with full CollaborationCursor support
         async createCloudEditorsWithCursors(bundle) {
-            console.log('☁️ Creating cloud editors with full cursor support (Tier 2)');
+            console.log('☁️ Creating Tier 2: Cloud editors with CollaborationCursor support');
             
             // Get components from the bundle
             const Editor = bundle.Editor?.default || bundle.Editor;
@@ -3374,6 +4143,7 @@ export default {
             const Collaboration = bundle.Collaboration?.default || bundle.Collaboration;
             const CollaborationCursor = bundle.CollaborationCursor?.default || bundle.CollaborationCursor;
             const Placeholder = bundle.Placeholder?.default || bundle.Placeholder;
+            const IndexeddbPersistence = bundle.IndexeddbPersistence?.default || bundle.IndexeddbPersistence;
 
             if (!Y || !Collaboration || !Editor || !StarterKit || !Placeholder) {
                 throw new Error('Required collaboration components missing for cloud editors');
@@ -3381,67 +4151,120 @@ export default {
             
             // CollaborationCursor is required for Tier 2
             if (!CollaborationCursor) {
-                console.warn('⚠️ CollaborationCursor not available - falling back to awareness-only');
-                return await this.createCollaborativeEditorsWithProperLifecycle(bundle);
+                console.warn('⚠️ CollaborationCursor not available - falling back to Tier 1');
+                return await this.createLocalEditorsWithUpgradeCapability(bundle);
             }
 
-            // Create or reuse Y.js document
+            // TIPTAP BEST PRACTICE: Create Y.js document immediately
             if (!this.ydoc) {
                 this.ydoc = new Y.Doc();
                 this.initializeCollaborativeSchema(Y);
+                console.log('✅ Y.js document created for Tier 2');
+                
+                // Add IndexedDB persistence for cloud documents
+                if (IndexeddbPersistence && this.currentFile) {
+                    const documentId = `${this.currentFile.owner}_${this.currentFile.permlink}`;
+                    this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc);
+                    console.log('✅ IndexedDB persistence created for cloud document');
+                }
             }
 
-            // Create WebSocket provider if not exists
+            // Create WebSocket provider if not exists (REQUIRED for CollaborationCursor)
             if (!this.provider && this.currentFile?.type === 'collaborative') {
                 await this.connectToCollaborationServer(this.currentFile);
             }
 
-            // Clean up existing editors
-            if (this.titleEditor) {
-                this.titleEditor.destroy();
-                this.titleEditor = null;
-            }
-            if (this.bodyEditor) {
-                this.bodyEditor.destroy();
-                this.bodyEditor = null;
+            // SAFETY CHECK: CollaborationCursor requires a valid provider
+            if (!this.provider) {
+                console.warn('⚠️ No WebSocket provider available for CollaborationCursor - falling back to Tier 1');
+                return await this.createLocalEditorsWithUpgradeCapability(bundle);
             }
 
+            // Clean up existing editors only
+            await this.cleanupEditorsOnly();
             await this.$nextTick();
 
-            // Create editors with CollaborationCursor from start
-            const getEnhancedExtensions = (field) => {
-                return this.getEnhancedExtensions(field, bundle, {
-                    includeCursor: true,  // ✅ Include CollaborationCursor
-                    includeEnhanced: true,
-                    cursorConfig: {
+            // Create extensions with CollaborationCursor (Tier 2)
+
+            const getCloudExtensions = (field) => {
+                const extensions = [];
+                
+                // 1. StarterKit (ESSENTIAL - contains Document node)
+                if (StarterKit) {
+                    extensions.push(StarterKit.configure({ 
+                        history: false, // Y.js handles history
+                        ...(field === 'title' ? {
+                            heading: false,
+                            bulletList: false,
+                            orderedList: false,
+                            blockquote: false,
+                            codeBlock: false,
+                            horizontalRule: false
+                        } : {})
+                    }));
+                }
+                
+                // 2. Collaboration extension (REQUIRED for Y.js)
+                if (Collaboration && this.ydoc) {
+                    extensions.push(Collaboration.configure({
+                        document: this.ydoc,
+                        field: field
+                    }));
+                }
+                
+                // 3. CollaborationCursor (cloud tier only)
+                if (CollaborationCursor && this.provider) {
+                    extensions.push(CollaborationCursor.configure({
+                        provider: this.provider, // ✅ Valid WebSocket provider required
+                        user: {
                         name: this.username || 'Anonymous',
                         color: this.generateUserColor(this.username || 'Anonymous')
                     }
-                });
+                    }));
+                }
+                
+                // 4. Placeholder extension
+                if (Placeholder) {
+                    extensions.push(Placeholder.configure({ 
+                        placeholder: field === 'title' ? 'Enter title...' : 
+                                   field === 'body' ? 'Start writing...' : 
+                                   'Auto-generated from title'
+                    }));
+                }
+                
+                // 5. Enhanced extensions for consistent UX
+                const enhancedExts = this.getEnhancedExtensions(field, bundle, { includeEnhanced: true });
+                extensions.push(...enhancedExts);
+                
+                return extensions;
             };
 
-            // Create title editor with cursors
+            // Create title editor with CollaborationCursor
             this.titleEditor = new Editor({
                 element: this.$refs.titleEditor,
-                extensions: getEnhancedExtensions('title'),
+                extensions: getCloudExtensions('title'),
                 editable: !this.isReadOnlyMode,
                 onUpdate: ({ editor }) => {
                     if (this.validatePermission('edit')) {
                         this.hasUnsavedChanges = true;
-                        this.clearUnsavedAfterSync();
+                        this.updateContent(); // Update content for parent component
+                        this.clearUnsavedAfterSync(); // Handle Y.js sync
+                        this.debouncedAutoSave(); // Trigger autosave for local documents
                     }
                 },
             });
 
-            // Create body editor with cursors
+            // Create body editor with CollaborationCursor
             this.bodyEditor = new Editor({
                 element: this.$refs.bodyEditor,
-                extensions: getEnhancedExtensions('body'),
+                extensions: getCloudExtensions('body'),
                 editable: !this.isReadOnlyMode,
                 onUpdate: ({ editor }) => {
                     if (this.validatePermission('edit')) {
                         this.hasUnsavedChanges = true;
-                        this.clearUnsavedAfterSync();
+                        this.updateContent(); // Update content for parent component
+                        this.clearUnsavedAfterSync(); // Handle Y.js sync
+                        this.debouncedAutoSave(); // Trigger autosave for local documents
                     }
                 },
             });
@@ -3459,27 +4282,10 @@ export default {
             this.isCollaborativeMode = true;
             this.fileType = 'collaborative';
             
-            console.log('✅ Cloud editors created with full CollaborationCursor support');
+            console.log('✅ Tier 2 cloud editors created with CollaborationCursor support');
         },
 
-        // UPGRADE PATH: Local → Cloud with full cursors (Single Clean Path)
-        async upgradeLocalToCloudWithCursors(bundle) {
-            console.log('🔄 Upgrading local document to cloud with full cursor support');
-            
-            // 1. Preserve content and state
-            const preservedContent = this.getEditorContent();
-            
-            // 2. Clean up basic editors
-            await this.cleanupCurrentDocument();
-            
-            // 3. Create cloud editors with cursors
-            await this.createCloudEditorsWithCursors(bundle);
-            
-            // 4. Restore content
-            this.setEditorContent(preservedContent);
-            
-            console.log('✅ Upgraded to cloud with full collaborative cursors');
-        },
+        // REMOVED: Duplicate method - using unified approach at line 3233
 
 
 
@@ -3576,7 +4382,7 @@ export default {
                 editable: !this.isReadOnlyMode,
                 editorProps: {
                     attributes: {
-                        class: 'form-control bg-transparent text-white border-0',
+                        // Styling handled by CSS - no need for dynamic classes
                     }
                 },
                 onCreate: ({ editor }) => {
@@ -3598,7 +4404,7 @@ export default {
                 editable: !this.isReadOnlyMode,
                 editorProps: {
                     attributes: {
-                        class: 'form-control bg-transparent text-white border-0',
+                        // Styling handled by CSS - no need for dynamic classes
                     }
                 },
                 onCreate: ({ editor }) => {
@@ -3627,7 +4433,7 @@ export default {
                 editable: false,
                 editorProps: {
                     attributes: {
-                        class: 'form-control bg-transparent text-muted border-0',
+                        // Styling handled by CSS - no need for dynamic classes
                     }
                 },
                 onCreate: ({ editor }) => {
@@ -3639,6 +4445,8 @@ export default {
         },
 
         async createOfflineFirstCollaborativeEditors(bundle) {
+            // Set flag to prevent temp document creation during initialization
+            this.isInitializingEditors = true;
             // TIPTAP BEST PRACTICE: Prevent multiple collaborative instances
             if (window.dluxCollaborativeInstance && window.dluxCollaborativeInstance !== this.componentId) {
                 console.warn('⚠️ Another collaborative instance is active, cleaning up first');
@@ -3674,63 +4482,109 @@ export default {
                 console.warn('⚠️ CollaborationCursor not available - user presence and cursors will not be shown');
             }
 
-            // ===== TIPTAP BEST PRACTICE: Lazy Y.js document creation for LOCAL documents =====
-            // For LOCAL documents, only create Y.js document when user actually starts editing
-            // This prevents IndexedDB bloat from unused documents
-            if (!this.ydoc && this.currentFile?.id) {
-                console.log('🆕 Creating Y.js document for existing local document');
+            // ===== TIPTAP OFFICIAL PATTERN: Create Y.js document if needed =====
+            // Check if Y.js document already exists (from loadDocument)
+            if (!this.ydoc) {
+                console.log('🆕 Creating fresh Y.js document (TipTap official pattern)');
                 this.ydoc = new Y.Doc();
                 
-                // Add IndexedDB persistence for existing documents
+                // Initialize collaborative schema
+                this.initializeCollaborativeSchema(Y);
+            } else {
+                console.log('✅ Using existing Y.js document (from loadDocument)');
+            }
+            
+            // For existing documents, create IndexedDB persistence immediately
+            if (this.currentFile?.id || this.currentFile?.permlink) {
                 const documentId = this.currentFile.id || this.currentFile.permlink;
                 const IndexeddbPersistence = bundle.IndexeddbPersistence?.default || bundle.IndexeddbPersistence;
                 
-                if (IndexeddbPersistence && !this.indexeddbProvider) {
+                if (IndexeddbPersistence) {
                     try {
                         this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc);
-                        console.log('💾 IndexedDB persistence enabled for existing document');
+                        
+                        // Wait for initial sync to complete
+                        await new Promise(resolve => {
+                            this.indexeddbProvider.on('synced', resolve);
+                        });
+                        
+                        console.log('💾 IndexedDB persistence synced for existing document');
+                        
+                        // Update custom JSON display after sync
+                        this.updateCustomJsonDisplay();
                     } catch (error) {
                         console.warn('⚠️ Failed to initialize IndexedDB persistence:', error.message);
                     }
                 }
-                
-                // Initialize collaborative schema
-                this.initializeCollaborativeSchema(Y);
-                this.isCollaborativeMode = true;
-                this.connectionStatus = 'offline';
-                this.fileType = 'local';
-            } else if (!this.ydoc) {
-                // For NEW local documents, store bundle for lazy Y.js creation on first edit
-                console.log('📦 Storing bundle for lazy Y.js creation on first edit');
-                this.lazyYjsComponents = { Y, bundle };
+            } else {
+                // For new documents, create temp Y.js document WITHOUT IndexedDB persistence
+                // This prevents auto-creation of drafts until user makes changes
+                console.log('📝 Created temp Y.js document (no IndexedDB until user edits)');
+                this.tempDocumentId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                this.isTemporaryDocument = true;
+            }
+            
+            // Set offline mode for temp documents
                 this.isCollaborativeMode = false;
                 this.connectionStatus = 'offline';
                 this.fileType = 'local';
-            } else {
-                console.log('♻️ Reusing existing Y.js document and IndexedDB persistence');
+            
+            // TIPTAP OFFICIAL PATTERN: Always use Collaboration extension with Y.js
+            // ✅ CORRECT: Build complete extension arrays with all required extensions
+            const getCompleteExtensions = (field) => {
+                const extensions = [];
+                
+                // 1. StarterKit (ESSENTIAL - contains Document node)
+                const StarterKit = bundle?.StarterKit?.default || bundle?.StarterKit;
+                if (StarterKit) {
+                    extensions.push(StarterKit.configure({
+                        history: false, // Y.js handles history
+                        ...(field === 'title' ? {
+                            // Title field: minimal formatting
+                            heading: false,
+                            bulletList: false,
+                            orderedList: false,
+                            blockquote: false,
+                            codeBlock: false,
+                            horizontalRule: false
+                        } : {
+                            // Body field: full formatting (StarterKit defaults)
+                        })
+                    }));
             }
             
-            // Using reusable getEnhancedExtensions method 
-            const getEnhancedExtensions = (field) => {
-                // For new local documents without Y.js, create basic editors initially
-                if (!this.ydoc && this.lazyYjsComponents) {
-                    return this.getEnhancedExtensions(field, bundle, {
-                        includeCursor: false,
-                        includeEnhanced: false  // Basic extensions only, no collaboration yet
-                    });
+                // 2. Collaboration extension (REQUIRED for Y.js)
+                const Collaboration = bundle?.Collaboration?.default || bundle?.Collaboration;
+                if (Collaboration && this.ydoc) {
+                    extensions.push(Collaboration.configure({
+                        document: this.ydoc,
+                        field: field
+                    }));
                 }
-                // For documents with Y.js, use full collaborative extensions
-                // TIPTAP BEST PRACTICE: Don't include cursor for offline-first editors
-                // Cursor requires provider which isn't available until WebSocket connects
-                return this.getEnhancedExtensions(field, bundle, {
-                    includeCursor: false,  // Cursor will be available only for initially connected documents
+                
+                // 3. Placeholder extension
+                const Placeholder = bundle?.Placeholder?.default || bundle?.Placeholder;
+                if (Placeholder) {
+                    extensions.push(Placeholder.configure({
+                        placeholder: field === 'title' ? 'Enter title...' : 
+                                   field === 'body' ? 'Start writing...' : 
+                                   'Auto-generated from title'
+                    }));
+                }
+                
+                // 4. Enhanced extensions (Link, Typography, etc.)
+                const enhancedExts = this.getEnhancedExtensions(field, bundle, {
+                    includeCursor: false,  // No cursor for offline-first
                     includeEnhanced: true
                 });
+                extensions.push(...enhancedExts);
+                
+                return extensions;
             };
             
-            // Create collaborative editors with enhanced extensions
-            const titleExtensions = getEnhancedExtensions('title');
-            const bodyExtensions = getEnhancedExtensions('body');
+            // Create collaborative editors with all required extensions
+            const titleExtensions = getCompleteExtensions('title');
+            const bodyExtensions = getCompleteExtensions('body');
 
             // Note: CollaborationCursor will be added dynamically when provider connects
             // This follows TipTap best practice for offline-first architecture
@@ -3750,14 +4604,24 @@ export default {
                 extensions: titleExtensions,
                     // TipTap Best Practice: Content validation for collaborative documents
                     enableContentCheck: true,
+                emitContentError: true, // Also emit without checking (TipTap 3.0 best practice)
                     onContentError: ({ editor, error, disableCollaboration }) => {
                         console.error('🚨 Title content validation error:', error);
+                    
+                    // For collaborative documents, disable collaboration to prevent sync issues
+                    if (this.isCollaborativeMode && disableCollaboration) {
+                        console.warn('🔒 Disabling collaboration due to content validation error');
+                        disableCollaboration();
+                        editor.setEditable(false, false); // Prevent further edits, don't emit
+                        this.schemaVersionMismatch = true; // Flag for UI notification
+                    }
+                    
                         this.handleContentValidationError('title', error, disableCollaboration);
                     },
                     editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
                     editorProps: {
                         attributes: {
-                            class: 'form-control bg-transparent text-white border-0',
+                            // Styling handled by CSS - no need for dynamic classes
                         }
                     },
                 onCreate: ({ editor }) => {
@@ -3773,16 +4637,18 @@ export default {
                             return;
                         }
                         
+                        // TEMP DOCUMENT STRATEGY: Debounced IndexedDB persistence creation
+                        // Only create temp document after user stops typing for 2 seconds
+                        if (this.isTemporaryDocument && !this.indexeddbProvider) {
+                            this.debouncedCreateIndexedDBForTempDocument();
+                        }
+                        
                         // COMPREHENSIVE SOLUTION: Track user as author on editing
                         if (this.authHeaders?.['x-account']) {
                             this.addAuthorToTracking(this.authHeaders['x-account']);
                         }
                         
-                        // TIPTAP BEST PRACTICE: Create persistent Y.js document after first real edit
-                        if (!this.ydoc && this.lazyYjsComponents) {
-                            console.log('⏳ User started editing - creating persistent Y.js document...');
-                            this.debouncedYjsCreation();
-                        }
+                        // Y.js document already exists - content automatically synced
                         
                         // Store clean title text without artifacts
                         let cleanTitle = editor.getText().trim();
@@ -3841,14 +4707,24 @@ export default {
                 extensions: bodyExtensions,
                 // TipTap Best Practice: Content validation for collaborative documents
                 enableContentCheck: true,
+                emitContentError: true, // Also emit without checking (TipTap 3.0 best practice)
                 onContentError: ({ editor, error, disableCollaboration }) => {
                     console.error('🚨 Body content validation error:', error);
+                    
+                    // For collaborative documents, disable collaboration to prevent sync issues
+                    if (this.isCollaborativeMode && disableCollaboration) {
+                        console.warn('🔒 Disabling collaboration due to content validation error');
+                        disableCollaboration();
+                        editor.setEditable(false, false); // Prevent further edits, don't emit
+                        this.schemaVersionMismatch = true; // Flag for UI notification
+                    }
+                    
                     this.handleContentValidationError('body', error, disableCollaboration);
                 },
                 editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
                     editorProps: {
                         attributes: {
-                            class: 'form-control bg-transparent text-white border-0',
+                            // Styling handled by CSS - no need for dynamic classes
                         }
                     },
                 onCreate: ({ editor }) => {
@@ -3864,16 +4740,18 @@ export default {
                         return;
                     }
                     
+                    // TEMP DOCUMENT STRATEGY: Debounced IndexedDB persistence creation
+                    // Only create temp document after user stops typing for 2 seconds
+                    if (this.isTemporaryDocument && !this.indexeddbProvider) {
+                        this.debouncedCreateIndexedDBForTempDocument();
+                    }
+                    
                     // COMPREHENSIVE SOLUTION: Track user as author on editing
                     if (this.authHeaders?.['x-account']) {
                         this.addAuthorToTracking(this.authHeaders['x-account']);
                     }
                     
-                    // TIPTAP BEST PRACTICE: Create persistent Y.js document after first real edit
-                    if (!this.ydoc && this.lazyYjsComponents) {
-                        console.log('⏳ User started editing - creating persistent Y.js document...');
-                        this.debouncedYjsCreation();
-                    }
+                    // Y.js document already exists - content automatically synced
                     
                         this.content.body = editor.getHTML();
                     
@@ -3922,174 +4800,75 @@ export default {
             }
 
             console.log('✅ Enhanced offline collaborative editors created successfully');
+            
+            // Clear initialization flag after a delay to allow TipTap's async initialization events to complete
+            setTimeout(() => {
+                this.isInitializingEditors = false;
+                console.log('🎯 Editor initialization complete - ready for real user edits');
+            }, 500); // 500ms delay to ensure all TipTap initialization events have fired
+        },
+
+        // ===== TEMP DOCUMENT STRATEGY: Debounced IndexedDB Creation =====
+        debouncedCreateIndexedDBForTempDocument() {
+            // CRITICAL FIX: Check flags immediately when called, not after delay
+            if (this.isInitializingEditors || this.isUpdatingPermissions) {
+                console.log('⏸️ Skipping temp document creation - editors are initializing or permissions updating');
+                return;
+            }
+            
+            if (!this.isTemporaryDocument || this.indexeddbProvider) {
+                return; // Already has persistence or not a temp document
+            }
+            
+            console.log('🔍 debouncedCreateIndexedDBForTempDocument called - real user input detected');
+            
+            // Clear any existing timer
+            if (this.tempDocumentCreationTimer) {
+                clearTimeout(this.tempDocumentCreationTimer);
+            }
+            
+            // Set new timer - only create temp document after user stops typing for 2 seconds
+            this.tempDocumentCreationTimer = setTimeout(() => {
+                this.createIndexedDBForTempDocument();
+            }, 2000);
+        },
+
+        // ===== TEMP DOCUMENT STRATEGY: Create IndexedDB on First Edit =====
+        async createIndexedDBForTempDocument() {
+            console.log('📝 User paused typing - creating IndexedDB persistence for temp document');
+            
+            try {
+                const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
+                const IndexeddbPersistence = bundle?.IndexeddbPersistence?.default || bundle?.IndexeddbPersistence;
+                
+                if (IndexeddbPersistence && this.ydoc) {
+                    // Create IndexedDB persistence with temp document ID
+                    this.indexeddbProvider = new IndexeddbPersistence(this.tempDocumentId, this.ydoc);
+                    
+                    // Wait for sync to complete
+                    await new Promise(resolve => {
+                        this.indexeddbProvider.on('synced', resolve);
+                    });
+                    
+                    // Update custom JSON display after sync
+                    this.updateCustomJsonDisplay();
+                    
+                    // Now add to drafts list
+                    await this.ensureLocalFileEntry();
+                    
+                    console.log('✅ Temp document now has IndexedDB persistence and appears in drafts');
+                    
+                    // No longer temporary
+                    this.isTemporaryDocument = false;
+                }
+            } catch (error) {
+                console.error('❌ Failed to create IndexedDB for temp document:', error);
+            }
         },
 
         // ===== NEW TIPTAP OFFLINE-FIRST BEST PRACTICE METHOD =====
         // Create editors with collaboration extensions and temporary Y.js document from the start
-        // This follows TipTap's true offline-first pattern: complete editor -> user edits -> switch to persistent ydoc
-        async createTrueOfflineFirstEditors(bundle) {
-            console.log('🏗️ Creating true offline-first editors (TipTap best practice)...');
-            
-            // Prevent multiple collaborative instances
-            if (window.dluxCollaborativeInstance && window.dluxCollaborativeInstance !== this.componentId) {
-                console.warn('⚠️ Another collaborative instance is active, cleaning up first');
-                if (window.dluxCollaborativeCleanup) {
-                    try {
-                        await window.dluxCollaborativeCleanup();
-                    } catch (error) {
-                        console.warn('⚠️ Error during previous instance cleanup:', error.message);
-                    }
-                }
-            }
-            
-            // Register this instance as the active collaborative instance
-            window.dluxCollaborativeInstance = this.componentId;
-            window.dluxCollaborativeCleanup = () => this.fullCleanupCollaboration();
-            
-            // Get components from the bundle
-            const Editor = bundle.Editor?.default || bundle.Editor;
-            const StarterKit = bundle.StarterKit?.default || bundle.StarterKit;
-            const Y = bundle.Y?.default || bundle.Y;
-            const Collaboration = bundle.Collaboration?.default || bundle.Collaboration;
-            const Placeholder = bundle.Placeholder?.default || bundle.Placeholder;
-
-            if (!Y || !Collaboration || !Editor || !StarterKit || !Placeholder) {
-                console.warn('⚠️ Required collaboration components missing, falling back to basic editors');
-                await this.createBasicEditors();
-                return;
-            }
-            
-            // Store Y.js components for later persistent document creation
-            this.lazyYjsComponents = { Y, bundle };
-            
-            // TIPTAP BEST PRACTICE: Create a temporary Y.js document for editor initialization
-            // This document will be replaced when the user starts editing
-            const tempYDoc = new Y.Doc();
-            console.log('📄 Created temporary Y.js document for editor initialization');
-            
-            // Using enhanced extensions with temporary Y.js document
-            const getEnhancedExtensions = (field) => {
-                return this.getEnhancedExtensions(field, bundle, {
-                    includeCursor: false,
-                    includeEnhanced: true,
-                    tempYDoc: tempYDoc  // Pass temporary Y.js document
-                });
-            };
-            
-            // Create collaborative editors with enhanced extensions and temp Y.js document
-            const titleExtensions = getEnhancedExtensions('title');
-            const bodyExtensions = getEnhancedExtensions('body');
-
-            // Clean up existing editors before creating new ones
-            if (this.titleEditor) {
-                try {
-                    this.titleEditor.destroy();
-                } catch (error) {
-                    console.warn('⚠️ Error destroying existing title editor:', error.message);
-                }
-                this.titleEditor = null;
-            }
-
-            // Create title editor with temporary Y.js document
-            this.titleEditor = new Editor({
-                element: this.$refs.titleEditor,
-                extensions: titleExtensions,
-                enableContentCheck: true,
-                onContentError: ({ editor, error, disableCollaboration }) => {
-                    console.error('🚨 Title content validation error:', error);
-                    this.handleContentValidationError('title', error, disableCollaboration);
-                },
-                editable: !this.isReadOnlyMode,
-                editorProps: {
-                    attributes: {
-                        class: 'form-control bg-transparent text-white border-0',
-                    }
-                },
-                onCreate: ({ editor }) => {
-                    console.log(`✅ True offline-first title editor ready with temp Y.js document (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
-                    // Store reference to temp document for later cleanup
-                    this.tempYDoc = tempYDoc;
-                },
-                onUpdate: ({ editor }) => {
-                    // SECURITY: Block updates for read-only users
-                    if (this.isReadOnlyMode) {
-                        console.warn('🚫 Blocked title update: user has read-only permissions');
-                        return;
-                    }
-                    
-                    // Track user as author on editing
-                    if (this.authHeaders?.['x-account']) {
-                        this.addAuthorToTracking(this.authHeaders['x-account']);
-                    }
-                    
-                    // Y.js document already exists from initialization (TipTap best practice)
-                    
-                    // Store clean title text
-                    let cleanTitle = editor.getText().trim();
-                    cleanTitle = cleanTitle
-                        .replace(/\u00A0/g, ' ')
-                        .replace(/\u200B/g, '')
-                        .replace(/\uFEFF/g, '')
-                        .replace(/[\u2000-\u206F]/g, ' ')
-                        .replace(/\s+/g, ' ')
-                        .trim();
-                    this.content.title = cleanTitle;
-                
-                    this.hasUnsavedChanges = true;
-                    this.clearUnsavedAfterSync();
-                }
-            });
-
-            // Clean up existing body editor
-            if (this.bodyEditor) {
-                try {
-                    this.bodyEditor.destroy();
-                } catch (error) {
-                    console.warn('⚠️ Error destroying existing body editor:', error.message);
-                }
-                this.bodyEditor = null;
-            }
-
-            // Create body editor with temporary Y.js document
-            this.bodyEditor = new Editor({
-                element: this.$refs.bodyEditor,
-                extensions: bodyExtensions,
-                enableContentCheck: true,
-                onContentError: ({ editor, error, disableCollaboration }) => {
-                    console.error('🚨 Body content validation error:', error);
-                    this.handleContentValidationError('body', error, disableCollaboration);
-                },
-                editable: !this.isReadOnlyMode,
-                editorProps: {
-                    attributes: {
-                        class: 'form-control bg-transparent text-white border-0',
-                    }
-                },
-                onCreate: ({ editor }) => {
-                    console.log(`✅ True offline-first body editor ready with temp Y.js document (${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'})`);
-                },
-                onUpdate: ({ editor }) => {
-                    // SECURITY: Block updates for read-only users
-                    if (this.isReadOnlyMode) {
-                        console.warn('🚫 Blocked body update: user has read-only permissions');
-                        return;
-                    }
-                    
-                    // Track user as author on editing
-                    if (this.authHeaders?.['x-account']) {
-                        this.addAuthorToTracking(this.authHeaders['x-account']);
-                    }
-                    
-                    // Y.js document already exists from initialization (TipTap best practice)
-                    
-                    this.content.body = editor.getHTML();
-                    this.hasUnsavedChanges = true;
-                    this.clearUnsavedAfterSync();
-                }
-            });
-            
-            console.log('✅ True offline-first editors created with collaboration extensions and temp Y.js document');
-        },
+        // REMOVED: createTrueOfflineFirstEditors() - Legacy method replaced by unified 2-tier system
 
         // ===== ENHANCED Y.JS DOCUMENT CREATION WITH EDITOR PRESERVATION =====
         async createPersistentYjsDocument(triggerEditor = null) {
@@ -4245,97 +5024,12 @@ export default {
             }
         },
 
-        // TIPTAP BEST PRACTICE: Create Y.js document after typing pause to preserve content without disrupting flow
-        async createLazyYjsDocument(triggerEditor = null) {
-            console.log('🏗️ Creating Y.js document after typing pause (preserving content)...');
-            
-            try {
-                // Safety checks - prevent duplicate creation attempts
-                if (this.ydoc) {
-                    console.log('✅ Y.js document already exists, skipping creation');
-                    return;
-                }
-                
-                if (this.isCreatingYjsDocument) {
-                    console.log('⏳ Y.js document creation already in progress, skipping');
-                    return;
-                }
-                
-                this.isCreatingYjsDocument = true;
-                
-                // Extract Y.js components from consistent structure
-                const { Y, bundle } = this.lazyYjsComponents;
-                
-                if (!bundle || !Y) {
-                    console.error('❌ Missing required Y.js components in bundle');
-                    throw new Error('Y.js components not available');
-                }
-                
-                // STEP 1: Preserve current content from all editors (non-disruptive)
-                const preservedContent = {
-                    title: this.titleEditor?.getHTML() || '',
-                    body: this.bodyEditor?.getHTML() || '',
-                    permlink: this.permlinkEditor?.getHTML() || ''
-                };
-                
-                console.log('💾 Preserved content before Y.js creation (after typing pause):', preservedContent);
-                
-                // STEP 2: Create Y.js document and IndexedDB persistence
-                this.ydoc = new Y.Doc();
-                
-                const documentId = `local_${Date.now()}`;
-                const IndexeddbPersistence = bundle?.IndexeddbPersistence?.default || bundle?.IndexeddbPersistence;
-                
-                if (IndexeddbPersistence) {
-                    try {
-                        this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc);
-                        console.log('💾 IndexedDB persistence enabled for new document');
-                    } catch (error) {
-                        console.warn('⚠️ Failed to initialize IndexedDB persistence:', error.message);
-                    }
-                }
-                
-                // STEP 3: Initialize collaborative schema
-                this.initializeCollaborativeSchema(Y);
-                
-                // STEP 4: Sync local state to Y.js (TipTap best practice for state migration)
-                this.syncLocalStateToYjs();
-                
-                // STEP 5: Store preserved content in Y.js config for restoration
-                this.ydoc.getMap('config').set('preservedContent', preservedContent);
-                
-                // STEP 6: Connect Y.js document for offline persistence (no Collaboration extension yet)
-                await this.connectYjsForOfflinePersistence(bundle, preservedContent);
-                
-                // STEP 7: Set offline persistence mode (not collaborative until connecting to cloud)
-                this.isCollaborativeMode = false; // Still local until connecting to cloud
-                this.connectionStatus = 'offline';
-                this.fileType = 'local';
-                
-                // Clear lazy components
-                this.lazyYjsComponents = null;
-                
-                console.log('✅ Y.js document created lazily with preserved content');
-                
-            } catch (error) {
-                console.error('❌ Failed to create lazy Y.js document:', error);
-                // Continue with non-collaborative editors
-                this.lazyYjsComponents = null;
-            } finally {
-                this.isCreatingYjsDocument = false;
-            }
-        },
+        // REMOVED: createLazyYjsDocument() - No longer needed with TipTap official pattern
+        // Y.js documents are now created immediately with editors
 
         // ===== DEPRECATED METHOD =====
         // @deprecated This method name suggests editor destruction, which violates TipTap offline-first best practices
-        // Use connectEditorsToYDoc() instead - Y.js documents are inherently collaborative
-        async recreateEditorsWithYjs(bundle, preservedContent) {
-            console.warn('⚠️ DEPRECATED: recreateEditorsWithYjs() - method name suggests destruction');
-            console.warn('⚠️ Use connectEditorsToYDoc() instead - Y.js documents are inherently collaborative');
-            
-            // Delegate to the properly-named method
-            return await this.connectEditorsToYDoc(bundle, preservedContent);
-        },
+        // REMOVED: recreateEditorsWithYjs() - Legacy method replaced by unified 2-tier system
 
         // ===== LIGHTWEIGHT Y.JS FOR OFFLINE PERSISTENCE =====
         // Connect Y.js document for offline persistence without Collaboration extension
@@ -4439,32 +5133,7 @@ export default {
             console.log('✅ Lightweight offline persistence listeners added (Y.js conflict-free)');
         },
 
-        // ===== UPGRADE TO COLLABORATIVE MODE =====
-        // Upgrade existing Y.js document to collaborative mode when connecting to cloud
-        async upgradeToCollaborativeMode(bundle, preservedContent = null) {
-            console.log('🔄 Upgrading to collaborative mode with Collaboration extension...');
-            
-            if (!this.ydoc) {
-                throw new Error('No Y.js document available to upgrade to collaborative mode');
-            }
-            
-            // Preserve current content if not provided
-            if (!preservedContent) {
-                preservedContent = {
-                    title: this.titleEditor?.getHTML() || '',
-                    body: this.bodyEditor?.getHTML() || '',
-                    permlink: this.permlinkEditor?.getHTML() || ''
-                };
-            }
-            
-            // Now we need the full collaboration approach with Collaboration extension
-            await this.connectEditorsToYDoc(bundle, preservedContent);
-            
-            // Enable collaborative mode
-            this.isCollaborativeMode = true;
-            
-            console.log('✅ Upgraded to collaborative mode with Collaboration extension');
-        },
+        // REMOVED: upgradeToCollaborativeMode() - Legacy method replaced by upgradeLocalToCloudWithCursors()
 
         // ===== TIPTAP OFFLINE-FIRST BEST PRACTICE =====
         // Connect existing editors to Y.js document without destruction
@@ -4524,7 +5193,7 @@ export default {
                 editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
                 editorProps: {
                     attributes: {
-                        class: 'form-control bg-transparent text-white border-0',
+                        // Styling handled by CSS - no need for dynamic classes
                     }
                 },
                 onCreate: ({ editor }) => {
@@ -4572,7 +5241,7 @@ export default {
                 editable: !this.isReadOnlyMode, // CRITICAL: Enforce read-only permissions
                 editorProps: {
                     attributes: {
-                        class: 'form-control bg-transparent text-white border-0',
+                        // Styling handled by CSS - no need for dynamic classes
                     }
                 },
                 onCreate: ({ editor }) => {
@@ -4594,6 +5263,68 @@ export default {
             });
             
             console.log('✅ Editors recreated with Y.js collaboration and preserved content');
+        },
+
+        // ✅ CORRECT: Sync editor content to Vue component state using TipTap methods
+        async syncEditorContentToVueState() {
+            try {
+                console.log('🔄 Syncing editor content to Vue component state...');
+                
+                // Add debugging to see what's in the editors
+                console.log('🔍 Debug - titleEditor exists:', !!this.titleEditor);
+                console.log('🔍 Debug - bodyEditor exists:', !!this.bodyEditor);
+                
+                // ✅ CORRECT: Use TipTap editor methods to get content
+                if (this.titleEditor) {
+                    const titleContent = this.titleEditor.getHTML();
+                    const titleText = this.titleEditor.getText().trim();
+                    
+                    console.log('🔍 Debug - titleContent:', titleContent);
+                    console.log('🔍 Debug - titleText:', titleText);
+                    
+                    if (titleText) {
+                        this.content.title = titleText;
+                        console.log('📝 Synced title from editor:', titleText);
+                    } else {
+                        console.log('⚠️ No title content found in editor');
+                    }
+                }
+                
+                if (this.bodyEditor) {
+                    const bodyContent = this.bodyEditor.getHTML();
+                    const bodyText = this.bodyEditor.getText().trim();
+                    
+                    console.log('🔍 Debug - bodyContent length:', bodyContent?.length || 0);
+                    console.log('🔍 Debug - bodyText length:', bodyText?.length || 0);
+                    
+                    if (bodyText) {
+                        this.content.body = bodyContent;
+                        console.log('📝 Synced body from editor (first 50 chars):', bodyText.substring(0, 50) + '...');
+                    } else {
+                        console.log('⚠️ No body content found in editor');
+                    }
+                }
+                
+                // Sync other collaborative data from Y.js using proper methods
+                if (this.ydoc) {
+                    const tags = this.ydoc.getArray('tags');
+                    if (tags && tags.length > 0) {
+                        this.content.tags = tags.toArray();
+                        console.log('🏷️ Synced tags from Y.js:', this.content.tags);
+                    }
+                    
+                    const customJson = this.ydoc.getMap('customJson');
+                    if (customJson && customJson.size > 0) {
+                        this.content.custom_json = customJson.toJSON();
+                        console.log('⚙️ Synced custom_json from Y.js');
+                    }
+                }
+                
+                console.log('✅ Editor content synced to Vue component state');
+                
+            } catch (error) {
+                console.error('❌ Error syncing editor content to Vue state:', error);
+            }
         },
 
         // TIPTAP BEST PRACTICE: Sync local state to Y.js document on creation
@@ -4662,6 +5393,12 @@ export default {
                         const authorsArray = this.ydoc.getArray('authors');
                         
                         // CRITICAL FIX: Validate array before forEach operation
+                        if (!Array.isArray(this.collaborativeAuthors)) {
+                            console.warn('⚠️ collaborativeAuthors is not an array in syncLocalStateToYjs:', typeof this.collaborativeAuthors, this.collaborativeAuthors);
+                            this.collaborativeAuthors = []; // Reset to empty array
+                            return; // Exit early
+                        }
+                        
                         const validAuthors = this.collaborativeAuthors.filter(author => {
                             if (!author) {
                                 console.warn('⚠️ Null/undefined author found, skipping');
@@ -4673,6 +5410,12 @@ export default {
                             }
                             return true;
                         });
+                        
+                        // Additional safety check for validAuthors array
+                        if (!Array.isArray(validAuthors)) {
+                            console.warn('⚠️ validAuthors filter returned non-array:', typeof validAuthors, validAuthors);
+                            return; // Exit early
+                        }
                         
                         validAuthors.forEach(author => {
                             const existingAuthors = authorsArray.toArray();
@@ -4755,6 +5498,12 @@ export default {
                 config.set('createdBy', this.username || 'anonymous');
                 config.set('lastModified', new Date().toISOString());
                 config.set('initialContentLoaded', false); // TipTap best practice flag
+                
+                // ✅ TIPTAP BEST PRACTICE: Store document name in config metadata
+                if (this.currentFile?.name && this.currentFile.name !== `${this.currentFile?.owner}/${this.currentFile?.permlink}`) {
+                    config.set('documentName', this.currentFile.name);
+                    console.log('📄 Document name stored in Y.js config:', this.currentFile.name);
+                }
             }
             
             // Advanced publishing options (atomic values only for conflict-free collaboration)
@@ -4808,6 +5557,55 @@ export default {
                 const config = this.ydoc.getMap('config');
                 config.observe((event) => {
                     console.log('⚙️ Post config changed:', event);
+                    console.log('🔍 DEBUG: Config change details:', {
+                        keysChanged: Array.from(event.changes.keys.keys()),
+                        target: event.target,
+                        transaction: event.transaction
+                    });
+                    
+                    // ✅ TIPTAP BEST PRACTICE: Update document name when changed or added in Y.js config
+                    event.changes.keys.forEach((change, key) => {
+                        if (key === 'documentName' && (change.action === 'update' || change.action === 'add')) {
+                            const newDocumentName = config.get('documentName');
+                            console.log('📄 Document name changed/added in Y.js config:', newDocumentName);
+                            
+                            // Update current file and UI immediately
+                            if (this.currentFile && newDocumentName) {
+                                console.log('🔄 BEFORE UPDATE:', {
+                                    oldCurrentFileName: this.currentFile.name,
+                                    oldCurrentDocumentInfoTitle: this.currentDocumentInfo?.title,
+                                    newDocumentName
+                                });
+                                
+                                // Use Vue.set or object replacement to ensure reactivity
+                                this.currentFile = {
+                                    ...this.currentFile,
+                                    name: newDocumentName,
+                                    title: newDocumentName,
+                                    documentName: newDocumentName
+                                };
+                                
+                                // Update currentDocumentInfo for template display
+                                if (this.currentDocumentInfo) {
+                                    this.currentDocumentInfo.title = newDocumentName;
+                                }
+                                
+                                console.log('🔄 AFTER UPDATE:', {
+                                    newCurrentFileName: this.currentFile.name,
+                                    newCurrentDocumentInfoTitle: this.currentDocumentInfo?.title
+                                });
+                                
+                                console.log('✅ UI updated with new document name from Y.js config');
+                                
+                                // Force Vue reactivity update with nextTick to ensure DOM update
+                                this.$nextTick(() => {
+                                    this.$forceUpdate();
+                                    console.log('🔄 Config observer: Vue reactivity forced after nextTick');
+                                });
+                            }
+                        }
+                    });
+                    
                     this.syncToParent();
                 });
                 
@@ -4815,6 +5613,11 @@ export default {
                 const publishOptions = this.ydoc.getMap('publishOptions');
                 publishOptions.observe((event) => {
                     console.log('📋 Publish options changed:', event);
+                    
+                    // Trigger status indicator update and auto-save
+                    this.hasUnsavedChanges = true;
+                    this.debouncedAutoSave();
+                    
                     this.syncToParent();
                 });
                 
@@ -4836,6 +5639,14 @@ export default {
                 const customJson = this.ydoc.getMap('customJson');
                 customJson.observe((event) => {
                     console.log('⚙️ Custom JSON changed:', event);
+                    
+                    // Update the display string for the textarea
+                    this.updateCustomJsonDisplay();
+                    
+                    // Trigger status indicator update and auto-save
+                    this.hasUnsavedChanges = true;
+                    this.debouncedAutoSave();
+                    
                     this.syncToParent();
                 });
                 
@@ -4884,6 +5695,34 @@ export default {
         getPostType() {
             const config = this.ydoc.getMap('config');
             return config.get('postType') || 'blog';
+        },
+
+        // Document Name Management (Y.js config metadata)
+        setDocumentName(documentName) {
+            if (!this.ydoc || !documentName) return false;
+            
+            try {
+                const config = this.ydoc.getMap('config');
+                config.set('documentName', documentName);
+                config.set('lastModified', new Date().toISOString());
+                console.log('📄 Document name set in Y.js config:', documentName);
+                return true;
+            } catch (error) {
+                console.error('❌ Failed to set document name in Y.js config:', error);
+                return false;
+            }
+        },
+
+        getDocumentName() {
+            if (!this.ydoc) return null;
+            
+            try {
+                const config = this.ydoc.getMap('config');
+                return config.get('documentName') || null;
+            } catch (error) {
+                console.error('❌ Failed to get document name from Y.js config:', error);
+                return null;
+            }
         },
 
         // Conflict-Free Advanced Options Management
@@ -5277,6 +6116,21 @@ export default {
             }
         },
 
+        // Update the custom JSON textarea display from Y.js Map
+        updateCustomJsonDisplay() {
+            const customJsonData = this.getCustomJson();
+            const newDisplayJson = Object.keys(customJsonData).length > 0 
+                ? JSON.stringify(customJsonData, null, 2) 
+                : '';
+            
+            // Only update if different and user isn't currently editing the textarea
+            if (newDisplayJson !== this.customJsonString && document.activeElement?.tagName !== 'TEXTAREA') {
+                this.customJsonString = newDisplayJson;
+                this.customJsonError = '';
+                console.log('📝 Custom JSON display updated from Y.js');
+            }
+        },
+
         // Atomic Publish Options (simple values, conflict-free)
         setPublishOption(key, value) {
             if (!this.validatePermission('setPublishOption')) return false;
@@ -5320,6 +6174,18 @@ export default {
                 // Y.js document not ready yet - use local state
                 const localOptions = this.content.publishOptions || {};
                 return localOptions[key] || defaultValue;
+            }
+        },
+
+        getPublishOptions() {
+            // TIPTAP BEST PRACTICE: Fallback pattern for offline-first collaborative editing
+            if (this.ydoc) {
+                // Y.js document exists - use collaborative map
+                const publishOptions = this.ydoc.getMap('publishOptions');
+                return publishOptions.toJSON();
+            } else {
+                // Y.js document not ready yet - use local state
+                return this.content.publishOptions || {};
             }
         },
 
@@ -5521,6 +6387,8 @@ export default {
 
         // Sync collaborative data to parent component
         syncToParent() {
+            // FIXED: Increment collaborativeDataVersion to trigger Vue reactivity for display methods
+            this.collaborativeDataVersion++;
             const collaborativeData = this.getCollaborativeData();
             this.$emit('collaborative-data-changed', collaborativeData);
         },
@@ -5549,6 +6417,7 @@ export default {
 
         // Permission validation
         validatePermission(operation) {
+            // Check read-only mode first
             if (this.isReadOnlyMode) {
                 console.warn(`🚫 Blocked ${operation}: read-only permissions`);
                 return false;
@@ -5558,6 +6427,34 @@ export default {
             if (this.schemaVersionMismatch) {
                 console.warn(`🚫 Blocked ${operation}: schema version mismatch - please refresh to update`);
                 return false;
+            }
+            
+            // Enhanced permission validation for collaborative documents
+            if (this.currentFile?.type === 'collaborative') {
+                // Ensure we have valid permissions loaded
+                if (!Array.isArray(this.documentPermissions) || this.documentPermissions.length === 0) {
+                    console.warn(`🚫 Blocked ${operation}: permissions not loaded`);
+                    return false;
+                }
+                
+                // Check specific operation permissions
+                const userPermission = this.documentPermissions.find(p => p.account === this.username);
+                if (!userPermission) {
+                    console.warn(`🚫 Blocked ${operation}: no permission found for user`);
+                    return false;
+                }
+                
+                // Operation-specific permission checks
+                if (operation === 'publish' && userPermission.permissionType !== 'postable') {
+                    console.warn(`🚫 Blocked ${operation}: requires 'postable' permission, user has '${userPermission.permissionType}'`);
+                    return false;
+                }
+                
+                if (['edit', 'addTag', 'addBeneficiary', 'setCustomJson'].includes(operation) && 
+                    userPermission.permissionType === 'readonly') {
+                    console.warn(`🚫 Blocked ${operation}: requires edit permissions, user has 'readonly'`);
+                    return false;
+                }
             }
             
             return true;
@@ -5619,6 +6516,9 @@ export default {
         updateEditorPermissions() {
             console.log('🔐 Updating editor permissions, read-only mode:', this.isReadOnlyMode);
             
+            // Set flag to prevent temp document creation during permission updates
+            this.isUpdatingPermissions = true;
+            
             // Update title editor permissions
             if (this.titleEditor) {
                 this.titleEditor.setEditable(!this.isReadOnlyMode);
@@ -5630,6 +6530,11 @@ export default {
                 this.bodyEditor.setEditable(!this.isReadOnlyMode);
                 console.log(`📝 Body editor set to ${this.isReadOnlyMode ? 'READ-ONLY' : 'EDITABLE'}`);
             }
+            
+            // Clear permission update flag after a brief delay
+            setTimeout(() => {
+                this.isUpdatingPermissions = false;
+            }, 100);
             
             // Update placeholders to reflect read-only state
             if (this.titleEditor) {
@@ -5783,7 +6688,9 @@ export default {
                     onUpdate: ({ editor }) => {
                         if (this.validatePermission('edit')) {
                             this.hasUnsavedChanges = true;
-                            this.clearUnsavedAfterSync();
+                            this.updateContent(); // Update content for parent component
+                            this.clearUnsavedAfterSync(); // Handle Y.js sync
+                            this.debouncedAutoSave(); // Trigger autosave for local documents
                         }
                     },
                     // Add focus and blur handlers to debug cursor tracking
@@ -5844,7 +6751,9 @@ export default {
                     onUpdate: ({ editor }) => {
                         if (this.validatePermission('edit')) {
                             this.hasUnsavedChanges = true;
-                            this.clearUnsavedAfterSync();
+                            this.updateContent(); // Update content for parent component
+                            this.clearUnsavedAfterSync(); // Handle Y.js sync
+                            this.debouncedAutoSave(); // Trigger autosave for local documents
                         }
                     },
                     // Add focus and blur handlers to debug cursor tracking
@@ -6146,9 +7055,16 @@ export default {
                     console.log('💾 Y.js persistence complete (memory only - will not persist after page refresh)');
                 }
                 
-                // ===== HYBRID APPROACH: Maintain local file index for UX =====
-                // Y.js handles content persistence, but we need local file entries for "Save to DLUX" workflow
-                await this.ensureLocalFileEntry();
+                // ===== TEMP DOCUMENT STRATEGY: Document creation handled in performAutoSave =====
+                // For collaborative documents, just clear the unsaved indicator
+                if (this.currentFile?.type === 'collaborative') {
+                    console.log('💾 Collaborative document changes synced via Y.js');
+                } else if (this.currentFile) {
+                    // Local document already exists - just log the save completion
+                    console.log('💾 Local document changes saved:', this.currentFile.name);
+                } else {
+                    console.log('💾 Changes synced to Y.js (document creation handled elsewhere)');
+                }
                 
                 this.hasUnsavedChanges = false;
             }, 1000); // 1 second delay to show sync indicator
@@ -6157,35 +7073,45 @@ export default {
         // Ensure local file entry exists for UX (Save to DLUX workflow)
         async ensureLocalFileEntry() {
             try {
-                // Only create local file entry if we don't have a current file or it's not collaborative
-                if (!this.currentFile || this.currentFile.type !== 'collaborative') {
+                // CRITICAL FIX: Skip during initialization to prevent overwriting collaborative document names
+                if (this.isInitializing) {
+                    console.log('📝 Skipping local file entry creation during initialization (preventing title corruption)');
+                    return;
+                }
+                
+                // CRITICAL FIX: Skip for collaborative documents entirely to prevent name corruption
+                if (this.currentFile?.type === 'collaborative') {
+                    console.log('📝 Skipping local file entry for collaborative document (preventing title corruption)');
+                    return;
+                }
+                
+                // Only create local file entry if we don't have a current file
+                if (!this.currentFile) {
                     
                     // Generate file info if needed
-                    if (!this.currentFile) {
-                        const timestamp = Date.now();
-                        const title = this.getPlainTextTitle();
-                        let filename;
-                        
-                        if (title && title.trim()) {
-                            // Use the actual title if it exists
-                            filename = title.substring(0, 50).replace(/[^a-zA-Z0-9\s-]/g, '').trim();
-                        } else {
-                            // Create "untitled - date time" format to match UI display
-                            const now = new Date();
-                            const dateStr = now.toLocaleDateString();
-                            const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                            filename = `Untitled - ${dateStr} ${timeStr}`;
-                        }
-                        
-                this.currentFile = {
-                            id: `local_${timestamp}`,
-                            name: filename,
-                            type: 'local',
-                            lastModified: new Date().toISOString(),
-                            isOfflineFirst: true // Flag to indicate this uses Y.js + IndexedDB
-                        };
-                        this.fileType = 'local';
+                    const timestamp = Date.now();
+                    const title = this.getPlainTextTitle();
+                    let filename;
+                    
+                    if (title && title.trim()) {
+                        // Use the actual title if it exists
+                        filename = title.substring(0, 50).replace(/[^a-zA-Z0-9\s-]/g, '').trim();
+                    } else {
+                        // Create "untitled - date time" format to match UI display
+                        const now = new Date();
+                        const dateStr = now.toLocaleDateString();
+                        const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        filename = `Untitled - ${dateStr} ${timeStr}`;
                     }
+                    
+                    this.currentFile = {
+                        id: this.tempDocumentId || `local_${timestamp}`,
+                        name: filename,
+                        type: 'local',
+                        lastModified: new Date().toISOString(),
+                        isOfflineFirst: true // Flag to indicate this uses Y.js + IndexedDB
+                    };
+                    this.fileType = 'local';
                     
                     // Update local file index (metadata only - content is in Y.js + IndexedDB)
                     await this.updateLocalFileIndex();
@@ -6463,27 +7389,93 @@ export default {
             if (collabOwner && collabPermlink) {
                 console.log('🔗 Auto-connect parameters detected:', { collabOwner, collabPermlink });
                 
-                // Wait for authentication if needed
+                // STEP 1: Fetch document metadata FIRST to preserve title
+                try {
+                    const response = await fetch(`https://data.dlux.io/api/collaboration/documents/${collabOwner}/${collabPermlink}`, {
+                        headers: this.authHeaders
+                    });
+                    
+                    if (response.ok) {
+                        const documentData = await response.json();
+                        console.log('✅ Pre-fetched document metadata for title preservation:', documentData.documentName);
+                        
+                        // Store document info for title preservation
+                        this.currentDocumentInfo = {
+                            owner: collabOwner,
+                            permlink: collabPermlink,
+                            title: documentData.documentName || documentData.title,
+                            description: documentData.description
+                        };
+                        
+                        // Preserve title immediately
+                        this.preserveDocumentTitle();
+                    }
+                } catch (fetchError) {
+                    console.warn('⚠️ Could not pre-fetch document metadata:', fetchError.message);
+                }
+                
+                // STEP 2: Wait for authentication if needed
                 if (!this.isAuthenticated || this.isAuthExpired) {
                     console.log('🔑 Authentication required for auto-connect, requesting...');
                     await this.requestAuthentication();
                     
-                    // Wait for authentication to complete
                     try {
-                        await this.waitForAuthentication(10000); // 10 second timeout
+                        await this.waitForAuthentication(10000);
                     } catch (error) {
                         console.error('❌ Auto-connect failed: Authentication timeout');
                         return;
                     }
                 }
                 
-                // Try to auto-connect to the collaborative document
+                // STEP 3: Auto-connect with title preservation
                 try {
                     await this.autoConnectToDocument(collabOwner, collabPermlink);
                 } catch (error) {
                     console.error('❌ Auto-connect failed:', error);
                 }
             }
+        },
+
+        // ===== TIPTAP BEST PRACTICE: ENHANCED TITLE PRESERVATION =====
+        preserveDocumentTitle() {
+            console.log('🔒 DEBUG: preserveDocumentTitle called');
+            console.log('🔒 DEBUG: currentDocumentInfo:', this.currentDocumentInfo);
+            
+            // CRITICAL: Prevent document title corruption during auto-connect
+            if (this.currentDocumentInfo?.title) {
+                console.log('🔒 Preserving document title:', this.currentDocumentInfo.title);
+                
+                // Store title in multiple places for recovery
+                this.preservedTitle = this.currentDocumentInfo.title;
+                this.content.title = this.currentDocumentInfo.title;
+                
+                console.log('🔒 DEBUG: Title stored in preservedTitle and content.title');
+                
+                // Set title in editor if it exists
+                if (this.titleEditor && this.titleEditor.commands) {
+                    const currentTitle = this.titleEditor.getText().trim();
+                    console.log('🔒 DEBUG: Current title in editor:', currentTitle);
+                    
+                    // Only update if current title is empty, corrupted, or looks like a path
+                    if (!currentTitle || 
+                        currentTitle === '' ||
+                        currentTitle.includes('/') ||
+                        currentTitle.includes('tech') ||
+                        currentTitle === this.currentFile?.owner + '/' + this.currentFile?.permlink) {
+                        
+                        console.log('🔄 Restoring proper document title in editor');
+                        this.titleEditor.commands.setContent(this.preservedTitle);
+                    }
+                } else {
+                    console.log('🔒 DEBUG: No title editor available yet');
+                }
+                
+                return this.preservedTitle;
+            } else {
+                console.log('🔒 DEBUG: No title found in currentDocumentInfo');
+            }
+            
+            return null;
         },
         
         async autoConnectToDocument(owner, permlink) {
@@ -6509,6 +7501,7 @@ export default {
                 const docToLoad = {
                     owner: owner,
                     permlink: permlink,
+                    name: documentData?.documentName || `${owner}/${permlink}`, // Primary display name
                     documentName: documentData?.documentName || `${owner}/${permlink}`,
                     title: documentData?.documentName || `${owner}/${permlink}`,
                     type: 'collaborative',
@@ -6664,7 +7657,8 @@ export default {
                     onSynced: ({ synced }) => {
                     console.log('🔄 onSynced called:', { synced, isCollaborativeMode: this.isCollaborativeMode, connectionStatus: this.connectionStatus, hasUnsavedChanges: this.hasUnsavedChanges });
                     
-                        if (synced) {
+                        // Execute document name extraction regardless of synced value (it can be undefined)
+                        if (synced !== false) {
                             console.log('📡 Document synchronized');
                             this.connectionMessage = 'Connected - Document synchronized';
                         
@@ -6677,6 +7671,92 @@ export default {
                         if (this.saveAsProcess.inProgress) {
                             this.saveAsProcess.step = 'synced';
                             this.saveAsProcess.message = 'Document synced with server!';
+                        }
+                        
+                        // ✅ TIPTAP BEST PRACTICE: Update document name from Y.js config after sync
+                        console.log('🔄 onSynced: Attempting to extract document name...');
+                        
+                        // DEBUG: Check Y.js config state
+                                                console.log('🔍 DEBUG onSynced conditions:', {
+                            hasYdoc: !!this.ydoc,
+                            hasCurrentFile: !!this.currentFile,
+                            currentFileType: this.currentFile?.type,
+                            isCollaborativeMode: this.isCollaborativeMode
+                        });
+                        
+                        if (this.ydoc && this.isCollaborativeMode) {
+                            try {
+                                const config = this.ydoc.getMap('config');
+                                const configKeys = Array.from(config.keys());
+                                const documentName = config.get('documentName');
+                                
+                                console.log('🔍 DEBUG onSynced: Y.js config state:', {
+                                    configKeys,
+                                    documentName,
+                                    currentFileName: this.currentFile?.name || 'null',
+                                    hasCurrentFile: !!this.currentFile
+                                });
+                                
+                                                        // Only proceed if we have a document name and currentFile exists
+                        if (documentName && this.currentFile) {
+                            const currentName = this.currentFile.name || '';
+                            const ownerPermlink = `${this.currentFile.owner}/${this.currentFile.permlink}`;
+                            
+                            if (documentName !== currentName && documentName !== ownerPermlink) {
+                                console.log('🚀 FAST: Document name found in Y.js config:', documentName);
+                                
+                                // Update current file and UI immediately using Vue-reactive object replacement
+                                this.currentFile = {
+                                    ...this.currentFile,
+                                    name: documentName,
+                                    title: documentName,
+                                    documentName: documentName
+                                };
+                                
+                                // Update currentDocumentInfo for template display
+                                if (this.currentDocumentInfo) {
+                                    this.currentDocumentInfo.title = documentName;
+                                }
+                                
+                                console.log('✅ FAST: UI updated immediately with document name from Y.js config');
+                                console.log('🔍 DEBUG: Updated values:', {
+                                    currentFileName: this.currentFile.name,
+                                    currentDocumentInfoTitle: this.currentDocumentInfo?.title
+                                });
+                                
+                                // Force Vue reactivity update with nextTick to ensure DOM update
+                                this.$nextTick(() => {
+                                    this.$forceUpdate();
+                                    console.log('🔄 Vue reactivity forced after nextTick');
+                                });
+                            } else {
+                                console.log('📋 onSynced: Document name unchanged or matches current name');
+                            }
+                                } else if (!this.currentFile) {
+                                    console.log('📋 onSynced: currentFile not ready yet, will retry with delay...');
+                                    // Fallback: Try again with a short delay when currentFile is ready
+                                    setTimeout(() => {
+                                        console.log('🔄 DELAYED: Attempting document name extraction after currentFile ready...');
+                                        this.updateDocumentNameFromContent();
+                                    }, 200);
+                                } else {
+                                    console.log('📋 onSynced: No document name found in Y.js config');
+                                    console.log('🔍 DEBUG: Current config contents:', {
+                                        allConfigKeys: configKeys,
+                                        documentNameValue: documentName,
+                                        configSize: config.size
+                                    });
+                                }
+                            } catch (error) {
+                                console.error('❌ Error accessing Y.js config in onSynced:', error);
+                                // Fallback to the original method with delay
+                                setTimeout(() => {
+                                    console.log('🔄 FALLBACK: Attempting document name extraction after error...');
+                                    this.updateDocumentNameFromContent();
+                                }, 200);
+                            }
+                        } else {
+                            console.log('📋 onSynced: Not collaborative mode or Y.js not ready');
                         }
                     }
                 },
@@ -6723,9 +7803,40 @@ export default {
                     if (origin !== this.ydoc.clientID && this.isCollaborativeMode && this.connectionStatus === 'connected') {
                         console.log('📡 Y.js remote update detected, clearing unsaved flag');
                         this.hasUnsavedChanges = false;
-                            }
-                        });
+                        
+                        // OPTIMIZATION: Check for document name updates in remote changes
+                        if (this.currentFile?.type === 'collaborative') {
+                            setTimeout(() => {
+                                console.log('📡 Checking for document name after remote Y.js update...');
+                                const configDocumentName = this.extractDocumentNameFromConfig();
+                                if (configDocumentName && configDocumentName !== this.currentFile.name && 
+                                    configDocumentName !== `${this.currentFile.owner}/${this.currentFile.permlink}`) {
+                                    
+                                    console.log('🚀 REMOTE UPDATE: Document name found in Y.js config:', configDocumentName);
+                                    
+                                    // Update current file and UI immediately
+                                    this.currentFile.name = configDocumentName;
+                                    this.currentFile.title = configDocumentName;
+                                    this.currentFile.documentName = configDocumentName;
+                                    
+                                    // Update currentDocumentInfo for template display
+                                    if (this.currentDocumentInfo) {
+                                        this.currentDocumentInfo.title = configDocumentName;
+                                    }
+                                    
+                                    console.log('✅ REMOTE UPDATE: UI updated with document name from Y.js config');
+                                    
+                                    // Force Vue reactivity update with nextTick to ensure DOM update
+                                    this.$nextTick(() => {
+                                        this.$forceUpdate();
+                                        console.log('🔄 Remote update: Vue reactivity forced after nextTick');
+                                    });
+                                }
+                            }, 100); // Small delay to ensure config is fully updated
+                        }
                     }
+                });
+            }
                     
             // Wait for connection with optimized retry logic
             let retries = 0;
@@ -6998,6 +8109,10 @@ export default {
                 // Connect to the server (this will create a new WebSocket provider)
                 await this.connectToCollaborationServer(this.currentFile);
                 
+                // TIPTAP BEST PRACTICE: Restore URL parameters after successful reconnection
+                this.updateURLWithCollabParams(this.currentFile.owner, this.currentFile.permlink);
+                console.log('🔗 URL parameters restored after successful reconnection');
+                
                 console.log('✅ Successfully reconnected to collaborative document');
                 
             } catch (error) {
@@ -7056,6 +8171,12 @@ export default {
                 this.updateEditorPermissions();
             }
 
+            // TIPTAP BEST PRACTICE: Update URL with collaboration parameters when connected
+            if (this.currentFile?.type === 'collaborative' && this.currentFile.owner && this.currentFile.permlink) {
+                this.updateURLWithCollabParams(this.currentFile.owner, this.currentFile.permlink);
+                console.log('🔗 URL updated with collaboration parameters on connection');
+            }
+
             // 🎯 TipTap Best Practice: Add CollaborationCursor when provider connects
             // This follows the offline-first collaborative architecture pattern
             console.log('🔍 DEBUG onConnect: provider exists:', !!this.provider);
@@ -7092,6 +8213,13 @@ export default {
             this.connectionStatus = 'disconnected';
             this.connectionMessage = 'Disconnected from server';
             
+            // TIPTAP BEST PRACTICE: Clear URL parameters when disconnected (unless intentionally offline)
+            // This prevents auto-reconnect attempts when user refreshes during disconnection
+            if (this.connectionStatus !== 'offline') {
+                this.clearCollabURLParams();
+                console.log('🔗 URL parameters cleared due to disconnection');
+            }
+            
             // OFFLINE-FIRST FIX: Update editor permissions when going offline
             // This ensures editors become editable in offline mode
             console.log('🔐 Connection lost - updating editor permissions for offline editing');
@@ -7106,6 +8234,20 @@ export default {
             if (this.ydoc && !this.ydoc.getMap('config').get('initialContentLoaded')) {
                 console.log('🔄 Setting initial content flag in Y.js document...');
                 this.ydoc.getMap('config').set('initialContentLoaded', true);
+                
+                // PRESERVE DOCUMENT TITLE: Ensure title doesn't get overwritten by Y.js sync
+                if (this.currentDocumentInfo && this.currentDocumentInfo.title && this.titleEditor) {
+                    const currentTitleContent = this.titleEditor.getHTML();
+                    // If title editor is empty or contains path-like content, restore proper title
+                    if (!currentTitleContent || 
+                        currentTitleContent === '<p></p>' || 
+                        currentTitleContent.includes('/user/') ||
+                        currentTitleContent.includes('tech')) {
+                        console.log('🔄 Restoring proper document title after Y.js sync:', this.currentDocumentInfo.title);
+                        this.titleEditor.commands.setContent(this.currentDocumentInfo.title);
+                        this.content.title = this.currentDocumentInfo.title;
+                    }
+                }
                 
                 // If this is a new document and we have local content, set it
                 if (this.titleEditor && this.bodyEditor) {
@@ -7166,11 +8308,31 @@ export default {
                 
                 // TIPTAP BEST PRACTICE: Check if editors exist and are ready before setting content
                 if (this.titleEditor && content.title && this.titleEditor.commands) {
+                    // PREVENT TITLE OVERWRITE: Don't set title if it looks like a path/tech ID
+                    const isPathLikeTitle = content.title.includes('/user/') || 
+                                          content.title.includes('tech') || 
+                                          content.title.startsWith('/');
+                    
+                    if (!isPathLikeTitle) {
                     // Use insertContent for Y.js editors to avoid transaction conflicts
                     if (this.ydoc) {
                         this.titleEditor.commands.insertContent(content.title);
                     } else {
                         this.titleEditor.commands.setContent(content.title);
+                        }
+                    } else {
+                        console.warn('⚠️ Prevented setting path-like title:', content.title);
+                        // Use the preserved document title instead
+                        if (this.currentDocumentInfo && this.currentDocumentInfo.title) {
+                            const properTitle = this.currentDocumentInfo.title;
+                            console.log('🔄 Using preserved document title instead:', properTitle);
+                            if (this.ydoc) {
+                                this.titleEditor.commands.insertContent(properTitle);
+                            } else {
+                                this.titleEditor.commands.setContent(properTitle);
+                            }
+                            content.title = properTitle; // Update the content object too
+                        }
                     }
                 }
                 
@@ -7272,52 +8434,38 @@ export default {
             });
         },
         
-        // TIPTAP BEST PRACTICE: Debounced auto-save method
+        // TIPTAP OFFICIAL PATTERN: Simplified auto-save for existing Y.js documents
         async performAutoSave() {
-            console.log('💾 Performing auto-save (TipTap best practice)...');
+            console.log('💾 Performing auto-save (Y.js automatically persists to IndexedDB)...');
             
             try {
-                // STEP 1: Create Y.js document if user has made edits and none exists
-                if (!this.ydoc && this.hasContentToSave()) {
-                    console.log('🆕 Creating Y.js document on first edit (TipTap best practice)');
+                // Y.js + IndexedDB automatically saves content - no manual intervention needed
+                if (this.ydoc && this.indexeddbProvider) {
+                    console.log('✅ Content automatically persisted to IndexedDB via Y.js');
+                }
+                
+                // Update local file entry for document list only if content exists
+                if (this.ydoc && this.hasContentToSave()) {
+                    // For temp documents, this will create the draft and change isTemporaryDocument to false
+                    await this.ensureLocalFileEntry();
                     
-                    // TIPTAP BEST PRACTICE: Preserve current content before creating Y.js document
-                    const currentContent = {
-                        title: this.titleEditor?.getHTML() || '',
-                        body: this.bodyEditor?.getHTML() || '',
-                        permlink: this.permlinkEditor?.getHTML() || ''
-                    };
-                    
-                    // Create Y.js collaborative editors
-                    await this.createStandardEditor();
-                    
-                    // TIPTAP BEST PRACTICE: Store content in Y.js config for later restoration
-                    if (this.ydoc && !this.ydoc.getMap('config').get('initialContentLoaded')) {
-                        this.ydoc.getMap('config').set('initialContentLoaded', true);
-                        
-                        // Store the preserved content in Y.js config map for safe restoration
-                        this.ydoc.getMap('config').set('preservedContent', currentContent);
-                        
-                        console.log('✅ Preserved user content in Y.js config (will restore after sync)');
+                    // If this was a temp document, it's now a real document
+                    if (this.isTemporaryDocument && this.currentFile) {
+                        this.isTemporaryDocument = false;
+                        console.log('📝 Temp document converted to draft:', this.currentFile.name);
                     }
                 }
                 
-                // STEP 2: Save to IndexedDB if Y.js document exists
-                if (this.ydoc && this.indexeddbProvider) {
-                    // Y.js automatically saves to IndexedDB through the persistence provider
-                    console.log('✅ Content auto-saved to IndexedDB');
-                }
-                
-                // STEP 3: Update local file entry for document list
-                if (this.ydoc) {
-                    await this.ensureLocalFileEntry();
-                }
-                
-                // STEP 4: Emit content changes to parent
+                // Emit content changes to parent
                 this.updateContent();
+                
+                // Clear unsaved changes indicator with proper timing
+                this.clearUnsavedAfterSync();
                 
             } catch (error) {
                 console.error('❌ Auto-save failed:', error);
+                // Still clear the unsaved flag even if save failed
+                this.hasUnsavedChanges = false;
             }
         },
         
@@ -7326,14 +8474,16 @@ export default {
             const titleContent = this.titleEditor?.getText()?.trim() || '';
             const bodyContent = this.bodyEditor?.getText()?.trim() || '';
             
-            // Safely check metadata with fallbacks
-            const tags = this.publishForm?.tags || [];
-            const beneficiaries = this.publishForm?.beneficiaries || [];
-            const customJson = this.publishForm?.customJson || {};
+            // FIXED: Check metadata from the correct sources
+            const tags = this.getTags() || [];
+            const beneficiaries = this.getBeneficiaries() || [];
+            const customJson = this.getCustomJson() || {};
+            const publishOptions = this.getPublishOptions() || {};
             
             const hasMetadata = tags.length > 0 || 
                                beneficiaries.length > 0 ||
-                               Object.keys(customJson).length > 0;
+                               Object.keys(customJson).length > 0 ||
+                               Object.keys(publishOptions).length > 0;
             
             return titleContent.length > 0 || bodyContent.length > 0 || hasMetadata;
         },
@@ -7361,9 +8511,9 @@ export default {
                     // Use a timeout to ensure the Y.js editor is fully ready
                     setTimeout(() => {
                         try {
-                            // Check if the editor is still valid and the fragment is empty
-                            const fragment = this.ydoc.getXmlFragment(field);
-                            if (fragment && fragment.length === 0) {
+                            // ✅ TIPTAP BEST PRACTICE: Use editor methods instead of direct Y.js fragment access
+                            const currentContent = editor.getText().trim();
+                            if (!currentContent || currentContent === '') {
                                 // TIPTAP BEST PRACTICE: Use insertContent instead of setContent for Y.js
                                 editor.commands.insertContent(contentToRestore);
                                 console.log(`✅ Restored preserved ${field} content:`, contentToRestore.substring(0, 50) + '...');
@@ -7400,55 +8550,96 @@ export default {
         // Status indicator styling methods (matching autosave banner style)
         getStatusStyle(state) {
             const styles = {
-                // FIXED: Grey background for dotted cloud (local documents) with dark grey left border
-                'saving-local': 'background: rgba(108, 117, 125, 0.3); border-left: 3px solid #495057;',
-                'saved-local': 'background: rgba(108, 117, 125, 0.3); border-left: 3px solid #495057;',
-                'offline-saving': 'background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;',
-                'offline-ready': 'background: rgba(13, 202, 240, 0.1); border-left: 3px solid #0dcaf0;',
-                'unsynced-changes': 'background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;',
-                'offline': 'background: rgba(13, 202, 240, 0.1); border-left: 3px solid #0dcaf0;',
-                'connecting': 'background: rgba(13, 110, 253, 0.1); border-left: 3px solid #0d6efd;',
-                'syncing': 'background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;',
-                'collaborating': 'background: rgba(25, 135, 84, 0.1); border-left: 3px solid #198754;',
-                'synced': 'background: rgba(25, 135, 84, 0.1); border-left: 3px solid #198754;',
-                'error': 'background: rgba(220, 53, 69, 0.1); border-left: 3px solid #dc3545;',
-                'unknown': 'background: rgba(108, 117, 125, 0.1); border-left: 3px solid #6c757d;'
+                // Temp documents (not yet drafts) - grey background
+                'temp-editing': 'background: rgba(108, 117, 125, 0.1); border-left: 3px solid #6c757d;', // Grey for temp editing
+                'temp-ready': 'background: rgba(108, 117, 125, 0.1); border-left: 3px solid #6c757d;', // Grey for temp ready
+                'initializing': 'background: rgba(108, 117, 125, 0.1); border-left: 3px solid #6c757d;', // Grey for initializing
+                'cleaning-up': 'background: rgba(108, 117, 125, 0.1); border-left: 3px solid #6c757d;', // Grey for cleanup
+                'no-document': 'background: rgba(108, 117, 125, 0.1); border-left: 3px solid #6c757d;', // Grey for no document
+                
+                // Local documents (dotted cloud) - proper color coding for save states
+                'saving-local': 'background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;', // Orange for changes
+                'saved-local': 'background: rgba(13, 202, 240, 0.1); border-left: 3px solid #0dcaf0;', // Blue for locally saved
+                
+                // Collaborative documents offline mode
+                'offline-saving': 'background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;', // Orange for changes
+                'offline-ready': 'background: rgba(13, 202, 240, 0.1); border-left: 3px solid #0dcaf0;', // Blue for offline ready
+                'unsynced-changes': 'background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;', // Orange for unsynced
+                'offline': 'background: rgba(13, 202, 240, 0.1); border-left: 3px solid #0dcaf0;', // Blue for offline
+                
+                // Collaborative documents online mode
+                'connecting': 'background: rgba(13, 110, 253, 0.1); border-left: 3px solid #0d6efd;', // Blue for connecting
+                'syncing': 'background: rgba(255, 193, 7, 0.1); border-left: 3px solid #ffc107;', // Orange for syncing
+                'collaborating': 'background: rgba(25, 135, 84, 0.1); border-left: 3px solid #198754;', // Green for collaborating
+                'synced': 'background: rgba(25, 135, 84, 0.1); border-left: 3px solid #198754;', // Green for synced
+                
+                // Error states
+                'error': 'background: rgba(220, 53, 69, 0.1); border-left: 3px solid #dc3545;', // Red for errors
+                'unknown': 'background: rgba(108, 117, 125, 0.1); border-left: 3px solid #6c757d;' // Grey for unknown
             };
             return styles[state] || styles.unknown;
         },
 
         getStatusIconClass(state) {
             const icons = {
-                'saving-local': 'fas fa-circle-notch fa-spin text-warning',
-                'saved-local': 'fas fa-check text-success',
-                'offline-saving': 'fas fa-circle-notch fa-spin text-warning',
-                'offline-ready': 'fas fa-hard-drive text-info',
-                'unsynced-changes': 'fas fa-exclamation-triangle text-warning',
-                'offline': 'fas fa-wifi-slash text-info',
-                'connecting': 'fas fa-circle-notch fa-spin text-primary',
-                'syncing': 'fas fa-sync fa-spin text-warning',
-                'collaborating': 'fas fa-users text-success',
-                'synced': 'fas fa-cloud-check text-success',
-                'error': 'fas fa-exclamation-circle text-danger',
-                'unknown': 'fas fa-question-circle text-muted'
+                // Temp documents (not yet drafts)
+                'temp-editing': 'fas fa-edit text-muted', // Grey edit icon for temp editing
+                'temp-ready': 'fas fa-file-alt text-muted', // Grey file icon for temp ready
+                'initializing': 'fas fa-circle-notch fa-spin text-muted', // Grey spinner for initializing
+                'cleaning-up': 'fas fa-broom text-muted', // Grey broom icon for cleanup
+                'no-document': 'fas fa-file text-muted', // Grey file icon for no document
+                
+                // Local documents (dotted cloud)
+                'saving-local': 'fas fa-circle-notch fa-spin text-warning', // Orange spinner for saving
+                'saved-local': 'fas fa-check text-info', // Blue check for locally saved
+                
+                // Collaborative documents offline mode
+                'offline-saving': 'fas fa-circle-notch fa-spin text-warning', // Orange spinner for saving
+                'offline-ready': 'fas fa-hard-drive text-info', // Blue hard drive for offline ready
+                'unsynced-changes': 'fas fa-exclamation-triangle text-warning', // Orange warning for unsynced
+                'offline': 'fas fa-wifi-slash text-info', // Blue wifi slash for offline
+                
+                // Collaborative documents online mode
+                'connecting': 'fas fa-circle-notch fa-spin text-primary', // Blue spinner for connecting
+                'syncing': 'fas fa-sync fa-spin text-warning', // Orange sync for syncing
+                'collaborating': 'fas fa-users text-success', // Green users for collaborating
+                'synced': 'fas fa-cloud text-success', // Green cloud for synced
+                
+                // Error states
+                'error': 'fas fa-exclamation-circle text-danger', // Red error icon
+                'unknown': 'fas fa-question-circle text-muted' // Grey question for unknown
             };
             return icons[state] || icons.unknown;
         },
 
         getStatusTextClass(state) {
             const textClasses = {
-                'saving-local': 'text-warning',
-                'saved-local': 'text-success',
-                'offline-saving': 'text-warning',
-                'offline-ready': 'text-info',
-                'unsynced-changes': 'text-warning',
-                'offline': 'text-info',
-                'connecting': 'text-primary',
-                'syncing': 'text-warning',
-                'collaborating': 'text-success',
-                'synced': 'text-success',
-                'error': 'text-danger',
-                'unknown': 'text-muted'
+                // Temp documents (not yet drafts)
+                'temp-editing': 'text-muted', // Grey text for temp editing
+                'temp-ready': 'text-muted', // Grey text for temp ready
+                'initializing': 'text-muted', // Grey text for initializing
+                'cleaning-up': 'text-muted', // Grey text for cleanup
+                'no-document': 'text-muted', // Grey text for no document
+                
+                // Local documents (dotted cloud)
+                'saving-local': 'text-warning', // Orange text for saving
+                'saved-local': 'text-info', // Blue text for locally saved
+                
+                // Collaborative documents offline mode
+                'offline-saving': 'text-warning', // Orange text for saving
+                'offline-ready': 'text-info', // Blue text for offline ready
+                'unsynced-changes': 'text-warning', // Orange text for unsynced
+                'offline': 'text-info', // Blue text for offline
+                
+                // Collaborative documents online mode
+                'connecting': 'text-primary', // Blue text for connecting
+                'syncing': 'text-warning', // Orange text for syncing
+                'collaborating': 'text-success', // Green text for collaborating
+                'synced': 'text-success', // Green text for synced
+                
+                // Error states
+                'error': 'text-danger', // Red text for errors
+                'unknown': 'text-muted' // Grey text for unknown
             };
             return textClasses[state] || textClasses.unknown;
         },
@@ -7921,9 +9112,24 @@ export default {
 
         async renameCurrentDocument(newName) {
             if (this.currentFile.type === 'collaborative') {
-                // For collaborative docs, use the existing rename functionality
-                this.saveForm.filename = newName;
-                await this.renameCollaborativeDocument();
+                // ✅ TIPTAP BEST PRACTICE: Store document name in Y.js config for collaborative docs
+                const success = this.setDocumentName(newName);
+                if (success) {
+                    // Update current file object
+                    this.currentFile.name = newName;
+                    this.currentFile.title = newName;
+                    this.currentFile.documentName = newName;
+                    this.currentFile.lastModified = new Date().toISOString();
+                    
+                    // Update currentDocumentInfo for template display
+                    if (this.currentDocumentInfo) {
+                        this.currentDocumentInfo.title = newName;
+                    }
+                    
+                    console.log('✅ Collaborative document name updated in Y.js config:', newName);
+                } else {
+                    throw new Error('Failed to update document name in Y.js config');
+                }
             } else {
                 // For local documents, update the name directly
                 this.currentFile.name = newName;
@@ -7951,11 +9157,11 @@ export default {
 
         // Y.js Undo/Redo Commands (TipTap Best Practice)
         canUndo() {
-            return this.titleEditor?.can().undo() || this.bodyEditor?.can().undo() || false;
+            return this.titleEditor?.can().undo || this.bodyEditor?.can().undo || false;
         },
 
         canRedo() {
-            return this.titleEditor?.can().redo() || this.bodyEditor?.can().redo() || false;
+            return this.titleEditor?.can().redo || this.bodyEditor?.can().redo || false;
         },
 
         performUndo() {
@@ -7981,8 +9187,7 @@ export default {
         },
 
         async convertToCollaborative() {
-            // TipTap Best Practice: All documents are already collaborative (offline-first)
-            // This method now just "publishes" the existing Y.js document to the server
+            // TipTap Best Practice: Handle both basic documents (no Y.js) and Y.js documents
             
             if (this.currentFile?.type === 'collaborative' && this.connectionStatus === 'connected') {
                 console.log('Document is already connected to collaboration server');
@@ -7991,16 +9196,49 @@ export default {
 
             // Check authentication
             if (!this.isAuthenticated || this.isAuthExpired) {
-                const confirmAuth = confirm('You need to authenticate to publish this document to the cloud. Authenticate now?');
-                if (confirmAuth) {
+                console.log('🔐 Authentication required for collaborative conversion');
                     this.requestAuthentication();
                     try {
                         await this.waitForAuthentication();
+                    console.log('✅ Authentication completed, continuing with conversion');
                     } catch (error) {
+                    console.error('❌ Authentication failed:', error);
                         alert('Authentication failed. Please try again.');
-                        return;
+                    return;
+                }
+                }
+
+            // FIXED: Create Y.js document if it doesn't exist (for basic documents)
+            if (!this.ydoc) {
+                console.log('📄 Creating Y.js document for basic document before enabling collaboration...');
+                try {
+                    await this.createLazyYjsDocument();
+                    console.log('✅ Y.js document created successfully');
+                    
+                    // Ensure we have a currentFile entry with default name if needed
+                    if (!this.currentFile) {
+                        const title = this.getPlainTextTitle()?.trim();
+                        let defaultName;
+                        if (title) {
+                            defaultName = title;
+                        } else {
+                            const now = new Date();
+                            const dateStr = now.toLocaleDateString();
+                            const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                            defaultName = `Untitled - ${dateStr} ${timeStr}`;
+                        }
+                        
+                        this.currentFile = {
+                            name: defaultName,
+                            type: 'local',
+                            id: Date.now().toString(),
+                            lastModified: new Date().toISOString()
+                        };
+                        console.log('📝 Created currentFile entry with default name:', defaultName);
                     }
-            } else {
+                } catch (error) {
+                    console.error('❌ Failed to create Y.js document:', error);
+                    alert('Failed to prepare document for collaboration: ' + error.message);
                     return;
                 }
                 }
@@ -8063,12 +9301,28 @@ export default {
                 // Update current file to collaborative
                 this.currentFile = {
                     ...serverDoc,
+                    name: serverDoc.documentName || serverDoc.name || documentName, // Ensure name field is set
                     type: 'collaborative'
                 };
                 this.fileType = 'collaborative';
+                
+                // CRITICAL: Set collaborative mode flag to enable cloud features
+                this.isCollaborativeMode = true;
+                
+                // ✅ TIPTAP BEST PRACTICE: Store document name in Y.js config after cloud conversion
+                const finalDocumentName = serverDoc.documentName || serverDoc.name || documentName;
+                this.setDocumentName(finalDocumentName);
+                console.log('📄 Document name stored in Y.js config after cloud conversion:', finalDocumentName);
+                
+                // UNIFIED APPROACH: Upgrade to Tier 2 (Cloud) editors with cursors
+                await this.upgradeLocalToCloudWithCursors();
 
                 // Reload collaborative documents list
                 await this.loadCollaborativeDocs();
+
+                // TIPTAP BEST PRACTICE: Update URL with collaboration parameters after successful cloud save
+                this.updateURLWithCollabParams(serverDoc.owner, serverDoc.permlink);
+                console.log('🔗 URL updated with collaboration parameters after cloud save');
 
                 console.log('✅ Document published to cloud successfully:', documentName);
                 
@@ -8106,6 +9360,10 @@ export default {
 
                 // Create local file entry for the now-local document
                 await this.ensureLocalFileEntry();
+
+                // TIPTAP BEST PRACTICE: Clear URL parameters when disabling cloud collaboration
+                this.clearCollabURLParams();
+                console.log('🔗 URL parameters cleared after disabling cloud collaboration');
 
                 console.log('✅ Document converted to local-only successfully');
                 
@@ -8299,6 +9557,13 @@ export default {
                 const authorsArray = this.ydoc.getArray('authors');
                 if (authorsArray && authorsArray.length > 0) {
                     const yjsAuthors = authorsArray.toArray();
+                    
+                    // CRITICAL FIX: Validate that yjsAuthors is actually an array
+                    if (!Array.isArray(yjsAuthors)) {
+                        console.warn('⚠️ Y.js authors array returned non-array:', typeof yjsAuthors, yjsAuthors);
+                        return; // Exit early if not an array
+                    }
+                    
                     console.log('👥 Loading collaborative authors from Y.js:', yjsAuthors);
                     
                     // Safely merge with existing local authors (no direct overwrite)
@@ -8341,6 +9606,12 @@ export default {
         addAuthorToTracking(username) {
             if (!username) return;
             
+            // CRITICAL FIX: Prevent author tracking during permission updates or cleanup
+            if (this.isUpdatingPermissions || this.isCleaningUp || this.isInitializingEditors) {
+                console.log('⏸️ Skipping author tracking - system operation in progress');
+                return;
+            }
+            
             try {
                 // Defensive programming - ensure collaborativeAuthors is always an array
                 if (!Array.isArray(this.collaborativeAuthors)) {
@@ -8367,6 +9638,13 @@ export default {
                     
                     // Check if author already exists
                     const existingAuthors = authorsArray.toArray();
+                    
+                    // CRITICAL FIX: Validate that existingAuthors is actually an array
+                    if (!Array.isArray(existingAuthors)) {
+                        console.warn('⚠️ Y.js authors toArray() returned non-array:', typeof existingAuthors, existingAuthors);
+                        throw new Error('Y.js authors array is corrupted');
+                    }
+                    
                     const authorExists = existingAuthors.some(author => 
                         (typeof author === 'object' && author.username === username) ||
                         (typeof author === 'string' && author === username)
@@ -8604,6 +9882,576 @@ export default {
                 console.error('❌ Error tracking user presence:', error);
             }
         },
+
+        // ===== TIPTAP BEST PRACTICE: RACE CONDITION PREVENTION METHODS =====
+        
+        /**
+         * Initialize application state sequentially to prevent race conditions
+         * TIPTAP BEST PRACTICE: Load data in proper sequence before editor creation
+         */
+        async initializeApplicationState() {
+            console.log('📋 Initializing application state...');
+            
+            // Load local files first (fast, no race conditions)
+            await this.loadLocalFiles();
+            
+            // Load collaborative documents only if authenticated
+            if (this.authHeaders && this.authHeaders['x-account']) {
+                await this.loadCollaborativeDocs();
+            }
+            
+            console.log('✅ Application state initialized');
+        },
+        
+        /**
+         * Determine initialization path based on URL parameters and state
+         * TIPTAP BEST PRACTICE: Single decision point prevents race conditions
+         */
+        async determineInitializationPath() {
+            console.log('🛤️ Determining initialization path...');
+            console.log('🔍 Current URL:', window.location.href);
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const collabOwner = urlParams.get('collab_owner');
+            const collabPermlink = urlParams.get('collab_permlink');
+            
+            console.log('🔍 URL Parameters:', {
+                collabOwner: collabOwner,
+                collabPermlink: collabPermlink,
+                hasAuth: !!(this.authHeaders && this.authHeaders['x-account']),
+                collaborativeDocsLength: this.collaborativeDocs.length,
+                hasInitialContent: !!(this.initialContent && Object.keys(this.initialContent).length > 0)
+            });
+            
+            // Check for collaborative auto-connect parameters
+            if (collabOwner && collabPermlink) {
+                console.log('🔗 Auto-connect parameters detected:', { collabOwner, collabPermlink });
+                return 'collaborative-autoconnect';
+            }
+            
+            // Check for collaborative mode with authentication
+            if (this.authHeaders && this.authHeaders['x-account'] && this.collaborativeDocs.length > 0) {
+                console.log('☁️ Collaborative mode available');
+                return 'collaborative-standard';
+            }
+            
+            // Check for initial content
+            if (this.initialContent && Object.keys(this.initialContent).length > 0) {
+                console.log('📄 Initial content provided');
+                return 'local-with-initial-content';
+            }
+            
+            // Default to local standard
+            console.log('💻 Local standard mode');
+            return 'local-standard';
+        },
+        
+        /**
+         * Execute collaborative auto-connect path
+         * TIPTAP BEST PRACTICE: Single path eliminates checkAutoConnectParams/loadCollaborativeDocs race condition
+         */
+        async executeCollaborativeAutoConnectPath() {
+            console.log('🔗 Executing collaborative auto-connect path...');
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const collabOwner = urlParams.get('collab_owner');
+            const collabPermlink = urlParams.get('collab_permlink');
+            
+            console.log('🔗 Auto-connect with parameters:', { collabOwner, collabPermlink });
+            console.log('🔐 Authentication status:', {
+                isAuthenticated: this.isAuthenticated,
+                isAuthExpired: this.isAuthExpired,
+                hasAuthHeaders: !!(this.authHeaders && this.authHeaders['x-account'])
+            });
+            
+            try {
+                // ✅ TIPTAP BEST PRACTICE: Skip temporary document info, wait for Y.js to provide real name
+                console.log('📋 Step 1: Preparing to load document and wait for Y.js document name...');
+                
+                // STEP 2: Ensure authentication
+                if (!this.isAuthenticated || this.isAuthExpired) {
+                    console.log('🔑 Authentication required for auto-connect');
+                    console.log('🔑 Current auth state:', {
+                        isAuthenticated: this.isAuthenticated,
+                        isAuthExpired: this.isAuthExpired,
+                        hasAuthHeaders: !!this.authHeaders,
+                        authHeadersKeys: this.authHeaders ? Object.keys(this.authHeaders) : []
+                    });
+                    
+                    await this.requestAuthentication();
+                    
+                    try {
+                        await this.waitForAuthentication(10000);
+                        console.log('🔑 Authentication successful for auto-connect');
+                    } catch (authError) {
+                        console.error('🔑 Authentication failed for auto-connect:', authError);
+                        // Continue anyway - might work in read-only mode
+                        console.log('🔑 Continuing with auto-connect in read-only mode');
+                    }
+                } else {
+                    console.log('🔑 Already authenticated for auto-connect');
+                }
+                
+                // STEP 3: Create collaborative document object without setting UI state yet
+                console.log('🏗️ Step 3: Creating collaborative document object...');
+                const docToLoad = {
+                    owner: collabOwner,
+                    permlink: collabPermlink,
+                    type: 'collaborative'
+                };
+                console.log('📄 Created document object:', docToLoad);
+                
+                // STEP 4: Load document and wait for Y.js to provide the real document name
+                console.log('📥 Step 4: Loading document and waiting for Y.js document name...');
+                await this.loadDocumentAndWaitForName(docToLoad);
+                
+                console.log('✅ Collaborative auto-connect completed successfully');
+                
+            } catch (error) {
+                console.error('❌ Auto-connect failed:', error);
+                throw error;
+            }
+        },
+        
+        /**
+         * Load document and wait for Y.js document name to be available
+         * TIPTAP BEST PRACTICE: Wait for real document name before setting UI state
+         */
+        async loadDocumentAndWaitForName(file) {
+            console.log('📋 Loading document and waiting for Y.js document name...');
+            
+            // First, load the document without cloud connection
+            await this.loadDocumentWithoutCloudConnection(file);
+            
+            // Wait for Y.js document name to be available
+            const documentName = await this.waitForDocumentName(file, 10000); // 10 second timeout
+            
+            if (documentName) {
+                console.log('✅ Document name received from Y.js:', documentName);
+                
+                // Now set the UI state with the real document name
+                this.currentFile = {
+                    ...file,
+                    name: documentName,
+                    title: documentName,
+                    documentName: documentName
+                };
+                
+                this.currentDocumentInfo = {
+                    owner: file.owner,
+                    permlink: file.permlink,
+                    title: documentName
+                };
+                
+                // Clear initializing state so UI shows document name instead of "Loading..."
+                this.isInitializing = false;
+                
+                console.log('✅ UI state set with real document name:', documentName);
+                
+                // Now connect to cloud in background (non-blocking)
+                if (file.type === 'collaborative') {
+                    console.log('🔗 Connecting to cloud in background...');
+                    this.connectToCollaborationServer(file).catch(error => {
+                        console.error('❌ Background cloud connection failed:', error);
+                    });
+                }
+                
+            } else {
+                console.warn('⚠️ Timeout waiting for document name, using fallback');
+                
+                // Fallback to username/permlink if timeout
+                const fallbackName = `${file.owner}/${file.permlink}`;
+                this.currentFile = {
+                    ...file,
+                    name: fallbackName,
+                    title: fallbackName,
+                    documentName: fallbackName
+                };
+                
+                this.currentDocumentInfo = {
+                    owner: file.owner,
+                    permlink: file.permlink,
+                    title: fallbackName
+                };
+                
+                // Clear initializing state even for fallback case
+                this.isInitializing = false;
+                
+                // Still try cloud connection in background for collaborative docs
+                if (file.type === 'collaborative') {
+                    console.log('🔗 Connecting to cloud in background (fallback case)...');
+                    this.connectToCollaborationServer(file).catch(error => {
+                        console.error('❌ Background cloud connection failed:', error);
+                    });
+                }
+            }
+        },
+        
+        /**
+         * Load document without cloud connection (internal method)
+         * TIPTAP BEST PRACTICE: Separate document loading from cloud connection
+         */
+        async loadDocumentWithoutCloudConnection(file) {
+            console.log('📋 Loading document without cloud connection...');
+            
+            try {
+                // Clean up any existing resources
+                await this.cleanupCurrentDocument();
+                await this.$nextTick();
+                
+                // Determine tier requirements
+                const requiresCloudTier = this.shouldUseCloudTier(file);
+                const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
+                
+                if (!bundle) {
+                    throw new Error('TipTap collaboration bundle is required');
+                }
+                
+                // Create Y.js document + IndexedDB immediately 
+                this.ydoc = new Y.Doc();
+                const documentId = file.id || file.permlink || `temp_${Date.now()}`;
+                const IndexeddbPersistence = bundle.IndexeddbPersistence?.default || bundle.IndexeddbPersistence;
+                
+                if (IndexeddbPersistence) {
+                    this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc);
+                    
+                    // Wait for IndexedDB sync (critical for content loading)
+                    await new Promise(resolve => {
+                        this.indexeddbProvider.on('synced', resolve);
+                    });
+                    
+                    console.log('💾 IndexedDB persistence synced for document');
+                    
+                    // Update custom JSON display after sync
+                    this.updateCustomJsonDisplay();
+                }
+                
+                // Initialize collaborative schema
+                this.initializeCollaborativeSchema(bundle.Y?.default || bundle.Y);
+                
+                // Create appropriate tier editor
+                if (requiresCloudTier) {
+                    await this.createCloudEditorsWithCursors(bundle); // Tier 2
+                    this.isCollaborativeMode = true;
+                    this.fileType = 'collaborative';
+                } else {
+                    await this.createOfflineFirstCollaborativeEditors(bundle); // Tier 1
+                    this.isCollaborativeMode = false;
+                    this.fileType = 'local';
+                }
+                
+                // For cloud documents, initialize permissions (but don't connect yet)
+                if (requiresCloudTier && file.type === 'collaborative') {
+                    // Initialize permissions immediately to prevent read-only mode during loading
+                    console.log('🔐 Initializing permissions for collaborative document...');
+                    this.documentPermissions = [{
+                        account: file.owner,
+                        permissionType: 'postable', // Owner always has full access
+                        grantedBy: file.owner,
+                        grantedAt: new Date().toISOString()
+                    }];
+                    
+                    // If user is not the owner, give them editable permissions by default
+                    if (this.username !== file.owner) {
+                        this.documentPermissions.push({
+                            account: this.username,
+                            permissionType: 'editable', // Default to editable, will be refined later
+                            grantedBy: file.owner,
+                            grantedAt: new Date().toISOString(),
+                            source: 'initial-assumption'
+                        });
+                        console.log('🔐 Initial assumption: User has editable permissions (will be refined)');
+                    }
+                    
+                    // Update URL with collaborative parameters for shareability
+                    console.log('🔗 Updating URL with collaborative parameters...', { owner: file.owner, permlink: file.permlink });
+                    try {
+                        this.updateURLWithCollabParams(file.owner, file.permlink);
+                        console.log('✅ URL update completed successfully');
+                    } catch (urlError) {
+                        console.error('❌ URL update failed:', urlError);
+                    }
+                    
+                    // Cloud connection will happen later in background
+                    console.log('🔗 Cloud connection deferred to background');
+                }
+                
+                this.showLoadModal = false;
+                this.hasUnsavedChanges = false;
+                
+                console.log('✅ Document loaded without cloud connection');
+                
+            } catch (error) {
+                console.error('Failed to load document without cloud connection:', error);
+                throw error;
+            }
+        },
+        
+        /**
+         * Wait for document name to be available in Y.js config
+         * TIPTAP BEST PRACTICE: Promise-based waiting for Y.js data
+         */
+        async waitForDocumentName(file, timeoutMs = 10000) {
+            console.log('⏳ Waiting for document name from Y.js config...');
+            
+            return new Promise((resolve) => {
+                let resolved = false;
+                
+                // Set up timeout
+                const timeout = setTimeout(() => {
+                    if (!resolved) {
+                        resolved = true;
+                        console.warn('⚠️ Timeout waiting for document name');
+                        resolve(null);
+                    }
+                }, timeoutMs);
+                
+                // Check if document name is already available
+                const checkDocumentName = () => {
+                    if (resolved) return;
+                    
+                    if (this.ydoc) {
+                        try {
+                            const config = this.ydoc.getMap('config');
+                            const documentName = config.get('documentName');
+                            
+                            if (documentName && documentName.trim() !== '' && 
+                                documentName !== `${file.owner}/${file.permlink}`) {
+                                resolved = true;
+                                clearTimeout(timeout);
+                                console.log('✅ Document name found in Y.js config:', documentName);
+                                resolve(documentName);
+                                return;
+                            }
+                        } catch (error) {
+                            console.warn('⚠️ Error checking Y.js config:', error);
+                        }
+                    }
+                    
+                    // Check again in 100ms
+                    setTimeout(checkDocumentName, 100);
+                };
+                
+                // Start checking
+                checkDocumentName();
+            });
+        },
+        
+        /**
+         * Execute collaborative standard path
+         * TIPTAP BEST PRACTICE: Standard collaborative initialization without auto-connect
+         */
+        async executeCollaborativeStandardPath() {
+            console.log('☁️ Executing collaborative standard path...');
+            
+            // Create default collaborative editors (Tier 2 - Cloud)
+            await this.createWorkingEditors();
+            
+            console.log('✅ Collaborative standard initialization completed');
+        },
+        
+        /**
+         * Execute local path with initial content
+         * TIPTAP BEST PRACTICE: Set initial content only for new documents
+         */
+        async executeLocalWithInitialContentPath() {
+            console.log('📄 Executing local with initial content path...');
+            
+            // Create local editors (Tier 1 - Local)
+            await this.createWorkingEditors();
+            
+            // TIPTAP BEST PRACTICE: Set initial content only if no Y.js document exists
+            if (!this.ydoc && !this.websocketProvider) {
+                this.content = { ...this.content, ...this.initialContent };
+                this.setEditorContent(this.content);
+            }
+            
+            console.log('✅ Local with initial content initialization completed');
+        },
+        
+        /**
+         * Execute local standard path
+         * TIPTAP BEST PRACTICE: Default local editor creation
+         */
+        async executeLocalStandardPath() {
+            console.log('💻 Executing local standard path...');
+            
+            // Create local editors (Tier 1 - Local)
+            await this.createWorkingEditors();
+            
+            console.log('✅ Local standard initialization completed');
+        },
+        
+        /**
+         * Complete initialization with common setup
+         * TIPTAP BEST PRACTICE: Single completion point for all paths
+         */
+        async completeInitialization() {
+            console.log('🏁 Completing initialization...');
+            
+            // Initialize custom JSON display
+            this.updateCustomJsonDisplay();
+            
+            // Set up event listeners
+            this.setupEventListeners();
+            
+            console.log('✅ Initialization completion finished');
+        },
+        
+        /**
+         * Set up event listeners
+         * TIPTAP BEST PRACTICE: Centralized event listener setup
+         */
+        setupEventListeners() {
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.dropdown')) {
+                    this.closeDropdowns();
+                }
+                
+                // Close color picker when clicking outside
+                if (!e.target.closest('.position-relative') && this.showColorPicker) {
+                    this.showColorPicker = false;
+                }
+            });
+        },
+        
+        /**
+         * Handle initialization errors
+         * TIPTAP BEST PRACTICE: Centralized error handling with fallback
+         */
+        async handleInitializationError(error) {
+            console.error('❌ Initialization error:', error);
+            
+            try {
+                // Attempt to create basic editors as fallback
+                console.log('🔄 Creating fallback basic editors...');
+                const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
+                if (bundle) {
+                    await this.createBasicEditorsAsFallback(bundle);
+                    this.setupEventListeners();
+                    console.log('✅ Fallback editors created successfully');
+                } else {
+                    console.error('❌ TipTap bundle not available for fallback');
+                }
+            } catch (fallbackError) {
+                console.error('❌ Fallback editor creation failed:', fallbackError);
+            }
+        },
+
+        /**
+         * Get collaborative parameters from URL for template display
+         * TIPTAP BEST PRACTICE: Centralized URL parameter access
+         */
+        getCollabParamsFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return {
+                collabOwner: urlParams.get('collab_owner'),
+                collabPermlink: urlParams.get('collab_permlink')
+            };
+        },
+        
+
+
+        /**
+         * Extract title from Y.js document after collaborative load
+         * TIPTAP BEST PRACTICE: Fallback title extraction when API metadata fails
+         */
+        /**
+         * Extract document name from Y.js config metadata
+         * ✅ TIPTAP BEST PRACTICE: Document name stored as metadata, separate from title content
+         */
+        extractDocumentNameFromConfig() {
+            if (!this.ydoc) return null;
+            
+            try {
+                const config = this.ydoc.getMap('config');
+                const documentName = config.get('documentName');
+                
+                if (documentName && documentName.trim() !== '') {
+                    console.log('📄 Extracted document name from Y.js config:', documentName);
+                    return documentName;
+                }
+            } catch (error) {
+                console.warn('⚠️ Could not extract document name from Y.js config:', error.message);
+            }
+            
+            return null;
+        },
+
+        extractTitleFromEditor() {
+            if (!this.titleEditor) return null;
+            
+            try {
+                // ✅ TIPTAP BEST PRACTICE: Use editor methods instead of direct Y.js access
+                const titleText = this.titleEditor.getText().trim();
+                if (titleText && titleText !== '') {
+                    console.log('📄 Extracted title from TipTap editor:', titleText);
+                    return titleText;
+                }
+            } catch (error) {
+                console.warn('⚠️ Could not extract title from TipTap editor:', error.message);
+            }
+            
+            return null;
+        },
+
+        /**
+         * Update document name from Y.js content after collaborative load
+         * TIPTAP BEST PRACTICE: Update UI with actual content after load
+         */
+        updateDocumentNameFromContent() {
+            console.log('🔄 updateDocumentNameFromContent called:', {
+                hasCurrentFile: !!this.currentFile,
+                currentFileType: this.currentFile?.type,
+                isCollaborativeMode: this.isCollaborativeMode
+            });
+            
+            if (!this.currentFile || (!this.isCollaborativeMode && this.currentFile.type !== 'collaborative')) {
+                console.log('📋 updateDocumentNameFromContent: Skipping - not collaborative or no currentFile');
+                return;
+            }
+            
+            // ✅ TIPTAP BEST PRACTICE: Extract document name from Y.js config metadata
+            const configDocumentName = this.extractDocumentNameFromConfig();
+            
+            if (configDocumentName && configDocumentName !== this.currentFile.name && 
+                configDocumentName !== `${this.currentFile.owner}/${this.currentFile.permlink}`) {
+                
+                console.log('🔄 Updating document name from Y.js config:', {
+                    oldName: this.currentFile.name,
+                    newDocumentName: configDocumentName
+                });
+                
+                // Update current file with document name from Y.js config
+                this.currentFile = {
+                    ...this.currentFile,
+                    name: configDocumentName,
+                    title: configDocumentName,
+                    documentName: configDocumentName
+                };
+                
+                // Also update currentDocumentInfo for template display
+                if (this.currentDocumentInfo) {
+                    this.currentDocumentInfo.title = configDocumentName;
+                }
+                
+                console.log('🔍 DEBUG updateDocumentNameFromContent: Updated values:', {
+                    currentFileName: this.currentFile.name,
+                    currentDocumentInfoTitle: this.currentDocumentInfo?.title
+                });
+                
+                // Force Vue reactivity update with nextTick to ensure DOM update
+                this.$nextTick(() => {
+                    this.$forceUpdate();
+                    console.log('🔄 updateDocumentNameFromContent: Vue reactivity forced after nextTick');
+                });
+                
+                console.log('✅ Document name updated from Y.js config metadata');
+            } else {
+                console.log('📋 No document name found in Y.js config or name unchanged');
+            }
+        },
     },
     
     watch: {
@@ -8683,82 +10531,95 @@ export default {
                 }
             }
         },
+
+        // FIXED: Watch for custom JSON changes from external sources (document loading, collaborative updates)
+        displayCustomJson: {
+            handler(newDisplayJson) {
+                // Only update customJsonString if it's different and not currently being edited
+                if (newDisplayJson !== this.customJsonString && document.activeElement?.tagName !== 'TEXTAREA') {
+                    console.log('🔧 Syncing customJsonString with stored data');
+                    this.customJsonString = newDisplayJson;
+                }
+            }
+        },
     },
     
     async mounted() {
         try {
-            // TIPTAP BEST PRACTICE: Initialize debounced auto-save (500ms delay)
+            console.log('🚀 Starting TipTap editor initialization with race condition prevention...');
+            
+            // STEP 1: Initialize debounced functions
             this.debouncedAutoSave = methodsCommon.debounce(this.performAutoSave, 500);
-            
-            // TIPTAP BEST PRACTICE: Initialize debounced Y.js creation (2 second delay to avoid disrupting typing)
             this.debouncedYjsCreation = methodsCommon.debounce(this.createLazyYjsDocument, 2000);
-        this.debouncedPersistentYjsCreation = methodsCommon.debounce(this.createPersistentYjsDocument, 2000);
+            this.debouncedPersistentYjsCreation = methodsCommon.debounce(this.createPersistentYjsDocument, 2000);
+            this.debouncedValidateCustomJson = methodsCommon.debounce(this.validateCustomJson, 1000);
             
-            // Check for auto-connect query parameters first
-            await this.checkAutoConnectParams();
+            // STEP 2: Set initialization flag to prevent race conditions
+            this.isInitializing = true;
             
-            // Check for collaborative document URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            const collabOwner = urlParams.get('collab_owner');
-            const collabPermlink = urlParams.get('collab_permlink');
+            // STEP 3: Initialize application state in proper sequence
+            await this.initializeApplicationState();
             
-            if (collabOwner && collabPermlink) {
-                console.log(`🔗 URL-based collaborative document detected: ${collabOwner}/${collabPermlink}`);
-                // URL-based loading will be handled after collaborative docs are loaded
+            // STEP 4: Determine initialization path based on URL parameters
+            const initializationPath = await this.determineInitializationPath();
+            
+            // STEP 5: Execute appropriate initialization path
+            console.log(`🛤️ Selected initialization path: ${initializationPath}`);
+            switch (initializationPath) {
+                case 'collaborative-autoconnect':
+                    console.log('🔗 Executing collaborative auto-connect path...');
+                    await this.executeCollaborativeAutoConnectPath();
+                    break;
+                case 'collaborative-standard':
+                    console.log('☁️ Executing collaborative standard path...');
+                    await this.executeCollaborativeStandardPath();
+                    break;
+                case 'local-with-initial-content':
+                    console.log('📄 Executing local with initial content path...');
+                    await this.executeLocalWithInitialContentPath();
+                    break;
+                case 'local-standard':
+                default:
+                    console.log('💻 Executing local standard path...');
+                    await this.executeLocalStandardPath();
+                    break;
             }
             
-            // Load initial data
-            await this.loadLocalFiles();
+            // STEP 6: Complete initialization
+            await this.completeInitialization();
             
-            // Check if authHeaders exists and has x-account
-            if (this.authHeaders && this.authHeaders['x-account']) {
-                await this.loadCollaborativeDocs();
-            }
-            
-            // TIPTAP BEST PRACTICE: Create working editors immediately in mounted()
-            // This follows the official TipTap.dev pattern for Vue.js applications
-            await this.createWorkingEditors();
-            
-            // Load initial content if provided (but not for collaborative documents that auto-load)
-            // TIPTAP BEST PRACTICE: Skip content loading for any Y.js-managed or collaborative editors
-            if (this.initialContent && Object.keys(this.initialContent).length > 0 && 
-                !this.isCollaborativeMode && !this.ydoc && !this.websocketProvider) {
-                this.content = { ...this.content, ...this.initialContent };
-                this.setEditorContent(this.content);
-            }
-            
-            // Close dropdowns when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.dropdown')) {
-                    this.closeDropdowns();
-                }
-                
-                // Close color picker when clicking outside
-                if (!e.target.closest('.position-relative') && this.showColorPicker) {
-                    this.showColorPicker = false;
-                }
-            });
         } catch (error) {
-            console.error('Error in mounted hook:', error);
+            console.error('❌ Error in mounted hook:', error);
+            await this.handleInitializationError(error);
+        } finally {
+            // Always clear initialization flag
+            this.isInitializing = false;
+            console.log('✅ TipTap editor initialization completed');
         }
-    },
-    
-    beforeUnmount() {
-        this.fullCleanupCollaboration();
+            },
         
-        // Clean up all editors
-        if (this.titleEditor) {
-            this.titleEditor.destroy();
-        }
-        if (this.permlinkEditor) {
-            this.permlinkEditor.destroy();
-        }
-        if (this.bodyEditor) {
-            this.bodyEditor.destroy();
-        }
-    },
-    
-    template: `<div class="collaborative-post-editor">
+        beforeUnmount() {
+            // Clear temp document creation timer
+            if (this.tempDocumentCreationTimer) {
+                clearTimeout(this.tempDocumentCreationTimer);
+                this.tempDocumentCreationTimer = null;
+            }
+            
+            this.fullCleanupCollaboration();
+            
+            // Clean up all editors
+            if (this.titleEditor) {
+                this.titleEditor.destroy();
+            }
+            if (this.permlinkEditor) {
+                this.permlinkEditor.destroy();
+            }
+            if (this.bodyEditor) {
+                this.bodyEditor.destroy();
+            }
+        },
+        
+        template: `<div class="collaborative-post-editor">
     <!-- File Menu Bar -->
     <div class="file-menu-bar bg-dark border-bottom border-secondary mb-3 p-05 d-flex">
 
@@ -8804,7 +10665,7 @@ export default {
                              <i class="fas fa-user-plus me-2"></i>Share Document
                              <small v-if="!canShare && (!isAuthenticated || isAuthExpired)" class="d-block text-muted">Authentication required</small>
                             </a></li>
-                            <li v-else><a class="dropdown-item d-flex align-items-center gap-2" href="#" @click="!isAuthenticated ? requestAuthentication() : convertToCollaborative()"
+                            <li v-else><a class="dropdown-item d-flex align-items-center gap-2" href="#" @click="convertToCollaborative()"
                                 >
                                 <div class="position-relative">
                     <i class="fas fa-cloud fa-fw fs-2"></i>  
@@ -8910,7 +10771,7 @@ export default {
             </a>
             <i class="fa-solid fa-chevron-right fa-fw"></i>
             <div>
-             <i class="fas fa-file fa-fw"></i>
+             <i class="fas fa-file fa-fw me-1"></i>
             <span v-if="currentFile" class="">
                
                 <!-- Editable document name -->
@@ -8941,9 +10802,15 @@ export default {
                     </span>
                 </span>
             </span>
+            <!-- Show loading state for collaborative docs during initialization -->
+            <span v-else-if="isInitializing" class="">
+                <span class="text-muted">
+                    <i class="fas fa-spinner fa-spin me-1"></i>Loading...
+                </span>
+            </span>
             <span v-else class="">
                 <!-- Clickable "Untitled" for new documents -->
-                <i class="fas fa-file-plus me-1"></i>
+               
                 <span v-if="!isEditingDocumentName"
                       @click="startEditingDocumentName"
                       class="cursor-pointer text-decoration-underline user-select-none"
@@ -9036,65 +10903,25 @@ export default {
                 <button class="btn btn-dark no-caret dropdown-toggle"  :style="getStatusStyle(unifiedStatusInfo.state)" type="button" data-bs-toggle="dropdown"
                     aria-expanded="false">
                         <span class="ms-1" v-html="documentTitleIndicator"></span>
-               
-                           
-
-                 
                 </button>
                 <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-dark">
-                    <!-- Authentication Status Header -->
-                     <!-- Unified Status Indicator -->
-                        <li>
-                         <div class="d-flex align-items-center">
-                             <i :class="getStatusIconClass(unifiedStatusInfo.state)" class="me-2 small"></i>
-                             <span :class="getStatusTextClass(unifiedStatusInfo.state)" class="small fw-medium">
-                                 {{ unifiedStatusInfo.message }}
-                             </span>
-                         </div>
-                       
-                          <div class="mt-2 pt-2 border-top border-light border-opacity-25">
-                      <p class="small text-white-50 mb-2">{{ unifiedStatusInfo.details }}</p>
-                      <div v-if="unifiedStatusInfo.actions.length" class="d-flex gap-1">
-                          <button 
-                              v-for="action in unifiedStatusInfo.actions" 
-                              :key="action.label"
-                              @click.stop="handleStatusAction(action)"
-                              class="btn btn-sm btn-outline-light"
-                          >
-                              {{ action.label }}
-                          </button>
-                      </div>
-                  </div></li>
 
-                    <li class="dropdown-header d-flex align-items-center justify-content-between">
-                        <span>Authentication Status</span>
-                        <span v-if="!isAuthenticated || isAuthExpired" class="badge bg-warning text-dark">
-                            <i class="fas fa-key me-1"></i>{{ isAuthExpired ? 'Expired' : 'Required' }}
-                        </span>
-                        <span v-else class="badge bg-success">
-                            <i class="fas fa-check me-1"></i>Authenticated
-                        </span>
-                    </li>
+                 
                     
-                    <!-- Authentication Actions -->
-                    <li v-if="!isAuthenticated || isAuthExpired">
-                        <a class="dropdown-item text-warning fw-bold" href="#" @click.prevent="requestAuthentication">
-                            <i class="fas fa-key me-2"></i>{{ isAuthExpired ? 'Re-authenticate' : 'Authenticate Now' }}
-                        </a>
-                    </li>
-                    <li v-else>
-                        <a class="dropdown-item text-muted" href="#" @click.prevent="requestAuthentication">
-                            <i class="fas fa-redo me-2"></i>Refresh Authentication
-                        </a>
-                    </li>
+                        <!-- Document Sharing & Collaboration -->
+                     <li><a class="dropdown-item" href="#" @click.prevent="shareDocument"
+                             :class="{ disabled: !canShare }">
+                             <i class="fas fa-user-plus me-2"></i>Share Document
+                             <small v-if="!isCollaborativeMode" class="d-block text-muted">Cloud Collaboration required</small>
+                             <small v-else-if="!canShare && (!isAuthenticated || isAuthExpired)" class="d-block text-muted">Authentication required</small>
+                         </a></li>
                     
                     <li><hr class="dropdown-divider"></li>
-                    
 
-                                         <!-- Document Publishing & Connection -->
-                     <li v-if="currentFile && currentFile.type !== 'collaborative'">
-                         <a class="dropdown-item" href="#" @click.prevent="!isAuthenticated ? requestAuthentication() : convertToCollaborative()">
-                             <i class="fas fa-cloud-upload-alt me-2"></i>Save to Cloud
+                    <!-- Document Publishing & Connection -->
+                     <li v-if="currentFile?.type !== 'collaborative'">
+                         <a class="dropdown-item" href="#" @click.prevent="convertToCollaborative()">
+                             <i class="fas fa-cloud-upload-alt me-2"></i>Turn on Cloud Collaboration
                              <small v-if="!isAuthenticated" class="d-block text-muted">Authentication required</small>
                          </a>
                      </li>
@@ -9111,15 +10938,52 @@ export default {
                      </li>
                      
                      <li><hr class="dropdown-divider"></li>
-                     
-                     <!-- Document Sharing & Collaboration -->
-                     <li class="dropdown-header">Collaboration</li>
-                     <li><a class="dropdown-item" href="#" @click.prevent="shareDocument"
-                             :class="{ disabled: !canShare }">
-                             <i class="fas fa-user-plus me-2"></i>Share Document
-                                                           <small v-if="!isCollaborativeMode" class="d-block text-muted">Cloud collaboration required</small>
-                             <small v-if="!canShare && (!isAuthenticated || isAuthExpired)" class="d-block text-muted">Authentication required</small>
-                         </a></li>
+
+
+                     <!-- Authentication Status -->
+                     <li class="d-none dropdown-header d-flex align-items-center justify-content-between">
+                        <span>Authentication Status</span>
+                        <span v-if="!isAuthenticated || isAuthExpired" class="badge bg-warning text-dark">
+                            <i class="fas fa-key me-1"></i>{{ isAuthExpired ? 'Expired' : 'Required' }}
+                        </span>
+                        <span v-else class="badge bg-success">
+                            <i class="fas fa-check me-1"></i>Authenticated
+                        </span>
+                    </li>
+                    
+                    <!-- Authentication Actions -->
+                    <li class="d-none" v-if="!isAuthenticated || isAuthExpired">
+                        <a class="dropdown-item text-warning fw-bold" href="#" @click.prevent="requestAuthentication">
+                            <i class="fas fa-key me-2"></i>{{ isAuthExpired ? 'Re-authenticate' : 'Authenticate Now' }}
+                        </a>
+                    </li>
+                    <li v-else>
+                        <a class="dropdown-item text-muted" href="#" @click.prevent="requestAuthentication">
+                            <i class="fas fa-redo me-2"></i>Refresh Authentication
+                        </a>
+                    </li>
+                    
+                    <li><hr class="dropdown-divider"></li>
+                    
+                    <!-- Saving Status Indicator -->
+                    <li class="px-3 pt-1">
+                        <div class="d-flex align-items-center">
+                            <i :class="getStatusIconClass(unifiedStatusInfo.state)" class="me-2 small"></i>
+                            <span :class="getStatusTextClass(unifiedStatusInfo.state)" class="small fw-medium">
+                                 {{ unifiedStatusInfo.message }}
+                            </span>
+                        </div>
+                        <p class="small text-white-50 mb-2">{{ unifiedStatusInfo.details }}</p>
+                        <div v-if="unifiedStatusInfo.actions.length" class="d-flex gap-1">
+                            <button 
+                              v-for="action in unifiedStatusInfo.actions" 
+                              :key="action.label"
+                              @click.stop="handleStatusAction(action)"
+                              class="btn btn-sm btn-outline-light">
+                              {{ action.label }}
+                            </button>
+                        </div>
+                     </li>
                                                   
                 </ul>
             </div>
@@ -9261,11 +11125,11 @@ export default {
 
                     <!--Actions -->
                     <div class="d-none" role="group">
-                        <button @click="bodyEditor?.chain().focus().undo().run()" :disabled="!bodyEditor?.can().undo()"
+                        <button @click="bodyEditor?.chain().focus().undo().run()" :disabled="!bodyEditor?.can().undo"
                             class="btn btn-sm btn-dark" type="button" title="Undo">
                             <i class="fas fa-undo"></i>
                         </button>
-                        <button @click="bodyEditor?.chain().focus().redo().run()" :disabled="!bodyEditor?.can().redo()"
+                        <button @click="bodyEditor?.chain().focus().redo().run()" :disabled="!bodyEditor?.can().redo"
                             class="btn btn-sm btn-dark" type="button" title="Redo">
                             <i class="fas fa-redo"></i>
                         </button>
@@ -9428,7 +11292,7 @@ export default {
                     </label>
                     <div class="bg-dark border border-secondary rounded p-3"
                         :class="{ 'opacity-75': isReadOnlyMode }">
-                        <textarea v-model="customJsonString" @input="validateCustomJson"
+                        <textarea v-model="customJsonString" @input="handleCustomJsonInput"
                             class="form-control bg-dark text-white border-secondary font-monospace" rows="6"
                             placeholder="Enter custom JSON metadata..."
                             :disabled="isReadOnlyMode"></textarea>
@@ -9872,7 +11736,7 @@ export default {
                     <h6 class="fw-bold mb-3">Current Access</h6>
 
                     <!-- Document Owner -->
-                    <div class="d-flex align-items-center justify-content-between p-2 bg-light rounded mb-2">
+                    <div class="d-flex align-items-center justify-content-between p-2 bg-darkg rounded mb-2">
                         <div class="d-flex align-items-center">
                             <img :src="ownerAvatarUrl"
                                 :alt="currentFile?.owner"
@@ -9903,7 +11767,7 @@ export default {
                     </div>
                     <div v-else>
                         <div v-for="permission in documentPermissions" :key="permission.account"
-                            class="d-flex align-items-center justify-content-between p-2 bg-light rounded mb-2">
+                            class="d-flex align-items-center justify-content-between p-2 bg-darkg rounded mb-2">
                             <div class="d-flex align-items-center">
                                 <img :src="getPermissionAvatarUrl(permission.account)"
                                     :alt="permission.account"
