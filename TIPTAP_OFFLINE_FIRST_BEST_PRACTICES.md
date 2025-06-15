@@ -4,6 +4,18 @@
 
 This document defines the **definitive architecture** for implementing TipTap's offline-first collaborative editing pattern based on official TipTap.dev documentation and best practices. Our implementation follows TipTap's recommended approach for maximum performance, reliability, and user experience.
 
+### 🚨 **CURRENT ARCHITECTURE: Temp Document Strategy (Updated 2024)**
+
+**Our implementation uses IMMEDIATE Y.js document creation with temp document strategy:**
+
+- ✅ **Y.js documents created immediately** on editor initialization
+- ✅ **Collaboration extension included from start** for all editors
+- ✅ **IndexedDB persistence delayed** until user shows intent (typing pause)
+- ✅ **No lazy Y.js creation patterns** - all documents have Y.js from start
+- ✅ **Two-tier system**: Tier 1 (no CollaborationCursor) vs Tier 2 (with CollaborationCursor)
+
+**This replaces the previous lazy Y.js creation approach** which had race conditions and violated TipTap best practices.
+
 ## Core Design Principles
 
 ### 1. **Offline-First with Temp Y.js Documents**
@@ -2146,19 +2158,47 @@ const editor = new Editor({
 })
 ```
 
-#### ✅ **LAZY Y.JS PATTERN**
+#### ✅ **TEMP DOCUMENT PATTERN (CURRENT ARCHITECTURE)**
 
 ```javascript
-// Store Y.js components for lazy creation
-this.lazyYjsComponents = { Y, bundle }
+// ✅ CURRENT: Create Y.js document immediately with temp document strategy
+this.ydoc = new Y.Doc();
+this.initializeCollaborativeSchema(Y);
 
-// Create Y.js only when needed (after user interaction)
+// Set temp document flags (IndexedDB created only when user shows intent)
+this.isTemporaryDocument = true;
+this.tempDocumentId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+// Create editors with Y.js collaboration from start
+await this.createOfflineFirstCollaborativeEditors(bundle);
+
+// Only create IndexedDB persistence when user pauses typing (shows intent)
+if (this.isTemporaryDocument && !this.indexeddbProvider) {
+    this.debouncedCreateIndexedDBForTempDocument();
+}
+```
+
+#### ❌ **DEPRECATED: Lazy Y.js Creation Pattern**
+
+The following pattern is **NO LONGER USED** in our current architecture:
+
+```javascript
+// ❌ DEPRECATED: Do not use lazy Y.js creation
+this.lazyYjsComponents = { Y, bundle } // Not used anymore
+
+// ❌ DEPRECATED: Do not create Y.js documents conditionally
 setTimeout(() => {
   if (userHasTyped) {
-    this.createYjsDocument()
+    this.createYjsDocument() // Architecture violation
   }
-}, 2000) // Typing pause detection
+}, 2000)
 ```
+
+**Why Temp Document Strategy is Superior:**
+- ✅ **Immediate Y.js availability** - No race conditions
+- ✅ **TipTap best practices compliance** - Y.js document exists from editor creation
+- ✅ **Performance optimization** - Only IndexedDB persistence is delayed
+- ✅ **Consistent collaborative state** - All editors have Y.js from start
 
 ### Extension Management
 
@@ -2671,7 +2711,7 @@ debugYjs() {
 
 This architecture provides:
 
-1. **Optimal Performance**: Offline-first loading with lazy Y.js creation
+1. **Optimal Performance**: Offline-first loading with immediate Y.js creation and temp document strategy
 2. **Reliable Collaboration**: Proper Y.js lifecycle management
 3. **Excellent UX**: Minimal editor interruption during mode switches
 4. **Maintainable Code**: Clear separation of concerns and error handling
@@ -2767,12 +2807,136 @@ Our offline-first collaborative architecture uses several categories of document
 </svg>
 ```
 
+### **4-State Status Indicator System**
+
+Both local (hard drive) and cloud (cloud) indicators use a consistent **4-state system**:
+
+#### **Local Status Indicator (Hard Drive Icon) - 4 States:**
+
+1. **🔘 Off** (`opacity-25`) - Document not available locally
+   - Template: `<i class="fas fa-hdd opacity-25"></i>`
+   - Condition: `!file.hasLocalVersion`
+
+2. **🔘 On/Available** (`text-muted` or `text-secondary`) - Document available locally but not current
+   - Template: `<i class="fas fa-hdd text-muted"></i>`
+   - Condition: `file.hasLocalVersion && file.localStatus === 'none'`
+
+3. **🔵 Saved** (`text-primary` - blue) - Document saved locally
+   - Template: `<i class="fas fa-hdd text-primary"></i>`
+   - Condition: `file.localStatus === 'saved'`
+
+4. **🟠 Saving** (`text-warning` - orange) - Document currently saving locally
+   - Template: `<i class="fas fa-hdd text-warning"></i>`
+   - Condition: `file.localStatus === 'saving'`
+
+#### **Cloud Status Indicator (Cloud Icon) - 4 States:**
+
+1. **🔘 Off** (`opacity-25`) - Document not in cloud
+   - Template: `<i class="fas fa-cloud opacity-25"></i>`
+   - Condition: `!file.hasCloudVersion`
+
+2. **🔘 Available** (`text-secondary` - gray) - Document available in cloud but not connected
+   - Template: `<i class="fas fa-cloud text-secondary"></i>`
+   - Condition: `file.cloudStatus === 'available'`
+
+3. **🟢 Synced** (`text-success` - green) - Document synced to cloud
+   - Template: `<i class="fas fa-cloud text-success"></i>`
+   - Condition: `file.cloudStatus === 'synced'`
+
+4. **🟠 Syncing** (`text-warning` - orange) - Document currently syncing
+   - Template: `<i class="fas fa-cloud text-warning"></i>`
+   - Condition: `file.cloudStatus === 'syncing' || file.cloudStatus === 'pending'`
+
+#### **Implementation in Drafts Table:**
+
+```html
+<!-- Local Status Indicator -->
+<div v-if="file.hasLocalVersion" class="status-indicator" :title="getLocalStatusTitle(file.localStatus)">
+    <i class="fas fa-hdd" :class="getLocalStatusClass(file.localStatus)"></i>
+</div>
+<div v-else class="status-indicator text-muted" title="Not saved locally">
+    <i class="fas fa-hdd opacity-25"></i>  <!-- STATE 1: OFF -->
+</div>
+
+<!-- Cloud Status Indicator -->
+<div v-if="file.hasCloudVersion" class="status-indicator" :title="getCloudStatusTitle(file.cloudStatus)">
+    <i class="fas fa-cloud" :class="getCloudStatusClass(file.cloudStatus)"></i>
+</div>
+<div v-else class="status-indicator text-muted" title="Not in cloud">
+    <i class="fas fa-cloud opacity-25"></i>  <!-- STATE 1: OFF -->
+</div>
+```
+
+#### **Status Determination Logic:**
+
+```javascript
+// Local Status Logic
+getLocalStatus(file) {
+    if (!file) return 'none';
+    
+    const documentKey = this.getDocumentKey(file);
+    
+    // For local documents (localStorage), they always have local status
+    if (file.id && !file.owner) {
+        if (this.hasUnsavedChanges && this.isCurrentDocument(file)) {
+            return 'saving'; // STATE 4: Orange - has unsaved changes
+        }
+        return 'saved'; // STATE 3: Blue - saved locally
+    }
+    
+    // For cloud documents, check if they're cached in IndexedDB
+    if (file.owner && file.permlink) {
+        if (this.indexedDBDocuments?.has(documentKey)) {
+            if (this.hasUnsavedChanges && this.isCurrentDocument(file)) {
+                return 'saving'; // STATE 4: Orange - has unsaved changes
+            }
+            return 'saved'; // STATE 3: Blue - cached locally in IndexedDB
+        }
+        return 'none'; // STATE 2: Available but not cached
+    }
+    
+    return 'none'; // STATE 1: Not available locally
+}
+
+// Cloud Status Logic
+getCloudStatus(cloudFile) {
+    if (!cloudFile) return 'none';
+    
+    // Check WebSocket connection status
+    if (this.provider && this.connectionStatus === 'connected') {
+        return 'synced'; // STATE 3: Green - synced to cloud
+    } else if (this.provider && this.connectionStatus === 'connecting') {
+        return 'syncing'; // STATE 4: Orange/Blue - syncing to cloud
+    } else if (this.hasUnsavedChanges && this.isCurrentDocument(cloudFile)) {
+        return 'pending'; // STATE 4: Orange - has unsynced changes
+    }
+    return 'available'; // STATE 2: Gray - available in cloud but not connected
+}
+```
+
 **Status Colors & Icons**:
 - 🟠 **Orange/Warning**: Changes being saved, syncing, unsynced changes
 - 🔵 **Blue/Info**: Locally saved, offline ready, connecting
 - 🟢 **Green/Success**: Cloud synced, collaborating
 - 🔴 **Red/Danger**: Errors, connection failures
-- 🔘 **Grey/Muted**: Temp documents (not yet drafts), unknown states, fallbacks
+- 🔘 **Grey/Muted**: Available but not active, temp documents, fallbacks
+- 🔘 **Opacity-25**: Off/not available states
+
+#### **Complete 4-State Reference Table:**
+
+| State | Local Indicator | Cloud Indicator | Description |
+|-------|----------------|-----------------|-------------|
+| **1. Off** | 🔘 `opacity-25` | 🔘 `opacity-25` | Document not available in this location |
+| **2. Available** | 🔘 `text-muted` | 🔘 `text-secondary` | Document exists but not active/connected |
+| **3. Saved/Synced** | 🔵 `text-primary` | 🟢 `text-success` | Document saved/synced successfully |
+| **4. Saving/Syncing** | 🟠 `text-warning` | 🟠 `text-warning` | Document currently being saved/synced |
+
+**Key Factors Determining State:**
+- **Document Availability**: `hasLocalVersion` / `hasCloudVersion`
+- **Current Document**: Whether this document is currently open
+- **Unsaved Changes**: Whether the open document has unsaved changes
+- **Connection Status**: For cloud documents, WebSocket connection state
+- **IndexedDB Cache**: For cloud documents, whether cached locally
 
 #### **Background Styling**
 
@@ -2805,7 +2969,7 @@ The status indicator button uses different background colors and left borders:
 
 #### **Local Document Flow**
 ```
-New Document → Basic Editors → User Types → Lazy Y.js Creation → IndexedDB Persistence
+New Document → Y.js Document Creation → Collaborative Editors → User Types → IndexedDB Persistence
      ↓
 Local Document (Dotted Cloud) → "Connect to Cloud" → Cloud Document (Solid/Slashed Cloud)
 ```
@@ -3427,6 +3591,125 @@ const examples = [
 - **Reconnected** = Restore collaborative URL parameters
 - **New Document** = Clear all URL parameters
 
+## 🎯 **CRITICAL: URL Management & Editor Lifecycle Best Practices**
+
+### **✅ TipTap.dev URL Management Principles**
+
+Based on TipTap.dev documentation and collaborative editor best practices:
+
+#### **1. Clean State Transitions (MANDATORY)**
+```javascript
+// ❌ WRONG: URL parameter stacking
+// Current URL: /post?collab_owner=user1&collab_permlink=doc1
+loadLocalFile() {
+    // Missing cleanup - results in:
+    // /post?collab_owner=user1&collab_permlink=doc1&local_owner=user2&local_permlink=doc2
+    this.updateURLWithLocalParams(user2, doc2);
+}
+
+// ✅ CORRECT: Always clean before setting
+loadLocalFile() {
+    this.clearCollabURLParams(); // Clean ALL parameters first
+    this.updateURLWithLocalParams(user2, doc2); // Then set new ones
+}
+```
+
+#### **2. Editor Destruction Order (TipTap.dev Standard)**
+```javascript
+// ✅ CORRECT: TipTap.dev recommended destruction sequence
+async cleanupCurrentDocument() {
+    // STEP 1: Clear URL parameters FIRST (prevents auto-reconnect)
+    this.clearCollabURLParams();
+    
+    // STEP 2: Disconnect providers
+    if (this.provider) {
+        this.provider.disconnect();
+        this.provider.destroy();
+    }
+    
+    // STEP 3: Destroy editors
+    if (this.titleEditor) this.titleEditor.destroy();
+    if (this.bodyEditor) this.bodyEditor.destroy();
+    
+    // STEP 4: Clean Y.js document
+    if (this.ydoc) this.ydoc.destroy();
+}
+```
+
+#### **3. Document Loading Lifecycle (MANDATORY)**
+```javascript
+// ✅ CORRECT: Every document load must follow this pattern
+async loadAnyDocument(file) {
+    // STEP 1: ALWAYS clean state first
+    await this.cleanupCurrentDocument(); // Includes URL cleanup
+    
+    // STEP 2: Load new document
+    await this.loadDocument(file);
+    
+    // STEP 3: Set appropriate URL
+    if (file.type === 'collaborative') {
+        this.updateURLWithCollabParams(file.owner, file.permlink);
+    } else if (file.type === 'local') {
+        this.updateURLWithLocalParams(this.username, file.id);
+    }
+    // New documents get no URL parameters (clean state)
+}
+```
+
+#### **4. Tier Transition Rules (CRITICAL)**
+```javascript
+// ✅ CORRECT: Tier 1 → Tier 2 transition
+convertToCollaborative() {
+    this.clearCollabURLParams(); // Clear local params
+    // ... conversion logic ...
+    this.updateURLWithCollabParams(owner, permlink); // Set collab params
+}
+
+// ✅ CORRECT: Tier 2 → Tier 1 transition  
+disconnectFromCollaboration() {
+    this.clearCollabURLParams(); // Clear collab params
+    // ... disconnection logic ...
+    this.updateURLWithLocalParams(username, localId); // Set local params
+}
+```
+
+### **🚨 URL Stacking Prevention Checklist**
+
+#### **✅ MANDATORY: Every URL-setting operation must:**
+
+1. **Clear existing parameters FIRST**
+2. **Set new parameters SECOND**  
+3. **Never skip cleanup step**
+4. **Follow TipTap.dev destruction order**
+
+#### **✅ Audit Points:**
+- [ ] `newDocument()` - Clears all URL parameters ✅
+- [ ] `loadLocalFile()` - Clears before setting local params ✅
+- [ ] `loadCollaborativeFile()` - Clears before setting collab params ✅
+- [ ] `cleanupCurrentDocument()` - Always clears URL parameters ✅
+- [ ] Tier transitions - Clear old, set new ✅
+- [ ] Auto-connect - Respects existing cleanup ✅
+
+### **🔧 Implementation Requirements**
+
+```javascript
+// ✅ STANDARD PATTERN: All document operations
+async anyDocumentOperation() {
+    // 1. Clean state (URL + editors + Y.js)
+    await this.cleanupCurrentDocument();
+    
+    // 2. Perform operation
+    // ... operation logic ...
+    
+    // 3. Set appropriate URL (if needed)
+    if (needsURL) {
+        this.updateURLWith[Type]Params(params);
+    }
+}
+```
+
+This ensures **zero URL parameter stacking** and follows **TipTap.dev best practices** for editor lifecycle management.
+
 This approach provides users with the shareability and navigation experience they expect from modern collaborative editing tools.
 
 ## ✅ CRITICAL FIXES: Initialization and Content Loading
@@ -3615,9 +3898,9 @@ handleCustomJsonInput() {
     // Phase 1: Immediate status update (every keystroke)
     this.hasUnsavedChanges = true;
     
-    // Trigger Y.js document creation if needed (for temp documents)
-    if (!this.ydoc && this.lazyYjsComponents) {
-        this.debouncedYjsCreation();
+    // ✅ TEMP DOCUMENT ARCHITECTURE: Y.js document should already exist
+    if (!this.ydoc) {
+        console.error('❌ CRITICAL: Y.js document missing - violates temp document architecture');
     }
     
     // Phase 2: Debounced validation and Y.js sync (1-second delay)
@@ -3671,10 +3954,8 @@ setCustomJsonField(key, value) {
         }
         this.content.custom_json[key] = value;
         
-        // Trigger Y.js document creation if components are available
-        if (this.lazyYjsComponents) {
-            this.debouncedYjsCreation();
-        }
+        // ✅ TEMP DOCUMENT ARCHITECTURE: Y.js document should exist from editor creation
+        console.warn('⚠️ Using local state fallback - Y.js document should exist (temp document architecture)');
         return true;
     }
 }
@@ -3769,10 +4050,8 @@ this.updateCustomJsonDisplay();
 ```javascript
 // ✅ CORRECT: Load TipTap collaboration bundle only when needed
 async loadYjsComponents() {
-    // Check if already loaded
-    if (this.lazyYjsComponents) {
-        return this.lazyYjsComponents;
-    }
+    // ✅ TEMP DOCUMENT ARCHITECTURE: Components loaded once during initialization
+    // No lazy loading needed - Y.js documents created immediately
     
     try {
         console.log('📦 Loading TipTap collaboration bundle...');
@@ -3785,14 +4064,14 @@ async loadYjsComponents() {
             await this.loadCollaborationBundle();
         }
         
-        // Store components for reuse
-        this.lazyYjsComponents = {
+        // Return components directly - no lazy storage needed in temp document architecture
+        const components = {
             Y: bundle.Y?.default || bundle.Y,
             bundle: bundle
         };
         
         console.log('✅ TipTap collaboration bundle loaded');
-        return this.lazyYjsComponents;
+        return components;
         
     } catch (error) {
         console.error('❌ Failed to load TipTap collaboration bundle:', error);
@@ -3872,8 +4151,7 @@ async fullCleanupCollaboration() {
             this.ydoc = null;
         }
         
-        // 5. Clear component references
-        this.lazyYjsComponents = null;
+        // 5. Clear any remaining component references (temp document architecture doesn't store these)
         
         // 6. Clear global instance tracking
         if (window.dluxCollaborativeInstance === this.componentId) {
@@ -5162,7 +5440,7 @@ Our custom JSON implementation has been validated against all TipTap.dev best pr
 
 **✅ Architecture Compliance**:
 - **Y.js Maps for Non-Editor Fields**: Uses `ydoc.getMap('customJson')` instead of TipTap editor content
-- **Offline-First Pattern**: Fallback to local state when Y.js not ready, with lazy Y.js creation
+- **Offline-First Pattern**: Y.js document available immediately with temp document strategy
 - **Collaborative State Management**: Granular field updates prevent conflicts between users
 - **Observer Pattern**: Proper Y.js observer setup with feedback loop prevention
 
@@ -5180,7 +5458,7 @@ Our custom JSON implementation has been validated against all TipTap.dev best pr
 
 **✅ Performance Optimization**:
 - **Debounced Updates**: Prevents excessive Y.js synchronization
-- **Lazy Loading**: Y.js document creation only when needed
+- **Temp Document Strategy**: Y.js document created immediately, IndexedDB persistence only when needed
 - **Granular Sync**: Only changed fields synchronize, not entire JSON object
 - **Efficient Display Updates**: Smart textarea synchronization with user input detection
 
@@ -5626,4 +5904,508 @@ Our DLUX TipTap implementation represents a **best-in-class offline-first collab
 
 **No changes needed** - our implementation is fully compliant and production-ready!
 
+## 🔌 **WebSocket Disconnection Patterns & URL Management**
+
+### **Core Principle: WebSocket-Only vs. Full Cleanup**
+
+#### **✅ `disconnectWebSocketOnly()` - Preserves Document State**
+
+**Purpose**: Disconnect from cloud while preserving the collaborative document for offline editing.
+
+**What it preserves**:
+- ✅ Y.js document and IndexedDB persistence
+- ✅ TipTap editors and collaborative extensions
+- ✅ Document content and metadata
+- ✅ Offline editing capability
+
+**What it disconnects**:
+- ❌ WebSocket provider only
+- ❌ Cloud real-time synchronization
+
+```javascript
+// ✅ CORRECT: WebSocket-only disconnect pattern
+disconnectWebSocketOnly() {
+    console.log('🔌 Disconnecting WebSocket only (preserving Y.js document and editors)...');
+    
+    // Only disconnect WebSocket provider, keep everything else intact
+    if (this.provider) {
+        this.provider.disconnect();
+        this.provider.destroy();
+        this.provider = null;
+    }
+    
+    // Keep Y.js document intact for offline editing
+    // Keep IndexedDB persistence active  
+    // Keep editors running for continued editing
+    
+    this.connectionStatus = 'offline';
+    this.connectionMessage = 'Working offline - changes saved locally';
+}
+```
+
+### **✅ URL Management Decision Matrix**
+
+| Scenario | Clear URLs? | Rationale | Implementation |
+|----------|-------------|-----------|----------------|
+| **Document Switching** | ✅ Yes | Replace with new document parameters | `loadCollaborativeFile()` |
+| **Intentional Offline** | ✅ Yes | Prevent auto-reconnect on refresh | `disconnectCollaboration()` |
+| **Cloud → Local Conversion** | ✅ Yes | Document no longer collaborative | `disableCloudCollaboration()` |
+| **Reconnection Prep** | ❌ No | Same document, restore after success | `reconnectToCollaborativeDocument()` |
+| **Network Disconnection** | ❓ Consider Intent | Preserve for UX vs prevent auto-reconnect | `onDisconnect()` handler |
+
+### **✅ Four Main Usage Patterns**
+
+#### **Pattern 1: Document Switching (URL Replacement)**
+```javascript
+// Context: Loading different collaborative document
+// Location: loadCollaborativeFile() line 3190
+this.disconnectWebSocketOnly(); // Preserve editors, disconnect WebSocket
+// ... reset Vue data ...
+this.updateURLWithCollabParams(doc.owner, doc.permlink); // Replace URL params
+```
+
+#### **Pattern 2: Intentional Offline Mode (URL Clearing)**
+```javascript
+// Context: User explicitly disconnects from collaboration
+// Location: disconnectCollaboration() line 8473
+this.disconnectWebSocketOnly(); // Preserve document for offline editing
+this.updateEditorPermissions(); // Enable offline editing
+this.clearCollabURLParams(); // Prevent auto-reconnect on refresh
+```
+
+#### **Pattern 3: Reconnection Preparation (URL Preservation)**
+```javascript
+// Context: Reconnecting to same document
+// Location: reconnectToCollaborativeDocument() line 8580
+this.disconnectWebSocketOnly(); // Clean disconnect before reconnect
+await this.connectToCollaborationServer(this.currentFile); // Reconnect
+this.updateURLWithCollabParams(this.currentFile.owner, this.currentFile.permlink); // Restore URL
+```
+
+#### **Pattern 4: Cloud-to-Local Conversion (URL Clearing)**
+```javascript
+// Context: Converting collaborative document to local-only
+// Location: disableCloudCollaboration() line 9836
+this.disconnectWebSocketOnly(); // Keep content, disconnect cloud
+this.currentFile.type = 'local'; // Change document type
+this.isCollaborativeMode = false; // Update mode
+this.clearCollabURLParams(); // Clear collaborative URL params
+```
+
+### **✅ Enhanced URL Management Best Practices**
+
+#### **Clean State Transitions (MANDATORY)**
+```javascript
+// ❌ WRONG: URL parameter stacking
+loadLocalFile() {
+    // Missing cleanup results in:
+    // /post?collab_owner=user1&collab_permlink=doc1&local_owner=user2&local_permlink=doc2
+    this.updateURLWithLocalParams(user2, doc2);
+}
+
+// ✅ CORRECT: Always clean before setting
+loadLocalFile() {
+    this.clearCollabURLParams(); // Clean ALL parameters first
+    this.updateURLWithLocalParams(user2, doc2); // Then set new ones
+}
+```
+
+#### **URL Lifecycle Management**
+```javascript
+// ✅ CORRECT: Complete URL lifecycle pattern
+async documentLifecycleWithURLs() {
+    // 1. Page Load: Check for share links
+    await this.checkAutoConnectParams();
+    
+    // 2. New Document: No URL parameters
+    await this.newDocument(); // Clean state
+    
+    // 3. Connect to Cloud: Update URL
+    await this.connectToCloud(); // Set collaborative parameters
+    
+    // 4. Disconnect: Clear URL (if intentional)
+    await this.disconnectFromCloud(); // Clear parameters
+    
+    // 5. Reconnect: Restore URL
+    await this.reconnectToCloud(); // Restore parameters
+    
+    // 6. Load Different Document: Update URL
+    await this.loadDocument(newDoc); // Replace parameters
+}
+```
+
+### **✅ Edge Case: Network Disconnection Handling**
+
+#### **Current Implementation**
+```javascript
+// Current onDisconnect() handler - may be too aggressive
+onDisconnect() {
+    this.connectionStatus = 'disconnected';
+    
+    // Clears URLs for ALL disconnections (including network issues)
+    if (this.connectionStatus !== 'offline') {
+        this.clearCollabURLParams();
+    }
+}
+```
+
+#### **Recommended Enhancement**
+```javascript
+// ✅ IMPROVED: Distinguish intentional vs unintentional disconnection
+onDisconnect() {
+    this.connectionStatus = 'disconnected';
+    
+    if (this.intentionalDisconnect) {
+        // User explicitly disconnected - clear URLs
+        this.clearCollabURLParams();
+        console.log('🔗 URL cleared due to intentional disconnection');
+    } else {
+        // Network/server issue - preserve URLs for easy reconnection
+        console.log('🔗 URL preserved for reconnection after network issue');
+        this.showReconnectOption = true;
+    }
+    
+    this.intentionalDisconnect = false;
+}
+
+// Set flag when user explicitly disconnects
+disconnectCollaboration() {
+    this.intentionalDisconnect = true; // Flag for onDisconnect handler
+    this.disconnectWebSocketOnly();
+    this.clearCollabURLParams();
+}
+```
+
+### **✅ Key Principles**
+
+1. **WebSocket disconnection ≠ URL clearing** - They serve different purposes
+2. **User intent matters** - Intentional vs. unintentional disconnection
+3. **Document identity preservation** - Same document should maintain same URL
+4. **Shareability consideration** - URLs enable sharing and bookmarking
+5. **Auto-reconnect control** - Clear URLs only when auto-reconnect is undesired
+6. **Clean state transitions** - Always clear before setting new parameters
+7. **TipTap.dev compliance** - Follow proper editor lifecycle patterns
+
+### **✅ Implementation Guidelines**
+
+#### **Always Use `disconnectWebSocketOnly()` When:**
+- Switching between collaborative documents
+- Preparing for reconnection to same document
+- Converting document types while preserving content
+- User explicitly goes offline but wants to continue editing
+
+#### **Clear URLs When:**
+- Loading different document (replace parameters)
+- User explicitly disconnects (prevent auto-reconnect)
+- Converting collaborative → local (no longer collaborative)
+- Document switching requires parameter changes
+
+#### **Preserve URLs When:**
+- Reconnecting to same document
+- Temporary network issues (consider user intent)
+- WebSocket provider recreation for same document
+- Maintaining shareability during brief disconnections
+
+### **✅ URL Parameter Standards**
+
+```javascript
+// Standard URL parameter names
+const URL_PARAMS = {
+    COLLAB_OWNER: 'collab_owner',      // Document owner username
+    COLLAB_PERMLINK: 'collab_permlink', // Document permlink identifier
+    LOCAL_OWNER: 'local_owner',        // Local document owner
+    LOCAL_PERMLINK: 'local_permlink'   // Local document identifier
+};
+
+// Example URLs
+const examples = [
+    'https://dlux.io/post',                                           // No collaboration
+    'https://dlux.io/post?collab_owner=user&collab_permlink=doc123', // Collaborative
+    'https://dlux.io/post?local_owner=user&local_permlink=local_123' // Local document
+];
+```
+
+This comprehensive WebSocket disconnection and URL management system ensures:
+- ✅ **Proper offline-first behavior** with document preservation
+- ✅ **Clean URL state management** preventing parameter stacking
+- ✅ **User-friendly reconnection** with appropriate URL handling
+- ✅ **TipTap.dev compliance** following official best practices
+- ✅ **Robust edge case handling** for network issues and user intent
+
 // ... existing code ...
+
+## NEW INSIGHTS: Advanced Patterns from Production Debugging
+
+### **Document Status Indicator Architecture**
+
+#### **Critical Pattern: isTemporaryDocument Flag Management**
+
+The `isTemporaryDocument` flag is crucial for proper status indicator behavior. **All document loading methods must handle this flag consistently**:
+
+```javascript
+// ✅ CORRECT: New document creation (temporary until content added)
+async newDocument() {
+    this.isTemporaryDocument = true;  // Start as temporary
+    this.currentFile = null;          // No file entry yet
+    // Status: Grey background "Ready to edit"
+}
+
+// ✅ CORRECT: Loading existing document (not temporary)
+async loadLocalDocument(file) {
+    this.isTemporaryDocument = false; // CRITICAL: Mark as real document
+    this.currentFile = file;          // Has file entry
+    // Status: Blue background "Saved locally" (when no unsaved changes)
+}
+
+// ✅ CORRECT: URL-based document loading (not temporary)
+async autoConnectToLocalDocument(owner, permlink) {
+    // Finds existing file and loads it
+    await this.loadLocalFile(existingFile);
+    // isTemporaryDocument automatically false for existing files
+}
+
+// ✅ CORRECT: Converting temporary to real document
+async ensureLocalFileEntry() {
+    if (!this.currentFile) {
+        this.currentFile = { /* create file entry */ };
+        
+        // CRITICAL: Mark as no longer temporary
+        if (this.isTemporaryDocument) {
+            this.isTemporaryDocument = false;
+            console.log('📝 Temp document converted to local document');
+        }
+    }
+}
+```
+
+#### **Status Indicator Color Logic**
+
+```javascript
+// Status determination follows this hierarchy:
+unifiedStatusInfo() {
+    const hasYjsDocument = !!this.ydoc;
+    const hasWebSocketProvider = !!this.provider;
+    const isConnected = this.connectionStatus === 'connected';
+    
+    if (hasYjsDocument) {
+        if (hasWebSocketProvider) {
+            // COLLABORATIVE DOCUMENTS
+            if (isConnected) {
+                return this.hasUnsavedChanges ? 
+                    { state: 'syncing', color: 'orange' } :     // Orange: Syncing
+                    { state: 'synced', color: 'green' };        // Green: Synced
+            } else {
+                return this.hasUnsavedChanges ?
+                    { state: 'offline-saving', color: 'orange' } : // Orange: Saving offline
+                    { state: 'offline-ready', color: 'blue' };     // Blue: Available offline
+            }
+        } else {
+            // LOCAL DOCUMENTS (no WebSocket provider)
+            if (this.isTemporaryDocument) {
+                return { state: 'temp-ready', color: 'grey' };     // Grey: Temporary
+            } else {
+                return this.hasUnsavedChanges ?
+                    { state: 'saving-local', color: 'orange' } :   // Orange: Saving
+                    { state: 'saved-local', color: 'blue' };       // Blue: Saved locally
+            }
+        }
+    }
+    
+    return { state: 'no-document', color: 'grey' }; // Grey: No document
+}
+```
+
+### **Cloud Syncing: Dual-Layer Architecture**
+
+#### **Critical Pattern: Y.js + API Dual Updates**
+
+For collaborative documents, document name changes require **both** Y.js config updates AND server API calls:
+
+```javascript
+// ✅ CORRECT: Dual-layer document name updates
+async renameCollaborativeDocument(newName) {
+    // LAYER 1: Y.js config update (real-time sync between users)
+    const success = this.setDocumentName(newName);
+    if (success) {
+        this.currentFile.name = newName; // Update local UI
+        
+        // LAYER 2: Server API update (persistent server-side storage)
+        try {
+            const response = await fetch(`/api/collaboration/documents/${owner}/${permlink}/name`, {
+                method: 'PATCH',
+                body: JSON.stringify({ documentName: newName })
+            });
+            
+            if (response.ok) {
+                console.log('✅ Server-side document name updated');
+                await this.loadCollaborativeDocs(); // Refresh docs list
+            }
+        } catch (error) {
+            console.warn('⚠️ Server API failed, but Y.js sync still works');
+            // Don't throw - Y.js sync is more important than server API
+        }
+        
+        // Trigger autosave for Y.js persistence
+        this.hasUnsavedChanges = true;
+        this.debouncedAutoSave();
+    }
+}
+```
+
+#### **Why Dual-Layer is Required**
+
+1. **Y.js Config**: Handles real-time sync between connected users
+2. **Server API**: Updates the collaborative documents list (what shows in File > Load)
+3. **Both Required**: Y.js alone doesn't update the server-side document name
+
+### **Document Loading Consistency Patterns**
+
+#### **Critical Pattern: Unified Flag Management**
+
+All document loading methods must handle the same flags consistently:
+
+```javascript
+// Template for ALL document loading methods:
+async loadAnyDocument(source) {
+    // 1. Clean up previous state
+    this.fullCleanupCollaboration();
+    await this.$nextTick();
+    
+    // 2. Set document type flags
+    this.currentFile = /* document object */;
+    this.fileType = /* 'local' or 'collaborative' */;
+    this.isCollaborativeMode = /* true/false based on type */;
+    this.isTemporaryDocument = false; // CRITICAL: Always false for existing docs
+    
+    // 3. Create Y.js document + IndexedDB
+    this.ydoc = new Y.Doc();
+    this.indexeddbProvider = new IndexeddbPersistence(docId, this.ydoc);
+    
+    // 4. Wait for sync and create editors
+    await this.waitForSync();
+    await this.createEditors();
+    
+    // 5. Clear flags
+    this.hasUnsavedChanges = false;
+    this.isCleaningUp = false;
+}
+```
+
+### **Auto-Save and Persistence Patterns**
+
+#### **Critical Pattern: Unified Auto-Save for All Document Types**
+
+```javascript
+// ✅ CORRECT: Unified auto-save handles all document types
+async performAutoSave() {
+    if (!this.ydoc || !this.hasContentToSave()) return;
+    
+    // STEP 1: Y.js + IndexedDB persistence (works for ALL documents)
+    console.log('✅ Content automatically persisted to IndexedDB via Y.js');
+    
+    // STEP 2: Update Y.js config metadata (unified approach)
+    await this.updateYjsConfigMetadata();
+    
+    // STEP 3: Handle document type-specific persistence
+    if (this.currentFile?.type === 'collaborative') {
+        // Collaborative: Y.js + WebSocket sync
+        console.log('💾 Collaborative document changes synced via Y.js');
+    } else {
+        // Local: Y.js + IndexedDB only
+        console.log('💾 Y.js + IndexedDB persistence complete (offline-first)');
+    }
+    
+    // STEP 4: Convert temp documents to real documents
+    if (this.ydoc && this.hasContentToSave()) {
+        await this.ensureLocalFileEntry();
+        
+        if (this.isTemporaryDocument && this.currentFile) {
+            this.isTemporaryDocument = false; // CRITICAL: Convert to real document
+            console.log('📝 Temp document converted to draft');
+        }
+    }
+    
+    // STEP 5: Clear unsaved flag
+    this.clearUnsavedAfterSync();
+}
+```
+
+### **Error Prevention Patterns**
+
+#### **Critical Pattern: Avoid Multiple Code Paths**
+
+**Problem**: Having different methods for similar operations leads to inconsistent flag handling.
+
+**Solution**: Use unified methods with consistent flag management:
+
+```javascript
+// ❌ WRONG: Multiple inconsistent methods
+async loadLocalDocumentMethod1(file) {
+    this.isTemporaryDocument = false; // ✅ Has flag
+}
+
+async loadLocalDocumentMethod2(file) {
+    // ❌ Missing flag - causes grey background
+}
+
+async loadLocalDocumentMethod3(file) {
+    this.isTemporaryDocument = false; // ✅ Has flag
+}
+
+// ✅ CORRECT: Single unified method
+async loadLocalDocument(file) {
+    this.isTemporaryDocument = false; // ✅ Consistent flag handling
+    // ... unified loading logic
+}
+```
+
+### **Debugging Patterns**
+
+#### **Status Indicator Debugging**
+
+```javascript
+// Add temporary debugging to understand status issues:
+unifiedStatusInfo() {
+    console.log('🔍 DEBUG: Status check:', {
+        isTemporaryDocument: this.isTemporaryDocument,
+        hasCurrentFile: !!this.currentFile,
+        currentFileType: this.currentFile?.type,
+        hasUnsavedChanges: this.hasUnsavedChanges,
+        hasWebSocketProvider: !!this.provider,
+        connectionStatus: this.connectionStatus
+    });
+    
+    // ... status logic
+}
+```
+
+#### **Document Name Debugging**
+
+```javascript
+// Debug document name sync issues:
+async updateYjsConfigMetadata() {
+    console.log('📄 Document name stored in Y.js config:', {
+        documentName: this.currentFile.name,
+        documentType: this.currentFile.type,
+        hasWebSocketProvider: !!this.provider,
+        isConnected: this.connectionStatus === 'connected',
+        willSyncToCloud: !!this.provider && this.connectionStatus === 'connected'
+    });
+    
+    if (this.provider && this.connectionStatus === 'connected') {
+        console.log('☁️ Document name change will auto-sync to cloud via WebSocket provider');
+    } else {
+        console.log('💾 Document name change will remain local-only');
+    }
+}
+```
+
+### **Key Takeaways**
+
+1. **Consistency is Critical**: All document loading methods must handle flags identically
+2. **Dual-Layer Syncing**: Collaborative documents need both Y.js AND API updates
+3. **Flag Management**: `isTemporaryDocument` determines status indicator color
+4. **Unified Auto-Save**: One method handles all document types consistently
+5. **Debugging First**: Add logging to understand state before fixing issues
+
+These patterns ensure reliable, consistent behavior across all document operations while following TipTap best practices.

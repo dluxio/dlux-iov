@@ -1,4 +1,4 @@
-this.version = "2025.06.15.4";
+this.version = "2025.06.15.5";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.15.4",
-  "generated": "2025-06-15T18:15:53Z",
+  "version": "2025.06.15.15",
+  "generated": "2025-06-15T22:20:42Z",
   "files": {
-    "/css/custom.css": {
-      "checksum": "82ac3e6cfdf6556b011c60440f7795a6",
-      "size": 349009,
-      "priority": "critical"
-    },
     "/js/vue.esm-browser.js": {
       "checksum": "232af68f6551a87a4732981749dd5265",
       "size": 531704,
@@ -616,8 +611,8 @@ self.cacheManifest =
       "priority": "critical"
     },
     "/sw.js": {
-      "checksum": "0c46d415227e735b7f70345472c0086e",
-      "size": 96854,
+      "checksum": "55433ba0a9e07c560037795ffb4270db",
+      "size": 96425,
       "priority": "critical"
     },
     "/about/index.html": {
@@ -689,11 +684,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/.ipfs/index.html": {
-      "checksum": "fbed18dd2cf4e8f4f7915e75841f94af",
-      "size": 8924,
-      "priority": "important"
     },
     "/.src/index.js": {
       "checksum": "7dcb7b0624cda5d531b74a6e6c17df17",
@@ -1636,7 +1626,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "47563b2b84b6baee5cb815dc7c2fd05b",
+      "checksum": "b0d48da35af67f12b5be12a26e4ba7ad",
       "size": 36316,
       "priority": "important"
     },
@@ -1656,8 +1646,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/tiptap-editor-with-file-menu.js": {
-      "checksum": "b924e42f4dac560777696300c6552977",
-      "size": 619046,
+      "checksum": "ddbd7ca65c3a5b70e1ec68c6592e77d3",
+      "size": 713332,
       "priority": "important"
     },
     "/js/tiptap-editor.js": {
@@ -1856,7 +1846,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "c5f1dd287bb4d8d70c5640b7b08bf67c",
+      "checksum": "dd702fb8bde59727ba95cba54b0fca04",
       "size": 7299,
       "priority": "important"
     },
@@ -1949,11 +1939,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/aframe-builder/index.html": {
-      "checksum": "03e5a74732c20329e874a40f36526064",
-      "size": 388601,
-      "priority": "page-specific"
     },
     "/aframe-builder/index2.html": {
       "checksum": "50d15bdba6ab42cde3109e5935abf189",
@@ -2885,11 +2870,6 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/js/bennies-old.js": {
-      "checksum": "2c4324cb1894d251a4aceb16125aa6ee",
-      "size": 7941,
-      "priority": "lazy"
-    },
     "/js/contractvue-old.js": {
       "checksum": "05243466168d1f1452c58fb91bd0d7bb",
       "size": 118493,
@@ -2961,8 +2941,8 @@ self.cacheManifest =
       "priority": "lazy"
     },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     }
   }
