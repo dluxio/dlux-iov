@@ -1,4 +1,4 @@
-this.version = "2025.06.15.5";
+this.version = "2025.06.16.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,22 +597,17 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.15.15",
-  "generated": "2025-06-15T22:20:42Z",
+  "version": "2025.06.16.1",
+  "generated": "2025-06-15T22:21:08Z",
   "files": {
-    "/js/vue.esm-browser.js": {
-      "checksum": "232af68f6551a87a4732981749dd5265",
-      "size": 531704,
-      "priority": "critical"
-    },
     "/js/v3-nav.js": {
       "checksum": "301acbee36b9989b208b8dfa5719da24",
       "size": 253060,
       "priority": "critical"
     },
     "/sw.js": {
-      "checksum": "55433ba0a9e07c560037795ffb4270db",
-      "size": 96425,
+      "checksum": "163650fbde42967eea45b768cce0fc56",
+      "size": 95886,
       "priority": "critical"
     },
     "/about/index.html": {
@@ -684,11 +679,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/.src/index.js": {
-      "checksum": "7dcb7b0624cda5d531b74a6e6c17df17",
-      "size": 599,
-      "priority": "important"
     },
     "/@markegiles/coastal-bike-tour-in-buenos-aires/index.html": {
       "checksum": "7cfdff509fb36ca5714be359a8bf9645",
@@ -1940,11 +1930,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/aframe-builder/index2.html": {
-      "checksum": "50d15bdba6ab42cde3109e5935abf189",
-      "size": 119115,
-      "priority": "page-specific"
-    },
     "/chat/gpt.html": {
       "checksum": "f1a43900d7a03cb4b9780f24fbff9999",
       "size": 12892,
@@ -2870,11 +2855,6 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/js/contractvue-old.js": {
-      "checksum": "05243466168d1f1452c58fb91bd0d7bb",
-      "size": 118493,
-      "priority": "lazy"
-    },
     "/js/extensionvue-old.js": {
       "checksum": "3d09236bed876fd8b322bf03d6177758",
       "size": 18405,
@@ -2941,8 +2921,8 @@ self.cacheManifest =
       "priority": "lazy"
     },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     }
   }
