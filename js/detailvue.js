@@ -56,6 +56,16 @@ data-bs-dismiss="modal" aria-label="Close"></button>
 <span class="ms-1 badge text-white-50" :class="{'rep-danger': modalRep < 25, 'rep-warning': modalRep >= 25 && modalRep < 50, 'rep-success': modalRep >= 50}">{{modalRep}}</span>
 </div>
 </div>
+<!-- Community info display -->
+<div v-if="postCommunity && postCommunityTitle" class="d-flex align-items-center mt-1">
+<a :href="'#community/' + postCommunity" @click.prevent="navigateToCommunity(postCommunity)" class="d-flex align-items-center no-decoration">
+<img :src="'https://images.hive.blog/u/' + postCommunity + '/avatar'" 
+     :alt="postCommunity" 
+     class="rounded-circle bg-light img-fluid me-1 border border-light" 
+     style="width: 24px;">
+<span class="small text-info">{{postCommunityTitle}}</span>
+</a>
+</div>
 <span class="small text-muted">{{post.ago}}</span>
 </div>
 </div>
@@ -301,6 +311,14 @@ data() {
     };
 },
 emits: ['vote', 'reply', 'modalselect', 'tosign'],
+computed: {
+    postCommunity() {
+        return this.post.community || (this.post.json_metadata && this.post.json_metadata.community);
+    },
+    postCommunityTitle() {
+        return this.post.community_title || (this.post.json_metadata && this.post.json_metadata.community_title);
+    }
+},
 methods: {
     ...Mcommon,
     async getModalAuthorReputation() {
@@ -678,6 +696,11 @@ methods: {
     },
     expIn(con){
         return `Expires in ${parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60) < 24 ? parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60) + ' hours' : parseInt((parseInt(con.e.split(':')[0]) - this.head_block) / 20 / 60 / 24) + ' days'}`
+    },
+    navigateToCommunity(community) {
+        // Navigate to the community feed
+        console.log(`Navigating to community: ${community}`);
+        window.location.href = `/hub/#community/${community}`;
     }
 },
 watch: {

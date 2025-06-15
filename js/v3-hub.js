@@ -266,6 +266,9 @@ createApp({
       selectedCommunity: '',
       availableCommunities: [],
       loadingCommunities: false,
+      skipHashUpdate: false,
+      followedCommunities: [],
+      loadingFollowedCommunities: false,
       postSelect: {
         sort: "time",
         searchTerm: "",
@@ -1072,6 +1075,12 @@ createApp({
       this.initializeMasonryColumns();
       this.newPostsCount = 0;
 
+      // Update hash when switching tabs manually (unless already handled by hash router)
+      if (!this.skipHashUpdate) {
+        this.updateHashFromTab();
+      }
+      this.skipHashUpdate = false;
+
       if (tab === 'hub') {
         // Reset pagination for hub (new posts)
         this.postSelect.new.o = 0;
@@ -1096,6 +1105,10 @@ createApp({
         if (tab === 'communities') {
           // Load communities list when switching to communities tab
           this.getAvailableCommunities();
+          // Also load followed communities if user is logged in
+          if (this.account) {
+            this.getFollowedCommunities();
+          }
           if (!this.selectedCommunity) {
             // Don't fetch posts if no community is selected
             return;
@@ -2264,6 +2277,160 @@ createApp({
         }
       }
     },
+    // Hash routing methods
+    handleHashRoute() {
+      const hash = window.location.hash.substring(1); // Remove the #
+      console.log('Handling hash route:', hash);
+      
+      if (!hash) {
+        // Default to hub tab
+        this.switchTab('hub');
+        return;
+      }
+      
+      const parts = hash.split('/');
+      const route = parts[0];
+      
+      switch (route) {
+        case 'new':
+        case 'hub':
+          this.switchTab('hub');
+          break;
+        case 'trending':
+          this.switchTab('trending');
+          break;
+        case 'promoted':
+          this.switchTab('promoted');
+          break;
+        case 'following':
+          if (this.account) {
+            this.switchTab('following');
+          }
+          break;
+                 case 'community':
+           this.switchTab('communities');
+           if (parts[1]) {
+             // Set the selected community directly without URL update
+             this.selectedCommunity = parts[1];
+             this.onCommunityChange();
+           }
+           break;
+        case 'communities':
+          this.switchTab('communities');
+          break;
+        default:
+          this.switchTab('hub');
+      }
+    },
+    navigateToSpecificCommunity(communityId) {
+      console.log('Navigating to community:', communityId);
+      // Ensure communities are loaded
+      if (this.availableCommunities.length === 0) {
+        this.getAvailableCommunities();
+      }
+      
+      // Set the selected community
+      this.selectedCommunity = communityId;
+      
+      // Update the URL hash
+      window.location.hash = `#community/${communityId}`;
+      
+      // Trigger community change
+      this.onCommunityChange();
+    },
+    updateHashFromTab() {
+      // Update hash when switching tabs manually
+      let hash = '';
+      switch (this.currentTab) {
+        case 'hub':
+          hash = '#hub';
+          break;
+        case 'trending':
+          hash = '#trending';
+          break;
+        case 'promoted':
+          hash = '#promoted';
+          break;
+        case 'following':
+          hash = '#following';
+          break;
+        case 'communities':
+          if (this.selectedCommunity) {
+            hash = `#community/${this.selectedCommunity}`;
+          } else {
+            hash = '#communities';
+          }
+          break;
+        default:
+          hash = '#hub';
+      }
+      
+      if (window.location.hash !== hash) {
+        window.location.hash = hash;
+      }
+    },
+    onCommunityChange() {
+      if (this.currentTab === 'communities' && this.selectedCommunity) {
+        // Reset pagination for communities
+        this.postSelect.communities.start_author = '';
+        this.postSelect.communities.start_permlink = '';
+        this.postSelect.communities.e = false;
+        this.postSelect.communities.p = false;
+        this.communities = [];
+        this.displayPosts = [];
+        this.initializeMasonryColumns();
+        this.newPostsCount = 0;
+
+        // Optionally get community info (for future use)
+        this.getCommunityInfo(this.selectedCommunity);
+
+        this.getHivePosts();
+      }
+    },
+    getFollowedCommunities() {
+      if (!this.account || this.loadingFollowedCommunities) return;
+
+      this.loadingFollowedCommunities = true;
+
+      fetch(this.hapi, {
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "bridge.get_following",
+          params: {
+            account: this.account,
+            type: "community",
+            start: "",
+            limit: 100
+          },
+          id: 1
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      })
+        .then((r) => r.json())
+        .then((res) => {
+          this.loadingFollowedCommunities = false;
+          if (res.result && res.result.length > 0) {
+            this.followedCommunities = res.result.map(follow => ({
+              id: follow.following,
+              name: follow.title || follow.following,
+              description: follow.about || 'Community',
+              subscribers: follow.subscribers || 0
+            }));
+            console.log('Loaded followed communities:', this.followedCommunities.length);
+          } else {
+            this.followedCommunities = [];
+            console.log('No followed communities found');
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching followed communities:', error);
+          this.loadingFollowedCommunities = false;
+          this.followedCommunities = [];
+        });
+    },
   },
   mounted() {
     // Initialize masonry system
@@ -2287,7 +2454,16 @@ createApp({
     if (this.pagePermlink) {
       this.getContent(this.pageAccount, this.pagePermlink, true)
     } else {
-      this.getHubPosts();
+      // Initialize hash routing
+      this.skipHashUpdate = true; // Prevent initial hash update
+      this.handleHashRoute(); // Handle initial hash
+      
+      // Add hash change listener
+      window.addEventListener('hashchange', () => {
+        this.skipHashUpdate = true; // Prevent loop
+        this.handleHashRoute();
+      });
+      
       this.boundScrollHandler = this.handleScroll.bind(this); // Create bound handler
       this.boundResizeHandler = this.handleResize.bind(this); // Create bound resize handler
       document.body.addEventListener('scroll', this.boundScrollHandler); // Use bound handler
@@ -2301,6 +2477,11 @@ createApp({
 
     // Pre-load communities list
     this.getAvailableCommunities();
+    
+    // Load followed communities if user is logged in
+    if (this.account) {
+      this.getFollowedCommunities();
+    }
 
     // Start observing for video elements to setup HLS
     this.videoObserver = this.initIpfsVideoSupport();
@@ -2315,6 +2496,9 @@ createApp({
     if (this.resizeTimeout) { // Clear any pending resize timeout
       clearTimeout(this.resizeTimeout);
     }
+
+    // Clean up hash change listener
+    window.removeEventListener('hashchange', this.handleHashRoute);
 
     // Clean up video observer and HLS instances
     if (this.videoObserver) {
@@ -2366,6 +2550,15 @@ createApp({
         }
       },
       deep: true
+    },
+    account(newAccount, oldAccount) {
+      // Load followed communities when user logs in
+      if (newAccount && newAccount !== oldAccount) {
+        this.getFollowedCommunities();
+      } else if (!newAccount) {
+        // Clear followed communities when user logs out
+        this.followedCommunities = [];
+      }
     }
   },
   computed: {

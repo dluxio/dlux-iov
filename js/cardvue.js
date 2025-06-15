@@ -34,6 +34,16 @@ export default {
               </span>
             </div>
           </a>
+          <!-- Community info display -->
+          <div v-if="postCommunity && postCommunityTitle" class="d-flex align-items-center mt-1">
+            <a :href="'#community/' + postCommunity" @click.prevent="navigateToCommunity(postCommunity)" class="d-flex align-items-center no-decoration">
+            <img :src="'https://images.hive.blog/u/' + postCommunity + '/avatar'" 
+                 :alt="postCommunity" 
+                 class="rounded-circle bg-light img-fluid me-1 border border-light" 
+                 style="width: 20px;">
+            <span class="small text-info">{{postCommunityTitle}}</span>
+            </a>
+          </div>
           <!-- time ago -->
           <span class="small text-muted" style="font-weight: 400">{{ timeSince(post.created) }}</span>
         </div>
@@ -429,6 +439,12 @@ export default {
                 return this.displayImages[this.currentImageIndex] || this.displayImage || '/img/dlux-logo-icon.png';
             }
             return this.displayImage || '/img/dlux-logo-icon.png';
+        },
+        postCommunity() {
+            return this.post.community || (this.post.json_metadata && this.post.json_metadata.community);
+        },
+        postCommunityTitle() {
+            return this.post.community_title || (this.post.json_metadata && this.post.json_metadata.community_title);
         }
     },
     methods: {
@@ -806,6 +822,11 @@ export default {
             if (imageSection) {
                 imageSection.style.display = 'none';
             }
+        },
+        navigateToCommunity(community) {
+            // Navigate to the community feed
+            console.log(`Navigating to community: ${community}`);
+            window.location.href = `/hub/#community/${community}`;
         }
     },
     watch: {

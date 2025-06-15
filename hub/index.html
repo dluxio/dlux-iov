@@ -161,31 +161,31 @@
                         <ul class="nav nav-tabs justify-content-center" role="tablist">
                             <li class="nav-item">
                                 <a class="nav-link" :class="{'active': currentTab === 'hub'}" 
-                                   @click="switchTab('hub')" href="#" role="tab">
+                                   @click="switchTab('hub')" href="#hub" role="tab">
                                     <i class="fa-solid fa-vr-cardboard me-2"></i>HUB
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" :class="{'active': currentTab === 'trending'}" 
-                                   @click="switchTab('trending')" href="#" role="tab">
+                                   @click="switchTab('trending')" href="#trending" role="tab">
                                     <i class="fa-solid fa-fire me-2"></i>TRENDING
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" :class="{'active': currentTab === 'promoted'}" 
-                                   @click="switchTab('promoted')" href="#" role="tab">
+                                   @click="switchTab('promoted')" href="#promoted" role="tab">
                                     <i class="fa-solid fa-clock me-2"></i>NEW
                                 </a>
                             </li>
                             <li class="nav-item" v-if="account">
                                 <a class="nav-link" :class="{'active': currentTab === 'following'}" 
-                                   @click="switchTab('following')" href="#" role="tab">
+                                   @click="switchTab('following')" href="#following" role="tab">
                                     <i class="fa-solid fa-users me-2"></i>FOLLOWING
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" :class="{'active': currentTab === 'communities'}" 
-                                   @click="switchTab('communities')" href="#" role="tab">
+                                   @click="switchTab('communities')" href="#communities" role="tab">
                                     <i class="fa-solid fa-users-gear me-2"></i>COMMUNITIES
                                 </a>
                             </li>
@@ -309,6 +309,17 @@
                                         </option>
                                         <option v-for="community in availableCommunities" :key="community.id" :value="community.id" style="color: white; background-color: #333;">
                                             {{ community.name }} - {{ community.description }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <!-- followed communities selector -->
+                                <div class="mx-1 mb-1" v-if="account && followedCommunities.length > 0">
+                                    <select class="form-select bg-dark text-white border-success" v-model="selectedCommunity" @change="onCommunityChange()" style="color: white !important;" :disabled="loadingFollowedCommunities">
+                                        <option value="" style="color: white; background-color: #333;">
+                                            {{ loadingFollowedCommunities ? 'Loading followed...' : 'My Communities...' }}
+                                        </option>
+                                        <option v-for="community in followedCommunities" :key="'followed-' + community.id" :value="community.id" style="color: white; background-color: #333;">
+                                            <i class="fa-solid fa-heart me-1 text-success"></i>{{ community.name }}
                                         </option>
                                     </select>
                                 </div>
