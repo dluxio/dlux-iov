@@ -1,4 +1,4 @@
-this.version = "2025.06.16.1";
+this.version = "2025.06.15.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,17 +597,12 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.16.1",
-  "generated": "2025-06-15T22:21:08Z",
+  "version": "2025.06.15.15",
+  "generated": "2025-06-15T22:34:09Z",
   "files": {
-    "/js/v3-nav.js": {
-      "checksum": "301acbee36b9989b208b8dfa5719da24",
-      "size": 253060,
-      "priority": "critical"
-    },
     "/sw.js": {
-      "checksum": "163650fbde42967eea45b768cce0fc56",
-      "size": 95886,
+      "checksum": "09a6fcf2acf8c85529b13e0f1d55901c",
+      "size": 95291,
       "priority": "critical"
     },
     "/about/index.html": {
@@ -679,11 +674,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/@markegiles/coastal-bike-tour-in-buenos-aires/index.html": {
-      "checksum": "7cfdff509fb36ca5714be359a8bf9645",
-      "size": 89252,
-      "priority": "important"
     },
     "/analyze-unused-methods.js": {
       "checksum": "6e764222e46e8f7fc8d51e462b8ad344",
@@ -1616,7 +1606,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "b0d48da35af67f12b5be12a26e4ba7ad",
+      "checksum": "d4fb106ad069a1d9ae2008de97761537",
       "size": 36316,
       "priority": "important"
     },
@@ -1636,8 +1626,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/tiptap-editor-with-file-menu.js": {
-      "checksum": "ddbd7ca65c3a5b70e1ec68c6592e77d3",
-      "size": 713332,
+      "checksum": "4c50b4782bedfcd9aadf8873648f5846",
+      "size": 716418,
       "priority": "important"
     },
     "/js/tiptap-editor.js": {
@@ -1836,7 +1826,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "dd702fb8bde59727ba95cba54b0fca04",
+      "checksum": "3869cd240fb38f7c0392eba1ac515d8e",
       "size": 7299,
       "priority": "important"
     },
@@ -1929,11 +1919,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/chat/gpt.html": {
-      "checksum": "f1a43900d7a03cb4b9780f24fbff9999",
-      "size": 12892,
-      "priority": "page-specific"
     },
     "/chat/index.html": {
       "checksum": "319e465189cdb6ccfda4fe045fa68cca",
@@ -2855,11 +2840,6 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/js/extensionvue-old.js": {
-      "checksum": "3d09236bed876fd8b322bf03d6177758",
-      "size": 18405,
-      "priority": "lazy"
-    },
     "/js/filesvue-dd.spec.js": {
       "checksum": "5185f103ff9f5ade0885455ba92cc4f7",
       "size": 41067,
@@ -2921,8 +2901,8 @@ self.cacheManifest =
       "priority": "lazy"
     },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     }
   }

@@ -718,18 +718,21 @@ export default {
                 // should be treated as collaborative documents with local cache
                 const isConvertedCollaborative = localFile.isCollaborative && localFile.owner && localFile.permlink;
                 
+                // ✅ FIXED: Cloud indicator should show for ALL collaborative documents
+                const hasCloudCapability = isConvertedCollaborative || (localFile.isCollaborative && localFile.owner && localFile.permlink);
+                
                 documentMap.set(key, {
                     ...localFile,
                     // UNIFIED MODEL: Single document with dual indicators
                     hasLocalVersion: true,
-                    hasCloudVersion: isConvertedCollaborative, // Converted local docs have cloud version
+                    hasCloudVersion: hasCloudCapability, // Show cloud indicator for all collaborative documents
                     localFile: localFile,
-                    cloudFile: isConvertedCollaborative ? localFile : null, // For converted docs, local file IS the cloud file
-                    // Prefer collaborative if it's been converted, otherwise local
-                    preferredType: isConvertedCollaborative ? 'collaborative' : 'local',
+                    cloudFile: hasCloudCapability ? localFile : null, // For collaborative docs, local file IS the cloud file
+                    // Prefer collaborative if it has cloud capability, otherwise local
+                    preferredType: hasCloudCapability ? 'collaborative' : 'local',
                     // Status indicators
                     localStatus: this.getLocalStatus(localFile),
-                    cloudStatus: isConvertedCollaborative ? this.getCloudStatus(localFile) : 'none'
+                    cloudStatus: hasCloudCapability ? this.getCloudStatus(localFile) : 'none'
                 });
             });
             
@@ -823,7 +826,10 @@ export default {
                 hasLocal: f.hasLocalVersion,
                 hasCloud: f.hasCloudVersion,
                 preferredType: f.preferredType,
-                isCollaborative: f.isCollaborative
+                isCollaborative: f.isCollaborative,
+                cloudStatus: f.cloudStatus,
+                owner: f.owner,
+                permlink: f.permlink
             })));
             
             return allFiles.sort((a, b) => {
@@ -1162,15 +1168,36 @@ export default {
         getCloudStatus(cloudFile) {
             if (!cloudFile) return 'none';
             
-            // Check WebSocket connection status
-            if (this.provider && this.connectionStatus === 'connected') {
-                return 'synced'; // Green - synced to cloud
-            } else if (this.provider && this.connectionStatus === 'connecting') {
-                return 'syncing'; // Yellow - syncing to cloud
-            } else if (this.hasUnsavedChanges && this.currentFile?.owner === cloudFile.owner && this.currentFile?.permlink === cloudFile.permlink) {
-                return 'pending'; // Orange - has unsynced changes
+            // ✅ FIXED: Determine cloud status based on document properties and authentication
+            // Check if this is a collaborative document (has owner/permlink)
+            const isCollaborativeDoc = cloudFile.isCollaborative && cloudFile.owner && cloudFile.permlink;
+            if (!isCollaborativeDoc) return 'none';
+            
+            // Check if user is authenticated (required for cloud features)
+            if (!this.isAuthenticated || this.isAuthExpired) {
+                return 'available'; // Gray - collaborative document but user not authenticated
             }
-            return 'available'; // Gray - available in cloud but not connected
+            
+            // Check if this is the currently open document to determine connection status
+            const isCurrentDoc = this.isCurrentDocument(cloudFile);
+            
+            if (isCurrentDoc) {
+                // For currently open document, check WebSocket connection status
+                if (this.provider && this.connectionStatus === 'connected') {
+                    return 'synced'; // Green - synced to cloud
+                } else if (this.provider && this.connectionStatus === 'connecting') {
+                    return 'syncing'; // Yellow - syncing to cloud
+                } else if (this.hasUnsavedChanges) {
+                    return 'pending'; // Orange - has unsynced changes
+                }
+                return 'available'; // Gray - collaborative but not connected
+            } else {
+                // For non-current documents, show as available if user can access them
+                const canAccess = cloudFile.owner === this.username || // User owns it
+                                this.documentPermissions?.some(p => p.account === this.username); // User has permissions
+                
+                return canAccess ? 'available' : 'available'; // Gray - available in cloud
+            }
         },
 
         // Status styling helpers
@@ -1205,8 +1232,8 @@ export default {
                 case 'synced': return 'Synced to cloud and up to date';
                 case 'syncing': return 'Syncing changes to cloud...';
                 case 'pending': return 'Has changes not yet synced to cloud';
-                case 'available': return 'Available in cloud (not connected)';
-                default: return 'Not in cloud';
+                case 'available': return 'Collaborative document - click to connect to cloud';
+                default: return 'Not a collaborative document';
             }
         },
 
@@ -2630,11 +2657,16 @@ export default {
                 this.hasUnsavedChanges = false;
                 this.isCleaningUp = false;
                 
+                // ✅ DISMISS MODAL: Local document loaded from IndexedDB
+                this.showLoadModal = false;
+                
                 console.log('✅ Local document loaded using NEW best practice pattern');
                 
             } catch (error) {
                 console.error('❌ Failed to load local document:', error);
                 alert('Failed to load document: ' + error.message);
+                // ✅ DISMISS MODAL: Even on error, dismiss modal to prevent UI lock
+                this.showLoadModal = false;
             }
         },
         
@@ -2932,7 +2964,13 @@ export default {
                 
                 console.log('📄 Publish options, custom JSON, and document name loaded from Y.js');
                 
-                // STEP 7: For cloud documents, initialize permissions and connect WebSocket
+                // ✅ OFFLINE-FIRST: Dismiss modal immediately after local content is loaded
+                this.showLoadModal = false;
+                this.hasUnsavedChanges = false;
+                
+                console.log('✅ Modal dismissed - local content loaded from IndexedDB');
+                
+                // STEP 7: For cloud documents, connect to cloud in background (non-blocking)
                 if (requiresCloudTier && file.type === 'collaborative') {
                     // Initialize permissions immediately to prevent read-only mode during loading
                     console.log('🔐 Initializing permissions for collaborative document...');
@@ -2964,7 +3002,14 @@ export default {
                         console.error('❌ URL update failed:', urlError);
                     }
                     
-                    await this.connectToCollaborationServer(file);
+                    // ✅ BACKGROUND CLOUD CONNECTION: Don't block UI for cloud connection
+                    this.connectToCollaborationServer(file).catch(error => {
+                        console.error('❌ Background cloud connection failed:', error);
+                        // Don't throw - let user continue with offline editing
+                    });
+                    
+                    console.log('🔗 Cloud connection started in background');
+                    
                 } else if (file.type === 'local' || !requiresCloudTier) {
                     // ✅ CRITICAL FIX: Set local URL parameters for local documents
                     if (file.id && this.username) {
@@ -2974,9 +3019,6 @@ export default {
                         console.log('🔗 Main loadDocument: URL updated with local file parameters:', permlink);
                     }
                 }
-                
-                this.showLoadModal = false;
-                this.hasUnsavedChanges = false;
                 
                 // ✅ Clear cleanup flag after successful document loading
                 this.isCleaningUp = false;
@@ -12425,7 +12467,13 @@ export default {
                         console.error('❌ URL update failed:', urlError);
                     }
                     
-                    await this.connectToCollaborationServer(file);
+                    // ✅ BACKGROUND CLOUD CONNECTION: Don't block UI for cloud connection
+                    this.connectToCollaborationServer(file).catch(error => {
+                        console.error('❌ Background cloud connection failed:', error);
+                        // Don't throw - let user continue with offline editing
+                    });
+                    
+                    console.log('🔗 Cloud connection started in background');
                 }
                 
                 // ✅ TIPTAP BEST PRACTICE: Use nextTick instead of arbitrary delay for DOM updates
@@ -12440,8 +12488,11 @@ export default {
                 // Clear cleanup flag after document loading is complete
                 this.isCleaningUp = false;
                 
+                // ✅ OFFLINE-FIRST: Dismiss modal immediately after local content is loaded
                 this.showLoadModal = false;
                 this.hasUnsavedChanges = false;
+                
+                console.log('✅ Modal dismissed - local content loaded from IndexedDB');
                 
                 console.log('✅ Document loaded without UI update');
                 
