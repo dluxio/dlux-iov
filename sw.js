@@ -1,4 +1,4 @@
-this.version = "2025.06.15.1";
+this.version = "2025.06.16.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.15.15",
-  "generated": "2025-06-15T22:34:09Z",
+  "version": "2025.06.16.1",
+  "generated": "2025-06-15T22:34:43Z",
   "files": {
-    "/sw.js": {
-      "checksum": "09a6fcf2acf8c85529b13e0f1d55901c",
-      "size": 95291,
-      "priority": "critical"
-    },
     "/about/index.html": {
       "checksum": "c55b0fb41651600457066258528efda7",
       "size": 50785,
@@ -674,11 +669,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/analyze-unused-methods.js": {
-      "checksum": "6e764222e46e8f7fc8d51e462b8ad344",
-      "size": 12342,
-      "priority": "important"
     },
     "/blog/index.html": {
       "checksum": "cea1a92da48ab633683afd7ac67d7dad",
@@ -1920,11 +1910,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/chat/index.html": {
-      "checksum": "319e465189cdb6ccfda4fe045fa68cca",
-      "size": 3707,
-      "priority": "page-specific"
-    },
     "/img/aframe.png": {
       "checksum": "8361db7f31590be699b6ca82a3ba2edd",
       "size": 38148,
@@ -2840,11 +2825,6 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/js/filesvue-dd.spec.js": {
-      "checksum": "5185f103ff9f5ade0885455ba92cc4f7",
-      "size": 41067,
-      "priority": "lazy"
-    },
     "/js/filesvue-old.js": {
       "checksum": "4b39d9cd81599840f6b31e61e66efa84",
       "size": 89644,
@@ -2901,8 +2881,8 @@ self.cacheManifest =
       "priority": "lazy"
     },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     }
   }
