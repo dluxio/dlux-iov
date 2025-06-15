@@ -255,6 +255,15 @@ export default {
             // Reactive trigger for Y.js data changes
             collaborativeDataVersion: 0,
             
+            // Flag to prevent triggering change handlers during data loading
+            isLoadingPublishOptions: false,
+            
+            // Flag to prevent clearing unsaved flag during local publish option changes
+            isUpdatingPublishOptions: false,
+            
+            // Flag to prevent infinite loops during custom JSON updates
+            isUpdatingCustomJson: false,
+            
             // COMPREHENSIVE COLLABORATIVE SOLUTION ADDITIONS
             // Collaborative authors tracking
             collaborativeAuthors: [],
@@ -1030,6 +1039,33 @@ export default {
                     }));
                 }
                 
+                // Add TaskList and TaskItem extensions for checkbox support (body editor only)
+                // TIPTAP BEST PRACTICE: Extensions now included in collaboration bundle
+                if (field === 'body') {
+                    // TaskList extension (required for checkbox functionality)
+                    if (bundle?.TaskList) {
+                        const TaskList = bundle.TaskList?.default || bundle.TaskList;
+                        enhancedExtensions.push(TaskList.configure({
+                            HTMLAttributes: {
+                                class: 'task-list'
+                            }
+                        }));
+                        console.log('✅ TaskList extension added to body editor');
+                    }
+                    
+                    // TaskItem extension (required for TaskList to function)
+                    if (bundle?.TaskItem) {
+                        const TaskItem = bundle.TaskItem?.default || bundle.TaskItem;
+                        enhancedExtensions.push(TaskItem.configure({
+                            HTMLAttributes: {
+                                class: 'task-item'
+                            },
+                            nested: true
+                        }));
+                        console.log('✅ TaskItem extension added to body editor');
+                    }
+                }
+                
                 return enhancedExtensions;
             }
 
@@ -1335,20 +1371,37 @@ export default {
         
         // Comment options change handler
         handleCommentOptionChange() {
+            // Skip if we're currently loading publish options from Y.js
+            if (this.isLoadingPublishOptions) {
+                console.log('📋 Skipping comment option change during Y.js loading');
+                return;
+            }
+            
             // ===== READ-ONLY PERMISSION ENFORCEMENT =====
             if (this.isReadOnlyMode) {
                 console.warn('🔒 Cannot change comment options: Read-only mode');
                 return;
             }
             
+            console.log('📋 Comment options changed:', this.commentOptions);
             this.hasUnsavedChanges = true;
             
-            // ===== REFACTORED: Single Path - Always use Y.js =====
+            // Set flag to prevent Y.js update listener from clearing unsaved flag
+            this.isUpdatingPublishOptions = true;
+            
+            // ===== REFACTORED: Single Path - Always use Y.js (convert checkbox values to Y.js format) =====
             this.setPublishOption('allowVotes', this.commentOptions.allowVotes);
             this.setPublishOption('allowCurationRewards', this.commentOptions.allowCurationRewards);
-            this.setPublishOption('maxAcceptedPayout', this.commentOptions.maxAcceptedPayout);
-            this.setPublishOption('percentHbd', this.commentOptions.percentHbd);
-            this.clearUnsavedAfterSync();
+            this.setPublishOption('maxAcceptedPayout', this.commentOptions.maxAcceptedPayout ? '0.000 HBD' : '1000000.000 HBD');
+            this.setPublishOption('percentHbd', this.commentOptions.percentHbd ? 10000 : 5000);
+            
+            // Clear the flag after a short delay
+            setTimeout(() => {
+                this.isUpdatingPublishOptions = false;
+            }, 200);
+            
+            // Trigger autosave to show saving indicator
+            this.debouncedAutoSave();
         },
         
         // Custom JSON input handling - triggers on every keystroke
@@ -1364,10 +1417,10 @@ export default {
             // ALWAYS trigger status updates when user types (even with invalid JSON)
             this.hasUnsavedChanges = true;
             
-            // Trigger Y.js document creation if needed (for temp documents)
-            if (!this.ydoc && this.lazyYjsComponents) {
-                console.log('🚀 Triggering Y.js document creation due to custom JSON input');
-                this.debouncedYjsCreation();
+            // ✅ TEMP DOCUMENT ARCHITECTURE: Y.js document should already exist
+            if (!this.ydoc) {
+                console.error('❌ CRITICAL: Y.js document missing during custom JSON input');
+                console.error('🔍 DEBUG: This violates temp document architecture - Y.js should exist from editor creation');
             }
             
             // Debounced validation and Y.js sync (only for valid JSON)
@@ -1376,50 +1429,93 @@ export default {
 
         // Custom JSON validation and Y.js sync - debounced to avoid excessive updates
         validateCustomJson() {
+            console.log('🚀 validateCustomJson method called - START');
+            console.log('🔍 DEBUG: isReadOnlyMode =', this.isReadOnlyMode);
+            console.log('🔍 DEBUG: currentFile =', this.currentFile);
+            console.log('🔍 DEBUG: username =', this.username);
+            
             // ===== READ-ONLY PERMISSION ENFORCEMENT =====
             if (this.isReadOnlyMode) {
                 console.warn('🔒 Cannot modify custom JSON: Read-only mode');
+                console.warn('🔍 DEBUG: Blocked by read-only mode - isReadOnlyMode =', this.isReadOnlyMode);
                 return;
             }
             
             console.log('⚙️ Validating custom JSON and syncing to Y.js...');
+            console.log('🔍 DEBUG: customJsonString length:', this.customJsonString?.length || 0);
+            console.log('🔍 DEBUG: customJsonString content:', this.customJsonString);
+            
+            // Set flag to prevent feedback loops during validation
+            this.isUpdatingCustomJson = true;
             
             if (!this.customJsonString.trim()) {
+                console.log('📝 Empty JSON detected - clearing existing fields');
                 this.customJsonError = '';
                 // Clear custom JSON when empty using collaborative methods
                 const existingKeys = Object.keys(this.getCustomJson());
+                console.log('🗑️ Clearing existing custom JSON keys:', existingKeys);
                 existingKeys.forEach(key => {
                     this.removeCustomJsonField(key);
                 });
                 
-                // Trigger autosave for empty JSON
+                // Clear flag and trigger autosave for empty JSON
+                this.isUpdatingCustomJson = false;
                 this.debouncedAutoSave();
+                console.log('✅ Empty JSON validation completed');
                 return;
             }
             
             try {
+                console.log('🔍 DEBUG: Attempting to parse JSON...');
                 const parsedJson = JSON.parse(this.customJsonString);
+                console.log('✅ JSON parsed successfully:', parsedJson);
+                console.log('🔍 DEBUG: Parsed JSON keys:', Object.keys(parsedJson));
                 this.customJsonError = '';
                 
                 // Follow same pattern as tags/beneficiaries - use collaborative methods
                 // Clear existing custom JSON first
                 const existingKeys = Object.keys(this.getCustomJson());
+                console.log('🗑️ Clearing existing custom JSON keys before setting new ones:', existingKeys);
                 existingKeys.forEach(key => {
-                    this.removeCustomJsonField(key);
+                    const removeResult = this.removeCustomJsonField(key);
+                    console.log(`🗑️ removeCustomJsonField result for ${key}:`, removeResult);
                 });
                 
                 // Set new custom JSON fields using collaborative methods
+                console.log('📝 Setting custom JSON fields:', Object.keys(parsedJson));
                 Object.entries(parsedJson).forEach(([key, value]) => {
-                    this.setCustomJsonField(key, value);
+                    console.log(`📝 About to set custom JSON field: ${key} = ${value}`);
+                    const result = this.setCustomJsonField(key, value);
+                    console.log(`📝 setCustomJsonField result for ${key}:`, result);
                 });
                 
-                // Trigger autosave for valid JSON
+                // Clear flag and trigger autosave for valid JSON
+                this.isUpdatingCustomJson = false;
                 this.debouncedAutoSave();
+                console.log('✅ Valid JSON validation completed');
                 
             } catch (error) {
-                this.customJsonError = error.message;
+                console.log('❌ JSON parsing failed:', error.message);
+                
+                // Provide clear, helpful error message
+                let userFriendlyError = 'Invalid JSON format. ';
+                
+                if (error.message.includes('Unexpected token')) {
+                    userFriendlyError += 'Check for missing quotes, commas, or brackets. ';
+                } else if (error.message.includes('Unexpected end')) {
+                    userFriendlyError += 'JSON appears incomplete - check for missing closing brackets or quotes. ';
+                }
+                
+                userFriendlyError += 'Example: {"key": "value", "number": 123}';
+                
+                this.customJsonError = userFriendlyError;
+                
+                // Clear flag even on error
+                this.isUpdatingCustomJson = false;
                 // Don't sync invalid JSON to Y.js, but keep hasUnsavedChanges = true
                 // This shows the user that they have unsaved changes (invalid JSON)
+                this.debouncedAutoSave();
+                console.log('❌ Invalid JSON validation completed');
             }
         },
         
@@ -2042,6 +2138,14 @@ export default {
                 };
                 this.attachedFiles = [];
                 
+                // ✅ CRITICAL FIX: Reset Vue reactive data properties
+                this.customJsonString = '';
+                this.customJsonError = '';
+                this.tagInput = '';
+                this.isUpdatingCustomJson = false;
+                this.isLoadingPublishOptions = false;
+                this.isUpdatingPublishOptions = false;
+                
                 // Reset temp document flags
                 this.isTemporaryDocument = false;
                 this.tempDocumentId = null;
@@ -2150,6 +2254,7 @@ export default {
                 // STEP 3: Create Y.js document + IndexedDB immediately 
                 this.ydoc = new Y.Doc();
                 const documentId = file.id || file.permlink || `temp_${Date.now()}`;
+                console.log('🔍 DEBUG: Main loadDocument - Document ID for IndexedDB:', documentId, 'from file:', {id: file.id, permlink: file.permlink, owner: file.owner});
                 const IndexeddbPersistence = bundle.IndexeddbPersistence?.default || bundle.IndexeddbPersistence;
                 
                 if (IndexeddbPersistence) {
@@ -2161,9 +2266,6 @@ export default {
                     });
                     
                     console.log('💾 IndexedDB persistence synced for document');
-                    
-                    // Update custom JSON display after sync
-                    this.updateCustomJsonDisplay();
                 }
                 
                 // Initialize collaborative schema
@@ -2182,6 +2284,15 @@ export default {
                 
                 // STEP 6: TipTap automatically loads content from Y.js/IndexedDB
                 // NO manual content setting needed!
+                
+                // STEP 6.5: Small delay to ensure content is visible from Y.js/IndexedDB
+                await new Promise(resolve => setTimeout(resolve, 100));
+                console.log('📄 ALL content (title, body) now visible from Y.js/IndexedDB');
+                
+                // STEP 6.6: Load publish options and custom JSON from Y.js after editors are ready
+                this.loadPublishOptionsFromYjs();
+                this.loadCustomJsonFromYjs();
+                console.log('📄 Publish options and custom JSON loaded from Y.js');
                 
                 // STEP 7: For cloud documents, initialize permissions and connect WebSocket
                 if (requiresCloudTier && file.type === 'collaborative') {
@@ -2899,6 +3010,16 @@ export default {
                 // Clean up any existing state first
                 this.fullCleanupCollaboration();
                 
+                // ✅ CRITICAL FIX: Ensure Vue reactive data is reset (redundant but safe)
+                this.isCleaningUp = true; // Prevent updateCustomJsonDisplay from overriding our reset
+                this.customJsonString = '';
+                this.customJsonError = '';
+                this.tagInput = '';
+                this.isUpdatingCustomJson = false;
+                this.isLoadingPublishOptions = false;
+                this.isUpdatingPublishOptions = false;
+                console.log('✅ Vue reactive data reset for local file load');
+                
                 // TIPTAP BEST PRACTICE: Pre-load Y.js document before editor creation
                 await this.preloadYjsDocument(file);
                 
@@ -3060,6 +3181,16 @@ export default {
             // TIPTAP BEST PRACTICE: Only disconnect WebSocket when switching documents
             // Keep Y.js document and IndexedDB persistence alive for offline-first editing
             this.disconnectWebSocketOnly();
+            
+            // ✅ CRITICAL FIX: Reset Vue reactive data when switching documents
+            this.isCleaningUp = true; // Prevent updateCustomJsonDisplay from overriding our reset
+            this.customJsonString = '';
+            this.customJsonError = '';
+            this.tagInput = '';
+            this.isUpdatingCustomJson = false;
+            this.isLoadingPublishOptions = false;
+            this.isUpdatingPublishOptions = false;
+            console.log('✅ Vue reactive data reset for collaborative document switch');
             
             // Shorter delay since we're not destroying everything
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -3522,6 +3653,15 @@ export default {
                             this.hasUnsavedChanges = true;
                             this.debouncedAutoSave();
                         }
+                    },
+                    onTransaction: ({ editor, transaction }) => {
+                        // TIPTAP BEST PRACTICE: Handle ALL editor state changes including TaskItem checkboxes
+                        if (transaction.docChanged && this.validatePermission('edit')) {
+                            console.log('📝 Basic title transaction detected document change (includes checkbox changes)');
+                            this.content.title = editor.getText();
+                            this.hasUnsavedChanges = true;
+                            this.debouncedAutoSave();
+                        }
                     }
                 });
                 
@@ -3531,6 +3671,15 @@ export default {
                     editable: !this.isReadOnlyMode,
                     onUpdate: ({ editor }) => {
                         if (this.validatePermission('edit')) {
+                            this.content.body = editor.getHTML();
+                            this.hasUnsavedChanges = true;
+                            this.debouncedAutoSave();
+                        }
+                    },
+                    onTransaction: ({ editor, transaction }) => {
+                        // TIPTAP BEST PRACTICE: Handle ALL editor state changes including TaskItem checkboxes
+                        if (transaction.docChanged && this.validatePermission('edit')) {
+                            console.log('📝 Basic body transaction detected document change (includes checkbox changes)');
                             this.content.body = editor.getHTML();
                             this.hasUnsavedChanges = true;
                             this.debouncedAutoSave();
@@ -3695,6 +3844,19 @@ export default {
                         this.hasUnsavedChanges = true;
                         this.clearUnsavedAfterSync();
                     }
+                },
+                onTransaction: ({ editor, transaction }) => {
+                    // TIPTAP BEST PRACTICE: Handle ALL editor state changes including TaskItem checkboxes
+                    if (transaction.docChanged && this.validatePermission('edit')) {
+                        console.log('📝 Local title transaction detected document change (includes checkbox changes)');
+                        
+                        if (this.isTemporaryDocument && !this.indexeddbProvider) {
+                            this.debouncedCreateIndexedDBForTempDocument();
+                        }
+                        
+                        this.hasUnsavedChanges = true;
+                        this.clearUnsavedAfterSync();
+                    }
                 }
             });
             
@@ -3706,6 +3868,19 @@ export default {
                     if (this.validatePermission('edit')) {
                         // TEMP DOCUMENT STRATEGY: Debounced IndexedDB persistence creation
                         // Only create temp document after user stops typing for 2 seconds
+                        if (this.isTemporaryDocument && !this.indexeddbProvider) {
+                            this.debouncedCreateIndexedDBForTempDocument();
+                        }
+                        
+                        this.hasUnsavedChanges = true;
+                        this.clearUnsavedAfterSync();
+                    }
+                },
+                onTransaction: ({ editor, transaction }) => {
+                    // TIPTAP BEST PRACTICE: Handle ALL editor state changes including TaskItem checkboxes
+                    if (transaction.docChanged && this.validatePermission('edit')) {
+                        console.log('📝 Local body transaction detected document change (includes checkbox changes)');
+                        
                         if (this.isTemporaryDocument && !this.indexeddbProvider) {
                             this.debouncedCreateIndexedDBForTempDocument();
                         }
@@ -3970,6 +4145,14 @@ export default {
                 this.isCreatingYjsDocument = false;
                 this.lazyYjsComponents = null;
                 
+                // ✅ CRITICAL FIX: Reset Vue reactive data properties during comprehensive cleanup
+                this.customJsonString = '';
+                this.customJsonError = '';
+                this.tagInput = '';
+                this.isUpdatingCustomJson = false;
+                this.isLoadingPublishOptions = false;
+                this.isUpdatingPublishOptions = false;
+                
                 // Ensure collaborativeAuthors is always an array
                 if (!Array.isArray(this.collaborativeAuthors)) {
                     this.collaborativeAuthors = [];
@@ -4082,6 +4265,14 @@ export default {
                 // Reset collaboration state and arrays
                 this.connectionStatus = 'disconnected';
                 this.connectionMessage = '';
+                
+                // ✅ CRITICAL FIX: Reset Vue reactive data properties during cleanup
+                this.customJsonString = '';
+                this.customJsonError = '';
+                this.tagInput = '';
+                this.isUpdatingCustomJson = false;
+                this.isLoadingPublishOptions = false;
+                this.isUpdatingPublishOptions = false;
                 
                 // CRITICAL: Don't reset isCollaborativeMode if we're loading a collaborative file
                 // This preserves the collaborative mode flag set by loadCollaborativeFile()
@@ -4643,10 +4834,13 @@ export default {
                             this.debouncedCreateIndexedDBForTempDocument();
                         }
                         
-                        // COMPREHENSIVE SOLUTION: Track user as author on editing
-                        if (this.authHeaders?.['x-account']) {
+                                            // TIPTAP BEST PRACTICE: Defer Y.js operations outside of update callback
+                    if (this.authHeaders?.['x-account']) {
+                        // Use nextTick to defer Y.js operations after TipTap content processing
+                        this.$nextTick(() => {
                             this.addAuthorToTracking(this.authHeaders['x-account']);
-                        }
+                        });
+                    }
                         
                         // Y.js document already exists - content automatically synced
                         
@@ -4667,6 +4861,27 @@ export default {
                     // Y.js + IndexedDB handles persistence automatically
                     // Just clear the unsaved indicator after a brief delay
                     this.clearUnsavedAfterSync();
+                },
+                onTransaction: ({ editor, transaction }) => {
+                    // TIPTAP BEST PRACTICE: Handle ALL editor state changes including TaskItem checkboxes
+                    // The transaction event fires for checkbox changes that onUpdate misses
+                    if (transaction.docChanged && !this.isReadOnlyMode) {
+                        console.log('📝 Title transaction detected document change (includes checkbox changes)');
+                        
+                        // Store clean title text without artifacts
+                        let cleanTitle = editor.getText().trim();
+                        cleanTitle = cleanTitle
+                            .replace(/\u00A0/g, ' ')         // Non-breaking spaces
+                            .replace(/\u200B/g, '')          // Zero-width spaces  
+                            .replace(/\uFEFF/g, '')          // Byte order marks
+                            .replace(/[\u2000-\u206F]/g, ' ') // General punctuation spaces
+                            .replace(/\s+/g, ' ')            // Multiple spaces to single
+                            .trim();
+                        this.content.title = cleanTitle;
+                        
+                        this.hasUnsavedChanges = true;
+                        this.clearUnsavedAfterSync();
+                    }
                 },
                 // Add focus and blur handlers to debug cursor tracking
                 onFocus: ({ editor }) => {
@@ -4746,9 +4961,12 @@ export default {
                         this.debouncedCreateIndexedDBForTempDocument();
                     }
                     
-                    // COMPREHENSIVE SOLUTION: Track user as author on editing
+                    // TIPTAP BEST PRACTICE: Defer Y.js operations outside of update callback
                     if (this.authHeaders?.['x-account']) {
-                        this.addAuthorToTracking(this.authHeaders['x-account']);
+                        // Use nextTick to defer Y.js operations after TipTap content processing
+                        this.$nextTick(() => {
+                            this.addAuthorToTracking(this.authHeaders['x-account']);
+                        });
                     }
                     
                     // Y.js document already exists - content automatically synced
@@ -4761,6 +4979,17 @@ export default {
                     // Y.js + IndexedDB handles persistence automatically
                     // Just clear the unsaved indicator after a brief delay
                     this.clearUnsavedAfterSync();
+                },
+                onTransaction: ({ editor, transaction }) => {
+                    // TIPTAP BEST PRACTICE: Handle ALL editor state changes including TaskItem checkboxes
+                    // The transaction event fires for checkbox changes that onUpdate misses
+                    if (transaction.docChanged && !this.isReadOnlyMode) {
+                        console.log('📝 Body transaction detected document change (includes checkbox changes)');
+                        
+                        this.content.body = editor.getHTML();
+                        this.hasUnsavedChanges = true;
+                        this.clearUnsavedAfterSync();
+                    }
                 },
                 // Add focus and blur handlers to debug cursor tracking
                 onFocus: ({ editor }) => {
@@ -5614,6 +5843,30 @@ export default {
                 publishOptions.observe((event) => {
                     console.log('📋 Publish options changed:', event);
                     
+                    // For remote changes, update Vue data selectively
+                    if (event.transaction.origin !== this.ydoc.clientID) {
+                        console.log('📋 Remote publish options change detected, updating Vue data selectively');
+                        
+                        // Set loading flag to prevent feedback loop
+                        this.isLoadingPublishOptions = true;
+                        
+                        // Update only the specific changed keys (convert formats for checkboxes)
+                        event.changes.keys.forEach((change, key) => {
+                            if (change.action === 'update' || change.action === 'add') {
+                                const newValue = publishOptions.get(key);
+                                if (key === 'allowVotes') this.commentOptions.allowVotes = Boolean(newValue);
+                                else if (key === 'allowCurationRewards') this.commentOptions.allowCurationRewards = Boolean(newValue);
+                                else if (key === 'maxAcceptedPayout') this.commentOptions.maxAcceptedPayout = (newValue === '0.000 HBD' || newValue === false);
+                                else if (key === 'percentHbd') this.commentOptions.percentHbd = (newValue === 10000 || newValue === true);
+                            }
+                        });
+                        
+                        // Clear loading flag
+                        this.$nextTick(() => {
+                            this.isLoadingPublishOptions = false;
+                        });
+                    }
+                    
                     // Trigger status indicator update and auto-save
                     this.hasUnsavedChanges = true;
                     this.debouncedAutoSave();
@@ -5640,12 +5893,23 @@ export default {
                 customJson.observe((event) => {
                     console.log('⚙️ Custom JSON changed:', event);
                     
-                    // Update the display string for the textarea
-                    this.updateCustomJsonDisplay();
+                    // For remote changes, reload custom JSON from Y.js into textarea
+                    if (event.transaction.origin !== this.ydoc.clientID) {
+                        console.log('📡 Remote custom JSON change detected, reloading from Y.js');
+                        this.loadCustomJsonFromYjs();
+                    } else {
+                        // For local changes, just update the display
+                        this.updateCustomJsonDisplay();
+                    }
                     
-                    // Trigger status indicator update and auto-save
-                    this.hasUnsavedChanges = true;
-                    this.debouncedAutoSave();
+                    // Only trigger autosave if not currently updating custom JSON (prevents feedback loops)
+                    if (!this.isUpdatingCustomJson) {
+                        // Trigger status indicator update and auto-save
+                        this.hasUnsavedChanges = true;
+                        this.debouncedAutoSave();
+                    } else {
+                        console.log('🔄 Skipping autosave during custom JSON update to prevent feedback loop');
+                    }
                     
                     this.syncToParent();
                 });
@@ -5753,6 +6017,13 @@ export default {
             if (!existingTags.includes(formattedTag)) {
                 tags.push([formattedTag]);
                     console.log('🏷️ Tag added to Y.js:', formattedTag);
+                
+                // ✅ CRITICAL FIX: Trigger temp document persistence for non-editor changes
+                if (this.isTemporaryDocument && !this.indexeddbProvider) {
+                    console.log('🚀 Tag addition triggering temp document persistence');
+                    this.debouncedCreateIndexedDBForTempDocument();
+                }
+                
                 this.syncToParent(); // Emit collaborative-data-changed event
                 return true;
             }
@@ -5775,11 +6046,9 @@ export default {
                     this.content.tags.push(formattedTag);
                     console.log('🏷️ Tag added to local state:', formattedTag);
                     
-                    // Trigger Y.js document creation if components are available
-                    if (this.lazyYjsComponents) {
-                        console.log('🚀 Triggering Y.js document creation due to tag addition');
-                        this.debouncedYjsCreation();
-                    }
+                    // ❌ ARCHITECTURE VIOLATION: Y.js document should exist (temp document architecture)
+                    console.error('❌ CRITICAL: Y.js document missing - violates temp document architecture');
+                    console.warn('⚠️ Using local state fallback - this indicates an architecture issue');
                     
                     return true;
                 }
@@ -5799,6 +6068,13 @@ export default {
             if (index >= 0) {
                 tags.delete(index, 1);
                     console.log('🏷️ Tag removed from Y.js:', tag);
+                
+                // ✅ CRITICAL FIX: Trigger temp document persistence for non-editor changes
+                if (this.isTemporaryDocument && !this.indexeddbProvider) {
+                    console.log('🚀 Tag removal triggering temp document persistence');
+                    this.debouncedCreateIndexedDBForTempDocument();
+                }
+                
                 this.syncToParent(); // Emit collaborative-data-changed event
                 return true;
                 }
@@ -5816,11 +6092,9 @@ export default {
                     this.content.tags.splice(index, 1);
                     console.log('🏷️ Tag removed from local state:', tag);
                     
-                    // Trigger Y.js document creation if components are available
-                    if (this.lazyYjsComponents) {
-                        console.log('🚀 Triggering Y.js document creation due to tag removal');
-                        this.debouncedYjsCreation();
-                    }
+                    // ❌ ARCHITECTURE VIOLATION: Y.js document should exist (temp document architecture)
+                    console.error('❌ CRITICAL: Y.js document missing - violates temp document architecture');
+                    console.warn('⚠️ Using local state fallback - this indicates an architecture issue');
                     
                     return true;
                 }
@@ -5903,6 +6177,13 @@ export default {
             
             beneficiaries.push([beneficiary]);
                 console.log('💰 Beneficiary added to Y.js:', beneficiary);
+            
+            // ✅ CRITICAL FIX: Trigger temp document persistence for non-editor changes
+            if (this.isTemporaryDocument && !this.indexeddbProvider) {
+                console.log('🚀 Beneficiary addition triggering temp document persistence');
+                this.debouncedCreateIndexedDBForTempDocument();
+            }
+            
             this.syncToParent(); // Emit collaborative-data-changed event
             return beneficiary.id;
             } else {
@@ -5944,11 +6225,9 @@ export default {
                 this.content.beneficiaries.push(beneficiary);
                 console.log('💰 Beneficiary added to local state:', beneficiary);
                 
-                // Trigger Y.js document creation if components are available
-                if (this.lazyYjsComponents) {
-                    console.log('🚀 Triggering Y.js document creation due to beneficiary addition');
-                    this.debouncedYjsCreation();
-                }
+                // ❌ ARCHITECTURE VIOLATION: Y.js document should exist (temp document architecture)
+                console.error('❌ CRITICAL: Y.js document missing - violates temp document architecture');
+                console.warn('⚠️ Using local state fallback - this indicates an architecture issue');
                 
                 return beneficiary.id;
             }
@@ -5967,6 +6246,13 @@ export default {
                 const removed = beneficiaries.toArray()[index];
                 beneficiaries.delete(index, 1);
                     console.log('💰 Beneficiary removed from Y.js:', removed.account);
+                
+                // ✅ CRITICAL FIX: Trigger temp document persistence for non-editor changes
+                if (this.isTemporaryDocument && !this.indexeddbProvider) {
+                    console.log('🚀 Beneficiary removal triggering temp document persistence');
+                    this.debouncedCreateIndexedDBForTempDocument();
+                }
+                
                 this.syncToParent(); // Emit collaborative-data-changed event
                 return true;
                 }
@@ -5985,11 +6271,9 @@ export default {
                     this.content.beneficiaries.splice(index, 1);
                     console.log('💰 Beneficiary removed from local state:', removed.account);
                     
-                    // Trigger Y.js document creation if components are available
-                    if (this.lazyYjsComponents) {
-                        console.log('🚀 Triggering Y.js document creation due to beneficiary removal');
-                        this.debouncedYjsCreation();
-                    }
+                    // ❌ ARCHITECTURE VIOLATION: Y.js document should exist (temp document architecture)
+                    console.error('❌ CRITICAL: Y.js document missing - violates temp document architecture');
+                    console.warn('⚠️ Using local state fallback - this indicates an architecture issue');
                     
                     return true;
                 }
@@ -6036,39 +6320,55 @@ export default {
 
         // Custom JSON Management (Y.Map for granular conflict-free updates)
         setCustomJsonField(key, value) {
-            if (!this.validatePermission('setCustomJsonField')) return false;
+            console.log('🔧 setCustomJsonField called:', key, 'value:', value);
+            const hasPermission = this.validatePermission('setCustomJsonField');
+            console.log('🔐 setCustomJsonField permission check result:', hasPermission);
+            if (!hasPermission) {
+                console.warn('❌ setCustomJsonField blocked by permission validation');
+                return false;
+            }
             
             // TIPTAP BEST PRACTICE: Fallback pattern for offline-first collaborative editing
             if (this.ydoc) {
                 // Y.js document exists - use collaborative map
-            const customJson = this.ydoc.getMap('customJson');
-            customJson.set(key, value);
-                console.log('⚙️ Custom JSON field updated in Y.js:', key);
-            return true;
-            } else {
-                // Y.js document not ready yet - use local state
-                console.log('⏳ Y.js not ready, using local state for custom JSON:', key);
+                const customJson = this.ydoc.getMap('customJson');
+                customJson.set(key, value);
+                console.log('⚙️ Custom JSON field updated in Y.js:', key, 'value:', value);
+                console.log('🔍 DEBUG: Y.js document GUID for custom JSON save:', this.ydoc.guid);
                 
-                // Ensure custom_json object exists
+                // ✅ CRITICAL FIX: Trigger temp document persistence for non-editor changes
+                if (this.isTemporaryDocument && !this.indexeddbProvider) {
+                    console.log('🚀 Custom JSON change triggering temp document persistence');
+                    this.debouncedCreateIndexedDBForTempDocument();
+                }
+                
+                return true;
+            } else {
+                // ❌ ARCHITECTURE VIOLATION: Y.js document should exist (temp document architecture)
+                console.error('❌ CRITICAL: Y.js document missing - violates temp document architecture');
+                console.error('🔍 DEBUG: This should not happen with temp Y.js document strategy');
+                console.error('🔍 DEBUG: All editors should have Y.js documents from creation');
+                
+                // Fallback to local state but log the violation
                 if (!this.content.custom_json || typeof this.content.custom_json !== 'object') {
                     this.content.custom_json = {};
                 }
                 
                 this.content.custom_json[key] = value;
-                console.log('⚙️ Custom JSON field updated in local state:', key);
+                console.warn('⚠️ Using local state fallback - this indicates an architecture issue');
                 
-                // Trigger Y.js document creation if components are available
-                if (this.lazyYjsComponents) {
-                    console.log('🚀 Triggering Y.js document creation due to custom JSON update');
-                    this.debouncedYjsCreation();
-                }
-                
-                return true;
+                return false; // Return false to indicate architecture violation
             }
         },
 
         removeCustomJsonField(key) {
-            if (!this.validatePermission('removeCustomJsonField')) return false;
+            console.log('🗑️ removeCustomJsonField called:', key);
+            const hasPermission = this.validatePermission('removeCustomJsonField');
+            console.log('🔐 removeCustomJsonField permission check result:', hasPermission);
+            if (!hasPermission) {
+                console.warn('❌ removeCustomJsonField blocked by permission validation');
+                return false;
+            }
             
             // TIPTAP BEST PRACTICE: Fallback pattern for offline-first collaborative editing
             if (this.ydoc) {
@@ -6077,28 +6377,29 @@ export default {
             if (customJson.has(key)) {
                 customJson.delete(key);
                     console.log('⚙️ Custom JSON field removed from Y.js:', key);
+                
+                // ✅ CRITICAL FIX: Trigger temp document persistence for non-editor changes
+                if (this.isTemporaryDocument && !this.indexeddbProvider) {
+                    console.log('🚀 Custom JSON removal triggering temp document persistence');
+                    this.debouncedCreateIndexedDBForTempDocument();
+                }
+                
                 return true;
                 }
             } else {
-                // Y.js document not ready yet - use local state
-                console.log('⏳ Y.js not ready, removing from local custom JSON:', key);
+                // ❌ ARCHITECTURE VIOLATION: Y.js document should exist (temp document architecture)
+                console.error('❌ CRITICAL: Y.js document missing - violates temp document architecture');
+                console.error('🔍 DEBUG: This should not happen with temp Y.js document strategy');
                 
-                // Ensure custom_json object exists
+                // Fallback to local state but log the violation
                 if (!this.content.custom_json || typeof this.content.custom_json !== 'object') {
                     this.content.custom_json = {};
                 }
                 
                 if (this.content.custom_json.hasOwnProperty(key)) {
                     delete this.content.custom_json[key];
-                    console.log('⚙️ Custom JSON field removed from local state:', key);
-                    
-                    // Trigger Y.js document creation if components are available
-                    if (this.lazyYjsComponents) {
-                        console.log('🚀 Triggering Y.js document creation due to custom JSON removal');
-                        this.debouncedYjsCreation();
-                    }
-                    
-                    return true;
+                    console.warn('⚠️ Using local state fallback - this indicates an architecture issue');
+                    return false; // Return false to indicate architecture violation
                 }
             }
             return false;
@@ -6108,16 +6409,65 @@ export default {
             // TIPTAP BEST PRACTICE: Fallback pattern for offline-first collaborative editing
             if (this.ydoc) {
                 // Y.js document exists - use collaborative map
-            const customJson = this.ydoc.getMap('customJson');
-            return customJson.toJSON();
+                const customJson = this.ydoc.getMap('customJson');
+                return customJson.toJSON();
             } else {
                 // Y.js document not ready yet - use local state
                 return this.content.custom_json || {};
             }
         },
 
+        // Load custom JSON from Y.js into Vue data (for document loading)
+        loadCustomJsonFromYjs() {
+            if (!this.ydoc) {
+                console.log('⚠️ loadCustomJsonFromYjs: No Y.js document available');
+                return;
+            }
+            
+            console.log('📥 Loading custom JSON from Y.js...');
+            console.log('🔍 DEBUG: Y.js document GUID for custom JSON load:', this.ydoc.guid);
+            
+            // Prevent feedback loops during loading
+            this.isUpdatingCustomJson = true;
+            
+            try {
+                const customJsonData = this.getCustomJson();
+                const newDisplayJson = Object.keys(customJsonData).length > 0 
+                    ? JSON.stringify(customJsonData, null, 2) 
+                    : '';
+                
+                // Update the textarea content
+                this.customJsonString = newDisplayJson;
+                this.customJsonError = '';
+                
+                console.log('✅ Custom JSON loaded from Y.js:', Object.keys(customJsonData).length, 'fields');
+                if (Object.keys(customJsonData).length > 0) {
+                    console.log('🔍 Custom JSON content:', customJsonData);
+                }
+                
+            } catch (error) {
+                console.error('❌ Error loading custom JSON from Y.js:', error);
+                this.customJsonError = 'Error loading custom JSON';
+            } finally {
+                // Clear flag after loading
+                this.isUpdatingCustomJson = false;
+            }
+        },
+
         // Update the custom JSON textarea display from Y.js Map
         updateCustomJsonDisplay() {
+            // Prevent feedback loops during custom JSON validation
+            if (this.isUpdatingCustomJson) {
+                console.log('🔄 Skipping custom JSON display update during validation to prevent feedback loop');
+                return;
+            }
+            
+            // ✅ CRITICAL FIX: Prevent overriding Vue data reset during document cleanup/switching
+            if (this.isCleaningUp || this.isInitializingEditors || this.isUpdatingPermissions) {
+                console.log('🔄 Skipping custom JSON display update during document cleanup/switching');
+                return;
+            }
+            
             const customJsonData = this.getCustomJson();
             const newDisplayJson = Object.keys(customJsonData).length > 0 
                 ? JSON.stringify(customJsonData, null, 2) 
@@ -6141,6 +6491,13 @@ export default {
             const publishOptions = this.ydoc.getMap('publishOptions');
             publishOptions.set(key, value);
                 console.log('📋 Publish option updated in Y.js:', key, value);
+            
+            // ✅ CRITICAL FIX: Trigger temp document persistence for non-editor changes
+            if (this.isTemporaryDocument && !this.indexeddbProvider) {
+                console.log('🚀 Publish option change triggering temp document persistence');
+                this.debouncedCreateIndexedDBForTempDocument();
+            }
+            
             return true;
             } else {
                 // Y.js document not ready yet - use local state
@@ -6154,11 +6511,9 @@ export default {
                 this.content.publishOptions[key] = value;
                 console.log('📋 Publish option updated in local state:', key, value);
                 
-                // Trigger Y.js document creation if components are available
-                if (this.lazyYjsComponents) {
-                    console.log('🚀 Triggering Y.js document creation due to publish option update');
-                    this.debouncedYjsCreation();
-                }
+                // ❌ ARCHITECTURE VIOLATION: Y.js document should exist (temp document architecture)
+                console.error('❌ CRITICAL: Y.js document missing - violates temp document architecture');
+                console.warn('⚠️ Using local state fallback - this indicates an architecture issue');
                 
                 return true;
             }
@@ -6186,6 +6541,39 @@ export default {
             } else {
                 // Y.js document not ready yet - use local state
                 return this.content.publishOptions || {};
+            }
+        },
+
+        // Load publish options from Y.js into Vue data (bypasses permission checks)
+        loadPublishOptionsFromYjs() {
+            if (!this.ydoc) return;
+            
+            const publishOptions = this.ydoc.getMap('publishOptions');
+            const yjsOptions = publishOptions.toJSON();
+            
+            // Update Vue commentOptions with Y.js data
+            if (Object.keys(yjsOptions).length > 0) {
+                console.log('📋 Loading publish options from Y.js:', yjsOptions);
+                
+                // Set flag to prevent change handlers from triggering during loading
+                this.isLoadingPublishOptions = true;
+                
+                // Update Vue data with Y.js values (convert formats for checkboxes)
+                this.commentOptions = {
+                    allowVotes: yjsOptions.allowVotes !== undefined ? Boolean(yjsOptions.allowVotes) : this.commentOptions.allowVotes,
+                    allowCurationRewards: yjsOptions.allowCurationRewards !== undefined ? Boolean(yjsOptions.allowCurationRewards) : this.commentOptions.allowCurationRewards,
+                    maxAcceptedPayout: yjsOptions.maxAcceptedPayout !== undefined ? (yjsOptions.maxAcceptedPayout === '0.000 HBD' || yjsOptions.maxAcceptedPayout === false) : this.commentOptions.maxAcceptedPayout,
+                    percentHbd: yjsOptions.percentHbd !== undefined ? (yjsOptions.percentHbd === 10000 || yjsOptions.percentHbd === true) : this.commentOptions.percentHbd
+                };
+                
+                // Clear the loading flag after Vue has processed the changes
+                this.$nextTick(() => {
+                    this.isLoadingPublishOptions = false;
+                    console.log('✅ Publish options loaded from Y.js into Vue data (loading flag cleared)');
+                });
+                
+            } else {
+                console.log('📋 No publish options in Y.js, using defaults');
             }
         },
 
@@ -6450,7 +6838,7 @@ export default {
                     return false;
                 }
                 
-                if (['edit', 'addTag', 'addBeneficiary', 'setCustomJson'].includes(operation) && 
+                if (['edit', 'addTag', 'addBeneficiary', 'setCustomJson', 'setCustomJsonField', 'removeCustomJsonField'].includes(operation) && 
                     userPermission.permissionType === 'readonly') {
                     console.warn(`🚫 Blocked ${operation}: requires edit permissions, user has 'readonly'`);
                     return false;
@@ -7676,6 +8064,12 @@ export default {
                         // ✅ TIPTAP BEST PRACTICE: Update document name from Y.js config after sync
                         console.log('🔄 onSynced: Attempting to extract document name...');
                         
+                        // Load publish options from Y.js after sync
+                        this.loadPublishOptionsFromYjs();
+                        
+                        // Load custom JSON from Y.js after sync
+                        this.loadCustomJsonFromYjs();
+                        
                         // DEBUG: Check Y.js config state
                                                 console.log('🔍 DEBUG onSynced conditions:', {
                             hasYdoc: !!this.ydoc,
@@ -7800,7 +8194,8 @@ export default {
             if (this.ydoc) {
                 this.ydoc.on('update', (update, origin) => {
                     // Only clear unsaved changes for updates that come from remote (not local)
-                    if (origin !== this.ydoc.clientID && this.isCollaborativeMode && this.connectionStatus === 'connected') {
+                    // But don't clear if we're currently updating publish options locally
+                    if (origin !== this.ydoc.clientID && this.isCollaborativeMode && this.connectionStatus === 'connected' && !this.isUpdatingPublishOptions) {
                         console.log('📡 Y.js remote update detected, clearing unsaved flag');
                         this.hasUnsavedChanges = false;
                         
@@ -9604,20 +9999,22 @@ export default {
 
         // Add author to collaborative tracking (with fallback support)
         addAuthorToTracking(username) {
-            if (!username) return;
-            
-            // CRITICAL FIX: Prevent author tracking during permission updates or cleanup
-            if (this.isUpdatingPermissions || this.isCleaningUp || this.isInitializingEditors) {
-                console.log('⏸️ Skipping author tracking - system operation in progress');
-                return;
-            }
-            
+            // DEFENSIVE: Wrap entire method in try-catch to prevent Y.js content errors from breaking functionality
             try {
+                if (!username) return;
+                
+                // CRITICAL FIX: Prevent author tracking during permission updates or cleanup
+                if (this.isUpdatingPermissions || this.isCleaningUp || this.isInitializingEditors) {
+                    console.log('⏸️ Skipping author tracking - system operation in progress');
+                    return;
+                }
+                
                 // Defensive programming - ensure collaborativeAuthors is always an array
                 if (!Array.isArray(this.collaborativeAuthors)) {
                     console.warn('⚠️ collaborativeAuthors corrupted in addAuthorToTracking, reinitializing');
                     this.collaborativeAuthors = [];
                 }
+                
                 // Fallback: Use local array if Y.js not available
                 if (!this.ydoc) {
                     if (!this.collaborativeAuthors.some(author => author.username === username)) {
@@ -9632,37 +10029,39 @@ export default {
                     return;
                 }
                 
-                // Y.js: Add to collaborative authors array using simplified structure
+                // TIPTAP BEST PRACTICE: Use Y.js transactions for safe operations
                 try {
-                    const authorsArray = this.ydoc.getArray('authors');
-                    
-                    // Check if author already exists
-                    const existingAuthors = authorsArray.toArray();
-                    
-                    // CRITICAL FIX: Validate that existingAuthors is actually an array
-                    if (!Array.isArray(existingAuthors)) {
-                        console.warn('⚠️ Y.js authors toArray() returned non-array:', typeof existingAuthors, existingAuthors);
-                        throw new Error('Y.js authors array is corrupted');
-                    }
-                    
-                    const authorExists = existingAuthors.some(author => 
-                        (typeof author === 'object' && author.username === username) ||
-                        (typeof author === 'string' && author === username)
-                    );
-                    
-                    if (!authorExists) {
-                        const authorData = {
-                            username: username,
-                            addedAt: new Date().toISOString(),
-                            color: this.generateUserColor(username)
-                        };
+                    // Use Y.js transaction to ensure atomic operations
+                    this.ydoc.transact(() => {
+                        const authorsArray = this.ydoc.getArray('authors');
                         
-                        // Push author object directly without array wrapping
-                        authorsArray.push(authorData);
-                        console.log('👤 Added collaborative author:', username);
-                    }
+                        // TIPTAP BEST PRACTICE: Use Y.js length instead of toArray() during transactions
+                        let authorExists = false;
+                        
+                        // Check existing authors without converting to array (safer during transactions)
+                        for (let i = 0; i < authorsArray.length; i++) {
+                            const author = authorsArray.get(i);
+                            if ((typeof author === 'object' && author.username === username) ||
+                                (typeof author === 'string' && author === username)) {
+                                authorExists = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!authorExists) {
+                            const authorData = {
+                                username: username,
+                                addedAt: new Date().toISOString(),
+                                color: this.generateUserColor(username)
+                            };
+                            
+                            // TIPTAP BEST PRACTICE: Insert within transaction
+                            authorsArray.push([authorData]);
+                            console.log('👤 Added collaborative author:', username);
+                        }
+                    });
                     
-                    // Also sync to local array for consistency with validation
+                    // Sync to local array outside of Y.js transaction
                     if (!Array.isArray(this.collaborativeAuthors)) {
                         this.collaborativeAuthors = [];
                     }
@@ -9689,15 +10088,12 @@ export default {
                 }
                 
             } catch (error) {
-                console.error('❌ Error adding author to tracking:', error);
+                // ULTIMATE FALLBACK: Silently fail to prevent breaking editor functionality
+                console.warn('⚠️ Author tracking completely failed, silently ignoring:', error.message);
                 
-                // Fallback to local tracking on error
-                if (!this.collaborativeAuthors.some(author => author.username === username)) {
-                    this.collaborativeAuthors.push({
-                        username: username,
-                        addedAt: new Date().toISOString(),
-                        color: this.generateUserColor(username)
-                    });
+                // Ensure collaborativeAuthors is at least an empty array
+                if (!Array.isArray(this.collaborativeAuthors)) {
+                    this.collaborativeAuthors = [];
                 }
             }
         },
@@ -9992,13 +10388,29 @@ export default {
                     console.log('🔑 Already authenticated for auto-connect');
                 }
                 
-                // STEP 3: Create collaborative document object without setting UI state yet
+                // STEP 3: Create collaborative document object, check if we have it in our list first
                 console.log('🏗️ Step 3: Creating collaborative document object...');
-                const docToLoad = {
-                    owner: collabOwner,
-                    permlink: collabPermlink,
-                    type: 'collaborative'
-                };
+                
+                // Check if document exists in our collaborative documents list
+                const existingDoc = this.collaborativeDocs.find(doc => 
+                    doc.owner === collabOwner && doc.permlink === collabPermlink
+                );
+                
+                let docToLoad;
+                if (existingDoc) {
+                    console.log('📄 Found existing document in collaborative list:', existingDoc.documentName || existingDoc.name);
+                    docToLoad = {
+                        ...existingDoc,
+                        type: 'collaborative'
+                    };
+                } else {
+                    console.log('📄 Document not in collaborative list, creating minimal object');
+                    docToLoad = {
+                        owner: collabOwner,
+                        permlink: collabPermlink,
+                        type: 'collaborative'
+                    };
+                }
                 console.log('📄 Created document object:', docToLoad);
                 
                 // STEP 4: Load document and wait for Y.js to provide the real document name
@@ -10018,18 +10430,18 @@ export default {
          * TIPTAP BEST PRACTICE: Wait for real document name before setting UI state
          */
         async loadDocumentAndWaitForName(file) {
-            console.log('📋 Loading document and waiting for Y.js document name...');
+            console.log('📋 Loading document with immediate filename check...');
             
             // First, load the document without cloud connection
             await this.loadDocumentWithoutCloudConnection(file);
             
-            // Wait for Y.js document name to be available
-            const documentName = await this.waitForDocumentName(file, 5000); // 5 second timeout
+            // Check if document name is immediately available in Y.js config (loads with title/body)
+            const documentName = this.extractDocumentNameFromConfig();
             
             if (documentName) {
-                console.log('✅ Document name received from Y.js:', documentName);
+                console.log('✅ Document name found immediately in Y.js config:', documentName);
                 
-                // Now set the UI state with the real document name
+                // Set the UI state with the real document name
                 this.currentFile = {
                     ...file,
                     name: documentName,
@@ -10043,23 +10455,12 @@ export default {
                     title: documentName
                 };
                 
-                // Clear initializing state so UI shows document name instead of "Loading..."
-                this.isInitializing = false;
-                
-                console.log('✅ UI state set with real document name:', documentName);
-                
-                // Now connect to cloud in background (non-blocking)
-                if (file.type === 'collaborative') {
-                    console.log('🔗 Connecting to cloud in background...');
-                    this.connectToCloudInBackground(file).catch(error => {
-                        console.error('❌ Background cloud connection failed:', error);
-                    });
-                }
+                console.log('✅ UI state set with document name from Y.js config:', documentName);
                 
             } else {
-                console.warn('⚠️ Timeout waiting for document name, using fallback');
+                console.log('📄 No document name in Y.js config yet, using fallback and will update when available');
                 
-                // Fallback to username/permlink if timeout
+                // Use fallback name initially, will be updated when document name arrives from server
                 const fallbackName = `${file.owner}/${file.permlink}`;
                 this.currentFile = {
                     ...file,
@@ -10074,16 +10475,18 @@ export default {
                     title: fallbackName
                 };
                 
-                // Clear initializing state even for fallback case
-                this.isInitializing = false;
-                
-                // Still try to connect to cloud in background
-                if (file.type === 'collaborative') {
-                    console.log('🔗 Connecting to cloud in background (fallback case)...');
-                    this.connectToCloudInBackground(file).catch(error => {
-                        console.error('❌ Background cloud connection failed:', error);
-                    });
-                }
+                console.log('📄 UI state set with fallback name, will update from server:', fallbackName);
+            }
+            
+            // Clear initializing state - document content is loaded
+            this.isInitializing = false;
+            
+            // Connect to cloud independently (non-blocking) - this will update document name if needed
+            if (file.type === 'collaborative') {
+                console.log('🔗 Starting independent cloud connection...');
+                this.connectToCloudInBackground(file).catch(error => {
+                    console.error('❌ Background cloud connection failed:', error);
+                });
             }
         },
         
@@ -10110,6 +10513,7 @@ export default {
                 // Create Y.js document + IndexedDB immediately 
                 this.ydoc = new Y.Doc();
                 const documentId = file.id || file.permlink || `temp_${Date.now()}`;
+                console.log('🔍 DEBUG: loadDocumentWithoutCloudConnection - Document ID for IndexedDB:', documentId, 'from file:', {id: file.id, permlink: file.permlink, owner: file.owner});
                 const IndexeddbPersistence = bundle.IndexeddbPersistence?.default || bundle.IndexeddbPersistence;
                 
                 if (IndexeddbPersistence) {
@@ -10126,6 +10530,13 @@ export default {
                     this.updateCustomJsonDisplay();
                 }
                 
+                // Store document name in Y.js config if available (for first-time loading)
+                if (file.documentName || file.name || file.title) {
+                    const documentName = file.documentName || file.name || file.title || `${file.owner}/${file.permlink}`;
+                    console.log('📄 Storing document name in Y.js config during load:', documentName);
+                    this.setDocumentName(documentName);
+                }
+                
                 // Initialize collaborative schema
                 this.initializeCollaborativeSchema(bundle.Y?.default || bundle.Y);
                 
@@ -10140,6 +10551,19 @@ export default {
                     this.isCollaborativeMode = false;
                     this.fileType = 'local';
                 }
+                
+                // TIPTAP BEST PRACTICE: Small delay to ensure content is visible from Y.js/IndexedDB
+                await new Promise(resolve => setTimeout(resolve, 100));
+                console.log('📄 Content should now be visible in editors from IndexedDB');
+                
+                // Load publish options from Y.js into Vue data
+                this.loadPublishOptionsFromYjs();
+                
+                // Load custom JSON from Y.js into Vue data
+                this.loadCustomJsonFromYjs();
+                
+                // Clear cleanup flag after document loading is complete
+                this.isCleaningUp = false;
                 
                 this.showLoadModal = false;
                 this.hasUnsavedChanges = false;
@@ -10235,9 +10659,6 @@ export default {
                     });
                     
                     console.log('💾 IndexedDB persistence synced for document');
-                    
-                    // Update custom JSON display after sync
-                    this.updateCustomJsonDisplay();
                 }
                 
                 // Initialize collaborative schema
@@ -10289,6 +10710,18 @@ export default {
                     await this.connectToCollaborationServer(file);
                 }
                 
+                // TIPTAP BEST PRACTICE: Small delay to ensure content is visible from Y.js/IndexedDB
+                await new Promise(resolve => setTimeout(resolve, 100));
+                console.log('📄 Content should now be visible in editors from IndexedDB');
+                
+                // Load publish options and custom JSON from Y.js after editors are ready
+                this.loadPublishOptionsFromYjs();
+                this.loadCustomJsonFromYjs();
+                console.log('📄 Publish options and custom JSON loaded from Y.js');
+                
+                // Clear cleanup flag after document loading is complete
+                this.isCleaningUp = false;
+                
                 this.showLoadModal = false;
                 this.hasUnsavedChanges = false;
                 
@@ -10304,11 +10737,13 @@ export default {
          * Wait for document name to be available in Y.js config
          * TIPTAP BEST PRACTICE: Promise-based waiting for Y.js data
          */
-        async waitForDocumentName(file, timeoutMs = 10000) {
+        async waitForDocumentName(file, timeoutMs = 5000) {
             console.log('⏳ Waiting for document name from Y.js config...');
             
             return new Promise((resolve) => {
                 let resolved = false;
+                let checkCount = 0;
+                const maxChecks = timeoutMs / 100; // Check every 100ms
                 
                 // Set up timeout
                 const timeout = setTimeout(() => {
@@ -10322,14 +10757,16 @@ export default {
                 // Check if document name is already available
                 const checkDocumentName = () => {
                     if (resolved) return;
+                    checkCount++;
                     
                     if (this.ydoc) {
                         try {
                             const config = this.ydoc.getMap('config');
                             const documentName = config.get('documentName');
                             
-                            if (documentName && documentName.trim() !== '' && 
-                                documentName !== `${file.owner}/${file.permlink}`) {
+                            // Accept any valid document name, even if it matches owner/permlink
+                            // (for new documents that haven't been renamed yet)
+                            if (documentName && documentName.trim() !== '') {
                                 resolved = true;
                                 clearTimeout(timeout);
                                 console.log('✅ Document name found in Y.js config:', documentName);
@@ -10341,8 +10778,34 @@ export default {
                         }
                     }
                     
+                    // For new documents, if we've checked many times and still no document name,
+                    // it might be a new document that needs a default name
+                    if (checkCount > maxChecks * 0.8) { // After 80% of timeout
+                        console.log('🔍 Long wait for document name, checking if this is a new document...');
+                        
+                        // If this is a new document without a name, resolve with null to use fallback
+                        if (this.ydoc) {
+                            try {
+                                const config = this.ydoc.getMap('config');
+                                const hasAnyContent = config.size > 0;
+                                
+                                if (!hasAnyContent) {
+                                    console.log('📄 New document detected, using fallback name');
+                                    resolved = true;
+                                    clearTimeout(timeout);
+                                    resolve(null);
+                                    return;
+                                }
+                            } catch (error) {
+                                console.warn('⚠️ Error checking document content:', error);
+                            }
+                        }
+                    }
+                    
                     // Check again in 100ms
-                    setTimeout(checkDocumentName, 100);
+                    if (checkCount < maxChecks) {
+                        setTimeout(checkDocumentName, 100);
+                    }
                 };
                 
                 // Start checking

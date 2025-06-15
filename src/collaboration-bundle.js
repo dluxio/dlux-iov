@@ -24,6 +24,8 @@ import Heading from '@tiptap/extension-heading';
 import BulletList from '@tiptap/extension-bullet-list';
 import OrderedList from '@tiptap/extension-ordered-list';
 import ListItem from '@tiptap/extension-list-item';
+import TaskList from '@tiptap/extension-task-list';
+import TaskItem from '@tiptap/extension-task-item';
 import Blockquote from '@tiptap/extension-blockquote';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
 
@@ -63,6 +65,8 @@ const TiptapCollaboration = {
   BulletList,
   OrderedList,
   ListItem,
+  TaskList,
+  TaskItem,
   Blockquote,
   HorizontalRule
 };

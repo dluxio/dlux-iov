@@ -43963,6 +43963,216 @@ const Placeholder = Extension.create({
 
 //# sourceMappingURL=index.js.map
 
+;// ./node_modules/@tiptap/extension-task-list/dist/index.js
+
+
+/**
+ * This extension allows you to create task lists.
+ * @see https://www.tiptap.dev/api/nodes/task-list
+ */
+const TaskList = core_dist_Node.create({
+    name: 'taskList',
+    addOptions() {
+        return {
+            itemTypeName: 'taskItem',
+            HTMLAttributes: {},
+        };
+    },
+    group: 'block list',
+    content() {
+        return `${this.options.itemTypeName}+`;
+    },
+    parseHTML() {
+        return [
+            {
+                tag: `ul[data-type="${this.name}"]`,
+                priority: 51,
+            },
+        ];
+    },
+    renderHTML({ HTMLAttributes }) {
+        return ['ul', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, { 'data-type': this.name }), 0];
+    },
+    addCommands() {
+        return {
+            toggleTaskList: () => ({ commands }) => {
+                return commands.toggleList(this.name, this.options.itemTypeName);
+            },
+        };
+    },
+    addKeyboardShortcuts() {
+        return {
+            'Mod-Shift-9': () => this.editor.commands.toggleTaskList(),
+        };
+    },
+});
+
+
+//# sourceMappingURL=index.js.map
+
+;// ./node_modules/@tiptap/extension-task-item/dist/index.js
+
+
+/**
+ * Matches a task item to a - [ ] on input.
+ */
+const extension_task_item_dist_inputRegex = /^\s*(\[([( |x])?\])\s$/;
+/**
+ * This extension allows you to create task items.
+ * @see https://www.tiptap.dev/api/nodes/task-item
+ */
+const TaskItem = core_dist_Node.create({
+    name: 'taskItem',
+    addOptions() {
+        return {
+            nested: false,
+            HTMLAttributes: {},
+            taskListTypeName: 'taskList',
+        };
+    },
+    content() {
+        return this.options.nested ? 'paragraph block*' : 'paragraph+';
+    },
+    defining: true,
+    addAttributes() {
+        return {
+            checked: {
+                default: false,
+                keepOnSplit: false,
+                parseHTML: element => element.getAttribute('data-checked') === 'true',
+                renderHTML: attributes => ({
+                    'data-checked': attributes.checked,
+                }),
+            },
+        };
+    },
+    parseHTML() {
+        return [
+            {
+                tag: `li[data-type="${this.name}"]`,
+                priority: 51,
+            },
+        ];
+    },
+    renderHTML({ node, HTMLAttributes }) {
+        return [
+            'li',
+            mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
+                'data-type': this.name,
+            }),
+            [
+                'label',
+                [
+                    'input',
+                    {
+                        type: 'checkbox',
+                        checked: node.attrs.checked ? 'checked' : null,
+                    },
+                ],
+                ['span'],
+            ],
+            ['div', 0],
+        ];
+    },
+    addKeyboardShortcuts() {
+        const shortcuts = {
+            Enter: () => this.editor.commands.splitListItem(this.name),
+            'Shift-Tab': () => this.editor.commands.liftListItem(this.name),
+        };
+        if (!this.options.nested) {
+            return shortcuts;
+        }
+        return {
+            ...shortcuts,
+            Tab: () => this.editor.commands.sinkListItem(this.name),
+        };
+    },
+    addNodeView() {
+        return ({ node, HTMLAttributes, getPos, editor, }) => {
+            const listItem = document.createElement('li');
+            const checkboxWrapper = document.createElement('label');
+            const checkboxStyler = document.createElement('span');
+            const checkbox = document.createElement('input');
+            const content = document.createElement('div');
+            checkboxWrapper.contentEditable = 'false';
+            checkbox.type = 'checkbox';
+            checkbox.addEventListener('change', event => {
+                // if the editor isn’t editable and we don't have a handler for
+                // readonly checks we have to undo the latest change
+                if (!editor.isEditable && !this.options.onReadOnlyChecked) {
+                    checkbox.checked = !checkbox.checked;
+                    return;
+                }
+                const { checked } = event.target;
+                if (editor.isEditable && typeof getPos === 'function') {
+                    editor
+                        .chain()
+                        .focus(undefined, { scrollIntoView: false })
+                        .command(({ tr }) => {
+                        const position = getPos();
+                        const currentNode = tr.doc.nodeAt(position);
+                        tr.setNodeMarkup(position, undefined, {
+                            ...currentNode === null || currentNode === void 0 ? void 0 : currentNode.attrs,
+                            checked,
+                        });
+                        return true;
+                    })
+                        .run();
+                }
+                if (!editor.isEditable && this.options.onReadOnlyChecked) {
+                    // Reset state if onReadOnlyChecked returns false
+                    if (!this.options.onReadOnlyChecked(node, checked)) {
+                        checkbox.checked = !checkbox.checked;
+                    }
+                }
+            });
+            Object.entries(this.options.HTMLAttributes).forEach(([key, value]) => {
+                listItem.setAttribute(key, value);
+            });
+            listItem.dataset.checked = node.attrs.checked;
+            if (node.attrs.checked) {
+                checkbox.setAttribute('checked', 'checked');
+            }
+            checkboxWrapper.append(checkbox, checkboxStyler);
+            listItem.append(checkboxWrapper, content);
+            Object.entries(HTMLAttributes).forEach(([key, value]) => {
+                listItem.setAttribute(key, value);
+            });
+            return {
+                dom: listItem,
+                contentDOM: content,
+                update: updatedNode => {
+                    if (updatedNode.type !== this.type) {
+                        return false;
+                    }
+                    listItem.dataset.checked = updatedNode.attrs.checked;
+                    if (updatedNode.attrs.checked) {
+                        checkbox.setAttribute('checked', 'checked');
+                    }
+                    else {
+                        checkbox.removeAttribute('checked');
+                    }
+                    return true;
+                },
+            };
+        };
+    },
+    addInputRules() {
+        return [
+            wrappingInputRule({
+                find: extension_task_item_dist_inputRegex,
+                type: this.type,
+                getAttributes: match => ({
+                    checked: match[match.length - 1] === 'x',
+                }),
+            }),
+        ];
+    },
+});
+
+
+//# sourceMappingURL=index.js.map
+
 ;// ./src/collaboration-bundle.js
 // TipTap v3 Collaboration Bundle
 // Based on official TipTap v3 documentation: https://next.tiptap.dev/docs/collaboration/getting-started/install
@@ -43979,6 +44189,8 @@ const Placeholder = Extension.create({
 
 
 // Additional useful extensions
+
+
 
 
 
@@ -44025,6 +44237,8 @@ var TiptapCollaboration = {
   BulletList: BulletList,
   OrderedList: OrderedList,
   ListItem: dist_ListItem,
+  TaskList: TaskList,
+  TaskItem: TaskItem,
   Blockquote: Blockquote,
   HorizontalRule: HorizontalRule
 };
