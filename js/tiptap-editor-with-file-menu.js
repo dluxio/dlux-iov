@@ -2581,6 +2581,26 @@ export default {
         
         // ✅ NEW BEST PRACTICE: Clean local document loading (follows newDocument pattern)
         async loadLocalDocument(file) {
+            // ✅ SECURITY: Verify user has access to this local file
+            if (!this.username) {
+                console.error('❌ No user logged in - cannot load local document');
+                alert('Please log in to access local documents.');
+                return;
+            }
+            
+            // Check file ownership
+            const fileOwner = file.isCollaborative ? file.owner : (file.creator || file.author);
+            if (fileOwner && fileOwner !== this.username) {
+                console.error('❌ Access denied: Document belongs to different user', {
+                    fileOwner,
+                    currentUser: this.username,
+                    fileName: file.name,
+                    fileId: file.id
+                });
+                alert(`Access denied: This document belongs to ${fileOwner}. You are logged in as ${this.username}.`);
+                return;
+            }
+            
             if (this.hasUnsavedChanges) {
                 const confirmResult = await this.confirmUnsavedChanges();
                 if (!confirmResult) return;
@@ -2642,6 +2662,27 @@ export default {
 
                 // Initialize schema and create editors (same as newDocument)
                 this.initializeCollaborativeSchema(bundle.Y?.default || bundle.Y);
+                
+                // ✅ SECURITY: Verify Y.js document ownership after loading from IndexedDB
+                if (this.ydoc) {
+                    const config = this.ydoc.getMap('config');
+                    const docOwner = config.get('owner') || config.get('creator');
+                    if (docOwner && docOwner !== this.username) {
+                        console.error('❌ Y.js document ownership mismatch in loadLocalDocument', {
+                            yjsOwner: docOwner,
+                            currentUser: this.username,
+                            fileId: file.id
+                        });
+                        // Clean up the loaded document
+                        if (this.ydoc) {
+                            this.ydoc.destroy();
+                            this.ydoc = null;
+                        }
+                        throw new Error(`Y.js document ownership verification failed: Document belongs to ${docOwner}`);
+                    }
+                    console.log('✅ Y.js document ownership verified for user:', this.username);
+                }
+                
                 await this.createOfflineFirstCollaborativeEditors(bundle);
 
                 // Load publish options and custom JSON from Y.js
@@ -3051,7 +3092,15 @@ export default {
                 type: this.currentFile.type,
                 lastModified: this.currentFile.lastModified,
                 isOfflineFirst: this.currentFile.isOfflineFirst || false, // Flag for Y.js + IndexedDB files
-                size: this.currentFile.isOfflineFirst ? 0 : (this.currentFile.size || 0) // Size managed by IndexedDB for offline-first files
+                size: this.currentFile.isOfflineFirst ? 0 : (this.currentFile.size || 0), // Size managed by IndexedDB for offline-first files
+                // ✅ SECURITY: Preserve creator field for user filtering
+                creator: this.currentFile.creator || this.username || 'anonymous',
+                createdAt: this.currentFile.createdAt || new Date().toISOString(),
+                // Preserve collaborative metadata if it exists
+                isCollaborative: this.currentFile.isCollaborative,
+                owner: this.currentFile.owner,
+                permlink: this.currentFile.permlink,
+                collaborativeId: this.currentFile.collaborativeId
             };
             
             if (existingIndex >= 0) {
@@ -3747,7 +3796,36 @@ export default {
         async loadLocalFiles() {
             try {
                 const files = JSON.parse(localStorage.getItem('dlux_tiptap_files') || '[]');
-                this.localFiles = files;
+                
+                // ✅ SECURITY FIX: Filter local files by current user
+                // Only show files created by the current logged-in user
+                if (this.username) {
+                    this.localFiles = files.filter(file => {
+                        // For collaborative documents converted to local, check owner
+                        if (file.isCollaborative && file.owner) {
+                            return file.owner === this.username;
+                        }
+                        // For pure local documents, check creator (if available)
+                        if (file.creator) {
+                            return file.creator === this.username;
+                        }
+                        // For legacy documents without creator info, check if they have user-specific metadata
+                        if (file.author) {
+                            return file.author === this.username;
+                        }
+                        // ✅ FALLBACK: For very old documents without user info, show them
+                        // This maintains backward compatibility but isn't ideal for multi-user scenarios
+                        console.warn('⚠️ Local document without user info found:', file.name, 'ID:', file.id);
+                        return true; // Show legacy documents to avoid data loss
+                    });
+                    
+                    console.log(`📋 Filtered local files: ${this.localFiles.length}/${files.length} files for user: ${this.username}`);
+                } else {
+                    // ✅ NO USER: If not logged in, don't show any local files
+                    // This prevents unauthorized access to other users' documents
+                    console.log('📋 No user logged in, hiding all local files for security');
+                    this.localFiles = [];
+                }
                 
                 // Also scan IndexedDB for Y.js documents
                 await this.scanIndexedDBDocuments();
@@ -3799,6 +3877,24 @@ export default {
         
         // ENHANCED DOCUMENT LOADING: TipTap Best Practice Implementation
         async loadLocalFile(file) {
+            // ✅ SECURITY: Verify user has access to this local file
+            if (!this.username) {
+                console.error('❌ No user logged in - cannot load local file');
+                throw new Error('Authentication required to access local files');
+            }
+            
+            // Check file ownership
+            const fileOwner = file.isCollaborative ? file.owner : (file.creator || file.author);
+            if (fileOwner && fileOwner !== this.username) {
+                console.error('❌ Access denied: File belongs to different user', {
+                    fileOwner,
+                    currentUser: this.username,
+                    fileName: file.name,
+                    fileId: file.id
+                });
+                throw new Error(`Access denied: This file belongs to ${fileOwner}. You are logged in as ${this.username}.`);
+            }
+            
             // ✅ TIPTAP BEST PRACTICE: Clean state FIRST, then set new URL
             // Clean up any existing state first (includes URL cleanup)
             this.fullCleanupCollaboration();
@@ -3826,6 +3922,26 @@ export default {
                 
                 // TIPTAP BEST PRACTICE: Pre-load Y.js document before editor creation
                 await this.preloadYjsDocument(file);
+                
+                // ✅ SECURITY: Verify Y.js document ownership after loading from IndexedDB
+                if (this.ydoc) {
+                    const config = this.ydoc.getMap('config');
+                    const docOwner = config.get('owner') || config.get('creator');
+                    if (docOwner && docOwner !== this.username) {
+                        console.error('❌ Y.js document ownership mismatch', {
+                            yjsOwner: docOwner,
+                            currentUser: this.username,
+                            fileId: file.id
+                        });
+                        // Clean up the loaded document
+                        if (this.ydoc) {
+                            this.ydoc.destroy();
+                            this.ydoc = null;
+                        }
+                        throw new Error(`Y.js document ownership verification failed: Document belongs to ${docOwner}`);
+                    }
+                    console.log('✅ Y.js document ownership verified for user:', this.username);
+                }
                 
                 // Create local editors with Y.js persistence (Tier 1)
                 await this.createWorkingEditors(); // Will choose Local Tier due to isCollaborativeMode = false
@@ -6802,6 +6918,10 @@ export default {
                 config.set('version', '1.0.0');
                 config.set('appVersion', 'dlux/1.0.0');
                 config.set('createdBy', this.username || 'anonymous');
+                // ✅ SECURITY: Set owner for access control verification
+                config.set('owner', this.username || 'anonymous');
+                config.set('creator', this.username || 'anonymous');
+                config.set('createdAt', new Date().toISOString());
                 config.set('lastModified', new Date().toISOString());
                 config.set('initialContentLoaded', false); // TipTap best practice flag
                 
@@ -6809,6 +6929,16 @@ export default {
                 if (this.currentFile?.name && this.currentFile.name !== `${this.currentFile?.owner}/${this.currentFile?.permlink}`) {
                     config.set('documentName', this.currentFile.name);
                     console.log('📄 Document name stored in Y.js config:', this.currentFile.name);
+                }
+                
+                console.log('🔐 Y.js document ownership set for user:', this.username);
+            } else {
+                // ✅ BACKWARD COMPATIBILITY: Set owner for existing documents that don't have it
+                if (!config.has('owner') && this.username) {
+                    config.set('owner', this.username);
+                    config.set('creator', this.username);
+                    config.set('createdAt', new Date().toISOString());
+                    console.log('🔐 Added ownership to existing Y.js document for user:', this.username);
                 }
             }
             
@@ -9016,14 +9146,39 @@ export default {
             console.log('🚀 Auto-connecting to local document:', { owner, permlink });
             
             try {
+                // ✅ SECURITY: Check if current user has access to this local document
+                if (!this.username) {
+                    console.error('❌ No user logged in - cannot access local documents');
+                    this.clearLocalURLParams();
+                    alert('Please log in to access local documents.');
+                    return;
+                }
+                
+                if (owner !== this.username) {
+                    console.error('❌ Access denied: Local document belongs to different user', {
+                        documentOwner: owner,
+                        currentUser: this.username
+                    });
+                    this.clearLocalURLParams();
+                    alert(`Access denied: This local document belongs to ${owner}. You are logged in as ${this.username}.`);
+                    return;
+                }
+                
                 // ✅ CRITICAL FIX: Use correct method to get local files from localStorage
                 const files = JSON.parse(localStorage.getItem('dlux_tiptap_files') || '[]');
                 console.log('🔍 Searching for local document in', files.length, 'files');
-                console.log('🔍 Looking for permlink:', permlink);
+                console.log('🔍 Looking for permlink:', permlink, 'for user:', owner);
                 
                 // Try multiple matching strategies to find the document
                 const existingFile = files.find(file => {
-                    console.log('🔍 Checking file:', file.id, file.name);
+                    console.log('🔍 Checking file:', file.id, file.name, 'creator:', file.creator, 'owner:', file.owner);
+                    
+                    // ✅ SECURITY: Additional user verification for found files
+                    const fileOwner = file.isCollaborative ? file.owner : (file.creator || file.author);
+                    if (fileOwner && fileOwner !== this.username) {
+                        console.log('🔒 Skipping file - belongs to different user:', fileOwner);
+                        return false;
+                    }
                     
                     // Direct match
                     if (file.id === permlink) return true;
@@ -11095,7 +11250,10 @@ export default {
                 name: name,
                 type: 'local',
                 lastModified: new Date().toISOString(),
-                isOfflineFirst: true // Flag to indicate this uses Y.js + IndexedDB
+                isOfflineFirst: true, // Flag to indicate this uses Y.js + IndexedDB
+                // ✅ SECURITY: Add creator field for user filtering
+                creator: this.username || 'anonymous',
+                createdAt: new Date().toISOString()
             };
             this.fileType = 'local';
             

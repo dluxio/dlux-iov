@@ -1,4 +1,4 @@
-this.version = "2025.06.16.1";
+this.version = "2025.06.15.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.16.1",
-  "generated": "2025-06-15T22:34:43Z",
+  "version": "2025.06.15.15",
+  "generated": "2025-06-15T22:54:30Z",
   "files": {
-    "/about/index.html": {
-      "checksum": "c55b0fb41651600457066258528efda7",
-      "size": 50785,
-      "priority": "critical"
-    },
     "/css/bootstrap-grid.css": {
       "checksum": "ff62c56c7f9eaa68592857aee5a7c93e",
       "size": 70327,
@@ -669,11 +664,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/blog/index.html": {
-      "checksum": "cea1a92da48ab633683afd7ac67d7dad",
-      "size": 7459,
-      "priority": "important"
     },
     "/build/index.html": {
       "checksum": "e0d175d96e7e772f4c13a626bdebeafe",
@@ -1616,8 +1606,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/tiptap-editor-with-file-menu.js": {
-      "checksum": "4c50b4782bedfcd9aadf8873648f5846",
-      "size": 716418,
+      "checksum": "607b77d35b3933cb898895812f5f004f",
+      "size": 725322,
       "priority": "important"
     },
     "/js/tiptap-editor.js": {
@@ -1626,8 +1616,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/tiptap-file-manager.js": {
-      "checksum": "ba38eba9343dd6cc4aa806d9eb6a2c0c",
-      "size": 39009,
+      "checksum": "e3a24394bea2f379796abfc85a9b7c47",
+      "size": 39205,
       "priority": "important"
     },
     "/js/toastvue.js": {
@@ -1909,11 +1899,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/img/aframe.png": {
-      "checksum": "8361db7f31590be699b6ca82a3ba2edd",
-      "size": 38148,
-      "priority": "page-specific"
     },
     "/img/chatgpt-icon.png": {
       "checksum": "3d4f973524b864115f67d06857692785",
@@ -2825,11 +2810,6 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/js/filesvue-old.js": {
-      "checksum": "4b39d9cd81599840f6b31e61e66efa84",
-      "size": 89644,
-      "priority": "lazy"
-    },
     "/js/mde-old.js": {
       "checksum": "67a091a43612269b845cb304e43af640",
       "size": 1038,
@@ -2881,8 +2861,8 @@ self.cacheManifest =
       "priority": "lazy"
     },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     }
   }

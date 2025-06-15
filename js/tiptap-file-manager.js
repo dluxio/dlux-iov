@@ -330,7 +330,10 @@ export default {
                 name: filename,
                 type: 'local',
                 lastModified: new Date().toISOString(),
-                size: JSON.stringify(content).length
+                size: JSON.stringify(content).length,
+                // ✅ SECURITY: Add creator field for user filtering
+                creator: this.authHeaders?.['x-account'] || 'anonymous',
+                createdAt: new Date().toISOString()
             };
             
             const existingIndex = files.findIndex(f => f.id === fileId);
