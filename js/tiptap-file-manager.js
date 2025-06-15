@@ -132,6 +132,9 @@ export default {
                 return;
             }
             
+            // ✅ CRITICAL FIX: Clear collaborative URL parameters when creating new documents
+            this.clearCollabURLParams();
+            
             this.currentFile = null;
             this.isCollaborativeMode = false;
             this.content = { title: '', body: '', tags: [], custom_json: {} };
@@ -302,6 +305,9 @@ export default {
         },
         
         async loadLocalFile(file) {
+            // ✅ CRITICAL FIX: Clear collaborative URL parameters when loading local documents
+            this.clearCollabURLParams();
+            
             const content = JSON.parse(localStorage.getItem(`dlux_tiptap_file_${file.id}`) || '{}');
             this.currentFile = file;
             this.content = content;
@@ -467,6 +473,15 @@ export default {
             if (bytes === 0) return '0 Bytes';
             const i = Math.floor(Math.log(bytes) / Math.log(1024));
             return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        },
+        
+        // ✅ URL Management for Tier Transitions
+        clearCollabURLParams() {
+            const url = new URL(window.location);
+            url.searchParams.delete('collab_owner');
+            url.searchParams.delete('collab_permlink');
+            window.history.replaceState({}, '', url.toString());
+            console.log('🔗 Cleared collaborative URL parameters');
         }
     },
     

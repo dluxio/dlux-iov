@@ -2996,6 +2996,18 @@ export default {
         
         // ENHANCED DOCUMENT LOADING: TipTap Best Practice Implementation
         async loadLocalFile(file) {
+            // ✅ CRITICAL FIX: Update URL for local document (tier transition compliance)
+            if (file.id && this.username) {
+                // Use Y.js document ID as permlink base (persistent tech ID)
+                const permlink = file.id.replace(/[^a-zA-Z0-9-]/g, '-').toLowerCase();
+                this.updateURLWithLocalParams(this.username, permlink);
+                console.log('🔗 URL updated with Y.js document ID as permlink:', permlink);
+            } else {
+                // Fallback: clear collaborative parameters
+                this.clearCollabURLParams();
+                console.log('🔗 URL cleared for local document load');
+            }
+            
             this.currentFile = file;
             this.fileType = 'local';
             
@@ -5071,13 +5083,28 @@ export default {
                 const IndexeddbPersistence = bundle?.IndexeddbPersistence?.default || bundle?.IndexeddbPersistence;
                 
                 if (IndexeddbPersistence && this.ydoc) {
-                    // Create IndexedDB persistence with temp document ID
-                    this.indexeddbProvider = new IndexeddbPersistence(this.tempDocumentId, this.ydoc);
+                    // ✅ CRITICAL: Generate clean document ID (no "temp" in URL)
+                    const cleanDocumentId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                    
+                    // Create IndexedDB persistence with clean document ID
+                    this.indexeddbProvider = new IndexeddbPersistence(cleanDocumentId, this.ydoc);
                     
                     // Wait for sync to complete
                     await new Promise(resolve => {
                         this.indexeddbProvider.on('synced', resolve);
                     });
+                    
+                    // ✅ CRITICAL: Update URL with clean document ID (no "temp")
+                    if (this.username) {
+                        const permlink = cleanDocumentId.replace(/[^a-zA-Z0-9-]/g, '-').toLowerCase();
+                        this.updateURLWithLocalParams(this.username, permlink);
+                        console.log('🔗 URL updated with clean document ID:', permlink);
+                    }
+                    
+                    // Update the current file ID to match the clean document ID
+                    if (this.currentFile) {
+                        this.currentFile.id = cleanDocumentId;
+                    }
                     
                     // Update custom JSON display after sync
                     this.updateCustomJsonDisplay();
@@ -5089,6 +5116,7 @@ export default {
                     
                     // No longer temporary
                     this.isTemporaryDocument = false;
+                    this.tempDocumentId = null; // Clear temp ID since we now have a clean one
                 }
             } catch (error) {
                 console.error('❌ Failed to create IndexedDB for temp document:', error);
@@ -7492,8 +7520,11 @@ export default {
                         filename = `Untitled - ${dateStr} ${timeStr}`;
                     }
                     
+                    // ✅ CRITICAL: Use IndexedDB provider name (clean ID) if available
+                    const documentId = this.indexeddbProvider?.name || `local_${timestamp}`;
+                    
                     this.currentFile = {
-                        id: this.tempDocumentId || `local_${timestamp}`,
+                        id: documentId,
                         name: filename,
                         type: 'local',
                         lastModified: new Date().toISOString(),
@@ -7921,6 +7952,22 @@ export default {
             console.log('🔗 URL updated with collaboration parameters for refresh persistence');
         },
         
+        // ✅ NEW: Update URL with local document path (follows /new/username/permlink pattern)
+        updateURLWithLocalParams(username, permlink) {
+            // Clear any collaborative parameters first
+            const url = new URL(window.location);
+            url.searchParams.delete('collab_owner');
+            url.searchParams.delete('collab_permlink');
+            
+            // Create clean /new/username/permlink URL
+            const newPath = `/new/${username}/${permlink}`;
+            const newUrl = `${url.origin}${newPath}`;
+            
+            // Update URL without triggering a page reload
+            window.history.replaceState({}, '', newUrl);
+            console.log('🔗 URL updated with local document path for refresh persistence:', newPath);
+        },
+        
         // Call this when connecting to a collaborative document
         setCollabURLParams() {
             if (this.currentFile && this.currentFile.type === 'collaborative') {
@@ -7928,7 +7975,7 @@ export default {
             }
         },
         
-        // Clear collaborative URL parameters when creating new documents
+        // Clear collaborative URL parameters and reset to clean /new URL
         clearCollabURLParams() {
             const url = new URL(window.location);
             
@@ -7936,9 +7983,16 @@ export default {
             url.searchParams.delete('collab_owner');
             url.searchParams.delete('collab_permlink');
             
-            // Update URL without triggering a page reload
-            window.history.replaceState({}, '', url.toString());
-            console.log('🧹 URL cleared of collaboration parameters for new document');
+            // If we're on a /new/username/permlink path, reset to clean /new
+            if (url.pathname.startsWith('/new/') && url.pathname.split('/').length > 2) {
+                const newUrl = `${url.origin}/new`;
+                window.history.replaceState({}, '', newUrl);
+                console.log('🧹 URL reset to clean /new for new document');
+            } else {
+                // Just clear query parameters
+                window.history.replaceState({}, '', url.toString());
+                console.log('🧹 URL cleared of collaboration parameters');
+            }
         },
         
         async connectToCollaborationServer(serverDoc) {
