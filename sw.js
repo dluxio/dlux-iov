@@ -1,4 +1,4 @@
-this.version = "2025.06.15.1";
+this.version = "2025.06.16.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.15.15",
-  "generated": "2025-06-15T22:54:30Z",
+  "version": "2025.06.16.1",
+  "generated": "2025-06-15T22:54:58Z",
   "files": {
-    "/css/bootstrap-grid.css": {
-      "checksum": "ff62c56c7f9eaa68592857aee5a7c93e",
-      "size": 70327,
-      "priority": "critical"
-    },
     "/css/bootstrap-reboot.css": {
       "checksum": "4092253288fe829ab354cc4a7d73450a",
       "size": 11895,
@@ -664,11 +659,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/build/index.html": {
-      "checksum": "e0d175d96e7e772f4c13a626bdebeafe",
-      "size": 7845,
-      "priority": "important"
     },
     "/create/index.html": {
       "checksum": "5a3d0842df9543804d26ccfdeafdb495",
@@ -1900,11 +1890,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/img/chatgpt-icon.png": {
-      "checksum": "3d4f973524b864115f67d06857692785",
-      "size": 6221,
-      "priority": "page-specific"
-    },
     "/js/aframe-environment-component.min.js": {
       "checksum": "b24c9108753f2af21987ba83c9674ff1",
       "size": 49209,
@@ -2810,11 +2795,6 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/js/mde-old.js": {
-      "checksum": "67a091a43612269b845cb304e43af640",
-      "size": 1038,
-      "priority": "lazy"
-    },
     "/js/modalvue-old.js": {
       "checksum": "b3b3a6b376fd063cc48b52a2c1505216",
       "size": 40019,
@@ -2861,8 +2841,8 @@ self.cacheManifest =
       "priority": "lazy"
     },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     }
   }
