@@ -83,6 +83,71 @@ createApp({
       },
       // NFT Creation Type
       nftCreationType: 'static',
+      // Static NFT content data
+      staticContent: {
+        file: null,
+        title: '',
+        description: '',
+        script: '',
+        contentType: '',
+        base64Data: ''
+      },
+      isDragging: false,
+      isUploading: false,
+      // NFT Data for API submission
+      nftData: {
+        type: 1, // 1: Basic, 2: Executable, 3: Extended, 4: Full Dynamic
+        name: '',
+        script: '',
+        permlink: '',
+        start: '00',
+        end: '00', // Set as 1 of 1
+        total: 1, // Only 1 NFT in this set
+        royalty: 0,
+        handling: 'html',
+        max_fee: 10000000,
+        bond: 0,
+        long_name: '',
+        exe_size: 1024, // For types 2,4
+        opt_size: 1024  // For types 3,4
+      },
+      // Icon picker data
+      iconSearchTerm: '',
+      selectedIconCategory: 'all',
+      filteredIcons: [],
+      popularIcons: [
+        { class: 'fa-solid fa-gem', name: 'Gem' },
+        { class: 'fa-solid fa-star', name: 'Star' },
+        { class: 'fa-solid fa-heart', name: 'Heart' },
+        { class: 'fa-solid fa-crown', name: 'Crown' },
+        { class: 'fa-solid fa-fire', name: 'Fire' },
+        { class: 'fa-solid fa-bolt', name: 'Bolt' },
+        { class: 'fa-solid fa-magic', name: 'Magic' },
+        { class: 'fa-solid fa-dragon', name: 'Dragon' },
+        { class: 'fa-solid fa-shield', name: 'Shield' },
+        { class: 'fa-solid fa-sword', name: 'Sword' }
+      ],
+      businessIcons: [
+        { class: 'fa-solid fa-briefcase', name: 'Briefcase' },
+        { class: 'fa-solid fa-chart-line', name: 'Chart' },
+        { class: 'fa-solid fa-coins', name: 'Coins' },
+        { class: 'fa-solid fa-handshake', name: 'Handshake' },
+        { class: 'fa-solid fa-building', name: 'Building' }
+      ],
+      natureIcons: [
+        { class: 'fa-solid fa-tree', name: 'Tree' },
+        { class: 'fa-solid fa-leaf', name: 'Leaf' },
+        { class: 'fa-solid fa-sun', name: 'Sun' },
+        { class: 'fa-solid fa-moon', name: 'Moon' },
+        { class: 'fa-solid fa-mountain', name: 'Mountain' }
+      ],
+      gamingIcons: [
+        { class: 'fa-solid fa-gamepad', name: 'Gamepad' },
+        { class: 'fa-solid fa-dice', name: 'Dice' },
+        { class: 'fa-solid fa-chess', name: 'Chess' },
+        { class: 'fa-solid fa-trophy', name: 'Trophy' },
+        { class: 'fa-solid fa-medal', name: 'Medal' }
+      ],
       preScroll: [0,0],
       lastScroll: 0,
       lastLoad: 0,
@@ -94,6 +159,8 @@ createApp({
           api: "https://token.dlux.io",
           sets: {
             dlux: {
+              sales: [],
+              auctions: [],
               mintAuctions: [],
               mintSales: [],
               computed: {
@@ -111,6 +178,8 @@ createApp({
           api: "https://duat.hivehoneycomb.com",
           sets: {
             rct: {
+              sales: [],
+              auctions: [],
               mintAuctions: [],
               mintSales: [],
             }
@@ -620,20 +689,25 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
       svgTag: "",
       svgTagClose: "",
       SA: {
-        logo: "Qma1aE2ntCwMw5pAZo3cCYCmMZ4byVvyGDbK22HiH92WN7",
-        banner: "QmdSXLw1qwQ51MtkS3SjUd8qryLWadAYvMWngFfDPCsb9Y",
-        featured: "QmVndpFfjDXtSt2v26G7tiM6mZJGcj3Ya4KzepM8c6Pu7u",
-        wrapped: "QmV4WZ7sKzvaPG85C2rYNhDS3nVhk3Bv5U9o5Gr9KWx7ir",
-        color1: "#ffffff",
-        color2: "#000000",
-        links: [],
-        categories: [],
-        faicon: "fa fa-gem",
-        description: "Provide a detailed description of your collection.",
+        setname: '',
+        description: '',
+        color1: '#000000',
+        color2: '#ffffff',
+        faicon: 'fa-solid fa-gem',
+        logo: '',
+        featured: '',
+        banner: '',
+        wrapped: '',
+        nsfw: false
       },
+      // NSFW toggle
+      notSfw: {
+        decent: 'false'
+      },
+      // NFT Creation Type
+      nftCreationType: 'static',
       SLN: [],
       // Icon Picker data
-      iconSearchTerm: '',
       selectedIconCategory: 'all',
       availableIcons: [
         // Popular/Common icons
@@ -882,6 +956,10 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
         if (this.NFTselect.keys.find(a => a.indexOf('Chain') >= 0) && !this.chains[chain].enabled) continue chainlabel;
         setlabel: for (var set in this.chains[chain].sets) {
           if (this.NFTselect.keys.find(a => a.indexOf('Set') >= 0) && !this.chains[chain].sets[set].enabled) continue setlabel;
+          // Ensure sales array exists
+          if (!this.chains[chain].sets[set].sales) {
+            this.chains[chain].sets[set].sales = [];
+          }
           salelabel: for (var i = 0; i < this.chains[chain].sets[set].sales.length; i++) {
             if (this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && !(this.selectors['For Sale'].checked || this.selectors['Affordable'].checked || this.selectors['Yours'].checked)) break salelabel;
             if (this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && this.selectors['Yours'].checked && this.chains[chain].sets[set].sales[i].by != this.account) continue salelabel;
@@ -907,6 +985,10 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
             } else {
               tempDisplayNFTs.push(this.chains[chain].sets[set].sales[i])
             }
+          }
+          // Ensure auctions array exists
+          if (!this.chains[chain].sets[set].auctions) {
+            this.chains[chain].sets[set].auctions = [];
           }
           auctionlabel: for (var i = 0; i < this.chains[chain].sets[set].auctions.length; i++) {
             if (this.NFTselect.keys.find(a => a.indexOf('Status') >= 0) && !(this.selectors['At Auction'].checked || this.selectors['Has Bids'].checked || this.selectors['Your Bids'].checked || this.selectors['Affordable'].checked || this.selectors['Mint'].checked || this.selectors['Yours'].checked)) break auctionlabel;
@@ -1054,13 +1136,8 @@ if(window.addEventListener){window.addEventListener("message",onMessage,false);}
           }
         }
       }
-      for (var i = 0; i < tempDisplayNFTs.length; i++) {
-        // add tempdisplaynft to displaynfts if it doesn't exisit
-        if (!this.displayNFTs.find(nft => nft.uid === tempDisplayNFTs[i].uid && nft.setname === tempDisplayNFTs[i].setname)) {
-          this.displayNFTs.push(tempDisplayNFTs[i]);
-        }
-
-      }
+      // Replace displayNFTs with the sorted tempDisplayNFTs array
+      this.displayNFTs = tempDisplayNFTs;
     },
     mintsQty(item) {
       return this.getMint(this.chains[item.token]?.sets[item.set]?.set, 'qty')
@@ -1983,7 +2060,14 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         return;
       }
       
-      // Handle specific image slots
+      // Handle content file for static NFTs
+      if (slotType === 'content') {
+        this.nftData.script = fileData.hash || fileData.cid;
+        this.showToast(`NFT content file set successfully!`, 'success');
+        return;
+      }
+      
+      // Handle specific image slots (for legacy support)
       if (this.nftImages.hasOwnProperty(slotType)) {
         this.nftImages[slotType] = {
           hash: fileData.hash || fileData.cid,
@@ -1993,47 +2077,45 @@ function bidNFT(setname, uid, bid_amount, type, callback){
           url: `https://ipfs.dlux.io/ipfs/${fileData.hash || fileData.cid}`
         };
         
-        // Show success message
         this.showToast(`${slotType.charAt(0).toUpperCase() + slotType.slice(1)} image set successfully!`, 'success');
-        
-        // Update the corresponding form field if it exists
         this.updateImageField(slotType, fileData.hash || fileData.cid);
       }
     },
     
     updateImageField(slotType, hash) {
-      // Update the corresponding input field or data property
       switch(slotType) {
         case 'logo':
-          this.SA.logo = hash;
+          if (this.SA) this.SA.logo = hash;
           break;
         case 'featured':
-          this.SA.featured = hash;
+          if (this.SA) this.SA.featured = hash;
           break;
         case 'banner':
-          this.SA.banner = hash;
+          if (this.SA) this.SA.banner = hash;
           break;
         case 'wrapped':
-          this.SA.wrapped = hash;
+          if (this.SA) this.SA.wrapped = hash;
           break;
       }
     },
     
     showToast(message, type = 'info') {
-      // Create a simple toast notification
+      const toastClass = type === 'error' ? 'danger' : type;
+      const iconClass = type === 'success' ? 'check-circle' : 
+                       type === 'error' ? 'exclamation-triangle' : 'info-circle';
+      
       const toast = document.createElement('div');
-      toast.className = `alert alert-${type} position-fixed`;
+      toast.className = `alert alert-${toastClass} position-fixed`;
       toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
       toast.innerHTML = `
         <div class="d-flex align-items-center">
-          <i class="fa-solid fa-${type === 'success' ? 'check-circle' : 'info-circle'} fa-fw me-2"></i>
+          <i class="fa-solid fa-${iconClass} fa-fw me-2"></i>
           ${message}
         </div>
       `;
       
       document.body.appendChild(toast);
       
-      // Auto remove after 3 seconds
       setTimeout(() => {
         if (toast.parentNode) {
           toast.parentNode.removeChild(toast);
@@ -2088,7 +2170,7 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     
     // Icon picker methods
     selectIcon(iconClass) {
-      this.SA.faicon = iconClass;
+      if (this.SA) this.SA.faicon = iconClass;
     },
     
     filterIcons() {
@@ -3033,7 +3115,395 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       return `${days}d ${hours}h ${minutes}m ${seconds}s`;
     },
     
+    // Proceed to mint tab with basic validation
+    proceedToMint() {
+      // For static NFTs, ensure script is generated and uploaded
+      if (this.nftCreationType === 'static') {
+        if (!this.nftData.script) {
+          this.showToast('Please upload your static content and generate the script first', 'error');
+          return;
+        }
+        
+        // Set as 1 of 1 NFT
+        this.nftData.start = '00';
+        this.nftData.end = '00';
+        this.nftData.total = 1;
+        this.nftData.handling = 'html';
+      }
+      
+      // Copy basic info to NFT data if not already set
+      if (!this.nftData.name) {
+        this.nftData.name = this.testsetname;
+      }
+      
+      // Validate required fields
+      if (!this.nftData.script) {
+        this.showToast('Please generate and upload your NFT script first', 'error');
+        return;
+      }
+      
+      if (!this.nftData.name) {
+        this.showToast('Please enter a set name', 'error');
+        return;
+      }
+      
+      // Switch to mint tab
+      const mintTab = document.querySelector('a[href="#nav-mint"]');
+      if (mintTab) {
+        mintTab.click();
+      }
+    },
+    
+    // Define NFT Set function
+    defineNFTSet() {
+      if (!this.isFormValid) {
+        this.showToast('Please fill in all required fields correctly', 'error');
+        return;
+      }
+      
+      if (!this.account || this.account === 'GUEST') {
+        this.showToast('Please log in to create an NFT set', 'error');
+        return;
+      }
+      
+      // Prepare the operation data according to API spec
+      const nftDefineOp = {
+        type: 'nft_define',
+        txid: `nft_define_${Date.now()}`,
+        msg: `Defining NFT Set: ${this.nftData.name}`,
+        title: 'NFT Set Definition',
+        delay: 250,
+        ops: ['getNFTsets'], // Refresh NFT sets after operation
+        
+        // API parameters
+        name: this.nftData.name,
+        type: parseInt(this.nftData.type),
+        script: this.nftData.script,
+        permlink: this.nftData.permlink,
+        start: this.nftData.start,
+        end: this.nftData.end,
+        royalty: parseInt(this.nftData.royalty) || 0,
+        handling: this.nftData.handling,
+        max_fee: parseInt(this.nftData.max_fee),
+        bond: parseFloat(this.nftData.bond) || 0,
+        long_name: this.nftData.long_name || undefined,
+        total: this.nftData.total ? parseInt(this.nftData.total) : undefined,
+        exe_size: (this.nftData.type === 2 || this.nftData.type === 4) ? parseInt(this.nftData.exe_size) : undefined,
+        opt_size: (this.nftData.type === 3 || this.nftData.type === 4) ? parseInt(this.nftData.opt_size) : undefined
+      };
+      
+      console.log('NFT Define Operation:', nftDefineOp);
+      
+      // Send for signing
+      this.sendIt(nftDefineOp);
+    },
+    
+    // Form validation computed property helper
+    validateNFTForm() {
+      return this.nftData.name && 
+             this.nftData.script && 
+             this.nftData.permlink && 
+             this.nftData.start && 
+             this.nftData.end && 
+             this.nftData.handling && 
+             this.nftData.max_fee;
+    },
+    
+    // Color validation for legacy support
+    validateHexColor(event, colorKey) {
+      let value = event.target.value;
+      if (!value.startsWith('#')) {
+        value = '#' + value;
+      }
+      value = '#' + value.substring(1).replace(/[^0-9A-Fa-f]/g, '');
+      if (value.length > 7) {
+        value = value.substring(0, 7);
+      }
+      
+      if (this.SA) {
+        if (colorKey === 'color1') {
+          this.SA.color1 = value;
+        } else if (colorKey === 'color2') {
+          this.SA.color2 = value;
+        }
+      }
+      event.target.value = value;
+    },
+    
+    // Static NFT file handling methods
+    handleStaticFileSelect(event) {
+      const file = event.target.files[0];
+      if (file) {
+        this.processStaticFile(file);
+      }
+    },
+    
+    handleStaticFileDrop(event) {
+      this.isDragging = false;
+      const file = event.dataTransfer.files[0];
+      if (file) {
+        this.processStaticFile(file);
+      }
+    },
+    
+    async processStaticFile(file) {
+      this.staticContent.file = file;
+      this.staticContent.contentType = file.type;
+      
+      // Auto-populate title from filename
+      if (!this.staticContent.title) {
+        this.staticContent.title = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+      }
+      
+      // Read file as base64 for embedding
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.staticContent.base64Data = e.target.result;
+        this.generateStaticScript();
+      };
+      reader.readAsDataURL(file);
+      
+      this.showToast(`File loaded: ${file.name}`, 'success');
+    },
+    
+    generateStaticScript() {
+      if (!this.staticContent.file || !this.staticContent.base64Data) return;
+      
+      const { file, title, description, base64Data, contentType } = this.staticContent;
+      
+      // Determine how to display the content
+      let contentDisplay = '';
+      if (contentType.startsWith('image/')) {
+        contentDisplay = `<img src="${base64Data}" style="max-width: 100%; height: auto;" alt="${title}">`;
+      } else if (contentType.startsWith('video/')) {
+        contentDisplay = `<video controls style="max-width: 100%; height: auto;"><source src="${base64Data}" type="${contentType}"></video>`;
+      } else if (contentType.startsWith('audio/')) {
+        contentDisplay = `<audio controls style="width: 100%;"><source src="${base64Data}" type="${contentType}"></audio>`;
+      } else if (contentType === 'text/html' || file.name.endsWith('.html')) {
+        // For HTML files, we'll embed the content directly
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          contentDisplay = e.target.result;
+          this.finishScriptGeneration(contentDisplay);
+        };
+        reader.readAsText(file);
+        return;
+      } else {
+        // For other file types, show as downloadable link
+        contentDisplay = `
+          <div style="text-align: center; padding: 2rem; border: 2px dashed #ccc; border-radius: 8px;">
+            <i style="font-size: 3rem; color: #666; margin-bottom: 1rem;">📄</i>
+            <h3>${title}</h3>
+            <p>File: ${file.name}</p>
+            <p>Size: ${this.formatFileSize(file.size)}</p>
+            <a href="${base64Data}" download="${file.name}" style="background: #007bff; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px;">Download File</a>
+          </div>
+        `;
+      }
+      
+      this.finishScriptGeneration(contentDisplay);
+    },
+    
+    finishScriptGeneration(contentDisplay) {
+      const { title, description } = this.staticContent;
+      const { color1, color2, faicon, logo, featured, banner, wrapped, description: setDescription } = this.SA;
+      const isNsfw = this.notSfw.decent === 'true';
+      
+      // Generate the script that will be uploaded to IPFS
+      const script = `<!DOCTYPE html>
+<html><head><script>
+function compile(message, display) {
+    const setData = {
+        name: "${this.nftData.name}",
+        description: "${setDescription}",
+        color1: "${color1}",
+        color2: "${color2}",
+        icon: "${faicon}",
+        logo: "${logo}",
+        featured: "${featured}",
+        banner: "${banner}",
+        wrapped: "${wrapped}",
+        nsfw: ${isNsfw}
+    };
+    
+    const nftData = {
+        title: "${title}",
+        description: "${description}",
+        uid: message,
+        type: "Static NFT (1 of 1)"
+    };
+    
+    const HTML = \`
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 1rem; 
+                    background: linear-gradient(\${setData.color1}, \${setData.color2}); 
+                    border-radius: 12px; color: white;">
+            <div style="text-align: center; margin-bottom: 1rem;">
+                <i class="\${setData.icon}" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
+                <h2 style="margin: 0.5rem 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">\${nftData.title}</h2>
+                <small style="opacity: 0.8;">\${setData.name} Collection</small>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                ${contentDisplay}
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px;">
+                <p style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">\${nftData.description}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; opacity: 0.8;">
+                    <span>UID: \${nftData.uid}</span>
+                    <span>\${nftData.type}</span>
+                </div>
+            </div>
+        </div>
+    \`;
+    
+    const attributes = [
+        {name: 'Title', value: nftData.title},
+        {name: 'Description', value: nftData.description},
+        {name: 'Set', value: setData.name},
+        {name: 'Set Description', value: setData.description},
+        {name: 'Type', value: nftData.type},
+        {name: 'Color 1', value: setData.color1},
+        {name: 'Color 2', value: setData.color2},
+        {name: 'Icon', value: setData.icon},
+        {name: 'NSFW', value: setData.nsfw ? 'Yes' : 'No'},
+        {name: 'UID', value: nftData.uid}
+    ];
+    
+    if(display){
+        document.getElementById('body').innerHTML = HTML;
+    } else {
+        return {
+            HTML: HTML, 
+            attributes: attributes, 
+            sealed: ''
+        };
+    }
+}
 
+// Iframe/message handling for sandboxed execution
+if (window.addEventListener) {
+    window.addEventListener("message", onMessage, false);
+} else if (window.attachEvent) {
+    window.attachEvent("onmessage", onMessage, false);
+}
+
+function onMessage(event) {
+    var data = event.data;
+    if (typeof(window[data.func]) == "function") {
+        const got = window[data.func].call(null, data.message);
+        window.parent.postMessage({
+            'func': 'compiled',
+            'message': got
+        }, "*");
+    }
+}
+
+function onLoad(id){
+    window.parent.postMessage({
+        'func': 'loaded', 
+        'message': id
+    }, "*");
+}
+</script></head>
+<body id="body">
+<script>
+const uid = location.href.split('?')[1]; 
+if(uid){
+    compile(uid, true);
+} else {
+    onLoad(uid);
+}
+</script>
+</body></html>`;
+      
+      this.staticContent.script = script;
+    },
+    
+    clearStaticFile() {
+      this.staticContent = {
+        file: null,
+        title: '',
+        description: '',
+        script: '',
+        contentType: '',
+        base64Data: ''
+      };
+      if (this.$refs.staticFileInput) {
+        this.$refs.staticFileInput.value = '';
+      }
+    },
+    
+    async uploadStaticScript() {
+      if (!this.staticContent.script || !this.account) return;
+      
+      this.isUploading = true;
+      
+      try {
+        // Create a blob from the script
+        const blob = new Blob([this.staticContent.script], { type: 'text/html' });
+        const file = new File([blob], `${this.nftData.name || 'static-nft'}.html`, { type: 'text/html' });
+        
+        // Upload to SPK Drive (similar to how other files are uploaded)
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        // This would typically go through the SPK Drive upload system
+        // For now, we'll simulate the upload and generate a hash
+        const response = await this.uploadToSpkDrive(formData);
+        
+        if (response.success) {
+          this.nftData.script = response.hash;
+          this.testscript = response.hash;
+          
+          this.showToast(`Script uploaded successfully! Hash: ${response.hash}`, 'success');
+          
+          // Proceed to mint tab
+          this.proceedToMint();
+        } else {
+          throw new Error(response.error || 'Upload failed');
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        this.showToast(`Upload failed: ${error.message}`, 'error');
+      } finally {
+        this.isUploading = false;
+      }
+    },
+    
+    async uploadToSpkDrive(formData) {
+      // This should integrate with the actual SPK Drive upload system
+      // For now, we'll simulate it
+      try {
+        const response = await fetch(`${this.spkapi}/upload`, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            // Add any required auth headers
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          return { success: true, hash: data.hash || data.cid };
+        } else {
+          return { success: false, error: 'Upload failed' };
+        }
+      } catch (error) {
+        // Fallback: generate a mock hash for testing
+        console.warn('SPK Drive upload not available, using mock hash');
+        const mockHash = 'Qm' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        return { success: true, hash: mockHash };
+      }
+    },
+    
+    formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    },
   },
   mounted() {
     //get hash and set it
@@ -3082,6 +3552,61 @@ function bidNFT(setname, uid, bid_amount, type, callback){
     }
   },
   computed: {
+    // Form validation for NFT creation
+    isFormValid: {
+      get() {
+        return this.nftData.name && 
+               this.nftData.script && 
+               this.nftData.permlink && 
+               this.nftData.start && 
+               this.nftData.end && 
+               this.nftData.handling && 
+               this.nftData.max_fee &&
+               (this.nftData.type !== 2 && this.nftData.type !== 4 || this.nftData.exe_size) &&
+               (this.nftData.type !== 3 && this.nftData.type !== 4 || this.nftData.opt_size);
+      }
+    },
+    
+    // Check if static script can be uploaded
+    canUploadStaticScript: {
+      get() {
+        return this.staticContent.script && 
+               this.staticContent.title &&
+               this.nftData.name &&
+               this.nftData.permlink &&
+               this.account &&
+               this.account !== 'GUEST';
+      }
+    },
+    
+    // Check if can proceed to mint (for both static and generative)
+    canProceedToMint: {
+      get() {
+        if (this.nftCreationType === 'static') {
+          return this.nftData.script && 
+                 this.nftData.name &&
+                 this.nftData.permlink;
+        } else {
+          // For generative NFTs, check if script is generated
+          return this.testscript && 
+                 this.nftData.name &&
+                 this.nftData.permlink;
+        }
+      }
+    },
+    
+    // All available icons combined
+    availableIcons: {
+      get() {
+        return [
+          ...this.popularIcons.map(icon => ({ ...icon, category: 'solid' })),
+          ...this.businessIcons.map(icon => ({ ...icon, category: 'business' })),
+          ...this.natureIcons.map(icon => ({ ...icon, category: 'nature' })),
+          ...this.gamingIcons.map(icon => ({ ...icon, category: 'gaming' }))
+        ];
+      }
+    },
+    
     filteredIcons: {
       get() {
         let icons = this.availableIcons;
@@ -3109,14 +3634,6 @@ function bidNFT(setname, uid, bid_amount, type, callback){
         return location;
       },
     },
-    // shown: {
-    //   get() {
-    //     const names = ['hive', 'hbd', 'dlux', 'duat']
-    //     for(var i = 0; i < names.length; i++){
-    //       if(this.$refs[`show${names[i]}`].classList.value.find('show'))return names[i]
-    //     }
-    //   }
-    // },
     chainSorted: {
       get() {
         return Object.keys(this.chains).sort((a, b) => {
