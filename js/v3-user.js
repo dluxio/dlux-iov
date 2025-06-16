@@ -31,6 +31,8 @@ import MFI from "/js/mfi-vue.js";
 import UploadEverywhere from "/js/upload-everywhere.js";
 import TiptapEditorWithFileMenu from "/js/tiptap-editor-with-file-menu.js";
 import Asset360Manager from "/js/components/360-asset-manager.js";
+import DappManager from "/js/components/dapp-manager.js";
+import RemixDappManager from "/js/components/remix-dapp-manager.js";
 import MCommon from '/js/methods-common.js'
 
 let url = location.href.replace(/\/$/, "");
@@ -1113,6 +1115,8 @@ PORT=3000
     "upload-everywhere": UploadEverywhere,
     "tiptap-editor-with-file-menu": TiptapEditorWithFileMenu,
     "asset-360-manager": Asset360Manager,
+    "dapp-manager": DappManager,
+    "remix-dapp-manager": RemixDappManager,
   },
   methods: {
     ...MCommon,
@@ -6361,6 +6365,59 @@ function buyNFT(setname, uid, price, type, callback){
       }
       
       this.handleSPKFileForAssets = fileData;
+    },
+
+    // dApp Manager Integration Methods
+    handleDappUpdated(data) {
+      // Integration Point: dApp Manager Data Handler
+      // This method receives the complete dApp data from the dApp Manager including:
+      // - dappStructure: file organization (entry, assets, scripts, styles, data, other)
+      // - customJson: custom JSON structure for the dApp
+      // - license: selected license information
+      // - licenseTree: tracking of derivative work licensing
+      
+      console.log('📱 dApp data updated:', data);
+      
+      // Update the post's custom JSON with the new dApp data
+      this.postCustom_json.dappStructure = data.dappStructure || {};
+      this.postCustom_json.customJson = data.customJson || {};
+      this.postCustom_json.license = data.license || '1';
+      this.postCustom_json.licenseTree = data.licenseTree || [];
+      
+      // Trigger mock update for preview
+      this.dluxMock();
+      
+      // Log the structure for debugging
+      console.log('📝 Updated postCustom_json.dappStructure:', this.postCustom_json.dappStructure);
+      console.log('🔧 Updated postCustom_json.customJson:', this.postCustom_json.customJson);
+      console.log('⚖️ Updated postCustom_json.license:', this.postCustom_json.license);
+    },
+
+    // ReMix dApp Manager Integration Methods
+    handleRemixUpdated(data) {
+      // Integration Point: ReMix dApp Manager Data Handler
+      // This method receives the complete remix data from the ReMix Manager including:
+      // - remixStructure: base dApp info, modifications, attribution, license
+      // - modificationFiles: files added/modified in the remix
+      // - customJson: custom JSON structure for the remix
+      // - license: selected license for the remix (must be compatible with base)
+      
+      console.log('🔄 ReMix dApp data updated:', data);
+      
+      // Update the post's custom JSON with the new remix data
+      this.postCustom_json.remixStructure = data.remixStructure || {};
+      this.postCustom_json.modificationFiles = data.modificationFiles || {};
+      this.postCustom_json.customJson = data.customJson || {};
+      this.postCustom_json.license = data.license || '1';
+      
+      // Trigger mock update for preview
+      this.dluxMock();
+      
+      // Log the structure for debugging
+      console.log('📝 Updated postCustom_json.remixStructure:', this.postCustom_json.remixStructure);
+      console.log('🔧 Updated postCustom_json.modificationFiles:', this.postCustom_json.modificationFiles);
+      console.log('🔄 Updated postCustom_json.customJson:', this.postCustom_json.customJson);
+      console.log('⚖️ Updated postCustom_json.license:', this.postCustom_json.license);
     }
   },
   mounted() {

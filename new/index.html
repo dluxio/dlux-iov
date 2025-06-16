@@ -84,6 +84,9 @@
     <script type="module" src="/js/v3-user.js"></script>
     <!-- 360° Asset Manager Component -->
     <script type="module" src="/js/components/360-asset-manager.js"></script>
+    <!-- dApp Manager Components -->
+    <script type="module" src="/js/components/dapp-manager.js"></script>
+    <script type="module" src="/js/components/remix-dapp-manager.js"></script>
     <style>
         .form-switch.form-switch-lg .form-check-input {
             height: 2rem;
@@ -217,6 +220,50 @@
         }
         
         .asset-360-manager .card:hover {
+            transform: scale(1.02);
+            border-color: #4ECDC4;
+        }
+
+        /* dApp Manager Styles */
+        .dapp-manager .drop-zone {
+            border: 2px dashed #495057;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            background-color: #212529;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .dapp-manager .drop-zone:hover,
+        .dapp-manager .drop-zone.dragover {
+            border-color: #4ECDC4;
+            background-color: #1e2329;
+        }
+        
+        .dapp-manager .card:hover {
+            transform: scale(1.02);
+            border-color: #4ECDC4;
+        }
+
+        /* ReMix dApp Manager Styles */
+        .remix-dapp-manager .drop-zone {
+            border: 2px dashed #495057;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            background-color: #212529;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .remix-dapp-manager .drop-zone:hover,
+        .remix-dapp-manager .drop-zone.dragover {
+            border-color: #4ECDC4;
+            background-color: #1e2329;
+        }
+        
+        .remix-dapp-manager .card:hover {
             transform: scale(1.02);
             border-color: #4ECDC4;
         }
@@ -794,6 +841,94 @@
                                     <i class="fas fa-sign-in-alt fa-3x mb-3"></i>
                                     <h5>Please Log In</h5>
                                     <p>You need to log in to manage 360° gallery assets.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- dApp Asset Management (Only show for dApp posts) -->
+                <div v-if="postCustom_json.vrHash == 'dapp'"
+                    class="accordion border-white-50 rounded mt-3" id="dappAccordion">
+                    <div class="accordion-item bg-img-none bg-dark-1">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button bg-card hero-subtitle fs-3 p-3" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#dappManager" aria-expanded="true"
+                                aria-controls="dappManager">
+                                <i class="fa-solid fa-mobile-screen-button fa-fw me-2"></i>dApp Builder
+                            </button>
+                        </h2>
+                        <div id="dappManager" class="accordion-collapse collapse show"
+                            data-bs-parent="#dappAccordion">
+                            <div class="accordion-body">
+                                <!-- New dApp Manager Component -->
+                                <!-- 
+                                    Integration Notes:
+                                    - This component manages dApp files with drag-and-drop organization and custom JSON structure
+                                    - Integrates with SPK Drive for file selection and upload
+                                    - Outputs dApp structure with licensing and custom JSON data
+                                    - Data is passed to TipTap editor via @dapp-updated event for blockchain posting
+                                    - SPK contract IDs are preserved for proper asset referencing in posts
+                                -->
+                                <dapp-manager
+                                    v-if="account"
+                                    :account="account"
+                                    :spk-api="spkapi"
+                                    :initial-custom-json="postCustom_json || {}"
+                                    :spk-file-to-add="handleSPKFileForAssets"
+                                    @dapp-updated="handleDappUpdated($event)"
+                                    @tosign="sendIt($event)">
+                                </dapp-manager>
+                                
+                                <!-- Fallback when not logged in -->
+                                <div v-else class="text-center text-muted py-5">
+                                    <i class="fas fa-sign-in-alt fa-3x mb-3"></i>
+                                    <h5>Please Log In</h5>
+                                    <p>You need to log in to build dApps.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ReMix dApp Management (Only show for remix posts) -->
+                <div v-if="postCustom_json.vrHash == 'remix'"
+                    class="accordion border-white-50 rounded mt-3" id="remixAccordion">
+                    <div class="accordion-item bg-img-none bg-dark-1">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button bg-card hero-subtitle fs-3 p-3" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#remixManager" aria-expanded="true"
+                                aria-controls="remixManager">
+                                <i class="fa-solid fa-shuffle fa-fw me-2"></i>ReMix dApp Builder
+                            </button>
+                        </h2>
+                        <div id="remixManager" class="accordion-collapse collapse show"
+                            data-bs-parent="#remixAccordion">
+                            <div class="accordion-body">
+                                <!-- ReMix dApp Manager Component -->
+                                <!-- 
+                                    Integration Notes:
+                                    - This component manages remixing of existing dApps with proper licensing attribution
+                                    - Integrates with SPK Drive for file selection and upload
+                                    - Outputs remix structure with base dApp attribution and licensing trees
+                                    - Data is passed to TipTap editor via @remix-updated event for blockchain posting
+                                    - SPK contract IDs are preserved for proper asset referencing in posts
+                                -->
+                                <remix-dapp-manager
+                                    v-if="account"
+                                    :account="account"
+                                    :spk-api="spkapi"
+                                    :initial-custom-json="postCustom_json || {}"
+                                    :spk-file-to-add="handleSPKFileForAssets"
+                                    @remix-updated="handleRemixUpdated($event)"
+                                    @tosign="sendIt($event)">
+                                </remix-dapp-manager>
+                                
+                                <!-- Fallback when not logged in -->
+                                <div v-else class="text-center text-muted py-5">
+                                    <i class="fas fa-sign-in-alt fa-3x mb-3"></i>
+                                    <h5>Please Log In</h5>
+                                    <p>You need to log in to remix dApps.</p>
                                 </div>
                             </div>
                         </div>

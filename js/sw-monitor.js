@@ -574,10 +574,13 @@ export default {
       window.location.reload();
     },
     blogLink(url){
-        if (url.includes('@')) {
-            return `${location.origin}/blog/${url}`
+        // Fix double question marks that break query parameters
+        const cleanUrl = url.replace(/\?\?/g, '?');
+        
+        if (cleanUrl.includes('@')) {
+            return `${location.origin}/blog/${cleanUrl}`
         }
-        return url
+        return cleanUrl
     },
     // Notification helper methods
     getNotificationAvatar(notification) {

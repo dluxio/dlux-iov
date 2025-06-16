@@ -3274,7 +3274,7 @@ export default {
         type: "cj",
         op: "setLastRead",
         id: "notify",
-        cj: ["setLastRead", {date}],
+        cj: ["setLastRead", {date, dlux: true}],
         msg: `Marking all notifications as read`,
         ops: ["refreshNotifications"],
         api: null,
