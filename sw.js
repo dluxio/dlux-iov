@@ -1,4 +1,4 @@
-this.version = "2025.06.16.1";
+this.version = "2025.06.16.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -597,14 +597,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.16.1",
-  "generated": "2025-06-15T22:54:58Z",
+  "version": "2025.06.16.2",
+  "generated": "2025-06-16T00:09:25Z",
   "files": {
-    "/css/bootstrap-reboot.css": {
-      "checksum": "4092253288fe829ab354cc4a7d73450a",
-      "size": 11895,
-      "priority": "critical"
-    },
     "/css/bootstrap-utilities.css": {
       "checksum": "de92f706ebf333fb981cbb719aa5130d",
       "size": 101679,
@@ -659,11 +654,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/create/index.html": {
-      "checksum": "5a3d0842df9543804d26ccfdeafdb495",
-      "size": 11922,
-      "priority": "important"
     },
     "/css/codemirror-monokai.min.css": {
       "checksum": "6cb64c5347235494cdc346527fc0e35d",
@@ -1576,7 +1566,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "d4fb106ad069a1d9ae2008de97761537",
+      "checksum": "18db5757ebf1639571f7ed4c09fde1cd",
       "size": 36316,
       "priority": "important"
     },
@@ -1661,8 +1651,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-nfts.js": {
-      "checksum": "94d2e8b918bf341ceb51fd4790f2dac8",
-      "size": 110184,
+      "checksum": "aaf7c1c58a03add0d55408f25ff12175",
+      "size": 127928,
       "priority": "important"
     },
     "/js/v3-qr.js": {
@@ -1751,8 +1741,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/nfts/create/index.html": {
-      "checksum": "731c1ebc3712880d93646f0201652d24",
-      "size": 66780,
+      "checksum": "1f12e238ba37611b8ba5f92d89e2cd24",
+      "size": 76938,
       "priority": "important"
     },
     "/nfts/index.html": {
@@ -1796,7 +1786,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "3869cd240fb38f7c0392eba1ac515d8e",
+      "checksum": "855bb047617558c8557d75fa8a37ef69",
       "size": 7299,
       "priority": "important"
     },
@@ -1889,11 +1879,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/js/aframe-environment-component.min.js": {
-      "checksum": "b24c9108753f2af21987ba83c9674ff1",
-      "size": 49209,
-      "priority": "page-specific"
     },
     "/js/aframe-extras.min.js": {
       "checksum": "0a0818f80d22eea6b402187404738a23",
@@ -2794,11 +2779,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/js/modalvue-old.js": {
-      "checksum": "b3b3a6b376fd063cc48b52a2c1505216",
-      "size": 40019,
-      "priority": "lazy"
     },
     "/js/navue-old.js": {
       "checksum": "22b4cad654ee4fba41856abd5057b0ef",
