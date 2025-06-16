@@ -574,7 +574,10 @@ export default {
       window.location.reload();
     },
     blogLink(url){
-        return `${location.origin}/blog/${url}`
+        if (url.includes('@')) {
+            return `${location.origin}/blog/${url}`
+        }
+        return url
     },
     // Notification helper methods
     getNotificationAvatar(notification) {
