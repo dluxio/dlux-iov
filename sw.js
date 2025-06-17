@@ -10,9 +10,6 @@ const CACHE_NAME = "sw-cache-v" + version;
 let priorityTwoCached = false;
 let backgroundCacheInProgress = false;
 
-self.nftscripts = {};
-const scriptPromises = {}; // Store ongoing fetch promises
-
 self.addEventListener("install", function (event) {
 
     event.waitUntil(
@@ -536,54 +533,8 @@ self.addEventListener("activate", function (event) {
     );
 });
 
-// NFT script handling
-self.addEventListener("message", function (e) {
-    const message = e.data, p = e.source;
-    switch (message.id) {
-        case "callScript":
-            callScript(message.o, p);
-            break;
-        default:
-            console.log("SW msg:", message);
-    }
-});
-
-function callScript(o, p) {
-    if (self.nftscripts[o.script] && self.nftscripts[o.script] !== "Loading...") {
-        const code = `(//${self.nftscripts[o.script]}\n)("${o.uid ? o.uid : 0}")`;
-        const computed = eval(code);
-        computed.uid = o.uid || "";
-        computed.owner = o.owner || "";
-        computed.script = o.script;
-        computed.setname = o.set;
-        computed.token = o.token;
-        p.postMessage(computed);
-    } else {
-        pullScript(o.script).then(() => callScript(o, p));
-    }
-}
-
-function pullScript(id) {
-    if (self.nftscripts[id] && self.nftscripts[id] !== "Loading...") {
-        return Promise.resolve("OK");
-    } else if (scriptPromises[id]) {
-        return scriptPromises[id];
-    } else {
-        scriptPromises[id] = fetch(`https://ipfs.dlux.io/ipfs/${id}`)
-            .then(response => response.text())
-            .then(data => {
-                self.nftscripts[id] = data;
-                delete scriptPromises[id];
-                return "OK";
-            })
-            .catch(error => {
-                console.error('Failed to fetch script:', id, error);
-                delete scriptPromises[id];
-                throw error;
-            });
-            return scriptPromises[id];
-    }
-}
+// NFT script handling has been moved to nft-script-executor.js for security
+// Service worker no longer executes arbitrary user scripts
 
 // Helper function to format bytes
 function formatBytes(bytes) {
@@ -1438,6 +1389,11 @@ self.cacheManifest =
     "/js/nav.js": {
       "checksum": "7ec38d3ee084cc52ed87ba82bad4d563",
       "size": 27637,
+      "priority": "important"
+    },
+    "/js/nft-script-executor.js": {
+      "checksum": "placeholder-checksum-for-nft-executor",
+      "size": 8000,
       "priority": "important"
     },
     "/js/navue.js": {

@@ -2910,27 +2910,21 @@ function bidNFT(setname, uid, bid_amount, type, callback){
       }
       return result || "0";
     },
-    callScript(o, i = 0) {
-      return new Promise((resolve, reject) => {
-        if (this.nftscripts[o.script]) {
-          const code = `(//${this.nftscripts[o.script]}\n)("${o.uid ? o.uid : 0
-            }")`;
-          var computed = eval(code);
-          computed.uid = o.uid || "";
-          computed.owner = o.owner || "";
-          computed.script = o.script;
-          (computed.setname = o.set), (computed.token = o.token);
-          computed.i = i;
-          resolve(computed);
-        } else {
-          this.pullScript(o.script).then((empty) => {
-            this.callScript(o).then((r) => {
-              resolve(r);
-            });
-          });
-        }
-      });
-    },
+         async callScript(o, i = 0) {
+       // Use secure NFT script executor only
+       if (!window.NFTScriptExecutor || typeof window.NFTScriptExecutor.callScript !== 'function') {
+         throw new Error('Secure NFT Script Executor not available - NFT scripts cannot be executed safely');
+       }
+       
+       try {
+         const computed = await window.NFTScriptExecutor.callScript(o);
+         computed.i = i; // Add index for compatibility
+         return computed;
+       } catch (error) {
+         console.error('Secure NFT script execution failed:', error);
+         throw error;
+       }
+     },
     makeLink(a, b, c) {
       if (c) return a + b + c.join("");
       return a + b;

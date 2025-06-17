@@ -4118,30 +4118,19 @@ function buyNFT(setname, uid, price, type, callback){
       }
       return result;
     },
-    callScript(o) {
-      return new Promise((resolve, reject) => {
-        if (this.serviceWorker) {
-          this.callSWfunction('callScript', o).then((r) => {
-            resolve(r)
-          }).catch((e) => { this.serviceWorker = false; this.callScript(o).then((r) => { resolve(r) }) })
-        } else if (this.nftscripts[o.script]) {
-          const code = `(//${this.nftscripts[o.script]}\n)("${o.uid ? o.uid : 0
-            }")`;
-          var computed = eval(code);
-          computed.uid = o.uid || "";
-          computed.owner = o.owner || "";
-          computed.script = o.script;
-          (computed.setname = o.set), (computed.token = o.token);
-          resolve(computed);
-        } else {
-          this.pullScript(o.script).then((empty) => {
-            this.callScript(o).then((r) => {
-              resolve(r);
-            });
-          });
-        }
-      });
-    },
+         async callScript(o) {
+       // Use secure NFT script executor only
+       if (!window.NFTScriptExecutor || typeof window.NFTScriptExecutor.callScript !== 'function') {
+         throw new Error('Secure NFT Script Executor not available - NFT scripts cannot be executed safely');
+       }
+       
+       try {
+         return await window.NFTScriptExecutor.callScript(o);
+       } catch (error) {
+         console.error('Secure NFT script execution failed:', error);
+         throw error;
+       }
+     },
     keyOf(obj = "smarkets", key = "node") {
       if (this[obj]) {
         if (this[obj][key]) {

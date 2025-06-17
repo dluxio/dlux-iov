@@ -470,6 +470,169 @@ export default {
                             </div>
                          </div>
                       </div>
+
+                      <!-- NFT Advanced Content Management (Types 2-4) -->
+                      <div class="accordion-item" v-if="showAdvancedContent">
+                         <h2 class="accordion-header">
+                            <button onclick="this.blur();" class="accordion-button collapsed" type="button"
+                               data-bs-toggle="collapse" data-bs-target="#collapseAdvanced" aria-expanded="false"
+                               aria-controls="collapseAdvanced">
+                               <i class="fa-solid fa-code me-3"></i>ADVANCED CONTENT
+                               <span class="ms-auto small">{{ getContentTypeInfo(nftType) }}</span>
+                            </button>
+                         </h2>
+                         <div id="collapseAdvanced" class="accordion-collapse collapse" data-bs-parent="#nftAccordion">
+                            <div class="accordion-body">
+                               <div class="alert alert-info mb-3">
+                                  <i class="fa-solid fa-info-circle me-2"></i>
+                                  <strong>NFT Type {{ nftType }}:</strong> {{ getContentTypeInfo(nftType) }}
+                               </div>
+
+                               <!-- Executable Code Section (Types 2 & 4) -->
+                               <div v-if="supportsExecutableCode" class="mb-4">
+                                  <div class="d-flex align-items-center justify-content-between mb-2">
+                                     <h5 class="mb-0">
+                                        <i class="fa-solid fa-terminal me-2"></i>Executable Code
+                                     </h5>
+                                     <div v-if="nftContent.updateMode !== 'exe'">
+                                        <button type="button" 
+                                           class="btn btn-outline-primary btn-sm"
+                                           @click="startContentUpdate('exe')">
+                                           <i class="fa-solid fa-edit me-1"></i>
+                                           {{ itemmodal.item.exe ? 'Update' : 'Set' }} Code
+                                        </button>
+                                     </div>
+                                  </div>
+                                  
+                                  <!-- Current code display -->
+                                  <div v-if="itemmodal.item.exe && nftContent.updateMode !== 'exe'" 
+                                       class="bg-dark p-3 rounded mb-2" style="max-height: 200px; overflow-y: auto;">
+                                     <pre class="text-info mb-0 small">{{ itemmodal.item.exe }}</pre>
+                                  </div>
+                                  <div v-else-if="!itemmodal.item.exe && nftContent.updateMode !== 'exe'"
+                                       class="text-muted p-3 bg-darker rounded mb-2">
+                                     <i class="fa-solid fa-code-slash me-2"></i>No executable code set
+                                  </div>
+
+                                  <!-- Code editor -->
+                                  <div v-if="nftContent.updateMode === 'exe'" class="border rounded p-3 bg-darker">
+                                     <div class="form-group mb-3">
+                                        <label class="form-label">
+                                           <i class="fa-solid fa-terminal me-1"></i>Executable Code
+                                        </label>
+                                        <div class="form-text mb-2">
+                                           Enter JavaScript code that will be executed when this NFT is displayed
+                                        </div>
+                                        <textarea class="form-control bg-dark border-dark text-info font-monospace" 
+                                                 rows="8"
+                                                 v-model="nftContent.exe"
+                                                 placeholder="// Your executable code here
+function execute() {
+    // NFT execution logic
+    console.log('NFT executed!');
+}
+execute();"
+                                                 :disabled="nftContent.isUpdating"></textarea>
+                                     </div>
+                                     <div class="d-flex justify-content-end gap-2">
+                                        <button type="button" 
+                                           class="btn btn-outline-secondary"
+                                           @click="cancelContentUpdate"
+                                           :disabled="nftContent.isUpdating">
+                                           Cancel
+                                        </button>
+                                        <button type="button" 
+                                           class="btn btn-primary"
+                                           @click="updateExecutableCode"
+                                           :disabled="!nftContent.exe.trim() || nftContent.isUpdating">
+                                           <i class="fa-solid fa-spinner fa-spin me-2" v-if="nftContent.isUpdating"></i>
+                                           <i class="fa-solid fa-save me-2" v-else></i>
+                                           {{ nftContent.isUpdating ? 'Updating...' : 'Update Code' }}
+                                        </button>
+                                     </div>
+                                  </div>
+                               </div>
+
+                               <!-- Optional Content Section (Types 3 & 4) -->
+                               <div v-if="supportsOptionalContent" class="mb-4">
+                                  <div class="d-flex align-items-center justify-content-between mb-2">
+                                     <h5 class="mb-0">
+                                        <i class="fa-solid fa-file-text me-2"></i>Optional Content
+                                     </h5>
+                                     <div v-if="nftContent.updateMode !== 'opt'">
+                                        <button type="button" 
+                                           class="btn btn-outline-primary btn-sm"
+                                           @click="startContentUpdate('opt')">
+                                           <i class="fa-solid fa-edit me-1"></i>
+                                           {{ itemmodal.item.opt ? 'Update' : 'Set' }} Content
+                                        </button>
+                                     </div>
+                                  </div>
+                                  
+                                  <!-- Current content display -->
+                                  <div v-if="itemmodal.item.opt && nftContent.updateMode !== 'opt'" 
+                                       class="bg-dark p-3 rounded mb-2" style="max-height: 200px; overflow-y: auto;">
+                                     <div v-html="sanitizeHTML(itemmodal.item.opt)"></div>
+                                  </div>
+                                  <div v-else-if="!itemmodal.item.opt && nftContent.updateMode !== 'opt'"
+                                       class="text-muted p-3 bg-darker rounded mb-2">
+                                     <i class="fa-solid fa-file-slash me-2"></i>No optional content set
+                                  </div>
+
+                                  <!-- Content editor -->
+                                  <div v-if="nftContent.updateMode === 'opt'" class="border rounded p-3 bg-darker">
+                                     <div class="form-group mb-3">
+                                        <label class="form-label">
+                                           <i class="fa-solid fa-file-text me-1"></i>Optional Content
+                                        </label>
+                                        <div class="form-text mb-2">
+                                           Enter additional content (HTML/Markdown) for this NFT
+                                        </div>
+                                        <textarea class="form-control bg-dark border-dark text-info" 
+                                                 rows="6"
+                                                 v-model="nftContent.opt"
+                                                 placeholder="<p>Additional content for this NFT...</p>
+<!-- or markdown -->
+# Title
+Some **bold** text"
+                                                 :disabled="nftContent.isUpdating"></textarea>
+                                     </div>
+                                     <div class="d-flex justify-content-end gap-2">
+                                        <button type="button" 
+                                           class="btn btn-outline-secondary"
+                                           @click="cancelContentUpdate"
+                                           :disabled="nftContent.isUpdating">
+                                           Cancel
+                                        </button>
+                                        <button type="button" 
+                                           class="btn btn-primary"
+                                           @click="updateOptionalContent"
+                                           :disabled="!nftContent.opt.trim() || nftContent.isUpdating">
+                                           <i class="fa-solid fa-spinner fa-spin me-2" v-if="nftContent.isUpdating"></i>
+                                           <i class="fa-solid fa-save me-2" v-else></i>
+                                           {{ nftContent.isUpdating ? 'Updating...' : 'Update Content' }}
+                                        </button>
+                                     </div>
+                                  </div>
+                               </div>
+
+                               <!-- Info about size limits -->
+                               <div class="alert alert-warning">
+                                  <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                                  <small>
+                                     <strong>Size Limits:</strong>
+                                     <span v-if="supportsExecutableCode">
+                                        Executable code is limited by the set's exe_size parameter.
+                                     </span>
+                                     <span v-if="supportsOptionalContent">
+                                        Optional content is limited by the set's opt_size parameter.
+                                     </span>
+                                     Updates may incur network fees.
+                                  </small>
+                               </div>
+                            </div>
+                         </div>
+                      </div>
  
                       <!-- NFT Melt -->
                       <div class="accordion-item" v-if="itemmodal.item.owner == account">
@@ -883,6 +1046,13 @@ export default {
                 searching: false,
             },
             isMountedComponent: false,
+            // NFT Type 2-4 content management
+            nftContent: {
+                exe: '', // Executable code for types 2 & 4
+                opt: '', // Optional content for types 3 & 4
+                updateMode: null, // 'exe' or 'opt'
+                isUpdating: false
+            },
         };
     },
     computed: {
@@ -895,6 +1065,19 @@ export default {
         longname() {
             if(this.chains[this.itemmodal.item.token]?.sets[this.itemmodal.item.setname]?.name_long)return this.chains[this.itemmodal.item.token]?.sets[this.itemmodal.item.setname]?.name_long
             return ''
+        },
+        // NFT Type support checks
+        nftType() {
+            return this.chains[this.itemmodal.item.token]?.sets[this.itemmodal.item.setname]?.type || 1;
+        },
+        supportsExecutableCode() {
+            return this.nftType === 2 || this.nftType === 4;
+        },
+        supportsOptionalContent() {
+            return this.nftType === 3 || this.nftType === 4;
+        },
+        showAdvancedContent() {
+            return this.itemmodal.item.owner === this.account && (this.supportsExecutableCode || this.supportsOptionalContent);
         }
     },
     methods: {
@@ -1162,6 +1345,79 @@ export default {
                 api: this.chains[this.itemmodal.item.token].api,
                 ops: ["getTokenUser"],
             });
+        },
+        // NFT Type 2-4 content management methods
+        startContentUpdate(type) {
+            this.nftContent.updateMode = type;
+            if (type === 'exe') {
+                this.nftContent.exe = this.itemmodal.item.exe || '';
+            } else if (type === 'opt') {
+                this.nftContent.opt = this.itemmodal.item.opt || '';
+            }
+        },
+        cancelContentUpdate() {
+            this.nftContent.updateMode = null;
+            this.nftContent.exe = '';
+            this.nftContent.opt = '';
+        },
+        updateExecutableCode() {
+            if (!this.supportsExecutableCode || !this.nftContent.exe.trim()) return;
+            
+            this.nftContent.isUpdating = true;
+            this.$emit('tosign', {
+                type: 'cja',
+                cj: {
+                    set: this.itemmodal.item.setname,
+                    uid: this.itemmodal.item.uid,
+                    exe: this.nftContent.exe.trim()
+                },
+                id: `${this.itemmodal.item.token}_nft_update_exe`,
+                msg: `Updating executable code for ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
+                ops: ["getTokenUser"],
+                api: this.chains[this.itemmodal.item.token].api,
+                txid: `${this.itemmodal.item.setname}:${this.itemmodal.item.uid}_update_exe`,
+                onSuccess: () => {
+                    this.nftContent.isUpdating = false;
+                    this.cancelContentUpdate();
+                },
+                onError: () => {
+                    this.nftContent.isUpdating = false;
+                }
+            });
+        },
+        updateOptionalContent() {
+            if (!this.supportsOptionalContent || !this.nftContent.opt.trim()) return;
+            
+            this.nftContent.isUpdating = true;
+            this.$emit('tosign', {
+                type: 'cja',
+                cj: {
+                    set: this.itemmodal.item.setname,
+                    uid: this.itemmodal.item.uid,
+                    opt: this.nftContent.opt.trim()
+                },
+                id: `${this.itemmodal.item.token}_nft_update_opt`,
+                msg: `Updating optional content for ${this.itemmodal.item.setname}:${this.itemmodal.item.uid}`,
+                ops: ["getTokenUser"],
+                api: this.chains[this.itemmodal.item.token].api,
+                txid: `${this.itemmodal.item.setname}:${this.itemmodal.item.uid}_update_opt`,
+                onSuccess: () => {
+                    this.nftContent.isUpdating = false;
+                    this.cancelContentUpdate();
+                },
+                onError: () => {
+                    this.nftContent.isUpdating = false;
+                }
+            });
+        },
+        getContentTypeInfo(type) {
+            const types = {
+                1: 'Basic NFT (Static Content)',
+                2: 'Executable NFT (With Code)',
+                3: 'Extended NFT (With Optional Content)',
+                4: 'Dynamic NFT (Code + Optional Content)'
+            };
+            return types[type] || 'Unknown Type';
         },
         setPFP(item){
          console.log('setpfp', item)
