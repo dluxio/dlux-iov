@@ -1,4 +1,4 @@
-this.version = "2025.06.16.3";
+this.version = "2025.06.17.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -548,14 +548,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.16.3",
-  "generated": "2025-06-16T18:56:11Z",
+  "version": "2025.06.17.1",
+  "generated": "2025-06-17T16:35:04Z",
   "files": {
-    "/css/bootstrap.css": {
-      "checksum": "60def5490c429c25858ae0c72462b38b",
-      "size": 271584,
-      "priority": "critical"
-    },
     "/css/bootstrap/bootstrap-grid.css": {
       "checksum": "ff62c56c7f9eaa68592857aee5a7c93e",
       "size": 70327,
@@ -600,11 +595,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/css/codemirror.min.css": {
-      "checksum": "c1da630111dc87f804761ecc75f89eac",
-      "size": 6037,
-      "priority": "important"
     },
     "/css/drag-sort.css": {
       "checksum": "693eee9d441c6e004ed4a7b413962c36",
@@ -1392,8 +1382,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/nft-script-executor.js": {
-      "checksum": "placeholder-checksum-for-nft-executor",
-      "size": 8000,
+      "checksum": "0e4a8dc8a3ce942d1f404c4531beed18",
+      "size": 10899,
       "priority": "important"
     },
     "/js/navue.js": {
@@ -1407,13 +1397,13 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/nftdetail.js": {
-      "checksum": "470766883c33ae998ec14ed2b92a4b4e",
-      "size": 75619,
+      "checksum": "eaf16d707930e3782ac391a903240751",
+      "size": 90543,
       "priority": "important"
     },
     "/js/nftsvue.js": {
-      "checksum": "5d644469cc5fd72a991fc3b934768f73",
-      "size": 98228,
+      "checksum": "395599cbe864c4640b9764fe2a7e5d4e",
+      "size": 98152,
       "priority": "important"
     },
     "/js/onlyhash.js": {
@@ -1497,8 +1487,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/spkvue.js": {
-      "checksum": "383f1b410ce7ceb6210f7b4227e8f894",
-      "size": 92248,
+      "checksum": "99073aee13e303e83415618eaa6dfbdb",
+      "size": 92106,
       "priority": "important"
     },
     "/js/standard-modal.js": {
@@ -1512,7 +1502,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "d7cb33f1504ccabe47ab2831fc7cd2ce",
+      "checksum": "168fd8f1d5bde91d52917640a19c90fd",
       "size": 36523,
       "priority": "important"
     },
@@ -1597,8 +1587,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-nfts.js": {
-      "checksum": "aaf7c1c58a03add0d55408f25ff12175",
-      "size": 127928,
+      "checksum": "af303885b3fea57983518ccffca8c8c4",
+      "size": 127852,
       "priority": "important"
     },
     "/js/v3-qr.js": {
@@ -1607,8 +1597,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "8a9f13dd13dda821781b7166d6b3d4b9",
-      "size": 233180,
+      "checksum": "e29f14d2c3364b4af10c1bcb06cf8db4",
+      "size": 232807,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1627,8 +1617,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/vueme.js": {
-      "checksum": "1de60fa4460c253f680d0da4f2edb24a",
-      "size": 149952,
+      "checksum": "17b7a8148f0850d12a53f1c587e6451d",
+      "size": 149535,
       "priority": "important"
     },
     "/js/vueqr.js": {
@@ -1692,8 +1682,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/nfts/index.html": {
-      "checksum": "b30cfe79674b3b7e91f5392fe9635294",
-      "size": 59063,
+      "checksum": "16d747268da8f81551173f94f9851f2c",
+      "size": 59158,
       "priority": "important"
     },
     "/nfts/old.html": {
@@ -1732,7 +1722,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "33c59dbcd232c2fd4fcc2fff2d543735",
+      "checksum": "8df02e8053442940df9f27337a67eec3",
       "size": 7299,
       "priority": "important"
     },
@@ -1762,8 +1752,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/user/index.html": {
-      "checksum": "edff9c91d0a00a39d78132cc15c0b88a",
-      "size": 301879,
+      "checksum": "ae93998d8103bb51ab6406a42cb5cff4",
+      "size": 301974,
       "priority": "important"
     },
     "/validate-tiptap-compliance.js": {
@@ -1825,11 +1815,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/js/aframe-inspector.min.js": {
-      "checksum": "90eb74ef16d61ee0ab934e8412e99bf6",
-      "size": 437913,
-      "priority": "page-specific"
     },
     "/js/aframe.min.js": {
       "checksum": "cf139ab9b75ee8fea3661385b5c50d45",
@@ -2720,11 +2705,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/js/onlyhash-old.js": {
-      "checksum": "5fbe0450d3cf05ca50a32db1388d35b7",
-      "size": 209217,
-      "priority": "lazy"
     },
     "/js/postvue-old.js": {
       "checksum": "f2bd9df92455de434430c350ed37641a",
