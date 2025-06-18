@@ -454,18 +454,14 @@ export default {
         },
         // Image carousel methods
         nextImage() {
-            console.log('Next image clicked, displayImages.length:', this.displayImages.length);
             if (this.displayImages.length > 1) {
                 this.currentImageIndex = (this.currentImageIndex + 1) % this.displayImages.length;
-                console.log('Changed to image index:', this.currentImageIndex);
                 this.preloadAdjacentImages();
             }
         },
         previousImage() {
-            console.log('Previous image clicked, displayImages.length:', this.displayImages.length);
             if (this.displayImages.length > 1) {
                 this.currentImageIndex = this.currentImageIndex === 0 ? this.displayImages.length - 1 : this.currentImageIndex - 1;
-                console.log('Changed to image index:', this.currentImageIndex);
                 this.preloadAdjacentImages();
             }
         },
@@ -539,17 +535,14 @@ export default {
                 foundImages = this.post.json_metadata.image.filter(img => 
                     typeof img === 'string' && img.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i)
                 );
-                console.log('Found image array:', foundImages.length, 'images');
             }
             // Check for single image string
             else if (this.post.json_metadata.image && typeof this.post.json_metadata.image === 'string') {
                 foundImages = [this.post.json_metadata.image];
-                console.log('Found single image in metadata:', foundImages[0]);
             }
             // Check for DLUX-specific images
             else if (this.post.json_metadata.Hash360) {
                 foundImages = [`https://ipfs.dlux.io/ipfs/${this.post.json_metadata.Hash360}`];
-                console.log('Found DLUX 360 image:', foundImages[0]);
             }
             
             // Fallback: search post body for markdown images
@@ -562,7 +555,6 @@ export default {
                     }).filter(url => 
                         url.startsWith('http') && url.match(/\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i)
                     );
-                    console.log('Found images in markdown:', foundImages.length, 'images');
                 }
                 
                 // Additional fallback: any HTTP image URLs in the body
@@ -570,7 +562,6 @@ export default {
                     const urlMatches = this.post.body.match(/https?:\/\/[^\s)]+\.(jpg|jpeg|png|gif|webp|svg)/gi);
                     if (urlMatches) {
                         foundImages = urlMatches;
-                        console.log('Found fallback image URLs:', foundImages.length, 'images');
                     }
                 }
             }
@@ -580,19 +571,14 @@ export default {
                 this.displayImages = foundImages;
                 this.displayImage = foundImages[0];
                 this.currentImageIndex = 0;
-                console.log('Set up image carousel with', foundImages.length, 'images');
-                console.log('Carousel condition check: displayImages.length > 1 =', this.displayImages.length > 1);
-                console.log('Blog type check: post.type === "Blog" =', this.post.type === 'Blog');
                 // Preload first few images
                 this.preloadAdjacentImages();
             } else if (foundImages.length === 1) {
                 this.displayImage = foundImages[0];
                 this.displayImages = [];
-                console.log('Set up single image:', foundImages[0]);
             } else {
                 this.displayImage = null;
                 this.displayImages = [];
-                console.log('No images found for blog post');
             }
         },
         isStored(contract){
@@ -697,7 +683,6 @@ export default {
         },
         vote(url) {
             this.$emit('vote', { url: `/@${this.post.author}/${this.post.permlink}`, slider: this.slider, flag: this.flag })
-            console.log(this.post)
         },
         color_code(name) {
             return parseInt(this.contracts[name] ? this.contracts[name].e.split(':')[0] : 0) - this.head_block
@@ -817,7 +802,6 @@ export default {
         },
         hideBlogImage(event, author, permlink) {
             // Hide the entire image section when image fails to load
-            console.log(`Image failed to load for post: ${author}/${permlink}, hiding image section`);
             const imageSection = document.getElementById(`imageSection-${author}-${permlink}`);
             if (imageSection) {
                 imageSection.style.display = 'none';
@@ -825,7 +809,6 @@ export default {
         },
         navigateToCommunity(community) {
             // Navigate to the community feed
-            console.log(`Navigating to community: ${community}`);
             window.location.href = `/hub/#community/${community}`;
         }
     },
@@ -846,22 +829,11 @@ export default {
     },
             mounted() {
             // Initialize component
-            console.log('CardVue mounted for post:', this.post.author + '/' + this.post.permlink);
             this.updateAuthorReputation();
             //this.getAuthorReputation();
             this.findPostImages();
             this.hideLowRep();
             this.getContracts();
-            
-            // Debug carousel setup
-            setTimeout(() => {
-                console.log('Carousel status for', this.post.author + '/' + this.post.permlink + ':', {
-                    type: this.post.type,
-                    displayImages: this.displayImages.length,
-                    hasImage: !!this.displayImage,
-                    showCarousel: this.post.type === 'Blog' && this.displayImages.length > 1
-                });
-            }, 1000);
         },
 };
 

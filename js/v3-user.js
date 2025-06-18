@@ -35,6 +35,15 @@ import DappManager from "/js/components/dapp-manager.js";
 import RemixDappManager from "/js/components/remix-dapp-manager.js";
 import MCommon from '/js/methods-common.js'
 
+// API Constants
+const HIVE_API = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+const LARYNX_API = "https://spkinstant.hivehoneycomb.com";
+const DUAT_API = "https://duat.hivehoneycomb.com";
+const DLUX_TOKEN_API = "https://token.dlux.io";
+const SPK_TEST_API = "https://spktest.dlux.io";
+const DLUX_DATA_API = "https://data.dlux.io";
+const COINGECKO_API = "https://api.coingecko.com/api/v3/simple/price";
+
 let url = location.href.replace(/\/$/, "");
 let lapi = "",
   sapi = "https://spkinstant.hivehoneycomb.com";
@@ -81,7 +90,7 @@ if (!lapi) {
 //   //window.history.replaceState(null, null, "dex");
 // }
 let user = localStorage.getItem("user") || "GUEST";
-let hapi = localStorage.getItem("hapi") || "https://hive-api.dlux.io";
+let hapi = HIVE_API; // Use constant instead of hardcoded fallback
 
 // var app = new Vue({
 // vue 2
@@ -119,6 +128,7 @@ createApp({
       },
       csvError: "", // Added for CSV upload error messages
       lastScroll: 0,
+      contractsLoaded: false, // Track if drive content has been loaded
       activeTab: "blog",
       accountDistributionChart: null, // Added for account distribution chart
       typeDistributionChart: null, // Added for type distribution chart
@@ -1132,7 +1142,7 @@ PORT=3000
       }
       const reader = new FileReader();
       reader.onload = (e) => {
-        console.log('📁 CSV file loaded, processing...');
+
         const text = e.target.result;
         const lines = text.split(/\r\n|\n/).filter(line => line.trim() !== '');
         if (lines.length === 0) {
@@ -1199,10 +1209,7 @@ PORT=3000
           }
           newDist[account] = { l, p, g };
         }
-        console.log('📁 Processed CSV data:', newDist);
-        console.log('📁 About to update this.newToken.dist...');
         this.newToken.dist = { ...this.newToken.dist, ...newDist };
-        console.log('📁 Updated this.newToken.dist:', this.newToken.dist);
         event.target.value = null; // Reset file input
       };
       reader.onerror = () => {
@@ -1270,7 +1277,6 @@ PORT=3000
               this.updatePubkey();
             } else {
               // User clicked Cancel - do nothing or handle as needed
-              console.log("User opted not to update SPK public key");
             }
           }
           
@@ -1278,7 +1284,6 @@ PORT=3000
             fetch("https://ipfs.dlux.io/upload-promo-contract?user=" + this.account)
               .then((response) => response.json())
               .then((data) => {
-                console.log(data)
                 if(data.message == "Contract Sent")setTimeout(() => {
                   this.getSPKUser()
                 }, 10000)
@@ -1501,12 +1506,10 @@ PORT=3000
                 }]]
           }]]
         hive_keychain.requestBroadcast(localStorage.getItem('user'), operations, 'active', function (response) {
-          console.log(response);
         });
       }
     },
     appFile(data) {
-      console.log(data)
       this.frameData = data
       this.postCustom_json.vrHash = ''
       this.frameURL = ''
@@ -1646,7 +1649,6 @@ PORT=3000
     resetCamera() {
       // Skip if aframePreview reference doesn't exist (when using new 360° component)
       if (!this.$refs.aframePreview) {
-        console.log('360° A-Frame preview not available - using new Asset Manager');
         return;
       }
       
@@ -1659,7 +1661,6 @@ PORT=3000
     dluxMock() {
       // Skip if aframePreview reference doesn't exist (when using new 360° component)
       if (!this.$refs.aframePreview) {
-        console.log('360° A-Frame preview not available - using new Asset Manager');
         return;
       }
       
@@ -1695,7 +1696,6 @@ PORT=3000
         try {
           r = `${s.set.Color1},${s.set.Color2 ? s.set.Color2 : s.set.Color1}`;
         } catch (e) {
-          console.log(e);
           r = "chartreuse,lawngreen";
         }
       }
@@ -1873,7 +1873,6 @@ PORT=3000
         msg: ``,
         ops: ["getHiveUser"],
       }
-      console.log('OK')
     },
     broca_calc(last = '0,0') {
       const last_calc = this.Base64toNumber(last.split(',')[1])
@@ -2243,7 +2242,6 @@ PORT=3000
       };
     },
     setPFP(item) {
-      console.log('trigger', item)
       var pjm = JSON.parse(this.accountinfo.posting_json_metadata);
       if (pjm.profile)
         pjm.profile.profile_image = `${this.chains[item.token].dataAPI}/pfp/${this.account}?${item.setname}-${item.uid}`;
@@ -2292,7 +2290,6 @@ PORT=3000
       else return "";
     },
     log(d) {
-      console.log(d)
     },
     meltNFT(item) {
       var cja = {
@@ -2518,7 +2515,6 @@ function buyNFT(setname, uid, price, type, callback){
       return out + post;
     },
     reply(deets) {
-      console.log('getReply:', deets)
       if (!deets.json_metadata) deets.json_metadata = JSON.stringify({})
       var operations = []
       if (deets.bens) {
@@ -2547,7 +2543,6 @@ function buyNFT(setname, uid, price, type, callback){
         callbacks: [], //get new replies for a/p
         txid: `reply:${deets.parent_author}/${deets.permlink}`,
       }
-      console.log(this.toSign)
     },
     vote(url) {
       var key, slider, flag
@@ -2623,26 +2618,31 @@ function buyNFT(setname, uid, price, type, callback){
       return parseFloat(num).toFixed(dig);
     },
     handleScroll() {
-      //console.log("Scroll event detected"); // Log: Check if handler fires
       if (this.activeTab == 'blog' || this.activeTab == 'inventory') {
         const now = Date.now();
         if (now - this.lastScroll > 500) { 
           this.lastScroll = now;
-          // Use document.body properties for scroll calculation
-          const scrollPosition = window.innerHeight + document.body.scrollTop; 
-          const scrollHeight = document.body.scrollHeight;
-          //const threshold = document.documentElement.scrollHeight - 500;
-          //console.log(`Scroll Position: ${scrollPosition}, Threshold: ${threshold}`); // Log: Check values
           
-          // Trigger when one viewport height away from the bottom of the body
-          if ( scrollPosition >= scrollHeight - window.innerHeight ) { 
-            //console.log("Threshold reached, loading more content..."); // Log: Check if condition met
+          // Try multiple methods to get scroll position
+          const scrollPosition = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+          const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+          const documentHeight = Math.max(
+            document.body.scrollHeight,
+            document.body.offsetHeight,
+            document.documentElement.clientHeight,
+            document.documentElement.scrollHeight,
+            document.documentElement.offsetHeight
+          );
+          
+          const threshold = documentHeight - 500;
+          const shouldTrigger = scrollPosition + windowHeight >= threshold;
+          
+          // Trigger when within 500px of the bottom
+          if (shouldTrigger) { 
             if (this.activeTab == 'blog') {
-              //console.log("Calling getPosts()"); // Log: Check function call
               this.getPosts();
             } else if (this.activeTab == 'inventory') {
-              //console.log("Calling getNFTs()"); // Log: Check function call
-              this.getNFTs()
+              this.getNFTs();
             }
           }
         }
@@ -2774,13 +2774,11 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     removeOp(txid) {
-      console.log(txid)
       if (this.toSign.txid == txid) {
         this.toSign = {};
       }
     },
     log(event) {
-      console.log(event)
     },
     getReplies(a, p, c) {
       return new Promise((resolve, reject) => {
@@ -2847,7 +2845,6 @@ function buyNFT(setname, uid, price, type, callback){
         })
         .then((re) => {
           var rez = re.result
-          console.log(rez)
           this.relations = rez
         });
     },
@@ -2878,7 +2875,6 @@ function buyNFT(setname, uid, price, type, callback){
           if (pendingWithdrawals[i].amount.split(' ')[1] == "HIVE") hives.push(pendingWithdrawals[i])
           else hbds.push(pendingWithdrawals[i])
         }
-        console.log({ hives, hbds })
         this[key].hive_pendingWithdrawals = hives
         this[key].hbd_pendingWithdrawals = hbds
         var totalDs = 0
@@ -3149,66 +3145,199 @@ function buyNFT(setname, uid, price, type, callback){
         this[this.postSelect.entry] = [];
         this.postSelect[this.postSelect.entry].o = 0;
         this.postSelect[this.postSelect.entry].e = false;
+        this.postSelect[this.postSelect.entry].start_author = '';
+        this.postSelect[this.postSelect.entry].start_permlink = '';
       }
       if (
         !this.postSelect[this.postSelect.entry].e &&
         !this.postSelect[this.postSelect.entry].p
       ) {
         this.postSelect[this.postSelect.entry].p = true;
-        fetch(this.hapi, {
-          body: `{"jsonrpc":"2.0", "method":"condenser_api.get_blog_entries", "params":["${this.pageAccount
-            }",${this.postSelect[this.postSelect.entry].o},${this.postSelect[this.postSelect.entry].a
-            }], "id":1}`,
+
+        // Use modern bridge API for better performance
+        const method = 'bridge.get_account_posts';
+        const params = [{
+          sort: 'blog',
+          account: this.pageAccount,
+          observer: this.account || '',
+          limit: this.postSelect[this.postSelect.entry].a,
+          start_author: this.postSelect[this.postSelect.entry].start_author || '',
+          start_permlink: this.postSelect[this.postSelect.entry].start_permlink || ''
+        }];
+
+        fetch(HIVE_API, {
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            method: method,
+            params: params,
+            id: 1
+          }),
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/json",
           },
           method: "POST",
         })
           .then((r) => r.json())
           .then((res) => {
-            if (!res || !res.result) {
-              console.log('Invalid API response:', res);
+            this.postSelect[this.postSelect.entry].p = false;
+
+            if (!res.result || res.result.length === 0) {
+              this.postSelect[this.postSelect.entry].e = true;
               return;
             }
-            this.postSelect[this.postSelect.entry].p = false;
+
             var authors = [];
-            this.postSelect[this.postSelect.entry].o +=
-              this.postSelect[this.postSelect.entry].a;
-            if (res.result.length < this.postSelect[this.postSelect.entry].a)
+
+            if (res.result.length < this.postSelect[this.postSelect.entry].a) {
               this.postSelect[this.postSelect.entry].e = true;
+            }
+
+            // Set pagination parameters for next call
+            if (res.result.length > 0) {
+              const lastPost = res.result[res.result.length - 1];
+              this.postSelect[this.postSelect.entry].start_author = lastPost.author;
+              this.postSelect[this.postSelect.entry].start_permlink = lastPost.permlink;
+            }
+
             for (var i = 0; i < res.result.length; i++) {
-              res.result[i].type = "Blog";
-              if (this.postSelect[this.postSelect.entry].o != res.result[i].entry_id - 1) {
-                this.postSelect[this.postSelect.entry].o = res.result[i].entry_id - 1;
+              const post = res.result[i];
+              const key = `/@${post.author}/${post.permlink}`;
+
+              if (!this.posturls[key]) {
+                this.posturls[key] = {
+                  ...post,
+                  slider: 10000,
+                  flag: false,
+                  upVotes: 0,
+                  downVotes: 0,
+                  edit: false,
+                  hasVoted: false,
+                  hasMoreVotes: false,
+                  contract: {},
+                  type: 'Blog',
+                  url: `/blog${key}`,
+                  ago: this.timeSince(post.created),
+                  preview: this.removeMD(post.body).substr(0, 250),
+                  rep: "..."
+                };
+
+                // Process vote data
+                if (post.active_votes && post.active_votes.length > 0) {
+                  for (var j = 0; j < post.active_votes.length; j++) {
+                    if (post.active_votes[j].rshares > 0) {
+                      this.posturls[key].upVotes++;
+                    } else if (post.active_votes[j].rshares < 0) {
+                      this.posturls[key].downVotes++;
+                    }
+                    // Skip rshares === 0 (neutral/no vote)
+
+                    if (post.active_votes[j].voter === this.account) {
+                      this.posturls[key].slider = post.active_votes[j].percent;
+                      this.posturls[key].hasVoted = true;
+                    }
+                  }
+                  
+                  // Add "+" indicator if we hit the API limit of 1000 votes
+                  if (post.active_votes.length >= 1000) {
+                    this.posturls[key].hasMoreVotes = true;
+                  } else {
+                    this.posturls[key].hasMoreVotes = false;
+                  }
+                  
+                }
+
+                if (this.posturls[key].slider < 0) {
+                  this.posturls[key].slider = this.posturls[key].slider * -1;
+                  this.posturls[key].flag = true;
+                }
+
+                // Process JSON metadata
+                try {
+                  if (typeof post.json_metadata === 'string') {
+                    this.posturls[key].json_metadata = JSON.parse(post.json_metadata);
+                  }
+                  
+                  // Calculate total payout correctly
+                  let totalPayout = 0;
+                  const pendingPayout = parseFloat(post.pending_payout_value?.split(' ')[0] || '0');
+                  const authorPayout = parseFloat(post.author_payout_value?.split(' ')[0] || '0');
+                  const curatorPayout = parseFloat(post.curator_payout_value?.split(' ')[0] || '0');
+                  
+                  if (pendingPayout > 0) {
+                    totalPayout = pendingPayout;
+                  } else {
+                    totalPayout = authorPayout + curatorPayout;
+                  }
+                  
+                  // Set calculated total payout
+                  this.posturls[key].total_payout_value = totalPayout.toFixed(3) + " HBD";
+
+                  // Check for DLUX content types
+                  var type = "Blog";
+                  var contracts = false;
+                  
+                  if (this.posturls[key].json_metadata.assets) {
+                    for (var k = 0; k < this.posturls[key].json_metadata.assets.length; k++) {
+                      if (this.posturls[key].json_metadata.assets[k].contract) {
+                        this.posturls[key].contract[this.posturls[key].json_metadata.assets[k].contract] = {}
+                        contracts = true
+                      }
+                    }
+                  }
+                  if (contracts) {
+                    this.getContracts(key)
+                  }
+
+                  if (
+                    "QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k" == this.posturls[key].json_metadata.vrHash ||
+                    "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16" ==
+                    this.posturls[key].json_metadata.vrHash ||
+                    "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV" ==
+                    this.posturls[key].json_metadata.vrHash ||
+                    "Qma4dk3mWP325HrHYBDz3UdL9h1A6q8CSvZdc8JhqfgiMp" == this.posturls[key].json_metadata.vrHash
+                  )
+                    type = "360";
+                  else if (this.posturls[key].json_metadata.vrHash)
+                    type = "VR";
+                  else if (this.posturls[key].json_metadata.arHash)
+                    type = "AR";
+                  else if (this.posturls[key].json_metadata.appHash)
+                    type = "APP";
+                  else if (this.posturls[key].json_metadata.audHash)
+                    type = "Audio";
+                  else if (this.posturls[key].json_metadata.vidHash)
+                    type = "Video";
+
+                  this.posturls[key].type = type;
+                  if (type != "Blog")
+                    this.posturls[key].url = "/dlux" + this.posturls[key].url;
+                  else
+                    this.posturls[key].url = "/blog" + this.posturls[key].url;
+
+                  this.posturls[key].pic = this.picFind(this.posturls[key].json_metadata);
+                } catch (e) {
+                  this.posturls[key].json_metadata = {};
+                }
+
+                // Set reputation from post data first (more efficient)
+                if (post.author_reputation) {
+                  this.posturls[key].rep = post.author_reputation
+                } else if (this.authors[post.author] && this.authors[post.author].reputation) {
+                  this.posturls[key].rep = this.authors[post.author].reputation
+                }
               }
-              if (
-                !this.posturls[
-                `/@${res.result[i].author}/${res.result[i].permlink}`
-                ]
-              ) {
-                this.posturls[
-                  `/@${res.result[i].author}/${res.result[i].permlink}`
-                ] = res.result[i];
-              }
-              this[this.postSelect.entry].push(
-                `/@${res.result[i].author}/${res.result[i].permlink}`
-              );
+
+              this[this.postSelect.entry].push(key);
+              authors.push(post.author);
             }
-            var called = false;
-            for (var post in this.posturls) {
-              if (!this.posturls[post].created) {
-                this.getContent(
-                  this.posturls[post].author,
-                  this.posturls[post].permlink
-                );
-                called = true;
-              }
-              authors.push(this.posturls[post].author);
-            }
-            if (!called) this.selectPosts();
+
+            this.selectPosts();
             authors = [...new Set(authors)];
-            this.getHiveAuthors(authors);
-          });
+            if (authors.length > 0) {
+              this.getHiveAuthors(authors);
+            }
+          })
+          .catch(error => console.error(`Error fetching posts for @${this.pageAccount}:`, error));
       }
     },
     selectPosts(modal, reset) {
@@ -3310,7 +3439,6 @@ function buyNFT(setname, uid, price, type, callback){
                 else if (this.posturls[key].json_metadata.vidHash)
                   type = "Video";
               } catch (e) {
-                console.log(key, e, "no JSON?");
               }
               this.posturls[key].type = type;
               if (type != "Blog")
@@ -3337,7 +3465,6 @@ function buyNFT(setname, uid, price, type, callback){
             }
           });
       } else {
-        console.log("no author or permlink", a, p);
       }
     },
     getContracts(url) {
@@ -3540,10 +3667,8 @@ function buyNFT(setname, uid, price, type, callback){
         t = 0,
         diff = this.saccountapi.head_block - this.saccountapi.spk_block;
       if (!this.saccountapi.spk_block) {
-        console.log("No SPK seconds");
         return 0;
       } else if (diff < 28800) {
-        console.log("Wait for SPK");
         return 0;
       } else {
         t = parseInt(diff / 28800);
@@ -3646,7 +3771,6 @@ function buyNFT(setname, uid, price, type, callback){
         try {
           r = `${s.set.Description}`;
         } catch (e) {
-          console.log(e);
           r = "";
         }
       }
@@ -3665,7 +3789,6 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     addBens(obj) {
-      console.log(obj)
       this.postBens.push(obj)
     },
     getNFTs(account) {
@@ -3728,7 +3851,6 @@ function buyNFT(setname, uid, price, type, callback){
             this.finishPFT(trade);
           }
         })
-        .catch((e) => console.log(e));
       fetch(this.providers[i].api + "/api/trades/nfts/" + this.account)
         .then((r) => r.json())
         .then((json) => {
@@ -3747,7 +3869,6 @@ function buyNFT(setname, uid, price, type, callback){
             });
           }
         })
-        .catch((e) => console.log(e));
     },
     displayNFT(code, payload) {
       if (code === 0) {
@@ -3907,7 +4028,6 @@ function buyNFT(setname, uid, price, type, callback){
       this.newToken.mainrender = 'https://data.' + this.newToken.fe
     },
     saveNewToken() {
-      console.log("Saving...")
       var pendingTokens = JSON.parse(localStorage.getItem(`pendingTokens`)) || []
       if (pendingTokens.indexOf(this.newToken.token) == -1) pendingTokens.push(this.newToken.token)
       localStorage.setItem(`newToken${this.newToken.token}`, JSON.stringify(this.newToken))
@@ -4021,7 +4141,30 @@ function buyNFT(setname, uid, price, type, callback){
             for (var i = 0; i < data.result.length; i++) {
               this.authors[data.result[i].name] = data.result[i];
             }
+            // Update reputation for posts using the new author data
+            this.updateReputationForPosts(data.result);
           });
+      }
+    },
+    updateReputationForPosts(authors) {
+      for (const author of authors) {
+        if (author && author.name && author.reputation) {
+          let updatedCount = 0;
+          for (const postKey in this.posturls) {
+            if (this.posturls[postKey].author === author.name && this.posturls[postKey].rep === "...") {
+              // Try to use author_reputation from post first, then fall back to author reputation
+              const post = this.posturls[postKey];
+              if (post.author_reputation) {
+                post.rep = post.author_reputation;
+              } else {
+                post.rep = author.reputation;
+              }
+              updatedCount++;
+            }
+          }
+          if (updatedCount > 0) {
+          }
+        }
       }
     },
     getRcAccount(account) {
@@ -4316,7 +4459,6 @@ function buyNFT(setname, uid, price, type, callback){
       var j = 0
       while (binSearch != lastFit) {
         j++
-        console.log(binSearch, lastFit, SAT)
         lastFit = binSearch
         var int = INT
         for (var i = 0; i < 2016; i++) {
@@ -4344,7 +4486,6 @@ function buyNFT(setname, uid, price, type, callback){
         if (isNaN(binSearch) || j > 100) break
       }
       this.newToken.apyint = binSearch
-      console.log('Iterations', j)
     },
     getPossibleBitrates(height) {
       if (!height) {
@@ -4439,7 +4580,6 @@ function buyNFT(setname, uid, price, type, callback){
         tempVideo.onloadedmetadata = () => {
           videoWidth = tempVideo.videoWidth;
           videoHeight = tempVideo.videoHeight;
-          console.log(`📹 Detected video dimensions: ${videoWidth}x${videoHeight}`);
           URL.revokeObjectURL(tempVideo.src);
           resolve();
         };
@@ -4453,13 +4593,11 @@ function buyNFT(setname, uid, price, type, callback){
       // For resolution ladder, use the SMALLER dimension to avoid upscaling
       // Portrait videos should not be upscaled to landscape resolutions
       const referenceDimension = Math.min(videoWidth, videoHeight);
-      console.log(`📐 Using reference dimension ${referenceDimension} for resolution ladder (avoids upscaling)`);
       
       bitrates = this.getPossibleBitrates(referenceDimension);
       
       // For portrait videos, we need to adjust the scale filter
       const isPortrait = videoHeight > videoWidth;
-      console.log(`📱 Video orientation: ${isPortrait ? 'Portrait' : 'Landscape'}`);
       
       // Filter out resolutions that would upscale the video
       const originalMaxDimension = Math.max(videoWidth, videoHeight);
@@ -4471,7 +4609,6 @@ function buyNFT(setname, uid, price, type, callback){
       // Limit resolutions to reduce memory pressure in FFmpeg.wasm
       if (bitrates.length > 3) {
         bitrates = bitrates.slice(0, 3); // Keep only top 3 resolutions
-        console.log('Limited to 3 resolutions to reduce memory usage:', bitrates);
       }
       
       if (bitrates.length === 0) {
@@ -4479,8 +4616,6 @@ function buyNFT(setname, uid, price, type, callback){
         return;
       }
       
-      console.log('📊 Final resolution ladder:', bitrates.map(b => parseInt(b.split('x')[1]) + 'p').join(', '));
-      console.log('Video analysis complete, starting transcoding...');
 
       // Reset hashing progress and start progress monitoring
       this.resetHashingProgress();
@@ -4512,7 +4647,6 @@ function buyNFT(setname, uid, price, type, callback){
             if (targetWidth % 2 !== 0) targetWidth += 1;
             if (targetHeight % 2 !== 0) targetHeight += 1;
             scaleFilter = `scale=${targetWidth}:${targetHeight}`;
-            console.log(`📱 Processing ${resHeight}p: Portrait scaling ${targetWidth}x${targetHeight}`);
           } else {
             // For landscape: calculate height based on aspect ratio  
             targetWidth = Math.round((resHeight * videoWidth) / videoHeight);
@@ -4521,7 +4655,6 @@ function buyNFT(setname, uid, price, type, callback){
             if (targetWidth % 2 !== 0) targetWidth += 1;
             if (targetHeight % 2 !== 0) targetHeight += 1;
             scaleFilter = `scale=${targetWidth}:${targetHeight}`;
-            console.log(`🖥️ Processing ${resHeight}p: Landscape scaling ${targetWidth}x${targetHeight}`);
           }
           
           // Build command for this resolution with shorter segments for short videos
@@ -4550,17 +4683,13 @@ function buyNFT(setname, uid, price, type, callback){
           this.videoMsg = `Transcoding ${resHeight}p (${i + 1}/${bitrates.length})...`;
           
           try {
-            console.log(`🚀 Starting ${resHeight}p transcoding...`);
             
             // Log filesystem state before transcode
             const filesBefore = await ffmpeg.listDir("/");
-            console.log(`📁 Files before ${resHeight}p:`, filesBefore.map(f => f.name).filter(name => !name.startsWith('.') && !['dev', 'home', 'proc', 'tmp'].includes(name)));
             
-            console.log(`🎬 FFmpeg command for ${resHeight}p:`, commands.join(' '));
             
             try {
               await ffmpeg.exec(commands);
-              console.log(`🔍 ${resHeight}p FFmpeg exec completed, checking filesystem...`);
               
               // Wait a moment for FFmpeg to fully write files
               await new Promise(resolve => setTimeout(resolve, 1000));
@@ -4568,7 +4697,6 @@ function buyNFT(setname, uid, price, type, callback){
               // Test if input file is still accessible
               try {
                 await ffmpeg.exec(["-i", name, "-t", "0.1", "-f", "null", "-"]);
-                console.log(`✅ ${resHeight}p: Input file still accessible after transcode`);
               } catch (testError) {
                 console.error(`⚠️ ${resHeight}p: Input file test failed:`, testError);
               }
@@ -4581,19 +4709,15 @@ function buyNFT(setname, uid, price, type, callback){
             // Check filesystem immediately after FFmpeg claims completion
             const filesAfter = await ffmpeg.listDir("/");
             const allFiles = filesAfter.map(f => f.name).filter(name => !name.startsWith('.') && !['dev', 'home', 'proc', 'tmp'].includes(name));
-            console.log(`📁 All files after ${resHeight}p:`, allFiles);
             
             const segmentFiles = filesAfter.filter(f => f.name.startsWith(`${resHeight}p_`) && f.name.endsWith('.ts'));
             const playlistFile = filesAfter.find(f => f.name === `${resHeight}p_index.m3u8`);
             
-            console.log(`📊 ${resHeight}p file check: ${segmentFiles.length} segments, playlist: ${playlistFile ? '✅' : '❌'}`);
             
             if (playlistFile && segmentFiles.length > 0) {
               successfulResolutions.push(resHeight);
-              console.log(`✅ ${resHeight}p transcoded successfully: ${segmentFiles.length} segments + playlist`);
               
               // Extract files to memory for processing and cleanup filesystem
-              console.log(`📦 Extracting ${resHeight}p files to memory...`);
               
               // Read segment files
               for (const segFile of segmentFiles) {
@@ -4601,7 +4725,6 @@ function buyNFT(setname, uid, price, type, callback){
                 // Create proper copy - slice() creates a new buffer
                 const segDataCopy = segData.slice();
                 extractedFiles.set(segFile.name, segDataCopy);
-                console.log(`📄 Extracted ${segFile.name} (${segDataCopy.byteLength} bytes)`);
               }
               
               // Read playlist file
@@ -4609,16 +4732,13 @@ function buyNFT(setname, uid, price, type, callback){
               // Create proper copy - slice() creates a new buffer
               const playlistDataCopy = playlistData.slice();
               extractedFiles.set(playlistFile.name, playlistDataCopy);
-              console.log(`📋 Extracted ${playlistFile.name} (${playlistDataCopy.byteLength} bytes)`);
               
               // Clean up FFmpeg filesystem (keep input file for next resolution)
-              console.log(`🧹 Cleaning up ${resHeight}p files from FFmpeg filesystem...`);
               try {
                 for (const segFile of segmentFiles) {
                   await ffmpeg.deleteFile(segFile.name);
                 }
                 await ffmpeg.deleteFile(playlistFile.name);
-                console.log(`✅ ${resHeight}p files cleaned from FFmpeg filesystem`);
               } catch (cleanupError) {
                 console.warn(`⚠️ Cleanup warning for ${resHeight}p:`, cleanupError);
               }
@@ -4634,7 +4754,6 @@ function buyNFT(setname, uid, price, type, callback){
             // Log filesystem state on failure
             try {
               const filesOnError = await ffmpeg.listDir("/");
-              console.log(`📁 Files on error:`, filesOnError.map(f => f.name).filter(name => !name.startsWith('.') && !['dev', 'home', 'proc', 'tmp'].includes(name)));
             } catch (e) {
               console.error(`Can't list files on error:`, e);
             }
@@ -4644,14 +4763,12 @@ function buyNFT(setname, uid, price, type, callback){
         }
         
         // Skip restoration - we have the files in memory and they exist in filesystem
-        console.log(`🚀 Skipping filesystem restoration - processing directly from extracted data (${extractedFiles.size} files)`);
         
         // Verify filesystem still has our files
         const verifyFiles = await ffmpeg.listDir("/");
         const existingFiles = verifyFiles.map(f => f.name).filter(name => 
           !name.startsWith('.') && !['dev', 'home', 'proc', 'tmp'].includes(name)
         );
-        console.log(`🔍 Existing files in filesystem: ${existingFiles.length}`, existingFiles);
         
         console.timeEnd('exec');
         
@@ -4659,7 +4776,6 @@ function buyNFT(setname, uid, price, type, callback){
           throw new Error('All resolution transcoding failed');
         }
         
-        console.log(`✅ Successfully transcoded ${successfulResolutions.length}/${bitrates.length} resolutions:`, successfulResolutions.map(r => r + 'p').join(', '));
         this.videoMsg = `🎉 Successfully transcoded ${successfulResolutions.length} resolutions! Preparing upload...`;
         
         // Wait a bit more for all files to be fully written
@@ -4667,7 +4783,6 @@ function buyNFT(setname, uid, price, type, callback){
         
       // Enhanced file validation and processing - MOVED TO TOP OF FUNCTION
       const validateAndProcessFiles = async (extractedFiles) => {
-        console.log(`🚀 Processing directly from extracted data (${extractedFiles.size} files)`);
         
         // Work directly with extracted files instead of filesystem
         const extractedFilenames = Array.from(extractedFiles.keys());
@@ -4676,11 +4791,6 @@ function buyNFT(setname, uid, price, type, callback){
         const expectedPlaylists = successfulResolutions.map(r => `${r}p_index.m3u8`);
         const actualPlaylists = m3u8Files;
         
-        console.log(`📊 Extracted file validation:`);
-        console.log(`   🎬 Segment files: ${tsFiles.length} - ${tsFiles.join(', ')}`);
-        console.log(`   📋 Playlist files: ${m3u8Files.length} - ${m3u8Files.join(', ')}`);
-        console.log(`   ✅ Expected playlists: ${expectedPlaylists.join(', ')}`);
-        console.log(`   📁 Actual playlists: ${actualPlaylists.join(', ')}`);
         
         // Check which playlists actually exist in extracted data
         const existingPlaylists = expectedPlaylists.filter(playlist => 
@@ -4698,7 +4808,6 @@ function buyNFT(setname, uid, price, type, callback){
           console.warn(`⚠️ Missing playlists: ${missing.join(', ')} - continuing with available ones`);
         }
         
-        console.log(`✅ Valid playlists found in extracted data: ${existingPlaylists.join(', ')}`);
         this.videoMsg = `Processing ${existingPlaylists.length} valid resolution(s) from extracted data...`;
         
         // Process files directly from extracted data
@@ -4719,7 +4828,6 @@ function buyNFT(setname, uid, price, type, callback){
         this.hashingProgress.current = 0;
         this.hashingProgress.percentage = 0;
         
-        console.log(`📈 Processing ${actualSegmentFiles.length} segments and ${existingPlaylists.length} playlists from extracted data`);
         
         // Process segments first from extracted data
         const segmentPromises = actualSegmentFiles.map(async (filename) => {
@@ -4817,7 +4925,6 @@ function buyNFT(setname, uid, price, type, callback){
           this.transcodePreview.selectedResolution = this.transcodePreview.resolutions[0];
           this.setPreviewVideoSrc();
           
-          console.log('🎬 Preview available with resolutions:', this.transcodePreview.resolutions.map(r => r.resolution + 'p'));
         }
         
         // Create master playlist from available resolutions
@@ -4842,7 +4949,6 @@ function buyNFT(setname, uid, price, type, callback){
             masterPlaylistContent += `https://ipfs.dlux.io/ipfs/${p.hash}?filename=${p.fileName}\n`;
           });
           
-          console.log('📋 Master M3U8 Playlist:', masterPlaylistContent);
           
           // Create master playlist filename based on original video file
           const originalName = name.substring(0, name.lastIndexOf('.')) || name;
@@ -4861,13 +4967,10 @@ function buyNFT(setname, uid, price, type, callback){
           
           this.dataURLS.push([masterPlaylistFilename, new TextEncoder().encode(masterPlaylistContent), 'application/x-mpegURL']);
           
-          console.log('📁 Final video files to upload:', videoFiles.map(f => f.file.name));
           this.videoFilesToUpload = videoFiles;
           
           // Debug the upload files structure
-          console.log('🔍 Upload files structure check:');
           videoFiles.forEach((vf, idx) => {
-            console.log(`  ${idx + 1}. ${vf.file.name} (${vf.file.size} bytes, ${vf.file.type})`);
           });
           
           this.videoMsg = `✅ ${resolutionPlaylists.length} resolution(s) ready for upload! (${videoFiles.length} files total)`;
@@ -4971,17 +5074,14 @@ function buyNFT(setname, uid, price, type, callback){
               return `${r}p${icon}(${status.segments})`;
             }).join(' ');
             
-            console.log(`📊 All resolutions check (${elapsedSeconds}s): ${statusSummary} | Total: ${totalCurrentFiles} files`);
             
             // Check if all resolutions are complete
             if (completedResolutions === expectedResolutions.length) {
               // All resolutions have at least playlist + 1 segment, check stability
               if (totalCurrentFiles === lastTotalFileCount) {
                 stableCount++;
-                console.log(`📈 All files stable (${stableCount}/${requiredStableChecks}): ${totalCurrentFiles} total files`);
                 
                 if (stableCount >= requiredStableChecks) {
-                  console.log(`✅ All ${expectedResolutions.length} resolutions confirmed stable!`);
                   resolve();
                   return;
                 }
@@ -4989,7 +5089,6 @@ function buyNFT(setname, uid, price, type, callback){
                 // File count changed, reset stability counter
                 stableCount = 0;
                 lastTotalFileCount = totalCurrentFiles;
-                console.log(`📝 File count changed to ${totalCurrentFiles}, resetting stability`);
               }
             } else {
               // Not all resolutions ready yet, reset counters
@@ -5040,16 +5139,13 @@ function buyNFT(setname, uid, price, type, callback){
             const currentFileCount = resolutionFiles.length;
             const elapsedSeconds = Math.round((Date.now() - startTime) / 1000);
             
-            console.log(`📊 ${resHeight}p file check (${elapsedSeconds}s): ${currentFileCount} files, playlist: ${playlistExists ? '✅' : '❌'}`);
             
             // Need both playlist and at least one segment file
             if (playlistExists && currentFileCount >= 2) { // playlist + at least 1 segment
               if (currentFileCount === lastFileCount) {
                 stableCount++;
-                console.log(`📈 ${resHeight}p files stable (${stableCount}/${requiredStableChecks}): ${currentFileCount} files`);
                 
                 if (stableCount >= requiredStableChecks) {
-                  console.log(`✅ ${resHeight}p files confirmed stable: ${currentFileCount} total files`);
                   resolve();
                   return;
                 }
@@ -5057,7 +5153,6 @@ function buyNFT(setname, uid, price, type, callback){
                 // File count changed, reset stability counter
                 stableCount = 0;
                 lastFileCount = currentFileCount;
-                console.log(`📝 ${resHeight}p file count changed to ${currentFileCount}, resetting stability`);
               }
             } else {
               // Not ready yet, reset counters
@@ -5126,7 +5221,6 @@ function buyNFT(setname, uid, price, type, callback){
           }
           
           this.videoMsg = `Transcoding: ${currentProgress}% (${elapsedSeconds}s elapsed)${timeText}`;
-          console.log(`Internal transcode progress: ${currentProgress}% (${elapsedSeconds}s elapsed)`);
         }
       };
       
@@ -5137,7 +5231,6 @@ function buyNFT(setname, uid, price, type, callback){
       setTimeout(() => {
         clearInterval(progressInterval);
         this.videoMsg = 'Transcoding complete! Processing files...';
-        console.log('Internal progress monitoring stopped');
       }, estimatedDuration + 10000);
       
       return progressInterval;
@@ -5224,7 +5317,6 @@ function buyNFT(setname, uid, price, type, callback){
           
           this.videoMsg = `Transcoding: ${progressPercent}% (${currentFileCount}/${estimatedTotalFiles} files)${timeRemainingText}${elapsedText}`;
           
-          console.log(`Transcode progress: ${currentFileCount}/${estimatedTotalFiles} files (${progressPercent}%) - Rate: ${progressHistory.length >= 2 ? ((progressHistory[progressHistory.length-1].files - progressHistory[0].files) / ((progressHistory[progressHistory.length-1].time - progressHistory[0].time) / 1000)).toFixed(2) : 0} files/sec`);
           
           // Check if transcoding seems complete (no new files for a while and reasonable count)
           if (currentFileCount >= numResolutions * 2 && (currentTime - lastUpdateTime) > 5000) {
@@ -5247,7 +5339,6 @@ function buyNFT(setname, uid, price, type, callback){
         // Stop monitoring if complete
         if (isTranscodingComplete) {
           clearInterval(monitoringInterval);
-          console.log('Progress monitoring stopped - transcoding complete');
         }
       }, 1500);
       
@@ -5256,13 +5347,11 @@ function buyNFT(setname, uid, price, type, callback){
     },
 
     handleVideoUploadComplete(uploadedFiles) {
-      console.log('Video upload completed:', uploadedFiles);
       this.videoMsg = 'Video upload completed successfully!';
       
       // Handle any post-upload processing here
       if (this.playlistUpdates && Object.keys(this.playlistUpdates).length > 0) {
         // Update playlists with actual CIDs if needed
-        console.log('Updating playlists with CIDs:', this.playlistUpdates);
         // This would be implemented based on how CIDs are returned from upload
       }
       
@@ -5288,7 +5377,6 @@ function buyNFT(setname, uid, price, type, callback){
           return;
       }
 
-      console.log(`Polling for bundle status. Expecting contract pattern: ${contractInstanceId} bundled`);
       var lastSince = since
       fetch('https://spktest.dlux.io/feed' + (since ? `/${since}` : ''))
         .then(response => {
@@ -5312,11 +5400,9 @@ function buyNFT(setname, uid, price, type, callback){
           }
 
           if (foundAndBundled) {
-            console.log(`✅ Bundle complete for contract ${contractInstanceId}!`);
             // Refresh SPK data to show updated files
             this.getSapi();
           } else {
-            console.log(`Bundle not yet complete for contract ${contractInstanceId}. Retrying in 5s...`);
             setTimeout(() => this.pollBundleStatus(contractID, lastSince), 5000);
           }
         })
@@ -5379,7 +5465,6 @@ function buyNFT(setname, uid, price, type, callback){
         this.ffmpegDownloadProgress = 100;
         this.ffmpegReady = true;
         this.videoMsg = 'FFmpeg loaded successfully! Ready to transcode videos.';
-        console.log('FFmpeg initialized successfully with default configuration');
         return;
         
       } catch (basicError) {
@@ -5413,7 +5498,6 @@ function buyNFT(setname, uid, price, type, callback){
         this.ffmpegDownloadProgress = 100;
         this.ffmpegReady = true;
         this.videoMsg = 'FFmpeg loaded successfully with local files!';
-        console.log('FFmpeg initialized with local core files');
         return;
         
       } catch (localError) {
@@ -5425,7 +5509,6 @@ function buyNFT(setname, uid, price, type, callback){
       this.videoMsg = 'FFmpeg initialization failed. You can still upload pre-processed video files.';
       this.ffmpegSkipped = true;
       this.ffmpegDownloadProgress = 0;
-      console.log('FFmpeg skipped - direct video upload mode enabled');
     },
     
 
@@ -5453,7 +5536,6 @@ function buyNFT(setname, uid, price, type, callback){
         try {
           const registrations = await navigator.serviceWorker.getRegistrations();
           const swPromises = registrations.map(registration => {
-            console.log('Temporarily unregistering SW for FFmpeg loading');
             return registration.unregister();
           });
           await Promise.all(swPromises);
@@ -5470,7 +5552,6 @@ function buyNFT(setname, uid, price, type, callback){
       // Re-register service worker after FFmpeg loading
       if ('serviceWorker' in navigator) {
         try {
-          console.log('Re-registering service worker');
           await navigator.serviceWorker.register('/sw.js?v=2025.06.05.9');
         } catch (error) {
           console.warn('Could not re-register service worker:', error);
@@ -5478,7 +5559,6 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     activeIndexUp() {
-      console.log(this.activeIndex, this[this.focusItem.source].length, this.focusItem)
       if (this.activeIndex < this[this.focusItem.source].length - 1) this.activeIndex++
       else this.activeIndex = 0
     },
@@ -5487,10 +5567,8 @@ function buyNFT(setname, uid, price, type, callback){
       else this.activeIndex = this[this.focusItem.source].length - 1
     },
     onClassChange(classAttrValue) {
-      console.log(classAttrValue)
       const classList = classAttrValue.split(' ');
       if (classList.includes('active')) {
-        console.log('active');
       }
     },
     init(reset = false) {
@@ -5544,7 +5622,6 @@ function buyNFT(setname, uid, price, type, callback){
           for (const m of mutations) {
             const newValue = m.target.getAttribute(m.attributeName);
             this.$nextTick(() => {
-              console.log('tick')
               this.onClassChange(newValue, m.oldValue);
             });
           }
@@ -5563,23 +5640,19 @@ function buyNFT(setname, uid, price, type, callback){
       this.initTypeDistributionChart();
     },
     initAccountDistributionChart() {
-      console.log('🔧 Initializing account distribution chart...');
       try {
         const ctx = document.getElementById('accountDistributionChart');
         if (!ctx) {
           console.warn('❌ Account distribution chart canvas not found');
           return;
         }
-        console.log('✅ Canvas found for account distribution chart');
 
         // Destroy existing chart if it exists
         if (this.accountDistributionChart) {
-          console.log('🗑️ Destroying existing account distribution chart');
           this.accountDistributionChart.destroy();
           this.accountDistributionChart = null;
         }
 
-        console.log('📊 Creating new account distribution chart...');
         this.accountDistributionChart = new Chart(ctx, {
           type: 'pie',
           data: {
@@ -5624,30 +5697,25 @@ function buyNFT(setname, uid, price, type, callback){
             }
           }
         });
-        console.log('✅ Account distribution chart created successfully');
       } catch (error) {
         console.error('❌ Error initializing account distribution chart:', error);
         this.accountDistributionChart = null;
       }
     },
     initTypeDistributionChart() {
-      console.log('🔧 Initializing type distribution chart...');
       try {
         const ctx = document.getElementById('typeDistributionChart');
         if (!ctx) {
           console.warn('❌ Type distribution chart canvas not found');
           return;
         }
-        console.log('✅ Canvas found for type distribution chart');
 
         // Destroy existing chart if it exists
         if (this.typeDistributionChart) {
-          console.log('🗑️ Destroying existing type distribution chart');
           this.typeDistributionChart.destroy();
           this.typeDistributionChart = null;
         }
 
-        console.log('📊 Creating new type distribution chart...');
         this.typeDistributionChart = new Chart(ctx, {
           type: 'pie',
           data: {
@@ -5686,14 +5754,12 @@ function buyNFT(setname, uid, price, type, callback){
             }
           }
         });
-        console.log('✅ Type distribution chart created successfully');
       } catch (error) {
         console.error('❌ Error initializing type distribution chart:', error);
         this.typeDistributionChart = null;
       }
     },
     updateAccountDistributionChart() {
-      console.log('🔄 Starting account distribution chart update...');
       try {
         // Check if canvas exists in DOM
         const canvas = document.getElementById('accountDistributionChart');
@@ -5701,11 +5767,9 @@ function buyNFT(setname, uid, price, type, callback){
           console.warn('❌ Canvas not found in DOM, skipping update');
           return; // Canvas not in DOM, skip update
         }
-        console.log('✅ Canvas found in DOM');
 
         // Always destroy and recreate the chart to avoid Chart.js state issues
         if (this.accountDistributionChart) {
-          console.log('🗑️ Destroying existing chart before recreating...');
           try {
             this.accountDistributionChart.destroy();
           } catch (destroyError) {
@@ -5714,16 +5778,12 @@ function buyNFT(setname, uid, price, type, callback){
           this.accountDistributionChart = null;
         }
 
-        console.log('📊 Processing distribution data...');
         const distData = this.newToken.dist || {};
-        console.log('📊 Distribution data:', distData);
         const labels = Object.keys(distData);
         const data = labels.map(acc => {
           const accountData = distData[acc] || {};
           return (parseFloat(accountData.l) || 0) + (parseFloat(accountData.p) || 0) + (parseFloat(accountData.g) || 0);
         });
-        console.log('📊 Processed labels:', labels);
-        console.log('📊 Processed data:', data);
 
         // Generate colors for all accounts
         const colors = [];
@@ -5736,7 +5796,6 @@ function buyNFT(setname, uid, price, type, callback){
           borderColors.push(`rgba(${r}, ${g}, ${b}, 1)`);
         }
 
-        console.log('📊 Creating new chart with data...');
         // Create new chart with the data
         this.accountDistributionChart = new Chart(canvas, {
           type: 'pie',
@@ -5768,7 +5827,6 @@ function buyNFT(setname, uid, price, type, callback){
             }
           }
         });
-        console.log('✅ Account distribution chart created successfully');
       } catch (error) {
         console.error('❌ Error updating account distribution chart:', error);
         console.error('❌ Error stack:', error.stack);
@@ -5777,7 +5835,6 @@ function buyNFT(setname, uid, price, type, callback){
       }
     },
     updateTypeDistributionChart() {
-      console.log('🔄 Starting type distribution chart update...');
       try {
         // Check if canvas exists in DOM
         const canvas = document.getElementById('typeDistributionChart');
@@ -5785,11 +5842,9 @@ function buyNFT(setname, uid, price, type, callback){
           console.warn('❌ Canvas not found in DOM, skipping update');
           return; // Canvas not in DOM, skip update
         }
-        console.log('✅ Canvas found in DOM');
 
         // Always destroy and recreate the chart to avoid Chart.js state issues
         if (this.typeDistributionChart) {
-          console.log('🗑️ Destroying existing chart before recreating...');
           try {
             this.typeDistributionChart.destroy();
           } catch (destroyError) {
@@ -5798,7 +5853,6 @@ function buyNFT(setname, uid, price, type, callback){
           this.typeDistributionChart = null;
         }
 
-        console.log('📊 Processing distribution data...');
         const distData = this.newToken.dist || {};
         let liquidTotal = 0;
         let powerTotal = 0;
@@ -5811,9 +5865,7 @@ function buyNFT(setname, uid, price, type, callback){
           governanceTotal += parseFloat(accountData.g) || 0;
         }
 
-        console.log('📊 Totals - Liquid:', liquidTotal, 'Power:', powerTotal, 'Governance:', governanceTotal);
 
-        console.log('📊 Creating new chart with data...');
         // Create new chart with the data
         this.typeDistributionChart = new Chart(canvas, {
           type: 'pie',
@@ -5853,7 +5905,6 @@ function buyNFT(setname, uid, price, type, callback){
             }
           }
         });
-        console.log('✅ Type distribution chart created successfully');
       } catch (error) {
         console.error('❌ Error updating type distribution chart:', error);
         console.error('❌ Error stack:', error.stack);
@@ -5989,7 +6040,6 @@ function buyNFT(setname, uid, price, type, callback){
         }
         
         this.transcodePreview.videoSrc = URL.createObjectURL(blob);
-        console.log(`🎬 Preview video src set for ${this.transcodePreview.selectedResolution.resolution}p with ${this.transcodePreview.segmentBlobs?.length || 0} segment blobs`);
       }
     },
     
@@ -6023,7 +6073,6 @@ function buyNFT(setname, uid, price, type, callback){
     
           // Collaborative editing methods
       async generateCollaborationAuthHeaders(forceRefresh = false) {
-        console.log('generateCollaborationAuthHeaders called for:', this.account, 'forceRefresh:', forceRefresh);
         
         if (!this.account) {
           console.warn('No account available for collaboration auth');
@@ -6034,25 +6083,20 @@ function buyNFT(setname, uid, price, type, callback){
         if (!forceRefresh) {
           const cachedHeaders = sessionStorage.getItem(`collaborationAuthHeaders_${this.account}`);
           if (cachedHeaders) {
-            console.log('Found cached headers for:', this.account);
             const headers = JSON.parse(cachedHeaders);
             const cachedChallenge = parseInt(headers['x-challenge']);
             const now = Math.floor(Date.now() / 1000);
             
             // If headers are valid (less than 23 hours old), reuse them
             if (cachedChallenge && (now - cachedChallenge) < (23 * 60 * 60)) {
-              console.log('Using valid cached headers for:', this.account);
               this.collaborationAuthHeaders = headers;
               return headers;
             } else {
-              console.log('Cached headers expired for:', this.account);
             }
           } else {
-            console.log('No cached headers found for:', this.account);
           }
         }
 
-        console.log('Creating new collaboration auth operation for:', this.account);
 
         return new Promise((resolve, reject) => {
           // Use the v3-nav op system for consistency
@@ -6066,38 +6110,29 @@ function buyNFT(setname, uid, price, type, callback){
             title: "Collaboration Authentication",
             // Add callbacks for success and error
             onSuccess: (headers) => {
-              console.log('Collaboration auth success callback received:', headers);
               this.collaborationAuthHeaders = headers;
               resolve(headers);
             },
             onError: (error) => {
-              console.log('Collaboration auth error callback received:', error);
               reject(error);
             }
           };
 
-          console.log('Setting toSign for collaboration auth:', op);
           // Trigger the operation by setting toSign (this will be picked up by v3-nav)
           this.toSign = op;
         });
       },
     
     async openCollaborativeDocument(documentPath) {
-      console.log('🚀 Opening collaborative document:', documentPath);
       this.collaborativeDocument = documentPath;
       this.isCollaborativeMode = true;
       
       // Generate auth headers if not available
       if (!this.collaborationAuthHeaders || !this.collaborationAuthHeaders['x-account']) {
-        console.log('🔐 Generating auth headers for collaboration...');
         await this.generateCollaborationAuthHeaders();
       }
       
-      console.log('✅ Collaborative mode activated:', {
-        document: this.collaborativeDocument,
-        isCollaborativeMode: this.isCollaborativeMode,
-        hasAuthHeaders: !!this.collaborationAuthHeaders['x-account']
-      });
+
       
       // Scroll to post section or expand it
       const postAccordion = document.querySelector('#postDetails');
@@ -6108,7 +6143,6 @@ function buyNFT(setname, uid, price, type, callback){
     
     async ensureCollaborationAuth() {
       // This method ensures auth headers are available for collaborative features
-      console.log('Ensuring collaboration auth headers for account:', this.account);
       
       if (!this.account) {
         console.warn('No account available for collaboration');
@@ -6117,7 +6151,6 @@ function buyNFT(setname, uid, price, type, callback){
       
       try {
         const headers = await this.generateCollaborationAuthHeaders();
-        console.log('Collaboration auth headers ready:', !!headers['x-account']);
         
         // Update the reactive data property
         this.collaborationAuthHeaders = headers;
@@ -6148,7 +6181,6 @@ function buyNFT(setname, uid, price, type, callback){
           // If headers are valid (less than 23 hours old), load them
           if (cachedChallenge && (now - cachedChallenge) < (23 * 60 * 60)) {
             this.collaborationAuthHeaders = headers;
-            console.log('Loaded valid collaboration headers for:', this.account);
             return;
           }
         } catch (e) {
@@ -6172,7 +6204,6 @@ function buyNFT(setname, uid, price, type, callback){
     },
     
     handleCollaborativePermissionChange(permissionData) {
-      console.log('Permission change received:', permissionData);
       this.collaborativePermission = permissionData.permission;
       this.canPostFromCollaboration = permissionData.canPost;
       
@@ -6184,7 +6215,6 @@ function buyNFT(setname, uid, price, type, callback){
     },
     
     loadDocumentIntoPost(documentContent) {
-      console.log('Loading document content into post:', documentContent);
       
       // Store collaborative document data for multi-field editor
       this.collaborativeDocumentData = documentContent;
@@ -6223,7 +6253,6 @@ function buyNFT(setname, uid, price, type, callback){
     
     handleCollaborativePostData(postData) {
       // Handle data changes from collaborative post editor
-      console.log('Collaborative post data updated:', postData);
       this.postTitle = postData.title;
       this.postBody = postData.body;
       this.postTags = postData.tags;
@@ -6234,7 +6263,6 @@ function buyNFT(setname, uid, price, type, callback){
     
     handleCollaborativePublish(postData) {
       // Handle publish request from collaborative editor
-      console.log('Publishing collaborative post:', postData);
       
       // Set the data and trigger normal post flow
       this.postTitle = postData.title;
@@ -6250,7 +6278,6 @@ function buyNFT(setname, uid, price, type, callback){
     
     handleEnhancedPostData(postData) {
       // Handle data changes from enhanced collaborative post editor
-      console.log('Enhanced post data updated:', postData);
       this.postTitle = postData.title;
       this.postBody = postData.body;
       this.postTags = postData.tags;
@@ -6261,7 +6288,6 @@ function buyNFT(setname, uid, price, type, callback){
     
     handleEnhancedPublish(postData) {
       // Handle publish request from enhanced collaborative editor
-      console.log('Publishing enhanced post:', postData);
       
       // Set the data and trigger normal post flow
       this.postTitle = postData.title;
@@ -6290,15 +6316,10 @@ function buyNFT(setname, uid, price, type, callback){
         ...postData.custom_json
       };
       
-      console.log('📝 Post content updated:', {
-        title: this.postTitle,
-        tags: this.postTags,
-        hasBody: !!this.postBody
-      });
+
     },
     
     handlePostPublish(postData) {
-      console.log('🚀 Publishing post from TipTap editor:', postData);
       
       // Update all post data
       this.postTitle = postData.title;
@@ -6324,7 +6345,6 @@ function buyNFT(setname, uid, price, type, callback){
       // - assets: array with index, url, thumb, rotation, title, description, contractId
       // - navigation: array with fromIndex, toIndex, position (phi, theta, radius), label, description
       
-      console.log('🌍 360° Assets updated:', data);
       
       // Update the post's custom JSON with the new 360° gallery data
       this.postCustom_json.assets = data.assets || [];
@@ -6334,23 +6354,18 @@ function buyNFT(setname, uid, price, type, callback){
       this.dluxMock();
       
       // Log the structure for debugging
-      console.log('📝 Updated postCustom_json.assets:', this.postCustom_json.assets);
-      console.log('🧭 Updated postCustom_json.navigation:', this.postCustom_json.navigation);
     },
 
     // Handle file selection from SPK Drive for 360° assets
     handleSPKFileForAssets(fileData) {
       // This method receives file data when users drag/select files from SPK Drive
       // and passes it to the 360° asset manager component
-      console.log('📁 SPK file selected for 360° assets:', fileData);
       
       // If this is from drag/drop, we need to look up the actual file metadata
       if (fileData.fromDragDrop && fileData.cid && fileData.contractId) {
-        console.log('🔍 Looking up metadata for dragged file:', fileData.cid);
         
         // For now, just pass the data as-is and let the component handle the metadata lookup
         // The context menu approach should provide better metadata
-        console.log('🎯 Passing drag/drop data to 360° manager for processing:', fileData);
       }
       
               this.spkFileForAssets = fileData;
@@ -6365,7 +6380,6 @@ function buyNFT(setname, uid, price, type, callback){
       // - license: selected license information
       // - licenseTree: tracking of derivative work licensing
       
-      console.log('📱 dApp data updated:', data);
       
       // Update the post's custom JSON with the new dApp data
       this.postCustom_json.dappStructure = data.dappStructure || {};
@@ -6377,9 +6391,6 @@ function buyNFT(setname, uid, price, type, callback){
       this.dluxMock();
       
       // Log the structure for debugging
-      console.log('📝 Updated postCustom_json.dappStructure:', this.postCustom_json.dappStructure);
-      console.log('🔧 Updated postCustom_json.customJson:', this.postCustom_json.customJson);
-      console.log('⚖️ Updated postCustom_json.license:', this.postCustom_json.license);
     },
 
     // ReMix dApp Manager Integration Methods
@@ -6391,7 +6402,6 @@ function buyNFT(setname, uid, price, type, callback){
       // - customJson: custom JSON structure for the remix
       // - license: selected license for the remix (must be compatible with base)
       
-      console.log('🔄 ReMix dApp data updated:', data);
       
       // Update the post's custom JSON with the new remix data
       this.postCustom_json.remixStructure = data.remixStructure || {};
@@ -6403,10 +6413,6 @@ function buyNFT(setname, uid, price, type, callback){
       this.dluxMock();
       
       // Log the structure for debugging
-      console.log('📝 Updated postCustom_json.remixStructure:', this.postCustom_json.remixStructure);
-      console.log('🔧 Updated postCustom_json.modificationFiles:', this.postCustom_json.modificationFiles);
-      console.log('🔄 Updated postCustom_json.customJson:', this.postCustom_json.customJson);
-      console.log('⚖️ Updated postCustom_json.license:', this.postCustom_json.license);
     }
   },
   mounted() {
@@ -6435,14 +6441,14 @@ function buyNFT(setname, uid, price, type, callback){
     }
     this.pendingTokens = JSON.parse(localStorage.getItem(`pendingTokens`)) || []
     this.boundScrollHandler = this.handleScroll.bind(this); // Create a bound reference
-    //window.addEventListener('scroll', this.boundScrollHandler); - Changed target below
     
-    // Simplified scroll listener for testing - Attached to BODY - REMOVED
-    //this.simpleScrollLogger = () => { console.log(\"*** BODY SCROLL EVENT FIRED ***\"); };
-    //document.body.addEventListener('scroll', this.simpleScrollLogger);
-
-    // Attach the actual handler to the body element
+    // Add scroll listeners - body is often the actual scroll container in SPAs
     document.body.addEventListener('scroll', this.boundScrollHandler);
+    window.addEventListener('scroll', this.boundScrollHandler);
+    document.addEventListener('scroll', this.boundScrollHandler);
+    document.documentElement.addEventListener('scroll', this.boundScrollHandler);
+    
+    // Test if scroll listener is working
 
     //check hash
     if (location.hash) {
@@ -6505,8 +6511,14 @@ function buyNFT(setname, uid, price, type, callback){
     this.loadCollaborationAuthHeaders();
   },
   beforeDestroy() {
-    this.observer.disconnect();
-    window.removeEventListener("scroll", this.handleScroll);
+    if (this.observer) {
+      this.observer.disconnect();
+    }
+    // Remove all scroll handlers
+    document.body.removeEventListener("scroll", this.boundScrollHandler);
+    window.removeEventListener("scroll", this.boundScrollHandler);
+    document.removeEventListener("scroll", this.boundScrollHandler);
+    document.documentElement.removeEventListener("scroll", this.boundScrollHandler);
     
     // Clean up video observer and HLS instances
     if (this.videoObserver) {
@@ -6522,11 +6534,11 @@ function buyNFT(setname, uid, price, type, callback){
     });
   },
   unmounted() {
-    //window.removeEventListener('scroll', this.boundScrollHandler); // Use the same bound reference - Temporarily disabled
-    //document.body.removeEventListener('scroll', this.simpleScrollLogger); // Remove simplified listener from BODY - REMOVED
-
-    // Remove the actual handler from the body element
+    // Remove all scroll handlers
     document.body.removeEventListener('scroll', this.boundScrollHandler);
+    window.removeEventListener('scroll', this.boundScrollHandler);
+    document.removeEventListener('scroll', this.boundScrollHandler);
+    document.documentElement.removeEventListener('scroll', this.boundScrollHandler);
     
     // Clean up video observer and HLS instances
     if (this.videoObserver) {
@@ -6542,6 +6554,29 @@ function buyNFT(setname, uid, price, type, callback){
     });
   },
   watch: {
+    activeTab: {
+      handler(newTab, oldTab) {
+        
+        // Smart loading based on active tab - only load if content is truly empty
+        if (newTab === 'blog') {
+          if (this.displayPosts.length === 0) {
+            this.getPosts(true); // Reset and load posts
+          } else {
+          }
+        } else if (newTab === 'inventory') {
+          if (this.accountNFTs.length === 0 && this.accountRNFTs.length === 0) {
+            this.getNFTs();
+          } else {
+          }
+        } else if (newTab === 'drive' && !this.contractsLoaded) {
+          this.contractsLoaded = true;
+          // Trigger drive content loading if needed
+        } else if (newTab === 'wallet') {
+          // Wallet data should already be loaded, but could refresh if needed
+        }
+      },
+      immediate: false
+    },
     postSelect(a, b) {
       if (a.searchTerm != b.searchTerm || a.bitMask != b.bitMask) {
         this.displayPosts = [];
@@ -6552,15 +6587,11 @@ function buyNFT(setname, uid, price, type, callback){
     },
     "newToken.dist": {
       handler() {
-        console.log('👀 newToken.dist watcher triggered');
-        console.log('👀 Current dist data:', this.newToken.dist);
         // Use setTimeout to ensure this runs after the current execution stack
         setTimeout(() => {
           try {
-            console.log('🚀 Starting chart updates from watcher...');
             this.updateAccountDistributionChart();
             this.updateTypeDistributionChart();
-            console.log('✅ Chart updates completed from watcher');
           } catch (error) {
             console.error('❌ Error in chart update watcher:', error);
             console.error('❌ Error stack:', error.stack);

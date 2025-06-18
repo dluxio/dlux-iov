@@ -1102,7 +1102,6 @@ export default {
         ...MCommon,
         ...MSpk,
         sendIt(event){
-            console.log(event)
             this.$emit('tosign', event)
         },
         getTokenUser(user = this.account) {
@@ -1121,21 +1120,18 @@ export default {
                 this.protocolspk = data
             })
             .catch(e => {
-                console.log(e)
             })
             fetch(this.sapi + "/api/protocol").then(r => r.json())
             .then(data =>{
                 this.protocollarynx = data
             })
             .catch(e => {
-                console.log(e)
             })
             fetch(this.sapi + "/broca/api/protocol").then(r => r.json())
             .then(data =>{
                 this.protocolbroca = data
             })
             .catch(e => {
-                console.log(e)
             })
         },
         getSNodes() {
@@ -1168,13 +1164,11 @@ export default {
             // fetch(`https://spktest.dlux.io/user_services/${provider}`)
             // .then(r=>r.json())
             // .then(json =>{
-            //   console.log(json)
             // })
             fetch(`/upload-contract?user=${this.account}`)
               .then(r => r.json())
               .then(json => {
                 this.petitionStatus = 'Sending'
-                console.log(json)
                 setTimeout(() => {
                   this.getSapi()
                   this.petitionStatus = 'Recieved'
@@ -1207,7 +1201,6 @@ export default {
             fetch(`${this.sapi}/user_services/${broker}`)
               .then(r => r.json())
               .then(res => {
-                console.log(res)
                 this.contract.api = res.services.IPFS[Object.keys(res.services.IPFS)[0]].a
               })
         },

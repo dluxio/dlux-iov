@@ -43,7 +43,6 @@ class NFTScriptExecutor {
                 if (promise) {
                     this.executionPromises.delete(executionId);
                     if (success) {
-                        console.log('🎨 Secure NFT execution result:', { result, html, executionId });
                         
                         // Extract HTML from result if not captured separately
                         let finalHtml = html;
@@ -198,7 +197,6 @@ class NFTScriptExecutor {
             const scriptContent = await this.pullScript(scriptId);
             
             // Execute in secure sandbox only
-            console.log('✅ NFT Script Executor: Using secure sandbox execution');
             return await this.executeInSandbox(scriptContent, nftData);
 
         } catch (error) {
@@ -223,7 +221,6 @@ class NFTScriptExecutor {
     async executeInSandbox(scriptContent, nftData) {
         const { script: scriptId, uid, owner, set, token } = nftData;
         
-        console.log('🔒 Executing NFT script in secure sandbox:', scriptId);
         
         // Generate unique execution ID
         const executionId = `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -284,7 +281,6 @@ if (typeof window !== 'undefined') {
     try {
         const nftScriptExecutor = new NFTScriptExecutor();
         window.NFTScriptExecutor = nftScriptExecutor;
-        console.log('✅ NFT Script Executor initialized successfully - secure execution only');
     } catch (error) {
         console.error('❌ Failed to initialize NFT Script Executor:', error);
         console.error('🚫 NFT scripts will not be available - no fallback execution allowed');

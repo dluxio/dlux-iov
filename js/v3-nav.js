@@ -514,13 +514,11 @@ export default {
 
     // Wallet messaging methods
     initWalletMessaging() {
-      console.log('[NavVue] Initializing wallet messaging...');
       window.addEventListener('message', this.handleWalletMessage.bind(this));
     },
 
     handleWalletMessage(event) {
       // Log all incoming messages for debugging
-      console.log('[NavVue] Received wallet message:', event.data);
 
       // Validate origin
       const validOrigins = [
@@ -565,7 +563,6 @@ export default {
         return;
       }
 
-      console.log('[NavVue] Processing wallet message:', event.data);
 
       // Handle message based on type
       switch (event.data.type) {
@@ -588,7 +585,6 @@ export default {
           signerType: this.getActiveSignerType()
         };
         
-        console.log('[NavVue] Sending user data:', userData);
         this.sendWalletResponse(message.id, userData, null, sourceWindow, sourceOrigin);
       } catch (error) {
         console.error('[NavVue] Error handling get-user request:', error);
@@ -607,13 +603,11 @@ export default {
         error
       };
 
-      console.log('[NavVue] Sending response to', targetOrigin, response);
       targetWindow.postMessage(response, '*');  // Use '*' to allow any origin in development
     },
 
     // Handle navigation request (requires confirmation)
     async handleNavigationRequest(message, sourceWindow, sourceOrigin) {
-      console.log('[NavVue] Handling navigation request from:', sourceOrigin, message.data);
       
       try {
         const { path } = message.data;
@@ -647,7 +641,6 @@ export default {
 
     // Handle transaction signing request (requires confirmation)
     async handleSignTransactionRequest(message, sourceWindow, sourceOrigin) {
-      console.log('[NavVue] Handling sign-transaction request from:', sourceOrigin, message.data);
       
       try {
         const { transaction } = message.data;
@@ -678,7 +671,6 @@ export default {
 
     // Handle sign-only request (requires confirmation)
     async handleSignOnlyRequest(message, sourceWindow, sourceOrigin) {
-      console.log('[NavVue] Handling sign-only request from:', sourceOrigin, message.data);
       
       try {
         const { transaction } = message.data;
@@ -709,7 +701,6 @@ export default {
 
     // Handle challenge signing request (requires confirmation)
     async handleSignChallengeRequest(message, sourceWindow, sourceOrigin) {
-      console.log('[NavVue] Handling sign-challenge request from:', sourceOrigin, message.data);
       
       try {
         const { challenge, keyType, username } = message.data;
@@ -807,12 +798,10 @@ export default {
 
       // Send to all connected wallet sources (if we track them)
       // For now, we'll just log this
-      console.log('[NavVue] Broadcasting user change:', message);
     },
 
     // Device pairing methods
     async handleDevicePairingRequest(message, sourceWindow, sourceOrigin) {
-      console.log('[NavVue] Handling device pairing request from:', sourceOrigin);
       
       try {
         if (!this.user) {
@@ -850,7 +839,6 @@ export default {
     },
 
     async handleDeviceConnectionRequest(message, sourceWindow, sourceOrigin) {
-      console.log('[NavVue] Handling device connection request from:', sourceOrigin, message.data);
       
       try {
         const { pairCode } = message.data;
@@ -883,7 +871,6 @@ export default {
     },
 
     async handleDeviceDisconnectionRequest(message, sourceWindow, sourceOrigin) {
-      console.log('[NavVue] Handling device disconnection request from:', sourceOrigin);
       
       try {
         const { sessionId } = message.data;
@@ -900,7 +887,6 @@ export default {
           
           // Don't throw on disconnect errors, just log them
           if (!response.ok) {
-            console.log('Disconnect API error (non-fatal):', await response.text());
           }
         }
 
@@ -913,7 +899,6 @@ export default {
     },
 
     async handleRemoteSignRequest(message, sourceWindow, sourceOrigin) {
-      console.log('[NavVue] Handling remote sign request from:', sourceOrigin, message.data);
       
       try {
         const { sessionId, transaction, broadcast, timeout } = message.data;
@@ -951,7 +936,6 @@ export default {
     },
 
     async handleRemoteSignChallengeRequest(message, sourceWindow, sourceOrigin) {
-      console.log('[NavVue] Handling remote sign challenge request from:', sourceOrigin, message.data);
       
       try {
         const { sessionId, challenge, keyType, timeout } = message.data;
@@ -989,7 +973,6 @@ export default {
     },
 
     async handleDeviceRequestsPolling(message, sourceWindow, sourceOrigin) {
-      console.log('[NavVue] Handling device requests polling from:', sourceOrigin);
       
       try {
         const { sessionId } = message.data;
@@ -1024,7 +1007,6 @@ export default {
     },
 
     async handleDeviceRequestResponse(message, sourceWindow, sourceOrigin) {
-      console.log('[NavVue] Handling device request response from:', sourceOrigin);
       
       try {
         const { sessionId, requestId, response, error } = message.data;
@@ -1058,11 +1040,9 @@ export default {
     },
 
     async handleIncomingDeviceRequest(request, sessionId) {
-      console.log('[NavVue] Handling incoming device request:', request);
       
       // Check for duplicate requests
       if (this.processedRequestIds.has(request.id)) {
-        console.log('[NavVue] Duplicate request ignored:', request.id);
         return;
       }
       
@@ -1124,7 +1104,6 @@ export default {
             error: error,
             timestamp: new Date().toISOString()
           }));
-          console.log('[NavVue] Sent device response via WebSocket');
         } catch (wsError) {
           console.error('[NavVue] Failed to send WebSocket response:', wsError);
           // Fallback to API if WebSocket fails
@@ -1157,7 +1136,6 @@ export default {
             error
           })
         });
-        console.log('[NavVue] Sent device response via API fallback');
       } catch (apiError) {
         console.error('[NavVue] Failed to send API response:', apiError);
       }
@@ -1196,7 +1174,6 @@ export default {
               if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
                 const modal = new bootstrap.Modal(modalEl, { backdrop: 'static' });
                 modal.show();
-                console.log('Remote signing modal shown via Bootstrap');
               } else {
                 console.warn('Bootstrap not available, using fallback');
                 modalEl.style.display = 'block';
@@ -1238,7 +1215,6 @@ export default {
               if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
                 const modal = new bootstrap.Modal(modalEl, { backdrop: 'static' });
                 modal.show();
-                console.log('Remote signing modal shown via Bootstrap');
               } else {
                 console.warn('Bootstrap not available, using fallback');
                 modalEl.style.display = 'block';
@@ -1344,7 +1320,6 @@ export default {
             if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
               const modal = new bootstrap.Modal(modalEl, { backdrop: 'static' });
               modal.show();
-              console.log('Timeout modal shown via Bootstrap');
             } else {
               console.warn('Bootstrap not available for timeout modal, using fallback');
               modalEl.style.display = 'block';
@@ -1365,14 +1340,12 @@ export default {
     // Handle timeout modal actions
     handleTimeoutResend() {
       // Resend the request if possible
-      console.log('Resending request:', this.timeoutRequest.requestId);
       this.closeTimeoutModal();
       // TODO: Implement resend logic
     },
 
     handleTimeoutReconnect() {
       // Attempt to reconnect
-      console.log('Attempting to reconnect...');
       this.disconnectDevice();
       this.closeTimeoutModal();
     },
@@ -1489,7 +1462,6 @@ export default {
         }
       }
 
-      console.log(`PBKDF2 benchmark: ${iterations} iterations = ${Math.round(duration)}ms`);
       return iterations;
     },
 
@@ -1550,7 +1522,6 @@ export default {
 
         // Convert to string first
         const dataString = JSON.stringify(data);
-        console.log("Data to encrypt length:", dataString.length);
 
         // Use simpler CryptoJS encryption with PBKDF2
         const key = CryptoJS.PBKDF2(password, salt, {
@@ -1558,12 +1529,10 @@ export default {
           iterations: iterations
         });
 
-        console.log("Key generated, encrypting...");
 
         // Use simple AES encryption with the derived key
         const encrypted = CryptoJS.AES.encrypt(dataString, key.toString());
 
-        console.log("Encryption successful");
 
         // Package everything together
         const packagedData = {
@@ -1660,7 +1629,6 @@ export default {
 
       if (isPendingAccount) {
         // Skip verification for pending accounts
-        console.log("Skipping key verification for pending account:", this.user);
 
         // Initialize user account if not exists
         if (!this.decrypted.accounts[this.user]) {
@@ -1727,13 +1695,9 @@ export default {
             const pubKey = PrivateKey.toPublic();
             derivedPublicKey = pubKey.toString();
           } else {
-            console.log("PrivateKey object:", PrivateKey);
-            console.log("Available methods:", Object.getOwnPropertyNames(PrivateKey));
             throw new Error("Unable to derive public key from private key - unsupported library version");
           }
 
-          console.log("Expected public key:", expectedPublicKey);
-          console.log("Derived public key:", derivedPublicKey);
 
           // Normalize both keys for comparison (remove prefixes)
           const normalizeKey = (key) => {
@@ -1746,19 +1710,15 @@ export default {
           const normalizedExpected = normalizeKey(expectedPublicKey);
           const normalizedDerived = normalizeKey(derivedPublicKey);
 
-          console.log("Normalized expected:", normalizedExpected);
-          console.log("Normalized derived:", normalizedDerived);
 
           // Compare normalized keys
           success = normalizedExpected === normalizedDerived;
 
-          console.log("Key validation result:", success);
 
         } catch (keyError) {
           console.error("Error deriving public key:", keyError);
           // For now, if we can't verify the key, let's assume it's valid if it passes basic format checks
           // This is less secure but allows the system to work
-          console.log("Skipping public key verification due to library limitations");
           success = true; // Allow the key to be stored
         }
 
@@ -1803,7 +1763,6 @@ export default {
     // Method to store new accounts from onboarding
     async storeNewAccount(accountData) {
       try {
-        console.log('Storing new account in dluxPEN:', accountData);
 
         // Ensure we have a valid username
         if (!accountData.username) {
@@ -1815,7 +1774,6 @@ export default {
         
         if (existingPEN && !this.PIN) {
           // We have an encrypted wallet but no PIN - need to decrypt first
-          console.log('Found existing encrypted wallet, requesting PIN for decryption...');
           this.pendingAccountData = accountData;
           this.requestPinForDecryption();
           return; // Return early, will be processed after PIN is entered
@@ -1823,7 +1781,6 @@ export default {
         
         // Ensure PIN is set up
         if (!this.PIN) {
-          console.log('No PIN found, setting up new PIN...');
           this.pendingAccountData = accountData;
           this.setupNewPin();
           return; // Return early, will be processed after PIN is created
@@ -1855,7 +1812,6 @@ export default {
 
         this.PENstatus = `New account @${accountData.username} stored successfully`;
 
-        console.log('New account stored successfully in dluxPEN');
         
         // Clear any pending account data
         this.pendingAccountData = null;
@@ -1874,7 +1830,6 @@ export default {
       try {
         const PEN = localStorage.getItem("PEN");
         if (!PEN) {
-          console.log("No PEN data found");
           return;
         }
 
@@ -1891,7 +1846,6 @@ export default {
           if (pbkdf2Error.message === "Incorrect password") {
             throw pbkdf2Error;
           }
-          console.log("PBKDF2 decryption failed, trying legacy method");
         }
 
         // Fallback to legacy decryption for backward compatibility
@@ -1976,7 +1930,6 @@ export default {
       if (pendingAccount) {
         try {
           const accountData = JSON.parse(pendingAccount);
-          console.log('Found pending new account, storing in PEN:', accountData);
 
           // If no PIN set up yet, trigger PIN setup
           if (!this.PIN && !localStorage.getItem("PEN")) {
@@ -2138,7 +2091,6 @@ export default {
 
           // If there was a pending operation, retry it
           if (this.pendingOperation) {
-            console.log("Retrying pending operation after PIN entry");
             const op = this.pendingOperation;
             this.pendingOperation = null;
             // Retry the operation
@@ -2277,7 +2229,6 @@ export default {
 
         // If there was a pending operation, retry it after key storage
         if (this.pendingOperation) {
-          console.log("Retrying pending operation after key storage");
           const op = this.pendingOperation;
           this.pendingOperation = null;
 
@@ -2316,16 +2267,13 @@ export default {
         ],
         "active",
       ];
-      console.log("CJ");
       this.sign(op)
         .then((r) => {
           this.statusFinder(r, obj);
           try {
-            obj.callbacks[0](`${obj.challenge}:${r}`, console.log("callback?"));
           } catch (e) { }
         })
         .catch((e) => {
-          console.log(e);
         });
     },
     broadcastCJA(obj) {
@@ -2344,16 +2292,13 @@ export default {
         ],
         "active",
       ];
-      console.log("CJA");
       this.sign(op)
         .then((r) => {
           this.statusFinder(r, obj);
           try {
-            obj.callbacks[0](`${obj.challenge}:${r}`, console.log("callback?"));
           } catch (e) { }
         })
         .catch((e) => {
-          console.log(e);
         });
     },
     broadcastTransfer(obj) {
@@ -2378,11 +2323,9 @@ export default {
         .then((r) => {
           this.statusFinder(r, obj);
           try {
-            obj.callbacks[0](`${obj.challenge}:${r}`, console.log("callback?"));
           } catch (e) { }
         })
         .catch((e) => {
-          console.log(e);
         });
     },
     broadcastRaw(obj) {
@@ -2391,11 +2334,9 @@ export default {
         .then((r) => {
           if (obj.id) this.statusFinder(r, obj);
           try {
-            obj.callbacks[0](`${obj.challenge}:${r}`, console.log("callback?"));
           } catch (e) { }
         })
         .catch((e) => {
-          console.log(e);
         });
     },
     signHeaders(obj) {
@@ -2422,7 +2363,6 @@ export default {
       this.cleanOps(obj.txid);
       
       try {
-        console.log('Generating collaboration headers for:', this.user);
         
         // Check if we have valid cached headers in session storage (user-specific)
         const cachedHeaders = sessionStorage.getItem(`collaborationAuthHeaders_${this.user}`);
@@ -2433,7 +2373,6 @@ export default {
           
           // If headers are valid (less than 23 hours old), reuse them
           if (cachedChallenge && (now - cachedChallenge) < (23 * 60 * 60)) {
-            console.log('Using cached collaboration headers for:', this.user);
             obj.status = 'Using cached authentication';
             
             // Call success callback if provided
@@ -2491,7 +2430,6 @@ export default {
         sessionStorage.setItem(`collaborationAuthHeaders_${this.user}`, JSON.stringify(headers));
         
         obj.status = 'Authentication successful!';
-        console.log('Generated and cached collaboration auth headers for:', this.user);
         
         // Call success callback if provided
         if (obj.onSuccess) {
@@ -2521,7 +2459,6 @@ export default {
       // Take the first request as the template
       const firstRequest = requests[0];
       var op = [this.user, firstRequest.challenge, firstRequest.key || "posting"];
-      console.log("Signing request:", op);
       
       this.signOnly(op)
         .then((r) => {
@@ -2537,7 +2474,6 @@ export default {
             }
             
             const result = `${firstRequest.challenge}:${signature}`;
-            console.log("Sign result:", result);
             localStorage.setItem(`${this.user}:auth`, result);
             
             // Call all callbacks with the same result
@@ -2560,20 +2496,17 @@ export default {
     },
     
     broadcastTransaction(op, statusObj = null) {
-      console.log("Broadcast request:", op);
       
       // Create a key for this transaction based on operations
       const opKey = JSON.stringify(op[1]);
       
       // Check if we already have pending requests for this operation
       if (this.pendingBroadcastRequests.has(opKey)) {
-        console.log("Adding to existing pending broadcast request");
         this.pendingBroadcastRequests.get(opKey).push({op, statusObj});
         return;
       }
       
       // Create new pending request collection
-      console.log("Creating new pending broadcast request");
       this.pendingBroadcastRequests.set(opKey, [{op, statusObj}]);
       
       // Set timeout to execute all requests for this operation after 250ms
@@ -2585,7 +2518,6 @@ export default {
     },
     
     executePendingBroadcastRequests(opKey) {
-      console.log("Executing pending broadcast requests for operation");
       const requests = this.pendingBroadcastRequests.get(opKey);
       if (!requests || requests.length === 0) return;
       
@@ -2599,7 +2531,6 @@ export default {
       
       this.sign(firstRequest.op)
         .then((r) => {
-          console.log("Broadcast result:", r);
           // Call status finder for all requests with the same result
           requests.forEach(request => {
             if (request.statusObj) {
@@ -2662,7 +2593,6 @@ export default {
         // Check if we have a connected device for remote signing
         if (this.deviceConnection && this.deviceConnection.isConnected && this.deviceConnection.role === 'requester') {
           try {
-            console.log("Remote device signing", op);
             const result = await this.requestRemoteSign(op);
             resolve(result);
             return;
@@ -2695,7 +2625,6 @@ export default {
         // Check if we have a connected device for remote signing
         if (this.deviceConnection && this.deviceConnection.isConnected && this.deviceConnection.role === 'requester') {
           try {
-            console.log("Remote device signOnly", op);
             const result = await this.requestRemoteSignChallenge(`${op[0]}:${op[1]}`, op[2]);
             resolve({signature: result, pubKey: null}); // Remote device handles pubKey
             return;
@@ -2756,7 +2685,6 @@ export default {
     },
     HKCsignOnly(op) {
       return new Promise((res, rej) => {
-        console.log("HKC signing:", op[1]);
         
         window.hive_keychain.requestSignBuffer(
           op[0],
@@ -2767,7 +2695,6 @@ export default {
               console.error("HKC error:", sig.error);
               rej(sig);
             } else {
-              console.log("HKC result:", {signature: sig.result, pubKey: sig.publicKey});
               res({signature: sig.result, pubKey: sig.publicKey});
             }
           }
@@ -2779,7 +2706,6 @@ export default {
         
         // Check if PIN is set up
         if (!this.PIN) {
-          console.log("PENsignOnly: No PIN found. PIN value:", this.PIN, "Session PIN:", sessionStorage.getItem('penPin'));
 
           // Check if there's encrypted PEN data that needs decryption
           const existingPEN = localStorage.getItem("PEN");
@@ -2836,7 +2762,6 @@ export default {
         }
 
         try {
-          console.log("PEN signing:", op[1]);
           
           const privateKey = hiveTx.PrivateKey.from(privateKeyStr);
           const messageHash = CryptoJS.SHA256(op[1]).toString();
@@ -2850,7 +2775,6 @@ export default {
           const signatureDataHex = this.uint8ArrayToHex(signature.data);
           const signatureString = recoveryByteHex + signatureDataHex;
           
-          console.log("PEN result:", {signature: signatureString, pubKey: publicKey.toString()});
           res({signature: signatureString, pubKey: publicKey.toString()});
         } catch (error) {
           console.error("PEN signing failed:", error);
@@ -2909,7 +2833,6 @@ export default {
         token: undefined,
         challenge: undefined,
       };
-      console.log("Login: ", this.user);
       if (!this.HAS_.auth_key) this.HAS_.auth_key = uuidv4();
       const data = CryptoJS.AES.encrypt(
         JSON.stringify(auth_data),
@@ -2928,11 +2851,9 @@ export default {
       if ("WebSocket" in window) {
         this.HAS_.ws = new WebSocket(this.HAS_.SERVER);
         this.HAS_.ws.onopen = function () {
-          console.log("OnOpen - WS");
           this.HAS_.wsconn = true;
           const session = localStorage.getItem(this.user + "HAS");
           const now = new Date().getTime();
-          console.log({ session });
           if (session && now < session.split(",")[1]) {
             this.HAS_.token = session.split(",")[0];
             this.HAS_.expire = session.split(",")[1];
@@ -2945,7 +2866,6 @@ export default {
           }
         }.bind(this);
         this.HAS_.ws.onmessage = function (event) {
-          console.log(event.data);
           const message =
             typeof event.data == "string" ? JSON.parse(event.data) : event.data;
           // Process HAS <-> PKSA protocol
@@ -3013,8 +2933,6 @@ export default {
                 break;
               case "sign_ack":
                 this.HAS_.ws_status = `transaction ${message.uuid} approved`;
-                console.log(message);
-                console.log(message.data);
                 //this.statusFinder(r, obj);
                 break;
               case "sign_nack":
@@ -3028,8 +2946,6 @@ export default {
                 break;
               case "challenge_ack":
                 this.HAS_.ws_status = `challenge ${message.uuid} signed`;
-                console.log(message);
-                console.log(message.data);
                 //this.statusFinder(r, obj);
                 break;
               case "challenge_nack":
@@ -3055,7 +2971,6 @@ export default {
         if (window.hive_keychain) {
           if (typeof op[1] == "string") op[1] = JSON.parse(op[1]);
           else op[1] = JSON.parse(JSON.stringify(op[1]))
-          console.log(op);
           try {
             window.hive_keychain.requestBroadcast(
               op[0],
@@ -3076,11 +2991,9 @@ export default {
     PENsign(op) {
       return new Promise(async (resolve, reject) => {
         if (typeof op[1] == "string") op[1] = JSON.parse(op[1]);
-        console.log(op);
 
         // Check if PIN is set up
         if (!this.PIN) {
-          console.log("PENsign: No PIN found. PIN value:", this.PIN, "Session PIN:", sessionStorage.getItem('penPin'));
 
           // Check if there's encrypted PEN data that needs decryption
           const existingPEN = localStorage.getItem("PEN");
@@ -3157,11 +3070,9 @@ export default {
           // Add the operations to the transaction
           //tx.operations = op[1];
 
-          console.log("Transaction before signing:", tx.transaction);
           const privateKey = hiveTx.PrivateKey.from(key);
           tx.sign(privateKey);
           const result = await tx.broadcast();
-          console.log(result);
           resolve(result);
         } catch (error) {
           console.error("Failed to sign transaction:", error);
@@ -3170,7 +3081,6 @@ export default {
       });
     },
     statusFinder(response, obj) {
-      console.log(response, obj);
       if (response.success == false) {
         this.cleanOps();
         return;
@@ -3206,7 +3116,6 @@ export default {
       fetch(api + "/api/status/" + txid)
         .then((re) => re.json())
         .then((json) => {
-          console.log(json, json.status.slice(0, 20));
           if (json.status.slice(0, 20) != "This TransactionID e") {
             if (json.status.indexOf(" minted ") > -1) {
               //changeDiv(id, json.status, "mint"); // worry about this later
@@ -3219,13 +3128,11 @@ export default {
             } else {
               for (var i = 0; i < this.ops.length; i++) {
                 if (this.ops[i].txid == txid) {
-                  console.log("Found Op");
                   var op = this.ops[i];
                   op.status = "Confirmed.";
                   op.msg = json.status;
                   //this.cleanOps();
                   for (var j = 0; j < op.ops.length; j++) {
-                    console.log(op.ops[j]);
                     this.$emit("refresh", op.ops[j]);
                   }
                   break;
@@ -3248,7 +3155,6 @@ export default {
           }
         })
         .catch((e) => {
-          console.log(e);
           this.statusPinger(txid, api, r + 1);
         });
     },
@@ -3258,7 +3164,6 @@ export default {
     },
     searchRecents() {
       this.filterRecents = this.recentUsers.reduce((a, b) => {
-        console.log(b);
         if (b.toLowerCase().includes(this.filterUsers.toLowerCase())) {
           a.push(b);
         }
@@ -3342,7 +3247,6 @@ export default {
           // Store account requests separately for easier access
           this.accountRequests = this.notifications.filter(n => n.type === 'account_request');
 
-          console.log('Merged notifications loaded:', data.summary);
           return;
         }
 
@@ -3375,7 +3279,6 @@ export default {
         this.notificationsCount = 0; // HIVE notifications are considered read
         this.accountRequests = []; // No account requests available without auth
 
-        console.log('HIVE-only notifications loaded:', this.notifications.length);
 
       } catch (error) {
         console.error('Error loading notifications:', error);
@@ -3479,7 +3382,6 @@ export default {
       // Check if we have a connected device for remote signing
       if (this.deviceConnection && this.deviceConnection.isConnected && this.deviceConnection.role === 'requester') {
         try {
-          console.log("Remote device signChallenge", challenge, keyType);
           const signature = await this.requestRemoteSignChallenge(challenge, keyType);
           return {signature, pubKey: null}; // Remote device handles pubKey
         } catch (error) {
@@ -3555,7 +3457,6 @@ export default {
 
     // Handle account creation request actions
     async createAccountForFriend(request, useACT = true) {
-      console.log(request)
       if(!request.status == 'done') return
       fetch('https://hive-api.dlux.io', {
         body: `{"jsonrpc":"2.0", "method":"condenser_api.get_chain_properties", "params":[], "id":1}`,
@@ -4035,7 +3936,6 @@ export default {
         // Set timeout to clear pairing code after 60 seconds if no connection
         this.devicePairingTimeout = setTimeout(() => {
           if (this.deviceConnection.role === 'signer' && !this.deviceConnection.connectedDevice) {
-            console.log('Device pairing timeout - no requester connected');
             this.clearDevicePairingCode();
           }
         }, 60000); // 60 seconds
@@ -4088,7 +3988,6 @@ export default {
         // Connect WebSocket for real-time communication (with polling fallback)
         this.connectDeviceWebSocket();
         
-        console.log('Successfully connected to device:', result.signerInfo);
         
       } catch (error) {
         console.error('[NavVue] Device connection failed:', error);
@@ -4114,7 +4013,6 @@ export default {
           });
         }
       } catch (error) {
-        console.log('Disconnect error (non-fatal):', error);
       } finally {
         this.stopDevicePolling();
         this.disconnectDeviceWebSocket();
@@ -4130,7 +4028,6 @@ export default {
 
       // Check if session has expired
       if (this.isDeviceSessionExpired()) {
-        console.log('Device session expired, cannot connect WebSocket');
         this.resetDeviceConnection();
         return;
       }
@@ -4139,7 +4036,6 @@ export default {
         this.deviceWebSocket = new WebSocket('wss://data.dlux.io/ws/payment-monitor');
         
         this.deviceWebSocket.onopen = () => {
-          console.log('[NavVue] Device WebSocket connected');
           this.deviceWSConnected = true;
           
           // Subscribe to device session events
@@ -4163,13 +4059,11 @@ export default {
         };
         
         this.deviceWebSocket.onclose = () => {
-          console.log('[NavVue] Device WebSocket disconnected');
           this.deviceWSConnected = false;
           this.deviceWebSocket = null;
           
           // Fallback to polling if we're still connected
           if (this.deviceConnection.isConnected) {
-            console.log('[NavVue] Falling back to polling');
             this.startDevicePolling();
           }
         };
@@ -4188,27 +4082,22 @@ export default {
 
     // Handle WebSocket messages
     handleDeviceWebSocketMessage(data) {
-      console.log('[NavVue] WebSocket message:', data);
       
       switch (data.type) {
         case 'device_pairing_created':
-          console.log('Pairing code created via WebSocket:', data.pairCode);
           break;
           
         case 'device_connected':
-          console.log('Device connected via WebSocket:', data.signerInfo);
           // Only update connection status if we're waiting for a connection
           if (this.deviceConnection.isConnected && this.deviceConnection.role === 'requester') {
             this.deviceConnection.connectedDevice = data.signerInfo;
             this.saveDeviceConnection();
           } else if (this.deviceConnection.role === 'signer') {
             // For signer devices, wait for actual authentication before marking as fully connected
-            console.log('Signer device received connection, waiting for auth...');
           }
           break;
           
                  case 'device_signing_request':
-           console.log('New signing request via WebSocket:', data);
            if (this.deviceConnection.role === 'signer') {
              // Construct proper request object with all needed fields
              const request = {
@@ -4222,31 +4111,25 @@ export default {
            break;
           
         case 'device_signing_response':
-          console.log('Signing response via WebSocket:', data.response);
           // This will be handled by the polling for remote result method
           break;
           
         case 'device_disconnected':
-          console.log('Device disconnected via WebSocket');
           this.resetDeviceConnection();
           break;
           
         case 'device_session_expired':
-          console.log('Device session expired via WebSocket');
           this.resetDeviceConnection();
           break;
           
         case 'device_request_timeout':
-          console.log('Device request timeout via WebSocket:', data.requestId);
           this.handleRequestTimeout(data.requestId, data);
           break;
           
         case 'connected':
-          console.log('WebSocket connection confirmed:', data.message);
           break;
           
         case 'device_session_status':
-          console.log('Device session status:', data.status);
           // Update connection status if needed
           if (data.status.connected === false) {
             this.resetDeviceConnection();
@@ -4254,17 +4137,14 @@ export default {
           break;
           
         case 'device_delivery_failed':
-          console.log('Device delivery failed:', data.reason);
           // Handle delivery failure - maybe show a notification
           break;
           
         case 'device_signing_response':
-          console.log('Device signing response received via WebSocket:', data);
           // Response handled by polling mechanism or direct response handlers
           break;
           
         default:
-          console.log('Unknown WebSocket message type:', data.type);
       }
     },
 
@@ -4283,7 +4163,6 @@ export default {
         return;
       }
 
-      console.log('[NavVue] Starting device polling as fallback');
       this.devicePollingInterval = setInterval(async () => {
         try {
           await this.pollForDeviceRequests();
@@ -4307,7 +4186,6 @@ export default {
 
       // Check if session has expired
       if (this.isDeviceSessionExpired()) {
-        console.log('Device session expired during polling');
         this.resetDeviceConnection();
         return;
       }
@@ -4442,7 +4320,6 @@ export default {
             // If we're a signer device, restart WebSocket connection
             if (this.deviceConnection.isConnected && this.deviceConnection.role === 'signer') {
               this.connectDeviceWebSocket();
-              console.log('Restored device connection as signer, reconnecting WebSocket');
             }
             
             return true;
@@ -4474,10 +4351,8 @@ export default {
       const sessionExpired = this.deviceSessionExpiry && now > this.deviceSessionExpiry;
       
       if (sessionExpired) {
-        console.log('Device session expired, disconnecting');
         this.resetDeviceConnection();
       } else if (!this.deviceConnection.connectedDevice && this.deviceConnection.role === 'signer') {
-        console.log('Clearing pairing code due to timeout - no requester connected');
         // Don't reset completely, just clear the pairing code
         // Keep the signer session active for potential future connections
       }
@@ -4491,7 +4366,6 @@ export default {
       if (this.deviceConnection.isConnected) {
         this.deviceSessionExpiry = Date.now() + (minutes * 60 * 1000);
         this.saveDeviceConnection();
-        console.log(`Device session timeout set to ${minutes} minutes`);
       }
     },
 
@@ -5443,7 +5317,6 @@ export default {
     },
   },
   async mounted() {
-    console.log('[NavVue] Component mounted. User:', this.user, 'Signer:', localStorage.getItem('signer'));
 
     // Initialize wallet messaging for subdomain communication
     this.initWalletMessaging();
@@ -5500,11 +5373,9 @@ export default {
     // add sting chat
     this.addStingChat();
     // Nav Behavior
-    console.log('[NavVue] Setting up Nav Behavior in mounted().');
     const navMore = document.querySelector(".nav-more .nav-link");
     const dropdownMenus = document.querySelectorAll(".nav-dropdown, .js-hoverable-dropdown");
     const bars = document.querySelectorAll(".nav-bars .bar");
-    console.log('[NavVue] dropdownMenus selected:', dropdownMenus);
 
     let isHoverListenerActive = false;
     let styleTag = null; // Reference to the dynamically added style tag
@@ -5521,7 +5392,6 @@ export default {
     }
 
     function dropdownHoverHandler(event) {
-      //console.log('[NavVue] dropdownHoverHandler triggered for:', event.currentTarget);
       dropdownMenus.forEach(otherDropdown => {
         const toggleButton = otherDropdown.querySelector(".dropdown-toggle");
         const dropdownInstance = bootstrap.Dropdown.getInstance(toggleButton);
@@ -5534,22 +5404,18 @@ export default {
     }
 
     function addDropdownHoverListeners() {
-      console.log('[NavVue] Attempting to add hover listeners. Width:', window.innerWidth, 'isHoverListenerActive:', isHoverListenerActive, 'isCoarsePointer:', window.matchMedia("(pointer: coarse)").matches);
       if (window.innerWidth > 768 && !isHoverListenerActive && !window.matchMedia("(pointer: coarse)").matches) {
-        console.log('[NavVue] Conditions MET for adding hover listeners.');
         dropdownMenus.forEach(dropdown => {
           dropdown.addEventListener("mouseover", dropdownHoverHandler);
         });
         isHoverListenerActive = true;
         addDropdownHoverCSS();
       } else {
-        console.log('[NavVue] Conditions NOT MET for adding hover listeners.');
       }
     }
 
     function removeDropdownHoverListeners() {
       if (isHoverListenerActive) { // Only remove if active
-        console.log('[NavVue] Removing hover listeners.');
         dropdownMenus.forEach(dropdown => {
           dropdown.removeEventListener("mouseover", dropdownHoverHandler);
         });
@@ -5559,17 +5425,14 @@ export default {
     }
 
     function addDropdownHoverCSS() {
-      console.log('[NavVue] Setting data-touch to false');
       document.body.setAttribute("data-touch", "false");
     }
 
     function removeDropdownHoverCSS() {
-      console.log('[NavVue] Setting data-touch to true');
       document.body.setAttribute("data-touch", "true");
     }
 
     function handleResize() {
-      console.log('[NavVue] handleResize called. Width:', window.innerWidth, 'isCoarsePointer:', window.matchMedia("(pointer: coarse)").matches);
       if (window.innerWidth > 768 && !window.matchMedia("(pointer: coarse)").matches) {
         addDropdownHoverListeners();
       } else {
