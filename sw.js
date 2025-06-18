@@ -1,4 +1,4 @@
-this.version = "2025.06.18.1";
+this.version = "2025.06.18.2";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -548,14 +548,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.18.1",
-  "generated": "2025-06-18T06:08:06Z",
+  "version": "2025.06.18.2",
+  "generated": "2025-06-18T17:08:26Z",
   "files": {
-    "/css/bootstrap/bootstrap-utilities.css": {
-      "checksum": "3302f743a95e6cbeace85ca6c02638d4",
-      "size": 104721,
-      "priority": "critical"
-    },
     "/css/bootstrap/bootstrap.css": {
       "checksum": "b81428268a775fbf425040349ab96a20",
       "size": 276580,
@@ -586,11 +581,6 @@ self.cacheManifest =
       "size": 80721,
       "priority": "critical"
     },
-    "/css/smde-comment.css": {
-      "checksum": "a2a7d007f4c51ffdba6937b4c79e29f7",
-      "size": 13071,
-      "priority": "important"
-    },
     "/css/smde.css": {
       "checksum": "80e8346c6b7648cc3b82c94f279de4d4",
       "size": 13090,
@@ -617,8 +607,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/dao/index.html": {
-      "checksum": "5c7f3167731d0c5d73f7d758e0690894",
-      "size": 11286,
+      "checksum": "ec632b1742a74b8daf12e42fae36700c",
+      "size": 11283,
       "priority": "important"
     },
     "/dependency-analyzer.js": {
@@ -627,8 +617,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/dex/index.html": {
-      "checksum": "b53fd571440258cb4fe782c26c399019",
-      "size": 112057,
+      "checksum": "1fbd901cf5c90d26651b70f5d4b55ad2",
+      "size": 112060,
       "priority": "important"
     },
     "/dlux/index.html": {
@@ -642,28 +632,28 @@ self.cacheManifest =
       "priority": "important"
     },
     "/honeyblocks/block/index.html": {
-      "checksum": "efc02e0ee6711a7818934367c74f2440",
-      "size": 31304,
+      "checksum": "22dc0f4f34473265bc3b5c7bfaf8a853",
+      "size": 31301,
       "priority": "important"
     },
     "/honeyblocks/detail/index.html": {
-      "checksum": "bd30022a2dc617f85ce7cb4b6099475d",
-      "size": 4211,
+      "checksum": "6b3bfc6ac63607696fd3064f36909609",
+      "size": 4208,
       "priority": "important"
     },
     "/honeyblocks/index.html": {
-      "checksum": "6449a18ba3e77dc5ffbe93dc1f5ef9aa",
-      "size": 4471,
+      "checksum": "9d600873a6b867ad44f9389ce227d2cd",
+      "size": 4468,
       "priority": "important"
     },
     "/honeyblocks/list/index.html": {
-      "checksum": "716045bd95e766d7ccede8c088089dde",
-      "size": 4206,
+      "checksum": "8d12bcde387a2fda02e457c4a2ac62f2",
+      "size": 4203,
       "priority": "important"
     },
     "/hub/index.html": {
-      "checksum": "2c5d01e77172b53b3d762655a1affd9d",
-      "size": 26820,
+      "checksum": "b23919c77710f15238a732ee65cf7c5b",
+      "size": 26813,
       "priority": "important"
     },
     "/img/FFmpeg_logo.svg": {
@@ -1482,7 +1472,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "74d2cc0002827f253f00a9ff6b231022",
+      "checksum": "4c8561038aea23d9d6665b141d5650d7",
       "size": 36523,
       "priority": "important"
     },
@@ -1617,23 +1607,23 @@ self.cacheManifest =
       "priority": "important"
     },
     "/mint/index.html": {
-      "checksum": "73c43be41af75559fe6f62d37c708e3f",
-      "size": 4258,
+      "checksum": "6af3134b0368a9ac54dacdf2ab491d9f",
+      "size": 4255,
       "priority": "important"
     },
     "/new/360-gallery/index-expanded.html": {
-      "checksum": "6a1fb25e4e9ecedc9444036d264df76c",
-      "size": 16662,
+      "checksum": "b679848cec470474e4bc5aa63340b93d",
+      "size": 16655,
       "priority": "important"
     },
     "/new/360-gallery/index.html": {
-      "checksum": "4c2f4cfbf14726961db685c19b2c0471",
-      "size": 10256,
+      "checksum": "bb0a1558c7cf973b389ea1b22f0e3f49",
+      "size": 10245,
       "priority": "important"
     },
     "/new/advanced/index.html": {
-      "checksum": "241247f62af0f07334fcf9b4f6602a0a",
-      "size": 34013,
+      "checksum": "ce30ccec87a967de6103af2d3e583464",
+      "size": 34006,
       "priority": "important"
     },
     "/new/index.html": {
@@ -1642,8 +1632,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/token/index.html": {
-      "checksum": "cef1ab1b9fea2a91c627f9570738c5de",
-      "size": 45310,
+      "checksum": "a687fbc86f8674d8b8bbdae0d25902c7",
+      "size": 45307,
       "priority": "important"
     },
     "/nfts/create/example1.html": {
@@ -1657,33 +1647,33 @@ self.cacheManifest =
       "priority": "important"
     },
     "/nfts/create/index.html": {
-      "checksum": "1f12e238ba37611b8ba5f92d89e2cd24",
-      "size": 76938,
+      "checksum": "e2b47a24a25d77dcafc5a718e8990039",
+      "size": 76931,
       "priority": "important"
     },
     "/nfts/index.html": {
-      "checksum": "16d747268da8f81551173f94f9851f2c",
-      "size": 59158,
+      "checksum": "4e9b3045398f83dd32ba0e35e6883ca6",
+      "size": 59238,
       "priority": "important"
     },
     "/nfts/old.html": {
-      "checksum": "fc4093d6ef4aa3d8f29e9c81f34dfadb",
-      "size": 120075,
+      "checksum": "aeec88d5f54b6d086e6a850672349713",
+      "size": 120053,
       "priority": "important"
     },
     "/nfts/set/index.html": {
-      "checksum": "54f1eb73c26f7480edb19e21fa64a57d",
-      "size": 43225,
+      "checksum": "010a87a8d872fe7dfea46365944fe25f",
+      "size": 43222,
       "priority": "important"
     },
     "/nfts/sets/index.html": {
-      "checksum": "f8522bbadcf9ac6f4d8112b8bca63b9b",
-      "size": 9939,
+      "checksum": "98c503b96638bfc0df8480e5d3dae619",
+      "size": 9932,
       "priority": "important"
     },
     "/node/index.html": {
-      "checksum": "b700ce842921bc856a27bb24eab5d321",
-      "size": 12981,
+      "checksum": "1201263dae69cc6be1dbe6873c17b66e",
+      "size": 12978,
       "priority": "important"
     },
     "/open.html": {
@@ -1697,12 +1687,12 @@ self.cacheManifest =
       "priority": "important"
     },
     "/qr/index.html": {
-      "checksum": "b38571431f358d2abe48151b1a9334e3",
-      "size": 70760,
+      "checksum": "fb6b6d6ec2036bc1dd3859c46fee1499",
+      "size": 70757,
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "1e73593e2c6969fd06997a8660ee7721",
+      "checksum": "bb381b4d1d7939a0fcd6518d3f6866d6",
       "size": 7299,
       "priority": "important"
     },
@@ -1712,18 +1702,18 @@ self.cacheManifest =
       "priority": "important"
     },
     "/storage/index.html": {
-      "checksum": "7495d5308f64220f83cc23e0137d97c5",
-      "size": 12417,
+      "checksum": "f815c9c160305a0e993f937a4bd22e4a",
+      "size": 12414,
       "priority": "important"
     },
     "/update.html": {
-      "checksum": "31d6f64d57f21cd9492f2bfc62657e3c",
-      "size": 11378,
+      "checksum": "95bad8ba0857205117ee5e96b08374d9",
+      "size": 11375,
       "priority": "important"
     },
     "/update/index.html": {
-      "checksum": "8ab59538a55dcb50a2787af75975ff12",
-      "size": 30809,
+      "checksum": "042f265f155fa2cf37f5a2cc888dcd15",
+      "size": 30802,
       "priority": "important"
     },
     "/user/detailmodal.html": {
@@ -1732,8 +1722,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/user/index.html": {
-      "checksum": "ae93998d8103bb51ab6406a42cb5cff4",
-      "size": 301974,
+      "checksum": "7d00c8959ef8bb06be987b5740483fd9",
+      "size": 301967,
       "priority": "important"
     },
     "/validate-tiptap-compliance.js": {
@@ -1796,11 +1786,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/naf-playground/aframe/aframe-inspector.min.js": {
-      "checksum": "90eb74ef16d61ee0ab934e8412e99bf6",
-      "size": 437913,
-      "priority": "page-specific"
-    },
     "/naf-playground/aframe/aframe.min.js": {
       "checksum": "9cc0b1c7c368abf433695fb93d4e4f9c",
       "size": 1277800,
@@ -1842,8 +1827,8 @@ self.cacheManifest =
       "priority": "page-specific"
     },
     "/naf-playground/index.html": {
-      "checksum": "58df4d43d3005340a5d07011659f8cff",
-      "size": 30893,
+      "checksum": "c479c117c9749ebd6d972bf466a9a50c",
+      "size": 30871,
       "priority": "page-specific"
     },
     "/naf-playground/js/asset-manager.js": {
@@ -2647,23 +2632,23 @@ self.cacheManifest =
       "priority": "page-specific"
     },
     "/playground/fogworking.html": {
-      "checksum": "413efc9ef654d7ede63343cd7d05dc7b",
-      "size": 166805,
+      "checksum": "b67f8e095072c32c5b59c9f0a66b2adb",
+      "size": 166798,
       "priority": "page-specific"
     },
     "/playground/index-monaco-fixed.html": {
-      "checksum": "ecbec4f3b2888e6f210ea7dea276ba76",
-      "size": 126958,
+      "checksum": "acedc1f1736c5e3124b1c6db6438a5c9",
+      "size": 126951,
       "priority": "page-specific"
     },
     "/playground/index-monaco.html": {
-      "checksum": "47a6abd2dce5936141b91deceac7514e",
-      "size": 69240,
+      "checksum": "2bdebde35f52a3dfdd9ca75d35d4671a",
+      "size": 69233,
       "priority": "page-specific"
     },
     "/playground/index.html": {
-      "checksum": "6325238a52aa1c7b365abfdd036696de",
-      "size": 48605,
+      "checksum": "575f56ba019b1780f56f116799e7648f",
+      "size": 48598,
       "priority": "page-specific"
     },
     "/playground/last-try.html": {
@@ -2675,11 +2660,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/test-permission-display.html": {
-      "checksum": "74bd6a84631e405ed540572cddd12b75",
-      "size": 17178,
-      "priority": "lazy"
     },
     "/test-readonly-permissions.html": {
       "checksum": "960e9e44760db14734245cf6eb9484a3",
