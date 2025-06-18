@@ -3833,6 +3833,143 @@ body[data-touch="false"] {
   color: var(--bs-secondary);
 }
 
+/* ===== UNIFIED DOCUMENT LIST STATUS INDICATORS ===== */
+
+/* Status indicator container */
+.status-indicator {
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: inline-block;
+  position: relative;
+}
+
+.status-indicator:hover {
+  transform: scale(1.1);
+}
+
+/* Unified document row styling */
+.unified-document-row {
+  transition: background-color 0.2s ease;
+}
+
+.unified-document-row:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Status indicator colors for local status (hard drive icon) */
+.status-indicator .fa-hdd.text-primary {
+  color: #0d6efd !important; /* Blue - saved locally */
+}
+
+.status-indicator .fa-hdd.text-warning {
+  color: #ffc107 !important; /* Orange - saving changes */
+}
+
+.status-indicator .fa-hdd.opacity-25 {
+  opacity: 0.25 !important; /* Faded - not cached locally */
+}
+
+/* Status indicator colors for cloud status (cloud icon) */
+.status-indicator .fa-cloud.text-success {
+  color: #198754 !important; /* Green - synced to cloud */
+}
+
+.status-indicator .fa-cloud.text-info {
+  color: #0dcaf0 !important; /* Blue - syncing to cloud */
+}
+
+.status-indicator .fa-cloud.text-warning {
+  color: #ffc107 !important; /* Orange - has unsynced changes */
+}
+
+.status-indicator .fa-cloud.text-secondary {
+  color: #6c757d !important; /* Gray - available but not connected */
+}
+
+.status-indicator .fa-cloud.opacity-25 {
+  opacity: 0.25 !important; /* Faded - not a collaborative document */
+}
+
+/* Status indicator colors for sync status (sync icon) */
+.status-indicator .fa-sync.text-success {
+  color: #198754 !important; /* Green - synchronized */
+}
+
+.status-indicator .fa-sync.text-info {
+  color: #0dcaf0 !important; /* Blue - syncing */
+}
+
+.status-indicator .fa-sync.text-warning {
+  color: #ffc107 !important; /* Orange - local changes to upload */
+}
+
+.status-indicator .fa-sync.text-secondary {
+  color: #6c757d !important; /* Gray - available for sync */
+}
+
+/* Unsaved changes indicator (small dot) */
+.status-indicator .fa-circle.fa-xs.text-warning {
+  color: #ffc107 !important;
+  font-size: 0.5rem !important;
+  vertical-align: middle;
+}
+
+/* Status indicator spacing in flex container */
+.status-indicator + .status-indicator {
+  margin-left: 0.25rem;
+}
+
+/* Hover effects for status indicators */
+.status-indicator:hover .fa-hdd,
+.status-indicator:hover .fa-cloud,
+.status-indicator:hover .fa-sync {
+  filter: brightness(1.2);
+}
+
+/* Document list table enhancements */
+.table-hover tbody tr:hover .status-indicator {
+  transform: scale(1.05);
+}
+
+/* Responsive adjustments for status indicators */
+@media (max-width: 768px) {
+  .status-indicator {
+    font-size: 0.8rem;
+  }
+  
+  .status-indicator .fa-circle.fa-xs {
+    font-size: 0.4rem !important;
+  }
+}
+
+/* Animation for saving/syncing states */
+.status-indicator .fa-sync.text-info {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Tooltip enhancement for status indicators */
+.status-indicator[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 0.25rem;
+  pointer-events: none;
+}
+
 /* JSON Preview Modal Styles */
 .nav-tabs .nav-link {
   background-color: #343a40;

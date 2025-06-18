@@ -762,6 +762,24 @@ async loadDocument(file) {
     console.log('📄 ALL content (filename, title, body) now visible from local storage');
     
     // STEP 7: For cloud documents, connect WebSocket after editors are ready
+
+### ✅ CORRECT: Collaborative Document Conversion
+
+// ❌ WRONG: Destroy Y.js document and recreate (loses content)
+async convertToCollaborativeWRONG(file) {
+    await this.cleanupDocument(); // DESTROYS Y.js content!
+    await this.loadDocument(file); // Creates empty Y.js document
+}
+
+// ✅ CORRECT: Preserve Y.js document instance during conversion
+async convertToCollaborative(collaborativeFile) {
+    // PRESERVE Y.js document - content syncs automatically via WebSocket
+    const webSocketProvider = await this.setupWebSocketWithOnSynced(this.ydoc, collaborativeFile);
+    if (webSocketProvider) {
+        // Upgrade editors while keeping Y.js document instance
+        await this.upgradeToCloudEditors(this.ydoc, webSocketProvider);
+    }
+}
     if (requiresCloudTier && file.type === 'collaborative') {
         await this.connectToCollaborationServer(file);
     }
@@ -6409,3 +6427,526 @@ async updateYjsConfigMetadata() {
 5. **Debugging First**: Add logging to understand state before fixing issues
 
 These patterns ensure reliable, consistent behavior across all document operations while following TipTap best practices.
+
+---
+
+# Collaborative Permissions System: Owner-Based API Strategy
+
+## Executive Summary
+
+This section defines the **definitive permissions architecture** for DLUX collaborative editing, implementing an owner-based API strategy that eliminates 403 errors while maintaining proper security and offline-first functionality.
+
+### 🚨 **CURRENT ARCHITECTURE: Owner-Based API Strategy (Updated 2024)**
+
+**Our implementation uses ownership-aware API calls to prevent 403 errors:**
+
+- ✅ **Document owners**: Use all 3 endpoints (info + permissions + stats)
+- ✅ **Non-owners**: Use info + stats only (skip permissions to avoid 403)
+- ✅ **Unified permission resolution**: Single method resolves permissions from multiple sources
+- ✅ **Offline-first caching**: 5-minute permission cache with user-specific storage
+- ✅ **Graceful degradation**: Falls back to cached permissions when API fails
+
+## Core Permissions Principles
+
+### 1. **Owner-Based API Access Control**
+- **Rule**: Only document owners can access the `/permissions` endpoint
+- **Rationale**: Server returns `403 "Only document owner can view permissions"` for non-owners
+- **Implementation**: Skip permissions endpoint for non-owner API calls to prevent errors
+
+### 2. **Unified Permission Resolution**
+- **Rule**: Single `getMasterPermissionForDocument()` method resolves permissions from multiple sources
+- **Rationale**: Provides consistent permission checking across the entire application
+- **Implementation**: Hierarchical permission resolution with confidence levels
+
+### 3. **Offline-First Permission Caching**
+- **Rule**: Cache all permission results for 5 minutes with user-specific keys
+- **Rationale**: Enables offline access and reduces API calls
+- **Implementation**: Timestamp-based cache invalidation with fallback strategies
+
+### 4. **Graceful Permission Degradation**
+- **Rule**: Always provide a permission level, even when API calls fail
+- **Rationale**: Application must remain functional during network issues
+- **Implementation**: Use cached permissions or conservative defaults
+
+## API Endpoint Documentation
+
+### **📋 Collaborative API Endpoints**
+
+#### **1. Info Endpoint (Public Access)**
+```javascript
+// Endpoint: GET /api/collaboration/info/{owner}/{permlink}
+// Access: All authenticated users
+// Purpose: Document metadata and access type
+// Returns: Document info including accessType (readonly/editable/postable)
+
+const infoUrl = `https://data.dlux.io/api/collaboration/info/${owner}/${permlink}`;
+const response = await fetch(infoUrl, {
+    headers: { ...this.authHeaders }
+});
+
+// Example Response:
+{
+    "documentName": "My Document",
+    "documentPath": "user/my-document",
+    "isPublic": false,
+    "hasContent": true,
+    "contentSize": 1024,
+    "accessType": "editable", // ← KEY: User's access level
+    "websocketUrl": "wss://collab.dlux.io/ws",
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T12:00:00Z",
+    "lastActivity": "2024-01-01T12:00:00Z"
+}
+
+// ✅ ACCESS TYPE VALUES:
+// - "postable": Highest level - can edit content AND publish to blockchain
+// - "editable": Mid level - can edit content but cannot publish to blockchain  
+// - "readonly": Lowest level - can only view content, no editing or publishing
+```
+
+#### **2. Permissions Endpoint (Owner-Only Access)**
+```javascript
+// Endpoint: GET /api/collaboration/permissions/{owner}/{permlink}
+// Access: Document owner ONLY
+// Purpose: Detailed permission list for all users
+// Error: 403 "Only document owner can view permissions" for non-owners
+
+const permissionsUrl = `https://data.dlux.io/api/collaboration/permissions/${owner}/${permlink}`;
+
+// ✅ OWNER-BASED STRATEGY: Only call for document owners
+if (currentUser === owner) {
+    const response = await fetch(permissionsUrl, {
+        headers: { ...this.authHeaders }
+    });
+} else {
+    // Skip to avoid 403 error
+    console.log('Skipping permissions endpoint (non-owner)');
+}
+
+// Example Response (Owner Only):
+{
+    "permissions": [
+        {
+            "account": "user1",
+            "permissionType": "editor",
+            "grantedBy": "owner",
+            "grantedAt": "2024-01-01T00:00:00Z"
+        },
+        {
+            "account": "user2", 
+            "permissionType": "readonly",
+            "grantedBy": "owner",
+            "grantedAt": "2024-01-01T00:00:00Z"
+        }
+    ]
+}
+```
+
+#### **3. Stats Endpoint (Public Access)**
+```javascript
+// Endpoint: GET /api/collaboration/stats/{owner}/{permlink}
+// Access: All authenticated users
+// Purpose: Document statistics and user-specific permission data
+// Returns: User's permission level and document analytics
+
+const statsUrl = `https://data.dlux.io/api/collaboration/stats/${owner}/${permlink}`;
+const response = await fetch(statsUrl, {
+    headers: { ...this.authHeaders }
+});
+
+// Example Response:
+{
+    "total_users": 3,
+    "active_users": 1,
+    "total_edits": 15,
+    "document_size": 2048,
+    "last_activity": "2024-01-01T12:00:00Z",
+    "inactivity_days": 0,
+    "userPermission": "editor", // ← KEY: Current user's permission
+    "canEdit": true,            // ← KEY: Boolean permission flags
+    "canView": true,
+    "accessLevel": "editor",    // ← KEY: Alternative permission format
+    "permissions": [            // ← KEY: May include permissions array
+        {
+            "account": "currentUser",
+            "permissionType": "editor"
+        }
+    ]
+}
+```
+
+## Implementation Strategy
+
+### **🔧 Owner-Based API Strategy**
+
+#### **API Call Logic**
+```javascript
+// ✅ OWNER-BASED API CALLS: Skip permissions endpoint for non-owners
+async loadDocumentPermissions(context = 'document-access') {
+    const isOwner = this.currentFile.owner === this.username;
+    
+    console.log('🔍 PERMISSION API STRATEGY:', {
+        document: `${this.currentFile.owner}/${this.currentFile.permlink}`,
+        currentUser: this.username,
+        documentOwner: this.currentFile.owner,
+        isOwner: isOwner,
+        strategy: isOwner ? 
+            'Owner: Use all 3 endpoints (info + permissions + stats)' : 
+            'Non-owner: Use info + stats only (skip permissions to avoid 403)'
+    });
+    
+    let apiPromises;
+    if (isOwner) {
+        // Owner: Use all 3 endpoints
+        apiPromises = [
+            this.loadCollaborationInfo(true),
+            fetch(permissionsUrl, { headers: { ...this.authHeaders } }),
+            this.loadCollaborationStats(true)
+        ];
+    } else {
+        // Non-owner: Skip permissions endpoint to avoid 403 error
+        apiPromises = [
+            this.loadCollaborationInfo(true),
+            Promise.resolve({ status: 'skipped', reason: 'non-owner-permissions-skip' }),
+            this.loadCollaborationStats(true)
+        ];
+    }
+    
+    const [infoResult, permissionsResponse, statsResult] = await Promise.allSettled(apiPromises);
+    
+    // Process results with owner-aware handling
+    return this.processUnifiedPermissionResults(infoResult, permissionsResponse, statsResult, isOwner);
+}
+```
+
+### **🎯 Unified Permission Resolution**
+
+#### **Permission Resolution Hierarchy**
+```javascript
+// ✅ UNIFIED PERMISSION RESOLUTION: Single source of truth
+async getMasterPermissionForDocument(file, forceRefresh = false, context = 'document-access') {
+    // STEP 1: Document owner always has full access (highest priority)
+    if (file.owner === this.username) {
+        return {
+            level: 'owner',
+            source: 'document-owner',
+            confidence: 'high',
+            reasoning: 'Document owner has full access'
+        };
+    }
+    
+    // STEP 2: Check cached permissions first (offline-first)
+    if (!forceRefresh) {
+        const cachedPermission = this.getCachedPermission(file);
+        if (cachedPermission && this.isCacheFresh(cachedPermission)) {
+            return {
+                level: cachedPermission.level,
+                source: 'cached-permission',
+                confidence: 'high',
+                reasoning: `Cached permission (${cachedPermission.level})`
+            };
+        }
+    }
+    
+    // STEP 3: Load fresh permissions using owner-based strategy
+    try {
+        await this.loadDocumentPermissions(context);
+        return this.resolveUnifiedPermission(context);
+    } catch (error) {
+        // STEP 4: Fallback to stale cache or conservative defaults
+        return this.handlePermissionError(file, error);
+    }
+}
+
+// ✅ HIERARCHICAL PERMISSION RESOLUTION
+resolveUnifiedPermission(documentInfo, permissionsData, permissionError, context, statsData) {
+    // Priority 1: Info endpoint accessType
+    if (documentInfo?.accessType) {
+        const accessType = documentInfo.accessType.toLowerCase();
+        if (accessType.includes('post')) {
+            return { level: 'postable', source: 'info-access-type', confidence: 'high' };
+        }
+        if (accessType.includes('edit')) {
+            return { level: 'editable', source: 'info-access-type', confidence: 'high' };
+        }
+        if (accessType.includes('read')) {
+            return { level: 'readonly', source: 'info-access-type', confidence: 'high' };
+        }
+    }
+    
+    // Priority 2: Stats endpoint user permission
+    if (statsData?.userPermission) {
+        return {
+            level: this.normalizePermissionLevel(statsData.userPermission),
+            source: 'stats-user-permission',
+            confidence: 'high'
+        };
+    }
+    
+    // Priority 3: Stats endpoint boolean flags
+    if (statsData?.canEdit === true) {
+        return { level: 'editor', source: 'stats-can-edit-flag', confidence: 'high' };
+    }
+    if (statsData?.canView === true) {
+        return { level: 'readonly', source: 'stats-can-view-flag', confidence: 'high' };
+    }
+    
+    // Priority 4: Explicit permissions data (owner only)
+    if (permissionsData?.permissions) {
+        const userPermission = permissionsData.permissions.find(p => p.account === this.username);
+        if (userPermission) {
+            return {
+                level: userPermission.permissionType,
+                source: 'explicit-user-permission',
+                confidence: 'high'
+            };
+        }
+    }
+    
+    // Priority 5: Handle API errors with fallbacks
+    if (permissionError) {
+        return this.handlePermissionError(permissionError, documentInfo, context);
+    }
+    
+    // Priority 6: Conservative default
+    return { level: 'no-access', source: 'no-permission-data', confidence: 'low' };
+}
+```
+
+### **💾 Offline-First Permission Caching**
+
+#### **Cache Implementation**
+```javascript
+// ✅ PERMISSION CACHING: User-specific with timestamp validation
+cachePermissionForFile(file, permissionLevel) {
+    if (!file || !this.username) return;
+    
+    const timestamp = Date.now();
+    const permissionData = {
+        level: permissionLevel,
+        timestamp: timestamp,
+        username: this.username // Prevent cache poisoning
+    };
+    
+    // Initialize cache structure
+    if (!file.cachedPermissions) {
+        file.cachedPermissions = {};
+    }
+    
+    // Store user-specific permission with timestamp
+    file.cachedPermissions[this.username] = permissionData;
+    file.permissionCacheTime = timestamp;
+    
+    console.log('💾 Permission cached:', {
+        document: file.name || `${file.owner}/${file.permlink}`,
+        user: this.username,
+        level: permissionLevel,
+        expiresAt: new Date(timestamp + 300000).toISOString() // 5 minutes
+    });
+    
+    // Trigger Vue reactivity for UI updates
+    this.$nextTick(() => {
+        this.triggerPermissionReactivity();
+    });
+}
+
+// ✅ CACHE VALIDATION: 5-minute expiry with security checks
+getCachedPermission(file) {
+    if (!file?.cachedPermissions?.[this.username]) return null;
+    
+    const cachedData = file.cachedPermissions[this.username];
+    
+    // Security: Verify cache is for current user
+    if (cachedData.username !== this.username) {
+        console.warn('🚫 Permission cache username mismatch - clearing stale cache');
+        delete file.cachedPermissions[this.username];
+        return null;
+    }
+    
+    return cachedData;
+}
+
+// ✅ CACHE FRESHNESS: 5-minute window
+isCacheFresh(cachedData) {
+    const cacheAge = Date.now() - cachedData.timestamp;
+    return cacheAge < 300000; // 5 minutes
+}
+```
+
+### **🔄 Error Handling and Fallbacks**  
+
+#### **Graceful Degradation Strategy**
+```javascript
+// ✅ ERROR HANDLING: Graceful degradation with fallbacks
+handlePermissionError(file, error) {
+    console.error('❌ Permission API error:', error.message);
+    
+    // Fallback 1: Use stale cached permissions
+    const cachedPermission = this.getCachedPermission(file);
+    if (cachedPermission) {
+        console.log('🔄 Using stale cached permission after API error');
+        return {
+            level: cachedPermission.level,
+            source: 'cached-after-error',
+            confidence: 'medium',
+            reasoning: `Fallback to cached permission after API error`
+        };
+    }
+    
+    // Fallback 2: Check if document is in collaborative list
+    const collaborativeDoc = this.collaborativeDocs.find(doc => 
+        doc.owner === file.owner && doc.permlink === file.permlink);
+    
+    if (collaborativeDoc) {
+        // If document appears in collaborative list, user has at least readonly access
+        return {
+            level: 'readonly',
+            source: 'collaborative-list-implied',
+            confidence: 'medium',
+            reasoning: 'Document in collaborative list implies readonly access'
+        };
+    }
+    
+    // Fallback 3: Conservative default
+    return {
+        level: 'no-access',
+        source: 'error-fallback',
+        confidence: 'low',
+        reasoning: `Permission check failed: ${error.message}`
+    };
+}
+
+// ✅ 403 ERROR HANDLING: Specific handling for owner-only endpoints
+handle403PermissionError(documentInfo, context) {
+    // 403 with public document = readonly access
+    if (documentInfo?.isPublic) {
+        return {
+            level: 'readonly',
+            source: 'public-document-fallback',
+            confidence: 'medium',
+            reasoning: '403 on permissions but document is public'
+        };
+    }
+    
+    // 403 with collaborative list presence = readonly access
+    if (context === 'file-browser' || this.documentInCollaborativeList()) {
+        return {
+            level: 'readonly',
+            source: 'collaborative-list-403-fallback',
+            confidence: 'medium',
+            reasoning: '403 on permissions but document in collaborative list'
+        };
+    }
+    
+    // Pure 403 = no access
+    return {
+        level: 'no-access',
+        source: 'permission-api-forbidden',
+        confidence: 'high',
+        reasoning: '403 Forbidden from permissions API'
+    };
+}
+```
+
+## Best Practices Summary
+
+### **✅ DO: Owner-Based API Strategy**
+- Check ownership before making API calls
+- Skip permissions endpoint for non-owners
+- Use info + stats endpoints for permission detection
+- Log API strategy decisions for debugging
+
+### **✅ DO: Unified Permission Resolution**
+- Use single `getMasterPermissionForDocument()` method
+- Implement hierarchical permission resolution
+- Provide confidence levels for permission sources
+- Cache all permission results immediately
+
+### **✅ DO: Offline-First Caching**
+- Cache permissions for 5 minutes with timestamps
+- Use user-specific cache keys to prevent poisoning
+- Validate cache freshness before use
+- Fall back to stale cache when API fails
+
+### **✅ DO: Graceful Error Handling**
+- Always return a permission level (never throw)
+- Use multiple fallback strategies
+- Provide clear reasoning for permission decisions
+- Log permission resolution process for debugging
+
+### **❌ DON'T: Common Anti-Patterns**
+- Don't call permissions endpoint for non-owners
+- Don't cache permissions without user-specific keys
+- Don't throw errors from permission methods
+- Don't use different permission methods for same document
+- Don't ignore cached permissions during API failures
+
+## Integration with TipTap Architecture
+
+### **🔗 TipTap Integration Points**
+
+#### **Read-Only Mode Integration**
+```javascript
+// ✅ COMPUTED PROPERTY: Uses unified permission system
+isReadOnlyMode() {
+    if (this.isTemporaryDocument) return false; // Temp docs always editable
+    if (this.currentFile?.type === 'local') return false; // Local docs always editable
+    
+    // For collaborative documents, use unified permission system
+    if (this.currentFile?.type === 'collaborative') {
+        const permissionLevel = this.getUserPermissionLevel(this.currentFile);
+        return (permissionLevel === 'readonly' || permissionLevel === 'no-access');
+    }
+    
+    return false; // Default to editable
+}
+
+// ✅ SYNCHRONOUS PERMISSION ACCESS: Uses cached results
+getUserPermissionLevel(file) {
+    // Use cached permission for immediate UI needs
+    const cachedPermission = this.getCachedPermission(file);
+    if (cachedPermission && this.isCacheFresh(cachedPermission)) {
+        return cachedPermission.level;
+    }
+    
+    // Fall back to ownership check
+    if (file.owner === this.username) return 'owner';
+    if (!this.isAuthenticated) return 'no-access';
+    
+    // Conservative default for UI
+    return 'readonly';
+}
+```
+
+#### **Editor State Management**
+```javascript
+// ✅ EDITOR UPDATES: Automatic permission enforcement
+async updateEditorPermissions() {
+    if (!this.titleEditor || !this.bodyEditor) return;
+    
+    const isReadOnly = this.isReadOnlyMode;
+    
+    // Update editor states based on permissions
+    this.titleEditor.setEditable(!isReadOnly);
+    this.bodyEditor.setEditable(!isReadOnly);
+    
+    console.log(`📝 Editors set to ${isReadOnly ? 'READ-ONLY' : 'EDITABLE'} based on permissions`);
+}
+
+// ✅ PERMISSION WATCHER: Automatic UI updates
+watch: {
+    isReadOnlyMode(newValue) {
+        this.$nextTick(() => {
+            this.updateEditorPermissions();
+        });
+    }
+}
+```
+
+This comprehensive permissions system ensures:
+- ✅ **Zero 403 errors** through owner-based API strategy
+- ✅ **Offline-first functionality** with robust permission caching
+- ✅ **Consistent permission checking** across the entire application
+- ✅ **Graceful error handling** with multiple fallback strategies
+- ✅ **TipTap compliance** following offline-first collaborative best practices
+- ✅ **Performance optimization** through intelligent caching and API call reduction

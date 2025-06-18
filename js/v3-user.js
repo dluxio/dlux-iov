@@ -29,7 +29,7 @@ import SPKVue from "/js/spk-wallet.js";
 import Assets from "/js/assets.js"
 import MFI from "/js/mfi-vue.js";
 import UploadEverywhere from "/js/upload-everywhere.js";
-import TiptapEditorWithFileMenu from "/js/tiptap-editor-with-file-menu.js";
+import TiptapEditorWithFileMenu from "/js/tiptap-editor-modular.js";
 import Asset360Manager from "/js/components/360-asset-manager.js";
 import DappManager from "/js/components/dapp-manager.js";
 import RemixDappManager from "/js/components/remix-dapp-manager.js";
@@ -1053,7 +1053,7 @@ PORT=3000
       postOptions: {},
       serviceWorkerPromises: {},
       fileToAddToPost: null,
-      handleSPKFileForAssets: null,
+      spkFileForAssets: null,
       playlistUpdates: {},
       videoFilesToUpload: [],
       ffmpegReady: false,
@@ -6353,7 +6353,7 @@ function buyNFT(setname, uid, price, type, callback){
         console.log('🎯 Passing drag/drop data to 360° manager for processing:', fileData);
       }
       
-      this.handleSPKFileForAssets = fileData;
+              this.spkFileForAssets = fileData;
     },
 
     // dApp Manager Integration Methods

@@ -531,19 +531,31 @@ export default {
       ];
 
       if (!validOrigins.includes(event.origin)) {
-        console.warn('[NavVue] Ignoring message from unauthorized origin:', event.origin);
+        // ✅ REDUCED NOISE: Only log unauthorized origins occasionally to reduce console spam
+        if (Math.random() < 0.01) { // Log ~1% of unauthorized messages
+          console.warn('[NavVue] Ignoring messages from unauthorized origin:', event.origin);
+        }
         return;
       }
 
       // Validate message structure
       if (!event.data || typeof event.data !== 'object') {
-        console.warn('[NavVue] Ignoring invalid message format:', event.data);
+        // ✅ REDUCED NOISE: Only log invalid formats occasionally
+        if (Math.random() < 0.05) { // Log ~5% of invalid messages
+          console.warn('[NavVue] Ignoring invalid message formats');
+        }
         return;
       }
 
       // Check if this is a wallet message
       if (!event.data.source || event.data.source !== 'dlux-wallet') {
-        console.warn('[NavVue] Ignoring non-wallet message:', event.data);
+        // ✅ REDUCED NOISE: Filter out known noisy sources completely
+        const noisySources = ['metamask-inpage', 'metamask-contentscript', 'metamask-provider'];
+        const isKnownNoisy = event.data.target && noisySources.includes(event.data.target);
+        
+        if (!isKnownNoisy && Math.random() < 0.02) { // Log ~2% of non-wallet messages, skip MetaMask entirely
+          console.warn('[NavVue] Ignoring non-wallet message from:', event.origin);
+        }
         return;
       }
 
