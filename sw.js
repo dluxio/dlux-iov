@@ -1,4 +1,4 @@
-this.version = "2025.06.17.2";
+this.version = "2025.06.18.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -548,14 +548,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.17.23",
-  "generated": "2025-06-18T06:07:43Z",
+  "version": "2025.06.18.1",
+  "generated": "2025-06-18T06:08:06Z",
   "files": {
-    "/css/bootstrap/bootstrap-reboot.css": {
-      "checksum": "a2c742a5d35fafe705ffc2f23f05b9be",
-      "size": 11998,
-      "priority": "critical"
-    },
     "/css/bootstrap/bootstrap-utilities.css": {
       "checksum": "3302f743a95e6cbeace85ca6c02638d4",
       "size": 104721,
@@ -590,11 +585,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/css/simplemde-bs-dark.css": {
-      "checksum": "96865c7891f63beeae48ad1b318b38b3",
-      "size": 16247,
-      "priority": "important"
     },
     "/css/smde-comment.css": {
       "checksum": "a2a7d007f4c51ffdba6937b4c79e29f7",
@@ -1806,11 +1796,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/js/chatvue.js": {
-      "checksum": "42c56d94e0753ac58265d3af75a59f55",
-      "size": 6802,
-      "priority": "page-specific"
-    },
     "/naf-playground/aframe/aframe-inspector.min.js": {
       "checksum": "90eb74ef16d61ee0ab934e8412e99bf6",
       "size": 437913,
@@ -2691,11 +2676,6 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/test-local-file-workflow.html": {
-      "checksum": "6d6d4ac1046450059dc300d51bf10fc0",
-      "size": 8920,
-      "priority": "lazy"
-    },
     "/test-permission-display.html": {
       "checksum": "74bd6a84631e405ed540572cddd12b75",
       "size": 17178,
@@ -2717,8 +2697,8 @@ self.cacheManifest =
       "priority": "lazy"
     },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     }
   }
