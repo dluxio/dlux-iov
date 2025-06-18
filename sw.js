@@ -1,4 +1,4 @@
-this.version = "2025.06.18.2";
+this.version = "2025.06.18.3";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -548,14 +548,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.18.2",
-  "generated": "2025-06-18T17:08:26Z",
+  "version": "2025.06.18.3",
+  "generated": "2025-06-18T21:52:16Z",
   "files": {
-    "/css/bootstrap/bootstrap.css": {
-      "checksum": "b81428268a775fbf425040349ab96a20",
-      "size": 276580,
-      "priority": "critical"
-    },
     "/css/custom-old.css": {
       "checksum": "d05166f557dbe2ffa4e68d15a849cc95",
       "size": 7317,
@@ -580,11 +575,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/css/smde.css": {
-      "checksum": "80e8346c6b7648cc3b82c94f279de4d4",
-      "size": 13090,
-      "priority": "important"
     },
     "/css/tagify.css": {
       "checksum": "17293e2a18aea950ca3ac847b1c1f565",
@@ -1127,8 +1117,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/cardvue.js": {
-      "checksum": "a3fbdc814cf3be516f7901f591ba9270",
-      "size": 37855,
+      "checksum": "39423715a5e7011068eb2b0511d59e2b",
+      "size": 35865,
       "priority": "important"
     },
     "/js/chartjs-adapter-date-fns.local.js": {
@@ -1182,8 +1172,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/contracts-vue.js": {
-      "checksum": "29e6d0a14ed27cea878b47e3adf25c3f",
-      "size": 109105,
+      "checksum": "e22730d638861562df6be63a3d36ac75",
+      "size": 109055,
       "priority": "important"
     },
     "/js/cryptojs.min.js": {
@@ -1352,8 +1342,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/nft-script-executor.js": {
-      "checksum": "0e4a8dc8a3ce942d1f404c4531beed18",
-      "size": 10899,
+      "checksum": "76d7c34dc059e1b6b7eff3007c59720d",
+      "size": 10534,
       "priority": "important"
     },
     "/js/navue.js": {
@@ -1447,8 +1437,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/spk-wallet.js": {
-      "checksum": "844b8d915e4789d1e156d26a0a6ac383",
-      "size": 71064,
+      "checksum": "df8d471e90bfebcb26298de1553f6417",
+      "size": 70838,
       "priority": "important"
     },
     "/js/spkdrive.js": {
@@ -1472,7 +1462,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "4c8561038aea23d9d6665b141d5650d7",
+      "checksum": "fb1bcf1fefe0071207539c23bbfeda7a",
       "size": 36523,
       "priority": "important"
     },
@@ -1567,8 +1557,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "f6c21ae452e2cc279388201134ee6282",
-      "size": 232796,
+      "checksum": "66cb3cd7186b86e8c904d8770fd157ac",
+      "size": 227595,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1692,7 +1682,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "bb381b4d1d7939a0fcd6518d3f6866d6",
+      "checksum": "b95a2abbf4451f3875d373aebc1ac93b",
       "size": 7299,
       "priority": "important"
     },
@@ -1722,8 +1712,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/user/index.html": {
-      "checksum": "7d00c8959ef8bb06be987b5740483fd9",
-      "size": 301967,
+      "checksum": "870afff2eee6890083e398fa8388a72a",
+      "size": 302148,
       "priority": "important"
     },
     "/validate-tiptap-compliance.js": {
@@ -1785,11 +1775,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/naf-playground/aframe/aframe.min.js": {
-      "checksum": "9cc0b1c7c368abf433695fb93d4e4f9c",
-      "size": 1277800,
-      "priority": "page-specific"
     },
     "/naf-playground/aframe/networked-aframe.min.js": {
       "checksum": "4b25bad9a7b40896916bcb097db405ba",
@@ -2660,11 +2645,6 @@ self.cacheManifest =
       "checksum": "503b8d7cc8ca7a145a6b3680d89aaa51",
       "size": 21317,
       "priority": "page-specific"
-    },
-    "/test-readonly-permissions.html": {
-      "checksum": "960e9e44760db14734245cf6eb9484a3",
-      "size": 15792,
-      "priority": "lazy"
     },
     "/test-recursion.js": {
       "checksum": "aa9d78598527667ad933d61a8f15c0cd",
