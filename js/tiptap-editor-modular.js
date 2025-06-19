@@ -174,7 +174,7 @@ class YjsDocumentManager {
         return ydoc;
     }
 
-    async setupIndexedDBWithOnSynced(ydoc, documentId) {
+    async setupIndexedDBWithOnSynced(ydoc, documentId, isCollaborative = false) {
         // ✅ CORRECT: Use multiple fallbacks for IndexeddbPersistence - prioritize bundle pattern
         const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
         const IndexeddbPersistence = (bundle?.IndexeddbPersistence?.default) || 
@@ -187,7 +187,19 @@ class YjsDocumentManager {
             return null;
         }
 
-        const persistence = new IndexeddbPersistence(documentId, ydoc);
+        // ✅ CRITICAL FIX: User-isolated IndexedDB keys for collaborative documents
+        // This prevents cross-user contamination when multiple users access the same document
+        let indexedDBKey = documentId;
+        if (isCollaborative && this.component.username) {
+            indexedDBKey = `${this.component.username}__${documentId}`;
+            console.log('🔐 Using user-isolated IndexedDB key for collaborative document:', {
+                originalKey: documentId,
+                userIsolatedKey: indexedDBKey,
+                username: this.component.username
+            });
+        }
+
+        const persistence = new IndexeddbPersistence(indexedDBKey, ydoc);
         
         // ✅ TIPTAP BEST PRACTICE: Use onSynced callback
         return new Promise((resolve) => {
@@ -293,7 +305,9 @@ class PersistenceManager {
     async setupCloudPersistence(yjsDoc, file) {
         // ✅ TIPTAP OFFLINE-FIRST: Load IndexedDB content immediately for instant editing
         
-        const indexedDB = await this.component.documentManager.yjsManager.setupIndexedDBWithOnSynced(yjsDoc, file.id);
+        // ✅ CRITICAL FIX: Pass isCollaborative=true to enable user isolation
+        const documentId = file.id || `${file.owner}/${file.permlink}`;
+        const indexedDB = await this.component.documentManager.yjsManager.setupIndexedDBWithOnSynced(yjsDoc, documentId, true);
         
         // ✅ CORRECT: TipTap handles collaborative content loading automatically
         // Trust TipTap automatic loading after IndexedDB + WebSocket sync
@@ -1393,6 +1407,16 @@ class LifecycleManager {
                 if (this.component.indexeddbProvider.clearData && typeof this.component.indexeddbProvider.clearData === 'function') {
                     await this.component.indexeddbProvider.clearData();
                     console.log('✅ IndexedDB data cleared - preventing document contamination');
+                    
+                    // ✅ ADDITIONAL LOGGING: Log which user-specific key was cleared
+                    if (this.component.currentFile && this.component.fileType === 'collaborative' && this.component.username) {
+                        const clearedKey = `${this.component.username}__${this.component.currentFile.owner}/${this.component.currentFile.permlink}`;
+                        console.log('🔐 Cleared user-isolated IndexedDB data:', {
+                            username: this.component.username,
+                            document: `${this.component.currentFile.owner}/${this.component.currentFile.permlink}`,
+                            clearedKey: clearedKey
+                        });
+                    }
                 }
                 
                 // Then destroy the provider
@@ -1522,7 +1546,8 @@ class DocumentManager {
                 webSocketProvider = webSocket;
                 
             } else {
-                this.component.indexeddbProvider = await this.yjsManager.setupIndexedDBWithOnSynced(yjsDoc, documentId);
+                // For local documents, don't use user isolation
+                this.component.indexeddbProvider = await this.yjsManager.setupIndexedDBWithOnSynced(yjsDoc, documentId, false);
                 this.component.hasIndexedDBPersistence = true; // ✅ CRITICAL: Set flag for status indicator
             }
         } else {
