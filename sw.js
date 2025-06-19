@@ -548,14 +548,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.18.3",
-  "generated": "2025-06-18T21:52:16Z",
+  "version": "2025.06.19.08",
+  "generated": "2025-06-19T15:39:53Z",
   "files": {
-    "/css/custom-old.css": {
-      "checksum": "d05166f557dbe2ffa4e68d15a849cc95",
-      "size": 7317,
-      "priority": "critical"
-    },
     "/css/custom-popover.css": {
       "checksum": "272dac40ceb0d411fa7d6f094b013ab3",
       "size": 2573,
@@ -575,11 +570,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/css/tagify.css": {
-      "checksum": "17293e2a18aea950ca3ac847b1c1f565",
-      "size": 14455,
-      "priority": "important"
     },
     "/css/tiptap-collaboration.css": {
       "checksum": "da8d04a62320157854af5b4d02609e97",
@@ -1147,8 +1137,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/collaborative-docs.js": {
-      "checksum": "40d506443b20b568163b206bc1a0e5b4",
-      "size": 27502,
+      "checksum": "d6aa54e4520fa35edf38b21659f218ee",
+      "size": 36408,
       "priority": "important"
     },
     "/js/collaborative-post-editor.js": {
@@ -1462,7 +1452,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "fb1bcf1fefe0071207539c23bbfeda7a",
+      "checksum": "8fce28a1394b186338e7c3354e54217b",
       "size": 36523,
       "priority": "important"
     },
@@ -1682,7 +1672,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "b95a2abbf4451f3875d373aebc1ac93b",
+      "checksum": "dbf58a78d8c997ea297471d05c038963",
       "size": 7299,
       "priority": "important"
     },
@@ -1775,11 +1765,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/naf-playground/aframe/networked-aframe.min.js": {
-      "checksum": "4b25bad9a7b40896916bcb097db405ba",
-      "size": 98119,
-      "priority": "page-specific"
     },
     "/naf-playground/assets/textures/sky/milkyway.jpg": {
       "checksum": "82c7278828d85ace9036d87c72801e20",
@@ -2646,19 +2631,14 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/test-recursion.js": {
-      "checksum": "aa9d78598527667ad933d61a8f15c0cd",
-      "size": 3008,
-      "priority": "lazy"
-    },
     "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
     "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     }
   }

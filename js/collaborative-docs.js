@@ -204,6 +204,29 @@ export default {
               <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+              <!-- ✅ PROPER SOLUTION: Use existing permissions data with correct document context -->
+              <div class="mb-4" v-if="shareDoc && shareDoc.owner === account">
+                <h6><i class="fas fa-users me-2"></i>Current Permissions</h6>
+                <div v-if="getPermissionsForDocument(shareDoc).length === 0" class="text-muted small">
+                  No users have been granted access yet.
+                </div>
+                <div v-else>
+                  <div v-for="perm in getPermissionsForDocument(shareDoc)" :key="perm.account" 
+                       class="d-flex justify-content-between align-items-center mb-2 p-2 bg-secondary rounded">
+                    <div>
+                      <strong>@{{ perm.account }}</strong>
+                      <span class="badge ms-2" :class="perm.permission_type === 'postable' ? 'bg-success' : perm.permission_type === 'editable' ? 'bg-warning' : 'bg-info'">
+                        {{ perm.permission_type }}
+                      </span>
+                    </div>
+                    <button @click="revokePermission(perm.account)" class="btn btn-sm btn-outline-danger">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <hr>
+              </div>
+              
               <div class="mb-3">
                 <label class="form-label">Share with user:</label>
                 <div class="input-group">
@@ -288,13 +311,42 @@ export default {
       
       this.loading = true;
       try {
+        console.log('📋 FULL DEBUG: Making documents API call', {
+          url: 'https://data.dlux.io/api/collaboration/documents',
+          headers: this.authHeaders
+        });
+        
         const response = await fetch('https://data.dlux.io/api/collaboration/documents', {
           headers: this.authHeaders
         });
         
+        console.log('📋 FULL DEBUG: Documents API response received', {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok,
+          headers: Object.fromEntries(response.headers.entries())
+        });
+        
         if (response.ok) {
-          const data = await response.json();
-          this.documents = data.documents || [];
+          try {
+            // Get the raw text first
+            const responseText = await response.text();
+            console.log('📋 FULL DEBUG: Raw response text (first 1000 chars):', responseText.substring(0, 1000));
+            
+            // Try to parse as JSON
+            const data = JSON.parse(responseText);
+            console.log('📋 Documents API response:', data);
+            this.documents = data.documents || [];
+            console.log('📋 Loaded documents:', this.documents);
+          } catch (jsonError) {
+            console.error('❌ JSON Parse Error - Documents API:', {
+              status: response.status,
+              statusText: response.statusText,
+              jsonError: jsonError.message,
+              rawResponse: 'Already consumed in debug above'
+            });
+            this.documents = [];
+          }
         } else {
           console.error('Failed to load documents:', response.statusText);
           // If unauthorized, the headers might be expired
@@ -416,15 +468,26 @@ export default {
         });
         
         if (response.ok) {
-          const data = await response.json();
-          this.permissions = data.permissions || [];
-          
-          // Emit permission change to parent
-          this.$emit('permission-change', {
-            canPost: this.canUserPost(),
-            permission: this.getCurrentUserPermission(),
-            documentPath: this.selectedDoc.documentPath
-          });
+          try {
+            const data = await response.json();
+            this.permissions = data.permissions || [];
+            
+            // Emit permission change to parent
+            this.$emit('permission-change', {
+              canPost: this.canUserPost(),
+              permission: this.getCurrentUserPermission(),
+              documentPath: this.selectedDoc.documentPath
+            });
+          } catch (jsonError) {
+            const responseText = await response.text();
+            console.error('❌ JSON Parse Error in loadPermissions - Server returned HTML:', {
+              status: response.status,
+              statusText: response.statusText,
+              url: response.url,
+              responseText: responseText.substring(0, 500) + '...'
+            });
+            this.permissions = [];
+          }
         }
       } catch (error) {
         console.error('Error loading permissions:', error);
@@ -440,8 +503,18 @@ export default {
         });
         
         if (response.ok) {
-          const data = await response.json();
-          this.activity = data.activity || [];
+          try {
+            const data = await response.json();
+            this.activity = data.activity || [];
+          } catch (jsonError) {
+            const responseText = await response.text();
+            console.error('❌ JSON Parse Error in loadActivity - Server returned HTML:', {
+              status: response.status,
+              statusText: response.statusText,
+              responseText: responseText.substring(0, 500) + '...'
+            });
+            this.activity = [];
+          }
         }
       } catch (error) {
         console.error('Error loading activity:', error);
@@ -452,6 +525,13 @@ export default {
       if (!this.newPermissionAccount || !this.selectedDoc) return;
       
       try {
+        console.log('📋 FULL DEBUG: Making grant permission API call (main panel)', {
+          url: `https://data.dlux.io/api/collaboration/permissions/${this.selectedDoc.owner}/${this.selectedDoc.permlink}`,
+          targetAccount: this.newPermissionAccount,
+          permissionType: this.newPermissionType,
+          headers: this.authHeaders
+        });
+        
         const response = await fetch('https://data.dlux.io/api/collaboration/permissions/' + this.selectedDoc.owner + '/' + this.selectedDoc.permlink, {
           method: 'POST',
           headers: {
@@ -467,8 +547,20 @@ export default {
         if (response.ok) {
           this.newPermissionAccount = '';
           await this.loadPermissions();
+          // ✅ REACTIVITY FIX: Refresh documents list to show newly accessible documents
+          await this.loadDocuments();
         } else {
-          console.error('Failed to grant permission:', response.statusText);
+          try {
+            const errorData = await response.json();
+            console.error('Failed to grant permission:', response.statusText, errorData);
+          } catch (jsonError) {
+            const responseText = await response.text();
+            console.error('❌ JSON Parse Error in grantPermission - Server returned HTML:', {
+              status: response.status,
+              statusText: response.statusText,
+              responseText: responseText.substring(0, 500) + '...'
+            });
+          }
         }
       } catch (error) {
         console.error('Error granting permission:', error);
@@ -486,6 +578,8 @@ export default {
         
         if (response.ok) {
           await this.loadPermissions();
+          // ✅ REACTIVITY FIX: Refresh documents list to reflect permission changes
+          await this.loadDocuments();
         } else {
           console.error('Failed to revoke permission:', response.statusText);
         }
@@ -494,10 +588,44 @@ export default {
       }
     },
     
+    // ✅ PROPER SOLUTION: Get permissions for any document (not just selectedDoc)
+    getPermissionsForDocument(doc) {
+      if (!doc) {
+        console.log('🔍 MODAL DEBUG: No doc provided');
+        return [];
+      }
+      
+      console.log('🔍 MODAL DEBUG: Getting permissions', {
+        shareDoc: doc.permlink,
+        shareDocPath: doc.documentPath,
+        selectedDoc: this.selectedDoc?.permlink,
+        selectedDocPath: this.selectedDoc?.documentPath,
+        permissionsCount: this.permissions?.length || 0,
+        permissions: this.permissions?.map(p => `${p.account}:${p.permission_type}`) || []
+      });
+      
+      // If this is the currently selected document, return its permissions
+      if (this.selectedDoc && doc.documentPath === this.selectedDoc.documentPath) {
+        console.log('✅ MODAL DEBUG: Returning permissions for selected doc');
+        return this.permissions || [];
+      }
+      
+      // For other documents, we need to fetch permissions on demand
+      console.log('❌ MODAL DEBUG: No permissions - document not selected');
+      return [];
+    },
+    
     openShareModal(doc) {
       this.shareDoc = doc;
       this.shareUsername = '';
       this.sharePermission = 'readonly';
+      
+      // ✅ PROPER SOLUTION: Select the document to load its permissions
+      // This ensures the modal shows current permissions via getPermissionsForDocument()
+      if (doc) {
+        this.selectedDoc = doc;
+        this.loadPermissions();
+      }
       
       // Clean up any existing modal backdrops before opening
       this.$nextTick(() => {
@@ -510,20 +638,57 @@ export default {
       if (!this.shareUsername.trim() || !this.shareDoc) return;
       
       try {
+        const requestBody = {
+          targetAccount: this.shareUsername.trim(),
+          permissionType: this.sharePermission
+        };
+        
+        console.log('📋 FULL DEBUG: Making share permission API call', {
+          url: `https://data.dlux.io/api/collaboration/permissions/${this.shareDoc.owner}/${this.shareDoc.permlink}`,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...this.authHeaders
+          },
+          body: requestBody
+        });
+        
         const response = await fetch('https://data.dlux.io/api/collaboration/permissions/' + this.shareDoc.owner + '/' + this.shareDoc.permlink, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             ...this.authHeaders
           },
-          body: JSON.stringify({
-            targetAccount: this.shareUsername.trim(),
-            permissionType: this.sharePermission
-          })
+          body: JSON.stringify(requestBody)
+        });
+        
+        console.log('📋 FULL DEBUG: Share permission API response received', {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok,
+          headers: Object.fromEntries(response.headers.entries())
         });
         
         if (response.ok) {
           const username = this.shareUsername.trim();
+          
+          // Get the raw response text to see what we're actually getting
+          const responseText = await response.text();
+          console.log('📋 FULL DEBUG: Share permission success response text (first 1000 chars):', responseText.substring(0, 1000));
+          
+          // Try to parse as JSON if there's content
+          let responseData = null;
+          if (responseText.trim()) {
+            try {
+              responseData = JSON.parse(responseText);
+              console.log('📋 FULL DEBUG: Share permission parsed JSON:', responseData);
+            } catch (jsonError) {
+              console.error('❌ FULL DEBUG: Share permission JSON parse error:', {
+                error: jsonError.message,
+                responseText: responseText.substring(0, 500)
+              });
+            }
+          }
           
           // Close modal properly
           const modalElement = document.getElementById('shareModal');
@@ -546,16 +711,41 @@ export default {
             }, 100);
           }, { once: true });
           
-          // Refresh permissions if this doc is currently selected
-          if (this.selectedDoc && this.selectedDoc.documentPath === this.shareDoc.documentPath) {
-            await this.loadPermissions();
-          }
+          // ✅ PROPER SOLUTION: Single source of truth - just refresh the selected document's permissions
+          console.log('🔄 SHARE MODAL: Refreshing permissions after granting access', {
+            username: username,
+            permission: this.sharePermission,
+            documentPath: this.selectedDoc?.documentPath,
+            shareDocPath: this.shareDoc?.documentPath,
+            documentsMatch: this.selectedDoc?.documentPath === this.shareDoc?.documentPath
+          });
+          
+          // Since shareDoc === selectedDoc, this updates both modal and main panel
+          await this.loadPermissions();
+          
+          console.log('✅ SHARE MODAL: Permissions loaded after grant', {
+            count: this.permissions?.length || 0,
+            permissions: this.permissions?.map(p => `${p.account}:${p.permission_type}`) || []
+          });
+          
+          // ✅ REACTIVITY FIX: Always refresh documents list to show newly accessible documents
+          await this.loadDocuments();
           
           alert('Access granted! @' + username + ' can now find this document in their Collaborative Documents section.');
         } else {
-          const errorData = await response.json().catch(() => null);
-          console.error('Failed to share document:', response.statusText, errorData);
-          alert('Failed to grant access. ' + (errorData?.error || 'Please try again.'));
+          try {
+            const errorData = await response.json();
+            console.error('Failed to share document:', response.statusText, errorData);
+            alert('Failed to grant access. ' + (errorData?.error || 'Please try again.'));
+          } catch (jsonError) {
+            const responseText = await response.text();
+            console.error('❌ JSON Parse Error in shareWithUser - Server returned HTML:', {
+              status: response.status,
+              statusText: response.statusText,
+              responseText: responseText.substring(0, 500) + '...'
+            });
+            alert('Failed to grant access - server error. Please try again.');
+          }
         }
       } catch (error) {
         console.error('Error sharing document:', error);
@@ -585,10 +775,17 @@ export default {
       try {
         console.log('📖 Loading document content for:', this.selectedDoc.documentPath);
         
-        // Default content structure
-        let documentContent = {
-          body: '',
-          title: this.selectedDoc.permlink.replace(/-/g, ' '),
+        // ✅ TIPTAP BEST PRACTICE: Do NOT emit content for existing collaborative documents
+        // The Y.js Collaboration extension will automatically load content from the shared document
+        // Any initial content would interfere with the proper Y.js sync process
+        
+        console.log('📋 ✅ TipTap Best Practice: Skipping content emission for existing collaborative document');
+        console.log('📋 Content will be loaded automatically from Y.js document via Collaboration extension');
+        
+        // ✅ METADATA ONLY: Only emit metadata, no content
+        const metadataOnly = {
+          // No title - will be loaded from Y.js document
+          // No body - will be loaded from Y.js document  
           tags: ['dlux', 'collaboration'],
           custom_json: {
             app: 'dlux/0.1.0',
@@ -596,32 +793,27 @@ export default {
             assets: [],
             contracts: [],
             images: [],
-            authors: [this.selectedDoc.owner], // Start with document owner
+            authors: [this.selectedDoc.owner],
             tags: ['dlux', 'collaboration']
           }
         };
         
-        // NOTE: Content is stored in the Y.js document and synced via WebSocket
-        // The collaborative editor will load content from the Y.js document after connection
-        console.log('📋 Using default document structure - content will be loaded from Y.js document after WebSocket connection');
-        
-        // Emit the document content to parent for TipTap editor
-        this.$emit('load-document-content', documentContent);
+        // Emit metadata only - no content that would interfere with Y.js loading
+        this.$emit('load-document-content', metadataOnly);
         
       } catch (error) {
         console.error('Failed to load document content:', error);
         
-        // Emit default content even if there's an error
-        const fallbackContent = {
-          body: '',
-          title: this.selectedDoc ? this.selectedDoc.permlink.replace(/-/g, ' ') : 'Untitled Document',
+        // ✅ TIPTAP BEST PRACTICE: Even for errors, don't emit content for collaborative documents
+        const metadataOnlyFallback = {
+          // No title or body - Y.js will handle content loading
           tags: ['dlux', 'collaboration'],
           custom_json: {
             app: 'dlux/0.1.0',
             tags: ['dlux', 'collaboration']
           }
         };
-        this.$emit('load-document-content', fallbackContent);
+        this.$emit('load-document-content', metadataOnlyFallback);
       }
     },
     

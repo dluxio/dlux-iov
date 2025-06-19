@@ -6950,3 +6950,1565 @@ This comprehensive permissions system ensures:
 - ✅ **Graceful error handling** with multiple fallback strategies
 - ✅ **TipTap compliance** following offline-first collaborative best practices
 - ✅ **Performance optimization** through intelligent caching and API call reduction
+
+---
+
+# TipTap v3 Migration Considerations
+
+## Executive Summary
+
+TipTap v3 introduces significant improvements for collaborative editing while maintaining backward compatibility for most use cases. This section covers migration strategies, breaking changes, and new features relevant to our offline-first collaborative architecture.
+
+## TipTap v3 Key Changes
+
+### 1. **Enhanced Collaboration Features**
+- **New y-tiptap Package**: Extends y-prosemirror with TipTap-specific enhancements
+- **Improved Comments System**: Stable comments feature with better collaborative UX
+- **Enhanced TypeScript Support**: Stronger typing for extensions and collaborative features
+
+### 2. **Provider Requirements**
+```javascript
+// TipTap v3 Provider Dependencies
+npm install @hocuspocus/provider@3 y-tiptap
+```
+
+### 3. **Breaking Changes**
+- **Provider Version**: Requires `@hocuspocus/provider` v3 for full compatibility
+- **Package Consolidation**: Some extensions moved to unified packages (e.g., TableKit)
+- **Schema Enforcement**: Stricter schema validation for collaborative documents
+
+## Migration Strategy
+
+### Phase 1: Dependency Updates
+```bash
+# Update core dependencies
+npm install @tiptap/core@3 @tiptap/starter-kit@3
+npm install @tiptap/extension-collaboration@3
+npm install @hocuspocus/provider@3
+
+# New collaborative enhancements
+npm install y-tiptap
+
+# Verify Y.js compatibility
+npm list yjs y-prosemirror y-indexeddb
+```
+
+### Phase 2: Code Updates
+```javascript
+// Enhanced Y.js Integration with y-tiptap
+import { TiptapCollabProvider } from '@hocuspocus/provider'
+import { ySyncPlugin, yUndoPlugin, yCursorPlugin } from 'y-prosemirror'
+import { yTiptapEnhancements } from 'y-tiptap' // New package
+
+// Updated Provider Configuration
+const provider = new TiptapCollabProvider({
+  url: 'wss://collaborate.tiptap.dev',
+  name: documentId,
+  document: ydoc,
+  // Enhanced authentication
+  token: authToken,
+  // New v3 options
+  preserveConnection: true,
+  maxAttempts: 5
+})
+```
+
+### Phase 3: Schema Validation
+```javascript
+// Enhanced Schema Compatibility Validation
+validateSchemaCompatibility(ydoc) {
+  const schemaVersion = ydoc.getMap('config').get('schemaVersion');
+  const currentVersion = this.getTiptapSchemaVersion();
+  
+  if (!this.isCompatible(schemaVersion, currentVersion)) {
+    throw new Error(`Schema incompatibility: ${schemaVersion} vs ${currentVersion}`);
+  }
+  
+  return true;
+}
+
+// Automatic Schema Migration
+migrateToV3Schema(ydoc) {
+  const config = ydoc.getMap('config');
+  
+  // Update schema version markers
+  config.set('tiptapVersion', '3.0');
+  config.set('migrationDate', new Date().toISOString());
+  config.set('schemaVersion', 'v3.0.0');
+  
+  // Apply any necessary content transformations
+  this.applyV3ContentMigrations(ydoc);
+}
+```
+
+## V3 Compatibility Checklist
+
+### ✅ **Pre-Migration Validation**
+- [ ] Test current implementation with TipTap v2 baseline
+- [ ] Document all custom extensions and their v3 compatibility
+- [ ] Backup Y.js documents before migration
+- [ ] Verify WebSocket provider connectivity
+
+### ✅ **Migration Execution**
+- [ ] Update package dependencies incrementally
+- [ ] Test collaborative features in isolated environment
+- [ ] Validate schema migration scripts
+- [ ] Update bundle configurations for new packages
+
+### ✅ **Post-Migration Verification**
+- [ ] Collaborative editing functionality intact
+- [ ] IndexedDB persistence working correctly
+- [ ] WebSocket connections stable
+- [ ] Performance metrics within acceptable ranges
+
+## V3 Feature Enhancements
+
+### Enhanced Comments Integration
+```javascript
+// Improved Comments System in v3
+import { Comments } from '@tiptap/extension-comments'
+
+const editor = new Editor({
+  extensions: [
+    Comments.configure({
+      HTMLAttributes: {
+        class: 'comment',
+      },
+      // Enhanced collaborative comments
+      collaboration: {
+        provider: websocketProvider,
+        user: {
+          name: username,
+          color: userColor,
+        }
+      }
+    })
+  ]
+})
+```
+
+### Advanced Collaboration Provider
+```javascript
+// Enhanced Provider with v3 Features
+setupEnhancedCollaboration(ydoc, documentId) {
+  const provider = new TiptapCollabProvider({
+    url: this.getCollaborationURL(),
+    name: documentId,
+    document: ydoc,
+    
+    // V3 Enhanced Features
+    preserveConnection: true,
+    reconnectTimeoutBase: 1000,
+    reconnectTimeoutIncrease: 1.3,
+    maxReconnectTimeout: 30000,
+    
+    // Improved authentication
+    authenticateUser: async () => {
+      return await this.getAuthenticationToken();
+    },
+    
+    // Enhanced error handling
+    onAuthenticationFailed: (error) => {
+      this.handleAuthenticationError(error);
+    },
+    
+    onConnectionLost: () => {
+      this.showConnectionLostWarning();
+    },
+    
+    onConnectionRestored: () => {
+      this.hideConnectionWarnings();
+    }
+  });
+  
+  return provider;
+}
+```
+
+---
+
+# Advanced Memory Management & Performance
+
+## Executive Summary
+
+Production-grade collaborative editing requires sophisticated memory management to prevent memory leaks, optimize performance, and handle large documents efficiently. This section covers advanced patterns for Y.js document lifecycle, editor cleanup, and performance monitoring.
+
+## Y.js Document Memory Management
+
+### Comprehensive Cleanup Pattern
+```javascript
+/**
+ * Advanced Y.js Document Cleanup
+ * Prevents memory leaks in collaborative editing sessions
+ */
+class YjsDocumentManager {
+  constructor() {
+    this.activeDocuments = new WeakMap();
+    this.cleanupCallbacks = new Set();
+  }
+  
+  // ✅ CRITICAL: Comprehensive Y.js cleanup
+  async destroyYjsDocument(ydoc, documentId) {
+    if (!ydoc) return;
+    
+    try {
+      // 1. Remove all observers first
+      this.removeAllObservers(ydoc);
+      
+      // 2. Disconnect and clean providers
+      await this.cleanupProviders(ydoc, documentId);
+      
+      // 3. Clear document state
+      this.clearDocumentState(ydoc);
+      
+      // 4. Destroy Y.js document
+      ydoc.destroy();
+      
+      // 5. Clear references
+      this.activeDocuments.delete(ydoc);
+      
+      console.log(`🧹 Y.js document ${documentId} cleaned up successfully`);
+      
+    } catch (error) {
+      console.error(`❌ Error cleaning up Y.js document ${documentId}:`, error);
+      throw error;
+    }
+  }
+  
+  // Remove all Y.js observers to prevent memory leaks
+  removeAllObservers(ydoc) {
+    // Remove document-level observers
+    ydoc.off('update', this.updateHandler);
+    ydoc.off('beforeTransaction', this.beforeTransactionHandler);
+    ydoc.off('afterTransaction', this.afterTransactionHandler);
+    
+    // Remove awareness observers
+    if (ydoc.awareness) {
+      ydoc.awareness.off('change', this.awarenessChangeHandler);
+    }
+    
+    // Remove map observers (config, metadata)
+    const config = ydoc.getMap('config');
+    const metadata = ydoc.getMap('metadata');
+    
+    try {
+      config.unobserve(this.configObserver);
+      metadata.unobserve(this.metadataObserver);
+    } catch (error) {
+      console.warn('Observer removal failed:', error);
+    }
+  }
+  
+  // Cleanup IndexedDB and WebSocket providers
+  async cleanupProviders(ydoc, documentId) {
+    const providers = this.getDocumentProviders(documentId);
+    
+    for (const provider of providers) {
+      try {
+        if (provider.type === 'indexeddb') {
+          // Clear IndexedDB data if needed
+          await provider.clearData?.();
+          provider.destroy?.();
+        } else if (provider.type === 'websocket') {
+          // Gracefully disconnect WebSocket
+          provider.disconnect?.();
+          provider.destroy?.();
+        }
+      } catch (error) {
+        console.warn(`Provider cleanup failed:`, error);
+      }
+    }
+  }
+  
+  // Clear Y.js document internal state
+  clearDocumentState(ydoc) {
+    try {
+      // Clear shared types if they exist
+      const sharedTypes = ['title', 'body', 'permlink'];
+      sharedTypes.forEach(type => {
+        const fragment = ydoc.get(type, Y.XmlFragment);
+        if (fragment && fragment.length > 0) {
+          // Clear content but don't delete fragments
+          // Let Y.js handle internal cleanup
+        }
+      });
+      
+      // Clear maps
+      const config = ydoc.getMap('config');
+      const metadata = ydoc.getMap('metadata');
+      
+      // Don't clear the maps, just mark as cleaned
+      config.set('cleanupTimestamp', Date.now());
+      
+    } catch (error) {
+      console.warn('Document state cleanup warning:', error);
+    }
+  }
+}
+```
+
+### Editor Memory Management
+```javascript
+/**
+ * TipTap Editor Memory Management
+ * Ensures proper cleanup of editor instances and event listeners
+ */
+class EditorMemoryManager {
+  constructor() {
+    this.editorInstances = new Set();
+    this.eventListeners = new WeakMap();
+  }
+  
+  // ✅ CRITICAL: Comprehensive editor cleanup
+  destroyEditor(editor, editorName) {
+    if (!editor) return;
+    
+    try {
+      // 1. Remove custom event listeners
+      this.removeEditorEventListeners(editor);
+      
+      // 2. Clear editor state
+      this.clearEditorState(editor);
+      
+      // 3. Destroy TipTap editor
+      editor.destroy();
+      
+      // 4. Remove from tracking
+      this.editorInstances.delete(editor);
+      this.eventListeners.delete(editor);
+      
+      console.log(`🧹 Editor ${editorName} destroyed and cleaned up`);
+      
+    } catch (error) {
+      console.error(`❌ Error destroying editor ${editorName}:`, error);
+      // Force cleanup even if error occurs
+      this.forceEditorCleanup(editor);
+    }
+  }
+  
+  // Remove all event listeners from editor
+  removeEditorEventListeners(editor) {
+    const listeners = this.eventListeners.get(editor) || [];
+    
+    listeners.forEach(({ event, handler }) => {
+      try {
+        editor.off(event, handler);
+      } catch (error) {
+        console.warn(`Failed to remove listener for ${event}:`, error);
+      }
+    });
+    
+    // Clear DOM event listeners if any
+    const editorElement = editor.view?.dom;
+    if (editorElement) {
+      // Remove any custom DOM listeners
+      editorElement.removeEventListener('keydown', this.keydownHandler);
+      editorElement.removeEventListener('focus', this.focusHandler);
+      editorElement.removeEventListener('blur', this.blurHandler);
+    }
+  }
+  
+  // Clear editor internal state
+  clearEditorState(editor) {
+    try {
+      // Clear any stored content references
+      editor.storage = {};
+      
+      // Clear command history if accessible
+      if (editor.commands) {
+        // Let TipTap handle internal cleanup
+      }
+      
+    } catch (error) {
+      console.warn('Editor state cleanup warning:', error);
+    }
+  }
+  
+  // Force cleanup for problematic editors
+  forceEditorCleanup(editor) {
+    try {
+      // Set editor reference to null
+      if (editor.view) {
+        editor.view = null;
+      }
+      
+      // Clear any remaining references
+      Object.keys(editor).forEach(key => {
+        try {
+          editor[key] = null;
+        } catch (e) {
+          // Some properties might be read-only
+        }
+      });
+      
+    } catch (error) {
+      console.warn('Force cleanup failed:', error);
+    }
+  }
+}
+```
+
+### Vue Component Memory Management
+```javascript
+/**
+ * Vue Component Lifecycle Integration
+ * Ensures proper cleanup when components are destroyed
+ */
+export default {
+  name: 'CollaborativeEditor',
+  
+  beforeUnmount() {
+    console.log('🧹 Starting comprehensive component cleanup...');
+    
+    // 1. Destroy Y.js documents
+    this.cleanupYjsDocuments();
+    
+    // 2. Destroy TipTap editors
+    this.cleanupTipTapEditors();
+    
+    // 3. Clear Vue reactive state
+    this.cleanupVueState();
+    
+    // 4. Remove global event listeners
+    this.cleanupGlobalListeners();
+    
+    // 5. Clear timers and intervals
+    this.cleanupTimers();
+    
+    console.log('✅ Component cleanup completed');
+  },
+  
+  methods: {
+    // Y.js document cleanup
+    cleanupYjsDocuments() {
+      if (this.ydoc) {
+        this.yjsManager.destroyYjsDocument(this.ydoc, this.currentFile?.id);
+        this.ydoc = null;
+      }
+      
+      // Clear provider references
+      this.indexeddbProvider = null;
+      this.websocketProvider = null;
+    },
+    
+    // TipTap editor cleanup
+    cleanupTipTapEditors() {
+      const editors = [
+        { editor: this.titleEditor, name: 'title' },
+        { editor: this.bodyEditor, name: 'body' },
+        { editor: this.permlinkEditor, name: 'permlink' }
+      ];
+      
+      editors.forEach(({ editor, name }) => {
+        if (editor) {
+          this.editorManager.destroyEditor(editor, name);
+          this[`${name}Editor`] = null;
+        }
+      });
+    },
+    
+    // Vue reactive state cleanup
+    cleanupVueState() {
+      // Clear large objects from reactive state
+      this.currentFile = null;
+      this.collaborativeContent = null;
+      this.permissions = [];
+      this.connectionStatus = 'disconnected';
+      
+      // Clear arrays and maps
+      this.activeUsers = [];
+      this.documentHistory = [];
+      
+      // Clear any cached data
+      this.clearComponentCache();
+    },
+    
+    // Global event listener cleanup
+    cleanupGlobalListeners() {
+      // Remove window listeners
+      window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+      window.removeEventListener('online', this.onlineHandler);
+      window.removeEventListener('offline', this.offlineHandler);
+      
+      // Remove document listeners
+      document.removeEventListener('visibilitychange', this.visibilityChangeHandler);
+    },
+    
+    // Timer and interval cleanup
+    cleanupTimers() {
+      // Clear any active timers
+      if (this.autoSaveTimer) {
+        clearTimeout(this.autoSaveTimer);
+        this.autoSaveTimer = null;
+      }
+      
+      if (this.connectionCheckInterval) {
+        clearInterval(this.connectionCheckInterval);
+        this.connectionCheckInterval = null;
+      }
+      
+      if (this.performanceMonitoringInterval) {
+        clearInterval(this.performanceMonitoringInterval);
+        this.performanceMonitoringInterval = null;
+      }
+    }
+  }
+}
+```
+
+## Performance Optimization Strategies
+
+### Large Document Handling
+```javascript
+/**
+ * Large Document Performance Optimization
+ * Handles documents with significant content efficiently
+ */
+class LargeDocumentOptimizer {
+  constructor() {
+    this.LARGE_DOCUMENT_THRESHOLD = 100000; // 100KB
+    this.VERY_LARGE_DOCUMENT_THRESHOLD = 500000; // 500KB
+  }
+  
+  // Analyze document size and apply optimizations
+  optimizeDocumentPerformance(ydoc, editorConfig) {
+    const documentSize = this.calculateDocumentSize(ydoc);
+    
+    if (documentSize > this.VERY_LARGE_DOCUMENT_THRESHOLD) {
+      return this.applyVeryLargeDocumentOptimizations(editorConfig);
+    } else if (documentSize > this.LARGE_DOCUMENT_THRESHOLD) {
+      return this.applyLargeDocumentOptimizations(editorConfig);
+    }
+    
+    return editorConfig; // No optimizations needed
+  }
+  
+  // Apply optimizations for large documents
+  applyLargeDocumentOptimizations(editorConfig) {
+    return {
+      ...editorConfig,
+      
+      // Reduce update frequency
+      immediatelyRender: false,
+      shouldRerenderOnTransaction: false,
+      
+      // Optimize extension configurations
+      extensions: editorConfig.extensions.map(ext => {
+        if (ext.name === 'collaboration') {
+          return ext.configure({
+            ...ext.options,
+            // Reduce sync frequency for large documents
+            syncInterval: 1000 // Increase from default 500ms
+          });
+        }
+        return ext;
+      }),
+      
+      // Add performance monitoring
+      onUpdate: ({ editor, transaction }) => {
+        // Debounce updates for large documents
+        this.debouncedUpdate(editor, transaction);
+      }
+    };
+  }
+  
+  // Apply aggressive optimizations for very large documents
+  applyVeryLargeDocumentOptimizations(editorConfig) {
+    return {
+      ...this.applyLargeDocumentOptimizations(editorConfig),
+      
+      // More aggressive optimization
+      extensions: editorConfig.extensions.filter(ext => {
+        // Remove non-essential extensions for very large documents
+        const essentialExtensions = [
+          'collaboration', 'starterKit', 'placeholder'
+        ];
+        return essentialExtensions.includes(ext.name);
+      }),
+      
+      // Virtual scrolling for very large content
+      enableVirtualScrolling: true,
+      
+      // Lazy load non-visible content
+      enableLazyLoading: true
+    };
+  }
+  
+  // Calculate approximate document size
+  calculateDocumentSize(ydoc) {
+    try {
+      const titleSize = ydoc.getText('title').length;
+      const bodySize = ydoc.getText('body').length;
+      const configSize = JSON.stringify(ydoc.getMap('config').toJSON()).length;
+      
+      return titleSize + bodySize + configSize;
+    } catch (error) {
+      console.warn('Document size calculation failed:', error);
+      return 0;
+    }
+  }
+  
+  // Debounced update handler for large documents
+  debouncedUpdate = this.debounce((editor, transaction) => {
+    // Process update with reduced frequency
+    this.processLargeDocumentUpdate(editor, transaction);
+  }, 300);
+  
+  // Utility: Debounce function
+  debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+}
+```
+
+### Performance Monitoring
+```javascript
+/**
+ * Collaborative Performance Monitoring
+ * Tracks and reports performance metrics for optimization
+ */
+class CollaborativePerformanceMonitor {
+  constructor() {
+    this.metrics = {
+      documentSize: 0,
+      editorCount: 0,
+      syncLatency: 0,
+      memoryUsage: 0,
+      updateFrequency: 0,
+      connectionStability: 100
+    };
+    
+    this.measurementInterval = null;
+    this.startTime = Date.now();
+  }
+  
+  // Start performance monitoring
+  startMonitoring(ydoc, editors, providers) {
+    this.ydoc = ydoc;
+    this.editors = editors;
+    this.providers = providers;
+    
+    // Collect metrics every 30 seconds
+    this.measurementInterval = setInterval(() => {
+      this.collectMetrics();
+    }, 30000);
+    
+    console.log('📊 Performance monitoring started');
+  }
+  
+  // Collect comprehensive performance metrics
+  collectMetrics() {
+    try {
+      // Document size metrics
+      this.metrics.documentSize = this.measureDocumentSize();
+      
+      // Editor performance metrics
+      this.metrics.editorCount = this.countActiveEditors();
+      
+      // Network performance metrics
+      this.metrics.syncLatency = this.measureSyncLatency();
+      
+      // Memory usage metrics
+      this.metrics.memoryUsage = this.estimateMemoryUsage();
+      
+      // Update frequency metrics
+      this.metrics.updateFrequency = this.measureUpdateFrequency();
+      
+      // Connection stability metrics
+      this.metrics.connectionStability = this.measureConnectionStability();
+      
+      // Report metrics
+      this.reportMetrics();
+      
+    } catch (error) {
+      console.error('Performance measurement error:', error);
+    }
+  }
+  
+  // Measure Y.js document size
+  measureDocumentSize() {
+    if (!this.ydoc) return 0;
+    
+    try {
+      // Measure Y.js internal state size
+      const stateVector = Y.encodeStateVector(this.ydoc);
+      const documentUpdate = Y.encodeStateAsUpdate(this.ydoc);
+      
+      return {
+        stateVectorSize: stateVector.length,
+        documentUpdateSize: documentUpdate.length,
+        totalSize: stateVector.length + documentUpdate.length
+      };
+    } catch (error) {
+      console.warn('Document size measurement failed:', error);
+      return 0;
+    }
+  }
+  
+  // Count active TipTap editors
+  countActiveEditors() {
+    return this.editors?.filter(editor => editor && !editor.isDestroyed).length || 0;
+  }
+  
+  // Measure synchronization latency
+  measureSyncLatency() {
+    if (!this.providers?.websocket) return 0;
+    
+    const startTime = Date.now();
+    
+    // Send ping and measure response time
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => resolve(5000), 5000);
+      
+      this.providers.websocket.once('status', () => {
+        clearTimeout(timeout);
+        resolve(Date.now() - startTime);
+      });
+    });
+  }
+  
+  // Estimate memory usage
+  estimateMemoryUsage() {
+    if (performance.memory) {
+      return {
+        used: performance.memory.usedJSHeapSize,
+        total: performance.memory.totalJSHeapSize,
+        limit: performance.memory.jsHeapSizeLimit
+      };
+    }
+    
+    // Fallback estimation
+    return this.estimateMemoryUsageFallback();
+  }
+  
+  // Report performance metrics
+  reportMetrics() {
+    console.log('📊 Collaborative Performance Metrics:', {
+      sessionDuration: Date.now() - this.startTime,
+      ...this.metrics
+    });
+    
+    // Send to monitoring service if configured
+    if (this.shouldReportToService()) {
+      this.sendMetricsToService(this.metrics);
+    }
+    
+    // Check for performance warnings
+    this.checkPerformanceWarnings();
+  }
+  
+  // Check for performance issues and warnings
+  checkPerformanceWarnings() {
+    const warnings = [];
+    
+    if (this.metrics.documentSize?.totalSize > 1000000) {
+      warnings.push('Large document size detected (>1MB)');
+    }
+    
+    if (this.metrics.syncLatency > 2000) {
+      warnings.push('High sync latency detected (>2s)');
+    }
+    
+    if (this.metrics.memoryUsage?.used > 100000000) {
+      warnings.push('High memory usage detected (>100MB)');
+    }
+    
+    if (this.metrics.connectionStability < 90) {
+      warnings.push('Unstable connection detected (<90% stability)');
+    }
+    
+    if (warnings.length > 0) {
+      console.warn('⚠️ Performance Warnings:', warnings);
+      this.handlePerformanceWarnings(warnings);
+    }
+  }
+  
+  // Stop performance monitoring
+  stopMonitoring() {
+    if (this.measurementInterval) {
+      clearInterval(this.measurementInterval);
+      this.measurementInterval = null;
+    }
+    
+    console.log('📊 Performance monitoring stopped');
+  }
+}
+```
+
+---
+
+# Advanced onSynced Patterns & Error Recovery
+
+## Executive Summary
+
+Robust collaborative editing requires sophisticated handling of Y.js synchronization events, error recovery strategies, and connection state management. This section covers advanced patterns for onSynced callbacks, error recovery, and resilient collaborative architectures.
+
+## Modern Y.js onSynced Patterns
+
+### Enhanced IndexedDB onSynced
+```javascript
+/**
+ * Advanced IndexedDB Synchronization with Error Recovery
+ * Handles complex synchronization scenarios and edge cases
+ */
+class AdvancedIndexedDBSync {
+  constructor() {
+    this.syncTimeouts = new Map();
+    this.retryAttempts = new Map();
+    this.maxRetries = 3;
+    this.syncTimeout = 15000; // 15 seconds
+  }
+  
+  // ✅ ADVANCED: Robust IndexedDB synchronization with retry logic
+  async setupIndexedDBWithAdvancedOnSynced(ydoc, documentId, options = {}) {
+    const {
+      timeout = this.syncTimeout,
+      maxRetries = this.maxRetries,
+      validateContent = true,
+      fallbackStrategy = 'create-new'
+    } = options;
+    
+    return new Promise((resolve, reject) => {
+      let persistence;
+      let syncTimeout;
+      let retryCount = 0;
+      
+      const attemptSync = () => {
+        try {
+          console.log(`🔄 Attempting IndexedDB sync for ${documentId} (attempt ${retryCount + 1})`);
+          
+          // Create IndexedDB persistence provider
+          persistence = new IndexeddbPersistence(documentId, ydoc);
+          
+          // Set up timeout for sync operation
+          syncTimeout = setTimeout(() => {
+            console.warn(`⏰ IndexedDB sync timeout for ${documentId}`);
+            this.handleSyncTimeout(documentId, retryCount, maxRetries, attemptSync, reject);
+          }, timeout);
+          
+          // Enhanced onSynced callback
+          persistence.once('synced', () => {
+            clearTimeout(syncTimeout);
+            this.handleSuccessfulSync(ydoc, documentId, persistence, validateContent, resolve, reject);
+          });
+          
+          // Error handling
+          persistence.on('destroyed', () => {
+            clearTimeout(syncTimeout);
+            console.error(`💥 IndexedDB persistence destroyed for ${documentId}`);
+            this.handleSyncError(documentId, retryCount, maxRetries, attemptSync, reject);
+          });
+          
+        } catch (error) {
+          clearTimeout(syncTimeout);
+          console.error(`❌ IndexedDB sync setup error for ${documentId}:`, error);
+          this.handleSyncError(documentId, retryCount, maxRetries, attemptSync, reject);
+        }
+      };
+      
+      // Start first sync attempt
+      attemptSync();
+    });
+  }
+  
+  // Handle successful synchronization
+  async handleSuccessfulSync(ydoc, documentId, persistence, validateContent, resolve, reject) {
+    try {
+      console.log(`✅ IndexedDB synced successfully for ${documentId}`);
+      
+      // Validate document state if requested
+      if (validateContent) {
+        const isValid = await this.validateDocumentState(ydoc, documentId);
+        if (!isValid) {
+          throw new Error('Document validation failed after sync');
+        }
+      }
+      
+      // Extract and validate document metadata
+      const documentMetadata = this.extractDocumentMetadata(ydoc);
+      
+      // Update component state with synced data
+      this.updateComponentFromSyncedData(ydoc, documentMetadata);
+      
+      // Reset retry tracking
+      this.retryAttempts.delete(documentId);
+      
+      // Resolve with persistence provider and metadata
+      resolve({
+        persistence,
+        metadata: documentMetadata,
+        documentSize: this.calculateDocumentSize(ydoc),
+        syncTime: Date.now()
+      });
+      
+    } catch (error) {
+      console.error(`❌ Post-sync processing error for ${documentId}:`, error);
+      reject(error);
+    }
+  }
+  
+  // Handle sync timeout with retry logic
+  handleSyncTimeout(documentId, retryCount, maxRetries, attemptSync, reject) {
+    retryCount++;
+    this.retryAttempts.set(documentId, retryCount);
+    
+    if (retryCount < maxRetries) {
+      const backoffDelay = Math.min(1000 * Math.pow(2, retryCount), 10000);
+      console.log(`🔄 Retrying IndexedDB sync for ${documentId} in ${backoffDelay}ms`);
+      
+      setTimeout(() => {
+        attemptSync();
+      }, backoffDelay);
+    } else {
+      console.error(`💥 IndexedDB sync failed after ${maxRetries} attempts for ${documentId}`);
+      reject(new Error(`IndexedDB sync timeout after ${maxRetries} attempts`));
+    }
+  }
+  
+  // Validate Y.js document state after sync
+  async validateDocumentState(ydoc, documentId) {
+    try {
+      // Check if document has expected structure
+      const hasTitle = ydoc.getXmlFragment('title') !== undefined;
+      const hasBody = ydoc.getXmlFragment('body') !== undefined;
+      const hasConfig = ydoc.getMap('config') !== undefined;
+      
+      if (!hasTitle || !hasBody || !hasConfig) {
+        console.warn(`⚠️ Document structure validation failed for ${documentId}`);
+        return false;
+      }
+      
+      // Check for corruption indicators
+      const stateVector = Y.encodeStateVector(ydoc);
+      if (stateVector.length === 0) {
+        console.warn(`⚠️ Empty state vector detected for ${documentId}`);
+        return false;
+      }
+      
+      // Validate config integrity
+      const config = ydoc.getMap('config');
+      const documentName = config.get('documentName');
+      const created = config.get('created');
+      
+      if (!documentName || !created) {
+        console.warn(`⚠️ Missing essential config data for ${documentId}`);
+        return false;
+      }
+      
+      console.log(`✅ Document validation passed for ${documentId}`);
+      return true;
+      
+    } catch (error) {
+      console.error(`❌ Document validation error for ${documentId}:`, error);
+      return false;
+    }
+  }
+  
+  // Extract document metadata from Y.js config
+  extractDocumentMetadata(ydoc) {
+    try {
+      const config = ydoc.getMap('config');
+      const metadata = ydoc.getMap('metadata');
+      
+      return {
+        documentName: config.get('documentName'),
+        created: config.get('created'),
+        lastModified: config.get('lastModified'),
+        version: config.get('version'),
+        tags: metadata.get('tags') || [],
+        customJson: metadata.get('customJson') || {},
+        schemaVersion: config.get('schemaVersion') || '1.0'
+      };
+    } catch (error) {
+      console.warn('Metadata extraction failed:', error);
+      return {};
+    }
+  }
+}
+```
+
+### Enhanced WebSocket onSynced
+```javascript
+/**
+ * Advanced WebSocket Synchronization with Connection Management
+ * Handles complex network scenarios and collaborative edge cases
+ */
+class AdvancedWebSocketSync {
+  constructor() {
+    this.connectionAttempts = new Map();
+    this.connectionQuality = new Map();
+    this.syncMetrics = new Map();
+  }
+  
+  // ✅ ADVANCED: Robust WebSocket synchronization with intelligent retry
+  async setupWebSocketWithAdvancedOnSynced(ydoc, documentConfig, options = {}) {
+    const {
+      maxConnectionAttempts = 5,
+      connectionTimeout = 30000,
+      adaptToNetworkQuality = true,
+      enableHeartbeat = true,
+      authRetryStrategy = 'exponential'
+    } = options;
+    
+    return new Promise((resolve, reject) => {
+      let provider;
+      let connectionTimeout;
+      let heartbeatInterval;
+      let connectionAttempt = 0;
+      
+      const attemptConnection = async () => {
+        try {
+          connectionAttempt++;
+          console.log(`🔌 Attempting WebSocket connection (attempt ${connectionAttempt})`);
+          
+          // Get authentication headers with retry
+          const authHeaders = await this.getAuthHeadersWithRetry(authRetryStrategy);
+          
+          // Adapt connection parameters based on network quality
+          const connectionParams = adaptToNetworkQuality 
+            ? this.adaptConnectionParameters(documentConfig)
+            : documentConfig;
+          
+          // Create WebSocket provider
+          provider = new HocuspocusProvider({
+            url: connectionParams.websocketUrl,
+            name: connectionParams.documentId,
+            document: ydoc,
+            parameters: authHeaders,
+            
+            // Enhanced connection options
+            maxAttempts: maxConnectionAttempts,
+            delay: this.calculateConnectionDelay(connectionAttempt),
+            timeout: connectionTimeout,
+            
+            // Connection event handlers
+            onConnect: () => {
+              this.handleWebSocketConnect(provider, documentConfig.documentId);
+            },
+            
+            onDisconnect: ({ event }) => {
+              this.handleWebSocketDisconnect(event, documentConfig.documentId);
+            },
+            
+            onAuthenticationFailed: ({ reason }) => {
+              this.handleAuthenticationFailure(reason, connectionAttempt, maxConnectionAttempts, attemptConnection, reject);
+            },
+            
+            // Enhanced onSynced callback
+            onSynced: ({ synced }) => {
+              this.handleWebSocketSynced(synced, provider, ydoc, documentConfig, resolve, reject);
+            },
+            
+            // Error handling
+            onDestroy: () => {
+              this.handleProviderDestroyed(documentConfig.documentId);
+            }
+          });
+          
+          // Set up connection timeout
+          connectionTimeout = setTimeout(() => {
+            this.handleConnectionTimeout(connectionAttempt, maxConnectionAttempts, attemptConnection, reject);
+          }, connectionTimeout);
+          
+          // Set up heartbeat if enabled
+          if (enableHeartbeat) {
+            heartbeatInterval = this.setupHeartbeat(provider, documentConfig.documentId);
+          }
+          
+        } catch (error) {
+          console.error(`❌ WebSocket connection setup error:`, error);
+          this.handleConnectionError(error, connectionAttempt, maxConnectionAttempts, attemptConnection, reject);
+        }
+      };
+      
+      // Start first connection attempt
+      attemptConnection();
+    });
+  }
+  
+  // Handle successful WebSocket synchronization
+  async handleWebSocketSynced(synced, provider, ydoc, documentConfig, resolve, reject) {
+    try {
+      if (!synced) {
+        console.warn(`⚠️ WebSocket sync failed for ${documentConfig.documentId}`);
+        return;
+      }
+      
+      console.log(`✅ WebSocket synced successfully for ${documentConfig.documentId}`);
+      
+      // Validate synchronized content
+      const isContentValid = await this.validateSynchronizedContent(ydoc, documentConfig);
+      if (!isContentValid) {
+        throw new Error('Synchronized content validation failed');
+      }
+      
+      // Update Y.js config with sync status
+      this.updateSyncStatus(ydoc, provider);
+      
+      // Extract and validate document name from cloud sync
+      const cloudDocumentName = this.extractCloudDocumentName(ydoc);
+      
+      // Update component state with cloud-synced data
+      this.updateComponentFromCloudSync(ydoc, cloudDocumentName, documentConfig);
+      
+      // Record sync metrics
+      this.recordSyncMetrics(documentConfig.documentId, provider);
+      
+      // Resolve with provider and sync information
+      resolve({
+        provider,
+        documentId: documentConfig.documentId,
+        cloudDocumentName,
+        syncTime: Date.now(),
+        connectionQuality: this.measureConnectionQuality(provider)
+      });
+      
+    } catch (error) {
+      console.error(`❌ WebSocket sync processing error:`, error);
+      reject(error);
+    }
+  }
+  
+  // Validate synchronized content integrity
+  async validateSynchronizedContent(ydoc, documentConfig) {
+    try {
+      // Check for expected content structure
+      const titleContent = ydoc.getXmlFragment('title');
+      const bodyContent = ydoc.getXmlFragment('body');
+      
+      // Validate content is not corrupted
+      const titleText = titleContent?.toString() || '';
+      const bodyText = bodyContent?.toString() || '';
+      
+      // Check for corruption patterns
+      const hasCorruption = this.detectContentCorruption(titleText, bodyText);
+      if (hasCorruption) {
+        console.warn('Content corruption detected in synchronized data');
+        return false;
+      }
+      
+      // Validate document consistency
+      const isConsistent = this.validateDocumentConsistency(ydoc);
+      if (!isConsistent) {
+        console.warn('Document consistency validation failed');
+        return false;
+      }
+      
+      console.log(`✅ Synchronized content validation passed for ${documentConfig.documentId}`);
+      return true;
+      
+    } catch (error) {
+      console.error('Content validation error:', error);
+      return false;
+    }
+  }
+  
+  // Update Y.js config with synchronization status
+  updateSyncStatus(ydoc, provider) {
+    try {
+      const config = ydoc.getMap('config');
+      const now = new Date().toISOString();
+      
+      config.set('lastWebSocketSync', now);
+      config.set('cloudSyncActive', true);
+      config.set('connectionId', provider.connectionId || 'unknown');
+      config.set('syncQuality', this.measureConnectionQuality(provider));
+      
+      // Update metadata with sync information
+      const metadata = ydoc.getMap('metadata');
+      metadata.set('lastCloudSync', now);
+      metadata.set('syncProvider', 'hocuspocus');
+      
+    } catch (error) {
+      console.warn('Sync status update failed:', error);
+    }
+  }
+  
+  // Adapt connection parameters based on network quality
+  adaptConnectionParameters(baseConfig) {
+    const networkQuality = this.detectNetworkQuality();
+    
+    switch (networkQuality) {
+      case 'poor':
+        return {
+          ...baseConfig,
+          // Increase timeouts for poor connections
+          timeout: baseConfig.timeout * 2,
+          maxAttempts: baseConfig.maxAttempts + 2,
+          // Reduce sync frequency
+          syncInterval: 5000
+        };
+        
+      case 'excellent':
+        return {
+          ...baseConfig,
+          // Optimize for fast connections
+          timeout: baseConfig.timeout * 0.7,
+          // Enable advanced features
+          enableRealTimeCursors: true,
+          enablePresenceAwareness: true
+        };
+        
+      default:
+        return baseConfig;
+    }
+  }
+  
+  // Setup heartbeat monitoring for connection quality
+  setupHeartbeat(provider, documentId) {
+    return setInterval(() => {
+      if (provider.status === 'connected') {
+        const startTime = Date.now();
+        
+        // Send ping and measure response time
+        provider.sendMessage({
+          type: 'ping',
+          timestamp: startTime
+        });
+        
+        // Update connection quality metrics
+        this.updateConnectionQuality(documentId, provider);
+      }
+    }, 30000); // Heartbeat every 30 seconds
+  }
+  
+  // Handle authentication failure with retry strategy
+  async handleAuthenticationFailure(reason, attempt, maxAttempts, attemptConnection, reject) {
+    console.error(`🔐 Authentication failed (attempt ${attempt}):`, reason);
+    
+    if (attempt < maxAttempts) {
+      // Refresh authentication and retry
+      try {
+        await this.refreshAuthentication();
+        const backoffDelay = this.calculateAuthRetryDelay(attempt);
+        
+        console.log(`🔄 Retrying authentication in ${backoffDelay}ms`);
+        setTimeout(attemptConnection, backoffDelay);
+        
+      } catch (refreshError) {
+        console.error('Authentication refresh failed:', refreshError);
+        reject(new Error('Authentication refresh failed'));
+      }
+    } else {
+      reject(new Error(`Authentication failed after ${maxAttempts} attempts: ${reason}`));
+    }
+  }
+}
+```
+
+## Error Recovery Strategies
+
+### Y.js Document Corruption Recovery
+```javascript
+/**
+ * Y.js Document Corruption Detection and Recovery
+ * Handles various types of document corruption and state conflicts
+ */
+class YjsCorruptionRecovery {
+  constructor() {
+    this.corruptionPatterns = [
+      /[\x00-\x08\x0E-\x1F\x7F]/g, // Control characters
+      /\uFFFD/g, // Replacement characters
+      /\u0000/g  // Null characters
+    ];
+  }
+  
+  // ✅ COMPREHENSIVE: Detect and recover from Y.js document corruption
+  async recoverCorruptedDocument(ydoc, documentId, options = {}) {
+    const {
+      enableBackup = true,
+      tryIndexedDBRecovery = true,
+      tryServerRecovery = true,
+      createFallbackDocument = true
+    } = options;
+    
+    console.log(`🔍 Starting corruption recovery for ${documentId}`);
+    
+    try {
+      // Step 1: Detect corruption type
+      const corruptionType = this.detectCorruptionType(ydoc);
+      console.log(`🔍 Corruption type detected: ${corruptionType}`);
+      
+      // Step 2: Create backup before recovery
+      if (enableBackup) {
+        await this.createCorruptionBackup(ydoc, documentId, corruptionType);
+      }
+      
+      // Step 3: Attempt recovery strategies in order of preference
+      const recoveryStrategies = [
+        { name: 'indexeddb', enabled: tryIndexedDBRecovery },
+        { name: 'server', enabled: tryServerRecovery },
+        { name: 'fallback', enabled: createFallbackDocument }
+      ];
+      
+      for (const strategy of recoveryStrategies) {
+        if (!strategy.enabled) continue;
+        
+        try {
+          const recoveredDoc = await this.executeRecoveryStrategy(
+            strategy.name, ydoc, documentId, corruptionType
+          );
+          
+          if (recoveredDoc) {
+            console.log(`✅ Recovery successful using ${strategy.name} strategy`);
+            return recoveredDoc;
+          }
+        } catch (strategyError) {
+          console.warn(`⚠️ Recovery strategy ${strategy.name} failed:`, strategyError);
+        }
+      }
+      
+      throw new Error('All recovery strategies failed');
+      
+    } catch (error) {
+      console.error(`❌ Document corruption recovery failed for ${documentId}:`, error);
+      throw error;
+    }
+  }
+  
+  // Detect type of corruption in Y.js document
+  detectCorruptionType(ydoc) {
+    const corruptionTypes = [];
+    
+    try {
+      // Check for structural corruption
+      const stateVector = Y.encodeStateVector(ydoc);
+      if (stateVector.length === 0) {
+        corruptionTypes.push('empty-state-vector');
+      }
+      
+      // Check for content corruption
+      const titleFragment = ydoc.getXmlFragment('title');
+      const bodyFragment = ydoc.getXmlFragment('body');
+      
+      const titleText = titleFragment?.toString() || '';
+      const bodyText = bodyFragment?.toString() || '';
+      
+      if (this.hasContentCorruption(titleText) || this.hasContentCorruption(bodyText)) {
+        corruptionTypes.push('content-corruption');
+      }
+      
+      // Check for metadata corruption
+      const config = ydoc.getMap('config');
+      const configData = config.toJSON();
+      
+      if (!configData || Object.keys(configData).length === 0) {
+        corruptionTypes.push('metadata-corruption');
+      }
+      
+      // Check for sync corruption
+      try {
+        const documentUpdate = Y.encodeStateAsUpdate(ydoc);
+        if (documentUpdate.length === 0) {
+          corruptionTypes.push('sync-corruption');
+        }
+      } catch (encodeError) {
+        corruptionTypes.push('encoding-corruption');
+      }
+      
+      return corruptionTypes.length > 0 ? corruptionTypes.join(',') : 'unknown';
+      
+    } catch (error) {
+      console.error('Corruption detection failed:', error);
+      return 'detection-failed';
+    }
+  }
+  
+  // Check for content corruption patterns
+  hasContentCorruption(text) {
+    return this.corruptionPatterns.some(pattern => pattern.test(text));
+  }
+  
+  // Execute specific recovery strategy
+  async executeRecoveryStrategy(strategyName, ydoc, documentId, corruptionType) {
+    switch (strategyName) {
+      case 'indexeddb':
+        return await this.recoverFromIndexedDB(documentId, corruptionType);
+        
+      case 'server':
+        return await this.recoverFromServer(documentId, corruptionType);
+        
+      case 'fallback':
+        return await this.createFallbackDocument(documentId, corruptionType);
+        
+      default:
+        throw new Error(`Unknown recovery strategy: ${strategyName}`);
+    }
+  }
+  
+  // Recover from IndexedDB backup
+  async recoverFromIndexedDB(documentId, corruptionType) {
+    try {
+      console.log(`🔄 Attempting IndexedDB recovery for ${documentId}`);
+      
+      // Create new Y.js document
+      const recoveredDoc = new Y.Doc();
+      
+      // Try to load from IndexedDB backup
+      const backupPersistence = new IndexeddbPersistence(`${documentId}_backup`, recoveredDoc);
+      
+      return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          reject(new Error('IndexedDB recovery timeout'));
+        }, 10000);
+        
+        backupPersistence.once('synced', () => {
+          clearTimeout(timeout);
+          
+          // Validate recovered document
+          if (this.validateRecoveredDocument(recoveredDoc)) {
+            console.log('✅ IndexedDB recovery successful');
+            resolve(recoveredDoc);
+          } else {
+            reject(new Error('Recovered document validation failed'));
+          }
+        });
+      });
+      
+    } catch (error) {
+      console.error('IndexedDB recovery failed:', error);
+      throw error;
+    }
+  }
+  
+  // Recover from server backup
+  async recoverFromServer(documentId, corruptionType) {
+    try {
+      console.log(`🔄 Attempting server recovery for ${documentId}`);
+      
+      // Request document recovery from server
+      const response = await fetch(`/api/collaboration/documents/${documentId}/recover`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...await this.getAuthHeaders()
+        },
+        body: JSON.stringify({
+          corruptionType,
+          requestBackup: true
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server recovery failed: ${response.status}`);
+      }
+      
+      const recoveryData = await response.json();
+      
+      // Create new Y.js document from server data
+      const recoveredDoc = new Y.Doc();
+      
+      if (recoveryData.yjsState) {
+        // Apply Y.js state from server
+        Y.applyUpdate(recoveredDoc, new Uint8Array(recoveryData.yjsState));
+      }
+      
+      // Validate recovered document
+      if (this.validateRecoveredDocument(recoveredDoc)) {
+        console.log('✅ Server recovery successful');
+        return recoveredDoc;
+      } else {
+        throw new Error('Server-recovered document validation failed');
+      }
+      
+    } catch (error) {
+      console.error('Server recovery failed:', error);
+      throw error;
+    }
+  }
+  
+  // Create fallback document as last resort
+  async createFallbackDocument(documentId, corruptionType) {
+    try {
+      console.log(`🔄 Creating fallback document for ${documentId}`);
+      
+      // Create new Y.js document with minimal structure
+      const fallbackDoc = new Y.Doc();
+      
+      // Initialize basic schema
+      this.initializeFallbackSchema(fallbackDoc, documentId);
+      
+      // Notify user about fallback creation
+      this.notifyUserOfFallback(documentId, corruptionType);
+      
+      console.log('✅ Fallback document created successfully');
+      return fallbackDoc;
+      
+    } catch (error) {
+      console.error('Fallback document creation failed:', error);
+      throw error;
+    }
+  }
+  
+  // Initialize fallback document schema
+  initializeFallbackSchema(ydoc, documentId) {
+    // Initialize config
+    const config = ydoc.getMap('config');
+    config.set('documentName', `Recovered Document ${Date.now()}`);
+    config.set('created', new Date().toISOString());
+    config.set('recovered', true);
+    config.set('originalDocumentId', documentId);
+    config.set('recoveryTimestamp', new Date().toISOString());
+    
+    // Initialize metadata
+    const metadata = ydoc.getMap('metadata');
+    metadata.set('tags', []);
+    metadata.set('customJson', {});
+    metadata.set('recoveryNote', 'This document was recovered from corruption');
+    
+    // Initialize empty content (will be populated by TipTap)
+    // Don't manipulate XmlFragments directly - let TipTap handle this
+  }
+  
+  // Validate recovered document integrity
+  validateRecoveredDocument(ydoc) {
+    try {
+      // Check basic structure
+      const hasConfig = ydoc.getMap('config') !== undefined;
+      const hasMetadata = ydoc.getMap('metadata') !== undefined;
+      
+      if (!hasConfig || !hasMetadata) {
+        return false;
+      }
+      
+      // Check config integrity
+      const config = ydoc.getMap('config');
+      const documentName = config.get('documentName');
+      
+      if (!documentName) {
+        return false;
+      }
+      
+      // Check for corruption patterns
+      const stateVector = Y.encodeStateVector(ydoc);
+      if (stateVector.length === 0) {
+        return false;
+      }
+      
+      return true;
+      
+    } catch (error) {
+      console.error('Document validation error:', error);
+      return false;
+    }
+  }
+}
+```
+
+This comprehensive update adds critical missing patterns to the TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md document, covering:
+
+1. **TipTap v3 compatibility and migration strategies**
+2. **Advanced memory management for Y.js and TipTap editors**
+3. **Performance optimization for large documents**
+4. **Modern onSynced patterns with robust error handling**
+5. **Comprehensive error recovery strategies**
+
+These additions future-proof the document and provide production-ready patterns for handling edge cases and performance optimization.
