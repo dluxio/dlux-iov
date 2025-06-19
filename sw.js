@@ -1,4 +1,4 @@
-this.version = "2025.06.19.2";
+this.version = "2025.06.19.3";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -548,23 +548,13 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.19.09",
-  "generated": "2025-06-19T16:10:03Z",
+  "version": "2025.06.19.3",
+  "generated": "2025-06-19T16:10:14Z",
   "files": {
-    "/css/v3.css": {
-      "checksum": "7056941e006936405769b10c0162a6f6",
-      "size": 16143,
-      "priority": "critical"
-    },
     "/js/bootstrap.bundle.min.js": {
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/dApps/turnkey-360-1-5-0.html": {
-      "checksum": "0834f17707c4f2de376b75f5993f2e72",
-      "size": 6884,
-      "priority": "important"
     },
     "/dao/index.html": {
       "checksum": "ec632b1742a74b8daf12e42fae36700c",
@@ -1746,11 +1736,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/naf-playground/css/styles.css": {
-      "checksum": "d19be71b5d2619d7bd403bc6f4e5fa39",
-      "size": 15467,
-      "priority": "page-specific"
-    },
     "/naf-playground/css/window-system.css": {
       "checksum": "ff3071e68b24c1bae6368bc3cc76235e",
       "size": 21402,
@@ -2601,12 +2586,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
