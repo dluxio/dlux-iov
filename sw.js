@@ -1,4 +1,4 @@
-this.version = "2025.06.19.3";
+this.version = "2025.06.19.4";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -548,19 +548,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.19.3",
-  "generated": "2025-06-19T16:10:14Z",
+  "version": "2025.06.19.15",
+  "generated": "2025-06-19T22:13:54Z",
   "files": {
-    "/js/bootstrap.bundle.min.js": {
-      "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
-      "size": 80721,
-      "priority": "critical"
-    },
-    "/dao/index.html": {
-      "checksum": "ec632b1742a74b8daf12e42fae36700c",
-      "size": 11283,
-      "priority": "important"
-    },
     "/dependency-analyzer.js": {
       "checksum": "a57847fc6110d2cb0ae4af1b1a6792db",
       "size": 14340,
@@ -1422,7 +1412,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "ba003ab72ed25b72850da4a22c871ece",
+      "checksum": "6171a35f62edd8087b21bd9e69859a64",
       "size": 36523,
       "priority": "important"
     },
@@ -1437,8 +1427,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/tiptap-collaboration.bundle.js": {
-      "checksum": "062c545d19930efe4c97b1a1f3f9ef8e",
-      "size": 1465217,
+      "checksum": "6a762e6bba35a712154503abf519c157",
+      "size": 1430717,
       "priority": "important"
     },
     "/js/tiptap-editor-with-file-menu.js": {
@@ -1642,7 +1632,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "dd933d83172afc1fef7a0d854e67bb9a",
+      "checksum": "324c998950ee472c89ad0db4975fdbdd",
       "size": 7299,
       "priority": "important"
     },
@@ -1735,11 +1725,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/naf-playground/css/window-system.css": {
-      "checksum": "ff3071e68b24c1bae6368bc3cc76235e",
-      "size": 21402,
-      "priority": "page-specific"
     },
     "/naf-playground/debug.js": {
       "checksum": "7deececc1586f528671639e502f6249c",
@@ -2586,12 +2571,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

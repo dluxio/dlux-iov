@@ -85,10 +85,11 @@ const extensions = [
 
 ## Permissions & Authentication System
 
-### Three-Tier Permission Model
+### Four-Tier Permission Model
 1. **`readonly`**: View and connect permissions only (read-only access)
 2. **`editable`**: View and edit document content  
 3. **`postable`**: Full access including edit and publish to Hive blockchain
+4. **`owner`**: Full access including edit, publish, and permissions management
 
 ### Authentication Architecture
 - **Local Operations**: DLUX username only (permissionless for drafts)
@@ -107,14 +108,26 @@ const extensions = [
 ```
 
 ### API Endpoints
-**Base URL**: `https://data.dlux.io/api/collaboration`
+**Base URL**: `https://data.dlux.io/api`
 
-- `GET /documents` - List user's collaborative documents
-- `POST /documents` - Create new collaborative document
-- `DELETE /documents/{owner}/{permlink}` - Delete document
-- `GET /permissions/{owner}/{permlink}` - Get document permissions
-- `POST /permissions/{owner}/{permlink}` - Grant user permissions
-- `DELETE /permissions/{owner}/{permlink}/{account}` - Revoke permissions
+#### System Endpoints
+- `GET /system/versions` - Get system and package version information
+
+#### Collaboration Endpoints
+- `GET /collaboration/documents` - List user's collaborative documents
+- `POST /collaboration/documents` - Create new collaborative document
+- `DELETE /collaboration/documents/{owner}/{permlink}` - Delete document
+- `GET /collaboration/info/{owner}/{permlink}` - Get document metadata
+- `GET /collaboration/stats/{owner}/{permlink}` - Get document statistics
+- `GET /collaboration/activity/{owner}/{permlink}` - Get document activity log
+- `GET /collaboration/permissions/{owner}/{permlink}` - Get document permissions - owner only
+- `POST /collaboration/permissions/{owner}/{permlink}` - Grant user permissions - owner only
+- `DELETE /collaboration/permissions/{owner}/{permlink}/{account}` - Revoke permissions - owner only
+
+permissions tiers include readonly editable postable and owner
+
+#### WebSocket Endpoint
+- `wss://data.dlux.io/collaboration/{owner}/{permlink}` - Real-time collaboration
 
 ### Permission Validation Patterns
 ```javascript

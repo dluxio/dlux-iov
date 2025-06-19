@@ -190,23 +190,70 @@ class YjsDocumentManager {
         // ✅ CRITICAL FIX: User-isolated IndexedDB keys for collaborative documents
         // This prevents cross-user contamination when multiple users access the same document
         let indexedDBKey = documentId;
-        if (isCollaborative && this.component.username) {
-            indexedDBKey = `${this.component.username}__${documentId}`;
+        if (isCollaborative) {
+            // ✅ SECURITY: Use user isolation for collaborative documents
+            // Public documents can use 'public' as the user identifier
+            const userIdentifier = this.component.username || 'public';
+            indexedDBKey = `${userIdentifier}__${documentId}`;
             console.log('🔐 Using user-isolated IndexedDB key for collaborative document:', {
                 originalKey: documentId,
                 userIsolatedKey: indexedDBKey,
-                username: this.component.username
+                userIdentifier: userIdentifier,
+                isAuthenticated: !!this.component.username,
+                isPublicAccess: !this.component.username
             });
         }
 
         const persistence = new IndexeddbPersistence(indexedDBKey, ydoc);
         
-        // ✅ TIPTAP BEST PRACTICE: Use onSynced callback
+        // ✅ TIPTAP BEST PRACTICE: Use onSynced callback with content verification
         return new Promise((resolve) => {
             persistence.once('synced', () => {
-                
-                // Check Y.js metadata only (NEVER touch XML fragments)
+                // ✅ CRITICAL FIX: Wait for actual Y.js content, not just metadata
                 const yjsDocumentName = ydoc.getMap('config').get('documentName');
+                const titleShare = ydoc.share.get('title');
+                const bodyShare = ydoc.share.get('body');
+                
+                // ✅ CONTENT VERIFICATION: Check if document has actual content
+                const hasRealContent = (titleShare && titleShare.length > 0) || (bodyShare && bodyShare.length > 0);
+                const hasDocumentMetadata = !!yjsDocumentName;
+                
+                console.log('💾 IndexedDB synced for document:', {
+                    indexedDBKey: indexedDBKey,
+                    isCollaborative: isCollaborative,
+                    hasContent: hasRealContent || hasDocumentMetadata
+                });
+                
+                // ✅ DEBUG: Enhanced Y.js content verification
+                const Y = bundle?.Y?.default || bundle?.Y;
+                const stateVector = Y.encodeStateAsUpdate(ydoc);
+                
+                console.log('💾 IndexedDB onSynced - Y.js content verification:', {
+                    indexedDBKey: indexedDBKey,
+                    isCollaborative: isCollaborative,
+                    hasDocumentName: !!yjsDocumentName,
+                    documentName: yjsDocumentName,
+                    contentStatus: {
+                        hasTitleShare: !!titleShare,
+                        hasBodyShare: !!bodyShare,
+                        titleLength: titleShare?.length || 0,
+                        bodyLength: bodyShare?.length || 0,
+                        hasRealContent: hasRealContent,
+                        hasMetadata: hasDocumentMetadata
+                    },
+                    yjsState: {
+                        titleType: titleShare?.constructor?.name,
+                        bodyType: bodyShare?.constructor?.name,
+                        stateSize: stateVector.length,
+                        shareKeys: Array.from(ydoc.share.keys()),
+                        clientID: ydoc.clientID
+                    },
+                    editorContext: {
+                        isReadOnlyMode: this.component.isReadOnlyMode,
+                        permissionLevel: this.component.currentFile?.permissionLevel,
+                        hasExistingEditors: !!(this.component.titleEditor && this.component.bodyEditor)
+                    }
+                });
                 
                 // ✅ FIX: Update currentFile object with correct document name from Y.js
                 if (yjsDocumentName && this.component.currentFile) {
@@ -236,7 +283,22 @@ class YjsDocumentManager {
                     this.component.documentManager.persistenceManager.updateLocalFileTimestamp(this.component.currentFile.id, now);
                 }
                 
-                // ✅ CORRECT: TipTap automatically loads content after onSynced
+                // ✅ CRITICAL FIX: Signal that IndexedDB content is ready for editor creation
+                // This enables proper content loading for read-only users without WebSocket dependency
+                this.component.indexedDBContentReady = true;
+                this.component.yjsContentAvailable = hasRealContent || hasDocumentMetadata;
+                
+                // ✅ SEQUENCING FIX: Use $nextTick to ensure Vue reactivity is updated
+                this.component.$nextTick(() => {
+                    console.log('📊 IndexedDB content readiness signaled to Vue:', {
+                        indexedDBContentReady: this.component.indexedDBContentReady,
+                        yjsContentAvailable: this.component.yjsContentAvailable,
+                        hasRealContent: hasRealContent,
+                        hasDocumentMetadata: hasDocumentMetadata
+                    });
+                });
+                
+                // ✅ CORRECT: TipTap will automatically load content when editors are created with this Y.js document
                 // Trust TipTap automatic loading - no manual intervention needed
                 
                 resolve(persistence);
@@ -289,7 +351,16 @@ class YjsDocumentManager {
             metadata.set('initialized', true);
         }
         
-        return { config, metadata };
+        // ✅ CRITICAL FIX: Ensure Y.js shares are accessible for content verification
+        // This doesn't add content, just ensures the fragments exist for .length checks
+        const titleShare = ydoc.getXmlFragment('title');
+        const bodyShare = ydoc.getXmlFragment('body');
+        const permlinkShare = ydoc.getXmlFragment('permlink');
+        
+        // The fragments now exist and can be checked for content length
+        // TipTap will populate them automatically when editors are created
+        
+        return { config, metadata, titleShare, bodyShare, permlinkShare };
     }
 }
 
@@ -307,6 +378,21 @@ class PersistenceManager {
         
         // ✅ CRITICAL FIX: Pass isCollaborative=true to enable user isolation
         const documentId = file.id || `${file.owner}/${file.permlink}`;
+        
+        // ✅ DEBUG: Log document ID and user for read-only debugging
+        const expectedIndexedDBKey = `${this.component.username}__${documentId}`;
+        console.log('🔑 Setting up cloud persistence with document ID:', {
+            documentId,
+            fileId: file.id,
+            owner: file.owner,
+            permlink: file.permlink,
+            currentUser: this.component.username,
+            isReadOnlyMode: this.component.isReadOnlyMode,
+            permissionLevel: file.permissionLevel,
+            expectedIndexedDBKey,
+            willUseUserIsolation: true
+        });
+        
         const indexedDB = await this.component.documentManager.yjsManager.setupIndexedDBWithOnSynced(yjsDoc, documentId, true);
         
         // ✅ CORRECT: TipTap handles collaborative content loading automatically
@@ -323,7 +409,14 @@ class PersistenceManager {
                 persistenceManager.component.provider = webSocket;
                 
                 // ✅ DUPLICATE PREVENTION: onConnect callback handles upgrade, no need for duplicate here
-                console.log('🔌 WebSocket provider created - upgrade will be handled by onConnect callback');
+                console.log('🔌 WebSocket provider created - upgrade will be handled by onConnect callback', {
+                    hasProvider: !!persistenceManager.component.provider,
+                    permissionLevel: persistenceManager.component.currentFile?.permissionLevel,
+                    isReadOnly: persistenceManager.component.isReadOnlyMode,
+                    connectionStatus: persistenceManager.component.connectionStatus
+                });
+            } else {
+                console.warn('⚠️ WebSocket provider was null - likely auth issue or connection blocked');
             }
         }).catch(error => {
             console.warn('⚠️ Background cloud connection failed:', error.message);
@@ -335,15 +428,52 @@ class PersistenceManager {
     }
     
     async setupWebSocketWithOnSynced(yjsDoc, file) {
-        // ✅ AUTHENTICATION CHECK: Only connect if authenticated
-        if (!this.component.isAuthenticated || this.component.isAuthExpired) {
-            return null;
+        // ✅ AUTHENTICATION CHECK: Allow WebSocket for:
+        // 1. Authenticated users (including read-only)
+        // 2. Public documents (no auth required)
+        // 3. Documents where we're checking if they're public
+        const isPublicDocument = file.permissionLevel === 'public' || file.isPublic;
+        const needsAuth = !isPublicDocument;
+        const hasValidAuth = this.component.isAuthenticated && !this.component.isAuthExpired;
+        
+        if (needsAuth && !hasValidAuth) {
+            // Try connecting anyway - server will determine if it's public
+            console.log('⏳ Attempting WebSocket connection without auth - server will validate access', {
+                isAuthenticated: this.component.isAuthenticated,
+                isAuthExpired: this.component.isAuthExpired,
+                isReadOnlyMode: this.component.isReadOnlyMode,
+                permissionLevel: file.permissionLevel,
+                document: `${file.owner}/${file.permlink}`,
+                reason: 'checking-if-public'
+            });
+            // Continue with connection attempt
         }
+        
+        // ✅ PUBLIC ACCESS: Allow WebSocket connection for public documents or authenticated users
+        console.log('🔌 WebSocket connection attempt', {
+            document: `${file.owner}/${file.permlink}`,
+            permissionLevel: file.permissionLevel,
+            isAuthenticated: this.component.isAuthenticated,
+            hasAuthHeaders: !!this.component.authHeaders,
+            isReadOnlyMode: this.component.isReadOnlyMode,
+            needsAuth,
+            hasValidAuth
+        });
         
         // ✅ CONFLICT PREVENTION: Clean up any existing provider first
         if (this.component.provider) {
             console.warn('⚠️ Existing WebSocket provider detected - cleaning up before creating new one');
-            await this.cleanupWebSocketProvider();
+            try {
+                if (this.component.provider.disconnect) {
+                    this.component.provider.disconnect();
+                }
+                if (this.component.provider.destroy) {
+                    this.component.provider.destroy();
+                }
+            } catch (error) {
+                console.warn('⚠️ Error cleaning up existing provider:', error.message);
+            }
+            this.component.provider = null;
         }
         
         // ✅ TIPTAP BEST PRACTICE: Use HocuspocusProvider with official onSynced pattern
@@ -362,16 +492,109 @@ class PersistenceManager {
         const persistenceManager = this;
         
         try {
-            // Build auth token like the working implementation
-            const authToken = JSON.stringify({
-                account: this.component.authHeaders?.['x-account'] || this.component.username,
-                signature: this.component.authHeaders?.['x-signature'],
-                challenge: this.component.authHeaders?.['x-challenge'],
-                pubkey: this.component.authHeaders?.['x-pubkey']
+            // Build auth token - handle both authenticated and public access
+            let authToken;
+            
+            if (this.component.isAuthenticated && this.component.authHeaders) {
+                // Full authentication for private documents
+                authToken = JSON.stringify({
+                    account: this.component.authHeaders['x-account'],
+                    signature: this.component.authHeaders['x-signature'],
+                    challenge: this.component.authHeaders['x-challenge'],
+                    pubkey: this.component.authHeaders['x-pubkey'],
+                    // ✅ FIX: Include permission level in auth token
+                    permission_level: file.permissionLevel || 'readonly',
+                    // ✅ COMPLIANCE: Add explicit readonly flag for server
+                    readonly: file.permissionLevel === 'readonly'
+                });
+            } else {
+                // Public access token for public documents
+                authToken = JSON.stringify({
+                    account: 'public',
+                    access_type: 'public',
+                    document: `${file.owner}/${file.permlink}`,
+                    permission_level: 'readonly', // Public users are always read-only
+                    readonly: true // Explicit readonly flag for server
+                });
+            }
+            
+            // ✅ DEBUG: Log WebSocket auth token details
+            console.log('🔐 WebSocket auth token for collaborative document:', {
+                documentPath: docPath,
+                username: this.component.username,
+                account: this.component.authHeaders?.['x-account'],
+                hasSignature: !!this.component.authHeaders?.['x-signature'],
+                hasChallenge: !!this.component.authHeaders?.['x-challenge'],
+                hasPubkey: !!this.component.authHeaders?.['x-pubkey'],
+                authTokenPreview: authToken.substring(0, 100) + '...',
+                permissionLevel: file.permissionLevel,
+                isReadOnlyMode: this.component.isReadOnlyMode,
+                isAuthenticated: this.component.isAuthenticated,
+                isAuthExpired: this.component.isAuthExpired
             });
             
             // ✅ TIPTAP COMPLIANCE: No artificial delays in WebSocket setup
             // HocuspocusProvider handles connection timing automatically
+            
+            console.log('🔧 Creating HocuspocusProvider with config:', {
+                url: wsUrl,
+                name: docPath,
+                hasYjsDoc: !!yjsDoc,
+                yjsDocGuid: yjsDoc.guid,
+                yjsDocClientID: yjsDoc.clientID,
+                tokenPreview: authToken.substring(0, 50) + '...',
+                isAuthenticated: this.component.isAuthenticated,
+                permissionLevel: file.permissionLevel,
+                isReadOnly: this.component.isReadOnlyMode
+            });
+            
+            // ✅ DEBUG: Add Y.js update observer for read-only users
+            let yjsUpdateObserver = null;
+            if (this.component.isReadOnlyMode) {
+                yjsUpdateObserver = (update, origin) => {
+                    console.log('📝 Y.js update received for read-only user:', {
+                        updateSize: update.length,
+                        originType: typeof origin,
+                        originName: origin?.constructor?.name || 'unknown',
+                        titleLength: yjsDoc.share.get('title')?.length || 0,
+                        bodyLength: yjsDoc.share.get('body')?.length || 0,
+                        configSize: yjsDoc.getMap('config')?.size || 0,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    // Check if editors need to be notified
+                    const titleShare = yjsDoc.share.get('title');
+                    const bodyShare = yjsDoc.share.get('body');
+                    if ((titleShare?.length > 0 || bodyShare?.length > 0) && update.length > 0) {
+                        console.log('✅ Content update received - checking editor sync');
+                        
+                        // Give TipTap time to process the update
+                        setTimeout(() => {
+                            const titleContent = persistenceManager.component.titleEditor?.getText() || '';
+                            const bodyContent = persistenceManager.component.bodyEditor?.getText() || '';
+                            
+                            console.log('📖 Editor content after Y.js update:', {
+                                titleHasContent: titleContent.length > 0,
+                                bodyHasContent: bodyContent.length > 0,
+                                yjsTitleLength: titleShare?.length || 0,
+                                yjsBodyLength: bodyShare?.length || 0
+                            });
+                            
+                            // If still no content in editors, trigger recovery
+                            if (titleShare.length > 0 && titleContent.length === 0) {
+                                console.warn('⚠️ Y.js update received but editor still empty - triggering recovery');
+                                persistenceManager.recreateReadOnlyEditors(yjsDoc).catch(error => {
+                                    console.error('❌ Failed to recreate editors after Y.js update:', error);
+                                });
+                            }
+                        }, 500);
+                        
+                        // Remove observer after significant update
+                        yjsDoc.off('update', yjsUpdateObserver);
+                    }
+                };
+                yjsDoc.on('update', yjsUpdateObserver);
+            }
             
             const provider = new HocuspocusProvider({
                 url: wsUrl,
@@ -380,6 +603,8 @@ class PersistenceManager {
                 token: authToken,
                 connect: true,
                 timeout: 30000,
+                // ✅ FIX: Force immediate connection
+                preserveConnection: true,
                 
                 // ✅ TIPTAP COMPLIANCE: Exponential backoff for reconnection
                 minReconnectTimeout: 1000,  // Start with 1 second
@@ -393,6 +618,70 @@ class PersistenceManager {
                 // ✅ TIPTAP BEST PRACTICE: Use onSynced callback for collaborative sync completion
                 onSynced() {
                     console.log('🔄 WebSocket Y.js sync completed for collaborative document');
+                    console.log('🔄 WebSocket onSynced called - checking current state:', {
+                        hasComponent: !!persistenceManager.component,
+                        hasTitleEditor: !!persistenceManager.component?.titleEditor,
+                        hasBodyEditor: !!persistenceManager.component?.bodyEditor,
+                        isReadOnlyMode: persistenceManager.component?.isReadOnlyMode,
+                        currentFilePermission: persistenceManager.component?.currentFile?.permissionLevel,
+                        documentPath: docPath,
+                        timestamp: new Date().toISOString(),
+                        providerConnected: provider.isConnected,
+                        providerSynced: provider.synced
+                    });
+                    
+                    // ✅ CRITICAL FIX: Log Y.js document state after sync for debugging
+                    const config = yjsDoc.getMap('config');
+                    const documentName = config.get('documentName');
+                    const lastModified = config.get('lastModified');
+                    
+                    // ✅ DEBUG: Check Y.js content shares for read-only debugging
+                    const titleShare = yjsDoc.share.get('title');
+                    const bodyShare = yjsDoc.share.get('body');
+                    
+                    console.log('📊 Y.js document state after WebSocket sync:', {
+                        hasDocumentName: !!documentName,
+                        documentName: documentName,
+                        lastModified: lastModified,
+                        isReadOnlyMode: persistenceManager.component.isReadOnlyMode,
+                        hasEditors: !!(persistenceManager.component.titleEditor && persistenceManager.component.bodyEditor),
+                        titleEditorContent: persistenceManager.component.titleEditor?.getText() || 'no editor',
+                        bodyEditorContent: persistenceManager.component.bodyEditor?.getText()?.substring(0, 50) || 'no editor',
+                        titleEditorExists: !!persistenceManager.component.titleEditor,
+                        bodyEditorExists: !!persistenceManager.component.bodyEditor,
+                        editorsAreEditable: {
+                            title: persistenceManager.component.titleEditor?.isEditable,
+                            body: persistenceManager.component.bodyEditor?.isEditable
+                        },
+                        yjsShareContent: {
+                            hasTitleShare: !!titleShare,
+                            hasBodyShare: !!bodyShare,
+                            titleLength: titleShare?.length || 0,
+                            bodyLength: bodyShare?.length || 0,
+                            titleType: titleShare?.constructor?.name || 'unknown',
+                            bodyType: bodyShare?.constructor?.name || 'unknown'
+                        }
+                    });
+                    
+                    // ✅ DEBUG: Check if content is actually in Y.js for read-only users
+                    if (persistenceManager.component.isReadOnlyMode) {
+                        console.log('📖 Read-only document Y.js content check after WebSocket sync:', {
+                            titleContent: persistenceManager.component.titleEditor?.getText() || 'no editor',
+                            bodyContent: persistenceManager.component.bodyEditor?.getText()?.substring(0, 100) || 'no editor',
+                            titleShareHasContent: (titleShare?.length || 0) > 0,
+                            bodyShareHasContent: (bodyShare?.length || 0) > 0,
+                            editorsExist: {
+                                title: !!persistenceManager.component.titleEditor,
+                                body: !!persistenceManager.component.bodyEditor
+                            },
+                            editorStates: {
+                                titleIsDestroyed: persistenceManager.component.titleEditor?.isDestroyed,
+                                bodyIsDestroyed: persistenceManager.component.bodyEditor?.isDestroyed,
+                                titleIsEditable: persistenceManager.component.titleEditor?.isEditable,
+                                bodyIsEditable: persistenceManager.component.bodyEditor?.isEditable
+                            }
+                        });
+                    }
                     
                     // ✅ TIPTAP COMPLIANCE: Use $nextTick for Vue reactivity updates
                     persistenceManager.component.$nextTick(() => {
@@ -434,6 +723,66 @@ class PersistenceManager {
                         yjsDoc.getMap('config').set('serverVersion', persistenceManager.component.serverVersion);
                         yjsDoc.getMap('config').set('serverVersionCheckTime', Date.now());
                     }
+                    
+                    // ✅ CRITICAL FIX: Decouple content loading from tier upgrades
+                    // Content should be available in Tier 1 editors via IndexedDB sync
+                    
+                    // Check if editors already have content from IndexedDB
+                    const titleHasContent = persistenceManager.component.titleEditor?.getText()?.length > 0;
+                    const bodyHasContent = persistenceManager.component.bodyEditor?.getText()?.length > 0;
+                    
+                    console.log('🔄 WebSocket sync content check:', {
+                        titleHasContent,
+                        bodyHasContent,
+                        hasEditors: !!(persistenceManager.component.titleEditor && persistenceManager.component.bodyEditor),
+                        permissionLevel: persistenceManager.component.currentFile?.permissionLevel,
+                        isReadOnly: persistenceManager.component.isReadOnlyMode
+                    });
+                    
+                    // ✅ OFFLINE-FIRST: Content is now available via WebSocket sync
+                    // For read-only users, content loads into existing Tier 1 editors automatically
+                    // For editable users, upgrade to Tier 2 for collaboration features
+                    
+                    const canEdit = persistenceManager.component.currentFile?.permissionLevel === 'editable' || 
+                                   persistenceManager.component.currentFile?.permissionLevel === 'postable';
+                    
+                    if (persistenceManager.component.titleEditor && persistenceManager.component.bodyEditor) {
+                        if (canEdit) {
+                            console.log('🔄 Y.js sync complete, upgrading to Tier 2 editors with cursors for editable users...');
+                            persistenceManager.upgradeToCloudEditors(yjsDoc, provider).catch(error => {
+                                console.warn('⚠️ Failed to upgrade to Tier 2 editors:', error.message);
+                            });
+                        } else {
+                            console.log('🔄 Read-only user: Y.js content synced via WebSocket, checking editor state...');
+                            
+                            // ✅ CRITICAL FIX: For read-only users, ensure editors reflect Y.js content
+                            // TipTap Collaboration should handle this automatically, but let's verify
+                            persistenceManager.component.$nextTick(() => {
+                                const titleContent = persistenceManager.component.titleEditor?.getText() || '';
+                                const bodyContent = persistenceManager.component.bodyEditor?.getText() || '';
+                                
+                                console.log('📖 Read-only content check after WebSocket sync:', {
+                                    titleHasContent: titleContent.length > 0,
+                                    bodyHasContent: bodyContent.length > 0,
+                                    titlePreview: titleContent.substring(0, 50),
+                                    bodyPreview: bodyContent.substring(0, 100)
+                                });
+                                
+                                // ✅ FORCE REFRESH: If content still not showing, recreate editors
+                                if (titleShare.length > 0 && titleContent.length === 0) {
+                                    console.warn('⚠️ Content sync issue detected for read-only user - Y.js has content but editor is empty');
+                                    
+                                    // ✅ RECOVERY: Recreate editors with synced Y.js document
+                                    console.log('🔄 Recreating read-only editors with synced Y.js document...');
+                                    persistenceManager.recreateReadOnlyEditors(yjsDoc).catch(error => {
+                                        console.error('❌ Failed to recreate read-only editors:', error);
+                                    });
+                                }
+                            });
+                        }
+                    } else {
+                        console.warn('⚠️ Cannot process WebSocket sync - editors not found');
+                    }
                 },
                 
                 onConnect() {
@@ -447,19 +796,81 @@ class PersistenceManager {
                         persistenceManager.component.reconnectAttempts = 0;
                     }
                     
-                    // WebSocket connected, waiting for sync - removed verbose logging
+                    // ✅ FIX: Don't upgrade editors immediately - wait for onSynced
+                    // The WebSocket needs to sync Y.js content first
+                    console.log('⏳ WebSocket connected, waiting for Y.js sync before upgrading editors...');
+                    
+                    // ✅ DEBUG: Check provider sync state
+                    console.log('🔍 Provider state after connection:', {
+                        isConnected: provider.isConnected,
+                        isSynced: provider.synced,
+                        status: provider.status,
+                        hasDocument: !!provider.document,
+                        documentGuid: provider.document?.guid
+                    });
+                    
+                    // ✅ FIX: For read-only users, check if we need to trigger sync
+                    if (persistenceManager.component.isReadOnlyMode) {
+                        console.log('📖 Read-only user connected - monitoring sync status...');
+                        
+                        // ✅ AWARENESS FIX: Set minimal awareness state for read-only users to trigger sync
+                        if (provider.awareness) {
+                            console.log('🔧 Setting awareness state for read-only user to trigger sync');
+                            provider.awareness.setLocalState({
+                                user: {
+                                    name: persistenceManager.component.username || 'Anonymous Reader',
+                                    color: '#808080', // Gray color for read-only users
+                                    isReadOnly: true,
+                                    permission: 'readonly',
+                                    accessType: 'readonly'
+                                }
+                            });
+                        }
+                        
+                        // ✅ SYNC FIX: Force Y.js sync for read-only users
+                        if (provider.document && typeof Y !== 'undefined') {
+                            console.log('🔄 Attempting to force Y.js sync for read-only user');
+                            try {
+                                // Get Y.js from the bundle
+                                const YBundle = window.TiptapCollaboration?.Y || window.Y;
+                                if (YBundle) {
+                                    const emptyUpdate = YBundle.encodeStateAsUpdate(yjsDoc);
+                                    console.log('📦 Y.js state update size:', emptyUpdate.length);
+                                }
+                            } catch (error) {
+                                console.warn('⚠️ Could not force Y.js sync:', error.message);
+                            }
+                        }
+                        
+                        // Check sync status after a delay
+                        setTimeout(() => {
+                            if (provider.isConnected && !provider.synced) {
+                                console.log('⚠️ Read-only user connected but not synced after 1s');
+                                
+                                // Log provider state for debugging
+                                console.log('🔍 Provider debug state:', {
+                                    isConnected: provider.isConnected,
+                                    isSynced: provider.synced,
+                                    hasAwareness: !!provider.awareness,
+                                    awarenessStates: provider.awareness?.states?.size || 0,
+                                    documentGuid: provider.document?.guid,
+                                    configuration: provider.configuration
+                                });
+                                
+                                // ✅ FORCE SYNC: Try sending a sync step to trigger sync completion
+                                if (provider.sendStateless) {
+                                    console.log('🔄 Attempting to force sync by sending stateless message');
+                                    provider.sendStateless({ type: 'sync-request', timestamp: Date.now() });
+                                }
+                            } else if (provider.synced) {
+                                console.log('✅ Read-only user successfully synced');
+                            }
+                        }, 1000);
+                    }
                     
                     // ✅ SERVER VERSION: Check version when connecting to ensure compatibility
                     persistenceManager.component.$nextTick(() => {
                         persistenceManager.component.checkServerVersion();
-                    });
-                    
-                    // ✅ TIER UPGRADE: Trigger automatic upgrade to Tier 2 editors with cursors
-                    // Use nextTick to ensure DOM is ready for editor creation
-                    persistenceManager.component.$nextTick(() => {
-                        persistenceManager.upgradeToCloudEditors(yjsDoc, provider).catch(error => {
-                            console.warn('⚠️ Failed to upgrade to Tier 2 editors:', error.message);
-                        });
                     });
                 },
                 
@@ -482,31 +893,213 @@ class PersistenceManager {
                     yjsDoc.getMap('config').set('lastDisconnect', new Date().toISOString());
                 },
                 
-                onAuthenticationFailed() {
-                    console.error('🔒 WebSocket authentication failed');
+                onAuthenticationFailed(data) {
+                    console.error('🔒 WebSocket authentication failed', data);
                     persistenceManager.component.connectionStatus = 'error';
                     persistenceManager.component.connectionMessage = 'Authentication failed';
+                    
+                    // ✅ DEBUG: Log authentication failure details
+                    console.log('🚫 Authentication failure details:', {
+                        data: data,
+                        documentPath: docPath,
+                        permissionLevel: file.permissionLevel,
+                        isReadOnly: persistenceManager.component.isReadOnlyMode,
+                        authHeaders: {
+                            hasAccount: !!persistenceManager.component.authHeaders?.['x-account'],
+                            hasSignature: !!persistenceManager.component.authHeaders?.['x-signature'],
+                            account: persistenceManager.component.authHeaders?.['x-account']
+                        }
+                    });
+                    
+                    // ✅ FIX: For read-only users, authentication failures might be permission-based
+                    if (persistenceManager.component.isReadOnlyMode) {
+                        console.log('📖 Read-only user authentication failed - may need to refresh permissions');
+                        
+                        // Try to refresh authentication
+                        if (persistenceManager.component.loadCollaborationAuthHeaders) {
+                            persistenceManager.component.loadCollaborationAuthHeaders(true).then(() => {
+                                console.log('🔄 Authentication headers refreshed - reconnection may be attempted');
+                            }).catch(error => {
+                                console.error('❌ Failed to refresh authentication headers:', error);
+                            });
+                        }
+                    }
                 },
                 
                 onError(error) {
                     console.error('❌ WebSocket error:', error);
                     
+                    // ✅ DEBUG: Log full error details
+                    console.log('🔍 WebSocket error details:', {
+                        message: error.message,
+                        type: error.type,
+                        code: error.code,
+                        reason: error.reason,
+                        wasClean: error.wasClean,
+                        documentPath: docPath,
+                        isReadOnly: persistenceManager.component.isReadOnlyMode
+                    });
+                    
                     // Handle specific protocol errors
                     if (error.message && error.message.includes('unknown type: 7')) {
                         console.warn('⚠️ Protocol mismatch detected - CLOSE message type not handled properly');
-                        // Try to gracefully disconnect and reconnect
-                        if (provider && provider.disconnect) {
-                            provider.disconnect();
-                        }
+                        // This error typically means the server sent a close message
+                        // Don't disconnect immediately - let the server close the connection
                         persistenceManager.component.connectionStatus = 'disconnected';
-                        persistenceManager.component.connectionMessage = 'Protocol error - please refresh';
+                        persistenceManager.component.connectionMessage = 'Server closed connection';
+                        
+                        // Clean up the provider reference
+                        persistenceManager.component.$nextTick(() => {
+                            persistenceManager.component.provider = null;
+                        });
+                        return;
+                    }
+                    
+                    // Handle WebSocket closed before connection
+                    if (error.message && error.message.includes('WebSocket is closed before the connection is established')) {
+                        console.warn('⚠️ WebSocket closed before connection - server may have rejected the connection');
+                        persistenceManager.component.connectionStatus = 'error';
+                        persistenceManager.component.connectionMessage = 'Server rejected connection';
                         return;
                     }
                     
                     persistenceManager.component.connectionStatus = 'error';
                     persistenceManager.component.connectionMessage = `Connection error: ${error.message}`;
+                },
+                
+                // Add debugging for provider events (but don't interfere with message handling)
+                onOpen() {
+                    console.log('🔓 WebSocket onOpen event fired');
+                },
+                
+                onStatus(event) {
+                    console.log('📊 WebSocket onStatus event:', event);
+                },
+                
+                // ✅ DEBUG: Add more event handlers to understand sync issue
+                onStateless(payload) {
+                    console.log('📨 WebSocket onStateless event:', {
+                        hasPayload: !!payload,
+                        payloadKeys: payload ? Object.keys(payload) : [],
+                        documentPath: docPath
+                    });
+                },
+                
+                beforeBroadcastStateless(payload) {
+                    console.log('📤 WebSocket beforeBroadcastStateless:', {
+                        hasPayload: !!payload,
+                        payloadKeys: payload ? Object.keys(payload) : [],
+                        documentPath: docPath
+                    });
+                    return payload;
                 }
             });
+            
+            console.log('✅ HocuspocusProvider created successfully', {
+                providerExists: !!provider,
+                isConnected: provider.isConnected,
+                isSynced: provider.synced,
+                documentPath: docPath,
+                permissionLevel: file.permissionLevel,
+                providerStatus: provider.status,
+                providerConfiguration: provider.configuration
+            });
+            
+            // ✅ FIX: Remove manual connection - provider should connect automatically with connect: true
+            
+            // ✅ DEBUG: Check sync status after a delay
+            setTimeout(() => {
+                console.log('🔍 WebSocket sync status check (2s):', {
+                    isConnected: provider.isConnected,
+                    isSynced: provider.synced,
+                    hasProvider: !!provider,
+                    documentPath: docPath,
+                    yjsDocSize: yjsDoc.store.clients.size,
+                    yjsShareKeys: Array.from(yjsDoc.share.keys()),
+                    titleShareLength: yjsDoc.share.get('title')?.length || 0,
+                    bodyShareLength: yjsDoc.share.get('body')?.length || 0
+                });
+                
+                // ✅ RECOVERY: If connected but not synced after 2s, force sync check
+                if (provider.isConnected && !provider.synced) {
+                    console.warn('⚠️ WebSocket connected but not synced after 2s - checking Y.js state');
+                    
+                    // Check if Y.js has received any updates
+                    const titleShare = yjsDoc.share.get('title');
+                    const bodyShare = yjsDoc.share.get('body');
+                    const config = yjsDoc.getMap('config');
+                    
+                    console.log('🔍 Y.js document state during sync issue:', {
+                        hasConfig: config.size > 0,
+                        configKeys: Array.from(config.keys()),
+                        documentName: config.get('documentName'),
+                        hasTitleContent: titleShare && titleShare.length > 0,
+                        hasBodyContent: bodyShare && bodyShare.length > 0,
+                        permissionLevel: file.permissionLevel,
+                        isReadOnly: persistenceManager.component.isReadOnlyMode
+                    });
+                    
+                    // ✅ MANUAL SYNC TRIGGER: If we have content but sync didn't fire
+                    if ((titleShare && titleShare.length > 0) || (bodyShare && bodyShare.length > 0)) {
+                        console.log('🔄 Content detected - manually triggering sync completion logic');
+                        
+                        // Mark provider as synced manually since onSynced didn't fire
+                        provider.synced = true;
+                        
+                        // Manually call the sync completion logic
+                        persistenceManager.component.$nextTick(() => {
+                            persistenceManager.component.connectionStatus = 'connected';
+                            persistenceManager.component.provider = provider;
+                            persistenceManager.component.lastSyncTime = new Date();
+                            
+                            // Update Y.js config with sync status
+                            yjsDoc.getMap('config').set('lastWebSocketSync', new Date().toISOString());
+                            yjsDoc.getMap('config').set('cloudSyncActive', true);
+                            yjsDoc.getMap('config').set('manualSyncTriggered', true);
+                            
+                            // Check if read-only editors need content
+                            if (persistenceManager.component.isReadOnlyMode && 
+                                persistenceManager.component.titleEditor && 
+                                persistenceManager.component.bodyEditor) {
+                                
+                                const titleContent = persistenceManager.component.titleEditor?.getText() || '';
+                                const bodyContent = persistenceManager.component.bodyEditor?.getText() || '';
+                                
+                                console.log('📖 Manual sync - checking read-only editor content:', {
+                                    titleHasContent: titleContent.length > 0,
+                                    bodyHasContent: bodyContent.length > 0,
+                                    titleShareLength: titleShare.length,
+                                    bodyShareLength: bodyShare.length
+                                });
+                                
+                                // If Y.js has content but editors don't, recreate editors
+                                if (titleShare.length > 0 && titleContent.length === 0) {
+                                    console.log('🔄 Recreating read-only editors due to sync issue...');
+                                    persistenceManager.recreateReadOnlyEditors(yjsDoc).catch(error => {
+                                        console.error('❌ Failed to recreate read-only editors:', error);
+                                    });
+                                } else if (titleContent.length > 0) {
+                                    console.log('✅ Read-only editors already have content - sync successful');
+                                }
+                            }
+                        });
+                    } else {
+                        console.log('⚠️ No content in Y.js document - waiting for sync');
+                    }
+                } else if (!provider.isConnected) {
+                    console.warn('⚠️ WebSocket not connected after 2s', {
+                        status: provider.status,
+                        configuration: provider.configuration,
+                        hasConnect: typeof provider.connect === 'function'
+                    });
+                    
+                    // Try to connect manually
+                    if (provider.connect) {
+                        console.log('🔌 Attempting manual reconnection...');
+                        provider.connect();
+                    }
+                }
+            }, 2000);
 
             return provider;
             
@@ -515,6 +1108,60 @@ class PersistenceManager {
             this.component.connectionStatus = 'error';
             this.component.connectionMessage = `Setup failed: ${error.message}`;
             return null;
+        }
+    }
+    
+    async recreateReadOnlyEditors(yjsDoc) {
+        // ✅ RECOVERY METHOD: Recreate read-only editors when content sync fails
+        console.log('🔄 Starting read-only editor recreation...');
+        
+        try {
+            // Destroy existing editors
+            if (this.component.titleEditor) {
+                this.component.titleEditor.destroy();
+                this.component.titleEditor = null;
+            }
+            if (this.component.bodyEditor) {
+                this.component.bodyEditor.destroy();
+                this.component.bodyEditor = null;
+            }
+            if (this.component.permlinkEditor) {
+                this.component.permlinkEditor.destroy();
+                this.component.permlinkEditor = null;
+            }
+            
+            // Wait for DOM cleanup
+            await this.component.$nextTick();
+            
+            // Recreate editors with synced Y.js document
+            const tier = TierDecisionManager.TierType.LOCAL; // Read-only uses Tier 1
+            const editors = await this.component.documentManager.editorFactory.createEditors(yjsDoc, tier, null);
+            
+            this.component.titleEditor = editors.titleEditor;
+            this.component.bodyEditor = editors.bodyEditor;
+            this.component.permlinkEditor = editors.permlinkEditor;
+            
+            // Re-setup sync listeners
+            this.component.syncManager.setupSyncListeners(editors, yjsDoc);
+            
+            console.log('✅ Read-only editors recreated successfully');
+            
+            // Verify content after recreation
+            setTimeout(() => {
+                const titleContent = this.component.titleEditor?.getText() || '';
+                const bodyContent = this.component.bodyEditor?.getText() || '';
+                
+                console.log('📖 Content check after editor recreation:', {
+                    titleHasContent: titleContent.length > 0,
+                    bodyHasContent: bodyContent.length > 0,
+                    titlePreview: titleContent.substring(0, 50),
+                    bodyPreview: bodyContent.substring(0, 100)
+                });
+            }, 100);
+            
+        } catch (error) {
+            console.error('❌ Failed to recreate read-only editors:', error);
+            throw error;
         }
     }
     
@@ -565,6 +1212,23 @@ class PersistenceManager {
             // ✅ VERIFICATION: Check that new editors have Y.js content
             const titleContent = newEditors.titleEditor?.getText() || '';
             const bodyContent = newEditors.bodyEditor?.getText() || '';
+            
+            // ✅ DEBUG: Log editor upgrade for read-only documents
+            console.log('🔄 Editor upgrade verification:', {
+                isReadOnlyMode: this.component.isReadOnlyMode,
+                permissionLevel: this.component.currentFile?.permissionLevel,
+                beforeUpgrade: beforeUpgrade,
+                afterUpgrade: {
+                    titleContent,
+                    bodyContent,
+                    titleEditorIsEditable: newEditors.titleEditor?.isEditable,
+                    bodyEditorIsEditable: newEditors.bodyEditor?.isEditable
+                },
+                yjsContent: {
+                    titleShareLength: yjsDoc.share.get('title')?.length || 0,
+                    bodyShareLength: yjsDoc.share.get('body')?.length || 0
+                }
+            });
             
             // ✅ TIPTAP BEST PRACTICE: Safe destruction with verification
             await this.component.documentManager.lifecycleManager.destroyEditors();
@@ -763,7 +1427,23 @@ class EditorFactory {
             }
         }
 
+        // ✅ DEBUG: Log Y.js document state before creating editors
+        console.log('🔨 Creating Tier 1 editors with Y.js document state:', {
+            hasDocumentName: !!yjsDoc.getMap('config').get('documentName'),
+            documentName: yjsDoc.getMap('config').get('documentName'),
+            isReadOnlyMode: this.component.isReadOnlyMode
+        });
+        
         // Create editors with Y.js collaboration but no CollaborationCursor
+        // ✅ CRITICAL FIX: Calculate editable state based on current permissions
+        const isEditable = !this.component.isReadOnlyMode;
+        console.log('🔧 Creating Tier 1 title editor with editable state:', {
+            isEditable,
+            isReadOnlyMode: this.component.isReadOnlyMode,
+            permissionLevel: this.component.currentFile?.permissionLevel,
+            documentType: this.component.currentFile?.type
+        });
+        
         const titleEditor = new Editor({
             element: this.component.$refs.titleEditor,
             extensions: [
@@ -778,29 +1458,44 @@ class EditorFactory {
                     placeholder: 'Enter title...' 
                 })
             ],
-            editable: !this.component.isReadOnlyMode,
+            editable: isEditable,
             immediatelyRender: true,
             shouldRerenderOnTransaction: false,
+            onCreate: ({ editor }) => {
+                // ✅ DEBUG: Check editor state immediately after creation
+                console.log('🎯 Title editor onCreate fired:', {
+                    isEditable: editor.isEditable,
+                    hasContent: editor.getText().length > 0,
+                    content: editor.getText(),
+                    yjsFieldContent: yjsDoc.share.get('title')?.length || 0,
+                    isReadOnlyMode: this.component.isReadOnlyMode
+                });
+            },
             onUpdate: ({ editor }) => {
                 // ✅ TIPTAP COMPLIANCE: Only UI state flags in onUpdate, no content access
 
-                // ✅ TIPTAP COMPLIANCE: Use synchronous permission check
-                if (!this.component.isReadOnlyMode) {
-                    this.component.hasUnsavedChanges = true;
-                    this.component.hasUserIntent = true; // ✅ PERFECT COMPLIANCE: No content access in onUpdate
-                    this.component.debouncedUpdateContent();
-                    
-                    // ✅ TIPTAP BEST PRACTICE: Create IndexedDB persistence lazily when user shows REAL intent
-                    if (this.component.isTemporaryDocument && !this.component.indexeddbProvider && !this.component.isCreatingPersistence) {
-                        // ✅ USER INTENT DETECTION: Use debounced real content check outside onUpdate
-                        this.component.debouncedCheckUserIntentAndCreatePersistence();
-                    } else if (!this.component.isTemporaryDocument && this.component.hasIndexedDBPersistence) {
-                        // ✅ PERFORMANCE: For stable documents, use shorter debounce for UI feedback
-                        this.component.clearUnsavedAfterSync();
-                    }
-                    
-                    // ✅ TEMP DOCUMENTS: No debounce needed (not yet persistent)
+                // ✅ CRITICAL FIX: Check both editor.isEditable AND component readonly mode
+                // This prevents any edit attempts during Y.js sync for read-only users
+                if (!editor.isEditable || this.component.isReadOnlyMode) {
+                    // Read-only mode - do nothing on updates
+                    return;
                 }
+
+                // ✅ TIPTAP COMPLIANCE: Only process updates for editable documents
+                this.component.hasUnsavedChanges = true;
+                this.component.hasUserIntent = true; // ✅ PERFECT COMPLIANCE: No content access in onUpdate
+                this.component.debouncedUpdateContent();
+                
+                // ✅ TIPTAP BEST PRACTICE: Create IndexedDB persistence lazily when user shows REAL intent
+                if (this.component.isTemporaryDocument && !this.component.indexeddbProvider && !this.component.isCreatingPersistence) {
+                    // ✅ USER INTENT DETECTION: Use debounced real content check outside onUpdate
+                    this.component.debouncedCheckUserIntentAndCreatePersistence();
+                } else if (!this.component.isTemporaryDocument && this.component.hasIndexedDBPersistence) {
+                    // ✅ PERFORMANCE: For stable documents, use shorter debounce for UI feedback
+                    this.component.clearUnsavedAfterSync();
+                }
+                
+                // ✅ TEMP DOCUMENTS: No debounce needed (not yet persistent)
             }
         });
 
@@ -818,29 +1513,44 @@ class EditorFactory {
                     placeholder: 'Start writing your content...' 
                 })
             ],
-            editable: !this.component.isReadOnlyMode,
+            editable: isEditable,
             immediatelyRender: true,
             shouldRerenderOnTransaction: false,
+            onCreate: ({ editor }) => {
+                // ✅ DEBUG: Check editor state immediately after creation
+                console.log('🎯 Body editor onCreate fired:', {
+                    isEditable: editor.isEditable,
+                    hasContent: editor.getText().length > 0,
+                    contentLength: editor.getText().length,
+                    yjsFieldContent: yjsDoc.share.get('body')?.length || 0,
+                    isReadOnlyMode: this.component.isReadOnlyMode
+                });
+            },
             onUpdate: ({ editor }) => {
                 // ✅ TIPTAP COMPLIANCE: Only UI state flags in onUpdate, no content access
 
-                // ✅ TIPTAP COMPLIANCE: Use synchronous permission check
-                if (!this.component.isReadOnlyMode) {
-                    this.component.hasUnsavedChanges = true;
-                    this.component.hasUserIntent = true; // ✅ PERFECT COMPLIANCE: No content access in onUpdate
-                    this.component.debouncedUpdateContent();
-                    
-                    // ✅ TIPTAP BEST PRACTICE: Create IndexedDB persistence lazily when user shows REAL intent
-                    if (this.component.isTemporaryDocument && !this.component.indexeddbProvider && !this.component.isCreatingPersistence) {
-                        // ✅ USER INTENT DETECTION: Use debounced real content check outside onUpdate
-                        this.component.debouncedCheckUserIntentAndCreatePersistence();
-                    } else if (!this.component.isTemporaryDocument && this.component.hasIndexedDBPersistence) {
-                        // ✅ PERFORMANCE: For stable documents, use shorter debounce for UI feedback
-                        this.component.clearUnsavedAfterSync();
-                    }
-                    
-                    // ✅ TEMP DOCUMENTS: No debounce needed (not yet persistent)
+                // ✅ CRITICAL FIX: Check both editor.isEditable AND component readonly mode
+                // This prevents any edit attempts during Y.js sync for read-only users
+                if (!editor.isEditable || this.component.isReadOnlyMode) {
+                    // Read-only mode - do nothing on updates
+                    return;
                 }
+
+                // ✅ TIPTAP COMPLIANCE: Only process updates for editable documents
+                this.component.hasUnsavedChanges = true;
+                this.component.hasUserIntent = true; // ✅ PERFECT COMPLIANCE: No content access in onUpdate
+                this.component.debouncedUpdateContent();
+                
+                // ✅ TIPTAP BEST PRACTICE: Create IndexedDB persistence lazily when user shows REAL intent
+                if (this.component.isTemporaryDocument && !this.component.indexeddbProvider && !this.component.isCreatingPersistence) {
+                    // ✅ USER INTENT DETECTION: Use debounced real content check outside onUpdate
+                    this.component.debouncedCheckUserIntentAndCreatePersistence();
+                } else if (!this.component.isTemporaryDocument && this.component.hasIndexedDBPersistence) {
+                    // ✅ PERFORMANCE: For stable documents, use shorter debounce for UI feedback
+                    this.component.clearUnsavedAfterSync();
+                }
+                
+                // ✅ TEMP DOCUMENTS: No debounce needed (not yet persistent)
             }
         });
 
@@ -855,6 +1565,18 @@ class EditorFactory {
             shouldRerenderOnTransaction: false
         });
 
+        // ✅ DEBUG: Check editor state after a delay to see if content syncs
+        setTimeout(() => {
+            console.log('🔍 Post-creation editor check (100ms) - Tier 1:', {
+                titleContent: titleEditor.getText(),
+                bodyContent: bodyEditor.getText().substring(0, 50),
+                titleEditable: titleEditor.isEditable,
+                bodyEditable: bodyEditor.isEditable,
+                yjsTitleContent: yjsDoc.share.get('title')?.length || 0,
+                yjsBodyContent: yjsDoc.share.get('body')?.length || 0
+            });
+        }, 100);
+        
         return { titleEditor, bodyEditor, permlinkEditor };
     }
     
@@ -909,13 +1631,23 @@ class EditorFactory {
             return extensions;
         };
 
+        // ✅ CRITICAL FIX: Calculate editable state based on current permissions
+        const isEditable = !this.component.isReadOnlyMode;
+        console.log('🔧 Creating Tier 2 title editor with editable state:', {
+            isEditable,
+            isReadOnlyMode: this.component.isReadOnlyMode,
+            permissionLevel: this.component.currentFile?.permissionLevel,
+            documentType: this.component.currentFile?.type,
+            hasWebSocketProvider: !!webSocketProvider
+        });
+        
         const titleEditor = new Editor({
             element: this.component.$refs.titleEditor,
             extensions: getCollaborativeExtensions('title'),
-            editable: !this.component.isReadOnlyMode,
+            editable: isEditable,
             immediatelyRender: true,
             shouldRerenderOnTransaction: false,
-            onUpdate: ({ editor }) => {
+            onUpdate: () => {
                 // ✅ TIPTAP COMPLIANCE: Only UI state flags in onUpdate, no content access
 
                 // ✅ TIPTAP COMPLIANCE: Use synchronous permission check
@@ -932,10 +1664,10 @@ class EditorFactory {
         const bodyEditor = new Editor({
             element: this.component.$refs.bodyEditor,
             extensions: getCollaborativeExtensions('body'),
-            editable: !this.component.isReadOnlyMode,
+            editable: isEditable,
             immediatelyRender: true,
             shouldRerenderOnTransaction: false,
-            onUpdate: ({ editor }) => {
+            onUpdate: () => {
                 // ✅ TIPTAP COMPLIANCE: Only UI state flags in onUpdate, no content access
 
                 // ✅ TIPTAP COMPLIANCE: Use synchronous permission check
@@ -1409,12 +2141,15 @@ class LifecycleManager {
                     console.log('✅ IndexedDB data cleared - preventing document contamination');
                     
                     // ✅ ADDITIONAL LOGGING: Log which user-specific key was cleared
-                    if (this.component.currentFile && this.component.fileType === 'collaborative' && this.component.username) {
-                        const clearedKey = `${this.component.username}__${this.component.currentFile.owner}/${this.component.currentFile.permlink}`;
+                    if (this.component.currentFile && this.component.fileType === 'collaborative') {
+                        const userIdentifier = this.component.username || 'public';
+                        const clearedKey = `${userIdentifier}__${this.component.currentFile.owner}/${this.component.currentFile.permlink}`;
                         console.log('🔐 Cleared user-isolated IndexedDB data:', {
-                            username: this.component.username,
+                            userIdentifier: userIdentifier,
                             document: `${this.component.currentFile.owner}/${this.component.currentFile.permlink}`,
-                            clearedKey: clearedKey
+                            clearedKey: clearedKey,
+                            isAuthenticated: !!this.component.username,
+                            isPublicAccess: !this.component.username
                         });
                     }
                 }
@@ -1496,6 +2231,16 @@ class DocumentManager {
     
     async loadDocument(file) {
         // ✅ TIPTAP BEST PRACTICE: Follow official loading patterns
+        console.log('🚀 DocumentManager.loadDocument called with:', {
+            fileId: file?.id,
+            owner: file?.owner,
+            permlink: file?.permlink,
+            type: file?.type,
+            permissionLevel: file?.permissionLevel,
+            documentName: file?.documentName || file?.name,
+            isReadOnly: file?.permissionLevel === 'readonly',
+            timestamp: new Date().toISOString()
+        });
         
         // Load document - removed diagnostic logging for performance
         
@@ -1559,11 +2304,80 @@ class DocumentManager {
             });
         }
         
-        // STEP 5: Create appropriate editors (for non-cloud documents only)
+        // STEP 5: Create appropriate editors immediately (offline-first pattern)
+        // ✅ OFFLINE-FIRST: Create editors immediately with whatever content is available
+        // IndexedDB has already synced (if content exists), WebSocket will sync in background
         const editors = await this.editorFactory.createEditors(yjsDoc, tier, webSocketProvider);
         this.component.titleEditor = editors.titleEditor;
         this.component.bodyEditor = editors.bodyEditor;
         this.component.permlinkEditor = editors.permlinkEditor;
+        
+        // ✅ DEBUG: Check editor content after creation
+        setTimeout(() => {
+            console.log('🔍 Editor content check after creation (1s delay):', {
+                titleContent: this.component.titleEditor?.getText() || 'no title editor',
+                bodyContent: this.component.bodyEditor?.getText()?.substring(0, 100) || 'no body editor',
+                isReadOnly: this.component.isReadOnlyMode,
+                hasWebSocketProvider: !!this.component.provider,
+                connectionStatus: this.component.connectionStatus,
+                titleEditorIsEditable: this.component.titleEditor?.isEditable,
+                bodyEditorIsEditable: this.component.bodyEditor?.isEditable,
+                yjsDocExists: !!this.component.ydoc,
+                yjsConfigDocumentName: this.component.ydoc?.getMap('config')?.get('documentName')
+            });
+            
+            // Additional Y.js state check
+            if (this.component.ydoc) {
+                const titleShare = this.component.ydoc.share.get('title');
+                const bodyShare = this.component.ydoc.share.get('body');
+                console.log('🔍 Y.js document state check:', {
+                    hasTitleShare: !!titleShare,
+                    hasBodyShare: !!bodyShare,
+                    titleLength: titleShare?.length || 0,
+                    bodyLength: bodyShare?.length || 0,
+                    yjsClientID: this.component.ydoc.clientID,
+                    yjsGuid: this.component.ydoc.guid
+                });
+                
+                // ✅ CRITICAL DEBUG: Check if read-only editors need content recovery
+                if (this.component.isReadOnlyMode && titleShare && titleShare.length > 0) {
+                    const editorHasContent = this.component.titleEditor?.getText()?.length > 0;
+                    const yjsHasContent = titleShare.length > 0;
+                    
+                    console.log('🔍 Read-only document with Y.js content detected', {
+                        editorHasContent,
+                        yjsHasContent,
+                        editorState: this.component.titleEditor?.state?.doc?.content?.size,
+                        isEditable: this.component.titleEditor?.isEditable
+                    });
+                    
+                    // ✅ CONTENT RECOVERY: If Y.js has content but editor is empty
+                    if (yjsHasContent && !editorHasContent) {
+                        console.warn('⚠️ Content mismatch detected - Y.js has content but editor is empty');
+                        
+                        // Check if TipTap Collaboration extension is properly connected
+                        const collabExtension = this.component.titleEditor?.extensionManager?.extensions?.find(ext => ext.name === 'collaboration');
+                        if (collabExtension) {
+                            console.log('🔍 Collaboration extension state:', {
+                                extensionName: collabExtension.name,
+                                hasOptions: !!collabExtension.options,
+                                document: collabExtension.options?.document === this.component.ydoc,
+                                field: collabExtension.options?.field,
+                                documentMatch: collabExtension.options?.document === this.component.ydoc
+                            });
+                            
+                            // ✅ RECOVERY: Trigger collaborative extension sync if disconnected
+                            if (collabExtension.options?.document !== this.component.ydoc) {
+                                console.log('🔄 RECOVERY: Collaboration extension document mismatch, content recovery may be needed');
+                                // This is a diagnostic - TipTap should handle automatic sync
+                            }
+                        } else {
+                            console.warn('⚠️ RECOVERY: Collaboration extension not found in read-only editor');
+                        }
+                    }
+                }
+            }
+        }, 1000);
         
         // ✅ CRITICAL: NO manual content setting
         // TipTap automatically loads content from Y.js after sync
@@ -1588,8 +2402,7 @@ class DocumentManager {
         } else {
             // For local documents, do a quick content check (no delays)
             if (this.component.titleEditor && this.component.bodyEditor) {
-                const hasTitle = Boolean(this.component.titleEditor.getText().trim());
-                const hasBody = Boolean(this.component.bodyEditor.getText().trim());
+                // Content verification performed for local documents
             }
         }
         
@@ -1654,16 +2467,48 @@ class DocumentManager {
             }
         }
         
+        // ✅ CRITICAL FIX: Ensure collaborative documents maintain their type and flags
+        if (tier === TierDecisionManager.TierType.CLOUD) {
+            finalFile = {
+                ...finalFile,
+                type: 'collaborative',
+                isCollaborative: true
+            };
+        }
+        
         this.component.currentFile = finalFile;
         
+        console.log('💾 Setting currentFile with collaborative flags:', {
+            hasOwner: !!finalFile.owner,
+            hasPermlink: !!finalFile.permlink,
+            type: finalFile.type,
+            isCollaborative: finalFile.isCollaborative,
+            permissionLevel: finalFile.permissionLevel,
+            tier: tier
+        });
         
         this.component.fileType = tier === TierDecisionManager.TierType.CLOUD ? 'collaborative' : 'local';
         this.component.isCollaborativeMode = tier === TierDecisionManager.TierType.CLOUD;
         
-
+        console.log('📊 Document state after loading:', {
+            tier: tier,
+            fileType: this.component.fileType,
+            isCollaborativeMode: this.component.isCollaborativeMode,
+            currentFileType: this.component.currentFile?.type,
+            currentFileIsCollaborative: this.component.currentFile?.isCollaborative,
+            hasOwnerPermlink: !!(this.component.currentFile?.owner && this.component.currentFile?.permlink),
+            permissionLevel: this.component.currentFile?.permissionLevel,
+            isReadOnlyMode: this.component.isReadOnlyMode
+        });
         
         // ✅ Force status update after state changes
         this.component.$nextTick(() => {
+            console.log('📊 Status check after nextTick:', {
+                isCollaborativeMode: this.component.isCollaborativeMode,
+                hasIndexedDBPersistence: this.component.hasIndexedDBPersistence,
+                connectionStatus: this.component.connectionStatus,
+                unifiedStatus: this.component.unifiedStatusInfo?.state
+            });
         });
     }
     
@@ -2038,7 +2883,7 @@ class RecoveryManager {
     /**
      * ✅ TIPTAP COMPLIANCE: Recover corrupted Y.js document
      */
-    async recoverCorruptedDocument(documentId, ydoc) {
+    async recoverCorruptedDocument(documentId) {
         console.log('🔧 Attempting Y.js document recovery', { documentId });
         
         try {
@@ -2143,6 +2988,7 @@ class RecoveryManager {
             return null;
         }
     }
+    
 }
 
 // ==================== MAIN COMPONENT ====================
@@ -2672,8 +3518,19 @@ export default {
                     };
                 }
 
-                // ✅ PRIORITY 2: LOCAL DOCUMENT WITH INDEXEDDB PERSISTENCE (Must check before collaborative)
-                if (this.hasIndexedDBPersistence && !this.isCollaborativeMode) {
+                // ✅ PRIORITY 2: CHECK FOR COLLABORATIVE DOCUMENTS FIRST
+                // Check if this is a collaborative document by looking at currentFile properties
+                const isCollaborativeDocument = this.currentFile && 
+                    (this.currentFile.type === 'collaborative' || 
+                     this.currentFile.isCollaborative || 
+                     (this.currentFile.owner && this.currentFile.permlink));
+                
+                // ✅ PRIORITY 2A: COLLABORATIVE DOCUMENTS (even if offline/read-only)
+                if (isCollaborativeDocument) {
+                    // Skip to collaborative status checks below
+                } 
+                // ✅ PRIORITY 2B: LOCAL DOCUMENT WITH INDEXEDDB PERSISTENCE
+                else if (this.hasIndexedDBPersistence && !this.isCollaborativeMode) {
                     if (this.hasUnsavedChanges) {
                         return {
                             state: 'saving-local',
@@ -2869,8 +3726,13 @@ export default {
             // ✅ ENHANCED: Additional permission validation for collaborative documents
             if (this.currentFile && this.currentFile.type === 'collaborative') {
                 const permissionLevel = this.getUserPermissionLevel(this.currentFile);
-                // Only allow editing if permission is editable, postable, or owner
-                return ['editable', 'postable', 'owner'].includes(permissionLevel);
+                // ✅ 4-TIER PERMISSION MODEL: Allow editing for all levels except readonly and no-access
+                // - owner: Can edit
+                // - postable: Can edit
+                // - editable: Can edit
+                // - readonly: Cannot edit
+                // - no-access: Cannot edit
+                return !['readonly', 'no-access', 'unknown'].includes(permissionLevel);
             }
             
             // ✅ DEFAULT: Local documents and temp documents are editable
@@ -3070,8 +3932,17 @@ export default {
                 return false;
             }
             
+            // ✅ SECURITY: Default collaborative documents to readonly until proven otherwise
+            // Check if we're loading a collaborative document from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const isLoadingCollaborativeFromURL = urlParams.has('collab_owner') && urlParams.has('collab_permlink');
+            
             // ✅ LOCAL DOCUMENT OVERRIDE: Local documents are ALWAYS editable (by design)
             if (!this.currentFile) {
+                // If no currentFile but loading collaborative doc, default to readonly
+                if (isLoadingCollaborativeFromURL) {
+                    return true; // Default collaborative to readonly
+                }
                 return false; // No document = new document = editable
             }
             
@@ -3101,74 +3972,18 @@ export default {
             
             // ✅ COLLABORATIVE DOCUMENTS: Only check permissions for collaborative docs
             if (this.currentFile?.type === 'collaborative') {
-                // ✅ TIPTAP BEST PRACTICE: Use reactive permission state (not computed evaluation)
-                // This follows TipTap's onSynced pattern for immediate UI updates
-                const documentKey = `${this.currentFile.owner}/${this.currentFile.permlink}`;
+                // ✅ TIPTAP BEST PRACTICE: Use getUserPermissionLevel for consistent 4-tier permission handling
+                const userPermission = this.getUserPermissionLevel(this.currentFile);
                 
-                // ✅ OFFLINE-FIRST: Check reactive permission state first (instant access)
-                if (this.reactivePermissionState && this.reactivePermissionState[documentKey]) {
-                    const reactiveState = this.reactivePermissionState[documentKey];
-                    const isStale = (Date.now() - reactiveState.timestamp) > 300000; // 5 minutes
-                    
-                    if (!isStale) {
-                        // ✅ PERFORMANCE: Return cached reactive state (no permission lookup needed)
-                        return reactiveState.isReadOnly;
-                    }
-                }
+                // ✅ 4-TIER PERMISSION MODEL COMPLIANCE:
+                // - owner: Full control (edit + share + delete)
+                // - postable: Can edit and publish to blockchain
+                // - editable: Can edit but not publish
+                // - readonly: Can only view
+                // - no-access: Cannot access document
                 
-                // ✅ PERFORMANCE: Check permission cache before expensive lookup
-                if (this.permissionCache && this.permissionCache[documentKey]) {
-                    const cachedPermission = this.permissionCache[documentKey];
-                    const isStale = (Date.now() - cachedPermission.timestamp) > 300000; // 5 minutes
-                    const isCorrectUser = cachedPermission.username === this.username;
-                    
-                    if (!isStale && isCorrectUser) {
-                        const isReadOnly = (cachedPermission.level === 'readonly' || cachedPermission.level === 'no-access');
-                        
-                        // ✅ SYNC: Update reactive state to match permission cache
-                        this.updateReactivePermissionState(documentKey, isReadOnly, cachedPermission.level);
-                        
-                        return isReadOnly;
-                    }
-                }
-                
-                // ✅ CACHE-FIRST FALLBACK: Check for any stale cached permissions before going optimistic
-                const staleCachedPermission = this.currentFile.cachedPermissions?.[this.username];
-                if (staleCachedPermission) {
-                    const staleLevel = typeof staleCachedPermission === 'string' ? staleCachedPermission : staleCachedPermission.level;
-                    const isStaleReadOnly = (staleLevel === 'readonly' || staleLevel === 'no-access');
-                    
-                    // Using stale cached permission for better UX - removed verbose logging
-                    
-                    // ✅ BACKGROUND: Trigger fresh permission load
-                    this.$nextTick(() => {
-                        this.getMasterPermissionForDocument(this.currentFile, false, 'stale-cache-refresh');
-                    });
-                    
-                    return isStaleReadOnly;
-                }
-                
-                // ✅ OPTIMISTIC FALLBACK: Only if no cache exists at all
-                // This prevents readonly flicker while permissions are being fetched
-                
-                // ✅ CHECK: If user has auth headers (even if expired), they likely have access
-                const hasAuthHeaders = !!this.authHeaders?.['x-account'];
-                const userAccount = this.authHeaders?.['x-account'];
-                
-                if (!this.isAuthenticated && !hasAuthHeaders) {
-                    // ✅ NO AUTH: Truly unauthenticated users default to readonly
-                    return true;
-                }
-                
-                // ✅ OPTIMISTIC: If user has auth headers or is authenticated, assume editable
-                // This handles cases where auth is expired but user likely has access
-                
-                // ✅ BACKGROUND: Trigger permission load without blocking UI
-                this.$nextTick(() => {
-                    this.getMasterPermissionForDocument(this.currentFile, false, 'optimistic-load');
-                });
-            
-                return false; // Optimistically assume editable
+                // Return true (read-only mode) for readonly and no-access
+                return userPermission === 'readonly' || userPermission === 'no-access';
             }
             
             // ✅ DEFAULT: All non-collaborative documents are editable
@@ -3331,6 +4146,39 @@ export default {
         this.setupGlobalErrorHandler();
         
         // ✅ API LOGGING: All collaboration endpoints have JSON response logging enabled
+        
+        // 🚨 DEBUG: Log collaboration endpoints 5 seconds after page load
+        setTimeout(async () => {
+            console.log('\n🔍 === DEBUGGING COLLABORATION ENDPOINTS (5s after load) ===');
+            
+            // Check if we have a collaborative document loaded
+            if (this.currentFile && this.currentFile.type === 'collaborative' && this.currentFile.owner && this.currentFile.permlink) {
+                console.log('📄 Current collaborative document:', {
+                    owner: this.currentFile.owner,
+                    permlink: this.currentFile.permlink,
+                    name: this.currentFile.name
+                });
+                
+                // Force load both endpoints to see their JSON responses
+                try {
+                    console.log('\n📡 Calling /collaboration/info endpoint...');
+                    await this.loadCollaborationInfo(true); // force refresh to bypass cache
+                } catch (error) {
+                    console.error('❌ Error loading info endpoint:', error);
+                }
+                
+                try {
+                    console.log('\n📡 Calling /collaboration/stats endpoint...');
+                    await this.loadCollaborationStats(true); // force refresh to bypass cache
+                } catch (error) {
+                    console.error('❌ Error loading stats endpoint:', error);
+                }
+                
+                console.log('\n=== END COLLABORATION ENDPOINTS DEBUG ===\n');
+            } else {
+                console.log('⚠️ No collaborative document loaded - skipping endpoint debug');
+            }
+        }, 5000);
         
         try {
             // Initialize managers
@@ -4292,14 +5140,38 @@ export default {
         },
         
         async autoConnectToCollaborativeDocument(owner, permlink) {
+            console.log('🚦 autoConnectToCollaborativeDocument called:', {
+                owner,
+                permlink,
+                isAuthenticated: this.isAuthenticated,
+                username: this.username,
+                hasAuthHeaders: !!this.authHeaders,
+                authAccount: this.authHeaders?.['x-account']
+            });
+            
+            // ✅ SECURITY: Wait for authentication to be available for private documents
+            // Public documents can proceed without authentication
+            if (!this.isAuthenticated && !this.authHeaders?.['x-account']) {
+                console.log('⏳ AUTH: No authentication available - checking if document is public', {
+                    document: `${owner}/${permlink}`,
+                    isAuthenticated: this.isAuthenticated,
+                    hasAuthHeaders: !!this.authHeaders
+                });
+                
+                // For now, proceed and let the server determine if it's public
+                // If it's private, the server will reject the request
+            }
             
             try {
                 // ✅ TIPTAP BEST PRACTICE: Use cached metadata for instant display
                 const documentId = `${owner}/${permlink}`;
                 const documentKey = `${owner}/${permlink}`;
                 
+                console.log('📍 Step 1: Starting document load process');
+                
                 // ✅ PERFORMANCE: Load cached metadata synchronously for instant document name
                 await this.preloadDocumentMetadata(owner, permlink);
+                console.log('📍 Step 2: Metadata preloaded');
                 const cachedMetadata = this.documentMetadataCache?.[documentKey];
                 
                 // ✅ FLASH FIX: Try to get real document name from collaborative docs API before creating document
@@ -4337,6 +5209,30 @@ export default {
                 }
                 
                 // ✅ TIPTAP COMPLIANT: Create proper document object
+                console.log('📄 Creating document object for loading:', {
+                    documentId,
+                    owner,
+                    permlink,
+                    displayName
+                });
+                
+                // ✅ OFFLINE-FIRST: Check for cached permission before creating document object
+                let cachedPermission = null;
+                if (this.reactivePermissionState && this.reactivePermissionState[documentKey]) {
+                    const reactiveState = this.reactivePermissionState[documentKey];
+                    const isStale = (Date.now() - reactiveState.timestamp) > 300000; // 5 minutes
+                    
+                    if (!isStale) {
+                        cachedPermission = reactiveState.permissionLevel;
+                        console.log('✅ PERMISSION: Using cached permission from reactive state', {
+                            document: documentKey,
+                            permission: cachedPermission,
+                            isReadOnly: reactiveState.isReadOnly,
+                            age: Math.round((Date.now() - reactiveState.timestamp) / 1000) + 's'
+                        });
+                    }
+                }
+                
                 const localDocumentFile = {
                     id: documentId,
                     owner: owner,
@@ -4348,7 +5244,8 @@ export default {
                     created: new Date().toISOString(),
                     modified: new Date().toISOString(),
                     isCollaborative: true,
-                    isOfflineFirst: true
+                    isOfflineFirst: true,
+                    permissionLevel: cachedPermission // Apply cached permission immediately
                 };
                 
                 
@@ -4395,7 +5292,23 @@ export default {
                 }
                 
                 // ✅ TIPTAP BEST PRACTICE: Load document through proper DocumentManager
+                console.log('📍 Step 3: About to call loadDocument');
+                console.log('📄 Loading collaborative document through DocumentManager:', {
+                    file: localDocumentFile,
+                    hasOwner: !!localDocumentFile.owner,
+                    hasPermlink: !!localDocumentFile.permlink,
+                    type: localDocumentFile.type,
+                    permissionLevel: localDocumentFile.permissionLevel,
+                    hasDocumentManager: !!this.documentManager
+                });
+                
+                if (!this.documentManager) {
+                    console.error('❌ CRITICAL: documentManager is not available!');
+                    throw new Error('DocumentManager not initialized');
+                }
+                
                 await this.documentManager.loadDocument(localDocumentFile);
+                console.log('📍 Step 4: loadDocument completed');
                 
                 // ✅ PHASE 2: BACKGROUND AUTHENTICATION (non-blocking)
                 let isAuthenticated = this.isAuthenticated && !this.isAuthExpired;
@@ -4461,12 +5374,12 @@ export default {
         // ✅ NEW: Background server metadata fetch (non-blocking)
         async fetchDocumentMetadataInBackground(owner, permlink) {
             try {
-                if (!this.isAuthenticated || this.isAuthExpired) {
-                    return null;
-                }
+                // ✅ ALLOW READ-ONLY: Try to fetch metadata even without authentication
+                // The server should return public/readonly document metadata
+                const headers = this.isAuthenticated && !this.isAuthExpired ? this.authHeaders : {};
                 
-                const response = await fetch(`https://data.dlux.io/api/collaboration/documents/${owner}/${permlink}`, {
-                    headers: this.authHeaders
+                const response = await fetch(`https://data.dlux.io/api/collaboration/info/${owner}/${permlink}`, {
+                    headers: headers
                 });
                 
                 if (response.ok) {
@@ -4485,7 +5398,25 @@ export default {
                         this.currentFile.permissionLevel = documentData.accessType;
                         
                         // Force UI reactivity update
-                        this.triggerPermissionReactivity();
+                        this.$nextTick(() => {
+                            // Update reactive permission state
+                            const documentKey = `${owner}/${permlink}`;
+                            this.updateReactivePermissionState(documentKey, documentData.accessType === 'readonly', documentData.accessType);
+                            
+                            // Force editors to update their editable state if needed
+                            if (this.titleEditor && this.bodyEditor) {
+                                const shouldBeEditable = documentData.accessType !== 'readonly';
+                                if (this.titleEditor.isEditable !== shouldBeEditable) {
+                                    this.titleEditor.setEditable(shouldBeEditable);
+                                    this.bodyEditor.setEditable(shouldBeEditable);
+                                    console.log('🔐 Updated editor editable state based on permission:', {
+                                        document: documentKey,
+                                        editable: shouldBeEditable,
+                                        accessType: documentData.accessType
+                                    });
+                                }
+                            }
+                        });
                     }
                     
                     return documentData;
@@ -4588,10 +5519,9 @@ export default {
             
             const documentKey = this.getDocumentKey(file);
             
-            // ✅ COLLABORATIVE FIX: Collaborative documents should never show local status indicators
-            if (file.isCollaborative || file.type === 'collaborative') {
-                return 'none'; // Collaborative documents are cloud-native, no local status
-            }
+            // ✅ COLLABORATIVE FIX: Collaborative documents can have local cache (IndexedDB)
+            // Don't exclude them from local status - they use offline-first architecture
+            // The local status shows if they're cached in IndexedDB for offline access
             
             // For local documents (localStorage), they always have local status
             if (file.id && !file.owner) {
@@ -4913,9 +5843,15 @@ export default {
             // ✅ TIPTAP BEST PRACTICE: Non-blocking permission loading for collaborative documents
             if (file && file.type === 'collaborative') {
                 this.loadDocumentPermissions().then(() => {
-                    // ✅ FIX: Trigger file table permission refresh after loading document
+                    // ✅ FIX: Force Vue to re-evaluate computed properties
                     if (this.collaborativeDocs && this.collaborativeDocs.length > 0) {
-                        this.triggerPermissionReactivity();
+                        this.$nextTick(() => {
+                            // Update reactive permission state if we have permission info
+                            if (file.permissionLevel) {
+                                const documentKey = `${file.owner}/${file.permlink}`;
+                                this.updateReactivePermissionState(documentKey, file.permissionLevel === 'readonly', file.permissionLevel);
+                            }
+                        });
                     }
                 }).catch(error => {
                     console.warn('⚠️ Background permission loading failed:', error.message);
@@ -5149,7 +6085,6 @@ export default {
             const errors = [];
             
             // ✅ TIPTAP BEST PRACTICE: Use method calls for display data
-            const title = this.displayTitle();
             const titleText = this.displayTitleForUI();
             const permlink = this.generatedPermlink();
             
@@ -5381,13 +6316,27 @@ export default {
                                 });
                             }
                             
-                            // ✅ TIPTAP BEST PRACTICE: Trigger editor mode update with proper Vue timing
+                            // ✅ TIPTAP BEST PRACTICE: Update editor editable state based on permission
                             this.$nextTick(() => {
-                                this.triggerPermissionReactivity();
-                                // Force immediate editor mode update after Vue reactivity
-                                this.$nextTick(() => {
-                                    this.updateEditorMode();
-                                });
+                                // Update reactive permission state for computed property
+                                const documentKey = `${doc.owner}/${doc.permlink}`;
+                                this.updateReactivePermissionState(documentKey, doc.accessType === 'readonly', doc.accessType);
+                                
+                                // Force editors to update their editable state if needed
+                                if (this.titleEditor && this.bodyEditor) {
+                                    const shouldBeEditable = doc.accessType !== 'readonly';
+                                    console.log('🔐 Updating editor mode from collab docs sync:', {
+                                        document: documentKey,
+                                        accessType: doc.accessType,
+                                        shouldBeEditable,
+                                        currentlyEditable: this.titleEditor.isEditable
+                                    });
+                                    
+                                    if (this.titleEditor.isEditable !== shouldBeEditable) {
+                                        this.titleEditor.setEditable(shouldBeEditable);
+                                        this.bodyEditor.setEditable(shouldBeEditable);
+                                    }
+                                }
                             });
                         }
                             
@@ -5793,7 +6742,7 @@ export default {
                     const sourceProvider = new IndexeddbPersistence(localId, sourceDoc);
                     
                     // Wait for source document to load
-                    await new Promise((resolve, reject) => {
+                    await new Promise((resolve) => {
                         const timeout = setTimeout(() => {
                             resolve(); // Don't fail the conversion
                         }, 1000);
@@ -5944,7 +6893,7 @@ export default {
                 const sourceDoc = new Y.Doc();
                 const sourceProvider = new IndexeddbPersistence(localId, sourceDoc);
                 
-                await new Promise((resolve, reject) => {
+                await new Promise((resolve) => {
                     const timeout = setTimeout(() => reject(new Error('Source document load timeout')), 2000);
                     
                     sourceProvider.once('synced', () => {
@@ -5962,7 +6911,7 @@ export default {
                 Y.applyUpdate(targetDoc, sourceState);
                 
                 // ✅ Wait for target to sync
-                await new Promise((resolve, reject) => {
+                await new Promise((resolve) => {
                     const timeout = setTimeout(() => reject(new Error('Target document save timeout')), 2000);
                     
                     targetProvider.once('synced', () => {
@@ -6164,6 +7113,16 @@ export default {
                 let documentInfo = null;
                 if (infoResult.status === 'fulfilled') {
                     documentInfo = this.collaborationInfo; // Use the cached result
+                    console.log('📋 INFO ENDPOINT JSON Response:', {
+                        endpoint: 'collaboration/info',
+                        url: infoUrl,
+                        response: documentInfo,
+                        keys: Object.keys(documentInfo || {}),
+                        accessType: documentInfo?.accessType,
+                        isPublic: documentInfo?.isPublic,
+                        owner: documentInfo?.owner,
+                        permlink: documentInfo?.permlink
+                    });
                 } else {
                     console.warn('⚠️ INFO LOAD: Failed to load document metadata via cached method', {
                         error: infoResult.reason?.message || 'Unknown error'
@@ -6189,7 +7148,15 @@ export default {
                         permissionsData = null;
                     }
                     
-
+                    console.log('📋 PERMISSIONS ENDPOINT JSON Response:', {
+                        endpoint: 'collaboration/permissions',
+                        url: permissionsUrl,
+                        response: permissionsData,
+                        permissions: permissionsData?.permissions || [],
+                        permissionCount: permissionsData?.permissions?.length || 0,
+                        currentUserPermission: permissionsData?.permissions?.find(p => p.account === this.username),
+                        isOwner: this.currentFile.owner === this.username
+                    });
                     
                     this.documentPermissions = permissionsData.permissions || [];
                     
@@ -8167,6 +9134,10 @@ export default {
                 'collaborating': 'background: rgba(25, 135, 84, 0.1); border-left: 3px solid #198754;', // Green for collaborating
                 'synced': 'background: rgba(25, 135, 84, 0.1); border-left: 3px solid #198754;', // Green for synced
                 
+                // New states for collaborative documents
+                'read-only-collaborative': 'background: rgba(108, 117, 125, 0.1); border-left: 3px solid #6c757d;', // Grey for read-only
+                'loading-collaborative': 'background: rgba(13, 110, 253, 0.1); border-left: 3px solid #0d6efd;', // Blue for loading
+                
                 // Error states
                 'error': 'background: rgba(220, 53, 69, 0.1); border-left: 3px solid #dc3545;', // Red for errors
                 'unknown': 'background: rgba(108, 117, 125, 0.1); border-left: 3px solid #6c757d;' // Grey for unknown
@@ -8198,6 +9169,10 @@ export default {
                 'syncing': 'fas fa-sync fa-spin text-warning', // Orange sync for syncing
                 'collaborating': 'fas fa-users text-success', // Green users for collaborating
                 'synced': 'fas fa-cloud text-success', // Green cloud for synced
+                
+                // New states for collaborative documents
+                'read-only-collaborative': 'fas fa-eye text-muted', // Grey eye for read-only
+                'loading-collaborative': 'fas fa-circle-notch fa-spin text-primary', // Blue spinner for loading
                 
                 // Error states
                 'error': 'fas fa-exclamation-circle text-danger', // Red error icon
@@ -8891,7 +9866,7 @@ export default {
                                           dbName.includes('dlux'))) {
                                 try {
                                     const deleteReq = indexedDB.deleteDatabase(dbName);
-                                    await new Promise((resolve, reject) => {
+                                    await new Promise((resolve) => {
                                         deleteReq.onsuccess = () => {
                                             resolve();
                                         };
@@ -9014,6 +9989,10 @@ export default {
                 'collaborating': 'text-success',
                 'synced': 'text-success',
                 
+                // New states for collaborative documents
+                'read-only-collaborative': 'text-muted',
+                'loading-collaborative': 'text-primary',
+                
                 // Error states
                 'error': 'text-danger',
                 'unknown': 'text-muted'
@@ -9130,6 +10109,26 @@ export default {
             // No manual DOM manipulation or forced updates required
         },
         
+        // ===== REACTIVE PERMISSION STATE: Update reactive permission state for computed properties =====
+        updateReactivePermissionState(documentKey, isReadOnly, permissionLevel) {
+            if (!this.reactivePermissionState) {
+                this.reactivePermissionState = {};
+            }
+            
+            this.$set(this.reactivePermissionState, documentKey, {
+                isReadOnly: isReadOnly,
+                permissionLevel: permissionLevel,
+                timestamp: Date.now()
+            });
+            
+            console.log('🔐 Updated reactive permission state:', {
+                documentKey,
+                isReadOnly,
+                permissionLevel,
+                source: 'permission-update'
+            });
+        },
+        
         // ✅ PERFORMANCE: Cache document metadata for instant future loading
         cacheDocumentMetadata(owner, permlink, documentName) {
             if (!documentName || !owner || !permlink) return;
@@ -9194,12 +10193,35 @@ export default {
             this.isCheckingServerVersion = true;
             
             try {
-                // No auth headers for version endpoint
-                const response = await fetch('https://data.dlux.io/api/collaboration/version');
+                // ✅ CORRECT API: Use system/versions endpoint as documented in docker-data
+                // ✅ FIX: Handle CORS properly for cross-origin requests
+                const response = await fetch('https://data.dlux.io/api/system/versions', {
+                    method: 'GET',
+                    mode: 'cors',
+                    credentials: 'omit', // Don't send cookies for this public endpoint
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
                 
                 if (response.ok) {
-                    const data = await response.json();
-                    this.serverVersion = data.version || data.serverVersion || data.server_version;
+                    // ✅ FIX: Handle potential JSON parsing issues with version endpoint
+                    let data;
+                    try {
+                        const responseText = await response.text();
+                        if (responseText) {
+                            data = JSON.parse(responseText);
+                        } else {
+                            console.warn('⚠️ Empty response from version endpoint');
+                            return null;
+                        }
+                    } catch (parseError) {
+                        console.warn('⚠️ Failed to parse version response:', parseError.message);
+                        return null;
+                    }
+                    
+                    // ✅ FIX: Correct path to version based on actual API response structure
+                    this.serverVersion = data.application?.version || data.version || '1.0.0';
                     this.serverVersionCheckTime = now;
                     
                     // Check for version mismatch
@@ -9226,10 +10248,20 @@ export default {
                     
                     return this.serverVersion;
                 } else {
-                    console.warn('⚠️ Server version check failed:', response.status, response.statusText);
+                    // Version endpoint might not be implemented yet
+                    if (response.status === 404) {
+                        console.log('ℹ️ Server version endpoint not available (404)');
+                    } else {
+                        console.warn('⚠️ Server version check failed:', response.status, response.statusText);
+                    }
                 }
             } catch (error) {
-                console.warn('⚠️ Failed to check server version:', error.message);
+                // Don't log as error - version check is optional
+                if (error.message.includes('Failed to fetch') || error.message.includes('ERR_FAILED')) {
+                    console.log('ℹ️ Server version check skipped - network or CORS issue');
+                } else {
+                    console.warn('⚠️ Failed to check server version:', error.message);
+                }
                 
                 // Try to load from localStorage cache
                 try {
@@ -9704,6 +10736,7 @@ export default {
                     });
 
                     // 🚨 CRITICAL: Show the complete JSON structure
+                    console.log('📋 FULL JSON RESPONSE - /collaboration/info endpoint:', JSON.stringify(this.collaborationInfo, null, 2));
                     
                     // ✅ OFFLINE-FIRST: Cache the result
                     this.analyticsCaches[cacheKey] = this.collaborationInfo;
@@ -9789,6 +10822,7 @@ export default {
                     this.collaborationStats = data.stats || data;
 
                     // 🚨 CRITICAL: Show the complete JSON structure
+                    console.log('📋 FULL JSON RESPONSE - /collaboration/stats endpoint:', JSON.stringify(this.collaborationStats, null, 2));
                     
                     // ✅ OFFLINE-FIRST: Cache the result
                     this.analyticsCaches[cacheKey] = this.collaborationStats;

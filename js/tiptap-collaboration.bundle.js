@@ -187,6 +187,7 @@ const min = (a, b) => a < b ? a : b;
 const max = (a, b) => a > b ? a : b;
 
 /* eslint-env browser */
+
 const BIT8 = 128;
 const BITS7 = 127;
 
@@ -195,6 +196,7 @@ const BITS7 = 127;
  *
  * @module number
  */
+
 
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 
@@ -269,6 +271,7 @@ if (utf8TextDecoder && utf8TextDecoder.decode(new Uint8Array()).length === 1) {
  *
  * @module encoding
  */
+
 
 /**
  * Write one byte to the encoder.
@@ -433,6 +436,7 @@ const create = s => new Error(s);
  *
  * @module decoding
  */
+
 
 const errorUnexpectedEndOfArray = create('Unexpected end of array');
 const errorIntegerOutOfRange = create('Integer out of Range');
@@ -603,7 +607,7 @@ const readAuthMessage = (decoder, permissionDeniedHandler, authenticatedHandler)
  */
 const MessageTooBig = {
     code: 1009,
-    reason: 'Message Too Big',
+    reason: "Message Too Big",
 };
 /**
  * The server successfully processed the request, asks that the requester reset
@@ -611,7 +615,7 @@ const MessageTooBig = {
  */
 const ResetConnection = {
     code: 4205,
-    reason: 'Reset Connection',
+    reason: "Reset Connection",
 };
 /**
  * Similar to Forbidden, but specifically for use when authentication is required and has
@@ -619,7 +623,7 @@ const ResetConnection = {
  */
 const Unauthorized = {
     code: 4401,
-    reason: 'Unauthorized',
+    reason: "Unauthorized",
 };
 /**
  * The request contained valid data and was understood by the server, but the server
@@ -627,14 +631,14 @@ const Unauthorized = {
  */
 const Forbidden = {
     code: 4403,
-    reason: 'Forbidden',
+    reason: "Forbidden",
 };
 /**
  * The server timed out waiting for the request.
  */
 const ConnectionTimeout = {
     code: 4408,
-    reason: 'Connection Timeout',
+    reason: "Connection Timeout",
 };
 
 const awarenessStatesToArray = (states) => {
@@ -15526,44 +15530,44 @@ async function retry(attemptFunc, attemptOptions) {
 
 
 /**
- * Utility module to work with key-value stores.
+ * Common Math expressions.
  *
- * @module map
+ * @module math
  */
 
-/**
- * Creates a new Map instance.
- *
- * @function
- * @return {Map<any, any>}
- *
- * @function
- */
-const create$2 = () => new Map();
+const hocuspocus_provider_esm_floor = Math.floor;
 
 /**
- * Get map property. Create T if property is undefined and set T on map.
- *
- * ```js
- * const listeners = map.setIfUndefined(events, 'eventName', set.create)
- * listeners.add(listener)
- * ```
- *
  * @function
- * @template V,K
- * @template {Map<K,V>} MAP
- * @param {MAP} map
- * @param {K} key
- * @param {function():V} createT
- * @return {V}
+ * @param {number} a
+ * @param {number} b
+ * @return {number} The smaller element of a and b
  */
-const hocuspocus_provider_esm_setIfUndefined = (map, key, createT) => {
-  let set = map.get(key);
-  if (set === undefined) {
-    map.set(key, set = createT());
-  }
-  return set
-};
+const hocuspocus_provider_esm_min = (a, b) => a < b ? a : b;
+
+/**
+ * @function
+ * @param {number} a
+ * @param {number} b
+ * @return {number} The bigger element of a and b
+ */
+const hocuspocus_provider_esm_max = (a, b) => a > b ? a : b;
+
+/* eslint-env browser */
+
+const hocuspocus_provider_esm_BIT7 = 64;
+const hocuspocus_provider_esm_BIT8 = 128;
+const hocuspocus_provider_esm_BITS6 = 63;
+const hocuspocus_provider_esm_BITS7 = 127;
+
+/**
+ * Utility helpers for working with numbers.
+ *
+ * @module number
+ */
+
+
+const hocuspocus_provider_esm_MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 
 /**
  * Utility module to work with sets.
@@ -15571,13 +15575,14 @@ const hocuspocus_provider_esm_setIfUndefined = (map, key, createT) => {
  * @module set
  */
 
-const create$1 = () => new Set();
+const create$2 = () => new Set();
 
 /**
  * Utility module to work with Arrays.
  *
  * @module array
  */
+
 
 /**
  * Transforms something array-like to an actual Array.
@@ -15588,37 +15593,6 @@ const create$1 = () => new Set();
  * @return {T}
  */
 const hocuspocus_provider_esm_from = Array.from;
-
-/**
- * Utility module to work with strings.
- *
- * @module string
- */
-
-const hocuspocus_provider_esm_fromCharCode = String.fromCharCode;
-
-/**
- * @param {string} s
- * @return {string}
- */
-const hocuspocus_provider_esm_toLowerCase = s => s.toLowerCase();
-
-const hocuspocus_provider_esm_trimLeftRegex = /^\s*/g;
-
-/**
- * @param {string} s
- * @return {string}
- */
-const hocuspocus_provider_esm_trimLeft = s => s.replace(hocuspocus_provider_esm_trimLeftRegex, '');
-
-const hocuspocus_provider_esm_fromCamelCaseRegex = /([A-Z])/g;
-
-/**
- * @param {string} s
- * @param {string} separator
- * @return {string}
- */
-const hocuspocus_provider_esm_fromCamelCase = (s, separator) => hocuspocus_provider_esm_trimLeft(s.replace(hocuspocus_provider_esm_fromCamelCaseRegex, match => `${separator}${hocuspocus_provider_esm_toLowerCase(match)}`));
 
 /**
  * @param {string} str
@@ -15665,384 +15639,6 @@ if (hocuspocus_provider_esm_utf8TextDecoder && hocuspocus_provider_esm_utf8TextD
 }
 
 /**
- * Often used conditions.
- *
- * @module conditions
- */
-
-/**
- * @template T
- * @param {T|null|undefined} v
- * @return {T|null}
- */
-/* c8 ignore next */
-const hocuspocus_provider_esm_undefinedToNull = v => v === undefined ? null : v;
-
-/* eslint-env browser */
-
-/**
- * Isomorphic variable storage.
- *
- * Uses LocalStorage in the browser and falls back to in-memory storage.
- *
- * @module storage
- */
-
-/* c8 ignore start */
-class hocuspocus_provider_esm_VarStoragePolyfill {
-  constructor () {
-    this.map = new Map();
-  }
-
-  /**
-   * @param {string} key
-   * @param {any} newValue
-   */
-  setItem (key, newValue) {
-    this.map.set(key, newValue);
-  }
-
-  /**
-   * @param {string} key
-   */
-  getItem (key) {
-    return this.map.get(key)
-  }
-}
-/* c8 ignore stop */
-
-/**
- * @type {any}
- */
-let hocuspocus_provider_esm_localStorage = new hocuspocus_provider_esm_VarStoragePolyfill();
-let hocuspocus_provider_esm_usePolyfill = true;
-
-/* c8 ignore start */
-try {
-  // if the same-origin rule is violated, accessing localStorage might thrown an error
-  if (typeof localStorage !== 'undefined' && localStorage) {
-    hocuspocus_provider_esm_localStorage = localStorage;
-    hocuspocus_provider_esm_usePolyfill = false;
-  }
-} catch (e) { }
-/* c8 ignore stop */
-
-/**
- * This is basically localStorage in browser, or a polyfill in nodejs
- */
-/* c8 ignore next */
-const hocuspocus_provider_esm_varStorage = hocuspocus_provider_esm_localStorage;
-
-/**
- * A polyfill for `addEventListener('storage', event => {..})` that does nothing if the polyfill is being used.
- *
- * @param {function({ key: string, newValue: string, oldValue: string }): void} eventHandler
- * @function
- */
-/* c8 ignore next */
-const hocuspocus_provider_esm_onChange = eventHandler => hocuspocus_provider_esm_usePolyfill || addEventListener('storage', /** @type {any} */ (eventHandler));
-
-/**
- * A polyfill for `removeEventListener('storage', event => {..})` that does nothing if the polyfill is being used.
- *
- * @param {function({ key: string, newValue: string, oldValue: string }): void} eventHandler
- * @function
- */
-/* c8 ignore next */
-const hocuspocus_provider_esm_offChange = eventHandler => hocuspocus_provider_esm_usePolyfill || removeEventListener('storage', /** @type {any} */ (eventHandler));
-
-/**
- * Utility functions for working with EcmaScript objects.
- *
- * @module object
- */
-
-/**
- * @param {Object<string,any>} obj
- */
-const hocuspocus_provider_esm_keys = Object.keys;
-
-/**
- * @todo implement mapToArray & map
- *
- * @template R
- * @param {Object<string,any>} obj
- * @param {function(any,string):R} f
- * @return {Array<R>}
- */
-const hocuspocus_provider_esm_map = (obj, f) => {
-  const results = [];
-  for (const key in obj) {
-    results.push(f(obj[key], key));
-  }
-  return results
-};
-
-/**
- * @param {Object<string,any>} obj
- * @return {number}
- */
-const length$1 = obj => hocuspocus_provider_esm_keys(obj).length;
-
-/**
- * Calls `Object.prototype.hasOwnProperty`.
- *
- * @param {any} obj
- * @param {string|symbol} key
- * @return {boolean}
- */
-const hocuspocus_provider_esm_hasProperty = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
-
-/**
- * Common functions and function call helpers.
- *
- * @module function
- */
-
-/**
- * @template T
- *
- * @param {T} a
- * @param {T} b
- * @return {boolean}
- */
-const hocuspocus_provider_esm_equalityStrict = (a, b) => a === b;
-
-/* c8 ignore start */
-
-/**
- * @param {any} a
- * @param {any} b
- * @return {boolean}
- */
-const hocuspocus_provider_esm_equalityDeep = (a, b) => {
-  if (a == null || b == null) {
-    return hocuspocus_provider_esm_equalityStrict(a, b)
-  }
-  if (a.constructor !== b.constructor) {
-    return false
-  }
-  if (a === b) {
-    return true
-  }
-  switch (a.constructor) {
-    case ArrayBuffer:
-      a = new Uint8Array(a);
-      b = new Uint8Array(b);
-    // eslint-disable-next-line no-fallthrough
-    case Uint8Array: {
-      if (a.byteLength !== b.byteLength) {
-        return false
-      }
-      for (let i = 0; i < a.length; i++) {
-        if (a[i] !== b[i]) {
-          return false
-        }
-      }
-      break
-    }
-    case Set: {
-      if (a.size !== b.size) {
-        return false
-      }
-      for (const value of a) {
-        if (!b.has(value)) {
-          return false
-        }
-      }
-      break
-    }
-    case Map: {
-      if (a.size !== b.size) {
-        return false
-      }
-      for (const key of a.keys()) {
-        if (!b.has(key) || !hocuspocus_provider_esm_equalityDeep(a.get(key), b.get(key))) {
-          return false
-        }
-      }
-      break
-    }
-    case Object:
-      if (length$1(a) !== length$1(b)) {
-        return false
-      }
-      for (const key in a) {
-        if (!hocuspocus_provider_esm_hasProperty(a, key) || !hocuspocus_provider_esm_equalityDeep(a[key], b[key])) {
-          return false
-        }
-      }
-      break
-    case Array:
-      if (a.length !== b.length) {
-        return false
-      }
-      for (let i = 0; i < a.length; i++) {
-        if (!hocuspocus_provider_esm_equalityDeep(a[i], b[i])) {
-          return false
-        }
-      }
-      break
-    default:
-      return false
-  }
-  return true
-};
-
-/**
- * @template V
- * @template {V} OPTS
- *
- * @param {V} value
- * @param {Array<OPTS>} options
- */
-// @ts-ignore
-const hocuspocus_provider_esm_isOneOf = (value, options) => options.includes(value);
-
-/**
- * Isomorphic module to work access the environment (query params, env variables).
- *
- * @module map
- */
-
-/* c8 ignore next 2 */
-// @ts-ignore
-const hocuspocus_provider_esm_isNode = typeof process !== 'undefined' && process.release && /node|io\.js/.test(process.release.name) && Object.prototype.toString.call(typeof process !== 'undefined' ? process : 0) === '[object process]';
-
-/* c8 ignore next */
-const hocuspocus_provider_esm_isBrowser = typeof window !== 'undefined' && typeof document !== 'undefined' && !hocuspocus_provider_esm_isNode;
-/* c8 ignore next 3 */
-typeof navigator !== 'undefined'
-  ? /Mac/.test(navigator.platform)
-  : false;
-
-/**
- * @type {Map<string,string>}
- */
-let hocuspocus_provider_esm_params;
-
-/* c8 ignore start */
-const hocuspocus_provider_esm_computeParams = () => {
-  if (hocuspocus_provider_esm_params === undefined) {
-    if (hocuspocus_provider_esm_isNode) {
-      hocuspocus_provider_esm_params = create$2();
-      const pargs = process.argv;
-      let currParamName = null;
-      for (let i = 0; i < pargs.length; i++) {
-        const parg = pargs[i];
-        if (parg[0] === '-') {
-          if (currParamName !== null) {
-            hocuspocus_provider_esm_params.set(currParamName, '');
-          }
-          currParamName = parg;
-        } else {
-          if (currParamName !== null) {
-            hocuspocus_provider_esm_params.set(currParamName, parg);
-            currParamName = null;
-          }
-        }
-      }
-      if (currParamName !== null) {
-        hocuspocus_provider_esm_params.set(currParamName, '');
-      }
-      // in ReactNative for example this would not be true (unless connected to the Remote Debugger)
-    } else if (typeof location === 'object') {
-      hocuspocus_provider_esm_params = create$2(); // eslint-disable-next-line no-undef
-      (location.search || '?').slice(1).split('&').forEach((kv) => {
-        if (kv.length !== 0) {
-          const [key, value] = kv.split('=');
-          hocuspocus_provider_esm_params.set(`--${hocuspocus_provider_esm_fromCamelCase(key, '-')}`, value);
-          hocuspocus_provider_esm_params.set(`-${hocuspocus_provider_esm_fromCamelCase(key, '-')}`, value);
-        }
-      });
-    } else {
-      hocuspocus_provider_esm_params = create$2();
-    }
-  }
-  return hocuspocus_provider_esm_params
-};
-/* c8 ignore stop */
-
-/**
- * @param {string} name
- * @return {boolean}
- */
-/* c8 ignore next */
-const hocuspocus_provider_esm_hasParam = (name) => hocuspocus_provider_esm_computeParams().has(name);
-
-/**
- * @param {string} name
- * @return {string|null}
- */
-/* c8 ignore next 4 */
-const hocuspocus_provider_esm_getVariable = (name) =>
-  hocuspocus_provider_esm_isNode
-    ? hocuspocus_provider_esm_undefinedToNull(process.env[name.toUpperCase()])
-    : hocuspocus_provider_esm_undefinedToNull(hocuspocus_provider_esm_varStorage.getItem(name));
-
-/**
- * @param {string} name
- * @return {boolean}
- */
-/* c8 ignore next 2 */
-const hocuspocus_provider_esm_hasConf = (name) =>
-  hocuspocus_provider_esm_hasParam('--' + name) || hocuspocus_provider_esm_getVariable(name) !== null;
-
-/* c8 ignore next */
-hocuspocus_provider_esm_hasConf('production');
-
-/* c8 ignore next 2 */
-const hocuspocus_provider_esm_forceColor = hocuspocus_provider_esm_isNode &&
-  hocuspocus_provider_esm_isOneOf(process.env.FORCE_COLOR, ['true', '1', '2']);
-
-/* c8 ignore start */
-!hocuspocus_provider_esm_hasParam('no-colors') &&
-  (!hocuspocus_provider_esm_isNode || process.stdout.isTTY || hocuspocus_provider_esm_forceColor) && (
-  !hocuspocus_provider_esm_isNode || hocuspocus_provider_esm_hasParam('color') || hocuspocus_provider_esm_forceColor ||
-    hocuspocus_provider_esm_getVariable('COLORTERM') !== null ||
-    (hocuspocus_provider_esm_getVariable('TERM') || '').includes('color')
-);
-/* c8 ignore stop */
-
-/**
- * Common Math expressions.
- *
- * @module math
- */
-
-const hocuspocus_provider_esm_floor = Math.floor;
-
-/**
- * @function
- * @param {number} a
- * @param {number} b
- * @return {number} The smaller element of a and b
- */
-const hocuspocus_provider_esm_min = (a, b) => a < b ? a : b;
-
-/**
- * @function
- * @param {number} a
- * @param {number} b
- * @return {number} The bigger element of a and b
- */
-const hocuspocus_provider_esm_max = (a, b) => a > b ? a : b;
-
-/* eslint-env browser */
-const hocuspocus_provider_esm_BIT7 = 64;
-const hocuspocus_provider_esm_BIT8 = 128;
-const hocuspocus_provider_esm_BITS6 = 63;
-const hocuspocus_provider_esm_BITS7 = 127;
-
-/**
- * Utility helpers for working with numbers.
- *
- * @module number
- */
-
-const hocuspocus_provider_esm_MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
-
-/**
  * Efficient schema-less binary encoding with support for variable length encoding.
  *
  * Use [lib0/encoding] with [lib0/decoding]. Every encoding function has a corresponding decoding function.
@@ -16069,6 +15665,7 @@ const hocuspocus_provider_esm_MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
  *
  * @module encoding
  */
+
 
 /**
  * A BinaryEncoder handles the encoding to an Uint8Array.
@@ -16097,7 +15694,7 @@ const hocuspocus_provider_esm_createEncoder = () => new hocuspocus_provider_esm_
  * @param {Encoder} encoder
  * @return {number}
  */
-const hocuspocus_provider_esm_length = encoder => {
+const length$1 = encoder => {
   let len = encoder.cpos;
   for (let i = 0; i < encoder.bufs.length; i++) {
     len += encoder.bufs[i].length;
@@ -16113,7 +15710,7 @@ const hocuspocus_provider_esm_length = encoder => {
  * @return {Uint8Array} The created ArrayBuffer.
  */
 const hocuspocus_provider_esm_toUint8Array = encoder => {
-  const uint8arr = new Uint8Array(hocuspocus_provider_esm_length(encoder));
+  const uint8arr = new Uint8Array(length$1(encoder));
   let curPos = 0;
   for (let i = 0; i < encoder.bufs.length; i++) {
     const d = encoder.bufs[i];
@@ -16258,7 +15855,7 @@ const hocuspocus_provider_esm_writeVarUint8Array = (encoder, uint8Array) => {
  * @return {Error}
  */
 /* c8 ignore next */
-const hocuspocus_provider_esm_create = s => new Error(s);
+const create$1 = s => new Error(s);
 
 /**
  * Efficient schema-less binary decoding with support for variable length encoding.
@@ -16288,8 +15885,9 @@ const hocuspocus_provider_esm_create = s => new Error(s);
  * @module decoding
  */
 
-const hocuspocus_provider_esm_errorUnexpectedEndOfArray = hocuspocus_provider_esm_create('Unexpected end of array');
-const hocuspocus_provider_esm_errorIntegerOutOfRange = hocuspocus_provider_esm_create('Integer out of Range');
+
+const hocuspocus_provider_esm_errorUnexpectedEndOfArray = create$1('Unexpected end of array');
+const hocuspocus_provider_esm_errorIntegerOutOfRange = create$1('Integer out of Range');
 
 /**
  * A Decoder handles the decoding of an Uint8Array.
@@ -16502,241 +16100,11 @@ const hocuspocus_provider_esm_peekVarString = decoder => {
 };
 
 /**
- * Utility functions to work with buffers (Uint8Array).
- *
- * @module buffer
- */
-
-/**
- * @param {number} len
- */
-const hocuspocus_provider_esm_createUint8ArrayFromLen = len => new Uint8Array(len);
-
-/**
- * Create Uint8Array with initial content from buffer
- *
- * @param {ArrayBuffer} buffer
- * @param {number} byteOffset
- * @param {number} length
- */
-const hocuspocus_provider_esm_createUint8ArrayViewFromArrayBuffer = (buffer, byteOffset, length) => new Uint8Array(buffer, byteOffset, length);
-
-/**
- * Create Uint8Array with initial content from buffer
- *
- * @param {ArrayBuffer} buffer
- */
-const hocuspocus_provider_esm_createUint8ArrayFromArrayBuffer = buffer => new Uint8Array(buffer);
-
-/* c8 ignore start */
-/**
- * @param {Uint8Array} bytes
- * @return {string}
- */
-const hocuspocus_provider_esm_toBase64Browser = bytes => {
-  let s = '';
-  for (let i = 0; i < bytes.byteLength; i++) {
-    s += hocuspocus_provider_esm_fromCharCode(bytes[i]);
-  }
-  // eslint-disable-next-line no-undef
-  return btoa(s)
-};
-/* c8 ignore stop */
-
-/**
- * @param {Uint8Array} bytes
- * @return {string}
- */
-const hocuspocus_provider_esm_toBase64Node = bytes => Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength).toString('base64');
-
-/* c8 ignore start */
-/**
- * @param {string} s
- * @return {Uint8Array}
- */
-const hocuspocus_provider_esm_fromBase64Browser = s => {
-  // eslint-disable-next-line no-undef
-  const a = atob(s);
-  const bytes = hocuspocus_provider_esm_createUint8ArrayFromLen(a.length);
-  for (let i = 0; i < a.length; i++) {
-    bytes[i] = a.charCodeAt(i);
-  }
-  return bytes
-};
-/* c8 ignore stop */
-
-/**
- * @param {string} s
- */
-const hocuspocus_provider_esm_fromBase64Node = s => {
-  const buf = Buffer.from(s, 'base64');
-  return hocuspocus_provider_esm_createUint8ArrayViewFromArrayBuffer(buf.buffer, buf.byteOffset, buf.byteLength)
-};
-
-/* c8 ignore next */
-const hocuspocus_provider_esm_toBase64 = hocuspocus_provider_esm_isBrowser ? hocuspocus_provider_esm_toBase64Browser : hocuspocus_provider_esm_toBase64Node;
-
-/* c8 ignore next */
-const hocuspocus_provider_esm_fromBase64 = hocuspocus_provider_esm_isBrowser ? hocuspocus_provider_esm_fromBase64Browser : hocuspocus_provider_esm_fromBase64Node;
-
-/* eslint-env browser */
-
-/**
- * @typedef {Object} Channel
- * @property {Set<function(any, any):any>} Channel.subs
- * @property {any} Channel.bc
- */
-
-/**
- * @type {Map<string, Channel>}
- */
-const channels = new Map();
-
-/* c8 ignore start */
-class LocalStoragePolyfill {
-  /**
-   * @param {string} room
-   */
-  constructor (room) {
-    this.room = room;
-    /**
-     * @type {null|function({data:ArrayBuffer}):void}
-     */
-    this.onmessage = null;
-    /**
-     * @param {any} e
-     */
-    this._onChange = e => e.key === room && this.onmessage !== null && this.onmessage({ data: hocuspocus_provider_esm_fromBase64(e.newValue || '') });
-    hocuspocus_provider_esm_onChange(this._onChange);
-  }
-
-  /**
-   * @param {ArrayBuffer} buf
-   */
-  postMessage (buf) {
-    hocuspocus_provider_esm_varStorage.setItem(this.room, hocuspocus_provider_esm_toBase64(hocuspocus_provider_esm_createUint8ArrayFromArrayBuffer(buf)));
-  }
-
-  close () {
-    hocuspocus_provider_esm_offChange(this._onChange);
-  }
-}
-/* c8 ignore stop */
-
-// Use BroadcastChannel or Polyfill
-/* c8 ignore next */
-const BC = typeof BroadcastChannel === 'undefined' ? LocalStoragePolyfill : BroadcastChannel;
-
-/**
- * @param {string} room
- * @return {Channel}
- */
-const getChannel = room =>
-  hocuspocus_provider_esm_setIfUndefined(channels, room, () => {
-    const subs = create$1();
-    const bc = new BC(room);
-    /**
-     * @param {{data:ArrayBuffer}} e
-     */
-    /* c8 ignore next */
-    bc.onmessage = e => subs.forEach(sub => sub(e.data, 'broadcastchannel'));
-    return {
-      bc, subs
-    }
-  });
-
-/**
- * Subscribe to global `publish` events.
- *
- * @function
- * @param {string} room
- * @param {function(any, any):any} f
- */
-const subscribe = (room, f) => {
-  getChannel(room).subs.add(f);
-  return f
-};
-
-/**
- * Unsubscribe from `publish` global events.
- *
- * @function
- * @param {string} room
- * @param {function(any, any):any} f
- */
-const unsubscribe = (room, f) => {
-  const channel = getChannel(room);
-  const unsubscribed = channel.subs.delete(f);
-  if (unsubscribed && channel.subs.size === 0) {
-    channel.bc.close();
-    channels.delete(room);
-  }
-  return unsubscribed
-};
-
-/**
- * Publish data to all subscribers (including subscribers on this tab)
- *
- * @function
- * @param {string} room
- * @param {any} data
- * @param {any} [origin]
- */
-const publish = (room, data, origin = null) => {
-  const c = getChannel(room);
-  c.bc.postMessage(data);
-  c.subs.forEach(sub => sub(data, origin));
-};
-
-/**
- * Mutual exclude for JavaScript.
- *
- * @module mutex
- */
-
-/**
- * @callback mutex
- * @param {function():void} cb Only executed when this mutex is not in the current stack
- * @param {function():void} [elseCb] Executed when this mutex is in the current stack
- */
-
-/**
- * Creates a mutual exclude function with the following property:
- *
- * ```js
- * const mutex = createMutex()
- * mutex(() => {
- *   // This function is immediately executed
- *   mutex(() => {
- *     // This function is not executed, as the mutex is already active.
- *   })
- * })
- * ```
- *
- * @return {mutex} A mutual exclude function
- * @public
- */
-const createMutex = () => {
-  let token = true;
-  return (f, g) => {
-    if (token) {
-      token = false;
-      try {
-        f();
-      } finally {
-        token = true;
-      }
-    } else if (g !== undefined) {
-      g();
-    }
-  }
-};
-
-/**
  * Utility module to work with time.
  *
  * @module time
  */
+
 
 /**
  * Return current unix time.
@@ -16746,10 +16114,51 @@ const createMutex = () => {
 const hocuspocus_provider_esm_getUnixTime = Date.now;
 
 /**
+ * Utility module to work with key-value stores.
+ *
+ * @module map
+ */
+
+/**
+ * Creates a new Map instance.
+ *
+ * @function
+ * @return {Map<any, any>}
+ *
+ * @function
+ */
+const hocuspocus_provider_esm_create = () => new Map();
+
+/**
+ * Get map property. Create T if property is undefined and set T on map.
+ *
+ * ```js
+ * const listeners = map.setIfUndefined(events, 'eventName', set.create)
+ * listeners.add(listener)
+ * ```
+ *
+ * @function
+ * @template {Map<any, any>} MAP
+ * @template {MAP extends Map<any,infer V> ? function():V : unknown} CF
+ * @param {MAP} map
+ * @param {MAP extends Map<infer K,any> ? K : unknown} key
+ * @param {CF} createT
+ * @return {ReturnType<CF>}
+ */
+const hocuspocus_provider_esm_setIfUndefined = (map, key, createT) => {
+  let set = map.get(key);
+  if (set === undefined) {
+    map.set(key, set = createT());
+  }
+  return set
+};
+
+/**
  * Observable class prototype.
  *
  * @module observable
  */
+
 
 /* c8 ignore start */
 /**
@@ -16764,7 +16173,7 @@ class hocuspocus_provider_esm_Observable {
      * Some desc.
      * @type {Map<N, any>}
      */
-    this._observers = create$2();
+    this._observers = hocuspocus_provider_esm_create();
   }
 
   /**
@@ -16772,7 +16181,7 @@ class hocuspocus_provider_esm_Observable {
    * @param {function} f
    */
   on (name, f) {
-    hocuspocus_provider_esm_setIfUndefined(this._observers, name, create$1).add(f);
+    hocuspocus_provider_esm_setIfUndefined(this._observers, name, create$2).add(f);
   }
 
   /**
@@ -16815,18 +16224,144 @@ class hocuspocus_provider_esm_Observable {
    */
   emit (name, args) {
     // copy all listeners to an array first to make sure that no event is emitted to listeners that are subscribed while the event handler is called.
-    return hocuspocus_provider_esm_from((this._observers.get(name) || create$2()).values()).forEach(f => f(...args))
+    return hocuspocus_provider_esm_from((this._observers.get(name) || hocuspocus_provider_esm_create()).values()).forEach(f => f(...args))
   }
 
   destroy () {
-    this._observers = create$2();
+    this._observers = hocuspocus_provider_esm_create();
   }
 }
 /* c8 ignore end */
 
 /**
+ * Utility functions for working with EcmaScript objects.
+ *
+ * @module object
+ */
+
+
+/**
+ * @param {Object<string,any>} obj
+ */
+const hocuspocus_provider_esm_keys = Object.keys;
+
+/**
+ * @deprecated use object.size instead
+ * @param {Object<string,any>} obj
+ * @return {number}
+ */
+const hocuspocus_provider_esm_length = obj => hocuspocus_provider_esm_keys(obj).length;
+
+/**
+ * Calls `Object.prototype.hasOwnProperty`.
+ *
+ * @param {any} obj
+ * @param {string|symbol} key
+ * @return {boolean}
+ */
+const hocuspocus_provider_esm_hasProperty = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
+
+/**
+ * Common functions and function call helpers.
+ *
+ * @module function
+ */
+
+
+/**
+ * @template T
+ *
+ * @param {T} a
+ * @param {T} b
+ * @return {boolean}
+ */
+const hocuspocus_provider_esm_equalityStrict = (a, b) => a === b;
+
+/* c8 ignore start */
+
+/**
+ * @param {any} a
+ * @param {any} b
+ * @return {boolean}
+ */
+const hocuspocus_provider_esm_equalityDeep = (a, b) => {
+  if (a == null || b == null) {
+    return hocuspocus_provider_esm_equalityStrict(a, b)
+  }
+  if (a.constructor !== b.constructor) {
+    return false
+  }
+  if (a === b) {
+    return true
+  }
+  switch (a.constructor) {
+    case ArrayBuffer:
+      a = new Uint8Array(a);
+      b = new Uint8Array(b);
+    // eslint-disable-next-line no-fallthrough
+    case Uint8Array: {
+      if (a.byteLength !== b.byteLength) {
+        return false
+      }
+      for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) {
+          return false
+        }
+      }
+      break
+    }
+    case Set: {
+      if (a.size !== b.size) {
+        return false
+      }
+      for (const value of a) {
+        if (!b.has(value)) {
+          return false
+        }
+      }
+      break
+    }
+    case Map: {
+      if (a.size !== b.size) {
+        return false
+      }
+      for (const key of a.keys()) {
+        if (!b.has(key) || !hocuspocus_provider_esm_equalityDeep(a.get(key), b.get(key))) {
+          return false
+        }
+      }
+      break
+    }
+    case Object:
+      if (hocuspocus_provider_esm_length(a) !== hocuspocus_provider_esm_length(b)) {
+        return false
+      }
+      for (const key in a) {
+        if (!hocuspocus_provider_esm_hasProperty(a, key) || !hocuspocus_provider_esm_equalityDeep(a[key], b[key])) {
+          return false
+        }
+      }
+      break
+    case Array:
+      if (a.length !== b.length) {
+        return false
+      }
+      for (let i = 0; i < a.length; i++) {
+        if (!hocuspocus_provider_esm_equalityDeep(a[i], b[i])) {
+          return false
+        }
+      }
+      break
+    default:
+      return false
+  }
+  return true
+};
+
+/**
  * @module awareness-protocol
  */
+
 
 const outdatedTimeout = 30000;
 
@@ -17087,8 +16622,10 @@ const applyAwarenessUpdate = (awareness, update, origin) => {
 
 class EventEmitter {
     constructor() {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
         this.callbacks = {};
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     on(event, fn) {
         if (!this.callbacks[event]) {
             this.callbacks[event] = [];
@@ -17099,15 +16636,16 @@ class EventEmitter {
     emit(event, ...args) {
         const callbacks = this.callbacks[event];
         if (callbacks) {
-            callbacks.forEach(callback => callback.apply(this, args));
+            callbacks.forEach((callback) => callback.apply(this, args));
         }
         return this;
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     off(event, fn) {
         const callbacks = this.callbacks[event];
         if (callbacks) {
             if (fn) {
-                this.callbacks[event] = callbacks.filter(callback => callback !== fn);
+                this.callbacks[event] = callbacks.filter((callback) => callback !== fn);
             }
             else {
                 delete this.callbacks[event];
@@ -17119,36 +16657,6 @@ class EventEmitter {
         this.callbacks = {};
     }
 }
-
-/**
- * Utility module to work with urls.
- *
- * @module url
- */
-
-/**
- * @param {Object<string,string>} params
- * @return {string}
- */
-const encodeQueryParams = params =>
-  hocuspocus_provider_esm_map(params, (val, key) => `${encodeURIComponent(key)}=${encodeURIComponent(val)}`).join('&');
-
-var MessageType;
-(function (MessageType) {
-    MessageType[MessageType["Sync"] = 0] = "Sync";
-    MessageType[MessageType["Awareness"] = 1] = "Awareness";
-    MessageType[MessageType["Auth"] = 2] = "Auth";
-    MessageType[MessageType["QueryAwareness"] = 3] = "QueryAwareness";
-    MessageType[MessageType["Stateless"] = 5] = "Stateless";
-    MessageType[MessageType["CLOSE"] = 7] = "CLOSE";
-    MessageType[MessageType["SyncStatus"] = 8] = "SyncStatus";
-})(MessageType || (MessageType = {}));
-var WebSocketStatus;
-(function (WebSocketStatus) {
-    WebSocketStatus["Connecting"] = "connecting";
-    WebSocketStatus["Connected"] = "connected";
-    WebSocketStatus["Disconnected"] = "disconnected";
-})(WebSocketStatus || (WebSocketStatus = {}));
 
 class IncomingMessage {
     constructor(data) {
@@ -17178,7 +16686,49 @@ class IncomingMessage {
         return hocuspocus_provider_esm_writeVarUint8Array(this.encoder, data);
     }
     length() {
-        return hocuspocus_provider_esm_length(this.encoder);
+        return length$1(this.encoder);
+    }
+}
+
+var MessageType;
+(function (MessageType) {
+    MessageType[MessageType["Sync"] = 0] = "Sync";
+    MessageType[MessageType["Awareness"] = 1] = "Awareness";
+    MessageType[MessageType["Auth"] = 2] = "Auth";
+    MessageType[MessageType["QueryAwareness"] = 3] = "QueryAwareness";
+    MessageType[MessageType["Stateless"] = 5] = "Stateless";
+    MessageType[MessageType["CLOSE"] = 7] = "CLOSE";
+    MessageType[MessageType["SyncStatus"] = 8] = "SyncStatus";
+})(MessageType || (MessageType = {}));
+var WebSocketStatus;
+(function (WebSocketStatus) {
+    WebSocketStatus["Connecting"] = "connecting";
+    WebSocketStatus["Connected"] = "connected";
+    WebSocketStatus["Disconnected"] = "disconnected";
+})(WebSocketStatus || (WebSocketStatus = {}));
+
+class OutgoingMessage {
+    constructor() {
+        this.encoder = hocuspocus_provider_esm_createEncoder();
+    }
+    get(args) {
+        return args.encoder;
+    }
+    toUint8Array() {
+        return hocuspocus_provider_esm_toUint8Array(this.encoder);
+    }
+}
+
+class CloseMessage extends OutgoingMessage {
+    constructor() {
+        super(...arguments);
+        this.type = MessageType.CLOSE;
+        this.description = "Ask the server to close the connection";
+    }
+    get(args) {
+        hocuspocus_provider_esm_writeVarString(this.encoder, args.documentName);
+        hocuspocus_provider_esm_writeVarUint(this.encoder, this.type);
+        return this.encoder;
     }
 }
 
@@ -17187,14 +16737,10 @@ class HocuspocusProviderWebsocket extends EventEmitter {
         super();
         this.messageQueue = [];
         this.configuration = {
-            url: '',
+            url: "",
             // @ts-ignore
             document: undefined,
             WebSocketPolyfill: undefined,
-            parameters: {},
-            connect: true,
-            broadcast: true,
-            forceSyncInterval: false,
             // TODO: this should depend on awareness.outdatedTime
             messageReconnectTimeout: 30000,
             // 1 second
@@ -17223,7 +16769,6 @@ class HocuspocusProviderWebsocket extends EventEmitter {
             onDestroy: () => null,
             onAwarenessUpdate: () => null,
             onAwarenessChange: () => null,
-            quiet: false,
             providerMap: new Map(),
         };
         this.webSocket = null;
@@ -17233,62 +16778,55 @@ class HocuspocusProviderWebsocket extends EventEmitter {
         this.lastMessageReceived = 0;
         this.identifier = 0;
         this.intervals = {
-            forceSync: null,
             connectionChecker: null,
         };
         this.connectionAttempt = null;
         this.receivedOnOpenPayload = undefined;
-        this.receivedOnStatusPayload = undefined;
         this.closeTries = 0;
         this.setConfiguration(configuration);
         this.configuration.WebSocketPolyfill = configuration.WebSocketPolyfill
             ? configuration.WebSocketPolyfill
             : WebSocket;
-        this.on('open', this.configuration.onOpen);
-        this.on('open', this.onOpen.bind(this));
-        this.on('connect', this.configuration.onConnect);
-        this.on('message', this.configuration.onMessage);
-        this.on('outgoingMessage', this.configuration.onOutgoingMessage);
-        this.on('status', this.configuration.onStatus);
-        this.on('status', this.onStatus.bind(this));
-        this.on('disconnect', this.configuration.onDisconnect);
-        this.on('close', this.configuration.onClose);
-        this.on('destroy', this.configuration.onDestroy);
-        this.on('awarenessUpdate', this.configuration.onAwarenessUpdate);
-        this.on('awarenessChange', this.configuration.onAwarenessChange);
-        this.on('close', this.onClose.bind(this));
-        this.on('message', this.onMessage.bind(this));
+        this.on("open", this.configuration.onOpen);
+        this.on("open", this.onOpen.bind(this));
+        this.on("connect", this.configuration.onConnect);
+        this.on("message", this.configuration.onMessage);
+        this.on("outgoingMessage", this.configuration.onOutgoingMessage);
+        this.on("status", this.configuration.onStatus);
+        this.on("disconnect", this.configuration.onDisconnect);
+        this.on("close", this.configuration.onClose);
+        this.on("destroy", this.configuration.onDestroy);
+        this.on("awarenessUpdate", this.configuration.onAwarenessUpdate);
+        this.on("awarenessChange", this.configuration.onAwarenessChange);
+        this.on("close", this.onClose.bind(this));
+        this.on("message", this.onMessage.bind(this));
         this.intervals.connectionChecker = setInterval(this.checkConnection.bind(this), this.configuration.messageReconnectTimeout / 10);
-        if (typeof configuration.connect !== 'undefined') {
-            this.shouldConnect = configuration.connect;
-        }
         if (!this.shouldConnect) {
             return;
         }
         this.connect();
     }
     async onOpen(event) {
+        this.cancelWebsocketRetry = undefined;
         this.receivedOnOpenPayload = event;
     }
-    async onStatus(data) {
-        this.receivedOnStatusPayload = data;
-    }
     attach(provider) {
-        let connectPromise;
         this.configuration.providerMap.set(provider.configuration.name, provider);
         if (this.status === WebSocketStatus.Disconnected && this.shouldConnect) {
-            connectPromise = this.connect();
+            this.connect();
         }
-        if (this.receivedOnOpenPayload) {
+        if (this.receivedOnOpenPayload &&
+            this.status === WebSocketStatus.Connected) {
             provider.onOpen(this.receivedOnOpenPayload);
         }
-        if (this.receivedOnStatusPayload) {
-            provider.onStatus(this.receivedOnStatusPayload);
-        }
-        return connectPromise;
     }
     detach(provider) {
-        this.configuration.providerMap.delete(provider.configuration.name);
+        if (this.configuration.providerMap.has(provider.configuration.name)) {
+            provider.send(CloseMessage, {
+                documentName: provider.configuration.name,
+            });
+            this.configuration.providerMap.delete(provider.configuration.name);
+        }
     }
     setConfiguration(configuration = {}) {
         this.configuration = { ...this.configuration, ...configuration };
@@ -17303,7 +16841,6 @@ class HocuspocusProviderWebsocket extends EventEmitter {
             this.cancelWebsocketRetry = undefined;
         }
         this.receivedOnOpenPayload = undefined;
-        this.receivedOnStatusPayload = undefined;
         this.shouldConnect = true;
         const abortableRetry = () => {
             let cancelAttempt = false;
@@ -17316,7 +16853,7 @@ class HocuspocusProviderWebsocket extends EventEmitter {
                 maxDelay: this.configuration.maxDelay,
                 jitter: this.configuration.jitter,
                 timeout: this.configuration.timeout,
-                beforeAttempt: context => {
+                beforeAttempt: (context) => {
                     if (!this.shouldConnect || cancelAttempt) {
                         context.abort();
                     }
@@ -17324,7 +16861,7 @@ class HocuspocusProviderWebsocket extends EventEmitter {
             }).catch((error) => {
                 // If we aborted the connection attempt then don’t throw an error
                 // ref: https://github.com/lifeomic/attempt/blob/master/src/index.ts#L136
-                if (error && error.code !== 'ATTEMPT_ABORTED') {
+                if (error && error.code !== "ATTEMPT_ABORTED") {
                     throw error;
                 }
             });
@@ -17339,11 +16876,12 @@ class HocuspocusProviderWebsocket extends EventEmitter {
         this.cancelWebsocketRetry = cancelFunc;
         return retryPromise;
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     attachWebSocketListeners(ws, reject) {
         const { identifier } = ws;
-        const onMessageHandler = (payload) => this.emit('message', payload);
-        const onCloseHandler = (payload) => this.emit('close', { event: payload });
-        const onOpenHandler = (payload) => this.emit('open', payload);
+        const onMessageHandler = (payload) => this.emit("message", payload);
+        const onCloseHandler = (payload) => this.emit("close", { event: payload });
+        const onOpenHandler = (payload) => this.emit("open", payload);
         const onErrorHandler = (err) => {
             reject(err);
         };
@@ -17354,7 +16892,7 @@ class HocuspocusProviderWebsocket extends EventEmitter {
             error: onErrorHandler,
         };
         const handlers = this.webSocketHandlers[ws.identifier];
-        Object.keys(handlers).forEach(name => {
+        Object.keys(handlers).forEach((name) => {
             ws.addEventListener(name, handlers[name]);
         });
     }
@@ -17364,7 +16902,7 @@ class HocuspocusProviderWebsocket extends EventEmitter {
         }
         const { identifier } = this.webSocket;
         const handlers = this.webSocketHandlers[identifier];
-        Object.keys(handlers).forEach(name => {
+        Object.keys(handlers).forEach((name) => {
             var _a;
             (_a = this.webSocket) === null || _a === void 0 ? void 0 : _a.removeEventListener(name, handlers[name]);
             delete this.webSocketHandlers[identifier];
@@ -17382,13 +16920,13 @@ class HocuspocusProviderWebsocket extends EventEmitter {
             this.identifier += 1;
             // Init the WebSocket connection
             const ws = new this.configuration.WebSocketPolyfill(this.url);
-            ws.binaryType = 'arraybuffer';
+            ws.binaryType = "arraybuffer";
             ws.identifier = this.identifier;
             this.attachWebSocketListeners(ws, reject);
             this.webSocket = ws;
             // Reset the status
             this.status = WebSocketStatus.Connecting;
-            this.emit('status', { status: WebSocketStatus.Connecting });
+            this.emit("status", { status: WebSocketStatus.Connecting });
             // Store resolve/reject for later use
             this.connectionAttempt = {
                 resolve,
@@ -17409,9 +16947,9 @@ class HocuspocusProviderWebsocket extends EventEmitter {
             this.connectionAttempt.resolve();
             this.connectionAttempt = null;
             this.status = WebSocketStatus.Connected;
-            this.emit('status', { status: WebSocketStatus.Connected });
-            this.emit('connect');
-            this.messageQueue.forEach(message => this.send(message));
+            this.emit("status", { status: WebSocketStatus.Connected });
+            this.emit("connect");
+            this.messageQueue.forEach((message) => this.send(message));
             this.messageQueue = [];
         }
     }
@@ -17434,8 +16972,8 @@ class HocuspocusProviderWebsocket extends EventEmitter {
             return;
         }
         // Don’t close the connection when a message was received recently
-        if (this.configuration.messageReconnectTimeout
-            >= hocuspocus_provider_esm_getUnixTime() - this.lastMessageReceived) {
+        if (this.configuration.messageReconnectTimeout >=
+            hocuspocus_provider_esm_getUnixTime() - this.lastMessageReceived) {
             return;
         }
         // No message received in a long time, not even your own
@@ -17447,7 +16985,7 @@ class HocuspocusProviderWebsocket extends EventEmitter {
             this.onClose({
                 event: {
                     code: 4408,
-                    reason: 'forced',
+                    reason: "forced",
                 },
             });
             this.closeTries = 0;
@@ -17457,16 +16995,15 @@ class HocuspocusProviderWebsocket extends EventEmitter {
             this.messageQueue = [];
         }
     }
-    // Ensure that the URL always ends with /
+    // Ensure that the URL never ends with /
     get serverUrl() {
-        while (this.configuration.url[this.configuration.url.length - 1] === '/') {
+        while (this.configuration.url[this.configuration.url.length - 1] === "/") {
             return this.configuration.url.slice(0, this.configuration.url.length - 1);
         }
         return this.configuration.url;
     }
     get url() {
-        const encodedParams = encodeQueryParams(this.configuration.parameters);
-        return `${this.serverUrl}${encodedParams.length === 0 ? '' : `?${encodedParams}`}`;
+        return this.serverUrl;
     }
     disconnect() {
         this.shouldConnect = false;
@@ -17477,8 +17014,8 @@ class HocuspocusProviderWebsocket extends EventEmitter {
             this.webSocket.close();
             this.messageQueue = [];
         }
-        catch {
-            //
+        catch (e) {
+            console.error(e);
         }
     }
     send(message) {
@@ -17493,56 +17030,23 @@ class HocuspocusProviderWebsocket extends EventEmitter {
     onClose({ event }) {
         this.closeTries = 0;
         this.cleanupWebSocket();
-        if (this.status === WebSocketStatus.Connected) {
-            this.status = WebSocketStatus.Disconnected;
-            this.emit('status', { status: WebSocketStatus.Disconnected });
-            this.emit('disconnect', { event });
-        }
-        if (event.code === Unauthorized.code) {
-            if (event.reason === Unauthorized.reason) {
-                console.warn('[HocuspocusProvider] An authentication token is required, but you didn’t send one. Try adding a `token` to your HocuspocusProvider configuration. Won’t try again.');
-            }
-            else {
-                console.warn(`[HocuspocusProvider] Connection closed with status Unauthorized: ${event.reason}`);
-            }
-            this.shouldConnect = false;
-        }
-        if (event.code === Forbidden.code) {
-            if (!this.configuration.quiet) {
-                console.warn('[HocuspocusProvider] The provided authentication token isn’t allowed to connect to this server. Will try again.');
-                return; // TODO REMOVE ME
-            }
-        }
-        if (event.code === MessageTooBig.code) {
-            console.warn(`[HocuspocusProvider] Connection closed with status MessageTooBig: ${event.reason}`);
-            this.shouldConnect = false;
-        }
         if (this.connectionAttempt) {
             // That connection attempt failed.
             this.rejectConnectionAttempt();
         }
-        else if (this.shouldConnect) {
-            // The connection was closed by the server. Let’s just try again.
-            this.connect();
-        }
-        // If we’ll reconnect, we’re done for now.
-        if (this.shouldConnect) {
-            return;
-        }
-        // The status is set correctly already.
-        if (this.status === WebSocketStatus.Disconnected) {
-            return;
-        }
         // Let’s update the connection status.
         this.status = WebSocketStatus.Disconnected;
-        this.emit('status', { status: WebSocketStatus.Disconnected });
-        this.emit('disconnect', { event });
+        this.emit("status", { status: WebSocketStatus.Disconnected });
+        this.emit("disconnect", { event });
+        // trigger connect if no retry is running and we want to have a connection
+        if (!this.cancelWebsocketRetry && this.shouldConnect) {
+            setTimeout(() => {
+                this.connect();
+            }, this.configuration.delay);
+        }
     }
     destroy() {
-        this.emit('destroy');
-        if (this.intervals.forceSync) {
-            clearInterval(this.intervals.forceSync);
-        }
+        this.emit("destroy");
         clearInterval(this.intervals.connectionChecker);
         // If there is still a connection attempt outstanding then we should stop
         // it before calling disconnect, otherwise it will be rejected in the onClose
@@ -17557,6 +17061,7 @@ class HocuspocusProviderWebsocket extends EventEmitter {
 /**
  * @module sync-protocol
  */
+
 
 /**
  * @typedef {Map<number, number>} StateMap
@@ -17681,26 +17186,9 @@ const readSyncMessage = (decoder, encoder, doc, transactionOrigin) => {
   return messageType
 };
 
-class OutgoingMessage {
-    constructor() {
-        this.encoder = hocuspocus_provider_esm_createEncoder();
-    }
-    get(args) {
-        return args.encoder;
-    }
-    toUint8Array() {
-        return hocuspocus_provider_esm_toUint8Array(this.encoder);
-    }
-}
-
 class MessageReceiver {
     constructor(message) {
-        this.broadcasted = false;
         this.message = message;
-    }
-    setBroadcasted(value) {
-        this.broadcasted = value;
-        return this;
     }
     apply(provider, emitSynced) {
         const { message } = this;
@@ -17725,21 +17213,27 @@ class MessageReceiver {
             case MessageType.SyncStatus:
                 this.applySyncStatusMessage(provider, hocuspocus_provider_esm_readVarInt(message.decoder) === 1);
                 break;
+            case MessageType.CLOSE:
+                // eslint-disable-next-line no-case-declarations
+                const event = {
+                    code: 1000,
+                    reason: hocuspocus_provider_esm_readVarString(message.decoder),
+                    // @ts-ignore
+                    target: provider.configuration.websocketProvider.webSocket,
+                    type: "close",
+                };
+                provider.onClose();
+                provider.configuration.onClose({ event });
+                provider.forwardClose(event);
+                break;
             default:
                 throw new Error(`Can’t apply message of unknown type: ${type}`);
         }
         // Reply
-        if (message.length() > emptyMessageLength + 1) { // length of documentName (considered in emptyMessageLength plus length of yjs sync type, set in applySyncMessage)
-            if (this.broadcasted) {
-                // TODO: Some weird TypeScript error
-                // @ts-ignore
-                provider.broadcast(OutgoingMessage, { encoder: message.encoder });
-            }
-            else {
-                // TODO: Some weird TypeScript error
-                // @ts-ignore
-                provider.send(OutgoingMessage, { encoder: message.encoder });
-            }
+        if (message.length() > emptyMessageLength + 1) {
+            // length of documentName (considered in emptyMessageLength plus length of yjs sync type, set in applySyncMessage)
+            // @ts-ignore
+            provider.send(OutgoingMessage, { encoder: message.encoder });
         }
     }
     applySyncMessage(provider, emitSynced) {
@@ -17787,20 +17281,17 @@ class MessageSender {
     send(webSocket) {
         webSocket === null || webSocket === void 0 ? void 0 : webSocket.send(this.create());
     }
-    broadcast(channel) {
-        publish(channel, this.create());
-    }
 }
 
 class AuthenticationMessage extends OutgoingMessage {
     constructor() {
         super(...arguments);
         this.type = MessageType.Auth;
-        this.description = 'Authentication';
+        this.description = "Authentication";
     }
     get(args) {
-        if (typeof args.token === 'undefined') {
-            throw new Error('The authentication message requires `token` as an argument.');
+        if (typeof args.token === "undefined") {
+            throw new Error("The authentication message requires `token` as an argument.");
         }
         hocuspocus_provider_esm_writeVarString(this.encoder, args.documentName);
         hocuspocus_provider_esm_writeVarUint(this.encoder, this.type);
@@ -17813,14 +17304,14 @@ class AwarenessMessage extends OutgoingMessage {
     constructor() {
         super(...arguments);
         this.type = MessageType.Awareness;
-        this.description = 'Awareness states update';
+        this.description = "Awareness states update";
     }
     get(args) {
-        if (typeof args.awareness === 'undefined') {
-            throw new Error('The awareness message requires awareness as an argument');
+        if (typeof args.awareness === "undefined") {
+            throw new Error("The awareness message requires awareness as an argument");
         }
-        if (typeof args.clients === 'undefined') {
-            throw new Error('The awareness message requires clients as an argument');
+        if (typeof args.clients === "undefined") {
+            throw new Error("The awareness message requires clients as an argument");
         }
         hocuspocus_provider_esm_writeVarString(this.encoder, args.documentName);
         hocuspocus_provider_esm_writeVarUint(this.encoder, this.type);
@@ -17836,43 +17327,17 @@ class AwarenessMessage extends OutgoingMessage {
     }
 }
 
-class CloseMessage extends OutgoingMessage {
-    constructor() {
-        super(...arguments);
-        this.type = MessageType.CLOSE;
-        this.description = 'Ask the server to close the connection';
-    }
-    get(args) {
-        hocuspocus_provider_esm_writeVarString(this.encoder, args.documentName);
-        hocuspocus_provider_esm_writeVarUint(this.encoder, this.type);
-        return this.encoder;
-    }
-}
-
-class QueryAwarenessMessage extends OutgoingMessage {
-    constructor() {
-        super(...arguments);
-        this.type = MessageType.QueryAwareness;
-        this.description = 'Queries awareness states';
-    }
-    get(args) {
-        hocuspocus_provider_esm_writeVarString(this.encoder, args.documentName);
-        hocuspocus_provider_esm_writeVarUint(this.encoder, this.type);
-        return this.encoder;
-    }
-}
-
 class StatelessMessage extends OutgoingMessage {
     constructor() {
         super(...arguments);
         this.type = MessageType.Stateless;
-        this.description = 'A stateless message';
+        this.description = "A stateless message";
     }
     get(args) {
         var _a;
         hocuspocus_provider_esm_writeVarString(this.encoder, args.documentName);
         hocuspocus_provider_esm_writeVarUint(this.encoder, this.type);
-        hocuspocus_provider_esm_writeVarString(this.encoder, (_a = args.payload) !== null && _a !== void 0 ? _a : '');
+        hocuspocus_provider_esm_writeVarString(this.encoder, (_a = args.payload) !== null && _a !== void 0 ? _a : "");
         return this.encoder;
     }
 }
@@ -17881,11 +17346,11 @@ class SyncStepOneMessage extends OutgoingMessage {
     constructor() {
         super(...arguments);
         this.type = MessageType.Sync;
-        this.description = 'First sync step';
+        this.description = "First sync step";
     }
     get(args) {
-        if (typeof args.document === 'undefined') {
-            throw new Error('The sync step one message requires document as an argument');
+        if (typeof args.document === "undefined") {
+            throw new Error("The sync step one message requires document as an argument");
         }
         hocuspocus_provider_esm_writeVarString(this.encoder, args.documentName);
         hocuspocus_provider_esm_writeVarUint(this.encoder, this.type);
@@ -17894,28 +17359,11 @@ class SyncStepOneMessage extends OutgoingMessage {
     }
 }
 
-class SyncStepTwoMessage extends OutgoingMessage {
-    constructor() {
-        super(...arguments);
-        this.type = MessageType.Sync;
-        this.description = 'Second sync step';
-    }
-    get(args) {
-        if (typeof args.document === 'undefined') {
-            throw new Error('The sync step two message requires document as an argument');
-        }
-        hocuspocus_provider_esm_writeVarString(this.encoder, args.documentName);
-        hocuspocus_provider_esm_writeVarUint(this.encoder, this.type);
-        writeSyncStep2(this.encoder, args.document);
-        return this.encoder;
-    }
-}
-
 class UpdateMessage extends OutgoingMessage {
     constructor() {
         super(...arguments);
         this.type = MessageType.Sync;
-        this.description = 'A document update';
+        this.description = "A document update";
     }
     get(args) {
         hocuspocus_provider_esm_writeVarString(this.encoder, args.documentName);
@@ -17936,14 +17384,12 @@ class HocuspocusProvider extends EventEmitter {
         var _a, _b, _c;
         super();
         this.configuration = {
-            name: '',
+            name: "",
             // @ts-ignore
             document: undefined,
             // @ts-ignore
             awareness: undefined,
             token: null,
-            parameters: {},
-            broadcast: true,
             forceSyncInterval: false,
             onAuthenticated: () => null,
             onAuthenticationFailed: () => null,
@@ -17951,7 +17397,6 @@ class HocuspocusProvider extends EventEmitter {
             onConnect: () => null,
             onMessage: () => null,
             onOutgoingMessage: () => null,
-            onStatus: () => null,
             onSynced: () => null,
             onDisconnect: () => null,
             onClose: () => null,
@@ -17959,91 +17404,82 @@ class HocuspocusProvider extends EventEmitter {
             onAwarenessUpdate: () => null,
             onAwarenessChange: () => null,
             onStateless: () => null,
-            quiet: false,
-            connect: true,
-            preserveConnection: true,
+            onUnsyncedChanges: () => null,
         };
-        this.subscribedToBroadcastChannel = false;
         this.isSynced = false;
         this.unsyncedChanges = 0;
-        this.status = WebSocketStatus.Disconnected;
         this.isAuthenticated = false;
         this.authorizedScope = undefined;
-        this.mux = createMutex();
+        // @internal
+        this.manageSocket = false;
+        this._isAttached = false;
         this.intervals = {
             forceSync: null,
         };
-        this.isConnected = true;
         this.boundDocumentUpdateHandler = this.documentUpdateHandler.bind(this);
         this.boundAwarenessUpdateHandler = this.awarenessUpdateHandler.bind(this);
-        this.boundBroadcastChannelSubscriber = this.broadcastChannelSubscriber.bind(this);
         this.boundPageHide = this.pageHide.bind(this);
         this.boundOnOpen = this.onOpen.bind(this);
         this.boundOnClose = this.onClose.bind(this);
-        this.boundOnStatus = this.onStatus.bind(this);
-        this.forwardConnect = (e) => this.emit('connect', e);
-        this.forwardOpen = (e) => this.emit('open', e);
-        this.forwardClose = (e) => this.emit('close', e);
-        this.forwardDisconnect = (e) => this.emit('disconnect', e);
-        this.forwardDestroy = (e) => this.emit('destroy', e);
+        this.forwardConnect = (e) => this.emit("connect", e);
+        this.forwardClose = (e) => this.emit("close", e);
+        this.forwardDisconnect = (e) => this.emit("disconnect", e);
+        this.forwardDestroy = (e) => this.emit("destroy", e);
         this.setConfiguration(configuration);
-        this.configuration.document = configuration.document ? configuration.document : new Doc();
-        this.configuration.awareness = configuration.awareness !== undefined ? configuration.awareness : new Awareness(this.document);
-        this.on('open', this.configuration.onOpen);
-        this.on('message', this.configuration.onMessage);
-        this.on('outgoingMessage', this.configuration.onOutgoingMessage);
-        this.on('synced', this.configuration.onSynced);
-        this.on('destroy', this.configuration.onDestroy);
-        this.on('awarenessUpdate', this.configuration.onAwarenessUpdate);
-        this.on('awarenessChange', this.configuration.onAwarenessChange);
-        this.on('stateless', this.configuration.onStateless);
-        this.on('authenticated', this.configuration.onAuthenticated);
-        this.on('authenticationFailed', this.configuration.onAuthenticationFailed);
-        this.configuration.websocketProvider.on('connect', this.configuration.onConnect);
-        this.configuration.websocketProvider.on('connect', this.forwardConnect);
-        this.configuration.websocketProvider.on('open', this.boundOnOpen);
-        this.configuration.websocketProvider.on('open', this.forwardOpen);
-        this.configuration.websocketProvider.on('close', this.boundOnClose);
-        this.configuration.websocketProvider.on('close', this.configuration.onClose);
-        this.configuration.websocketProvider.on('close', this.forwardClose);
-        this.configuration.websocketProvider.on('status', this.boundOnStatus);
-        this.configuration.websocketProvider.on('disconnect', this.configuration.onDisconnect);
-        this.configuration.websocketProvider.on('disconnect', this.forwardDisconnect);
-        this.configuration.websocketProvider.on('destroy', this.configuration.onDestroy);
-        this.configuration.websocketProvider.on('destroy', this.forwardDestroy);
-        (_a = this.awareness) === null || _a === void 0 ? void 0 : _a.on('update', () => {
-            this.emit('awarenessUpdate', { states: awarenessStatesToArray(this.awareness.getStates()) });
+        this.configuration.document = configuration.document
+            ? configuration.document
+            : new Doc();
+        this.configuration.awareness =
+            configuration.awareness !== undefined
+                ? configuration.awareness
+                : new Awareness(this.document);
+        this.on("open", this.configuration.onOpen);
+        this.on("message", this.configuration.onMessage);
+        this.on("outgoingMessage", this.configuration.onOutgoingMessage);
+        this.on("synced", this.configuration.onSynced);
+        this.on("destroy", this.configuration.onDestroy);
+        this.on("awarenessUpdate", this.configuration.onAwarenessUpdate);
+        this.on("awarenessChange", this.configuration.onAwarenessChange);
+        this.on("stateless", this.configuration.onStateless);
+        this.on("unsyncedChanges", this.configuration.onUnsyncedChanges);
+        this.on("authenticated", this.configuration.onAuthenticated);
+        this.on("authenticationFailed", this.configuration.onAuthenticationFailed);
+        (_a = this.awareness) === null || _a === void 0 ? void 0 : _a.on("update", () => {
+            this.emit("awarenessUpdate", {
+                states: awarenessStatesToArray(this.awareness.getStates()),
+            });
         });
-        (_b = this.awareness) === null || _b === void 0 ? void 0 : _b.on('change', () => {
-            this.emit('awarenessChange', { states: awarenessStatesToArray(this.awareness.getStates()) });
+        (_b = this.awareness) === null || _b === void 0 ? void 0 : _b.on("change", () => {
+            this.emit("awarenessChange", {
+                states: awarenessStatesToArray(this.awareness.getStates()),
+            });
         });
-        this.document.on('update', this.boundDocumentUpdateHandler);
-        (_c = this.awareness) === null || _c === void 0 ? void 0 : _c.on('update', this.boundAwarenessUpdateHandler);
+        this.document.on("update", this.boundDocumentUpdateHandler);
+        (_c = this.awareness) === null || _c === void 0 ? void 0 : _c.on("update", this.boundAwarenessUpdateHandler);
         this.registerEventListeners();
-        if (this.configuration.forceSyncInterval
-            && typeof this.configuration.forceSyncInterval === 'number') {
+        if (this.configuration.forceSyncInterval &&
+            typeof this.configuration.forceSyncInterval === "number") {
             this.intervals.forceSync = setInterval(this.forceSync.bind(this), this.configuration.forceSyncInterval);
         }
-        this.configuration.websocketProvider.attach(this);
-    }
-    onStatus({ status }) {
-        this.status = status;
-        this.configuration.onStatus({ status });
-        this.emit('status', { status });
+        if (this.manageSocket) {
+            this.attach();
+        }
     }
     setConfiguration(configuration = {}) {
-        if (!configuration.websocketProvider && configuration.url) {
+        if (!configuration.websocketProvider) {
             const websocketProviderConfig = configuration;
+            this.manageSocket = true;
             this.configuration.websocketProvider = new HocuspocusProviderWebsocket({
                 url: websocketProviderConfig.url,
-                connect: websocketProviderConfig.connect,
-                parameters: websocketProviderConfig.parameters,
             });
         }
         this.configuration = { ...this.configuration, ...configuration };
     }
     get document() {
         return this.configuration.document;
+    }
+    get isAttached() {
+        return this._isAttached;
     }
     get awareness() {
         return this.configuration.awareness;
@@ -18053,43 +17489,51 @@ class HocuspocusProvider extends EventEmitter {
     }
     resetUnsyncedChanges() {
         this.unsyncedChanges = 1;
-        this.emit('unsyncedChanges', this.unsyncedChanges);
+        this.emit("unsyncedChanges", { number: this.unsyncedChanges });
     }
     incrementUnsyncedChanges() {
         this.unsyncedChanges += 1;
-        this.emit('unsyncedChanges', this.unsyncedChanges);
+        this.emit("unsyncedChanges", { number: this.unsyncedChanges });
     }
     decrementUnsyncedChanges() {
-        this.unsyncedChanges -= 1;
+        if (this.unsyncedChanges > 0) {
+            this.unsyncedChanges -= 1;
+        }
         if (this.unsyncedChanges === 0) {
             this.synced = true;
         }
-        this.emit('unsyncedChanges', this.unsyncedChanges);
+        this.emit("unsyncedChanges", { number: this.unsyncedChanges });
     }
     forceSync() {
         this.resetUnsyncedChanges();
-        this.send(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name });
+        this.send(SyncStepOneMessage, {
+            document: this.document,
+            documentName: this.configuration.name,
+        });
     }
     pageHide() {
         if (this.awareness) {
-            removeAwarenessStates(this.awareness, [this.document.clientID], 'page hide');
+            removeAwarenessStates(this.awareness, [this.document.clientID], "page hide");
         }
     }
     registerEventListeners() {
-        if (typeof window === 'undefined' || !('addEventListener' in window)) {
+        if (typeof window === "undefined" || !("addEventListener" in window)) {
             return;
         }
-        window.addEventListener('pagehide', this.boundPageHide);
+        window.addEventListener("pagehide", this.boundPageHide);
     }
     sendStateless(payload) {
-        this.send(StatelessMessage, { documentName: this.configuration.name, payload });
+        this.send(StatelessMessage, {
+            documentName: this.configuration.name,
+            payload,
+        });
     }
     documentUpdateHandler(update, origin) {
         if (origin === this) {
             return;
         }
         this.incrementUnsyncedChanges();
-        this.send(UpdateMessage, { update, documentName: this.configuration.name }, true);
+        this.send(UpdateMessage, { update, documentName: this.configuration.name });
     }
     awarenessUpdateHandler({ added, updated, removed }, origin) {
         const changedClients = added.concat(updated).concat(removed);
@@ -18097,7 +17541,7 @@ class HocuspocusProvider extends EventEmitter {
             awareness: this.awareness,
             clients: changedClients,
             documentName: this.configuration.name,
-        }, true);
+        });
     }
     /**
      * Indicates whether a first handshake with the server has been established
@@ -18113,35 +17557,29 @@ class HocuspocusProvider extends EventEmitter {
             return;
         }
         this.isSynced = state;
-        this.emit('synced', { state });
-        this.emit('sync', { state });
+        if (state) {
+            this.emit("synced", { state });
+        }
     }
     receiveStateless(payload) {
-        this.emit('stateless', { payload });
-    }
-    get isAuthenticationRequired() {
-        return !!this.configuration.token && !this.isAuthenticated;
+        this.emit("stateless", { payload });
     }
     // not needed, but provides backward compatibility with e.g. lexical/yjs
     async connect() {
-        if (this.configuration.broadcast) {
-            this.subscribeToBroadcastChannel();
+        if (this.manageSocket) {
+            return this.configuration.websocketProvider.connect();
         }
-        this.configuration.websocketProvider.shouldConnect = true;
-        return this.configuration.websocketProvider.attach(this);
+        console.warn("HocuspocusProvider::connect() is deprecated and does not do anything. Please connect/disconnect on the websocketProvider, or attach/deattach providers.");
     }
     disconnect() {
-        this.disconnectBroadcastChannel();
-        this.configuration.websocketProvider.detach(this);
-        this.isConnected = false;
-        if (!this.configuration.preserveConnection) {
-            this.configuration.websocketProvider.disconnect();
+        if (this.manageSocket) {
+            return this.configuration.websocketProvider.disconnect();
         }
+        console.warn("HocuspocusProvider::disconnect() is deprecated and does not do anything. Please connect/disconnect on the websocketProvider, or attach/deattach providers.");
     }
     async onOpen(event) {
         this.isAuthenticated = false;
-        this.isConnected = true;
-        this.emit('open', { event });
+        this.emit("open", { event });
         let token;
         try {
             token = await this.getToken();
@@ -18150,16 +17588,14 @@ class HocuspocusProvider extends EventEmitter {
             this.permissionDeniedHandler(`Failed to get token: ${error}`);
             return;
         }
-        if (this.isAuthenticationRequired) {
-            this.send(AuthenticationMessage, {
-                token,
-                documentName: this.configuration.name,
-            });
-        }
+        this.send(AuthenticationMessage, {
+            token: token !== null && token !== void 0 ? token : "",
+            documentName: this.configuration.name,
+        });
         this.startSync();
     }
     async getToken() {
-        if (typeof this.configuration.token === 'function') {
+        if (typeof this.configuration.token === "function") {
             const token = await this.configuration.token();
             return token;
         }
@@ -18167,7 +17603,10 @@ class HocuspocusProvider extends EventEmitter {
     }
     startSync() {
         this.resetUnsyncedChanges();
-        this.send(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name });
+        this.send(SyncStepOneMessage, {
+            document: this.document,
+            documentName: this.configuration.name,
+        });
         if (this.awareness && this.awareness.getLocalState() !== null) {
             this.send(AwarenessMessage, {
                 awareness: this.awareness,
@@ -18176,538 +17615,93 @@ class HocuspocusProvider extends EventEmitter {
             });
         }
     }
-    send(message, args, broadcast = false) {
-        if (!this.isConnected) {
+    send(message, args) {
+        if (!this._isAttached)
             return;
-        }
-        if (broadcast) {
-            this.mux(() => { this.broadcast(message, args); });
-        }
         const messageSender = new MessageSender(message, args);
-        this.emit('outgoingMessage', { message: messageSender.message });
+        this.emit("outgoingMessage", { message: messageSender.message });
         messageSender.send(this.configuration.websocketProvider);
     }
     onMessage(event) {
         const message = new IncomingMessage(event.data);
         const documentName = message.readVarString();
         message.writeVarString(documentName);
-        this.emit('message', { event, message: new IncomingMessage(event.data) });
+        this.emit("message", { event, message: new IncomingMessage(event.data) });
         new MessageReceiver(message).apply(this, true);
     }
-    onClose(event) {
+    onClose() {
         this.isAuthenticated = false;
         this.synced = false;
         // update awareness (all users except local left)
         if (this.awareness) {
-            removeAwarenessStates(this.awareness, Array.from(this.awareness.getStates().keys()).filter(client => client !== this.document.clientID), this);
+            removeAwarenessStates(this.awareness, Array.from(this.awareness.getStates().keys()).filter((client) => client !== this.document.clientID), this);
         }
     }
     destroy() {
-        this.emit('destroy');
+        this.emit("destroy");
         if (this.intervals.forceSync) {
             clearInterval(this.intervals.forceSync);
         }
         if (this.awareness) {
-            removeAwarenessStates(this.awareness, [this.document.clientID], 'provider destroy');
-            this.awareness.off('update', this.boundAwarenessUpdateHandler);
+            removeAwarenessStates(this.awareness, [this.document.clientID], "provider destroy");
+            this.awareness.off("update", this.boundAwarenessUpdateHandler);
             this.awareness.destroy();
         }
-        this.document.off('update', this.boundDocumentUpdateHandler);
+        this.document.off("update", this.boundDocumentUpdateHandler);
         this.removeAllListeners();
-        this.configuration.websocketProvider.off('connect', this.configuration.onConnect);
-        this.configuration.websocketProvider.off('connect', this.forwardConnect);
-        this.configuration.websocketProvider.off('open', this.boundOnOpen);
-        this.configuration.websocketProvider.off('open', this.forwardOpen);
-        this.configuration.websocketProvider.off('close', this.boundOnClose);
-        this.configuration.websocketProvider.off('close', this.configuration.onClose);
-        this.configuration.websocketProvider.off('close', this.forwardClose);
-        this.configuration.websocketProvider.off('status', this.boundOnStatus);
-        this.configuration.websocketProvider.off('disconnect', this.configuration.onDisconnect);
-        this.configuration.websocketProvider.off('disconnect', this.forwardDisconnect);
-        this.configuration.websocketProvider.off('destroy', this.configuration.onDestroy);
-        this.configuration.websocketProvider.off('destroy', this.forwardDestroy);
-        this.send(CloseMessage, { documentName: this.configuration.name });
-        this.disconnect();
-        if (typeof window === 'undefined' || !('removeEventListener' in window)) {
+        this.detach();
+        if (this.manageSocket) {
+            this.configuration.websocketProvider.destroy();
+        }
+        if (typeof window === "undefined" || !("removeEventListener" in window)) {
             return;
         }
-        window.removeEventListener('pagehide', this.boundPageHide);
+        window.removeEventListener("pagehide", this.boundPageHide);
+    }
+    detach() {
+        this.configuration.websocketProvider.off("connect", this.configuration.onConnect);
+        this.configuration.websocketProvider.off("connect", this.forwardConnect);
+        this.configuration.websocketProvider.off("open", this.boundOnOpen);
+        this.configuration.websocketProvider.off("close", this.boundOnClose);
+        this.configuration.websocketProvider.off("close", this.configuration.onClose);
+        this.configuration.websocketProvider.off("close", this.forwardClose);
+        this.configuration.websocketProvider.off("disconnect", this.configuration.onDisconnect);
+        this.configuration.websocketProvider.off("disconnect", this.forwardDisconnect);
+        this.configuration.websocketProvider.off("destroy", this.configuration.onDestroy);
+        this.configuration.websocketProvider.off("destroy", this.forwardDestroy);
+        this.configuration.websocketProvider.detach(this);
+        this._isAttached = false;
+    }
+    attach() {
+        if (this._isAttached)
+            return;
+        this.configuration.websocketProvider.on("connect", this.configuration.onConnect);
+        this.configuration.websocketProvider.on("connect", this.forwardConnect);
+        this.configuration.websocketProvider.on("open", this.boundOnOpen);
+        this.configuration.websocketProvider.on("close", this.boundOnClose);
+        this.configuration.websocketProvider.on("close", this.configuration.onClose);
+        this.configuration.websocketProvider.on("close", this.forwardClose);
+        this.configuration.websocketProvider.on("disconnect", this.configuration.onDisconnect);
+        this.configuration.websocketProvider.on("disconnect", this.forwardDisconnect);
+        this.configuration.websocketProvider.on("destroy", this.configuration.onDestroy);
+        this.configuration.websocketProvider.on("destroy", this.forwardDestroy);
+        this.configuration.websocketProvider.attach(this);
+        this._isAttached = true;
     }
     permissionDeniedHandler(reason) {
-        this.emit('authenticationFailed', { reason });
+        this.emit("authenticationFailed", { reason });
         this.isAuthenticated = false;
-        this.disconnect();
-        this.status = WebSocketStatus.Disconnected;
     }
     authenticatedHandler(scope) {
         this.isAuthenticated = true;
         this.authorizedScope = scope;
-        this.emit('authenticated');
-    }
-    get broadcastChannel() {
-        return `${this.configuration.name}`;
-    }
-    broadcastChannelSubscriber(data) {
-        this.mux(() => {
-            const message = new IncomingMessage(data);
-            const documentName = message.readVarString();
-            message.writeVarString(documentName);
-            new MessageReceiver(message)
-                .setBroadcasted(true)
-                .apply(this, false);
-        });
-    }
-    subscribeToBroadcastChannel() {
-        if (!this.subscribedToBroadcastChannel) {
-            subscribe(this.broadcastChannel, this.boundBroadcastChannelSubscriber);
-            this.subscribedToBroadcastChannel = true;
-        }
-        this.mux(() => {
-            this.broadcast(SyncStepOneMessage, { document: this.document, documentName: this.configuration.name });
-            this.broadcast(SyncStepTwoMessage, { document: this.document, documentName: this.configuration.name });
-            this.broadcast(QueryAwarenessMessage, { document: this.document, documentName: this.configuration.name });
-            if (this.awareness) {
-                this.broadcast(AwarenessMessage, {
-                    awareness: this.awareness,
-                    clients: [this.document.clientID],
-                    document: this.document,
-                    documentName: this.configuration.name,
-                });
-            }
-        });
-    }
-    disconnectBroadcastChannel() {
-        // broadcast message with local awareness state set to null (indicating disconnect)
-        if (this.awareness) {
-            this.send(AwarenessMessage, {
-                awareness: this.awareness,
-                clients: [this.document.clientID],
-                states: new Map(),
-                documentName: this.configuration.name,
-            }, true);
-        }
-        if (this.subscribedToBroadcastChannel) {
-            unsubscribe(this.broadcastChannel, this.boundBroadcastChannelSubscriber);
-            this.subscribedToBroadcastChannel = false;
-        }
-    }
-    broadcast(Message, args) {
-        if (!this.configuration.broadcast) {
-            return;
-        }
-        if (!this.subscribedToBroadcastChannel) {
-            return;
-        }
-        new MessageSender(Message, args).broadcast(this.broadcastChannel);
+        this.emit("authenticated", { scope });
     }
     setAwarenessField(key, value) {
         if (!this.awareness) {
             throw new AwarenessError(`Cannot set awareness field "${key}" to ${JSON.stringify(value)}. You have disabled Awareness for this provider by explicitly passing awareness: null in the provider configuration.`);
         }
         this.awareness.setLocalStateField(key, value);
-    }
-}
-
-/* eslint-env browser */
-const hocuspocus_provider_esm_getRandomValues = crypto.getRandomValues.bind(crypto);
-
-/**
- * Isomorphic module for true random numbers / buffers / uuids.
- *
- * Attention: falls back to Math.random if the browser does not support crypto.
- *
- * @module random
- */
-
-const hocuspocus_provider_esm_uint32 = () => hocuspocus_provider_esm_getRandomValues(new Uint32Array(1))[0];
-
-// @ts-ignore
-const hocuspocus_provider_esm_uuidv4Template = [1e7] + -1e3 + -4e3 + -8e3 + -1e11;
-
-/**
- * @return {string}
- */
-const hocuspocus_provider_esm_uuidv4 = () => hocuspocus_provider_esm_uuidv4Template.replace(/[018]/g, /** @param {number} c */ c =>
-  (c ^ hocuspocus_provider_esm_uint32() & 15 >> c / 4).toString(16)
-);
-
-class TiptapCollabProviderWebsocket extends HocuspocusProviderWebsocket {
-    constructor(configuration) {
-        var _a;
-        let url = (_a = configuration.baseUrl) !== null && _a !== void 0 ? _a : `wss://${configuration.appId}.collab.tiptap.cloud`;
-        if (configuration.shardKey) {
-            url += url.includes('?') ? '&' : '?';
-            url += `shard=${configuration.shardKey}`;
-        }
-        super({ ...configuration, url });
-    }
-}
-
-const defaultDeleteCommentOptions = {
-    deleteContent: false,
-    deleteThread: false,
-};
-const defaultGetThreadsOptions = {
-    types: ['unarchived'],
-};
-const defaultDeleteThreadOptions = {
-    deleteComments: false,
-    force: false,
-};
-class TiptapCollabProvider extends HocuspocusProvider {
-    constructor(configuration) {
-        if (!configuration.websocketProvider) {
-            configuration.websocketProvider = new TiptapCollabProviderWebsocket({ appId: configuration.appId, baseUrl: configuration.baseUrl });
-        }
-        if (!configuration.token) {
-            configuration.token = 'notoken'; // need to send a token anyway (which will be ignored)
-        }
-        super(configuration);
-        this.tiptapCollabConfigurationPrefix = '__tiptapcollab__';
-        if (configuration.user) {
-            this.userData = new PermanentUserData(this.document, this.document.getMap('__tiptapcollab__users'));
-            this.userData.setUserMapping(this.document, this.document.clientID, configuration.user);
-        }
-    }
-    /**
-     * note: this will only work if your server loaded @hocuspocus-pro/extension-history, or if you are on a Tiptap business plan.
-     */
-    createVersion(name) {
-        return this.sendStateless(JSON.stringify({ action: 'version.create', name }));
-    }
-    /**
-     * note: this will only work if your server loaded @hocuspocus-pro/extension-history, or if you are on a Tiptap business plan.
-     */
-    revertToVersion(targetVersion) {
-        return this.sendStateless(JSON.stringify({ action: 'document.revert', version: targetVersion }));
-    }
-    /**
-     * note: this will only work if your server loaded @hocuspocus-pro/extension-history, or if you are on a Tiptap business plan.
-     *
-     * The server will reply with a stateless message (THistoryVersionPreviewEvent)
-     */
-    previewVersion(targetVersion) {
-        return this.sendStateless(JSON.stringify({ action: 'version.preview', version: targetVersion }));
-    }
-    /**
-     * note: this will only work if your server loaded @hocuspocus-pro/extension-history, or if you are on a Tiptap business plan.
-     */
-    getVersions() {
-        return this.configuration.document.getArray(`${this.tiptapCollabConfigurationPrefix}versions`).toArray();
-    }
-    watchVersions(callback) {
-        return this.configuration.document.getArray('__tiptapcollab__versions').observe(callback);
-    }
-    unwatchVersions(callback) {
-        return this.configuration.document.getArray('__tiptapcollab__versions').unobserve(callback);
-    }
-    isAutoVersioning() {
-        return !!this.configuration.document.getMap(`${this.tiptapCollabConfigurationPrefix}config`).get('autoVersioning');
-    }
-    enableAutoVersioning() {
-        return this.configuration.document.getMap(`${this.tiptapCollabConfigurationPrefix}config`).set('autoVersioning', 1);
-    }
-    disableAutoVersioning() {
-        return this.configuration.document.getMap(`${this.tiptapCollabConfigurationPrefix}config`).set('autoVersioning', 0);
-    }
-    /**
-     * Returns all users in the document as Y.Map objects
-     * @returns An array of Y.Map objects
-     */
-    getYThreads() {
-        return this.configuration.document.getArray(`${this.tiptapCollabConfigurationPrefix}threads`);
-    }
-    /**
-     * Finds all threads in the document and returns them as JSON objects
-     * @options Options to control the output of the threads (e.g. include deleted threads)
-     * @returns An array of threads as JSON objects
-     */
-    getThreads(options) {
-        const { types } = { ...defaultGetThreadsOptions, ...options };
-        const threads = this.getYThreads().toJSON();
-        if ((types === null || types === void 0 ? void 0 : types.includes('archived')) && (types === null || types === void 0 ? void 0 : types.includes('unarchived'))) {
-            return threads;
-        }
-        return threads.filter(currentThead => {
-            if ((types === null || types === void 0 ? void 0 : types.includes('archived')) && currentThead.deletedAt) {
-                return true;
-            }
-            if ((types === null || types === void 0 ? void 0 : types.includes('unarchived')) && !currentThead.deletedAt) {
-                return true;
-            }
-            return false;
-        });
-    }
-    /**
-     * Find the index of a thread by its id
-     * @param id The thread id
-     * @returns The index of the thread or null if not found
-     */
-    getThreadIndex(id) {
-        let index = null;
-        let i = 0;
-        // eslint-disable-next-line no-restricted-syntax
-        for (const thread of this.getThreads({ types: ['archived', 'unarchived'] })) {
-            if (thread.id === id) {
-                index = i;
-                break;
-            }
-            i += 1;
-        }
-        return index;
-    }
-    /**
-     * Gets a single thread by its id
-     * @param id The thread id
-     * @returns The thread as a JSON object or null if not found
-     */
-    getThread(id) {
-        const index = this.getThreadIndex(id);
-        if (index === null) {
-            return null;
-        }
-        return this.getYThreads().get(index).toJSON();
-    }
-    /**
-     * Gets a single thread by its id as a Y.Map object
-     * @param id The thread id
-     * @returns The thread as a Y.Map object or null if not found
-     */
-    getYThread(id) {
-        const index = this.getThreadIndex(id);
-        if (index === null) {
-            return null;
-        }
-        return this.getYThreads().get(index);
-    }
-    /**
-     * Create a new thread
-     * @param data The thread data
-     * @returns The created thread
-     */
-    createThread(data) {
-        let createdThread = {};
-        this.document.transact(() => {
-            const thread = new YMap();
-            thread.set('id', hocuspocus_provider_esm_uuidv4());
-            thread.set('createdAt', (new Date()).toISOString());
-            thread.set('comments', new YArray());
-            thread.set('deletedComments', new YArray());
-            thread.set('deletedAt', null);
-            this.getYThreads().push([thread]);
-            createdThread = this.updateThread(String(thread.get('id')), data);
-        });
-        return createdThread;
-    }
-    /**
-     * Update a specific thread
-     * @param id The thread id
-     * @param data New data for the thread
-     * @returns The updated thread or null if the thread is not found
-     */
-    updateThread(id, data) {
-        let updatedThread = {};
-        this.document.transact(() => {
-            const thread = this.getYThread(id);
-            if (thread === null) {
-                return null;
-            }
-            thread.set('updatedAt', (new Date()).toISOString());
-            if (data.data) {
-                thread.set('data', data.data);
-            }
-            if (data.resolvedAt || data.resolvedAt === null) {
-                thread.set('resolvedAt', data.resolvedAt);
-            }
-            updatedThread = thread.toJSON();
-        });
-        return updatedThread;
-    }
-    /**
-     * Handle the deletion of a thread. By default, the thread and it's comments are not deleted, but marked as deleted
-     * via the `deletedAt` property. Forceful deletion can be enabled by setting the `force` option to `true`.
-     *
-     * If you only want to delete the comments of a thread, you can set the `deleteComments` option to `true`.
-     * @param id The thread id
-     * @param options A set of options that control how the thread is deleted
-     * @returns The deleted thread or null if the thread is not found
-     */
-    deleteThread(id, options) {
-        const { deleteComments, force } = { ...defaultDeleteThreadOptions, ...options };
-        const index = this.getThreadIndex(id);
-        if (index === null) {
-            return null;
-        }
-        if (force) {
-            this.getYThreads().delete(index, 1);
-            return;
-        }
-        const thread = this.getYThreads().get(index);
-        thread.set('deletedAt', (new Date()).toISOString());
-        if (deleteComments) {
-            thread.set('comments', new YArray());
-            thread.set('deletedComments', new YArray());
-        }
-        return thread.toJSON();
-    }
-    /**
-     * Tries to restore a deleted thread
-     * @param id The thread id
-     * @returns The restored thread or null if the thread is not found
-     */
-    restoreThread(id) {
-        const index = this.getThreadIndex(id);
-        if (index === null) {
-            return null;
-        }
-        const thread = this.getYThreads().get(index);
-        thread.set('deletedAt', null);
-        return thread.toJSON();
-    }
-    /**
-     * Returns comments from a thread, either deleted or not
-     * @param threadId The thread id
-     * @param includeDeleted If you want to include deleted comments, defaults to `false`
-     * @returns The comments or null if the thread is not found
-     */
-    getThreadComments(threadId, includeDeleted) {
-        var _a, _b, _c;
-        const index = this.getThreadIndex(threadId);
-        if (index === null) {
-            return null;
-        }
-        const comments = !includeDeleted ? (_a = this.getThread(threadId)) === null || _a === void 0 ? void 0 : _a.comments : [...(((_b = this.getThread(threadId)) === null || _b === void 0 ? void 0 : _b.comments) || []), ...(((_c = this.getThread(threadId)) === null || _c === void 0 ? void 0 : _c.deletedComments) || [])].sort((a, b) => {
-            return a.createdAt.localeCompare(b.createdAt);
-        });
-        return comments !== null && comments !== void 0 ? comments : [];
-    }
-    /**
-     * Get a single comment from a specific thread
-     * @param threadId The thread id
-     * @param commentId The comment id
-     * @param includeDeleted If you want to include deleted comments in the search
-     * @returns The comment or null if not found
-     */
-    getThreadComment(threadId, commentId, includeDeleted) {
-        var _a;
-        const index = this.getThreadIndex(threadId);
-        if (index === null) {
-            return null;
-        }
-        const comments = this.getThreadComments(threadId, includeDeleted);
-        return (_a = comments === null || comments === void 0 ? void 0 : comments.find(comment => comment.id === commentId)) !== null && _a !== void 0 ? _a : null;
-    }
-    /**
-     * Adds a comment to a thread
-     * @param threadId The thread id
-     * @param data The comment data
-     * @returns The updated thread or null if the thread is not found
-     * @example addComment('123', { content: 'Hello world', data: { author: 'Maria Doe' } })
-     */
-    addComment(threadId, data) {
-        let updatedThread = {};
-        this.document.transact(() => {
-            const thread = this.getYThread(threadId);
-            if (thread === null)
-                return null;
-            const commentMap = new YMap();
-            commentMap.set('id', hocuspocus_provider_esm_uuidv4());
-            commentMap.set('createdAt', (new Date()).toISOString());
-            thread.get('comments').push([commentMap]);
-            this.updateComment(threadId, String(commentMap.get('id')), data);
-            updatedThread = thread.toJSON();
-        });
-        return updatedThread;
-    }
-    /**
-     * Update a comment in a thread
-     * @param threadId The thread id
-     * @param commentId The comment id
-     * @param data The new comment data
-     * @returns The updated thread or null if the thread or comment is not found
-     * @example updateComment('123', { content: 'The new content', data: { attachments: ['file1.jpg'] }})
-     */
-    updateComment(threadId, commentId, data) {
-        let updatedThread = {};
-        this.document.transact(() => {
-            const thread = this.getYThread(threadId);
-            if (thread === null)
-                return null;
-            let comment = null;
-            // eslint-disable-next-line no-restricted-syntax
-            for (const c of thread.get('comments')) {
-                if (c.get('id') === commentId) {
-                    comment = c;
-                    break;
-                }
-            }
-            if (comment === null)
-                return null;
-            comment.set('updatedAt', (new Date()).toISOString());
-            if (data.data) {
-                comment.set('data', data.data);
-            }
-            if (data.content) {
-                comment.set('content', data.content);
-            }
-            updatedThread = thread.toJSON();
-        });
-        return updatedThread;
-    }
-    /**
-     * Deletes a comment from a thread
-     * @param threadId The thread id
-     * @param commentId The comment id
-     * @param options A set of options that control how the comment is deleted
-     * @returns The updated thread or null if the thread or comment is not found
-     */
-    deleteComment(threadId, commentId, options) {
-        const { deleteContent, deleteThread } = { ...defaultDeleteCommentOptions, ...options };
-        const thread = this.getYThread(threadId);
-        if (thread === null)
-            return null;
-        let commentIndex = 0;
-        // eslint-disable-next-line no-restricted-syntax
-        for (const c of thread.get('comments')) {
-            if (c.get('id') === commentId) {
-                break;
-            }
-            commentIndex += 1;
-        }
-        // if the first comment of a thread is deleted we also
-        // delete the thread itself as the source comment is gone
-        if (commentIndex === 0 && (deleteThread || this.configuration.deleteThreadOnFirstCommentDelete)) {
-            this.deleteThread(threadId);
-            return;
-        }
-        const comment = thread.get('comments').get(commentIndex);
-        const newComment = new YMap();
-        newComment.set('id', comment.get('id'));
-        newComment.set('createdAt', comment.get('createdAt'));
-        newComment.set('updatedAt', (new Date()).toISOString());
-        newComment.set('deletedAt', (new Date()).toISOString());
-        newComment.set('data', comment.get('data'));
-        newComment.set('content', deleteContent ? null : comment.get('content'));
-        if (!thread.get('deletedComments')) {
-            thread.set('deletedComments', new YArray());
-        }
-        thread.get('deletedComments').push([newComment]);
-        thread.get('comments').delete(commentIndex);
-        return thread.toJSON();
-    }
-    /**
-     * Start watching threads for changes
-     * @param callback The callback function to be called when a thread changes
-     */
-    watchThreads(callback) {
-        this.getYThreads().observeDeep(callback);
-    }
-    /**
-     * Stop watching threads for changes
-     * @param callback The callback function to be removed
-     */
-    unwatchThreads(callback) {
-        this.getYThreads().unobserveDeep(callback);
     }
 }
 
@@ -40764,7 +39758,7 @@ const yCursorPluginKey = new PluginKey('yjs-cursor')
  * @return {mutex} A mutual exclude function
  * @public
  */
-const mutex_createMutex = () => {
+const createMutex = () => {
   let token = true
   return (f, g) => {
     if (token) {
@@ -42013,7 +41007,7 @@ class ProsemirrorBinding {
      * @type {any}
      */
     this.prosemirrorView = null
-    this.mux = mutex_createMutex()
+    this.mux = createMutex()
     this.mapping = mapping
     /**
      * Is overlapping mark - i.e. mark does not exclude itself.

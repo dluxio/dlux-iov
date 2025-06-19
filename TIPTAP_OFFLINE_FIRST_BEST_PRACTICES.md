@@ -1156,7 +1156,7 @@ Our collaborative editing integrates with the Hive Collaboration API for real-ti
 
 #### Base URL
 ```
-https://data.dlux.io/api/collaboration
+https://data.dlux.io/api
 ```
 
 #### Authentication System
@@ -1197,28 +1197,103 @@ Three permission levels with specific capabilities:
 - **`editable`**: View and edit document content
 - **`postable`**: View, edit, and publish to Hive blockchain
 
-#### Key API Endpoints
+#### Comprehensive API Endpoints
 
+##### System Endpoints
 ```javascript
-// Create collaborative document
+// Get system version information
+GET /api/system/versions
+// Returns: { version, nodeVersion, packageVersions, ... }
+```
+
+##### Collaboration Document Endpoints
+```javascript
+// List user's collaborative documents
+GET /api/collaboration/documents
+// Headers: x-account, x-challenge, x-pubkey, x-signature
+
+// Create new collaborative document
 POST /api/collaboration/documents
 {
   "documentName": "My New Document", 
   "isPublic": false
 }
 
+// Delete collaborative document
+DELETE /api/collaboration/documents/{owner}/{permlink}
+// Headers: x-account, x-challenge, x-pubkey, x-signature
+
+// Get document metadata
+GET /api/collaboration/info/{owner}/{permlink}
+// Headers: x-account, x-challenge, x-pubkey, x-signature
+
+// Get document statistics
+GET /api/collaboration/stats/{owner}/{permlink}
+// Headers: x-account, x-challenge, x-pubkey, x-signature
+
+// Get document activity log
+GET /api/collaboration/activity/{owner}/{permlink}
+// Headers: x-account, x-challenge, x-pubkey, x-signature
+```
+
+##### Permission Management Endpoints
+```javascript
 // Get document permissions
 GET /api/collaboration/permissions/{owner}/{permlink}
 
-// Grant permission
+// Grant permission to user
 POST /api/collaboration/permissions/{owner}/{permlink}
 {
   "targetAccount": "username",
-  "permissionType": "editable"
+  "permissionType": "editable"  // readonly, editable, or postable
+}
+// Headers: x-account, x-challenge, x-pubkey, x-signature
+
+// Revoke user permission
+DELETE /api/collaboration/permissions/{owner}/{permlink}/{account}
+// Headers: x-account, x-challenge, x-pubkey, x-signature
+```
+
+##### Device Connection Endpoints (Mobile/Desktop Auth)
+```javascript
+// Initiate device pairing
+POST /api/device/pair
+{
+  "deviceName": "My Desktop",
+  "publicKey": "STM..."
 }
 
-// List user's documents
-GET /api/collaboration/documents?type=all&limit=50
+// Connect paired device
+POST /api/device/connect
+{
+  "sessionId": "...",
+  "signature": "..."
+}
+
+// Send authentication request
+POST /api/device/request
+{
+  "sessionId": "...",
+  "type": "auth",
+  "data": {...}
+}
+
+// Check pending requests
+GET /api/device/requests?sessionId={sessionId}
+
+// Respond to auth request
+POST /api/device/respond
+{
+  "requestId": "...",
+  "approved": true,
+  "signature": "..."
+}
+
+// Disconnect device
+POST /api/device/disconnect
+{
+  "sessionId": "..."
+}
 ```
 
 #### WebSocket Integration
@@ -1229,7 +1304,7 @@ async connectToCollaborationServer(doc) {
     const token = await this.generateWebSocketToken();
     
   this.provider = new HocuspocusProvider({
-    url: 'wss://data.dlux.io/collaboration',
+    url: `wss://data.dlux.io/collaboration/${doc.owner}/${doc.permlink}`,
         name: `${doc.owner}/${doc.permlink}`,
         document: this.ydoc,
         token: token,
