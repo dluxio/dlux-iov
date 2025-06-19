@@ -1,4 +1,4 @@
-this.version = "2025.06.18.3";
+this.version = "2025.06.19.1";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -548,14 +548,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.19.08",
-  "generated": "2025-06-19T15:39:53Z",
+  "version": "2025.06.19.1",
+  "generated": "2025-06-19T15:40:10Z",
   "files": {
-    "/css/custom-popover.css": {
-      "checksum": "272dac40ceb0d411fa7d6f094b013ab3",
-      "size": 2573,
-      "priority": "critical"
-    },
     "/css/customaf.css": {
       "checksum": "77f6758aadb843a30c49b08f154a042b",
       "size": 300474,
@@ -570,11 +565,6 @@ self.cacheManifest =
       "checksum": "2e477967e482f32e65d4ea9b2fd8e106",
       "size": 80721,
       "priority": "critical"
-    },
-    "/css/tiptap-collaboration.css": {
-      "checksum": "da8d04a62320157854af5b4d02609e97",
-      "size": 3817,
-      "priority": "important"
     },
     "/css/tiptap-editor.css": {
       "checksum": "11a0baa45f8ccd3055a96f1da939e1bd",
@@ -1766,11 +1756,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/naf-playground/assets/textures/sky/milkyway.jpg": {
-      "checksum": "82c7278828d85ace9036d87c72801e20",
-      "size": 124780,
-      "priority": "page-specific"
-    },
     "/naf-playground/css/style.css": {
       "checksum": "7597b95ad89083ebdd726b24009e0c5c",
       "size": 4283,
@@ -2631,14 +2616,14 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     }
   }
