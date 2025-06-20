@@ -479,10 +479,13 @@ class PersistenceManager {
         // ✅ TIPTAP BEST PRACTICE: Use HocuspocusProvider with official onSynced pattern
         const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
         const HocuspocusProvider = bundle?.HocuspocusProvider?.default || bundle?.HocuspocusProvider;
+        const Y = bundle?.Y?.default || bundle?.Y;
         
-        if (!HocuspocusProvider) {
-            console.warn('⚠️ HocuspocusProvider not available in bundle');
+        if (!HocuspocusProvider || !Y) {
+            console.warn('⚠️ Required components not available in bundle');
             console.log('Available bundle keys:', bundle ? Object.keys(bundle) : 'none');
+            console.log('HocuspocusProvider available:', !!HocuspocusProvider);
+            console.log('Y available:', !!Y);
             return null;
         }
 
@@ -545,7 +548,8 @@ class PersistenceManager {
                 tokenPreview: authToken.substring(0, 50) + '...',
                 isAuthenticated: this.component.isAuthenticated,
                 permissionLevel: file.permissionLevel,
-                isReadOnly: this.component.isReadOnlyMode
+                isReadOnly: this.component.isReadOnlyMode,
+                willSkipAwareness: this.component.isReadOnlyMode
             });
             
             // ✅ DEBUG: Add Y.js update observer for read-only users
@@ -595,6 +599,10 @@ class PersistenceManager {
                 };
                 yjsDoc.on('update', yjsUpdateObserver);
             }
+            
+            // ✅ DEBUG: Add message handler to track WebSocket messages
+            let messageCount = 0;
+            let lastMessageTime = Date.now();
             
             const provider = new HocuspocusProvider({
                 url: wsUrl,
@@ -694,8 +702,13 @@ class PersistenceManager {
                     });
                     
                     // ✅ UPDATE: Mark Y.js config with sync status (metadata only)
-                    yjsDoc.getMap('config').set('lastWebSocketSync', new Date().toISOString());
-                    yjsDoc.getMap('config').set('cloudSyncActive', true);
+                    // ❌ CRITICAL FIX: Skip Y.js updates for read-only users to prevent server rejection
+                    if (!persistenceManager.component.isReadOnlyMode) {
+                        yjsDoc.getMap('config').set('lastWebSocketSync', new Date().toISOString());
+                        yjsDoc.getMap('config').set('cloudSyncActive', true);
+                    } else {
+                        console.log('📖 Read-only user - skipping Y.js config updates in onSynced');
+                    }
                     
                     // ✅ DOCUMENT NAME SYNC: Update currentFile with document name from cloud sync (metadata only)
                     const yjsDocumentName = yjsDoc.getMap('config').get('documentName');
@@ -719,7 +732,8 @@ class PersistenceManager {
                     // No manual content loading needed - TipTap updates editors automatically when Y.js syncs
                     
                     // ✅ SERVER VERSION: Store server version in Y.js config for offline access
-                    if (persistenceManager.component.serverVersion) {
+                    // ❌ CRITICAL FIX: Skip for read-only users to prevent server rejection
+                    if (persistenceManager.component.serverVersion && !persistenceManager.component.isReadOnlyMode) {
                         yjsDoc.getMap('config').set('serverVersion', persistenceManager.component.serverVersion);
                         yjsDoc.getMap('config').set('serverVersionCheckTime', Date.now());
                     }
@@ -739,25 +753,20 @@ class PersistenceManager {
                         isReadOnly: persistenceManager.component.isReadOnlyMode
                     });
                     
-                    // ✅ OFFLINE-FIRST: Content is now available via WebSocket sync
-                    // For read-only users, content loads into existing Tier 1 editors automatically
-                    // For editable users, upgrade to Tier 2 for collaboration features
-                    
-                    const canEdit = persistenceManager.component.currentFile?.permissionLevel === 'editable' || 
-                                   persistenceManager.component.currentFile?.permissionLevel === 'postable';
+                    // ✅ TIPTAP BEST PRACTICE: All users with WebSocket should have CollaborationCursor
+                    // This provides better collaborative experience with cursor visibility
                     
                     if (persistenceManager.component.titleEditor && persistenceManager.component.bodyEditor) {
-                        if (canEdit) {
-                            console.log('🔄 Y.js sync complete, upgrading to Tier 2 editors with cursors for editable users...');
-                            persistenceManager.upgradeToCloudEditors(yjsDoc, provider).catch(error => {
-                                console.warn('⚠️ Failed to upgrade to Tier 2 editors:', error.message);
-                            });
-                        } else {
-                            console.log('🔄 Read-only user: Y.js content synced via WebSocket, checking editor state...');
-                            
-                            // ✅ CRITICAL FIX: For read-only users, ensure editors reflect Y.js content
-                            // TipTap Collaboration should handle this automatically, but let's verify
-                            persistenceManager.component.$nextTick(() => {
+                        // ✅ UPGRADE FOR ALL USERS: Both editable and read-only users get Tier 2 with cursors
+                        console.log('🔄 Y.js sync complete, upgrading to Tier 2 editors with CollaborationCursor...');
+                        console.log('👥 User type:', persistenceManager.component.isReadOnlyMode ? 'read-only' : 'editable');
+                        
+                        persistenceManager.upgradeToCloudEditors(yjsDoc, provider).catch(error => {
+                            console.warn('⚠️ Failed to upgrade to Tier 2 editors:', error.message);
+                        });
+                        
+                        // ✅ VERIFY CONTENT: Check content after upgrade
+                        persistenceManager.component.$nextTick(() => {
                                 const titleContent = persistenceManager.component.titleEditor?.getText() || '';
                                 const bodyContent = persistenceManager.component.bodyEditor?.getText() || '';
                                 
@@ -779,7 +788,6 @@ class PersistenceManager {
                                     });
                                 }
                             });
-                        }
                     } else {
                         console.warn('⚠️ Cannot process WebSocket sync - editors not found');
                     }
@@ -813,39 +821,32 @@ class PersistenceManager {
                     if (persistenceManager.component.isReadOnlyMode) {
                         console.log('📖 Read-only user connected - monitoring sync status...');
                         
-                        // ✅ AWARENESS FIX: Set minimal awareness state for read-only users to trigger sync
-                        if (provider.awareness) {
-                            console.log('🔧 Setting awareness state for read-only user to trigger sync');
-                            provider.awareness.setLocalState({
-                                user: {
-                                    name: persistenceManager.component.username || 'Anonymous Reader',
-                                    color: '#808080', // Gray color for read-only users
-                                    isReadOnly: true,
-                                    permission: 'readonly',
-                                    accessType: 'readonly'
-                                }
-                            });
-                        }
+                        // ✅ TIPTAP BEST PRACTICE: Set awareness state for read-only users
+                        // This enables CollaborationCursor to show their presence to other users
+                        console.log('📖 Read-only user - setting awareness state for cursor visibility');
                         
-                        // ✅ SYNC FIX: Force Y.js sync for read-only users
-                        if (provider.document && typeof Y !== 'undefined') {
-                            console.log('🔄 Attempting to force Y.js sync for read-only user');
-                            try {
-                                // Get Y.js from the bundle
-                                const YBundle = window.TiptapCollaboration?.Y || window.Y;
-                                if (YBundle) {
-                                    const emptyUpdate = YBundle.encodeStateAsUpdate(yjsDoc);
-                                    console.log('📦 Y.js state update size:', emptyUpdate.length);
-                                }
-                            } catch (error) {
-                                console.warn('⚠️ Could not force Y.js sync:', error.message);
+                        // Set awareness state with read-only indicator
+                        provider.awareness.setLocalState({
+                            user: {
+                                name: persistenceManager.component.username || 'Anonymous Reader',
+                                color: '#808080', // Gray color for read-only users
+                                isReadOnly: true // Custom field to indicate read-only status
                             }
-                        }
+                        });
                         
-                        // Check sync status after a delay
-                        setTimeout(() => {
-                            if (provider.isConnected && !provider.synced) {
-                                console.log('⚠️ Read-only user connected but not synced after 1s');
+                        console.log('✅ Read-only awareness state set:', {
+                            documentPath: docPath,
+                            username: persistenceManager.component.username,
+                            permissionLevel: file.permissionLevel,
+                            awarenessStates: provider.awareness?.states?.size || 0
+                        });
+                        
+                        // 🔍 DEBUG: Server currently treats this as unauthorized_edit_attempt
+                        
+                        // ✅ WORKAROUND: For read-only users, fetch content via HTTP if sync doesn't complete
+                        let syncTimeout = setTimeout(async () => {
+                            if (!provider.synced) {
+                                console.log('⚠️ Read-only user not synced after 2s - attempting HTTP fallback');
                                 
                                 // Log provider state for debugging
                                 console.log('🔍 Provider debug state:', {
@@ -854,18 +855,67 @@ class PersistenceManager {
                                     hasAwareness: !!provider.awareness,
                                     awarenessStates: provider.awareness?.states?.size || 0,
                                     documentGuid: provider.document?.guid,
-                                    configuration: provider.configuration
+                                    configuration: provider.configuration,
+                                    yjsContentSize: yjsDoc.store.clients.size,
+                                    hasContent: (yjsDoc.share.get('title')?.length || 0) > 0 || (yjsDoc.share.get('body')?.length || 0) > 0
                                 });
                                 
-                                // ✅ FORCE SYNC: Try sending a sync step to trigger sync completion
-                                if (provider.sendStateless) {
-                                    console.log('🔄 Attempting to force sync by sending stateless message');
-                                    provider.sendStateless({ type: 'sync-request', timestamp: Date.now() });
+                                // ✅ CRITICAL: For read-only users, if Y.js has content but provider not synced,
+                                // manually trigger the onSynced callback since server may not send sync completion
+                                const titleShare = yjsDoc.share.get('title');
+                                const bodyShare = yjsDoc.share.get('body');
+                                const hasYjsContent = (titleShare?.length || 0) > 0 || (bodyShare?.length || 0) > 0;
+                                
+                                if (hasYjsContent) {
+                                    console.log('🎆 Read-only: Y.js has content but provider not synced - manually triggering onSynced');
+                                    // Manually call the onSynced callback
+                                    if (provider.configuration?.onSynced) {
+                                        provider.configuration.onSynced();
+                                    }
+                                } else {
+                                    console.log('💭 Read-only: No Y.js content - attempting HTTP fallback');
+                                    
+                                    // ✅ FALLBACK: Use HTTP API to fetch document content for read-only users
+                                    try {
+                                        const infoUrl = `https://data.dlux.io/api/collaboration/info/${docPath}`;
+                                        console.log('🌐 Fetching document via HTTP:', infoUrl);
+                                        
+                                        const response = await fetch(infoUrl, {
+                                            headers: persistenceManager.component.authHeaders || {}
+                                        });
+                                        
+                                        if (response.ok) {
+                                            const data = await response.json();
+                                            console.log('📦 HTTP response received:', {
+                                                hasYdocState: !!data.ydocState,
+                                                stateSize: data.ydocState?.length || 0,
+                                                documentName: data.document_name
+                                            });
+                                            
+                                            if (data.ydocState) {
+                                                // Apply the state to our Y.js document
+                                                const update = new Uint8Array(data.ydocState);
+                                                Y.applyUpdate(yjsDoc, update);
+                                                
+                                                console.log('✅ Applied HTTP document state to Y.js');
+                                                
+                                                // Now manually trigger onSynced
+                                                if (provider.configuration?.onSynced) {
+                                                    console.log('🎉 Manually triggering onSynced after HTTP load');
+                                                    provider.configuration.onSynced();
+                                                }
+                                            }
+                                        } else {
+                                            console.error('❌ HTTP fetch failed:', response.status, response.statusText);
+                                        }
+                                    } catch (error) {
+                                        console.error('❌ HTTP fallback error:', error);
+                                    }
                                 }
                             } else if (provider.synced) {
                                 console.log('✅ Read-only user successfully synced');
                             }
-                        }, 1000);
+                        }, 2000); // Wait 2 seconds for sync
                     }
                     
                     // ✅ SERVER VERSION: Check version when connecting to ensure compatibility
@@ -889,8 +939,11 @@ class PersistenceManager {
                     });
                     
                     // ✅ UPDATE: Mark Y.js config with disconnect status
-                    yjsDoc.getMap('config').set('cloudSyncActive', false);
-                    yjsDoc.getMap('config').set('lastDisconnect', new Date().toISOString());
+                    // ❌ CRITICAL FIX: Skip for read-only users to prevent server rejection
+                    if (!persistenceManager.component.isReadOnlyMode) {
+                        yjsDoc.getMap('config').set('cloudSyncActive', false);
+                        yjsDoc.getMap('config').set('lastDisconnect', new Date().toISOString());
+                    }
                 },
                 
                 onAuthenticationFailed(data) {
@@ -937,7 +990,8 @@ class PersistenceManager {
                         reason: error.reason,
                         wasClean: error.wasClean,
                         documentPath: docPath,
-                        isReadOnly: persistenceManager.component.isReadOnlyMode
+                        isReadOnly: persistenceManager.component.isReadOnlyMode,
+                        errorStack: error.stack
                     });
                     
                     // Handle specific protocol errors
@@ -969,11 +1023,52 @@ class PersistenceManager {
                 
                 // Add debugging for provider events (but don't interfere with message handling)
                 onOpen() {
-                    console.log('🔓 WebSocket onOpen event fired');
+                    console.log('🔓 WebSocket onOpen event fired', {
+                        documentPath: docPath,
+                        isReadOnly: persistenceManager.component.isReadOnlyMode,
+                        permissionLevel: file.permissionLevel,
+                        timestamp: new Date().toISOString()
+                    });
                 },
                 
                 onStatus(event) {
-                    console.log('📊 WebSocket onStatus event:', event);
+                    console.log('📊 WebSocket onStatus event:', {
+                        status: event.status,
+                        documentPath: docPath,
+                        isReadOnly: persistenceManager.component.isReadOnlyMode,
+                        timestamp: new Date().toISOString()
+                    });
+                },
+                
+                // ✅ DEBUG: Track message flow
+                onMessage(data) {
+                    messageCount++;
+                    const timeSinceLastMessage = Date.now() - lastMessageTime;
+                    lastMessageTime = Date.now();
+                    
+                    console.log('📨 WebSocket message received', {
+                        messageNumber: messageCount,
+                        timeSinceLastMessage: timeSinceLastMessage + 'ms',
+                        dataType: typeof data,
+                        dataSize: data?.byteLength || data?.length || 0,
+                        isReadOnly: persistenceManager.component.isReadOnlyMode,
+                        documentPath: docPath,
+                        providerStatus: {
+                            synced: provider.synced,
+                            hasAwareness: !!provider.awareness,
+                            wsReadyState: provider.ws?.readyState
+                        }
+                    });
+                    
+                    // First message is typically the sync response
+                    if (messageCount === 1) {
+                        console.log('🌟 First WebSocket message received - likely initial sync');
+                    }
+                    
+                    // Check if sync completed after message
+                    if (provider.synced && messageCount <= 3) {
+                        console.log('✅ Provider synced after message', messageCount);
+                    }
                 },
                 
                 // ✅ DEBUG: Add more event handlers to understand sync issue
@@ -1002,8 +1097,14 @@ class PersistenceManager {
                 documentPath: docPath,
                 permissionLevel: file.permissionLevel,
                 providerStatus: provider.status,
-                providerConfiguration: provider.configuration
+                providerConfiguration: provider.configuration,
+                providerKeys: Object.keys(provider),
+                hasWebSocket: !!provider.ws,
+                wsState: provider.ws?.readyState
             });
+            
+            // ✅ TIPTAP BEST PRACTICE: Awareness state is properly set in onConnect
+            // No need to clear it here - CollaborationCursor will work correctly
             
             // ✅ FIX: Remove manual connection - provider should connect automatically with connect: true
             
@@ -1017,12 +1118,14 @@ class PersistenceManager {
                     yjsDocSize: yjsDoc.store.clients.size,
                     yjsShareKeys: Array.from(yjsDoc.share.keys()),
                     titleShareLength: yjsDoc.share.get('title')?.length || 0,
-                    bodyShareLength: yjsDoc.share.get('body')?.length || 0
+                    bodyShareLength: yjsDoc.share.get('body')?.length || 0,
+                    wsReadyState: provider.ws?.readyState,
+                    configuration: provider.configuration ? Object.keys(provider.configuration) : []
                 });
                 
-                // ✅ RECOVERY: If connected but not synced after 2s, force sync check
-                if (provider.isConnected && !provider.synced) {
-                    console.warn('⚠️ WebSocket connected but not synced after 2s - checking Y.js state');
+                // ✅ RECOVERY: If not synced after 2s, check Y.js state
+                if (!provider.synced) {
+                    console.warn('⚠️ WebSocket not synced after 2s - checking Y.js state');
                     
                     // Check if Y.js has received any updates
                     const titleShare = yjsDoc.share.get('title');
@@ -1390,17 +1493,17 @@ class EditorFactory {
             if (webSocketProvider) {
                 return await this.createTier2Editors(yjsDoc, webSocketProvider);
             } else {
-                return await this.createTier1Editors(yjsDoc);
+                return await this.createTier1Editors(yjsDoc, webSocketProvider);
             }
         } else {
-            return await this.createTier1Editors(yjsDoc);
+            return await this.createTier1Editors(yjsDoc, webSocketProvider);
             }
         } finally {
             this.component.creatingEditors = false;
         }
     }
     
-    async createTier1Editors(yjsDoc) {
+    async createTier1Editors(yjsDoc, webSocketProvider = null) {
         // ✅ TIPTAP BEST PRACTICE: Use window bundle instead of ES6 imports
         const bundle = window.TiptapCollaboration?.default || window.TiptapCollaboration;
         if (!bundle) {
@@ -1410,6 +1513,7 @@ class EditorFactory {
         const Editor = bundle.Editor?.default || bundle.Editor;
         const StarterKit = bundle.StarterKit?.default || bundle.StarterKit;
         const Collaboration = bundle.Collaboration?.default || bundle.Collaboration;
+        const CollaborationCursor = bundle.CollaborationCursor?.default || bundle.CollaborationCursor;
         const Placeholder = bundle.Placeholder?.default || bundle.Placeholder;
 
         if (!Editor || !StarterKit || !Collaboration || !Placeholder) {
@@ -1434,30 +1538,55 @@ class EditorFactory {
             isReadOnlyMode: this.component.isReadOnlyMode
         });
         
-        // Create editors with Y.js collaboration but no CollaborationCursor
-        // ✅ CRITICAL FIX: Calculate editable state based on current permissions
+        // ✅ TIPTAP BEST PRACTICE: Include CollaborationCursor when WebSocket is available
+        // This follows TipTap's recommendation for read-only users with cursor visibility
         const isEditable = !this.component.isReadOnlyMode;
-        console.log('🔧 Creating Tier 1 title editor with editable state:', {
+        console.log('🔧 Creating Tier 1 editors with:', {
             isEditable,
             isReadOnlyMode: this.component.isReadOnlyMode,
+            hasWebSocketProvider: !!webSocketProvider,
             permissionLevel: this.component.currentFile?.permissionLevel,
             documentType: this.component.currentFile?.type
         });
         
+        // Build extensions array
+        const titleExtensions = [
+            StarterKit.configure({ 
+                history: false // Disable history when using Collaboration
+            }),
+            Collaboration.configure({
+                document: yjsDoc,
+                field: 'title'
+            }),
+            Placeholder.configure({ 
+                placeholder: 'Enter title...' 
+            })
+        ];
+        
+        // ✅ TIPTAP BEST PRACTICE: Add CollaborationCursor for all users when WebSocket is available
+        // Read-only users get cursor visibility without edit capabilities
+        if (CollaborationCursor && webSocketProvider) {
+            const cursorConfig = {
+                provider: webSocketProvider,
+                user: {
+                    name: this.component.username || 'Anonymous',
+                    color: this.component.getUserColor
+                }
+            };
+            
+            // Add read-only indicator
+            if (this.component.isReadOnlyMode) {
+                cursorConfig.user.isReadOnly = true;
+                cursorConfig.user.color = '#808080'; // Gray for read-only
+            }
+            
+            titleExtensions.push(CollaborationCursor.configure(cursorConfig));
+            console.log('✅ CollaborationCursor added for', this.component.isReadOnlyMode ? 'read-only' : 'editable', 'user');
+        }
+        
         const titleEditor = new Editor({
             element: this.component.$refs.titleEditor,
-            extensions: [
-                StarterKit.configure({ 
-                    history: false // Disable history when using Collaboration
-                }),
-                Collaboration.configure({
-                    document: yjsDoc,
-                    field: 'title'
-                }),
-                Placeholder.configure({ 
-                    placeholder: 'Enter title...' 
-                })
-            ],
+            extensions: titleExtensions,
             editable: isEditable,
             immediatelyRender: true,
             shouldRerenderOnTransaction: false,
@@ -1499,20 +1628,41 @@ class EditorFactory {
             }
         });
 
+        // Build body extensions array
+        const bodyExtensions = [
+            StarterKit.configure({ 
+                history: false 
+            }),
+            Collaboration.configure({
+                document: yjsDoc,
+                field: 'body'
+            }),
+            Placeholder.configure({ 
+                placeholder: 'Start writing your content...' 
+            })
+        ];
+        
+        // ✅ TIPTAP BEST PRACTICE: Add CollaborationCursor for body editor too
+        if (CollaborationCursor && webSocketProvider) {
+            const cursorConfig = {
+                provider: webSocketProvider,
+                user: {
+                    name: this.component.username || 'Anonymous',
+                    color: this.component.getUserColor
+                }
+            };
+            
+            if (this.component.isReadOnlyMode) {
+                cursorConfig.user.isReadOnly = true;
+                cursorConfig.user.color = '#808080';
+            }
+            
+            bodyExtensions.push(CollaborationCursor.configure(cursorConfig));
+        }
+        
         const bodyEditor = new Editor({
             element: this.component.$refs.bodyEditor,
-            extensions: [
-                StarterKit.configure({ 
-                    history: false 
-                }),
-                Collaboration.configure({
-                    document: yjsDoc,
-                    field: 'body'
-                }),
-                Placeholder.configure({ 
-                    placeholder: 'Start writing your content...' 
-                })
-            ],
+            extensions: bodyExtensions,
             editable: isEditable,
             immediatelyRender: true,
             shouldRerenderOnTransaction: false,
@@ -1617,15 +1767,21 @@ class EditorFactory {
 
             // Add CollaborationCursor if available and we have a provider
             if (CollaborationCursor && webSocketProvider) {
-                extensions.push(
-                    CollaborationCursor.configure({
-                        provider: webSocketProvider,
-                        user: {
-                            name: this.component.username || 'Anonymous',
-                            color: this.component.getUserColor
-                        }
-                    })
-                );
+                const cursorConfig = {
+                    provider: webSocketProvider,
+                    user: {
+                        name: this.component.username || 'Anonymous',
+                        color: this.component.getUserColor
+                    }
+                };
+                
+                // ✅ TIPTAP BEST PRACTICE: Add read-only indicator for cursor visibility
+                if (this.component.isReadOnlyMode) {
+                    cursorConfig.user.isReadOnly = true;
+                    cursorConfig.user.color = '#808080'; // Gray for read-only users
+                }
+                
+                extensions.push(CollaborationCursor.configure(cursorConfig));
             }
 
             return extensions;
@@ -4361,13 +4517,23 @@ export default {
                 
                 // Set up new provider awareness listeners
                 if (newProvider && newProvider.awareness) {
-                    // Set local user state
-                    newProvider.awareness.setLocalState({
+                    // ✅ TIPTAP BEST PRACTICE: Set awareness state for all users
+                    // Read-only users should have cursor visibility
+                    const userState = {
                         user: {
                             name: this.username || 'Anonymous',
                             color: this.getUserColor
                         }
-                    });
+                    };
+                    
+                    // Add read-only indicator if applicable
+                    if (this.isReadOnlyMode) {
+                        userState.user.isReadOnly = true;
+                        userState.user.color = '#808080'; // Gray for read-only
+                        console.log('📖 Setting read-only user awareness state');
+                    }
+                    
+                    newProvider.awareness.setLocalState(userState);
                     
                     // Listen for awareness changes
                     newProvider.awareness.on('change', this.updateConnectedUsers);
@@ -10017,14 +10183,24 @@ export default {
             
             // Update provider awareness if available
             if (this.provider && this.provider.awareness) {
+                // ✅ TIPTAP BEST PRACTICE: Allow color updates for read-only users
+                // They should be visible with their chosen color
                 const currentState = this.provider.awareness.getLocalState() || {};
-                this.provider.awareness.setLocalState({
+                const updatedState = {
                     ...currentState,
                     user: {
                         ...currentState.user,
                         color: color
                     }
-                });
+                };
+                
+                // Maintain read-only indicator
+                if (this.isReadOnlyMode) {
+                    updatedState.user.isReadOnly = true;
+                }
+                
+                this.provider.awareness.setLocalState(updatedState);
+                console.log('🎨 User color updated:', color);
             }
             
             // Store in localStorage for persistence
