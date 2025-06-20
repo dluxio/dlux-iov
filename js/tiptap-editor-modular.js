@@ -1189,15 +1189,16 @@ class PersistenceManager {
                     } else {
                         console.log('⚠️ No content in Y.js document - waiting for sync');
                     }
-                } else if (!provider.isConnected) {
-                    console.warn('⚠️ WebSocket not connected after 2s', {
+                } else if (provider.ws && provider.ws.readyState !== WebSocket.OPEN) {
+                    console.warn('⚠️ WebSocket not in OPEN state after 2s', {
+                        readyState: provider.ws.readyState,
+                        readyStateText: ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'][provider.ws.readyState],
                         status: provider.status,
-                        configuration: provider.configuration,
-                        hasConnect: typeof provider.connect === 'function'
+                        synced: provider.synced
                     });
                     
-                    // Try to connect manually
-                    if (provider.connect) {
+                    // Try to connect manually if WebSocket exists but isn't connected
+                    if (provider.connect && provider.ws.readyState === WebSocket.CLOSED) {
                         console.log('🔌 Attempting manual reconnection...');
                         provider.connect();
                     }
