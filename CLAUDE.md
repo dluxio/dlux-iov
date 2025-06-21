@@ -6,11 +6,30 @@ DLUX IOV is a collaborative document editing platform built with TipTap editor, 
 ## Architecture Overview
 
 ### Core Technologies
-- **TipTap Editor**: Rich text editing with ProseMirror
+- **TipTap Editor v3**: Rich text editing with ProseMirror (using v3.0.0+)
 - **Y.js**: Conflict-free replicated data types (CRDT) for collaboration
 - **IndexedDB**: Local persistence and offline capabilities
 - **WebSocket/WebRTC**: Real-time synchronization for cloud documents
 - **DLUX/Hive Authentication**: Blockchain-based permissions with 24-hour expiration
+
+### TipTap v3 Migration Notes
+This project uses TipTap v3, which has several important changes from v2:
+
+1. **Collaboration Parameter Change**: 
+   - v2: `fragment: 'fieldName'`
+   - v3: `field: 'fieldName'` ✅
+
+2. **Undo/Redo Requires Pro Extension**:
+   - v3 requires `@tiptap-pro/extension-collaboration-history` for undo/redo functionality
+   - Without the Pro extension, undo/redo commands will not work with Collaboration
+
+3. **Import Changes**:
+   - All extensions now use `@tiptap/extension-*` naming convention
+   - Core is imported from `@tiptap/core`
+
+4. **Extension API**:
+   - More modular approach with individual extension imports
+   - StarterKit still available but requires explicit history: false when using Collaboration
 
 ### Two-Tier Collaboration Strategy
 1. **Tier 1**: Local editing with Y.js + IndexedDB + Collaboration extension (no CollaborationCursor)
@@ -57,16 +76,22 @@ setDocumentName(documentName) {
 ```
 
 #### Editor Configuration
+
+##### ⚠️ TipTap v3 Configuration Changes
+In TipTap v3, the Collaboration extension uses `field` instead of the v2 `fragment` parameter:
+- **v2**: `fragment: 'content'` 
+- **v3**: `field: 'content'` ✅
+
 ```javascript
 // Tier 1: Local editing (no CollaborationCursor)
 const extensions = [
     // CRITICAL: Do not include History extension with Collaboration
     Collaboration.configure({
         document: this.ydoc,
-        field: 'content'
+        field: 'content' // v3 uses 'field' instead of 'fragment'
     })
     // No CollaborationCursor - prevents null provider errors
-    // Use editor.commands.undo() and editor.commands.redo() from Collaboration
+    // Note: undo/redo requires @tiptap-pro/extension-collaboration-history in v3
 ];
 
 // Tier 2: Cloud editing (with CollaborationCursor)
@@ -74,12 +99,12 @@ const extensions = [
     // CRITICAL: Do not include History extension with Collaboration
     Collaboration.configure({
         document: this.ydoc,
-        field: 'content'
+        field: 'content' // v3 uses 'field' instead of 'fragment'
     }),
     CollaborationCursor.configure({
         provider: this.websocketProvider // Valid WebSocket provider required
     })
-    // Use editor.commands.undo() and editor.commands.redo() from Collaboration
+    // Note: undo/redo requires @tiptap-pro/extension-collaboration-history in v3
 ];
 ```
 
@@ -178,6 +203,72 @@ npm test          # If available
 6. **Disable History extension when using Collaboration** - TipTap requirement for conflict-free editing
 7. **Use Collaboration extension's built-in undo/redo** - instead of separate History extension
 
+## History and Undo/Redo Implementation
+
+### ⚠️ IMPORTANT: TipTap v3 Undo/Redo Limitation
+**Undo/Redo functionality requires the Pro extension `@tiptap-pro/extension-collaboration-history` in TipTap v3**. Without this paid extension, undo/redo commands will not work properly with the Collaboration extension.
+
+### Core Principles
+1. **NEVER use History extension with Collaboration** - Must disable in StarterKit
+2. **Y.js manages undo/redo** - Through the Collaboration extension (requires Pro extension in v3)
+3. **Undo/redo disabled** - Not available without Pro extension
+
+### Current Implementation (TipTap v3)
+
+```javascript
+// Editor Configuration (BOTH Tier 1 and Tier 2)
+StarterKit.configure({ 
+    history: false // CRITICAL: Must be false when using Collaboration
+}),
+Collaboration.configure({
+    document: yjsDoc,
+    field: 'title' // v3 uses 'field' instead of v2's 'fragment'
+})
+
+// Undo/Redo NOT IMPLEMENTED
+// Requires @tiptap-pro/extension-collaboration-history
+```
+
+### To Enable Undo/Redo (Requires Pro License)
+
+```javascript
+// Install Pro extension
+npm install @tiptap-pro/extension-collaboration-history @hocuspocus/transformer
+
+// Configure with Pro extension
+import { CollaborationHistory } from '@tiptap-pro/extension-collaboration-history'
+
+const editor = new Editor({
+  extensions: [
+    StarterKit.configure({ history: false }),
+    Collaboration.configure({
+        document: yjsDoc,
+        field: 'title'
+    }),
+    CollaborationHistory.configure({
+        provider, // Your WebSocket provider
+    }),
+  ],
+})
+
+// Then you can use:
+editor.commands.undo()
+editor.commands.redo()
+editor.commands.saveVersion('Version Name')
+editor.commands.revertToVersion(versionNumber)
+```
+
+**Redo not available**
+- Cause: State tracking issues
+- Solution: Properly check with `can().undo()` and `can().redo()`
+
+### Best Practices
+- ✅ Always disable History extension with Collaboration
+- ✅ Use simple command execution (no chaining)
+- ✅ Let Y.js manage the undo stack automatically
+- ✅ Handle destroyed editor checks before commands
+- ✅ Update UI state with requestAnimationFrame
+
 ## Common Issues and Solutions
 
 ### Race Conditions
@@ -196,6 +287,8 @@ npm test          # If available
 - Implement proper cleanup for temporary documents
 
 ## Y.js Document Lifecycle Patterns
+
+> **Note**: All code examples use TipTap v3 syntax with `field` parameter instead of v2's `fragment`.
 
 ### 1. Temp Document Strategy
 ```javascript
@@ -533,3 +626,97 @@ const YjsMigrationFramework = {
 4. **Add performance monitoring** for collaborative sessions
 5. **Implement accessibility framework** for collaborative features
 6. **Design Y.js schema migration system** for future updates
+
+## TipTap v3 Specific Best Practices
+
+### 1. Collaboration Extension Configuration
+```javascript
+// ✅ CORRECT: TipTap v3 syntax
+Collaboration.configure({
+    document: yjsDoc,
+    field: 'content' // v3 parameter name
+})
+
+// ❌ WRONG: TipTap v2 syntax
+Collaboration.configure({
+    document: yjsDoc,
+    fragment: 'content' // v2 parameter name - will not work in v3
+})
+```
+
+### 2. Extension Imports
+```javascript
+// ✅ CORRECT: TipTap v3 imports
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import Collaboration from '@tiptap/extension-collaboration'
+import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
+
+// All extensions follow @tiptap/extension-* pattern
+```
+
+### 3. History Extension Handling
+```javascript
+// When using Collaboration in v3, ALWAYS disable history
+StarterKit.configure({
+    history: false // Required in v3 when using Collaboration
+})
+
+// For undo/redo functionality, you need the Pro extension:
+// import { CollaborationHistory } from '@tiptap-pro/extension-collaboration-history'
+```
+
+### 4. Type Definitions (TypeScript)
+```typescript
+// v3 has improved TypeScript support
+import type { Editor } from '@tiptap/core'
+import type { Doc } from 'yjs'
+
+interface EditorConfig {
+    yjsDoc: Doc
+    field: string // Note: 'field' not 'fragment'
+}
+```
+
+### 5. Editor Creation Pattern
+```javascript
+// v3 pattern for creating collaborative editor
+const editor = new Editor({
+    extensions: [
+        StarterKit.configure({ history: false }),
+        Collaboration.configure({
+            document: yjsDoc,
+            field: 'content' // v3 syntax
+        }),
+        // Only include if you have a valid WebSocket provider
+        ...(websocketProvider ? [
+            CollaborationCursor.configure({
+                provider: websocketProvider
+            })
+        ] : [])
+    ],
+    content: '', // Let Y.js handle content
+    onCreate: ({ editor }) => {
+        // v3 lifecycle hook
+    },
+    onUpdate: ({ editor }) => {
+        // v3 lifecycle hook
+    }
+})
+```
+
+### 6. Common v2 → v3 Migration Issues
+
+1. **Parameter Naming**: Always use `field` instead of `fragment`
+2. **Undo/Redo**: Built-in undo/redo with Collaboration requires Pro extension
+3. **Import Paths**: All imports use `@tiptap/` prefix
+4. **Extension Configuration**: More strict type checking in v3
+5. **Lifecycle Hooks**: Some hooks have been renamed or restructured
+
+### 7. v3-Specific Debugging
+```javascript
+// Check collaboration field configuration
+console.log('Collaboration field:', editor.extensionManager.extensions
+    .find(ext => ext.name === 'collaboration')
+    ?.options.field) // Should show your field name, not undefined
+```

@@ -3173,9 +3173,6 @@ body[data-touch="false"] {
 }
 
 /* Editor Toolbar */
-.editor-toolbar {
-    border-radius: 0.375rem 0.375rem 0 0 !important;
-}
 
 .editor-toolbar .btn.active {
     background-color: #5C94FE;
@@ -3363,9 +3360,9 @@ body[data-touch="false"] {
 /* Editor Container Styling */
 .editor-field {
     border: 1px solid #495057;
-    border-radius: 0.375rem;
     background-color: transparent;
 }
+
 
 .editor-field:focus-within {
     border-color: #5C94FE;
