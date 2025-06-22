@@ -2388,6 +2388,16 @@ const app = createApp({
         isProposalCurrentlyFunded = this.isProposalFunded(this.selectedProposalForAnalysis);
       }
       
+      // Get custom analysis data if any
+      let customAnalysisPay = 0;
+      let customAnalysisDescription = '';
+      let isCustomAnalysisAddition = true;
+      if (this.customAnalysis && this.customAnalysis.active) {
+        customAnalysisPay = parseFloat(this.customAnalysis.dailyAmount || 0);
+        customAnalysisDescription = String(this.customAnalysis.description || 'Custom Analysis');
+        isCustomAnalysisAddition = Boolean(this.customAnalysis.isAddition);
+      }
+      
       // Calculate projections with plain JavaScript (no Vue reactivity)
       const days = 365 * 3;
       const priceGrowthDaily = Math.pow(1 + (priceGrowthRate / 100), 1/365);
@@ -2395,7 +2405,9 @@ const app = createApp({
       
       const projections = [];
       let currentTreasuryWithout = treasury;
-      let currentTreasuryWith = treasury;
+      let currentTreasuryWithProposal = treasury;
+      let currentTreasuryWithCustom = treasury;
+      let currentTreasuryWithBoth = treasury;
       let currentHiveBalance = hiveBalance;
       
       for (let day = 0; day < days; day++) {
@@ -2408,27 +2420,41 @@ const app = createApp({
         
         const totalDailyInflow = projectedRewardsInflow + dailyNinjaGrant;
         
+        // Calculate different outflow scenarios
         const dailyOutflowWithout = dailyOutflow;
-        // If proposal is currently funded, removing it decreases outflow
-        // If proposal is not funded, adding it increases outflow
-        const dailyOutflowWith = isProposalCurrentlyFunded ? 
-          dailyOutflow - selectedProposalPay : 
-          dailyOutflow + selectedProposalPay;
         
+        // Proposal impact
+        const proposalImpact = isProposalCurrentlyFunded ? -selectedProposalPay : selectedProposalPay;
+        const dailyOutflowWithProposal = dailyOutflow + proposalImpact;
+        
+        // Custom analysis impact
+        const customImpact = isCustomAnalysisAddition ? customAnalysisPay : -customAnalysisPay;
+        const dailyOutflowWithCustom = dailyOutflow + customImpact;
+        
+        // Combined impact
+        const dailyOutflowWithBoth = dailyOutflow + proposalImpact + customImpact;
+        
+        // Update treasury projections
         currentTreasuryWithout += totalDailyInflow - dailyOutflowWithout;
-        currentTreasuryWith += totalDailyInflow - dailyOutflowWith;
+        currentTreasuryWithProposal += totalDailyInflow - dailyOutflowWithProposal;
+        currentTreasuryWithCustom += totalDailyInflow - dailyOutflowWithCustom;
+        currentTreasuryWithBoth += totalDailyInflow - dailyOutflowWithBoth;
         
         if (day % 30 === 0) { // Monthly data points
           projections.push({
             date: new Date(Date.now() + day * 24 * 60 * 60 * 1000),
             treasuryWithout: Number(currentTreasuryWithout),
-            treasuryWith: Number(currentTreasuryWith),
+            treasuryWithProposal: Number(currentTreasuryWithProposal),
+            treasuryWithCustom: Number(currentTreasuryWithCustom),
+            treasuryWithBoth: Number(currentTreasuryWithBoth),
             hiveBalance: Number(currentHiveBalance),
             dailyInflow: Number(totalDailyInflow),
             dailyRewardsInflow: Number(projectedRewardsInflow),
             dailyNinjaGrant: Number(dailyNinjaGrant),
             dailyOutflowWithout: Number(dailyOutflowWithout),
-            dailyOutflowWith: Number(dailyOutflowWith)
+            dailyOutflowWithProposal: Number(dailyOutflowWithProposal),
+            dailyOutflowWithCustom: Number(dailyOutflowWithCustom),
+            dailyOutflowWithBoth: Number(dailyOutflowWithBoth)
           });
         }
       }
@@ -2489,7 +2515,7 @@ const app = createApp({
         const actionLabel = isProposalCurrentlyFunded ? 'removing' : 'adding';
         datasets.push({
           label: `Treasury ${actionLabel} "${selectedProposalTitle}..."`,
-          data: projections.map(p => p.treasuryWith),
+          data: projections.map(p => p.treasuryWithProposal),
           borderColor: 'rgb(255, 205, 86)',
           backgroundColor: 'rgba(255, 205, 86, 0.1)',
           tension: 0.1,
@@ -2499,12 +2525,61 @@ const app = createApp({
         
         datasets.push({
           label: `Daily Outflow (${actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1)} Proposal)`,
-          data: projections.map(p => p.dailyOutflowWith),
+          data: projections.map(p => p.dailyOutflowWithProposal),
           borderColor: 'rgb(255, 99, 132)',
           backgroundColor: 'rgba(255, 99, 132, 0.3)',
           tension: 0.1,
           yAxisID: 'y1',
           borderDash: [5, 5],
+          fill: false
+        });
+      }
+      
+      // Add custom analysis if active
+      if (customAnalysisPay > 0) {
+        const actionLabel = isCustomAnalysisAddition ? 'adding' : 'removing';
+        datasets.push({
+          label: `Treasury ${actionLabel} "${customAnalysisDescription}"`,
+          data: projections.map(p => p.treasuryWithCustom),
+          borderColor: 'rgb(138, 43, 226)', // Blue-violet color
+          backgroundColor: 'rgba(138, 43, 226, 0.1)',
+          tension: 0.1,
+          borderDash: [10, 5], // Different dash pattern from proposal
+          fill: false
+        });
+        
+        datasets.push({
+          label: `Daily Outflow (${actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1)} Custom)`,
+          data: projections.map(p => p.dailyOutflowWithCustom),
+          borderColor: 'rgb(138, 43, 226)',
+          backgroundColor: 'rgba(138, 43, 226, 0.3)',
+          tension: 0.1,
+          yAxisID: 'y1',
+          borderDash: [10, 5],
+          fill: false
+        });
+      }
+      
+      // Add combined analysis if both are active
+      if (selectedProposalPay > 0 && customAnalysisPay > 0) {
+        datasets.push({
+          label: `Treasury (Combined Impact)`,
+          data: projections.map(p => p.treasuryWithBoth),
+          borderColor: 'rgb(255, 20, 147)', // Deep pink
+          backgroundColor: 'rgba(255, 20, 147, 0.1)',
+          tension: 0.1,
+          borderDash: [15, 5, 5, 5], // Dash-dot pattern
+          fill: false
+        });
+        
+        datasets.push({
+          label: `Daily Outflow (Combined Impact)`,
+          data: projections.map(p => p.dailyOutflowWithBoth),
+          borderColor: 'rgb(255, 20, 147)',
+          backgroundColor: 'rgba(255, 20, 147, 0.3)',
+          tension: 0.1,
+          yAxisID: 'y1',
+          borderDash: [15, 5, 5, 5],
           fill: false
         });
       }
