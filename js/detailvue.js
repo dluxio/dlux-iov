@@ -153,7 +153,7 @@ data-bs-dismiss="modal" aria-label="Close"></button>
 </form>
 </div>
 <div class="collapse" :id="'vote-modal-' + post.author + '-' + post.permlink">
-<form id="voteForm">
+<form :id="'voteForm-' + post.author + '-' + post.permlink">
 <div class="d-flex align-items-center text-white-50">
 <button type="button" class="btn btn-sm me-1" :class="{'btn-success': !flag, ' btn-danger': flag}" @click="vote(post.url)" style="min-width: 85px;"><span v-if="!flag"><i class="fas fa-heart fa-fw me-1"></i></span><span v-if="flag"><i class="fa-solid fa-flag me-1"></i></span>{{flag ? '-' : ''}}{{formatNumber(slider / 100, 0,'.',',')}}%</button>
 <button type="button" class="btn btn-sm btn-secondary px-1 me-1" data-bs-toggle="collapse" :data-bs-target="'#vote-modal-' + post.author + '-' + post.permlink">
@@ -192,7 +192,7 @@ data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 <div class="px-2">
 <div class="mb-3 ms-auto me-auto" style="max-width: 750px">
-<form id="commentForm">
+<form :id="'commentForm-' + post.author + '-' + post.permlink">
 <mde id="body" @data="settext($event)" />
 </form>
 <div class="collapse" id="bene-collapse">
@@ -344,6 +344,7 @@ methods: {
             } catch (error) {
                 console.error('Error fetching modal author reputation:', error);
                 if (this.post.author_reputation) {
+                    // Condenser API returns raw reputation values that need calculation
                     this.modalRep = this.post.author_reputation
                 }
             }
@@ -351,8 +352,10 @@ methods: {
     },
     updateModalReputation() {
         if (this.post.author_reputation) {
+            // Condenser API returns raw reputation values that need calculation
             this.modalRep = this.post.author_reputation
         } else if (this.modalAuthorInfo && this.modalAuthorInfo.reputation) {
+            // Condenser API returns raw reputation values that need calculation
             this.modalRep = this.modalAuthorInfo.reputation
         } else if (this.post.rep && this.post.rep !== "...") {
             this.modalRep = this.post.rep;

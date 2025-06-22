@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="en" class="h-100">
+
+<head>
+	<title>DLUX - Hive Proposal Tracker</title>
+	<meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="description" content="Track and vote on Hive blockchain proposals - decentralized governance in action" />
+	<meta name="keywords" content="hive, proposals, governance, voting, blockchain, decentralized" />
+	<link rel="manifest" href="/manifest.webmanifest">
+	<link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<meta name="apple-mobile-web-app-title" content="DLUX">
+	<meta name="theme-color" content="#111222" />
+	<link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
+	<!-- Bootstrap -->
+	<link href="/css/custom.css" rel="stylesheet" />
+	<!-- Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Space+Grotesk:wght@300..700&display=swap"
+		rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/hive-tx/dist/hive-tx.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="/js/diff.js"></script>
+	<!-- Markdown Processing -->
+	<script src="https://cdn.jsdelivr.net/npm/marked-linkify-it/lib/index.umd.js"></script>
+	<!-- Highlight.js -->
+	<script src="https://cdn.jsdelivr.net/npm/marked-highlight@2.2.1/lib/index.umd.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+	<!-- KaTeX for Math Rendering -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" integrity="sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLpaCct6O9ctzYFfFr4dgmgccOTx" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/marked-katex-extension@5.1.4/lib/index.umd.js"></script>
+	<script src="/js/purify.min.js"></script>
+	<!-- End Markdown Processing -->
+	<!-- HLS.js for M3U8 video playback support in Chrome/Firefox -->
+	<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+	<!-- SimpleMDE for markdown editing -->
+	<link href="/css/smde-comment.css" rel="stylesheet" />
+	<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+	<script type="module" src="/js/v3-index.js"></script>
+	<!-- Font Awesome -->
+	<link href="/css/font-awesome.min.css" rel="stylesheet">
+	<script src="/reg-sw.js"></script>
+	<style>
+		/* v-cloak directive - hide until Vue is ready */
+		[v-cloak] {
+			display: none !important;
+		}
+		
+		/* Threaded reply styling */
+		.reply-container {
+			transition: all 0.2s ease;
+		}
+		
+		.reply-container:hover {
+			background-color: rgba(255,255,255,0.02);
+		}
+		
+		.nested-replies {
+			margin-top: 0.5rem;
+		}
+		
+		.collapsed-info {
+			color: #6c757d;
+			font-size: 0.875rem;
+			padding: 0.25rem 0;
+		}
+		
+		.author-img.cover {
+			object-fit: cover;
+		}
+		
+		/* Reputation badges */
+		.rep-danger { background-color: #dc3545 !important; }
+		.rep-warning { background-color: #ffc107 !important; color: #000 !important; }
+		.rep-success { background-color: #198754 !important; }
+		
+		/* Better responsive threading */
+		@media (max-width: 768px) {
+			.reply-container {
+				margin-left: 0 !important;
+				padding-left: 0.5rem !important;
+			}
+		}
+		
+		/* Custom scrollbar for proposal lists */
+		.proposal-scroll::-webkit-scrollbar {
+			width: 6px;
+		}
+		
+		.proposal-scroll::-webkit-scrollbar-track {
+			background: rgba(255,255,255,0.1);
+			border-radius: 3px;
+		}
+		
+		.proposal-scroll::-webkit-scrollbar-thumb {
+			background: rgba(255,255,255,0.3);
+			border-radius: 3px;
+		}
+		
+		.proposal-scroll::-webkit-scrollbar-thumb:hover {
+			background: rgba(255,255,255,0.5);
+		}
+	</style>
+</head>
+
+<body class="bg-img-gradient">
+	<div id="app" class="d-flex flex-column vh-100" v-cloak>
+		<!-- navbar -->
+		<div>
+			<nav-vue @login="account = $event;getTokenUser($event);getHiveUser($event)"
+				@logout="account = '';removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
+				:lapi="lapi" />
+		</div>
+		
+		<main role="main" class="d-flex flex-column flex-grow-1 padmain">
+			<!-- Health Monitor Dashboard -->
+			<section class="container-fluid py-4" style="background: linear-gradient(135deg, #1b5199 0%, #2c5aa0 100%);">
+				<div class="container">
+					<div class="row mb-4">
+						<div class="col-12 text-center">
+							<h1 class="text-light mb-2">Hive DAO Health Monitor</h1>
+							<p class="text-light-1 mb-4">Real-time analysis of decentralized funding ecosystem</p>
+							
+							<!-- View Mode Switch -->
+							<div class="btn-group mb-3" role="group">
+								<input type="radio" class="btn-check" name="viewMode" id="currentView" v-model="viewMode" value="current">
+								<label class="btn btn-outline-light" for="currentView">Current State</label>
+								
+								<input type="radio" class="btn-check" name="viewMode" id="hfView" v-model="viewMode" value="hf_proposal">
+								<label class="btn btn-outline-light" for="hfView">HF Proposal Impact</label>
+							</div>
+						</div>
+					</div>
+					
+					<!-- Key Metrics Row -->
+					<div class="row mb-4">
+						<div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+							<div class="card bg-dark bg-opacity-75 text-light h-100">
+								<div class="card-body text-center">
+									<h6 class="card-title text-info">Hive Price</h6>
+									<h4 class="text-success mb-1">${{ hiveprice.hive.usd.toFixed(3) }}</h4>
+									<small class="text-muted">Current USD</small>
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+							<div class="card bg-dark bg-opacity-75 text-light h-100">
+								<div class="card-body text-center">
+									<h6 class="card-title text-info">Daily Inflow</h6>
+									<h4 class="text-warning mb-1">${{ fancyRounding(daoFund.dailyInflow) }}</h4>
+									<small class="text-muted">From rewards</small>
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+							<div class="card bg-dark bg-opacity-75 text-light h-100">
+								<div class="card-body text-center">
+									<h6 class="card-title text-info">Ninja Grant</h6>
+									<h4 class="text-primary mb-1">${{ fancyRounding(daoFund.ninjaGrant) }}</h4>
+									<small class="text-muted">0.05%/day</small>
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+							<div class="card bg-dark bg-opacity-75 text-light h-100">
+								<div class="card-body text-center">
+									<h6 class="card-title text-info">Funded (All)</h6>
+									<h4 class="text-danger mb-1">${{ fancyRounding(healthStats.totalFundedOutflowsNoZero) }}</h4>
+									<small class="text-muted">Active only</small>
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+							<div class="card bg-dark bg-opacity-75 text-light h-100">
+								<div class="card-body text-center">
+									<h6 class="card-title text-info">Funded</h6>
+									<h4 class="text-danger mb-1">${{ fancyRounding(healthStats.totalFundedOutflowsNoStabilizer) }}</h4>
+									<small class="text-muted">No stabilizer</small>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<!-- User Voting Stats (if logged in) -->
+					<div v-if="account" class="row mb-4">
+						<div class="col-12">
+							<div class="card bg-dark bg-opacity-75 text-light">
+								<div class="card-body">
+									<h5 class="card-title text-info mb-3">Your Voting Impact (@{{ account }})</h5>
+									<div class="row">
+										<div class="col-lg-4 col-md-6 mb-3">
+											<div class="text-center">
+												<h6 class="text-warning mb-1">${{ fancyRounding(healthStats.userVotedOutflowsNoZero) }}</h6>
+												<small class="text-muted">Total Voted</small>
+											</div>
+										</div>
+										<div class="col-lg-4 col-md-6 mb-3">
+											<div class="text-center">
+												<h6 class="text-warning mb-1">${{ fancyRounding(healthStats.userVotedOutflowsNoStabilizer) }}</h6>
+												<small class="text-muted">Voted (Excluding Stabilizer)</small>
+											</div>
+										</div>
+										<div class="col-lg-4 col-md-6 mb-3">
+											<div class="text-center">
+												<h6 class="mb-1" :class="getUserVote(0) ? 'text-success' : 'text-danger'">
+													{{ getUserVote(0) ? '✓ Supporting' : '✗ Not Supporting' }}
+												</h6>
+												<small class="text-muted">Return Proposal</small>
+											</div>
+										</div>
+									</div>
+									
+									<!-- Voting Power Impact Analysis -->
+									<div class="row mt-4">
+										<div class="col-12">
+											<div class="card bg-secondary bg-opacity-25">
+												<div class="card-body">
+													<h6 class="text-warning mb-3">
+														<i class="fa-solid fa-balance-scale me-2"></i>Your Voting Power Impact
+													</h6>
+													<div class="row">
+														<div class="col-md-6">
+															<div class="small text-muted mb-2">Estimated Voting Power:</div>
+															<div class="h6 text-info">{{ formatVotes(getUserVotingPower()) }} HP</div>
+														</div>
+														<div class="col-md-6">
+															<div class="small text-muted mb-2">Threshold Impact Range:</div>
+															<div class="h6 text-warning">
+																{{ formatVotes(getThresholdImpactRange().min) }} - {{ formatVotes(getThresholdImpactRange().max) }} HP
+															</div>
+														</div>
+													</div>
+													
+													<div class="row mt-3">
+														<div class="col-md-6">
+															<div class="small text-muted mb-2">Return Proposal Effect:</div>
+															<div v-if="getUserVote(0)" class="text-success small">
+																<i class="fa-solid fa-arrow-up me-1"></i>
+																Raising threshold by ~{{ formatVotes(getUserVotingPower()) }} HP
+															</div>
+															<div v-else class="text-warning small">
+																<i class="fa-solid fa-arrow-up me-1"></i>
+																Could raise threshold by ~{{ formatVotes(getUserVotingPower()) }} HP
+															</div>
+														</div>
+														<div class="col-md-6">
+															<div class="small text-muted mb-2">Proposals You Could Impact:</div>
+															<div class="h6 text-info">{{ getProposalsInRange().length }} proposals</div>
+														</div>
+													</div>
+													
+													<!-- Actionable Proposals List -->
+													<div v-if="getProposalsInRange().length > 0" class="mt-3">
+														<div class="small text-muted mb-2">Proposals within your voting range ({{ getProposalsInRange().length }} total):</div>
+														<div class="d-flex flex-wrap gap-1 proposal-scroll" style="max-height: 120px; overflow-y: auto;">
+															<span v-for="proposal in getProposalsInRange()" :key="proposal.id" 
+																class="badge bg-info cursor-pointer" 
+																@click="openProposalModal(proposal)"
+																:title="proposal.subject">
+																#{{ proposal.id }}
+															</span>
+														</div>
+													</div>
+													
+													<div class="small text-muted mt-3">
+														<i class="fa-solid fa-info-circle me-1"></i>
+														Your vote can push proposals {{ formatVotes(getUserVotingPower()) }} HP up or down. 
+														{{ !getUserVote(0) ? 'Voting for' : 'Not voting for' }} the return proposal 
+														{{ !getUserVote(0) ? 'raises' : 'could raise' }} the funding threshold.
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<!-- Price Projection Controls -->
+					<div class="row mb-4">
+						<div class="col-12">
+							<div class="card bg-dark bg-opacity-75 text-light">
+								<div class="card-body">
+									<h5 class="card-title text-info mb-3">Price Growth Projection</h5>
+									<div class="row align-items-center">
+										<div class="col-md-8">
+											<label for="priceGrowth" class="form-label">Hive Price Growth Rate (APR): {{ priceGrowthRate }}%</label>
+											<input type="range" class="form-range" id="priceGrowth" 
+												v-model.number="priceGrowthRate" min="-50" max="500" step="10">
+											<div class="d-flex justify-content-between small text-muted mt-1">
+												<span>-50%</span>
+												<span>0%</span>
+												<span>100%</span>
+												<span>300%</span>
+												<span>500%</span>
+											</div>
+										</div>
+										<div class="col-md-4">
+											<div class="text-center">
+												<h6 class="text-success">Projected Price (1yr)</h6>
+												<h4 class="text-warning">${{ getProjectedValues().projectedPrice.toFixed(3) }}</h4>
+												<small class="text-muted">
+													{{ priceGrowthRate > 0 ? '+' : '' }}{{ priceGrowthRate }}% growth
+												</small>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<!-- 3-Year Budget Projection Chart -->
+					<div class="row mb-4">
+						<div class="col-12">
+							<div class="card bg-dark bg-opacity-75 text-light">
+								<div class="card-body">
+									<div class="d-flex justify-content-between align-items-center mb-3">
+										<h5 class="card-title text-info mb-0">3-Year Budget Projection</h5>
+										<div class="d-flex gap-2">
+											<button v-if="selectedProposalForAnalysis" 
+												@click="clearProposalAnalysis()" 
+												class="btn btn-sm btn-outline-warning">
+												<i class="fa-solid fa-times me-1"></i>Clear Analysis
+											</button>
+											<span v-if="selectedProposalForAnalysis" class="badge bg-info">
+												{{ isProposalFunded(selectedProposalForAnalysis) ? 'Removing' : 'Adding' }}: 
+												{{ selectedProposalForAnalysis.subject.substring(0, 30) }}...
+											</span>
+										</div>
+									</div>
+									
+														<div class="mb-3" style="height: 500px;">
+						<canvas id="budgetChart"></canvas>
+					</div>
+									
+									<div class="row">
+										<div class="col-md-4">
+											<h6 class="text-success mb-2">Key Assumptions</h6>
+											<ul class="small text-muted mb-0">
+												<li>Hive reward fund grows 8% annually</li>
+												<li>Hive price grows at {{ priceGrowthRate }}% annually</li>
+												<li>Current outflows remain constant (HBD)</li>
+												<li>Ninja grant scales with Hive price</li>
+												<li>Only active proposals considered</li>
+											</ul>
+										</div>
+										<div class="col-md-4">
+											<h6 class="text-info mb-2">Chart Legend</h6>
+											<ul class="small text-muted mb-0">
+												<li><span class="text-info">Teal:</span> Treasury balance (HBD)</li>
+												<li><span class="text-warning">Orange:</span> Hive balance (ninja fund)</li>
+												<li><span class="text-primary">Blue:</span> Total daily inflow</li>
+												<li><span class="text-success">Purple:</span> Ninja grant (decreasing)</li>
+												<li><span class="text-danger">Red:</span> Daily outflow</li>
+											</ul>
+										</div>
+										<div class="col-md-4" v-if="calculateFundProjectionAnalysis()">
+											<h6 class="text-warning mb-2">Fund Trajectory</h6>
+											<div class="small text-muted">
+												<div v-if="calculateFundProjectionAnalysis().hasMaxValue">
+													<strong class="text-warning">Peak Fund:</strong><br>
+													${{ fancyRounding(calculateFundProjectionAnalysis().maxTreasury) }}<br>
+													<span class="text-muted">in {{ Math.round(calculateFundProjectionAnalysis().maxTreasuryDay / 365 * 10) / 10 }} years</span>
+												</div>
+												<div v-else>
+													<strong class="text-success">Exponential Growth</strong><br>
+													<span class="text-muted">Fund continues growing</span>
+												</div>
+												<div v-if="calculateFundProjectionAnalysis().equilibriumSpending" class="mt-2">
+													<strong class="text-info">Sustainable Spending:</strong><br>
+													${{ fancyRounding(calculateFundProjectionAnalysis().equilibriumSpending) }}/day
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<!-- Budget Health Summary -->
+					<div class="row">
+						<div class="col-12">
+							<div class="card bg-dark bg-opacity-75 text-light">
+								<div class="card-body">
+									<h5 class="card-title text-info mb-4">
+										Annual Budget Health Summary
+										<span v-if="selectedProposalForAnalysis" class="badge bg-info ms-2">
+											{{ isProposalFunded(selectedProposalForAnalysis) ? 'Removing' : 'Adding' }} Impact Analysis
+										</span>
+									</h5>
+									
+									<div class="row mb-4">
+										<div class="col-md-6">
+											<h6 class="text-success mb-3">Inflows (Annual)</h6>
+											<div class="d-flex justify-content-between align-items-center mb-2">
+												<span>Rewards Inflow:</span>
+												<div class="text-end">
+													<span class="text-success">${{ fancyRounding(getProjectedValues().projectedDailyInflow * 365) }}</span>
+													<div v-if="priceGrowthRate !== 0" class="small text-muted">
+														was ${{ fancyRounding(daoFund.dailyInflow * 365) }} @ 0%
+													</div>
+												</div>
+											</div>
+											<div class="d-flex justify-content-between align-items-center mb-2">
+												<span>Ninja Grant:</span>
+												<div class="text-end">
+													<span class="text-primary">${{ fancyRounding(getProjectedValues().projectedNinjaGrant * 365) }}</span>
+													<div v-if="priceGrowthRate !== 0" class="small text-muted">
+														was ${{ fancyRounding(daoFund.ninjaGrant * 365) }} @ 0%
+													</div>
+												</div>
+											</div>
+											<hr class="border-secondary">
+											<div class="d-flex justify-content-between align-items-center">
+												<strong>Total Annual Inflow:</strong>
+												<div class="text-end">
+													<strong class="text-warning">${{ fancyRounding(getProjectedValues().projectedTotalInflow * 365) }}</strong>
+													<div v-if="priceGrowthRate !== 0" class="small text-muted">
+														was ${{ fancyRounding((daoFund.dailyInflow + daoFund.ninjaGrant) * 365) }} @ 0%
+													</div>
+												</div>
+											</div>
+										</div>
+										
+										<div class="col-md-6">
+											<h6 class="text-danger mb-3">Outflows (Annual)</h6>
+											<div class="d-flex justify-content-between align-items-center mb-2">
+												<span>All Funded:</span>
+												<div class="text-end">
+													<span class="text-danger">
+														${{ fancyRounding(healthStats.totalFundedOutflows * 365) }}
+														<span v-if="selectedProposalForAnalysis" class="text-warning">
+															(${{ fancyRounding(getProjectedValuesWithProposalImpact().projectedTotalOutflowAll * 365) }})
+														</span>
+													</span>
+												</div>
+											</div>
+											<div class="d-flex justify-content-between align-items-center mb-2">
+												<span>Funded (Excluding Stabilizer):</span>
+												<div class="text-end">
+													<span class="text-danger">
+														${{ fancyRounding(healthStats.totalFundedOutflowsNoStabilizer * 365) }}
+														<span v-if="selectedProposalForAnalysis" class="text-warning">
+															(${{ fancyRounding(getProjectedValuesWithProposalImpact().projectedTotalOutflow * 365) }})
+														</span>
+													</span>
+												</div>
+											</div>
+											<hr class="border-secondary">
+											<div class="d-flex justify-content-between align-items-center">
+												<strong>Net Balance (Excluding Stabilizer):</strong>
+												<div class="text-end">
+													<strong :class="(getProjectedValues().projectedTotalInflow * 365 - healthStats.totalFundedOutflowsNoStabilizer * 365) > 0 ? 'text-success' : 'text-danger'">
+														${{ fancyRounding(getProjectedValues().projectedTotalInflow * 365 - healthStats.totalFundedOutflowsNoStabilizer * 365) }}
+													</strong>
+													<span v-if="selectedProposalForAnalysis" class="text-warning d-block">
+														<strong :class="(getProjectedValues().projectedTotalInflow * 365 - getProjectedValuesWithProposalImpact().projectedTotalOutflow * 365) > 0 ? 'text-success' : 'text-danger'">
+															(${{ fancyRounding(getProjectedValues().projectedTotalInflow * 365 - getProjectedValuesWithProposalImpact().projectedTotalOutflow * 365) }})
+														</strong>
+													</span>
+													<div v-if="priceGrowthRate !== 0" class="small text-muted">
+														was ${{ fancyRounding((daoFund.dailyInflow + daoFund.ninjaGrant) * 365 - healthStats.totalFundedOutflowsNoStabilizer * 365) }} @ 0%
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									
+									<!-- Proposal Impact Summary -->
+									<div v-if="selectedProposalForAnalysis" class="row mb-4">
+										<div class="col-12">
+											<div class="card bg-info bg-opacity-25 border-info">
+												<div class="card-body">
+													<h6 class="text-info mb-3">
+														<i class="fa-solid fa-chart-line me-2"></i>
+														{{ getProjectedValuesWithProposalImpact().proposalImpact.action === 'adding' ? 'Adding' : 'Removing' }} Proposal Impact: 
+														{{ selectedProposalForAnalysis.subject.substring(0, 50) }}{{ selectedProposalForAnalysis.subject.length > 50 ? '...' : '' }}
+													</h6>
+													<div class="row">
+														<div class="col-md-4">
+															<strong class="text-warning">Daily Change:</strong><br>
+															<span :class="getProjectedValuesWithProposalImpact().proposalImpact.dailyChange > 0 ? 'text-danger' : 'text-success'">
+																{{ getProjectedValuesWithProposalImpact().proposalImpact.dailyChange > 0 ? '+' : '' }}${{ fancyRounding(Math.abs(getProjectedValuesWithProposalImpact().proposalImpact.dailyChange)) }}/day
+															</span>
+														</div>
+														<div class="col-md-4">
+															<strong class="text-warning">Annual Change:</strong><br>
+															<span :class="getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? 'text-danger' : 'text-success'">
+																{{ getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? '+' : '' }}${{ fancyRounding(Math.abs(getProjectedValuesWithProposalImpact().proposalImpact.annualChange)) }}/year
+															</span>
+														</div>
+														<div class="col-md-4">
+															<strong class="text-warning">% of Annual Inflow:</strong><br>
+															<span :class="getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? 'text-danger' : 'text-success'">
+																{{ getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? '+' : '' }}{{ (Math.abs(getProjectedValuesWithProposalImpact().proposalImpact.annualChange) / (getProjectedValues().projectedTotalInflow * 365) * 100).toFixed(2) }}%
+															</span>
+														</div>
+													</div>
+													<div class="small text-muted mt-2">
+														<i class="fa-solid fa-info-circle me-1"></i>
+														Values in parentheses show the budget impact with this proposal 
+														{{ getProjectedValuesWithProposalImpact().proposalImpact.action === 'adding' ? 'added to' : 'removed from' }} funding.
+														Adjust the APR above to see how price growth affects these projections.
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<!-- Visual Budget Chart -->
+									<div class="mb-3">
+										<h6 class="small text-muted mb-2">Budget Visualization (Annual)</h6>
+										<div class="progress mb-2" style="height: 20px;">
+											<div class="progress-bar bg-success" role="progressbar" 
+												:style="'width: ' + Math.min((getProjectedValues().projectedDailyInflow * 365 / (getProjectedValues().projectedTotalInflow * 365)) * 100, 100) + '%'">
+												Rewards
+											</div>
+											<div class="progress-bar bg-primary" role="progressbar" 
+												:style="'width: ' + Math.min((getProjectedValues().projectedNinjaGrant * 365 / (getProjectedValues().projectedTotalInflow * 365)) * 100, 100) + '%'">
+												Ninja
+											</div>
+										</div>
+										<div class="progress" style="height: 20px;">
+											<div class="progress-bar bg-danger" role="progressbar" 
+												:style="'width: ' + Math.min(((selectedProposalForAnalysis ? getProjectedValuesWithProposalImpact().projectedTotalOutflow : healthStats.totalFundedOutflowsNoStabilizer) * 365 / (getProjectedValues().projectedTotalInflow * 365)) * 100, 100) + '%'">
+												Funded (Excluding Stabilizer)
+												<span v-if="selectedProposalForAnalysis"> - With Impact</span>
+											</div>
+										</div>
+									</div>
+									
+									<!-- Equilibrium Analysis -->
+									<div class="row mt-4">
+										<div class="col-12">
+											<div class="card bg-secondary bg-opacity-25">
+												<div class="card-body">
+													<h6 class="text-info mb-3">
+														<i class="fa-solid fa-balance-scale me-2"></i>Equilibrium Analysis
+													</h6>
+													<div class="row">
+														<div class="col-md-3">
+															<div class="small text-muted mb-2">Time to sustainable fund level:</div>
+															<div v-if="calculateEquilibriumYears() !== null && calculateEquilibriumYears() > 0" class="h5 text-info">
+																{{ calculateEquilibriumYears().toFixed(1) }} years
+															</div>
+															<div v-else-if="calculateEquilibriumYears() === 0" class="h5 text-success">
+																In target band (75x-150x)
+															</div>
+															<div v-else class="h5 text-danger">
+																Never (under spending)
+															</div>
+														</div>
+														<div class="col-md-3">
+															<div class="small text-muted mb-2">Spending analysis:</div>
+															<div v-if="calculateFundProjectionAnalysis() && calculateFundProjectionAnalysis().spendingCushion > 0" class="h5 text-success">
+																+${{ fancyRounding(calculateFundProjectionAnalysis().spendingCushion) }}/day cushion
+															</div>
+															<div v-else-if="calculateSpendingReductionNeeded() !== null && calculateSpendingReductionNeeded() > 0" class="h5 text-warning">
+																-${{ fancyRounding(calculateSpendingReductionNeeded()) }}/day needed
+															</div>
+															<div v-else-if="calculateSpendingReductionNeeded() === 0" class="h5 text-success">
+																Balanced
+															</div>
+															<div v-else class="h5 text-muted">
+																Calculating...
+															</div>
+														</div>
+														<div class="col-md-3">
+															<div class="small text-muted mb-2">Current runway (0% growth):</div>
+															<div v-if="calculateRunwayAtZeroGrowth() !== null" class="h5 text-info">
+																{{ Math.floor(calculateRunwayAtZeroGrowth()) }} days
+															</div>
+															<div v-else class="h5 text-success">
+																50+ years
+															</div>
+														</div>
+														<div class="col-md-3" v-if="priceGrowthRate !== 0">
+															<div class="small text-muted mb-2">Projected runway ({{ priceGrowthRate }}% growth):</div>
+															<div v-if="calculateProjectedRunway() !== null" class="h5 text-info">
+																{{ Math.floor(calculateProjectedRunway()) }} days
+															</div>
+															<div v-else class="h5 text-success">
+																50+ years
+															</div>
+														</div>
+													</div>
+													<div class="small text-muted mt-2">
+														<i class="fa-solid fa-info-circle me-1"></i>
+														The DAO is currently over-funded due to the ninja grant. Sustainable funding occurs 
+														in the 75x-150x daily inflow band, allowing indefinite funding through modest returns (2-3% annually). 
+														Note: Ninja grant decreases over time as the Hive balance depletes at 0.05% daily.
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<div class="text-center mt-3">
+										<a class="btn btn-primary" href="#proposals">
+											<i class="fa-solid fa-arrow-down me-2"></i>View Detailed Proposals
+										</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- Main Content -->
+			<div id="proposals" class="container-fluid py-4">
+				<div class="container">
+					<!-- Filter and Stats Bar -->
+					<div class="row mb-4">
+						<div class="col-lg-8">
+							<div class="card card-bg text-light">
+								<div class="card-body">
+									<div class="d-flex flex-wrap align-items-center gap-3">
+										<div class="d-flex align-items-center">
+											<label class="form-label me-2 mb-0">Status:</label>
+											<select v-model="filterStatus" class="form-select form-select-sm" style="width: auto;">
+												<option value="all">All</option>
+												<option value="active">Active</option>
+												<option value="inactive">Inactive</option>
+												<option value="expired">Expired</option>
+											</select>
+										</div>
+										<div class="d-flex align-items-center">
+											<label class="form-label me-2 mb-0">Sort:</label>
+											<select v-model="sortBy" class="form-select form-select-sm" style="width: auto;">
+												<option value="votes">Votes</option>
+												<option value="created">Created</option>
+												<option value="funding">Funding</option>
+												<option value="end_date">End Date</option>
+											</select>
+										</div>
+										<div class="d-flex align-items-center">
+											<input v-model="searchTerm" type="text" class="form-control form-control-sm" 
+												placeholder="Search proposals..." style="width: 200px;">
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-4">
+							<div class="card card-bg text-light">
+								<div class="card-body text-center">
+									<h6 class="card-title mb-1">Quick Stats</h6>
+									<p class="h4 mb-0 text-info">{{ proposals.length }} Proposals</p>
+									<small class="text-muted d-block">{{ filteredProposals.length }} shown</small>
+									<small class="text-success">
+										{{ proposals.filter(p => isProposalFunded(p)).length }} funded
+									</small>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Loading State -->
+					<div v-if="loading" class="text-center py-5">
+						<div class="spinner-border text-light" role="status">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+						<p class="mt-3 text-light">Loading proposals...</p>
+					</div>
+
+					<!-- Error State -->
+					<div v-if="error" class="alert alert-danger" role="alert">
+						<h5 class="alert-heading">Error Loading Proposals</h5>
+						<p>{{ error }}</p>
+						<button @click="loadProposals" class="btn btn-danger">Retry</button>
+					</div>
+
+					<!-- Proposal List -->
+					<div v-if="!loading && !error" class="row">
+						<div v-for="proposal in filteredProposals" :key="proposal.id" class="col-12 mb-4">
+							<div class="card card-bg text-light h-100" :data-proposal-id="proposal.id">
+								<div class="card-body">
+									<div class="row">
+										<div class="col-lg-8">
+											<div class="d-flex align-items-start mb-3">
+												<span class="badge me-3 fs-6" 
+													:class="getProposalStatusClass(proposal)">
+													#{{ proposal.id }}
+												</span>
+																							<div class="flex-grow-1">
+												<h5 class="card-title mb-2">
+													<a @click="openProposalModal(proposal)" 
+														href="#" class="text-decoration-none text-light">
+														{{ proposal.subject }}
+													</a>
+													<a @click="openBlogModal(proposal.creator, proposal.permlink)" 
+														href="#" class="text-decoration-none text-muted">
+														<i class="fa-solid fa-external-link fa-sm ms-2"></i>
+													</a>
+												</h5>
+													<p class="text-muted mb-2">
+														by <a :href="'/@' + proposal.creator" 
+															class="text-info text-decoration-none">
+															@{{ proposal.creator }}
+														</a>
+													</p>
+													<div class="d-flex flex-wrap gap-3 small text-muted">
+														<span><i class="fa-solid fa-calendar me-1"></i>{{ formatDate(proposal.start_date) }}</span>
+														<span><i class="fa-solid fa-calendar-xmark me-1"></i>{{ formatDate(proposal.end_date) }}</span>
+														<span><i class="fa-solid fa-coins me-1"></i>{{ fancyRounding(proposal.daily_pay.amount / 1000) }} HBD/day</span>
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="col-lg-4">
+											<div class="text-lg-end">
+												<!-- Support Status -->
+												<div class="mb-3">
+													<div class="d-flex justify-content-between align-items-center mb-1">
+														<small class="text-muted">Support Level</small>
+														<small class="text-light">{{ formatVotes(proposal.total_votes) }} HP</small>
+													</div>
+													<div class="progress" style="height: 8px;">
+														<div class="progress-bar" role="progressbar" 
+															:class="isProposalFunded(proposal) ? 'bg-success' : (getVotePercentage(proposal) >= 100 ? 'bg-warning' : 'bg-danger')"
+															:style="'width: ' + Math.max(getVotePercentage(proposal), 10) + '%'">
+														</div>
+													</div>
+													<small class="text-muted">
+														<span v-if="isProposalFunded(proposal)" class="text-success">✓ Funded</span>
+														<span v-else-if="getVotePercentage(proposal) >= 100" class="text-warning">Above Threshold</span>
+														<span v-else class="text-danger">{{ getSupportLabel(proposal) }}</span>
+													</small>
+												</div>
+
+												<!-- User Vote Status -->
+												<div v-if="account" class="mb-3">
+													<div v-if="getUserVote(proposal.id)" class="text-success small">
+														<i class="fa-solid fa-check me-1"></i>You support this proposal
+													</div>
+													<div v-else class="text-muted small">
+														<i class="fa-solid fa-minus me-1"></i>Not voted
+													</div>
+												</div>
+
+												<!-- Voting Buttons -->
+												<div v-if="account && isProposalActive(proposal)" class="d-grid gap-2">
+													<button v-if="!getUserVote(proposal.id)" 
+														@click="voteForProposal(proposal.id, true)"
+														:disabled="votingProposal === proposal.id"
+														class="btn btn-success btn-sm"
+														:title="getVoteTooltip(proposal, true)"
+														data-bs-toggle="tooltip" data-bs-placement="left">
+														<span v-if="votingProposal === proposal.id" class="spinner-border spinner-border-sm me-1"></span>
+														<i v-else class="fa-solid fa-thumbs-up me-1"></i>
+														Support
+													</button>
+													<button v-else 
+														@click="voteForProposal(proposal.id, false)"
+														:disabled="votingProposal === proposal.id"
+														class="btn btn-outline-danger btn-sm"
+														:title="getVoteTooltip(proposal, false)"
+														data-bs-toggle="tooltip" data-bs-placement="left">
+														<span v-if="votingProposal === proposal.id" class="spinner-border spinner-border-sm me-1"></span>
+														<i v-else class="fa-solid fa-thumbs-down me-1"></i>
+														Remove Support
+													</button>
+												</div>
+												<div v-else-if="!account" class="text-muted small">
+													<i class="fa-solid fa-sign-in-alt me-1"></i>Login to vote
+												</div>
+												
+												<!-- Chart Analysis Button -->
+												<div class="mt-2">
+													<button v-if="selectedProposalForAnalysis && selectedProposalForAnalysis.id === proposal.id"
+														@click="clearProposalAnalysis()"
+														class="btn btn-outline-warning btn-sm w-100">
+														<i class="fa-solid fa-chart-line me-1"></i>Remove from Chart
+													</button>
+													<button v-else
+														@click="selectProposalForAnalysis(proposal)"
+														class="btn btn-outline-info btn-sm w-100">
+														<i class="fa-solid fa-chart-line me-1"></i>
+														{{ isProposalFunded(proposal) ? 'Analyze Removing' : 'Analyze Adding' }}
+													</button>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<!-- Budget Impact Accordion -->
+									<div class="col-12 mt-3">
+										<button class="btn btn-sm btn-outline-secondary w-100" type="button" 
+											data-bs-toggle="collapse" :data-bs-target="'#budget-' + proposal.id">
+											<i class="fa-solid fa-chart-line me-2"></i>Budget Impact Analysis
+										</button>
+										<div class="collapse mt-2" :id="'budget-' + proposal.id">
+											<div class="card card-body bg-secondary bg-opacity-25">
+												<h6 class="text-info mb-3">Annual Budget Impact</h6>
+												
+												<div class="row mb-3">
+													<div class="col-md-4">
+														<strong>Daily Cost:</strong><br>
+														<span class="text-warning">{{ fancyRounding(getBudgetImpact(proposal).daily) }} HBD</span>
+													</div>
+													<div class="col-md-4">
+														<strong>Annual Cost:</strong><br>
+														<span class="text-warning">{{ fancyRounding(getBudgetImpact(proposal).yearly) }} HBD</span>
+													</div>
+													<div class="col-md-4">
+														<strong>% of Annual Inflow:</strong><br>
+														<span class="text-warning">{{ getBudgetImpact(proposal).percentOfInflow.toFixed(1) }}%</span>
+													</div>
+												</div>
+
+												<!-- Simple Budget Visualization -->
+												<div class="mb-3">
+													<h6 class="small text-muted mb-2">Annual Budget Impact</h6>
+													<div class="d-flex align-items-center mb-1">
+														<span class="small me-2" style="min-width: 80px;">Funded:</span>
+														<div class="progress flex-grow-1 me-2" style="height: 8px;">
+															<div class="progress-bar bg-success" role="progressbar" 
+																:style="'width: ' + Math.min((getBudgetImpact(proposal).yearly / getBudgetImpact(proposal).yearlyInflow) * 100, 100) + '%'">
+															</div>
+														</div>
+														<span class="small">{{ fancyRounding(getBudgetImpact(proposal).yearly) }} HBD</span>
+													</div>
+													<div class="d-flex align-items-center">
+														<span class="small me-2" style="min-width: 80px;">Available:</span>
+														<div class="progress flex-grow-1 me-2" style="height: 8px;">
+															<div class="progress-bar bg-info" role="progressbar" 
+																:style="'width: ' + Math.min(((getBudgetImpact(proposal).yearlyInflow - getBudgetImpact(proposal).yearly) / getBudgetImpact(proposal).yearlyInflow) * 100, 100) + '%'">
+															</div>
+														</div>
+														<span class="small">{{ fancyRounding(getBudgetImpact(proposal).yearlyInflow - getBudgetImpact(proposal).yearly) }} HBD</span>
+													</div>
+												</div>
+
+												<div class="small text-muted">
+													<i class="fa-solid fa-info-circle me-1"></i>
+													This proposal would consume {{ getBudgetImpact(proposal).percentOfInflow.toFixed(1) }}% 
+													of the annual DAO inflow ({{ fancyRounding(getBudgetImpact(proposal).yearlyInflow) }} HBD/year)
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- No Results -->
+					<div v-if="!loading && !error && filteredProposals.length === 0" class="text-center py-5">
+						<i class="fa-solid fa-search fa-3x text-muted mb-3"></i>
+						<h4 class="text-light">No proposals found</h4>
+						<p class="text-muted">Try adjusting your filters or search terms.</p>
+					</div>
+				</div>
+			</div>
+		</main>
+
+		<div>
+			<foot-vue />
+		</div>
+
+		<!-- Blog Detail Modal -->
+		<div v-if="blogPost" class="modal fade" id="blogModal" tabindex="-1" aria-labelledby="blogModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-fullscreen">
+				<div class="modal-content bg-dark">
+					<div class="modal-header border-secondary">
+						<h5 class="modal-title text-light" id="blogModalLabel">{{ blogPost.title || 'Blog Post' }}</h5>
+						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body p-0">
+						<detail-vue v-if="blogPost" :post="blogPost" :account="account" :modal="false" 
+							:voteval="0" :head_block="0" :broca_refill="0" :broca="0" :spk_power="0"
+							:contracts="{}" :extendcost="{}" :post_select="postSelect" :has_ipfs="false"
+							:TOKEN="'HBD'" :solo="true" :hide="false"
+							@tosign="sendIt($event)" @reply="handleReply($event)" @vote="handleVote($event)">
+						</detail-vue>
+						<div v-else class="text-center py-5">
+							<div class="spinner-border text-light" role="status">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+							<p class="mt-3 text-light">Loading blog post...</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Proposal Detail Modal -->
+		<div v-if="selectedProposal" class="modal fade" id="proposalModal" tabindex="-1" aria-hidden="true">
+			<div class="modal-dialog modal-lg modal-dialog-centered">
+				<div class="modal-content bg-dark text-light">
+					<div class="modal-header border-secondary">
+						<h5 class="modal-title">{{ selectedProposal.subject }}</h5>
+						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" 
+								@click="closeProposalModal"></button>
+					</div>
+					<div class="modal-body">
+						<div class="row mb-3">
+							<div class="col-md-6">
+								<strong class="text-info">Creator:</strong><br>
+								<a :href="'/@' + selectedProposal.creator" 
+									class="text-light text-decoration-none">
+									@{{ selectedProposal.creator }}
+								</a>
+							</div>
+							<div class="col-md-6">
+								<strong class="text-info">Status:</strong><br>
+								<span v-if="isProposalFunded(selectedProposal)" class="text-success">✓ Funded</span>
+								<span v-else-if="getVotePercentage(selectedProposal) >= 100" class="text-warning">Above Threshold</span>
+								<span v-else class="text-danger">{{ getSupportLabel(selectedProposal) }}</span>
+							</div>
+						</div>
+						
+						<div class="row mb-3">
+							<div class="col-md-6">
+								<strong class="text-info">Daily Payment:</strong><br>
+								{{ fancyRounding(selectedProposal.daily_pay.amount / 1000) }} HBD
+							</div>
+							<div class="col-md-6">
+								<strong class="text-info">Total Support:</strong><br>
+								{{ formatVotes(selectedProposal.total_votes) }} HP
+							</div>
+						</div>
+						
+						<div class="row mb-3">
+							<div class="col-md-6">
+								<strong class="text-info">Start Date:</strong><br>
+								{{ formatDate(selectedProposal.start_date) }}
+							</div>
+							<div class="col-md-6">
+								<strong class="text-info">End Date:</strong><br>
+								{{ formatDate(selectedProposal.end_date) }}
+							</div>
+						</div>
+						
+						<div class="mb-3">
+							<strong class="text-info">Receiver:</strong><br>
+							<a :href="'/@' + selectedProposal.receiver" 
+								class="text-light text-decoration-none">
+								@{{ selectedProposal.receiver }}
+							</a>
+						</div>
+
+						<div class="mb-3">
+							<strong class="text-info">Support Progress:</strong>
+							<div class="progress mt-2" style="height: 12px;">
+								<div class="progress-bar" role="progressbar" 
+									:class="isProposalFunded(selectedProposal) ? 'bg-success' : (getVotePercentage(selectedProposal) >= 100 ? 'bg-warning' : 'bg-danger')"
+									:style="'width: ' + Math.max(getVotePercentage(selectedProposal), 5) + '%'">
+									{{ getVotePercentage(selectedProposal).toFixed(1) }}%
+								</div>
+							</div>
+						</div>
+						
+						<!-- User Vote Status -->
+						<div v-if="account" class="mb-3 p-3 rounded" 
+							:class="getUserVote(selectedProposal.id) ? 'bg-success bg-opacity-25' : 'bg-secondary bg-opacity-25'">
+							<div v-if="getUserVote(selectedProposal.id)" class="text-success">
+								<i class="fa-solid fa-check me-2"></i>You are supporting this proposal
+							</div>
+							<div v-else class="text-muted">
+								<i class="fa-solid fa-minus me-2"></i>You have not voted on this proposal
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer border-secondary d-flex justify-content-between">
+						<button @click="openBlogModal(selectedProposal.creator, selectedProposal.permlink)" 
+							class="btn btn-outline-info">
+							<i class="fa-solid fa-file-alt me-1"></i>View Blog Post
+						</button>
+						
+						<div v-if="account && isProposalActive(selectedProposal)">
+							<button v-if="!getUserVote(selectedProposal.id)" 
+								@click="voteForProposal(selectedProposal.id, true); closeProposalModal()"
+								:disabled="votingProposal === selectedProposal.id"
+								class="btn btn-success">
+								<span v-if="votingProposal === selectedProposal.id" class="spinner-border spinner-border-sm me-1"></span>
+								<i v-else class="fa-solid fa-thumbs-up me-1"></i>
+								Support Proposal
+							</button>
+							<button v-else 
+								@click="voteForProposal(selectedProposal.id, false); closeProposalModal()"
+								:disabled="votingProposal === selectedProposal.id"
+								class="btn btn-outline-danger">
+								<span v-if="votingProposal === selectedProposal.id" class="spinner-border spinner-border-sm me-1"></span>
+								<i v-else class="fa-solid fa-thumbs-down me-1"></i>
+								Remove Support
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+		crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"
+		integrity="sha512-E8QSvWZ0eCLGk4km3hxSsNmGWbLtSCSUcewDQPQWZF6pEU8GlT8a5fF32wOl1i8ftdMhssTrF/OhyGWwonTcXA=="
+		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.1.0/uuidv4.min.js"></script>
+	<script>
+		const { Marked } = globalThis.marked;
+		const { markedHighlight } = globalThis.markedHighlight
+		const marked = new Marked(
+			markedHighlight({
+				emptyLangClass: 'hljs',
+				langPrefix: 'hljs language-',
+				highlight(code, lang, info) {
+					const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+					return hljs.highlight(code, { language }).value;
+				}
+			})
+		)
+		
+		// Add KaTeX support for math rendering
+		marked.use(markedKatex({
+			throwOnError: false,
+			displayMode: true
+		}));
+		
+		marked.use(markedLinkifyIt({
+			'@': {
+				validate: function (text, pos, self) {
+					var tail = text.slice(pos);
+
+					if (!self.re.hive) {
+						self.re.hive = new RegExp(
+							'^([a-z0-9\.\-]){1,16}(?!_)(?=$|' + self.re.src_ZPCc + ')'
+						);
+					}
+					if (self.re.hive.test(tail)) {
+						if (pos >= 2 && tail[pos - 2] === '@') {
+							return false;
+						}
+						return tail.match(self.re.hive)[0].length;
+					}
+					return 0;
+				},
+				normalize: function (match) {
+					if (match.url.endsWith('.')) {
+						match.url = match.url.substring(0, match.url.length - 1);
+					}
+					match.url = '/@' + match.url.replace(/^@/, '');
+				}
+			}
+		}, {}));
+	</script>
+</body>
+
+</html>

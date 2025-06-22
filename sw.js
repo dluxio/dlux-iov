@@ -432,6 +432,12 @@ async function handleRouting(request) {
         return tryStaticOrRewrite('/blog/index.html');
     }
 
+    // Handle /proposal/<id> -> rewrite to /proposals/index.html if file doesn't exist
+    // This allows direct links like /proposal/123 to work with the proposals page
+    if (pathname.startsWith('/proposal/')) {
+        return tryStaticOrRewrite('/proposals/index.html');
+    }
+
     // Default cache-first strategy for all other requests
     return cacheFirstStrategy(request);
 }

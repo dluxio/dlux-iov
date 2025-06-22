@@ -14,35 +14,54 @@ export default {
     "vote": Vote,
     "pop-vue": Pop
   },
-  template: `<div :id="'comment-' + post.permlink">
-<a role="button" v-if="warn" @click="warn = false">Hidden due to low reputation.</a>
-<div class="d-flex align-items-start">
-<a :href="'/@' + post.author" class="no-decoration">
-<img :src="'https://images.hive.blog/u/' + post.author + '/avatar'" class="rounded-circle border-2 border-light bg-light img-fluid me-1 cover author-img" :class="{'w-32p': post.depth > 1, 'w-40p': post.depth = 1}"></a>
+  template: `<div :id="'comment-' + post.permlink" class="reply-container" :style="getReplyStyles()">
+<a role="button" v-if="warn" @click="warn = false" class="text-warning">
+  <i class="fa-solid fa-eye-slash me-1"></i>Hidden due to low reputation. Click to show.
+</a>
+<div v-if="!warn" class="d-flex align-items-start">
+<a :href="'/@' + post.author" class="no-decoration flex-shrink-0">
+<img :src="'https://images.hive.blog/u/' + post.author + '/avatar'" 
+     class="rounded-circle border-2 border-light bg-light img-fluid me-2 cover author-img" 
+     :style="getAvatarSize()"></a>
 <div class="d-flex flex-column w-100">
-<div class="d-flex align-items-center">
+<div class="d-flex align-items-center flex-wrap">
 <a :href="'/@' + post.author" class="no-decoration">
 <span class="d-flex align-items-center">
-<h5 class="m-0 text-white-50">{{ post.author }}</h5>
-<span class="ms-1 badge small text-white-50" :class="{'rep-danger': replyRep < 25, 'rep-warning': replyRep >= 25 && replyRep < 50, 'rep-success': replyRep >= 50}">{{ replyRep }}</span></span></a>
-<span class="ms-1 text-muted">•</span>
-<vue-ratings v-if="post.rating" class="d-flex" :stars="post.rating"/>
-<span class="ms-1 small text-muted" style="font-weight: 400">{{ timeSince(post.created) }}</span>
-<a role="button" class="ms-auto no-decoration text-white-50" @click="view = !view"><i v-show="view" class="fa-solid fa-circle-minus fa-fw"></i><i v-show="!view" class="fa-solid fa-circle-plus fa-fw"></i></a>
+<h6 class="m-0 text-white-50 me-1">{{ post.author }}</h6>
+<span class="badge small text-white-50" :class="getReputationClass()">{{ replyRep }}</span></span></a>
+<span class="mx-1 text-muted">•</span>
+<vue-ratings v-if="post.rating" class="d-flex me-1" :stars="post.rating"/>
+<span class="small text-muted" style="font-weight: 400">{{ post.ago || timeSince(post.created) }}</span>
+<div class="ms-auto d-flex align-items-center">
+  <small v-if="post.depth" class="text-muted me-2">{{ post.depth }}</small>
+  <a role="button" class="no-decoration text-white-50" @click="view = !view">
+    <i v-show="view" class="fa-solid fa-circle-minus fa-fw"></i>
+    <i v-show="!view" class="fa-solid fa-circle-plus fa-fw"></i>
+  </a>
 </div>
-<div class="my-1" v-if="view" v-show="!edit">
+</div>
+<div class="my-2" v-if="view" v-show="!edit">
 <vue-markdown :md="post.body"/>
 </div>
-<div v-show="edit">
+<div v-show="edit" class="my-2">
 <vue-markdown :toedit="post.body" @settext="pending($event)"/>
 </div>
-<div class="card-footer p-0" v-if="view">
+<div class="card-footer p-0 mb-2" v-if="view">
 <vote :post="post" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"></vote>
 </div>
-<div v-if="!view">{{post.children + 1}} comment<span v-if="post.children > 0">s</span> collapsed. <a role="button" class="text-info no-decoration" @click="view = !view">Click to expand</a>
+<div v-if="!view" class="collapsed-info">
+<span class="text-muted">{{ getCollapsedText() }}</span>
+<a role="button" class="text-info no-decoration ms-1" @click="view = !view">Click to expand</a>
 </div>
-<div v-for="reps in post.replies">
-<replies v-if="view" :post="reps" :account="account" :voteval="voteval" @vote="vote($event)" @reply="reply($event)"/>
+<div v-if="post.replies && post.replies.length > 0" class="nested-replies">
+<replies v-for="childReply in post.replies" 
+        :key="childReply.author + '-' + childReply.permlink"
+        v-if="view" 
+        :post="childReply" 
+        :account="account" 
+        :voteval="voteval" 
+        @vote="vote($event)" 
+        @reply="reply($event)"/>
 </div>
 </div>                 
 </div>
@@ -84,8 +103,8 @@ export default {
           const response = await fetch("https://hive-api.dlux.io", {
             body: JSON.stringify({
               "jsonrpc": "2.0", 
-              "method": "condenser_api.get_accounts", 
-              "params": [[this.post.author]], 
+              "method": "bridge.get_profile", 
+              "params": {"account": this.post.author, "observer": this.account}, 
               "id": 1
             }),
             headers: {
@@ -94,23 +113,28 @@ export default {
             method: "POST",
           });
           const data = await response.json();
-          if (data.result && data.result.length > 0) {
-            this.replyAuthorInfo = data.result[0];
+          if (data.result) {
+            this.replyAuthorInfo = data.result;
             this.updateReplyReputation();
           }
         } catch (error) {
           console.error('Error fetching reply author reputation:', error);
           if (this.post.author_reputation) {
-            this.replyRep = this.post.author_reputation
+            // Only calculate if it's a raw reputation value (very large number from condenser API)
+            this.replyRep = this.post.author_reputation > 1000000 ? 
+              this.calculateReputation(this.post.author_reputation) : this.post.author_reputation;
           }
         }
       }
     },
     updateReplyReputation() {
       if (this.post.author_reputation) {
-        this.replyRep = this.post.author_reputation
+        // Only calculate if it's a raw reputation value (very large number from condenser API)
+        this.replyRep = this.post.author_reputation > 1000000 ? 
+          this.calculateReputation(this.post.author_reputation) : this.post.author_reputation;
       } else if (this.replyAuthorInfo && this.replyAuthorInfo.reputation) {
-        this.replyRep = this.replyAuthorInfo.reputation
+        // Bridge API returns already calculated reputation, use directly
+        this.replyRep = this.replyAuthorInfo.reputation;
       } else if (this.post.rep && this.post.rep !== "...") {
         this.replyRep = this.post.rep;
       }
@@ -201,12 +225,64 @@ export default {
     },
     setRating(rating) {
       this.post.rating = rating;
-    }
+    },
+    getReplyStyles() {
+      const depth = this.post.depth || 1;
+      const maxDepth = 6; // Limit visual nesting
+      const effectiveDepth = Math.min(depth, maxDepth);
+      
+      return {
+        'margin-left': `${Math.max(0, (effectiveDepth - 1) * 20)}px`,
+        'border-left': effectiveDepth > 1 ? '2px solid rgba(255,255,255,0.1)' : 'none',
+        'padding-left': effectiveDepth > 1 ? '10px' : '0px',
+        'margin-bottom': '1rem'
+      };
+    },
+    getAvatarSize() {
+      const depth = this.post.depth || 1;
+      const baseSize = depth > 3 ? 28 : depth > 1 ? 36 : 44;
+      
+      return {
+        'width': `${baseSize}px`,
+        'height': `${baseSize}px`,
+        'min-width': `${baseSize}px`
+      };
+    },
+    getReputationClass() {
+      const rep = parseFloat(this.replyRep);
+      if (isNaN(rep)) return 'bg-secondary';
+      
+      if (rep < 25) return 'rep-danger bg-danger';
+      if (rep >= 25 && rep < 50) return 'rep-warning bg-warning text-dark';
+      return 'rep-success bg-success';
+    },
+    getCollapsedText() {
+      const childCount = this.post.replies ? this.post.replies.length : this.post.children || 0;
+      const totalComments = childCount + 1;
+      
+      if (totalComments === 1) {
+        return 'Comment collapsed.';
+      } else {
+        return `${totalComments} comment${totalComments > 1 ? 's' : ''} collapsed.`;
+      }
+    },
+    calculateReputation(raw_reputation) {
+      if (!raw_reputation) return 25;
+      
+      const reputation = parseInt(raw_reputation);
+      if (reputation === 0) return 25;
+      
+      let score = Math.log10(Math.abs(reputation));
+      score = Math.max(score - 9, 0);
+      score = (reputation > 0 ? 1 : -1) * score;
+      score = (score * 9) + 25;
+      
+      return Math.floor(score);
+    },
   },
   watch: {
     post: {
       handler() {
-        this.updateReplyReputation();
         this.hideLowRep();
         try {
           if (this.post?.replies?.length != 0) this.first_replier_permlink = this.post.replies[0].permlink
@@ -217,9 +293,33 @@ export default {
     }
   },
   mounted() {
-    this.updateReplyReputation();
-    this.getReplyAuthorReputation();
+    // Initialize reputation display
+    if (this.post.rep && this.post.rep !== "...") {
+      this.replyRep = this.post.rep;
+    } else if (this.post.author_reputation) {
+      // Only calculate if it's a raw reputation value (very large number from condenser API)
+      this.replyRep = this.post.author_reputation > 1000000 ? 
+        this.calculateReputation(this.post.author_reputation) : this.post.author_reputation;
+    } else {
+      this.getReplyAuthorReputation();
+    }
+    
+    // Hide low reputation comments
     this.hideLowRep();
+    
+    // Set initial view state based on depth (auto-collapse deep replies)
+    if (this.post.depth && this.post.depth > 4) {
+      this.view = false;
+    }
+    
+    console.log('Reply mounted:', {
+      author: this.post.author,
+      permlink: this.post.permlink,
+      depth: this.post.depth,
+      children: this.post.children,
+      replies: this.post.replies ? this.post.replies.length : 0,
+      reputation: this.replyRep
+    });
   },
 };
 
