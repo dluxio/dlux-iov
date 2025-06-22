@@ -2604,9 +2604,32 @@ export default {
 
         // Local signing methods
         if (this.HKC) {
-          this.HKCsign(op)
-            .then((r) => resolve(r))
-            .catch((e) => reject(e));
+          // Check for specific witness operations and broadcast them
+          const isWitnessOp = op.type === 'account_witness_vote' || op.type === 'account_witness_proxy' || op.type === 'witness_update' ||
+            (op.type === 'raw' && op.op && Array.isArray(op.op) && op.op.length > 0 && 
+             (op.op[0][0] === 'account_witness_vote' || op.op[0][0] === 'account_witness_proxy' || op.op[0][0] === 'witness_update'));
+          
+          if (isWitnessOp) {
+            const operations = op.type === 'raw' ? op.op : [op.op];
+            window.hive_keychain.requestBroadcast(
+              this.user,
+              operations,
+              "Active",
+              (response) => {
+                if (response.success) {
+                  this.statusFinder(response, op);
+                  resolve(response);
+                } else {
+                  reject(response);
+                }
+              }
+            );
+          } else {
+            // Fallback to existing HKCsign logic for other ops
+            this.HKCsign(op)
+              .then((r) => resolve(r))
+              .catch((e) => reject(e));
+          }
         } else if (this.HAS) {
           this.HASsign(op);
           reject("No TXID");

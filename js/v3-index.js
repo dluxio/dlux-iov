@@ -86,8 +86,8 @@ const app = createApp({
       },
       loading: false,
       error: null,
-      filterStatus: 'active',
-      sortBy: 'votes',
+      filterStatus: 'all',
+      sortBy: 'rank',
       searchTerm: '',
       votingProposal: null,
       proposalThreshold: 0,
@@ -111,6 +111,39 @@ const app = createApp({
         userVotedOutflowsNoZero: 0,
         userVotedOutflowsNoStabilizer: 0
       },
+      
+      // Witness monitoring data
+      witnesses: [],
+      witnessSchedule: null,
+      userWitnessVotes: [],
+      userProxy: null,
+      currentBlock: 0,
+      current_witness: '',
+      signingOperation: false,
+      
+      // Live monitoring
+      isMonitoring: false,
+      monitoringInterval: 10000, // 10 seconds
+      monitoringTimer: null,
+      lastUpdate: null,
+      
+      // Witness management
+      isUserWitness: false,
+      currentUserWitnessInfo: null,
+      witnessForm: {
+        url: '',
+        signingKey: '',
+        accountCreationFee: 3,
+        maxBlockSize: 65536,
+        hbdInterestRate: 0
+      },
+      
+      // Proxy modal
+      showProxyModal: false,
+      proxyForm: {
+        account: ''
+      },
+      
       accountapi: {},
       accountinfo: null,
       authors: {}, // Store author information for reputation calculations
@@ -907,17 +940,28 @@ const app = createApp({
   watch: {
     account(newAccount) {
       // Refresh user votes when account changes
-              if (window.location.pathname.includes('/proposals')) {
-          if (newAccount) {
-           this.fetchUserVotes().then(() => {
-             this.calculateHealthStats();
-           });
-          } else {
-            this.userVotes = [];
+      if (window.location.pathname.includes('/proposals')) {
+        if (newAccount) {
+         this.fetchUserVotes().then(() => {
            this.calculateHealthStats();
-          }
+         });
+        } else {
+          this.userVotes = [];
+         this.calculateHealthStats();
         }
-      },
+      }
+      
+      // Refresh witness votes when account changes - do this globally, not just on witnesses page
+      if (newAccount) {
+        this.fetchUserWitnessVotes();
+        this.checkIfUserIsWitness();
+      } else {
+        this.userWitnessVotes = [];
+        this.userProxy = null;
+        this.isUserWitness = false;
+        this.currentUserWitnessInfo = null;
+      }
+    },
       
       priceGrowthRate() {
         // Add a small debounce to prevent rapid updates
@@ -929,6 +973,22 @@ const app = createApp({
             this.updateChart();
           }
         }, 100);
+      },
+      
+      showProxyModal(newVal) {
+        if (newVal) {
+          this.$nextTick(() => {
+            const modalElement = document.getElementById('proxyModal');
+            if (modalElement) {
+              const modal = new bootstrap.Modal(modalElement);
+              modal.show();
+              
+              modalElement.addEventListener('hidden.bs.modal', () => {
+                this.showProxyModal = false;
+              }, { once: true });
+            }
+          });
+        }
       }
   },
   beforeUnmount() {
@@ -941,6 +1001,9 @@ const app = createApp({
       clearTimeout(this.chartUpdateTimeout);
       this.chartUpdateTimeout = null;
     }
+    
+    // Clean up witness monitoring
+    this.stopMonitoring();
   },
   components: {
     "nav-vue": Navue,
@@ -2615,6 +2678,156 @@ const app = createApp({
       }
     },
 
+    // Hard Fork Impact Analysis Methods
+    getProposalsAtRisk() {
+      if (!this.proposals || !this.userVotes || !this.account) return [];
+      
+      // Proposals that are currently funded but might lose funding under HF weighting
+      return this.proposals.filter(proposal => {
+        if (!this.isProposalFunded(proposal) || !this.isProposalActive(proposal)) return false;
+        
+        // Estimate potential vote reduction (simplified)
+        const currentVotes = proposal.total_votes;
+        const threshold = this.calculateProposalThreshold();
+        
+        // Estimate 10-20% vote reduction for marginal proposals
+        const estimatedNewVotes = currentVotes * 0.85;
+        
+        return estimatedNewVotes < threshold && currentVotes >= threshold;
+      }).slice(0, 5); // Limit to top 5 for display
+    },
+
+    getProposalsBenefiting() {
+      if (!this.proposals || !this.userVotes || !this.account) return [];
+      
+      // Proposals that are currently not funded but might gain funding
+      return this.proposals.filter(proposal => {
+        if (this.isProposalFunded(proposal) || !this.isProposalActive(proposal)) return false;
+        
+        const currentVotes = proposal.total_votes;
+        const currentThreshold = this.calculateProposalThreshold();
+        
+        // Estimate new threshold might be higher, but some proposals might benefit from redistributed votes
+        const estimatedNewThreshold = currentThreshold * 1.15;
+        const estimatedNewVotes = currentVotes * 1.1; // Slight boost from redistributed votes
+        
+        return estimatedNewVotes >= estimatedNewThreshold && currentVotes < currentThreshold;
+      }).slice(0, 5); // Limit to top 5 for display
+    },
+
+         calculateVoterCommitment(voter = null) {
+       if (!this.proposals || !this.userVotes || !this.daoFund || !this.daoFund.fund_balance) return 0;
+       
+       const targetVoter = voter || this.account;
+       if (!targetVoter) return 0;
+       
+       let totalCommitment = 0;
+       let hasLargeProposal = false;
+       
+       const sustainableRate = this.daoFund.fund_balance / 100; // 1% of treasury per day
+       
+       for (const proposal of this.proposals) {
+         if (!this.isProposalActive(proposal)) continue;
+         
+         const userVoted = this.getUserVote(proposal.id);
+         if (!userVoted) continue;
+         
+         const dailyPay = proposal.daily_pay.amount / 1000; // Convert to HBD
+         
+         // Check if this is a large proposal (>sustainable rate)
+         if (dailyPay > sustainableRate) {
+           if (!hasLargeProposal) {
+             // Only count one large proposal, capped at sustainable rate
+             totalCommitment += sustainableRate;
+             hasLargeProposal = true;
+           }
+           // Skip additional large proposals (per HF rules)
+         } else {
+           // Regular proposal - add full amount
+           totalCommitment += dailyPay;
+         }
+       }
+       
+       return totalCommitment;
+     },
+
+    calculateVoteWeight(voter = null) {
+      const targetVoter = voter || this.account;
+      if (!targetVoter) return 1.0;
+      
+      const dailyInflow = this.daoFund.dailyInflow;
+      const commitment = this.calculateVoterCommitment(targetVoter);
+      
+      if (commitment <= dailyInflow) return 1.0;
+      
+      // Calculate proportional weight
+      const proportionalWeight = Math.min(1.0, dailyInflow / commitment);
+      
+      // Calculate minimum weight based on consensus (simplified)
+      // In real implementation, this would be highest_raw_vote_total / total_vesting_shares
+      const estimatedMinimumWeight = 0.3; // Assume 30% minimum for demo
+      
+      return Math.max(proportionalWeight, estimatedMinimumWeight);
+    },
+
+         getHFImpactForUser() {
+       if (!this.account) return null;
+       
+       const currentCommitment = this.calculateVoterCommitment();
+       const voteWeight = this.calculateVoteWeight();
+       const dailyInflow = this.daoFund.dailyInflow;
+       
+       return {
+         commitment: currentCommitment,
+         dailyInflow: dailyInflow,
+         voteWeight: voteWeight,
+         isOverCommitted: currentCommitment > dailyInflow,
+         weightReduction: 1 - voteWeight
+       };
+     },
+
+     // Helper methods for HF Impact display with proper fallbacks
+     getReturnProposalVotes() {
+       if (!this.proposals || this.proposals.length === 0) return 'Loading...';
+       
+       const returnProposal = this.proposals.find(p => p.id === 0);
+       if (!returnProposal) return 'N/A';
+       
+       return this.formatVotes(returnProposal.total_votes);
+     },
+
+     getProjectedNewThreshold() {
+       if (!this.proposals || this.proposals.length === 0) return 'Loading...';
+       
+       const currentThreshold = this.calculateProposalThreshold();
+       if (!currentThreshold || isNaN(currentThreshold)) return 'N/A';
+       
+       return this.formatVotes(currentThreshold * 1.15);
+     },
+
+     getSustainableRate() {
+       if (!this.daoFund || typeof this.daoFund.fund_balance !== 'number') {
+         return 'Loading...';
+       }
+       
+       const sustainableRate = this.daoFund.fund_balance / 100;
+       if (isNaN(sustainableRate) || sustainableRate <= 0) {
+         return 'N/A';
+       }
+       
+       return this.fancyRounding(sustainableRate);
+     },
+
+     getEstimatedAffectedVoters() {
+       if (!this.userVotes) return 'Loading...';
+       
+       const totalVoters = Object.keys(this.userVotes).length;
+       if (totalVoters === 0) return '0';
+       
+       // Estimate 25% of voters might be over-committed
+       return Math.floor(totalVoters * 0.25);
+     },
+
     makeQr(ref, link = "test", opts = {}){
       var qrcode = new QRCode(this.$refs[ref], opts);
       qrcode.makeCode(link);
@@ -3306,6 +3519,561 @@ const app = createApp({
         // this.openBlogModal(this.blogPost.author, this.blogPost.permlink);
       }
     },
+
+    // Witness monitoring methods
+    async loadWitnesses() {
+      this.loading = true;
+      this.error = null;
+      try {
+        // Fetch dynamic global properties first to get current witness and block
+        const propsResponse = await fetch(this.hapi, {
+            method: 'POST',
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                method: 'condenser_api.get_dynamic_global_properties',
+                params: [],
+                id: 1
+            })
+        });
+        const propsData = await propsResponse.json();
+        if(propsData.result) {
+          this.currentBlock = propsData.result.head_block_number;
+          this.hivestats = propsData.result;
+          this.current_witness = propsData.result.current_witness;
+        }
+        
+        await Promise.all([
+          this.fetchWitnesses(),
+          this.fetchWitnessSchedule(),
+          this.account ? this.fetchUserWitnessVotes() : Promise.resolve(),
+          this.account ? this.checkIfUserIsWitness() : Promise.resolve()
+        ]);
+      } catch (error) {
+        console.error('Error loading witnesses:', error);
+        this.error = error.message || 'Failed to load witness data. Please try again.';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchWitnesses() {
+      try {
+        // Try the condenser API first as it's more reliable for this data
+        const response = await fetch(this.hapi, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'condenser_api.get_witnesses_by_vote',
+            params: ['', 1000],
+            id: 1
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.message || 'API error');
+
+        const witnesses = data.result || [];
+        
+        // Add ranking to witnesses (they should already be sorted by votes)
+        this.witnesses = witnesses.map((witness, index) => ({
+          ...witness,
+          rank: index + 1
+        }));
+
+        // Get current block number
+        const propsResponse = await fetch(this.hapi, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'condenser_api.get_dynamic_global_properties',
+            params: [],
+            id: 1
+          })
+        });
+
+        if (propsResponse.ok) {
+          const propsData = await propsResponse.json();
+          if (propsData.result) {
+            this.currentBlock = propsData.result.head_block_number;
+            this.hivestats = propsData.result;
+            this.current_witness = propsData.result.current_witness; // Store current witness
+          }
+        }
+
+      } catch (error) {
+        console.error('Error fetching witnesses:', error);
+        throw new Error(`Failed to fetch witnesses: ${error.message}`);
+      }
+    },
+
+    async fetchWitnessSchedule() {
+      try {
+        // Try condenser API first
+        const response = await fetch(this.hapi, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'condenser_api.get_witness_schedule',
+            params: [],
+            id: 1
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.error) {
+          console.warn('Condenser API failed, trying database API:', data.error);
+          // Fallback to database API
+          const dbResponse = await fetch(this.hapi, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              method: 'database_api.get_witness_schedule',
+              params: {},
+              id: 1
+            })
+          });
+          
+          if (dbResponse.ok) {
+            const dbData = await dbResponse.json();
+            this.witnessSchedule = dbData.result;
+          }
+        } else {
+          this.witnessSchedule = data.result;
+        }
+      } catch (error) {
+        console.error('Error fetching witness schedule:', error);
+        // Don't throw here, schedule is not critical
+      }
+    },
+
+    async fetchUserWitnessVotes() {
+      if (!this.account) return;
+
+      try {
+        // Try condenser API first as it's more reliable
+        const response = await fetch(this.hapi, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'condenser_api.get_accounts',
+            params: [[this.account]],
+            id: 1
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.message || 'API error');
+
+        const accounts = data.result || [];
+        if (accounts.length > 0) {
+          const account = accounts[0];
+          // Extract witness votes from account data
+          this.userWitnessVotes = account.witness_votes || [];
+          
+          // Check for proxy
+          this.userProxy = (account.proxy && account.proxy !== '') ? account.proxy : null;
+        } else {
+          this.userWitnessVotes = [];
+          this.userProxy = null;
+        }
+
+      } catch (error) {
+        console.error('Error fetching user witness votes:', error);
+        this.userWitnessVotes = [];
+        this.userProxy = null;
+      }
+    },
+
+    async checkIfUserIsWitness() {
+      if (!this.account) return;
+
+      try {
+        const response = await fetch(this.hapi, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'condenser_api.get_witness_by_account',
+            params: [this.account],
+            id: 1
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.message || 'API error');
+
+        const witness = data.result;
+        if (witness && witness.owner) {
+          this.isUserWitness = true;
+          this.currentUserWitnessInfo = witness;
+          
+          // Pre-fill witness form with current data
+          // witness is already defined above
+          
+          // Handle different data formats for witness properties
+          let accountCreationFee = 3;
+          let maxBlockSize = 65536;
+          let hbdInterestRate = 0;
+          
+          if (witness.props) {
+            // Handle account creation fee - could be string with units or just number
+            if (witness.props.account_creation_fee) {
+              if (typeof witness.props.account_creation_fee === 'string') {
+                accountCreationFee = parseFloat(witness.props.account_creation_fee.split(' ')[0]);
+              } else if (typeof witness.props.account_creation_fee === 'object' && witness.props.account_creation_fee.amount) {
+                accountCreationFee = parseFloat(witness.props.account_creation_fee.amount) / 1000; // Convert from milli units
+              } else {
+                accountCreationFee = parseFloat(witness.props.account_creation_fee) || 3;
+              }
+            }
+            
+            // Handle max block size
+            maxBlockSize = witness.props.maximum_block_size || 65536;
+            
+            // Handle HBD interest rate - could be in basis points
+            if (witness.props.hbd_interest_rate !== undefined) {
+              hbdInterestRate = witness.props.hbd_interest_rate / 100 || 0;
+            }
+          }
+          
+          this.witnessForm = {
+            url: witness.url || '',
+            signingKey: witness.signing_key || '',
+            accountCreationFee: accountCreationFee,
+            maxBlockSize: maxBlockSize,
+            hbdInterestRate: hbdInterestRate
+          };
+        } else {
+          this.isUserWitness = false;
+          this.currentUserWitnessInfo = null;
+        }
+
+      } catch (error) {
+        console.error('Error checking if user is witness:', error);
+        this.isUserWitness = false;
+        this.currentUserWitnessInfo = null;
+      }
+    },
+
+    async refreshWitnesses() {
+      await this.loadWitnesses();
+      this.lastUpdate = Date.now();
+    },
+
+    // Live monitoring methods
+    startMonitoring() {
+      if (this.isMonitoring) return;
+      
+      this.isMonitoring = true;
+      this.lastUpdate = Date.now();
+      
+      this.monitoringTimer = setInterval(async () => {
+        try {
+          await this.refreshWitnesses();
+        } catch (error) {
+          console.error('Error during monitoring update:', error);
+        }
+      }, this.monitoringInterval);
+      
+      console.log('Started witness monitoring');
+    },
+
+    stopMonitoring() {
+      if (!this.isMonitoring) return;
+      
+      this.isMonitoring = false;
+      
+      if (this.monitoringTimer) {
+        clearInterval(this.monitoringTimer);
+        this.monitoringTimer = null;
+      }
+      
+      console.log('Stopped witness monitoring');
+    },
+
+    // Witness voting methods
+    async voteForWitness(witnessName, approve) {
+      if (!this.account || this.userProxy) return;
+
+      this.signingOperation = true;
+
+      const op = {
+        type: "raw",
+        op: [
+          [
+            "account_witness_vote",
+            {
+              account: this.account,
+              witness: witnessName,
+              approve: approve
+            }
+          ]
+        ],
+        key: "active",
+        msg: `${approve ? 'Voting for' : 'Removing vote from'} witness @${witnessName}`,
+        txid: `witness_vote_${witnessName}_${Date.now()}`,
+        api: this.hapi,
+        delay: 250,
+        ops: ["fetchUserWitnessVotes", "resetSigningState"]
+      };
+
+      this.toSign = op;
+    },
+
+    async setProxy() {
+      if (!this.account || !this.proxyForm.account) return;
+
+      this.signingOperation = true;
+
+      const op = {
+        type: "raw",
+        op: [
+          [
+            "account_witness_proxy",
+            {
+              account: this.account,
+              proxy: this.proxyForm.account
+            }
+          ]
+        ],
+        key: "active",
+        msg: `Setting witness voting proxy to @${this.proxyForm.account}`,
+        txid: `set_proxy_${this.proxyForm.account}_${Date.now()}`,
+        api: this.hapi,
+        delay: 250,
+        ops: ["fetchUserWitnessVotes", "resetSigningState", "closeProxyModal"]
+      };
+
+      this.toSign = op;
+    },
+
+    async clearProxy() {
+      if (!this.account) return;
+
+      this.signingOperation = true;
+
+      const op = {
+        type: "raw",
+        op: [
+          [
+            "account_witness_proxy",
+            {
+              account: this.account,
+              proxy: ""
+            }
+          ]
+        ],
+        key: "active",
+        msg: "Clearing witness voting proxy",
+        txid: `clear_proxy_${Date.now()}`,
+        api: this.hapi,
+        delay: 250,
+        ops: ["fetchUserWitnessVotes", "resetSigningState"]
+      };
+
+      this.toSign = op;
+    },
+
+    // Witness management methods
+    async updateWitness() {
+      if (!this.account || !this.isUserWitness) return;
+
+      this.signingOperation = true;
+
+      const op = {
+        type: "raw",
+        op: [
+          [
+            "witness_update",
+            {
+              owner: this.account,
+              url: this.witnessForm.url,
+              block_signing_key: this.witnessForm.signingKey,
+              props: {
+                account_creation_fee: `${this.witnessForm.accountCreationFee.toFixed(3)} HIVE`,
+                maximum_block_size: parseInt(this.witnessForm.maxBlockSize),
+                hbd_interest_rate: Math.round(this.witnessForm.hbdInterestRate * 100)
+              },
+              fee: "0.000 HIVE"
+            }
+          ]
+        ],
+        key: "active",
+        msg: "Updating witness properties",
+        txid: `witness_update_${Date.now()}`,
+        api: this.hapi,
+        delay: 250,
+        ops: ["checkIfUserIsWitness", "resetSigningState"]
+      };
+
+      this.toSign = op;
+    },
+
+    async setNullKey() {
+      if (!this.account || !this.isUserWitness) return;
+
+      const nullKey = "STM1111111111111111111111111111111114T1Anm";
+      this.signingOperation = true;
+
+      const op = {
+        type: "raw",
+        op: [
+          [
+            "witness_update",
+            {
+              owner: this.account,
+              url: this.witnessForm.url,
+              block_signing_key: nullKey,
+              props: {
+                account_creation_fee: `${this.witnessForm.accountCreationFee.toFixed(3)} HIVE`,
+                maximum_block_size: parseInt(this.witnessForm.maxBlockSize),
+                hbd_interest_rate: Math.round(this.witnessForm.hbdInterestRate * 100)
+              },
+              fee: "0.000 HIVE"
+            }
+          ]
+        ],
+        key: "active",
+        msg: "Setting witness signing key to null (disabling block production)",
+        txid: `witness_null_key_${Date.now()}`,
+        api: this.hapi,
+        delay: 250,
+        ops: ["checkIfUserIsWitness", "resetSigningState"]
+      };
+
+      this.toSign = op;
+    },
+
+    // Helper methods
+    resetSigningState() {
+      this.signingOperation = false;
+    },
+
+    closeProxyModal() {
+      this.showProxyModal = false;
+      this.proxyForm.account = '';
+    },
+
+    isVotedForWitness(witnessName) {
+      // userWitnessVotes is now an array of witness names from condenser API
+      return this.userWitnessVotes.includes(witnessName);
+    },
+
+    formatVotes(votes) {
+      const vests = parseFloat(votes) / 1000000; // Convert from micro-vests to vests
+      
+      if (this.hivestats && this.hivestats.total_vesting_fund_hive && this.hivestats.total_vesting_shares) {
+        const totalVestingFund = parseFloat(this.hivestats.total_vesting_fund_hive.split(' ')[0]);
+        const totalVestingShares = parseFloat(this.hivestats.total_vesting_shares.split(' ')[0]);
+        const hp = (vests * totalVestingFund) / totalVestingShares;
+        return this.fancyRounding(hp);
+      } else {
+        // Fallback approximation
+        return this.fancyRounding(vests / 1000);
+      }
+    },
+
+    formatHbdRate(exchangeRate) {
+      if (!exchangeRate || !exchangeRate.base || !exchangeRate.quote) return 'N/A';
+      
+      // Parse the base (HBD amount) and quote (HIVE amount)
+      const hbdAmount = parseFloat(exchangeRate.base.split(' ')[0]);
+      const hiveAmount = parseFloat(exchangeRate.quote.split(' ')[0]);
+      
+      // Calculate HIVE price in USD terms (HBD/HIVE ratio)
+      const hivePrice = hbdAmount / hiveAmount;
+      return hivePrice.toFixed(3);
+    },
+
+    getHbdPrice(exchangeRate) {
+      // HBD is always pegged to $1 USD
+      return '1.000';
+    },
+
+    getHivePrice(exchangeRate) {
+      if (!exchangeRate || !exchangeRate.base || !exchangeRate.quote) return 'N/A';
+      
+      const hbdAmount = parseFloat(exchangeRate.base.split(' ')[0]);
+      const hiveAmount = parseFloat(exchangeRate.quote.split(' ')[0]);
+      
+      return (hbdAmount / hiveAmount).toFixed(3);
+    },
+
+    formatAccountCreationFee(fee) {
+      if (!fee) return 'N/A';
+      if (typeof fee === 'string') return fee;
+      if (typeof fee === 'object' && fee.amount !== undefined) {
+        return `${(fee.amount / Math.pow(10, fee.precision || 3)).toFixed(3)} HIVE`;
+      }
+      return fee.toString();
+    },
+
+    formatHbdInterestRate(rate) {
+      if (rate === undefined || rate === null) return '0.00%';
+      // Rate is in basis points (100 = 1%)
+      return (rate / 100).toFixed(2) + '%';
+    },
+
+    getHbdRateClass(witness) {
+      if (!witness.hbd_exchange_rate) return 'hbd-rate-normal';
+      
+      const witnessPrice = parseFloat(this.getHivePrice(witness.hbd_exchange_rate));
+      const averagePrice = this.averageHivePrice;
+
+      if(isNaN(witnessPrice) || averagePrice === 0) return 'hbd-rate-normal';
+
+      const deviation = Math.abs(witnessPrice / averagePrice - 1);
+      
+      if (deviation <= 0.03) return 'hbd-rate-low'; // Green
+      if (deviation <= 0.10) return 'hbd-rate-warning'; // Yellow
+      return 'hbd-rate-high'; // Red
+    },
+
+    timeAgo(timestamp) {
+      if (!timestamp) return '';
+      
+      const now = new Date();
+      const past = new Date(timestamp);
+      const diffMs = now - past;
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      
+      if (diffDays > 0) return `${diffDays}d ago`;
+      if (diffHours > 0) return `${diffHours}h ago`;
+      if (diffMinutes > 0) return `${diffMinutes}m ago`;
+      return 'just now';
+    },
+
+    formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      try {
+        return new Date(dateString).toLocaleDateString();
+      } catch (e) {
+        return 'Invalid Date';
+      }
+    },
   },
   mounted() {
     this.getQuotes();
@@ -3320,6 +4088,14 @@ const app = createApp({
       this.loadProposals().then(() => {
         // Handle URL routing after proposals are loaded
         this.handleUrlRouting();
+      });
+    }
+    
+    // Load witnesses if we're on the witnesses page
+    if (window.location.pathname.includes('/witnesses')) {
+      this.loadWitnesses().then(() => {
+        // Start monitoring by default
+        this.startMonitoring();
       });
     }
     
@@ -3418,6 +4194,125 @@ const app = createApp({
       get(){
         return this.formatNumber(parseFloat(this.hivestats.pending_rewarded_vesting_hive) * this.hiveprice.hive.usd * 2,0, ".", ",")
       }
+    },
+    
+    // Witness computed properties
+    filteredWitnesses() {
+      if (!this.witnesses || !Array.isArray(this.witnesses)) return [];
+      
+      // Always filter to only show active and backup witnesses (rank 1-100)
+      let filtered = this.witnesses.filter(witness => {
+        return witness && witness.rank <= 100;
+      });
+      
+      // Filter by status
+      if (this.filterStatus !== 'all') {
+        filtered = filtered.filter(witness => {
+          if (!witness) return false;
+          
+          switch (this.filterStatus) {
+            case 'active':
+              return witness.rank <= 20;
+            case 'backup':
+              return witness.rank > 20 && witness.rank <= 100;
+            case 'voted':
+              return this.isVotedForWitness(witness.owner);
+            default:
+              return true;
+          }
+        });
+      }
+      
+      // Filter by search term
+      if (this.searchTerm) {
+        const search = this.searchTerm.toLowerCase();
+        filtered = filtered.filter(witness =>
+          witness.owner.toLowerCase().includes(search)
+        );
+      }
+      
+      // Sort witnesses
+      filtered.sort((a, b) => {
+        switch (this.sortBy) {
+          case 'rank':
+            return a.rank - b.rank;
+          case 'votes':
+            return parseFloat(b.votes) - parseFloat(a.votes);
+          case 'name':
+            return a.owner.localeCompare(b.owner);
+          case 'missed':
+            return (b.total_missed || 0) - (a.total_missed || 0);
+          case 'version':
+            return (b.running_version || '').localeCompare(a.running_version || '');
+          default:
+            return a.rank - b.rank;
+        }
+      });
+      
+      return filtered;
+    },
+    
+    activeWitnesses() {
+      return (this.witnesses || []).filter(w => w.rank <= 20);
+    },
+    
+    backupWitnesses() {
+      return (this.witnesses || []).filter(w => w.rank > 20 && w.rank <= 100);
+    },
+    
+    totalWitnessVotes() {
+      return (this.witnesses || []).reduce((sum, w) => sum + parseFloat(w.votes || 0), 0);
+    },
+    
+    nextWitnessTime() {
+      // Estimate time until next witness produces a block (3 seconds per block)
+      return "~3 seconds";
+    },
+
+    nextWitness() {
+      if (!this.current_witness || !this.witnessSchedule) {
+        return 'Loading...';
+      }
+      
+      // Check different possible structures for witness schedule
+      const shuffled = this.witnessSchedule.current_shuffled_witnesses || 
+                      this.witnessSchedule.shuffled_witnesses ||
+                      [];
+      
+      if (!shuffled.length) {
+        return this.current_witness; // Just show current if no schedule available
+      }
+      
+      const currentIndex = shuffled.indexOf(this.current_witness);
+      if (currentIndex === -1) {
+        return shuffled[0] || 'Unknown'; // Return first witness if current not found
+      }
+      const nextIndex = (currentIndex + 1) % shuffled.length;
+      return shuffled[nextIndex];
+    },
+
+    averageHivePrice() {
+      const activeWitnesses = this.witnesses.filter(w => w.rank <= 20 && w.hbd_exchange_rate);
+      if (activeWitnesses.length === 0) return 0;
+      
+      const totalPrice = activeWitnesses.reduce((sum, witness) => {
+        const price = parseFloat(this.getHivePrice(witness.hbd_exchange_rate));
+        return sum + (isNaN(price) ? 0 : price);
+      }, 0);
+      
+      return totalPrice / activeWitnesses.length;
+    },
+
+    medianHbdInterestRate() {
+      const activeWitnesses = this.witnesses.filter(w => w.rank <= 20 && w.props && w.props.hbd_interest_rate !== undefined);
+      if (activeWitnesses.length === 0) return 0;
+
+      const rates = activeWitnesses.map(w => w.props.hbd_interest_rate).sort((a, b) => a - b);
+      const mid = Math.floor(rates.length / 2);
+
+      const medianRate = rates.length % 2 !== 0 ? rates[mid] : (rates[mid - 1] + rates[mid]) / 2;
+      
+      return medianRate / 100; // Convert from basis points to percentage
     }
   },
 });

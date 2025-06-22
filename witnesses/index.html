@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hive Witnesses | DLUX</title>
+    <meta name="description" content="Monitor and vote for Hive witnesses. Comprehensive witness statistics, voting tools, and witness management.">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/custom.css">
+    
+    <style>
+        .witness-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .witness-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .witness-active {
+            border-left-color: #28a745 !important;
+            background: linear-gradient(90deg, rgba(40,167,69,0.05) 0%, transparent 100%);
+        }
+        .witness-backup {
+            border-left-color: #ffc107 !important;
+            background: linear-gradient(90deg, rgba(255,193,7,0.05) 0%, transparent 100%);
+        }
+        .witness-inactive {
+            border-left-color: #6c757d !important;
+            opacity: 0.7;
+        }
+        .vote-button {
+            transition: all 0.2s ease;
+        }
+        .vote-button:hover {
+            transform: scale(1.05);
+        }
+        .witness-stats {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .witness-management {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .missed-blocks {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .version-badge {
+            font-size: 0.75rem;
+        }
+        .witness-rank {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .proxy-info {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .witness-schedule {
+            background: rgba(13, 202, 240, 0.1);
+            border: 1px solid rgba(13, 202, 240, 0.3);
+            border-radius: 8px;
+        }
+        .tiny {
+            font-size: 0.7rem;
+        }
+        .hbd-rate-high {
+            color: #dc3545;
+        }
+        .hbd-rate-low {
+            color: #198754;
+        }
+        .hbd-rate-warning {
+            color: #ffc107;
+        }
+        .hbd-rate-normal {
+            color: #6c757d;
+        }
+        @media (max-width: 576px) {
+            .witness-rank {
+                font-size: 0.9rem;
+            }
+            .h5 {
+                font-size: 1rem;
+            }
+        }
+        
+        /* Fix navbar overlap */
+        .container-fluid {
+            padding-top: 20px;
+        }
+        
+        /* v-cloak directive */
+        [v-cloak] {
+            display: none !important;
+        }
+        
+        /* Live monitoring styles */
+        .monitoring-controls {
+            background: rgba(13, 202, 240, 0.1);
+            border: 1px solid rgba(13, 202, 240, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .monitoring-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #28a745;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        .monitoring-indicator.stopped {
+            background-color: #dc3545;
+            animation: none;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-dark text-light">
+    <div id="app" v-cloak>
+        <nav-vue ref="nav" :account="account" :op="toSign" @tosign="sendIt($event)"></nav-vue>
+        
+        <div class="container-fluid py-4">
+            <!-- Header Section -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="text-center mb-4">
+                        <h1 class="display-4 fw-bold mb-3">
+                            <i class="fas fa-server me-3 text-info"></i>
+                            Hive Witnesses
+                        </h1>
+                        <p class="lead text-muted">
+                            Monitor witness performance, vote for your preferred witnesses, and manage witness operations
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Witness Statistics Overview -->
+            <div class="row mb-4">
+                <div class="col-lg-8 mx-auto">
+                    <div class="witness-stats p-4 mb-4">
+                        <h3 class="text-center mb-4"><i class="fas fa-chart-line me-2"></i>Witness Network Overview</h3>
+                        <div class="row text-center mb-4">
+                            <div class="col-lg-2 col-md-4 col-6 mb-3">
+                                <div class="h4 mb-1">{{ activeWitnesses.length }}</div>
+                                <small class="opacity-75">Active Witnesses</small>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-6 mb-3">
+                                <div class="h4 mb-1">{{ backupWitnesses.length }}</div>
+                                <small class="opacity-75">Backup Witnesses</small>
+                            </div>
+                            <div class="col-lg-2 col-md-4 col-12 mb-3">
+                                <div class="h4 mb-1">{{ currentBlock }}</div>
+                                <small class="opacity-75">Current Block</small>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-12 mb-3">
+                                <div class="h4 mb-1 text-success">${{ averageHivePrice.toFixed(3) }}</div>
+                                <small class="opacity-75">Avg HIVE Price</small>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-12 mb-3">
+                                <div class="h4 mb-1 text-info">{{ medianHbdInterestRate.toFixed(2) }}%</div>
+                                <small class="opacity-75">Median HBD Interest</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Proxy Info (if applicable) -->
+            <div v-if="userProxy && account" class="row mb-4">
+                <div class="col-lg-8 mx-auto">
+                    <div class="proxy-info">
+                        <h5><i class="fas fa-user-tie me-2"></i>Witness Voting Proxy</h5>
+                        <p class="mb-2">
+                            Your witness votes are currently managed by proxy: 
+                            <strong class="text-warning">@{{ userProxy }}</strong>
+                        </p>
+                        <p class="mb-3 small text-muted">
+                            To vote for witnesses directly, you need to clear your proxy first.
+                        </p>
+                        <button class="btn btn-warning btn-sm" @click="clearProxy" :disabled="signingOperation">
+                            <i class="fas fa-times me-1"></i>
+                            Clear Proxy
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Witness Management (for witness accounts) -->
+            <div v-if="isUserWitness && account" class="row mb-4">
+                <div class="col-lg-10 mx-auto">
+                    <div class="witness-management p-4">
+                        <h3 class="text-center mb-4">
+                            <i class="fas fa-cogs me-2"></i>Witness Management
+                        </h3>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card bg-dark border-light">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="fas fa-server me-2"></i>Update Witness</h5>
+                                        <form @submit.prevent="updateWitness">
+                                            <div class="mb-3">
+                                                <label class="form-label">Witness URL</label>
+                                                <input type="url" class="form-control" v-model="witnessForm.url" 
+                                                       placeholder="https://your-witness-post.com" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Block Signing Key</label>
+                                                <input type="text" class="form-control" v-model="witnessForm.signingKey" 
+                                                       placeholder="STM..." required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Account Creation Fee (HIVE)</label>
+                                                <input type="number" class="form-control" v-model="witnessForm.accountCreationFee" 
+                                                       step="0.001" min="0" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Maximum Block Size</label>
+                                                <input type="number" class="form-control" v-model="witnessForm.maxBlockSize" 
+                                                       min="65536" max="2097152" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">HBD Interest Rate (%)</label>
+                                                <input type="number" class="form-control" v-model="witnessForm.hbdInterestRate" 
+                                                       step="0.01" min="0" max="20" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary" :disabled="signingOperation">
+                                                <i class="fas fa-save me-1"></i>Update Witness
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card bg-dark border-light">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="fas fa-key me-2"></i>Witness Keys</h5>
+                                        <div class="mb-3">
+                                            <button class="btn btn-warning me-2 mb-2" @click="setNullKey" :disabled="signingOperation">
+                                                <i class="fas fa-ban me-1"></i>Set Null Key
+                                            </button>
+                                            <small class="d-block text-muted">
+                                                Disables block production temporarily
+                                            </small>
+                                        </div>
+                                        <div class="mb-3">
+                                            <h6>Current Witness Info:</h6>
+                                            <div v-if="currentUserWitnessInfo">
+                                                <small class="d-block">URL: {{ currentUserWitnessInfo.url || 'Not set' }}</small>
+                                                <small class="d-block">Signing Key: {{ currentUserWitnessInfo.signing_key || 'Not set' }}</small>
+                                                <small class="d-block">Votes: {{ formatNumber(currentUserWitnessInfo.votes) }}</small>
+                                                <small class="d-block">Missed: {{ currentUserWitnessInfo.total_missed || 0 }} blocks</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Filters -->
+            <div class="row mb-4">
+                <div class="col-lg-8 mx-auto">
+                    <div class="card bg-dark border-secondary">
+                        <div class="card-body">
+                            <div class="row align-items-end">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-search me-1"></i>Search Witnesses
+                                    </label>
+                                    <input type="text" class="form-control" v-model="searchTerm" 
+                                           placeholder="Search by name...">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-filter me-1"></i>Status
+                                    </label>
+                                    <select class="form-select" v-model="filterStatus">
+                                        <option value="all">Active & Backup (1-100)</option>
+                                        <option value="active">Active Only (Top 20)</option>
+                                        <option value="backup">Backup Only (21-100)</option>
+                                        <option value="voted">My Votes</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-sort me-1"></i>Sort By
+                                    </label>
+                                    <select class="form-select" v-model="sortBy">
+                                        <option value="rank">Rank</option>
+                                        <option value="votes">Votes</option>
+                                        <option value="name">Name</option>
+                                        <option value="missed">Missed Blocks</option>
+                                        <option value="version">Version</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <button class="btn btn-info w-100" @click="refreshWitnesses" :disabled="loading">
+                                        <i class="fas fa-sync-alt me-1" :class="{'fa-spin': loading}"></i>
+                                        Refresh
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Monitoring Controls -->
+            <div class="row mb-4">
+                <div class="col-lg-8 mx-auto">
+                    <div class="monitoring-controls">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">
+                                    <span class="monitoring-indicator" :class="{ stopped: !isMonitoring }"></span>
+                                    Live Monitoring
+                                </h6>
+                                <small class="text-muted">
+                                    {{ isMonitoring ? `Updates every ${monitoringInterval/1000}s` : 'Monitoring stopped' }}
+                                    <span v-if="lastUpdate"> | Last update: {{ timeAgo(lastUpdate) }}</span>
+                                </small>
+                            </div>
+                            <div>
+                                <button v-if="!isMonitoring" class="btn btn-success btn-sm" @click="startMonitoring">
+                                    <i class="fas fa-play me-1"></i>Start Monitoring
+                                </button>
+                                <button v-else class="btn btn-warning btn-sm" @click="stopMonitoring">
+                                    <i class="fas fa-stop me-1"></i>Stop Monitoring
+                                </button>
+                                <button class="btn btn-info btn-sm ms-2" @click="refreshWitnesses" :disabled="loading">
+                                    <i class="fas fa-sync-alt me-1" :class="{'fa-spin': loading}"></i>
+                                    Refresh Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Witness Schedule (Current Round) -->
+            <div v-if="witnessSchedule" class="row mb-4">
+                <div class="col-lg-10 mx-auto">
+                    <div class="witness-schedule p-3">
+                        <h5 class="mb-3"><i class="fas fa-clock me-2"></i>Current Witness Schedule</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Active Round</h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span v-for="witness in (witnessSchedule?.current_shuffled_witnesses || witnessSchedule?.shuffled_witnesses || [])" :key="witness"
+                                          class="badge bg-success">{{ witness }}</span>
+                                    <span v-if="!witnessSchedule || (!witnessSchedule.current_shuffled_witnesses && !witnessSchedule.shuffled_witnesses)" 
+                                          class="text-muted">Schedule loading...</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Next Witness</h6>
+                                <div class="h5 text-info">{{ nextWitness }}</div>
+                                <small class="text-muted">Estimated time: {{ nextWitnessTime }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div v-if="loading" class="row">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-info mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-muted">Loading witness data...</p>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div v-if="error && !loading" class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        {{ error }}
+                        <button class="btn btn-outline-danger btn-sm ms-3" @click="refreshWitnesses">
+                            Try Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Witnesses List -->
+            <div v-if="!loading && !error" class="row">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3>
+                            <i class="fas fa-list me-2"></i>
+                            Witnesses ({{ filteredWitnesses.length }})
+                        </h3>
+                        <div v-if="account && !userProxy">
+                            <small class="text-muted me-3">
+                                Votes used: {{ userWitnessVotes.length }}/30
+                            </small>
+                            <button class="btn btn-outline-warning btn-sm" @click="showProxyModal = true">
+                                <i class="fas fa-user-tie me-1"></i>Set Proxy
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Single Column Witness List -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div v-for="witness in filteredWitnesses" :key="witness.owner" 
+                                 class="card witness-card mb-3" 
+                                 :class="{
+                                   'witness-active': witness.rank <= 20,
+                                   'witness-backup': witness.rank > 20 && witness.rank <= 100,
+                                   'witness-inactive': !witness.signing_key || witness.signing_key.startsWith('STM1111111')
+                                 }">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <!-- Rank and Name -->
+                                        <div class="col-lg-3 col-md-4 col-12 mb-3 mb-md-0">
+                                            <div class="d-flex align-items-center">
+                                                <span class="witness-rank me-3">#{{ witness.rank }}</span>
+                                                <div>
+                                                    <h5 class="mb-1">{{ witness.owner }}</h5>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span v-if="witness.rank <= 20" class="badge bg-success">
+                                                            <i class="fas fa-star me-1"></i>Active
+                                                        </span>
+                                                        <span v-else-if="witness.rank <= 100" class="badge bg-warning">
+                                                            <i class="fas fa-clock me-1"></i>Backup
+                                                        </span>
+                                                        <span v-if="witness.running_version" class="badge bg-info version-badge">
+                                                            {{ witness.running_version }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Votes -->
+                                        <div class="col-lg-2 col-md-3 col-6 mb-3 mb-lg-0 text-center">
+                                            <div class="text-info fw-bold h5 mb-1">{{ formatVotes(witness.votes) }}</div>
+                                            <small class="text-muted">votes</small>
+                                        </div>
+
+                                        <!-- Missed Blocks -->
+                                        <div class="col-lg-2 col-md-2 col-6 mb-3 mb-lg-0 text-center">
+                                            <div class="missed-blocks h5 mb-1">{{ witness.total_missed || 0 }}</div>
+                                            <small class="text-muted">missed</small>
+                                        </div>
+
+                                        <!-- Price Feed -->
+                                        <div class="col-lg-2 col-md-3 col-6 mb-3 mb-lg-0 text-center">
+                                            <div class="h6 mb-1" :class="getHbdRateClass(witness)">
+                                                ${{ getHivePrice(witness.hbd_exchange_rate) }}
+                                            </div>
+                                            <small class="text-muted">HIVE Price</small>
+                                            <div v-if="witness.last_hbd_exchange_update" class="tiny text-muted">
+                                                {{ timeAgo(witness.last_hbd_exchange_update) }}
+                                            </div>
+                                        </div>
+
+                                        <!-- Actions -->
+                                        <div class="col-lg-3 col-12">
+                                            <div class="d-flex gap-2 align-items-center">
+                                                <div v-if="witness.url" class="flex-grow-1">
+                                                    <a :href="witness.url" target="_blank" 
+                                                       class="btn btn-outline-info btn-sm w-100">
+                                                        <i class="fas fa-external-link-alt me-1"></i>
+                                                        <span class="d-none d-sm-inline">Post</span>
+                                                    </a>
+                                                </div>
+                                                
+                                                <div v-if="account && !userProxy" class="flex-grow-1">
+                                                    <button v-if="!isVotedForWitness(witness.owner)"
+                                                            class="btn btn-success vote-button btn-sm w-100" 
+                                                            @click="voteForWitness(witness.owner, true)"
+                                                            :disabled="signingOperation || userWitnessVotes.length >= 30">
+                                                        <i class="fas fa-thumbs-up me-1"></i>
+                                                        <span class="d-none d-sm-inline">Vote</span>
+                                                    </button>
+                                                    <button v-else
+                                                            class="btn btn-outline-danger vote-button btn-sm w-100" 
+                                                            @click="voteForWitness(witness.owner, false)"
+                                                            :disabled="signingOperation">
+                                                        <i class="fas fa-thumbs-down me-1"></i>
+                                                        <span class="d-none d-sm-inline">Unvote</span>
+                                                    </button>
+                                                </div>
+                                                
+                                                <div v-else-if="!account" class="flex-grow-1">
+                                                    <button class="btn btn-outline-secondary btn-sm w-100" disabled>
+                                                        <i class="fas fa-sign-in-alt me-1"></i>
+                                                        <span class="d-none d-sm-inline">Login</span>
+                                                    </button>
+                                                </div>
+                                                
+                                                <div>
+                                                    <button class="btn btn-outline-light btn-sm" 
+                                                            type="button" 
+                                                            :data-bs-toggle="'collapse'" 
+                                                            :data-bs-target="'#details-' + witness.owner" 
+                                                            aria-expanded="false">
+                                                        <i class="fas fa-info-circle"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Collapsible Details Section -->
+                                    <div class="collapse mt-3" :id="'details-' + witness.owner">
+                                        <div class="card bg-secondary">
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <h6 class="text-info mb-3"><i class="fas fa-cogs me-2"></i>Witness Properties</h6>
+                                                        <div class="row small">
+                                                            <div class="col-sm-6 mb-2">
+                                                                <strong>Account Creation Fee:</strong><br>
+                                                                {{ formatAccountCreationFee(witness.props?.account_creation_fee) }}
+                                                            </div>
+                                                            <div class="col-sm-6 mb-2">
+                                                                <strong>HBD Interest Rate:</strong><br>
+                                                                {{ formatHbdInterestRate(witness.props?.hbd_interest_rate) }}
+                                                            </div>
+                                                            <div class="col-sm-6 mb-2">
+                                                                <strong>Max Block Size:</strong><br>
+                                                                {{ formatNumber(witness.props?.maximum_block_size || 0) }} bytes
+                                                            </div>
+                                                            <div class="col-sm-6 mb-2">
+                                                                <strong>Account Subsidy Budget:</strong><br>
+                                                                {{ formatNumber(witness.props?.account_subsidy_budget || 0) }}
+                                                            </div>
+                                                            <div class="col-sm-6 mb-2">
+                                                                <strong>Subsidy Decay:</strong><br>
+                                                                {{ formatNumber(witness.props?.account_subsidy_decay || 0) }}
+                                                            </div>
+                                                            <div class="col-sm-6 mb-2">
+                                                                <strong>Available Subsidies:</strong><br>
+                                                                {{ formatNumber(witness.available_witness_account_subsidies || 0) }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <h6 class="text-info mb-3"><i class="fas fa-chart-bar me-2"></i>Technical Details</h6>
+                                                        <div class="row small">
+                                                            <div class="col-sm-6 mb-2">
+                                                                <strong>Signing Key:</strong><br>
+                                                                <code class="text-light">{{ witness.signing_key || 'N/A' }}</code>
+                                                            </div>
+                                                            <div class="col-sm-6 mb-2">
+                                                                <strong>Last Block:</strong><br>
+                                                                {{ formatNumber(witness.last_confirmed_block_num || 0) }}
+                                                            </div>
+                                                            <div class="col-sm-6 mb-2">
+                                                                <strong>Hardfork Version:</strong><br>
+                                                                {{ witness.hardfork_version_vote || 'N/A' }}
+                                                            </div>
+                                                            <div class="col-sm-6 mb-2">
+                                                                <strong>Created:</strong><br>
+                                                                {{ formatDate(witness.created) }}
+                                                            </div>
+                                                            <div class="col-sm-6 mb-2">
+                                                                <strong>Last Update:</strong><br>
+                                                                {{ timeAgo(witness.last_hbd_exchange_update) }}
+                                                            </div>
+                                                            <div class="col-sm-6 mb-2">
+                                                                <strong>Price Feed:</strong><br>
+                                                                {{ witness.hbd_exchange_rate?.base || 'N/A' }} = {{ witness.hbd_exchange_rate?.quote || 'N/A' }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Proxy Modal -->
+        <div v-if="showProxyModal" class="modal d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog">
+                <div class="modal-content bg-dark text-light">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title">
+                            <i class="fas fa-user-tie me-2"></i>Set Witness Voting Proxy
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" 
+                                @click="closeProxyModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted mb-3">
+                            A witness voting proxy allows another account to vote for witnesses on your behalf. 
+                            Your existing witness votes will be cleared.
+                        </p>
+                        <form @submit.prevent="setProxy">
+                            <div class="mb-3">
+                                <label class="form-label">Proxy Account</label>
+                                <input type="text" class="form-control" v-model="proxyForm.account" 
+                                       placeholder="username" required>
+                            </div>
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-secondary" @click="closeProxyModal">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="btn btn-warning" :disabled="signingOperation">
+                                    <i class="fas fa-user-tie me-1"></i>
+                                    Set Proxy
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <foot-vue></foot-vue>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Vue 3 and App -->
+    <script type="module" src="/js/v3-index.js"></script>
+</body>
+</html>

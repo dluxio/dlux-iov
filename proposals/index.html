@@ -192,8 +192,252 @@
 						</div>
 					</div>
 					
+					<!-- HF Proposal Impact Analysis -->
+					<div v-if="viewMode === 'hf_proposal'" class="row mb-4">
+						<div class="col-12">
+							<div class="card bg-warning bg-opacity-25 border-warning text-light">
+								<div class="card-body">
+									<h5 class="card-title text-warning mb-3">
+										<i class="fa-solid fa-code-fork me-2"></i>Hard Fork Proposal: DHF Vote Weighting System
+									</h5>
+									
+									<!-- HF Explanation -->
+									<div class="alert alert-info mb-4">
+										<h6 class="alert-heading">What This Hard Fork Does:</h6>
+										<p class="mb-2">
+											This proposal introduces economic rationality to DHF voting by <strong>limiting vote power</strong> based on 
+											your total funding commitment versus daily DHF inflows. Key changes:
+										</p>
+										<ul class="mb-2">
+											<li><strong>Vote Weighting:</strong> Your vote weight reduces if you support more proposals than the DHF can fund daily</li>
+											<li><strong>Budget Accountability:</strong> Prevents voting for unlimited proposals without economic consequence</li>
+											<li><strong>Consensus Floor:</strong> Higher community participation automatically raises minimum vote weights</li>
+											<li><strong>One Large Proposal Rule:</strong> Only one large proposal (>1% treasury/day) counts toward your commitment</li>
+										</ul>
+										<p class="mb-0">
+											<strong>Formula:</strong> <code>vote_weight = max(daily_inflow/your_commitment, consensus_minimum) × base_vote_power</code>
+										</p>
+									</div>
+
+									<!-- Impact Scenarios -->
+									<div class="row mb-4">
+										<div class="col-md-6">
+											<h6 class="text-warning mb-3">Conservative Voter Example</h6>
+											<div class="card bg-success bg-opacity-25 border-success">
+												<div class="card-body">
+													<div class="small mb-2 text-light">
+														<strong class="text-white">Commitment:</strong> $500/day (3 small proposals)<br>
+														<strong class="text-white">Daily Inflow:</strong> ${{ fancyRounding(daoFund.dailyInflow) }}<br>
+														<strong class="text-white">Vote Weight:</strong> <span class="text-success fw-bold">100%</span> (unchanged)
+													</div>
+													<div class="text-success small fw-bold">
+														<i class="fa-solid fa-check me-1"></i>
+														Stays within budget - no penalty
+													</div>
+												</div>
+											</div>
+										</div>
+										
+										<div class="col-md-6">
+											<h6 class="text-warning mb-3">Over-Committed Voter Example</h6>
+											<div class="card bg-danger bg-opacity-25 border-danger">
+												<div class="card-body">
+													<div class="small mb-2 text-light">
+														<strong class="text-white">Commitment:</strong> ${{ fancyRounding(daoFund.dailyInflow * 2) }}/day (many proposals)<br>
+														<strong class="text-white">Daily Inflow:</strong> ${{ fancyRounding(daoFund.dailyInflow) }}<br>
+														<strong class="text-white">Vote Weight:</strong> <span class="text-danger fw-bold">50%</span> (reduced)
+													</div>
+													<div class="text-danger small fw-bold">
+														<i class="fa-solid fa-exclamation-triangle me-1"></i>
+														2x over-commitment = 50% vote power
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<!-- System Impact Metrics -->
+									<div class="row mb-4">
+										<div class="col-md-4 mb-3">
+											<div class="text-center">
+												<h6 class="text-info mb-1">Current Threshold</h6>
+												<div class="h5 text-warning">{{ getReturnProposalVotes() }} HP</div>
+												<small class="text-muted">Return proposal votes</small>
+											</div>
+										</div>
+										<div class="col-md-4 mb-3">
+											<div class="text-center">
+												<h6 class="text-info mb-1">Sustainable Rate</h6>
+												<div class="h5 text-primary">${{ getSustainableRate() }}/day</div>
+												<small class="text-muted">1% of treasury daily</small>
+											</div>
+										</div>
+										<div class="col-md-4 mb-3">
+											<div class="text-center">
+												<h6 class="text-info mb-1">Daily DHF Inflow</h6>
+												<div class="h5 text-info">${{ fancyRounding(daoFund.dailyInflow) }}/day</div>
+												<small class="text-muted">Current reward allocation</small>
+											</div>
+										</div>
+									</div>
+
+									<!-- Key Mechanics -->
+									<div class="mb-4">
+										<h6 class="text-warning mb-3">Key HF Mechanics</h6>
+										<div class="row">
+											<div class="col-md-6">
+												<div class="card bg-secondary bg-opacity-25">
+													<div class="card-body">
+														<h6 class="text-info mb-2">Vote Weight Formula</h6>
+														<div class="small text-light mb-2">
+															<code class="text-warning">weight = max(daily_inflow / commitment, consensus_floor)</code>
+														</div>
+														<div class="small text-muted">
+															If you support more than ${{ fancyRounding(daoFund.dailyInflow) }}/day in proposals, 
+															your vote weight reduces proportionally.
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="col-md-6">
+												<div class="card bg-secondary bg-opacity-25">
+													<div class="card-body">
+														<h6 class="text-info mb-2">One Large Proposal Rule</h6>
+														<div class="small text-light mb-2">
+															Only one proposal >${{ getSustainableRate() }}/day counts toward commitment
+														</div>
+														<div class="small text-muted">
+															Multiple large proposals don't stack penalties - supports ambitious funding without excessive weight reduction.
+														</div>
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<!-- Economic Impact Summary -->
+									<div class="card bg-secondary bg-opacity-25">
+										<div class="card-body">
+											<h6 class="text-info mb-3">
+												<i class="fa-solid fa-chart-line me-2"></i>Economic Impact Summary
+											</h6>
+											<div class="row">
+												<div class="col-md-6">
+													<strong class="text-success">Benefits:</strong>
+													<ul class="small mb-0 mt-2">
+														<li>Forces budget consciousness in voting</li>
+														<li>Prevents economic irrationality</li>
+														<li>Creates competitive proposal environment</li>
+														<li>Rewards engaged community participation</li>
+														<li>Maintains democratic legitimacy</li>
+													</ul>
+												</div>
+												<div class="col-md-6">
+													<strong class="text-warning">Trade-offs:</strong>
+													<ul class="small mb-0 mt-2">
+														<li>Reduces vote power for over-committed voters</li>
+														<li>May increase funding threshold initially</li>
+														<li>Requires strategic voting decisions</li>
+														<li>Adds system complexity</li>
+														<li>Could change voter behavior patterns</li>
+													</ul>
+												</div>
+											</div>
+											<div class="mt-3 small text-muted">
+												<i class="fa-solid fa-info-circle me-1"></i>
+												This system creates a self-regulating economy where high community participation 
+												automatically raises minimum vote weights, balancing budget discipline with democratic engagement.
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- HF Impact for User (if logged in and viewing HF mode) -->
+					<div v-if="account && viewMode === 'hf_proposal'" class="row mb-4">
+						<div class="col-12">
+							<div class="card bg-danger bg-opacity-25 border-danger text-light">
+								<div class="card-body">
+									<h5 class="card-title text-danger mb-3">
+										<i class="fa-solid fa-user-cog me-2"></i>Your Personal HF Impact (@{{ account }})
+									</h5>
+									
+									<div v-if="getHFImpactForUser()" class="row mb-4">
+										<div class="col-md-3 mb-3">
+											<div class="text-center">
+												<h6 class="text-info mb-1">Your Commitment</h6>
+												<div class="h5 text-warning">${{ fancyRounding(getHFImpactForUser().commitment) }}/day</div>
+												<small class="text-muted">Total proposals supported</small>
+											</div>
+										</div>
+										<div class="col-md-3 mb-3">
+											<div class="text-center">
+												<h6 class="text-info mb-1">Daily Budget</h6>
+												<div class="h5 text-info">${{ fancyRounding(getHFImpactForUser().dailyInflow) }}/day</div>
+												<small class="text-muted">Available DHF inflow</small>
+											</div>
+										</div>
+										<div class="col-md-3 mb-3">
+											<div class="text-center">
+												<h6 class="text-info mb-1">Your Vote Weight</h6>
+												<div class="h5" :class="getHFImpactForUser().voteWeight >= 1 ? 'text-success' : 'text-danger'">
+													{{ (getHFImpactForUser().voteWeight * 100).toFixed(1) }}%
+												</div>
+												<small class="text-muted">Under HF weighting</small>
+											</div>
+										</div>
+										<div class="col-md-3 mb-3">
+											<div class="text-center">
+												<h6 class="text-info mb-1">Status</h6>
+												<div v-if="getHFImpactForUser().isOverCommitted" class="h6 text-danger">
+													<i class="fa-solid fa-exclamation-triangle me-1"></i>Over-Committed
+												</div>
+												<div v-else class="h6 text-success">
+													<i class="fa-solid fa-check me-1"></i>Within Budget
+												</div>
+												<small class="text-muted">Budget analysis</small>
+											</div>
+										</div>
+									</div>
+									
+									<div v-if="getHFImpactForUser() && getHFImpactForUser().isOverCommitted" class="alert alert-warning">
+										<h6 class="alert-heading">
+											<i class="fa-solid fa-exclamation-triangle me-2"></i>Over-Commitment Alert
+										</h6>
+										<p class="mb-2">
+											You're supporting <strong>${{ fancyRounding(getHFImpactForUser().commitment - getHFImpactForUser().dailyInflow) }}</strong> 
+											more per day than the DHF can sustainably fund. Under the proposed hard fork:
+										</p>
+										<ul class="mb-2">
+											<li>Your vote weight would be reduced to <strong>{{ (getHFImpactForUser().voteWeight * 100).toFixed(1) }}%</strong></li>
+											<li>This represents a <strong>{{ (getHFImpactForUser().weightReduction * 100).toFixed(1) }}%</strong> reduction in voting power</li>
+											<li>Consider reducing your proposal commitments to maintain full voting power</li>
+										</ul>
+										<p class="mb-0">
+											<strong>Recommendation:</strong> Support proposals totaling ${{ fancyRounding(getHFImpactForUser().dailyInflow) }}/day or less to maintain 100% vote weight.
+										</p>
+									</div>
+									
+									<div v-else-if="getHFImpactForUser()" class="alert alert-success">
+										<h6 class="alert-heading">
+											<i class="fa-solid fa-check me-2"></i>Budget Conscious Voting
+										</h6>
+										<p class="mb-0">
+											Excellent! Your proposal commitments are within the daily DHF budget. 
+											Under the proposed hard fork, you would maintain <strong>100% voting power</strong> 
+											because you're supporting proposals that total less than the ${{ fancyRounding(getHFImpactForUser().dailyInflow) }}/day 
+											DHF inflow.
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
 					<!-- User Voting Stats (if logged in) -->
-					<div v-if="account" class="row mb-4">
+					<div v-if="account && viewMode === 'current'" class="row mb-4">
 						<div class="col-12">
 							<div class="card bg-dark bg-opacity-75 text-light">
 								<div class="card-body">
