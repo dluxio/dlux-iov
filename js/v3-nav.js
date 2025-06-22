@@ -3214,9 +3214,9 @@ export default {
         type: "cj",
         op: "setLastRead",
         id: "notify",
-        cj: ["setLastRead", {date, dlux: true}],
+        cj: ["setLastRead", {date}],
         msg: `Marking all notifications as read`,
-        ops: ["refreshNotifications"],
+        ops: ["refreshNotifications", "callSetLastReadAPI"],
         api: null,
         txid: `setLastRead`,
       }
@@ -3225,7 +3225,6 @@ export default {
         op.delay = 5000;
         op.title = op.id ? op.id : op.cj ? op.cj.memo : "No Waiter";
         this.broadcastCJ(op);
-        this.broadcastRaw(op);
     },
     getUser() {
       this.user = localStorage.getItem("user");
@@ -3252,6 +3251,25 @@ export default {
     refreshNotifications(obj) {
       if(obj.txid)this.dismissNotification(obj.txid)
       this.getNotifications();
+    },
+    
+    // Call the set-last-read API with the transaction ID
+    async callSetLastReadAPI(obj) {
+      if (!obj.txid) {
+        console.error('No transaction ID available for set-last-read API call');
+        return;
+      }
+      
+      try {
+        const response = await fetch(`https://data.dlux.io/api/set-last-read/${obj.txid}`);
+        if (response.ok) {
+          console.log('Successfully called set-last-read API with txid:', obj.txid);
+        } else {
+          console.error('Failed to call set-last-read API:', response.status, response.statusText);
+        }
+      } catch (error) {
+        console.error('Error calling set-last-read API:', error);
+      }
     },
     async getNotifications() {
       if (!this.user) return;
@@ -5676,6 +5694,8 @@ export default {
           <li><a class="dropdown-item subnav-title position-relative" href="/docs/" target="_blank">Docs<span
                 class="subnav-subtitle">Explore
                 DLUX Documentation</span><span class="position-absolute top-50 end-0 translate-middle-y"><i class="mx-2 fa-solid fa-arrow-up-right-from-square"></i></span></a></li>
+          <li><a class="dropdown-item subnav-title" href="/proposals/">DHF Proposals<span class="subnav-subtitle">Hive Development Fund</span></a></li>
+          <li><a class="dropdown-item subnav-title" href="/witnesses/">Witnesses<span class="subnav-subtitle">Hive Block Producers</span></a></li>
           <li class="subnav-extra-top"><a class="dropdown-extra" href="/@disregardfiat">Blog</a></li>
           <li class="subnav-extra-bottom"><a class="dropdown-extra" href="/about">Press Kit</a></li>
         </ul>

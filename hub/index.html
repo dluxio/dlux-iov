@@ -320,7 +320,7 @@
                                             {{ loadingFollowedCommunities ? 'Loading followed...' : 'My Communities...' }}
                                         </option>
                                         <option v-for="community in followedCommunities" :key="'followed-' + community.id" :value="community.id" style="color: white; background-color: #333;">
-                                            <i class="fa-solid fa-heart me-1 text-success"></i>{{ community.name }}
+                                            ❤️ {{ community.name }}
                                         </option>
                                     </select>
                                 </div>
