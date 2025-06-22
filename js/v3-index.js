@@ -1242,20 +1242,27 @@ const app = createApp({
             }
           ]
         ],
+        key: "active",
         msg: `${approve ? 'Supporting' : 'Removing support for'} Proposal #${proposalId}`,
+        txid: `update_proposal_votes_${proposalId}_${Date.now()}`,
+        api: "https://hive-api.dlux.io",
         delay: 250,
-        onSuccess: () => {
-          this.votingProposal = null;
-          // Refresh user votes after successful vote
-          this.fetchUserVotes();
-        },
-        onError: (error) => {
-          console.error('Vote failed:', error);
-          this.votingProposal = null;
-        }
+        ops: ["fetchUserVotes", "resetVotingState"]
       };
       
       this.toSign = op;
+    },
+
+    // Callback method to reset voting state after operation completes
+    resetVotingState() {
+      this.votingProposal = null;
+    },
+
+    // Required method for v3-nav ack event - clears toSign when operation is acknowledged
+    removeOp(txid) {
+      if (this.toSign.txid === txid) {
+        this.toSign = {};
+      }
     },
 
     getUserVote(proposalId) {
