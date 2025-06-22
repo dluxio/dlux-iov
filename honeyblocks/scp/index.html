@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+  <title>Smart Contract Proposals - DLUX HoneyComb</title>
+  
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
+  
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
+    crossorigin="anonymous"></script>
+  
+  <link href="/css/custom.css" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link href="/css/font-awesome.min.css" rel="stylesheet">
+  
+  <script src="https://cdn.jsdelivr.net/npm/hive-tx/dist/hive-tx.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script type="module" src="/js/v3-nav.js"></script>
+  <script type="module" src="/js/v3-scp.js"></script>
+  
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/img/dlux-icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DLUX">
+  <meta name="theme-color" content="#111222" />
+  <script src="/reg-sw.js"></script>
+</head>
+
+<body class="d-flex flex-column h-100 bg-dark text-white">
+  <div id="app" v-cloak>
+    <!-- Navigation -->
+    <div>
+      <nav-vue @login="setValue('account', $event);getTokenUser($event);getHiveUser($event)"
+        @logout="setValue('account', '');removeUser()" @ack="removeOp($event)" @refresh="run($event)" :op="toSign"
+        :lapi="lapi" />
+    </div>
+
+    <main class="flex-grow-1 container-fluid py-4">
+      <div class="container">
+        <!-- Header -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <h1 class="display-5 mb-2">Smart Contract Proposals</h1>
+                <p class="lead text-white-50">Manage and vote on blockchain code changes</p>
+              </div>
+              <div v-if="account && account !== 'GUEST'" class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#createProposalModal">
+                  <i class="fas fa-plus me-2"></i>Create Proposal
+                </button>
+                <button type="button" class="btn btn-outline-info" @click="refreshData">
+                  <i class="fas fa-sync-alt me-2"></i>Refresh
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="card bg-dark border-secondary">
+              <div class="card-body">
+                <div class="row text-center">
+                  <div class="col-md-3">
+                    <div class="d-flex flex-column">
+                      <span class="fs-4 text-success">{{ activeProposals.length }}</span>
+                      <small class="text-white-50">Active Proposals</small>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="d-flex flex-column">
+                      <span class="fs-4 text-warning">{{ pendingProposals.length }}</span>
+                      <small class="text-white-50">Pending Approval</small>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="d-flex flex-column">
+                      <span class="fs-4 text-info">{{ stats?.ms?.active_threshold || 0 }}</span>
+                      <small class="text-white-50">Required Votes</small>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="d-flex flex-column">
+                      <span class="fs-4 text-primary">{{ Object.keys(stats?.ms?.active_account_auths || {}).length }}</span>
+                      <small class="text-white-50">Total Signers</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <ul class="nav nav-pills nav-fill bg-dark rounded p-2">
+              <li class="nav-item">
+                <a class="nav-link" :class="{'active': activeTab === 'all'}" @click="activeTab = 'all'" href="#">
+                  <i class="fas fa-list me-2"></i>All Proposals
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" :class="{'active': activeTab === 'pending'}" @click="activeTab = 'pending'" href="#">
+                  <i class="fas fa-clock me-2"></i>Pending
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" :class="{'active': activeTab === 'approved'}" @click="activeTab = 'approved'" href="#">
+                  <i class="fas fa-check me-2"></i>Approved
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" :class="{'active': activeTab === 'myproposals'}" @click="activeTab = 'myproposals'" href="#">
+                  <i class="fas fa-user me-2"></i>My Proposals
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Proposals List -->
+        <div class="row">
+          <div class="col-12">
+            <div v-if="loading" class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-3 text-white-50">Loading proposals...</p>
+            </div>
+
+            <div v-else-if="filteredProposals.length === 0" class="text-center py-5">
+              <i class="fas fa-inbox fa-3x text-white-50 mb-3"></i>
+              <h4 class="text-white-50">No proposals found</h4>
+              <p class="text-white-50">{{ getEmptyMessage() }}</p>
+            </div>
+
+            <div v-else class="row">
+              <div v-for="proposal in filteredProposals" :key="proposal.id" class="col-12 mb-4">
+                <div class="card bg-dark border-secondary h-100">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                      <span class="badge me-2" :class="getProposalBadgeClass(proposal)">
+                        {{ getProposalTypeDisplay(proposal.type) }}
+                      </span>
+                      <small class="text-white-50">by @{{ proposal.from }}</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="badge" :class="getStatusBadgeClass(proposal)">
+                        {{ getProposalStatus(proposal) }}
+                      </span>
+                      <span class="text-white-50 small">{{ formatTimeAgo(proposal.id) }}</span>
+                    </div>
+                  </div>
+                  
+                  <div class="card-body">
+                    <h5 class="card-title">{{ proposal.path }}</h5>
+                    <p class="card-text text-white-50 mb-3">
+                      {{ getProposalDescription(proposal) }}
+                    </p>
+                    
+                    <!-- Voting Progress -->
+                    <div class="mb-3">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small text-white-50">Approval Progress</span>
+                        <span class="small">{{ getApprovalCount(proposal) }} / {{ proposal.threshold }} votes</span>
+                      </div>
+                      <div class="progress" style="height: 8px;">
+                        <div class="progress-bar" :class="getProgressBarClass(proposal)"
+                             :style="{width: getApprovalPercentage(proposal) + '%'}">
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Voting Status -->
+                    <div class="mb-3">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <h6 class="text-success mb-2">
+                            <i class="fas fa-thumbs-up me-1"></i>Approved ({{ getApprovalCount(proposal) }})
+                          </h6>
+                          <div class="small">
+                            <span v-for="(vote, account) in proposal.approvals" :key="account"
+                                  v-if="vote === 1" class="badge bg-success me-1 mb-1">@{{ account }}</span>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <h6 class="text-danger mb-2">
+                            <i class="fas fa-thumbs-down me-1"></i>Rejected ({{ getRejectionCount(proposal) }})
+                          </h6>
+                          <div class="small">
+                            <span v-for="(vote, account) in proposal.approvals" :key="account"
+                                  v-if="vote === -1" class="badge bg-danger me-1 mb-1">@{{ account }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="card-footer d-flex justify-content-between align-items-center">
+                    <div class="d-flex gap-2">
+                      <button class="btn btn-sm btn-outline-info" @click="viewProposalDetails(proposal)">
+                        <i class="fas fa-eye me-1"></i>View Details
+                      </button>
+                      <button v-if="canDelete(proposal)" class="btn btn-sm btn-outline-danger" 
+                              @click="deleteProposal(proposal.id)">
+                        <i class="fas fa-trash me-1"></i>Delete
+                      </button>
+                    </div>
+                    
+                    <div v-if="canVote(proposal)" class="d-flex gap-2">
+                      <button class="btn btn-sm btn-success" @click="voteOnProposal(proposal.id, true)"
+                              :disabled="hasVoted(proposal, account)">
+                        <i class="fas fa-thumbs-up me-1"></i>Approve
+                      </button>
+                      <button class="btn btn-sm btn-danger" @click="voteOnProposal(proposal.id, false)"
+                              :disabled="hasVoted(proposal, account)">
+                        <i class="fas fa-thumbs-down me-1"></i>Reject
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Create Proposal Modal -->
+    <div class="modal fade" id="createProposalModal" tabindex="-1" aria-labelledby="createProposalModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-white">
+          <div class="modal-header border-secondary">
+            <h5 class="modal-title" id="createProposalModalLabel">Create Smart Contract Proposal</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form @submit.prevent="createProposal">
+            <div class="modal-body">
+              <div class="mb-3">
+                <label for="proposalType" class="form-label">Proposal Type</label>
+                <select class="form-select bg-dark text-white border-secondary" id="proposalType" 
+                        v-model="newProposal.type" required>
+                  <option value="">Select type...</option>
+                  <option value="1">onOperation - Hook into operation processing</option>
+                  <option value="2">on - Event handler</option>
+                  <option value="3">api - API endpoint</option>
+                  <option value="4">chron - Scheduled job</option>
+                  <option value="5">CodeShare - Update shared code functions</option>
+                  <option value="6">CustomEvery - Update recurring jobs</option>
+                </select>
+              </div>
+              
+              <div class="mb-3">
+                <label for="proposalPath" class="form-label">Path/Function Name</label>
+                <input type="text" class="form-control bg-dark text-white border-secondary" 
+                       id="proposalPath" v-model="newProposal.path" 
+                       placeholder="e.g., 'transfer' or 'PoA.Check'" required>
+                <div class="form-text text-white-50">
+                  For types 1-4: function name. For type 5: CodeShare path. For type 6: CustomEvery ID.
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="proposalFunc" class="form-label">Function Definition</label>
+                <textarea class="form-control bg-dark text-white border-secondary" 
+                          id="proposalFunc" v-model="newProposal.func" rows="10" 
+                          placeholder="Enter JavaScript function definition or JSON configuration..." required></textarea>
+                <div class="form-text text-white-50">
+                  Enter the complete function code or configuration object for this proposal.
+                </div>
+              </div>
+              
+              <div class="alert alert-info bg-dark border-info">
+                <h6 class="alert-heading">
+                  <i class="fas fa-info-circle me-2"></i>Important Notes
+                </h6>
+                <ul class="mb-0 small">
+                  <li>Proposals require {{ stats?.ms?.active_threshold || 0 }} approval votes to be implemented</li>
+                  <li>Proposals automatically expire after 201,600 blocks (~7 days)</li>
+                  <li>Only multisig account holders can vote on proposals</li>
+                  <li>Code changes take effect immediately upon approval</li>
+                </ul>
+              </div>
+            </div>
+            <div class="modal-footer border-secondary">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Create Proposal
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proposal Details Modal -->
+    <div class="modal fade" id="proposalDetailsModal" tabindex="-1" aria-labelledby="proposalDetailsModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content bg-dark text-white">
+          <div class="modal-header border-secondary">
+            <h5 class="modal-title" id="proposalDetailsModalLabel">Proposal Details</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" v-if="selectedProposal">
+            <div class="row">
+              <div class="col-md-6">
+                <h6>Proposal Information</h6>
+                <table class="table table-dark table-sm">
+                  <tr>
+                    <td><strong>ID:</strong></td>
+                    <td>{{ selectedProposal.id }}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Type:</strong></td>
+                    <td>{{ getProposalTypeDisplay(selectedProposal.type) }}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Path:</strong></td>
+                    <td>{{ selectedProposal.path }}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Author:</strong></td>
+                    <td>@{{ selectedProposal.from }}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Status:</strong></td>
+                    <td>
+                      <span class="badge" :class="getStatusBadgeClass(selectedProposal)">
+                        {{ getProposalStatus(selectedProposal) }}
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <div class="col-md-6">
+                <h6>Voting Progress</h6>
+                <div class="mb-2">
+                  <div class="progress" style="height: 20px;">
+                    <div class="progress-bar" :class="getProgressBarClass(selectedProposal)"
+                         :style="{width: getApprovalPercentage(selectedProposal) + '%'}">
+                      {{ getApprovalCount(selectedProposal) }} / {{ selectedProposal.threshold }}
+                    </div>
+                  </div>
+                </div>
+                <small class="text-white-50">
+                  {{ getApprovalPercentage(selectedProposal) }}% approval rate
+                </small>
+              </div>
+            </div>
+            
+            <div class="mt-4">
+              <h6>Function Definition</h6>
+              <pre class="bg-black text-white p-3 rounded"><code>{{ selectedProposal.func }}</code></pre>
+            </div>
+          </div>
+          <div class="modal-footer border-secondary">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div>
+      <foot-vue />
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    // Bootstrap validation and initialization
+    (function () {
+      "use strict";
+      window.addEventListener("load", function () {
+        var forms = document.getElementsByClassName("needs-validation");
+        var validation = Array.prototype.filter.call(forms, function (form) {
+          form.addEventListener("submit", function (event) {
+            if (form.checkValidity() === false) {
+              event.preventDefault();
+              event.stopPropagation();
+            }
+            form.classList.add("was-validated");
+          }, false);
+        });
+      });
+    })();
+  </script>
+</body>
+
+</html>
