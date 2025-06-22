@@ -108,7 +108,7 @@
                     </div>
                 </div>
             </div>
-            <div v-if="pageAccount != null || account != null" class="container-fluid d-flex flex-grow-1 px-0">
+            <div v-if="pageAccount || account" class="container-fluid d-flex flex-grow-1 px-0">
                 <div class="d-flex flex-column flex-grow-1">
                     <!-- Page header area -->
                     <div class="">
@@ -130,16 +130,16 @@
                                 <div class="row pt-3 pb-2 px-3">
                                     <div class="col-md-8 text-white pt-2">
                                         <div class="d-flex flex-wrap align-items-center">
-                                            <div v-if="pageAccount" class="d-flex">
-                                                <img :src="'https://images.hive.blog/u/' + pageAccount + '/avatar'"
+                                            <div v-if="pageAccount || account" class="d-flex">
+                                                <img :src="'https://images.hive.blog/u/' + (pageAccount || account) + '/avatar'"
                                                     alt="" class="rounded-circle bg-light me-4 cover profile-img">
                                             </div>
                                             <div class="d-flex flex-column" style="max-width: 600px;">
                                                 <div class="d-flex">
-                                                    <p class="display-4 mb-0">{{pageAccount}}</p>
+                                                    <p class="display-4 mb-0">{{pageAccount || account}}</p>
                                                 </div>
                                                 <div class="d-flex"><small
-                                                        class="lead py-2">{{focus.posting_json_metadata.profile.about}}</small>
+                                                        class="lead py-2">{{focus.posting_json_metadata?.profile?.about || accountinfo?.posting_json_metadata?.profile?.about}}</small>
                                                 </div>
                                             </div>
                                         </div>

@@ -574,14 +574,22 @@
 									<div class="d-flex justify-content-between align-items-center mb-3">
 										<h5 class="card-title text-info mb-0">3-Year Budget Projection</h5>
 										<div class="d-flex gap-2">
-											<button v-if="selectedProposalForAnalysis" 
-												@click="clearProposalAnalysis()" 
+											<button @click="openCustomAnalysisModal()" 
+												class="btn btn-sm btn-outline-primary">
+												<i class="fa-solid fa-calculator me-1"></i>Custom Analysis
+											</button>
+											<button v-if="selectedProposalForAnalysis || customAnalysis.active" 
+												@click="clearAllAnalysis()" 
 												class="btn btn-sm btn-outline-warning">
 												<i class="fa-solid fa-times me-1"></i>Clear Analysis
 											</button>
 											<span v-if="selectedProposalForAnalysis" class="badge bg-info">
 												{{ isProposalFunded(selectedProposalForAnalysis) ? 'Removing' : 'Adding' }}: 
 												{{ selectedProposalForAnalysis.subject.substring(0, 30) }}...
+											</span>
+											<span v-if="customAnalysis.active" class="badge bg-primary">
+												{{ customAnalysis.isAddition ? 'Adding' : 'Removing' }}: 
+												${{ fancyRounding(customAnalysis.dailyAmount) }}/day custom funding
 											</span>
 										</div>
 									</div>
@@ -698,7 +706,7 @@
 												<div class="text-end">
 													<span class="text-danger">
 														${{ fancyRounding(healthStats.totalFundedOutflowsNoStabilizer * 365) }}
-														<span v-if="selectedProposalForAnalysis" class="text-warning">
+														<span v-if="selectedProposalForAnalysis || customAnalysis.active" class="text-warning">
 															(${{ fancyRounding(getProjectedValuesWithProposalImpact().projectedTotalOutflow * 365) }})
 														</span>
 													</span>
@@ -711,7 +719,7 @@
 													<strong :class="(getProjectedValues().projectedTotalInflow * 365 - healthStats.totalFundedOutflowsNoStabilizer * 365) > 0 ? 'text-success' : 'text-danger'">
 														${{ fancyRounding(getProjectedValues().projectedTotalInflow * 365 - healthStats.totalFundedOutflowsNoStabilizer * 365) }}
 													</strong>
-													<span v-if="selectedProposalForAnalysis" class="text-warning d-block">
+													<span v-if="selectedProposalForAnalysis || customAnalysis.active" class="text-warning d-block">
 														<strong :class="(getProjectedValues().projectedTotalInflow * 365 - getProjectedValuesWithProposalImpact().projectedTotalOutflow * 365) > 0 ? 'text-success' : 'text-danger'">
 															(${{ fancyRounding(getProjectedValues().projectedTotalInflow * 365 - getProjectedValuesWithProposalImpact().projectedTotalOutflow * 365) }})
 														</strong>
@@ -724,41 +732,101 @@
 										</div>
 									</div>
 									
-									<!-- Proposal Impact Summary -->
-									<div v-if="selectedProposalForAnalysis" class="row mb-4">
+									<!-- Analysis Impact Summary -->
+									<div v-if="selectedProposalForAnalysis || customAnalysis.active" class="row mb-4">
 										<div class="col-12">
 											<div class="card bg-info bg-opacity-25 border-info">
 												<div class="card-body">
 													<h6 class="text-info mb-3">
-														<i class="fa-solid fa-chart-line me-2"></i>
-														{{ getProjectedValuesWithProposalImpact().proposalImpact.action === 'adding' ? 'Adding' : 'Removing' }} Proposal Impact: 
-														{{ selectedProposalForAnalysis.subject.substring(0, 50) }}{{ selectedProposalForAnalysis.subject.length > 50 ? '...' : '' }}
+														<i class="fa-solid fa-chart-line me-2"></i>Budget Impact Analysis
 													</h6>
-													<div class="row">
-														<div class="col-md-4">
-															<strong class="text-warning">Daily Change:</strong><br>
-															<span :class="getProjectedValuesWithProposalImpact().proposalImpact.dailyChange > 0 ? 'text-danger' : 'text-success'">
-																{{ getProjectedValuesWithProposalImpact().proposalImpact.dailyChange > 0 ? '+' : '' }}${{ fancyRounding(Math.abs(getProjectedValuesWithProposalImpact().proposalImpact.dailyChange)) }}/day
-															</span>
-														</div>
-														<div class="col-md-4">
-															<strong class="text-warning">Annual Change:</strong><br>
-															<span :class="getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? 'text-danger' : 'text-success'">
-																{{ getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? '+' : '' }}${{ fancyRounding(Math.abs(getProjectedValuesWithProposalImpact().proposalImpact.annualChange)) }}/year
-															</span>
-														</div>
-														<div class="col-md-4">
-															<strong class="text-warning">% of Annual Inflow:</strong><br>
-															<span :class="getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? 'text-danger' : 'text-success'">
-																{{ getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? '+' : '' }}{{ (Math.abs(getProjectedValuesWithProposalImpact().proposalImpact.annualChange) / (getProjectedValues().projectedTotalInflow * 365) * 100).toFixed(2) }}%
-															</span>
+													
+													<!-- Proposal Impact -->
+													<div v-if="selectedProposalForAnalysis && getProjectedValuesWithProposalImpact().proposalImpact" class="mb-4">
+														<h6 class="text-warning mb-2">
+															{{ getProjectedValuesWithProposalImpact().proposalImpact.action === 'adding' ? 'Adding' : 'Removing' }} Proposal: 
+															{{ selectedProposalForAnalysis.subject.substring(0, 50) }}{{ selectedProposalForAnalysis.subject.length > 50 ? '...' : '' }}
+														</h6>
+														<div class="row mb-3">
+															<div class="col-md-4">
+																<strong class="text-light">Daily Change:</strong><br>
+																<span :class="getProjectedValuesWithProposalImpact().proposalImpact.dailyChange > 0 ? 'text-danger' : 'text-success'">
+																	{{ getProjectedValuesWithProposalImpact().proposalImpact.dailyChange > 0 ? '+' : '' }}${{ fancyRounding(Math.abs(getProjectedValuesWithProposalImpact().proposalImpact.dailyChange)) }}/day
+																</span>
+															</div>
+															<div class="col-md-4">
+																<strong class="text-light">Annual Change:</strong><br>
+																<span :class="getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? 'text-danger' : 'text-success'">
+																	{{ getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? '+' : '' }}${{ fancyRounding(Math.abs(getProjectedValuesWithProposalImpact().proposalImpact.annualChange)) }}/year
+																</span>
+															</div>
+															<div class="col-md-4">
+																<strong class="text-light">% of Annual Inflow:</strong><br>
+																<span :class="getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? 'text-danger' : 'text-success'">
+																	{{ getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? '+' : '' }}{{ (Math.abs(getProjectedValuesWithProposalImpact().proposalImpact.annualChange) / (getProjectedValues().projectedTotalInflow * 365) * 100).toFixed(2) }}%
+																</span>
+															</div>
 														</div>
 													</div>
+													
+													<!-- Custom Analysis Impact -->
+													<div v-if="customAnalysis.active && getProjectedValuesWithProposalImpact().customImpact" class="mb-4">
+														<h6 class="text-primary mb-2">
+															{{ getProjectedValuesWithProposalImpact().customImpact.action === 'adding' ? 'Adding' : 'Removing' }} Custom Analysis: 
+															{{ getProjectedValuesWithProposalImpact().customImpact.description }}
+														</h6>
+														<div class="row mb-3">
+															<div class="col-md-4">
+																<strong class="text-light">Daily Change:</strong><br>
+																<span :class="getProjectedValuesWithProposalImpact().customImpact.dailyChange > 0 ? 'text-danger' : 'text-success'">
+																	{{ getProjectedValuesWithProposalImpact().customImpact.dailyChange > 0 ? '+' : '' }}${{ fancyRounding(Math.abs(getProjectedValuesWithProposalImpact().customImpact.dailyChange)) }}/day
+																</span>
+															</div>
+															<div class="col-md-4">
+																<strong class="text-light">Annual Change:</strong><br>
+																<span :class="getProjectedValuesWithProposalImpact().customImpact.annualChange > 0 ? 'text-danger' : 'text-success'">
+																	{{ getProjectedValuesWithProposalImpact().customImpact.annualChange > 0 ? '+' : '' }}${{ fancyRounding(Math.abs(getProjectedValuesWithProposalImpact().customImpact.annualChange)) }}/year
+																</span>
+															</div>
+															<div class="col-md-4">
+																<strong class="text-light">% of Annual Inflow:</strong><br>
+																<span :class="getProjectedValuesWithProposalImpact().customImpact.annualChange > 0 ? 'text-danger' : 'text-success'">
+																	{{ getProjectedValuesWithProposalImpact().customImpact.annualChange > 0 ? '+' : '' }}{{ (Math.abs(getProjectedValuesWithProposalImpact().customImpact.annualChange) / (getProjectedValues().projectedTotalInflow * 365) * 100).toFixed(2) }}%
+																</span>
+															</div>
+														</div>
+													</div>
+													
+													<!-- Combined Impact (if both active) -->
+													<div v-if="selectedProposalForAnalysis && customAnalysis.active" class="mb-3">
+														<hr class="border-secondary">
+														<h6 class="text-success mb-2">Combined Impact:</h6>
+														<div class="row">
+															<div class="col-md-4">
+																<strong class="text-light">Total Daily Change:</strong><br>
+																<span :class="(getProjectedValuesWithProposalImpact().proposalImpact.dailyChange + getProjectedValuesWithProposalImpact().customImpact.dailyChange) > 0 ? 'text-danger' : 'text-success'">
+																	{{ (getProjectedValuesWithProposalImpact().proposalImpact.dailyChange + getProjectedValuesWithProposalImpact().customImpact.dailyChange) > 0 ? '+' : '' }}${{ fancyRounding(Math.abs(getProjectedValuesWithProposalImpact().proposalImpact.dailyChange + getProjectedValuesWithProposalImpact().customImpact.dailyChange)) }}/day
+																</span>
+															</div>
+															<div class="col-md-4">
+																<strong class="text-light">Total Annual Change:</strong><br>
+																<span :class="(getProjectedValuesWithProposalImpact().proposalImpact.annualChange + getProjectedValuesWithProposalImpact().customImpact.annualChange) > 0 ? 'text-danger' : 'text-success'">
+																	{{ (getProjectedValuesWithProposalImpact().proposalImpact.annualChange + getProjectedValuesWithProposalImpact().customImpact.annualChange) > 0 ? '+' : '' }}${{ fancyRounding(Math.abs(getProjectedValuesWithProposalImpact().proposalImpact.annualChange + getProjectedValuesWithProposalImpact().customImpact.annualChange)) }}/year
+																</span>
+															</div>
+															<div class="col-md-4">
+																<strong class="text-light">% of Annual Inflow:</strong><br>
+																<span :class="(getProjectedValuesWithProposalImpact().proposalImpact.annualChange + getProjectedValuesWithProposalImpact().customImpact.annualChange) > 0 ? 'text-danger' : 'text-success'">
+																	{{ (getProjectedValuesWithProposalImpact().proposalImpact.annualChange + getProjectedValuesWithProposalImpact().customImpact.annualChange) > 0 ? '+' : '' }}{{ (Math.abs(getProjectedValuesWithProposalImpact().proposalImpact.annualChange + getProjectedValuesWithProposalImpact().customImpact.annualChange) / (getProjectedValues().projectedTotalInflow * 365) * 100).toFixed(2) }}%
+																</span>
+															</div>
+														</div>
+													</div>
+													
 													<div class="small text-muted mt-2">
 														<i class="fa-solid fa-info-circle me-1"></i>
-														Values in parentheses show the budget impact with this proposal 
-														{{ getProjectedValuesWithProposalImpact().proposalImpact.action === 'adding' ? 'added to' : 'removed from' }} funding.
-														Adjust the APR above to see how price growth affects these projections.
+														Values in parentheses in the budget summary above show the impact with these changes applied.
+														Adjust the APR slider to see how price growth affects these projections.
 													</div>
 												</div>
 											</div>
@@ -780,9 +848,9 @@
 										</div>
 										<div class="progress" style="height: 20px;">
 											<div class="progress-bar bg-danger" role="progressbar" 
-												:style="'width: ' + Math.min(((selectedProposalForAnalysis ? getProjectedValuesWithProposalImpact().projectedTotalOutflow : healthStats.totalFundedOutflowsNoStabilizer) * 365 / (getProjectedValues().projectedTotalInflow * 365)) * 100, 100) + '%'">
+												:style="'width: ' + Math.min(((selectedProposalForAnalysis || customAnalysis.active ? getProjectedValuesWithProposalImpact().projectedTotalOutflow : healthStats.totalFundedOutflowsNoStabilizer) * 365 / (getProjectedValues().projectedTotalInflow * 365)) * 100, 100) + '%'">
 												Funded (Excluding Stabilizer)
-												<span v-if="selectedProposalForAnalysis"> - With Impact</span>
+												<span v-if="selectedProposalForAnalysis || customAnalysis.active"> - With Analysis Impact</span>
 											</div>
 										</div>
 									</div>
@@ -1245,6 +1313,153 @@
 								Remove Support
 							</button>
 						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Custom Funding Analysis Modal -->
+		<div class="modal fade" id="customAnalysisModal" tabindex="-1" aria-hidden="true">
+			<div class="modal-dialog modal-lg modal-dialog-centered">
+				<div class="modal-content bg-dark text-light">
+					<div class="modal-header border-secondary">
+						<h5 class="modal-title">
+							<i class="fa-solid fa-calculator me-2"></i>Custom Funding Analysis
+						</h5>
+						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" 
+								@click="closeCustomAnalysisModal"></button>
+					</div>
+					<div class="modal-body">
+						<div class="mb-4">
+							<p class="text-muted">
+								Analyze the impact of hypothetical funding amounts on the DAO budget and 3-year projections. 
+								This helps you understand how different funding levels would affect the treasury over time.
+							</p>
+						</div>
+
+						<div class="row mb-4">
+							<div class="col-md-6">
+								<label class="form-label">Analysis Type</label>
+								<select v-model="customAnalysisForm.isAddition" class="form-select bg-dark text-light border-secondary">
+									<option :value="true">Adding New Funding</option>
+									<option :value="false">Removing Existing Funding</option>
+								</select>
+								<div class="form-text">
+									Choose whether to analyze adding new funding or removing existing funding from the budget.
+								</div>
+							</div>
+							<div class="col-md-6">
+								<label class="form-label">Funding Period</label>
+								<select v-model="customAnalysisForm.period" class="form-select bg-dark text-light border-secondary">
+									<option value="daily">Daily Amount</option>
+									<option value="monthly">Monthly Amount</option>
+									<option value="yearly">Yearly Amount</option>
+								</select>
+								<div class="form-text">
+									Specify whether your amount is per day, month, or year.
+								</div>
+							</div>
+						</div>
+
+						<div class="mb-4">
+							<label class="form-label">
+								{{ customAnalysisForm.period === 'daily' ? 'Daily' : customAnalysisForm.period === 'monthly' ? 'Monthly' : 'Yearly' }} Amount (HBD)
+							</label>
+							<div class="input-group">
+								<span class="input-group-text bg-dark text-light border-secondary">$</span>
+								<input 
+									v-model.number="customAnalysisForm.amount" 
+									type="number" 
+									step="0.01" 
+									min="0" 
+									class="form-control bg-dark text-light border-secondary"
+									:placeholder="'Enter ' + customAnalysisForm.period + ' amount...'"
+									@input="calculateCustomAnalysisPreview">
+								<span class="input-group-text bg-dark text-light border-secondary">HBD</span>
+							</div>
+							<div class="form-text">
+								{{ customAnalysisForm.isAddition ? 'Amount to add to' : 'Amount to remove from' }} the DAO budget.
+							</div>
+						</div>
+
+						<!-- Live Preview -->
+						<div v-if="customAnalysisForm.amount > 0" class="mb-4">
+							<h6 class="text-info mb-3">Impact Preview</h6>
+							<div class="row">
+								<div class="col-md-4">
+									<div class="text-center p-3 rounded" style="background: rgba(255,255,255,0.05);">
+										<div class="small text-muted mb-1">Daily Impact</div>
+										<div class="h6 text-warning">
+											{{ customAnalysisForm.isAddition ? '+' : '-' }}${{ fancyRounding(getCustomAnalysisDailyAmount()) }}
+										</div>
+									</div>
+								</div>
+								<div class="col-md-4">
+									<div class="text-center p-3 rounded" style="background: rgba(255,255,255,0.05);">
+										<div class="small text-muted mb-1">Annual Impact</div>
+										<div class="h6 text-warning">
+											{{ customAnalysisForm.isAddition ? '+' : '-' }}${{ fancyRounding(getCustomAnalysisDailyAmount() * 365) }}
+										</div>
+									</div>
+								</div>
+								<div class="col-md-4">
+									<div class="text-center p-3 rounded" style="background: rgba(255,255,255,0.05);">
+										<div class="small text-muted mb-1">% of Annual Inflow</div>
+										<div class="h6 text-warning">
+											{{ ((getCustomAnalysisDailyAmount() * 365) / (daoFund.dailyInflow * 365) * 100).toFixed(2) }}%
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<!-- Budget Bar Visualization -->
+							<div class="mt-3">
+								<div class="small text-muted mb-2">Budget Impact Visualization</div>
+								<div class="progress mb-2" style="height: 20px;">
+									<div class="progress-bar bg-info" role="progressbar" 
+										:style="'width: ' + Math.min((daoFund.dailyInflow * 365) / (daoFund.dailyInflow * 365) * 100, 100) + '%'">
+										Current Inflow
+									</div>
+								</div>
+								<div class="progress" style="height: 20px;">
+									<div class="progress-bar bg-danger" role="progressbar" 
+										:style="'width: ' + Math.min((healthStats.totalFundedOutflowsNoStabilizer * 365) / (daoFund.dailyInflow * 365) * 100, 100) + '%'">
+										Current Outflow
+									</div>
+									<div class="progress-bar" role="progressbar" 
+										:class="customAnalysisForm.isAddition ? 'bg-warning' : 'bg-success'"
+										:style="'width: ' + Math.min((getCustomAnalysisDailyAmount() * 365) / (daoFund.dailyInflow * 365) * 100, 100) + '%'">
+										{{ customAnalysisForm.isAddition ? 'Added' : 'Removed' }}
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Description Field -->
+						<div class="mb-4">
+							<label class="form-label">Description (Optional)</label>
+							<input 
+								v-model="customAnalysisForm.description" 
+								type="text" 
+								class="form-control bg-dark text-light border-secondary"
+								placeholder="e.g., 'Developer Fund', 'Marketing Budget', 'Infrastructure Costs'..."
+								maxlength="50">
+							<div class="form-text">
+								Give your analysis a name for easier identification in the chart.
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer border-secondary">
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click="closeCustomAnalysisModal">
+							Cancel
+						</button>
+						<button 
+							@click="applyCustomAnalysis()" 
+							:disabled="!customAnalysisForm.amount || customAnalysisForm.amount <= 0"
+							class="btn btn-primary">
+							<i class="fa-solid fa-chart-line me-1"></i>
+							Apply to Chart
+						</button>
 					</div>
 				</div>
 			</div>

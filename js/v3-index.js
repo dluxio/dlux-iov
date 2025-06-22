@@ -94,6 +94,19 @@ const app = createApp({
       selectedProposal: null,
       selectedProposalForAnalysis: null,
       showProposalModal: false,
+      // Custom analysis data
+      customAnalysis: {
+        active: false,
+        dailyAmount: 0,
+        isAddition: true,
+        description: ''
+      },
+      customAnalysisForm: {
+        amount: 0,
+        period: 'daily',
+        isAddition: true,
+        description: ''
+      },
       // Blog modal data
       blogPost: null,
       showBlogModal: false,
@@ -1895,36 +1908,59 @@ const app = createApp({
     getProjectedValuesWithProposalImpact(timeframe = 365) {
       const baseProjected = this.getProjectedValues(timeframe);
       
-      if (!this.selectedProposalForAnalysis) {
+      // Check if we have any analysis active
+      if (!this.selectedProposalForAnalysis && !this.customAnalysis.active) {
         return baseProjected;
       }
       
-      const proposal = this.selectedProposalForAnalysis;
-      const proposalDailyPay = parseFloat(proposal.daily_pay?.amount || 0) / 1000;
-      const isCurrentlyFunded = this.isProposalFunded(proposal);
-      
-      // Calculate the impact of adding or removing this proposal
       let impactMultiplier = 0;
-      if (isCurrentlyFunded) {
-        // If currently funded, we're analyzing REMOVING it
-        impactMultiplier = -proposalDailyPay;
-      } else {
-        // If not currently funded, we're analyzing ADDING it
-        impactMultiplier = proposalDailyPay;
+      let impactData = {};
+      
+      // Handle proposal analysis
+      if (this.selectedProposalForAnalysis) {
+        const proposal = this.selectedProposalForAnalysis;
+        const proposalDailyPay = parseFloat(proposal.daily_pay?.amount || 0) / 1000;
+        const isCurrentlyFunded = this.isProposalFunded(proposal);
+        
+        if (isCurrentlyFunded) {
+          // If currently funded, we're analyzing REMOVING it
+          impactMultiplier += -proposalDailyPay;
+        } else {
+          // If not currently funded, we're analyzing ADDING it
+          impactMultiplier += proposalDailyPay;
+        }
+        
+        impactData.proposalImpact = {
+          dailyChange: isCurrentlyFunded ? -proposalDailyPay : proposalDailyPay,
+          annualChange: (isCurrentlyFunded ? -proposalDailyPay : proposalDailyPay) * 365,
+          action: isCurrentlyFunded ? 'removing' : 'adding',
+          proposalTitle: proposal.subject
+        };
+      }
+      
+      // Handle custom analysis
+      if (this.customAnalysis.active) {
+        const customImpact = this.customAnalysis.isAddition ? 
+          this.customAnalysis.dailyAmount : 
+          -this.customAnalysis.dailyAmount;
+        
+        impactMultiplier += customImpact;
+        
+        impactData.customImpact = {
+          dailyChange: customImpact,
+          annualChange: customImpact * 365,
+          action: this.customAnalysis.isAddition ? 'adding' : 'removing',
+          description: this.customAnalysis.description
+        };
       }
       
       return {
         ...baseProjected,
-        // Daily outflow includes the proposal impact
+        // Daily outflow includes all impacts
         projectedTotalOutflow: this.healthStats.totalFundedOutflowsNoStabilizer + impactMultiplier,
         projectedTotalOutflowWithZero: this.healthStats.totalFundedOutflowsNoZero + impactMultiplier,
         projectedTotalOutflowAll: this.healthStats.totalFundedOutflows + impactMultiplier,
-        proposalImpact: {
-          dailyChange: impactMultiplier,
-          annualChange: impactMultiplier * 365,
-          action: isCurrentlyFunded ? 'removing' : 'adding',
-          proposalTitle: proposal.subject
-        }
+        ...impactData
       };
     },
 
@@ -2654,6 +2690,95 @@ const app = createApp({
           }
         });
       }
+    },
+
+    // Custom Analysis Methods
+    openCustomAnalysisModal() {
+      // Reset form
+      this.customAnalysisForm = {
+        amount: 0,
+        period: 'daily',
+        isAddition: true,
+        description: ''
+      };
+      
+      // Show modal using Bootstrap 5
+      const modal = new bootstrap.Modal(document.getElementById('customAnalysisModal'));
+      modal.show();
+    },
+
+    closeCustomAnalysisModal() {
+      // Hide modal
+      const modal = bootstrap.Modal.getInstance(document.getElementById('customAnalysisModal'));
+      if (modal) {
+        modal.hide();
+      }
+    },
+
+    getCustomAnalysisDailyAmount() {
+      if (!this.customAnalysisForm.amount) return 0;
+      
+      switch (this.customAnalysisForm.period) {
+        case 'daily':
+          return this.customAnalysisForm.amount;
+        case 'monthly':
+          return this.customAnalysisForm.amount / 30.44; // Average days per month
+        case 'yearly':
+          return this.customAnalysisForm.amount / 365;
+        default:
+          return this.customAnalysisForm.amount;
+      }
+    },
+
+    calculateCustomAnalysisPreview() {
+      // This is called when the user changes the amount input
+      // It's just for reactive updates, no heavy calculations here
+    },
+
+    applyCustomAnalysis() {
+      if (!this.customAnalysisForm.amount || this.customAnalysisForm.amount <= 0) {
+        return;
+      }
+
+      // Set custom analysis data
+      this.customAnalysis = {
+        active: true,
+        dailyAmount: this.getCustomAnalysisDailyAmount(),
+        isAddition: this.customAnalysisForm.isAddition,
+        description: this.customAnalysisForm.description || 'Custom Analysis'
+      };
+
+      // Update chart data
+      this.updateChartData();
+
+      // Close modal
+      this.closeCustomAnalysisModal();
+
+      // Scroll to chart
+      this.$nextTick(() => {
+        const chartSection = document.getElementById('budgetChart');
+        if (chartSection) {
+          chartSection.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      });
+    },
+
+    clearCustomAnalysis() {
+      this.customAnalysis = {
+        active: false,
+        dailyAmount: 0,
+        isAddition: true,
+        description: ''
+      };
+      this.updateChartData();
+    },
+
+    clearAllAnalysis() {
+      this.clearProposalAnalysis();
+      this.clearCustomAnalysis();
     },
 
     // New method to update chart data without destroying the chart

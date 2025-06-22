@@ -3949,6 +3949,8 @@ function buyNFT(setname, uid, price, type, callback){
           data.tick = data.tick || 0.01;
           this.behind = data.behind;
           if (!fu) {
+            // If viewing another user's profile, store their data in accountapi
+            // If viewing own profile, also store in accountapi (current behavior)
             this.balance = (data.balance / 1000).toFixed(3);
             this.bargov = (data.gov / 1000).toFixed(3);
             this.accountapi = data;
@@ -5586,6 +5588,7 @@ function buyNFT(setname, uid, price, type, callback){
             this.pagePermlink = this.pageAccount.split('/')[1]
             this.pageAccount = this.pageAccount.split('/')[0]
           }
+          this.me = false; // Make sure me is false when viewing another user
         } else if (location.pathname.indexOf("new") > -1) {
           this.builder = true
         } else {
@@ -5599,7 +5602,7 @@ function buyNFT(setname, uid, price, type, callback){
         this.focus.account = this.pageAccount;
         this.sapi = sapi;
         this.checkAccount("pageAccount", "focus");
-        this.getHiveUser();
+        this.getHiveUser(this.pageAccount); // Load Hive data for the page account
         this.getSPKUser()
         this.accountRelations(this.pageAccount);
         this.getHiveStats();
@@ -5610,8 +5613,8 @@ function buyNFT(setname, uid, price, type, callback){
         this.getSpkStats();
         this.getRewardFund();
         this.getFeedPrice();
-        this.getSapi(this.pageAccount, false);
-        //this.getTokenUser(this.pageAccount, false);
+        this.getSapi(this.pageAccount, false); // Load SPK data for the page account
+        this.getTokenUser(this.pageAccount, false); // Load DLUX token data for the page account
         //this.getNFTs(this.pageAccount);
       }
       this.getRcAccount(this.pageAccount)
