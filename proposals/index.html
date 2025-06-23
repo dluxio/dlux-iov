@@ -764,9 +764,25 @@
 													<!-- Proposal Impact -->
 													<div v-if="selectedProposalForAnalysis && getProjectedValuesWithProposalImpact().proposalImpact" class="mb-4">
 														<h6 class="text-warning mb-2">
-															{{ getProjectedValuesWithProposalImpact().proposalImpact.action === 'adding' ? 'Adding' : 'Removing' }} Proposal: 
+															{{ getProjectedValuesWithProposalImpact().proposalImpact.action === 'adding' ? 'Adding' : 'Removing' }} 
+															{{ getProjectedValuesWithProposalImpact().proposalImpact.isShortTerm ? 'Short-Term' : '' }} Proposal: 
 															{{ selectedProposalForAnalysis.subject.substring(0, 50) }}{{ selectedProposalForAnalysis.subject.length > 50 ? '...' : '' }}
 														</h6>
+														
+														<!-- Short-term proposal info -->
+														<div v-if="getProjectedValuesWithProposalImpact().proposalImpact.isShortTerm" class="alert alert-info mb-3">
+															<div class="small">
+																<strong><i class="fa-solid fa-clock me-1"></i>Short-Term Proposal:</strong><br>
+																<span class="text-muted">
+																	Duration: {{ getProjectedValuesWithProposalImpact().proposalImpact.totalDuration.toFixed(1) }} days total, 
+																	{{ getProjectedValuesWithProposalImpact().proposalImpact.remainingDays.toFixed(1) }} days remaining
+																</span><br>
+																<span class="text-muted">
+																	This analysis shows one-time impact, not ongoing funding.
+																</span>
+															</div>
+														</div>
+														
 														<div class="row mb-3">
 															<div class="col-md-4">
 																<strong class="text-light">Daily Change:</strong><br>
@@ -775,9 +791,11 @@
 																</span>
 															</div>
 															<div class="col-md-4">
-																<strong class="text-light">Annual Change:</strong><br>
+																<strong class="text-light">
+																	{{ getProjectedValuesWithProposalImpact().proposalImpact.isShortTerm ? 'Total Remaining Impact:' : 'Annual Change:' }}
+																</strong><br>
 																<span :class="getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? 'text-danger' : 'text-success'">
-																	{{ getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? '+' : '' }}${{ fancyRounding(Math.abs(getProjectedValuesWithProposalImpact().proposalImpact.annualChange)) }}/year
+																	{{ getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? '+' : '' }}${{ fancyRounding(Math.abs(getProjectedValuesWithProposalImpact().proposalImpact.annualChange)) }}{{ getProjectedValuesWithProposalImpact().proposalImpact.isShortTerm ? '' : '/year' }}
 																</span>
 															</div>
 															<div class="col-md-4">
@@ -1190,24 +1208,50 @@
 											data-bs-toggle="collapse" :data-bs-target="'#budget-' + proposal.id">
 											<i class="fa-solid fa-chart-line me-2"></i>Budget Impact Analysis
 										</button>
-										<div class="collapse mt-2" :id="'budget-' + proposal.id">
-											<div class="card card-body bg-secondary bg-opacity-25">
-												<h6 class="text-info mb-3">Annual Budget Impact</h6>
-												
-												<div class="row mb-3">
-													<div class="col-md-4">
-														<strong>Daily Cost:</strong><br>
-														<span class="text-warning">{{ fancyRounding(getBudgetImpact(proposal).daily) }} HBD</span>
+																					<div class="collapse mt-2" :id="'budget-' + proposal.id">
+												<div class="card card-body bg-secondary bg-opacity-25">
+													<h6 class="text-info mb-3">
+														{{ isShortTermProposal(proposal) ? 'One-Time' : 'Annual' }} Budget Impact
+													</h6>
+													
+													<!-- Short-term proposal info -->
+													<div v-if="isShortTermProposal(proposal)" class="alert alert-info mb-3 small">
+														<div class="d-flex align-items-center">
+															<i class="fa-solid fa-clock me-2"></i>
+															<div>
+																<strong>Short-Term Proposal</strong><br>
+																<span class="text-muted">
+																	{{ getTotalDurationDays(proposal).toFixed(0) }} days total, 
+																	{{ Math.max(0, getRemainingDays(proposal)).toFixed(0) }} days remaining
+																</span>
+															</div>
+														</div>
 													</div>
-													<div class="col-md-4">
-														<strong>Annual Cost:</strong><br>
-														<span class="text-warning">{{ fancyRounding(getBudgetImpact(proposal).yearly) }} HBD</span>
+													
+													<div class="row mb-3">
+														<div class="col-md-4">
+															<strong>Daily Cost:</strong><br>
+															<span class="text-warning">{{ fancyRounding(getBudgetImpact(proposal).daily) }} HBD</span>
+														</div>
+														<div class="col-md-4">
+															<strong>{{ isShortTermProposal(proposal) ? 'Remaining Cost:' : 'Annual Cost:' }}</strong><br>
+															<span class="text-warning">
+																{{ isShortTermProposal(proposal) ? 
+																	fancyRounding(getBudgetImpact(proposal).daily * Math.max(0, getRemainingDays(proposal))) : 
+																	fancyRounding(getBudgetImpact(proposal).yearly) 
+																}} HBD
+															</span>
+														</div>
+														<div class="col-md-4">
+															<strong>% of Annual Inflow:</strong><br>
+															<span class="text-warning">
+																{{ isShortTermProposal(proposal) ? 
+																	((getBudgetImpact(proposal).daily * Math.max(0, getRemainingDays(proposal))) / getBudgetImpact(proposal).yearlyInflow * 100).toFixed(1) :
+																	getBudgetImpact(proposal).percentOfInflow.toFixed(1) 
+																}}%
+															</span>
+														</div>
 													</div>
-													<div class="col-md-4">
-														<strong>% of Annual Inflow:</strong><br>
-														<span class="text-warning">{{ getBudgetImpact(proposal).percentOfInflow.toFixed(1) }}%</span>
-													</div>
-												</div>
 
 												<!-- Simple Budget Visualization -->
 												<div class="mb-3">
@@ -1234,8 +1278,16 @@
 
 												<div class="small text-muted">
 													<i class="fa-solid fa-info-circle me-1"></i>
-													This proposal would consume {{ getBudgetImpact(proposal).percentOfInflow.toFixed(1) }}% 
-													of the annual DAO inflow ({{ fancyRounding(getBudgetImpact(proposal).yearlyInflow) }} HBD/year)
+													<span v-if="isShortTermProposal(proposal)">
+														This short-term proposal would consume 
+														{{ ((getBudgetImpact(proposal).daily * Math.max(0, getRemainingDays(proposal))) / getBudgetImpact(proposal).yearlyInflow * 100).toFixed(1) }}% 
+														of the annual DAO inflow over its remaining {{ Math.max(0, getRemainingDays(proposal)).toFixed(0) }} days
+														({{ fancyRounding(getBudgetImpact(proposal).yearlyInflow) }} HBD/year total available)
+													</span>
+													<span v-else>
+														This proposal would consume {{ getBudgetImpact(proposal).percentOfInflow.toFixed(1) }}% 
+														of the annual DAO inflow ({{ fancyRounding(getBudgetImpact(proposal).yearlyInflow) }} HBD/year)
+													</span>
 												</div>
 											</div>
 										</div>

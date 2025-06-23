@@ -1463,6 +1463,32 @@ const app = createApp({
              (proposal.proposal_id || proposal.id) === 0; // Return proposal is also a stabilizer
     },
 
+    isShortTermProposal(proposal) {
+      // Check if proposal duration is less than 31 days (one-off funding)
+      const startDate = new Date(proposal.start_date);
+      const endDate = new Date(proposal.end_date);
+      const durationMs = endDate.getTime() - startDate.getTime();
+      const durationDays = durationMs / (1000 * 60 * 60 * 24);
+      return durationDays < 31;
+    },
+
+    getRemainingDays(proposal) {
+      // Get remaining days for a proposal
+      const now = new Date();
+      const endDate = new Date(proposal.end_date);
+      const remainingMs = endDate.getTime() - now.getTime();
+      const remainingDays = Math.max(0, remainingMs / (1000 * 60 * 60 * 24));
+      return remainingDays;
+    },
+
+    getTotalDurationDays(proposal) {
+      // Get total duration of proposal in days
+      const startDate = new Date(proposal.start_date);
+      const endDate = new Date(proposal.end_date);
+      const durationMs = endDate.getTime() - startDate.getTime();
+      return durationMs / (1000 * 60 * 60 * 24);
+    },
+
     formatDate(dateString) {
       return new Date(dateString).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -1969,21 +1995,51 @@ const app = createApp({
         const proposal = this.selectedProposalForAnalysis;
         const proposalDailyPay = parseFloat(proposal.daily_pay?.amount || 0) / 1000;
         const isCurrentlyFunded = this.isProposalFunded(proposal);
+        const isShortTerm = this.isShortTermProposal(proposal);
         
-        if (isCurrentlyFunded) {
-          // If currently funded, we're analyzing REMOVING it
-          impactMultiplier += -proposalDailyPay;
+        let dailyChange, annualChange, analysisType;
+        
+        if (isShortTerm) {
+          // For short-term proposals, calculate impact based on remaining duration only
+          const remainingDays = this.getRemainingDays(proposal);
+          const totalDuration = this.getTotalDurationDays(proposal);
+          
+          dailyChange = isCurrentlyFunded ? -proposalDailyPay : proposalDailyPay;
+          
+          // Annual change is based on remaining time, not full year
+          const remainingImpact = dailyChange * remainingDays;
+          annualChange = remainingImpact; // Total remaining impact, not annualized
+          
+          analysisType = isCurrentlyFunded ? 'removing' : 'adding';
+          
+          impactData.proposalImpact = {
+            dailyChange: dailyChange,
+            annualChange: annualChange,
+            action: analysisType,
+            proposalTitle: proposal.subject,
+            isShortTerm: true,
+            remainingDays: remainingDays,
+            totalDuration: totalDuration,
+            remainingImpact: remainingImpact
+          };
+          
+          // For chart calculation, use daily rate only for remaining days
+          impactMultiplier += dailyChange;
         } else {
-          // If not currently funded, we're analyzing ADDING it
-          impactMultiplier += proposalDailyPay;
+          // For long-term proposals, treat as perpetual funding
+          dailyChange = isCurrentlyFunded ? -proposalDailyPay : proposalDailyPay;
+          annualChange = dailyChange * 365;
+          
+          impactMultiplier += dailyChange;
+          
+          impactData.proposalImpact = {
+            dailyChange: dailyChange,
+            annualChange: annualChange,
+            action: isCurrentlyFunded ? 'removing' : 'adding',
+            proposalTitle: proposal.subject,
+            isShortTerm: false
+          };
         }
-        
-        impactData.proposalImpact = {
-          dailyChange: isCurrentlyFunded ? -proposalDailyPay : proposalDailyPay,
-          annualChange: (isCurrentlyFunded ? -proposalDailyPay : proposalDailyPay) * 365,
-          action: isCurrentlyFunded ? 'removing' : 'adding',
-          proposalTitle: proposal.subject
-        };
       }
       
       // Handle custom analysis
@@ -2446,10 +2502,14 @@ const app = createApp({
       let selectedProposalPay = 0;
       let selectedProposalTitle = '';
       let isProposalCurrentlyFunded = false;
+      let isSelectedProposalShortTerm = false;
+      let selectedProposalRemainingDays = 0;
       if (this.selectedProposalForAnalysis && this.selectedProposalForAnalysis.daily_pay) {
         selectedProposalPay = parseFloat(this.selectedProposalForAnalysis.daily_pay.amount || 0) / 1000;
         selectedProposalTitle = String(this.selectedProposalForAnalysis.subject || '').substring(0, 30);
         isProposalCurrentlyFunded = this.isProposalFunded(this.selectedProposalForAnalysis);
+        isSelectedProposalShortTerm = this.isShortTermProposal(this.selectedProposalForAnalysis);
+        selectedProposalRemainingDays = this.getRemainingDays(this.selectedProposalForAnalysis);
       }
       
       // Get custom analysis data if any
@@ -2490,8 +2550,20 @@ const app = createApp({
         // Calculate different outflow scenarios
         const dailyOutflowWithout = dailyOutflow;
         
-        // Proposal impact
-        const proposalImpact = isProposalCurrentlyFunded ? -selectedProposalPay : selectedProposalPay;
+        // Proposal impact - only apply for remaining days if short-term
+        let proposalImpact = 0;
+        if (selectedProposalPay > 0) {
+          if (isSelectedProposalShortTerm) {
+            // For short-term proposals, only apply impact for remaining days
+            if (day <= selectedProposalRemainingDays) {
+              proposalImpact = isProposalCurrentlyFunded ? -selectedProposalPay : selectedProposalPay;
+            }
+            // After remaining days, impact becomes 0 (proposal expires)
+          } else {
+            // For long-term proposals, apply impact for the entire projection period
+            proposalImpact = isProposalCurrentlyFunded ? -selectedProposalPay : selectedProposalPay;
+          }
+        }
         const dailyOutflowWithProposal = dailyOutflow + proposalImpact;
         
         // Custom analysis impact
