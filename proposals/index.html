@@ -588,11 +588,11 @@
 												class="btn btn-sm btn-outline-primary">
 												<i class="fa-solid fa-calculator me-1"></i>Custom Analysis
 											</button>
-											<button v-if="selectedProposalForAnalysis || customAnalysis.active" 
-												@click="clearAllAnalysis()" 
-												class="btn btn-sm btn-outline-warning">
-												<i class="fa-solid fa-times me-1"></i>Clear Analysis
-											</button>
+																		<button v-if="selectedProposalForAnalysis || customAnalysis.active" 
+								@click="clearAllAnalysis()" 
+								class="btn btn-sm btn-outline-warning">
+								<i class="fa-solid fa-broom me-1"></i>Reset Analysis
+							</button>
 											<span v-if="selectedProposalForAnalysis" class="badge bg-info">
 												{{ isProposalFunded(selectedProposalForAnalysis) ? 'Removing' : 'Adding' }}: 
 												{{ selectedProposalForAnalysis.subject.substring(0, 30) }}...
@@ -1174,11 +1174,11 @@
 												
 												<!-- Chart Analysis Button -->
 												<div class="mt-2">
-													<button v-if="selectedProposalForAnalysis && selectedProposalForAnalysis.id === proposal.id"
-														@click="clearProposalAnalysis()"
-														class="btn btn-outline-warning btn-sm w-100">
-														<i class="fa-solid fa-chart-line me-1"></i>Remove from Chart
-													</button>
+																						<button v-if="selectedProposalForAnalysis && selectedProposalForAnalysis.id === proposal.id"
+										@click="clearProposalAnalysis()"
+										class="btn btn-outline-warning btn-sm w-100">
+										<i class="fa-solid fa-times me-1"></i>Clear Analysis
+									</button>
 													<button v-else-if="proposal.id !== 0 && !isStabilizerProposal(proposal)"
 														@click="selectProposalForAnalysis(proposal)"
 														class="btn btn-outline-info btn-sm w-100">

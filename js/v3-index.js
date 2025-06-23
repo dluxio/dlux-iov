@@ -2978,33 +2978,44 @@ const app = createApp({
       // Store the proposal reference before clearing
       const proposalToScrollTo = this.selectedProposalForAnalysis;
       
-      // Clear the selection
+      // Clear the selection - reset to initial state
       this.selectedProposalForAnalysis = null;
       
-      // Update chart data without destroying the entire chart
-      this.updateChartData();
+      // Clear any timeouts to prevent race conditions
+      if (this.chartUpdateTimeout) {
+        clearTimeout(this.chartUpdateTimeout);
+        this.chartUpdateTimeout = null;
+      }
       
-      // Scroll back to the proposal in the list
-      if (proposalToScrollTo) {
-        this.$nextTick(() => {
-          const proposalElement = document.querySelector(`[data-proposal-id="${proposalToScrollTo.id}"]`);
-          if (proposalElement) {
-            proposalElement.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center' 
+      // Reset updatingChart flag
+      this.updatingChart = false;
+      
+      // Recreate chart from scratch to ensure clean state
+      this.$nextTick(() => {
+        this.recreateChart(() => {
+          // Scroll back to the proposal in the list
+          if (proposalToScrollTo) {
+            this.$nextTick(() => {
+              const proposalElement = document.querySelector(`[data-proposal-id="${proposalToScrollTo.id}"]`);
+              if (proposalElement) {
+                proposalElement.scrollIntoView({ 
+                  behavior: 'smooth', 
+                  block: 'center' 
+                });
+              } else {
+                // Fallback: scroll to proposals section
+                const proposalsSection = document.getElementById('proposals');
+                if (proposalsSection) {
+                  proposalsSection.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                  });
+                }
+              }
             });
-          } else {
-            // Fallback: scroll to proposals section
-            const proposalsSection = document.getElementById('proposals');
-            if (proposalsSection) {
-              proposalsSection.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
-              });
-            }
           }
         });
-      }
+      });
     },
 
     // Custom Analysis Methods
@@ -3082,18 +3093,94 @@ const app = createApp({
     },
 
     clearCustomAnalysis() {
+      // Reset to initial state
       this.customAnalysis = {
         active: false,
         dailyAmount: 0,
         isAddition: true,
         description: ''
       };
-      this.updateChartData();
+      
+      // Also reset the form
+      this.customAnalysisForm = {
+        amount: 0,
+        period: 'daily',
+        isAddition: true,
+        description: ''
+      };
+      
+      // Clear any timeouts to prevent race conditions
+      if (this.chartUpdateTimeout) {
+        clearTimeout(this.chartUpdateTimeout);
+        this.chartUpdateTimeout = null;
+      }
+      
+      // Reset updatingChart flag
+      this.updatingChart = false;
+      
+      // Recreate chart from scratch to ensure clean state
+      this.$nextTick(() => {
+        this.recreateChart();
+      });
     },
 
     clearAllAnalysis() {
-      this.clearProposalAnalysis();
-      this.clearCustomAnalysis();
+      // Clear all analysis data at once
+      this.selectedProposalForAnalysis = null;
+      this.customAnalysis = {
+        active: false,
+        dailyAmount: 0,
+        isAddition: true,
+        description: ''
+      };
+      this.customAnalysisForm = {
+        amount: 0,
+        period: 'daily',
+        isAddition: true,
+        description: ''
+      };
+      
+      // Clear any timeouts to prevent race conditions
+      if (this.chartUpdateTimeout) {
+        clearTimeout(this.chartUpdateTimeout);
+        this.chartUpdateTimeout = null;
+      }
+      
+      // Reset updatingChart flag
+      this.updatingChart = false;
+      
+      // Recreate chart from scratch to ensure clean state
+      this.$nextTick(() => {
+        this.recreateChart();
+      });
+    },
+
+    // Method to completely recreate the chart (for clean state after clearing analysis)
+    recreateChart(callback = null) {
+      try {
+        // Destroy existing chart if it exists
+        if (this.chartInstance) {
+          this.chartInstance.destroy();
+          this.chartInstance = null;
+        }
+        
+        // Clear any update flags
+        this.updatingChart = false;
+        
+        // Recreate the chart
+        this.$nextTick(() => {
+          this.createChart();
+          if (callback) {
+            callback();
+          }
+        });
+      } catch (error) {
+        console.error('Error recreating chart:', error);
+        this.updatingChart = false;
+        if (callback) {
+          callback();
+        }
+      }
     },
 
     // New method to update chart data without destroying the chart
@@ -3122,20 +3209,9 @@ const app = createApp({
         this.updatingChart = false;
         
         // Don't call updateChart() here as it can cause infinite loops
-        // Instead, try to recreate chart on next tick
+        // Instead, recreate chart cleanly
         this.$nextTick(() => {
-          if (this.chartInstance && !this.updatingChart) {
-            try {
-              this.updatingChart = true;
-              this.chartInstance.destroy();
-              this.chartInstance = null;
-              this.createChart();
-              this.updatingChart = false;
-            } catch (recreateError) {
-              console.error('Error recreating chart:', recreateError);
-              this.updatingChart = false;
-            }
-          }
+          this.recreateChart();
         });
       }
     },
