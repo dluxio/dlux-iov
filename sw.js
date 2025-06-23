@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.23.8",
-  "generated": "2025-06-23T20:46:17Z",
+  "version": "2025.06.23.14",
+  "generated": "2025-06-23T21:15:23Z",
   "files": {
-    "/img/dex-vr-comp.jpg": {
-      "checksum": "e763f32eddfb928e99597355486c7654",
-      "size": 101824,
-      "priority": "important"
-    },
     "/img/dlux-hive-logo-alpha-font_color.svg": {
       "checksum": "d5cba5e8acda2fd786ec0b8af4580666",
       "size": 3441,
@@ -1298,7 +1293,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "a8841e94bb8bd626986032de8f1013d0",
+      "checksum": "a3bc081105d117ca261646b5771b69b2",
       "size": 36523,
       "priority": "important"
     },
@@ -1518,7 +1513,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "20d12f5e04319c66323b6d552c1878bd",
+      "checksum": "8316b149336bd80e916f12ef866513fa",
       "size": 7299,
       "priority": "important"
     },
@@ -1550,11 +1545,6 @@ self.cacheManifest =
     "/user/index.html": {
       "checksum": "361003373601934b80b9b61f7642cd3f",
       "size": 302223,
-      "priority": "important"
-    },
-    "/validate-tiptap-compliance.js": {
-      "checksum": "b4dd1fecf24cba74aea13a395bfb7f42",
-      "size": 7430,
       "priority": "important"
     },
     "/vid/stills/blue_dust.jpg": {
@@ -1611,11 +1601,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/naf-playground/js/network-manager.js": {
-      "checksum": "a44c210d1a833a9da4e95c87c22da749",
-      "size": 4917,
-      "priority": "page-specific"
     },
     "/naf-playground/js/network.js": {
       "checksum": "c47bdabff89051bd383584f1125de1e5",
@@ -2337,12 +2322,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
