@@ -1347,8 +1347,8 @@
 							<span v-else-if="pendingProposalId">Proposal #{{ pendingProposalId }}</span>
 							<span v-else>Loading Proposal...</span>
 						</h5>
-						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" 
-								@click="closeProposalModal"></button>
+						<button type="button" class="btn-close btn-close-white" 
+								@click="dismissModal('proposalModal')"></button>
 					</div>
 					<div class="modal-body">
 						<!-- Loading State -->

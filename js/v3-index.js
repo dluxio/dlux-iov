@@ -1560,6 +1560,21 @@ const app = createApp({
       this.showProposalModal = false;
       this.selectedProposal = null;
       this.pendingProposalId = null;
+      
+      // Force cleanup of any Bootstrap modal remnants
+      setTimeout(() => {
+        // Remove any lingering backdrop elements
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+          backdrop.remove();
+        });
+        
+        // Remove modal-open class from body
+        document.body.classList.remove('modal-open');
+        
+        // Reset body styles that Bootstrap adds
+        document.body.style.paddingRight = '';
+        document.body.style.overflow = '';
+      }, 100);
     },
 
     dismissModal(modalId) {
@@ -1570,7 +1585,23 @@ const app = createApp({
         if (modal) {
           modal.hide();
         }
+        
+        // Force remove any lingering backdrop and modal-open class
+        setTimeout(() => {
+          // Remove backdrop elements
+          document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+            backdrop.remove();
+          });
+          
+          // Remove modal-open class from body
+          document.body.classList.remove('modal-open');
+          
+          // Reset body styles that Bootstrap adds
+          document.body.style.paddingRight = '';
+          document.body.style.overflow = '';
+        }, 100);
       }
+      
       // Also call the appropriate close method
       if (modalId === 'proposalModal') {
         this.closeProposalModal();
@@ -1759,6 +1790,11 @@ const app = createApp({
             if (modalElement) {
               const modal = new bootstrap.Modal(modalElement);
               modal.show();
+              
+              // Add event listener for when the modal is hidden to clean up properly
+              modalElement.addEventListener('hidden.bs.modal', () => {
+                this.closeProposalModal();
+              }, { once: true });
             }
           });
           
