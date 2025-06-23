@@ -716,7 +716,7 @@
 													<span class="text-danger">
 														${{ fancyRounding(healthStats.totalFundedOutflows * 365) }}
 														<span v-if="selectedProposalForAnalysis" class="text-warning">
-															(${{ fancyRounding(getProjectedValuesWithProposalImpact().projectedTotalOutflowAll * 365) }})
+															(${{ fancyRounding(getProjectedValuesWithProposalImpact().projectedTotalOutflowAllAnnual * 365) }})
 														</span>
 													</span>
 												</div>
@@ -727,7 +727,7 @@
 													<span class="text-danger">
 														${{ fancyRounding(healthStats.totalFundedOutflowsNoStabilizer * 365) }}
 														<span v-if="selectedProposalForAnalysis || customAnalysis.active" class="text-warning">
-															(${{ fancyRounding(getProjectedValuesWithProposalImpact().projectedTotalOutflow * 365) }})
+															(${{ fancyRounding(getProjectedValuesWithProposalImpact().projectedTotalOutflowAnnual * 365) }})
 														</span>
 													</span>
 												</div>
@@ -736,14 +736,14 @@
 											<div class="d-flex justify-content-between align-items-center">
 												<strong>Net Balance (Excluding Stabilizer):</strong>
 												<div class="text-end">
-													<strong :class="(getProjectedValues().projectedTotalInflow * 365 - healthStats.totalFundedOutflowsNoStabilizer * 365) > 0 ? 'text-success' : 'text-danger'">
-														${{ fancyRounding(getProjectedValues().projectedTotalInflow * 365 - healthStats.totalFundedOutflowsNoStabilizer * 365) }}
+																									<strong :class="(getProjectedValues().projectedTotalInflow * 365 - healthStats.totalFundedOutflowsNoStabilizer * 365) > 0 ? 'text-success' : 'text-danger'">
+													${{ fancyRounding(getProjectedValues().projectedTotalInflow * 365 - healthStats.totalFundedOutflowsNoStabilizer * 365) }}
+												</strong>
+												<span v-if="selectedProposalForAnalysis || customAnalysis.active" class="text-warning d-block">
+													<strong :class="(getProjectedValues().projectedTotalInflow * 365 - getProjectedValuesWithProposalImpact().projectedTotalOutflowAnnual * 365) > 0 ? 'text-success' : 'text-danger'">
+														(${{ fancyRounding(getProjectedValues().projectedTotalInflow * 365 - getProjectedValuesWithProposalImpact().projectedTotalOutflowAnnual * 365) }})
 													</strong>
-													<span v-if="selectedProposalForAnalysis || customAnalysis.active" class="text-warning d-block">
-														<strong :class="(getProjectedValues().projectedTotalInflow * 365 - getProjectedValuesWithProposalImpact().projectedTotalOutflow * 365) > 0 ? 'text-success' : 'text-danger'">
-															(${{ fancyRounding(getProjectedValues().projectedTotalInflow * 365 - getProjectedValuesWithProposalImpact().projectedTotalOutflow * 365) }})
-														</strong>
-													</span>
+												</span>
 													<div v-if="priceGrowthRate !== 0" class="small text-muted">
 														was ${{ fancyRounding((daoFund.dailyInflow + daoFund.ninjaGrant + daoFund.beneficiaryRewards) * 365 - healthStats.totalFundedOutflowsNoStabilizer * 365) }} @ 0%
 													</div>
@@ -928,7 +928,7 @@
 										</div>
 										<div class="progress" style="height: 20px;">
 											<div class="progress-bar bg-danger" role="progressbar" 
-												:style="'width: ' + Math.min(((selectedProposalForAnalysis || customAnalysis.active ? getProjectedValuesWithProposalImpact().projectedTotalOutflow : healthStats.totalFundedOutflowsNoStabilizer) * 365 / (getProjectedValues().projectedTotalInflow * 365)) * 100, 100) + '%'">
+												:style="'width: ' + Math.min(((selectedProposalForAnalysis || customAnalysis.active ? getProjectedValuesWithProposalImpact().projectedTotalOutflowAnnual : healthStats.totalFundedOutflowsNoStabilizer) * 365 / (getProjectedValues().projectedTotalInflow * 365)) * 100, 100) + '%'">
 												Funded (Excluding Stabilizer)
 												<span v-if="selectedProposalForAnalysis || customAnalysis.active"> - With Analysis Impact</span>
 											</div>

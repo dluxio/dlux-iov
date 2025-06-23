@@ -117,6 +117,7 @@ const app = createApp({
       priceGrowthRate: 0, // -50 to 500% APR
       chartInstance: null,
       chartUpdateTimeout: null,
+      urlChecker: null,
       updatingChart: false,
       healthStats: {
         totalFundedOutflows: 0,
@@ -1017,6 +1018,12 @@ const app = createApp({
       this.chartUpdateTimeout = null;
     }
     
+    // Clean up URL monitoring
+    if (this.urlChecker) {
+      clearInterval(this.urlChecker);
+      this.urlChecker = null;
+    }
+    
     // Clean up witness monitoring
     this.stopMonitoring();
   },
@@ -1745,6 +1752,16 @@ const app = createApp({
               this.pendingProposalId = null;
             }
           }
+          
+          // Open the Bootstrap modal
+          this.$nextTick(() => {
+            const modalElement = document.getElementById('proposalModal');
+            if (modalElement) {
+              const modal = new bootstrap.Modal(modalElement);
+              modal.show();
+            }
+          });
+          
           // If proposals aren't loaded yet, the modal will show a spinner
           // and the proposal will be set when proposals finish loading
         }
@@ -2058,12 +2075,32 @@ const app = createApp({
         };
       }
       
+      // Calculate the actual annual impact (short-term proposals don't get full annual impact)
+      let annualImpactMultiplier = impactMultiplier;
+      
+      // If we have a short-term proposal, calculate its actual annual impact
+      if (this.selectedProposalForAnalysis && impactData.proposalImpact && impactData.proposalImpact.isShortTerm) {
+        const proposalDailyPay = parseFloat(this.selectedProposalForAnalysis.daily_pay?.amount || 0) / 1000;
+        const isCurrentlyFunded = this.isProposalFunded(this.selectedProposalForAnalysis);
+        const remainingDays = this.getRemainingDays(this.selectedProposalForAnalysis);
+        
+        // Calculate what the annual impact actually is (remaining days / 365)
+        const dailyChange = isCurrentlyFunded ? -proposalDailyPay : proposalDailyPay;
+        const actualAnnualImpact = (dailyChange * remainingDays) / 365;
+        
+        // Adjust the impact multiplier for annual calculations
+        annualImpactMultiplier = actualAnnualImpact;
+      }
+      
       return {
         ...baseProjected,
         // Daily outflow includes all impacts
         projectedTotalOutflow: this.healthStats.totalFundedOutflowsNoStabilizer + impactMultiplier,
         projectedTotalOutflowWithZero: this.healthStats.totalFundedOutflowsNoZero + impactMultiplier,
         projectedTotalOutflowAll: this.healthStats.totalFundedOutflows + impactMultiplier,
+        // Annual-adjusted values for display
+        projectedTotalOutflowAnnual: this.healthStats.totalFundedOutflowsNoStabilizer + annualImpactMultiplier,
+        projectedTotalOutflowAllAnnual: this.healthStats.totalFundedOutflows + annualImpactMultiplier,
         ...impactData
       };
     },
@@ -4474,8 +4511,11 @@ const app = createApp({
     
     // Load proposals if we're on the proposals page
     if (window.location.pathname.includes('/proposals')) {
+      // Handle URL routing immediately (before proposals load, for modal display)
+      this.handleUrlRouting();
+      
       this.loadProposals().then(() => {
-        // Handle URL routing after proposals are loaded
+        // Handle URL routing again after proposals are loaded (to fill in proposal data)
         this.handleUrlRouting();
       });
     }
@@ -4498,8 +4538,11 @@ const app = createApp({
       }
     });
     
-    // Handle browser back/forward buttons
+    // Handle browser back/forward buttons and URL changes
     window.addEventListener('popstate', (event) => {
+      // Handle URL routing for proposal links
+      this.handleUrlRouting();
+      
       if (event.state) {
         if (event.state.type === 'proposal') {
           // Close any open modals
@@ -4518,6 +4561,15 @@ const app = createApp({
         }
       }
     });
+    
+    // Monitor URL changes for proposal links (for direct navigation)
+    let currentUrl = window.location.pathname;
+    this.urlChecker = setInterval(() => {
+      if (window.location.pathname !== currentUrl) {
+        currentUrl = window.location.pathname;
+        this.handleUrlRouting();
+      }
+    }, 100);
     
     //this.makeQr('qrcode', 'follow');
   },
