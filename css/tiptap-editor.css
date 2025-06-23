@@ -176,10 +176,45 @@
   border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
-/* Collaboration cursor indicators in editor */
+/* Collaboration caret indicators in editor (TipTap v3) */
+.ProseMirror .collaboration-carets__caret {
+  border-left-width: 2px !important;
+  border-left-style: solid !important;
+  border-right: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  margin-left: -1px;
+  margin-right: -1px;
+  pointer-events: none;
+  position: relative;
+  word-break: normal;
+  display: inline-block;
+  height: 1.2em;
+}
+
+.ProseMirror .collaboration-carets__label {
+  border-radius: 3px 3px 3px 0;
+  color: white !important;
+  font-size: 12px !important;
+  font-style: normal !important;
+  font-weight: 600 !important;
+  left: -2px;
+  line-height: 1.2 !important;
+  padding: 0.1rem 0.3rem !important;
+  position: absolute;
+  top: -1.4em;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 10;
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+/* Legacy support for collaboration-cursor (in case some components still use it) */
 .tiptap-editor-content .ProseMirror .collaboration-cursor__caret {
-  border-left: 1px solid #0d0d0d;
-  border-right: 1px solid #0d0d0d;
+  border-left: 2px solid var(--caret-color);
+  border-right: none;
   margin-left: -1px;
   margin-right: -1px;
   pointer-events: none;
@@ -188,18 +223,20 @@
 }
 
 .tiptap-editor-content .ProseMirror .collaboration-cursor__label {
+  background-color: var(--caret-color);
   border-radius: 3px 3px 3px 0;
-  color: #0d0d0d;
-  font-size: 12px;
+  color: white;
+  font-size: 12px !important;
   font-style: normal;
   font-weight: 600;
   left: -1px;
-  line-height: normal;
+  line-height: 1.2 !important;
   padding: 0.1rem 0.3rem;
   position: absolute;
   top: -1.4em;
   user-select: none;
   white-space: nowrap;
+  z-index: 10;
 }
 
 /* Responsive toolbar */
