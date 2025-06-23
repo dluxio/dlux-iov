@@ -6,7 +6,8 @@ DLUX IOV is a collaborative document editing platform with TipTap v3, Y.js, and 
 ## Quick Reference
 - **Main implementation**: `js/tiptap-editor-modular.js`
 - **Architecture guide**: `TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md` (comprehensive implementation details)
-- **Extension mapping**: `tiptap-v3-extension-map.html`
+- **Shema guide**; `TIPTAP_COLLABORATIVE_SCHEMA.MD`
+- **API Documentation**; `Collaboration_editor.md`
 - **Testing commands**: `npm run lint && npm run typecheck`
 
 ## Core Technologies

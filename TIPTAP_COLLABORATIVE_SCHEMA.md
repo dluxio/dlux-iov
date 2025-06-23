@@ -31,7 +31,7 @@ This document outlines the clean, optimal Y.js collaborative document schema des
 ### 5. **TipTap Best Practice Compliance**
 - **Offline-First Pattern**: `new IndexeddbPersistence('document-id', ydoc)` + `HocuspocusProvider`
 - **Content Validation**: `enableContentCheck: true` with graceful error handling
-- **Document Fragments**: Separate `field: 'title'` and `field: 'body'` editors
+- **Single Editor Architecture**: Title uses simple input field, only body uses TipTap editor with `field: 'body'`
 - **Schema Safety**: Version tracking and conflict detection
 - **Y.js Optimization**: Conflict-free arrays, maps, and atomic operations
 - **Critical Focus Management**: Never programmatically focus Y.js collaborative editors during initialization
@@ -363,18 +363,24 @@ async function validatePermissions(req, res, next) {
 ## 📊 **Schema Structure**
 
 ### **Core Collaborative Content**
-```javascript
-// Primary content (Y.XmlFragment for rich text editing)
-ydoc.get('title', Y.XmlFragment)        // Post title
-ydoc.get('body', Y.XmlFragment)         // Post body content
 
-// Post configuration (Y.Map for structured data)
-ydoc.getMap('config')                   // Post configuration
+**IMPORTANT**: Following TipTap v3 best practices, DLUX uses a **single editor architecture**:
+- **Title**: Simple `<input>` field with `v-model="titleInput"`
+- **Body**: Single TipTap editor instance with `field: 'body'`
+
+```javascript
+// Single Editor Architecture - Title in config map
+ydoc.getMap('config')                   // Document metadata & configuration
+├── title: String                           // Post title (plain text)
+├── documentName: String                    // Display name for document
 ├── postType: String                        // 'blog', 'video', '360', 'dapp', 'remix'
 ├── version: String                         // '1.0.0'
 ├── appVersion: String                      // 'dlux/1.0.0'
 ├── lastModified: String                    // ISO timestamp
 └── createdBy: String                       // Original creator
+
+// Body content (Y.XmlFragment for TipTap editor)
+ydoc.get('body', Y.XmlFragment)         // Post body content (rich text)
 
 // Advanced publishing options (Y.Map for atomic values only)
 ydoc.getMap('publishOptions')           // Atomic publishing settings
@@ -531,28 +537,28 @@ async createOfflineFirstCollaborativeEditors(bundle) {
     // STEP 2: Initialize collaborative schema
     this.initializeCollaborativeSchema(Y);
     
-    // STEP 3: Create TipTap editors with content validation
-    this.titleEditor = new Editor({
-        element: this.$refs.titleEditor,
+    // STEP 3: Create single TipTap editor for body (title uses input field)
+    this.bodyEditor = new Editor({
+        element: this.$refs.bodyEditor,
         extensions: [
             StarterKit.configure({ history: false }),
             Collaboration.configure({
                 document: this.ydoc,
-                field: 'title'
+                field: 'body'  // Only body uses TipTap
             }),
             Placeholder.configure({
-                placeholder: this.isReadOnlyMode ? 'Title (read-only)' : 'Enter title...'
+                placeholder: this.isReadOnlyMode ? 'Content (read-only)' : 'Write your content...'
             })
         ],
         // TipTap Best Practice: Content validation
         enableContentCheck: true,
         onContentError: ({ editor, error, disableCollaboration }) => {
-            this.handleContentValidationError('title', error, disableCollaboration);
+            this.handleContentValidationError('body', error, disableCollaboration);
         },
         editable: !this.isReadOnlyMode,
         onUpdate: ({ editor }) => {
             if (!this.isReadOnlyMode) {
-                this.content.title = editor.getHTML();
+                // ✅ Only set flags, never sync content manually
                 this.hasUnsavedChanges = true;
                 this.clearUnsavedAfterSync(); // Unified sync indicator
             }
@@ -573,8 +579,10 @@ initializeCollaborativeSchema(Y) {
     metadata.set('schemaVersion', currentSchemaVersion);
     metadata.set('lastUpdated', new Date().toISOString());
     
-    // Core content (TipTap editors with fragments)
-    this.ydoc.get('title', Y.XmlFragment);
+    // Core content - Single editor architecture
+    // Title is stored in config map as plain text
+    this.ydoc.getMap('config').set('title', '');
+    // Only body uses Y.XmlFragment for TipTap editor
     this.ydoc.get('body', Y.XmlFragment);
     
     // Conflict-free collaborative structures
@@ -727,6 +735,43 @@ setupObservers() {
         this.updatePresenceUI();
     });
 }
+```
+
+### **TipTap v3 Extension Updates**
+
+**IMPORTANT**: TipTap v3 has renamed several extensions. When implementing collaborative features:
+
+```javascript
+// ✅ CORRECT - TipTap v3 Extensions
+import { CollaborationCaret } from '@tiptap/extension-collaboration-caret'  // v3 name
+import { StarterKit } from '@tiptap/starter-kit'
+
+// ❌ WRONG - Old v2 names
+import { CollaborationCursor } from '@tiptap/extension-collaboration-cursor'  // v2 name
+
+// Single Editor Setup (v3 Best Practice)
+const bodyEditor = new Editor({
+    element: this.$refs.bodyEditor,
+    extensions: [
+        StarterKit.configure({ 
+            history: false  // MUST disable for collaboration
+        }),
+        Collaboration.configure({
+            document: ydoc,
+            field: 'body'  // Only body uses TipTap editor
+        }),
+        CollaborationCaret.configure({  // v3 name!
+            provider: websocketProvider,
+            user: {
+                name: username,
+                color: userColor
+            }
+        })
+    ]
+});
+
+// Title uses simple input field
+// <input v-model="titleInput" @input="onTitleInput" />
 ```
 
 ## 🔄 **Data Synchronization**
