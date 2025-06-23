@@ -29,7 +29,7 @@ import SPKVue from "/js/spk-wallet.js";
 import Assets from "/js/assets.js"
 import MFI from "/js/mfi-vue.js";
 import UploadEverywhere from "/js/upload-everywhere.js";
-import TiptapEditorWithFileMenu from "/js/tiptap-editor-modular.js";
+import TiptapEditorModular from "/js/tiptap-editor-modular.js";
 import Asset360Manager from "/js/components/360-asset-manager.js";
 import DappManager from "/js/components/dapp-manager.js";
 import RemixDappManager from "/js/components/remix-dapp-manager.js";
@@ -1123,7 +1123,7 @@ PORT=3000
     "choices-vue": ChoicesVue,
     "mfi-vue": MFI,
     "upload-everywhere": UploadEverywhere,
-    "tiptap-editor-with-file-menu": TiptapEditorWithFileMenu,
+    "tiptap-editor-modular": TiptapEditorModular,
     "asset-360-manager": Asset360Manager,
     "dapp-manager": DappManager,
     "remix-dapp-manager": RemixDappManager,

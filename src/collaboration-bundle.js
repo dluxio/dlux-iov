@@ -2,17 +2,30 @@
 // Based on official TipTap v3 documentation: https://next.tiptap.dev/docs/collaboration/getting-started/install
 
 import { HocuspocusProvider } from '@hocuspocus/provider';
+import { WebrtcProvider } from 'y-webrtc';
 import * as Y from 'yjs';
 import { IndexeddbPersistence } from 'y-indexeddb';
 
 // Import all TipTap modules we need
 import { Editor } from '@tiptap/core';
+import { EditorContent, useEditor } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Collaboration from '@tiptap/extension-collaboration';
-import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
-import Placeholder from '@tiptap/extension-placeholder';
+import CollaborationCaret from '@tiptap/extension-collaboration-caret';
 
-// Additional useful extensions
+// Import from consolidated extensions package
+import { 
+  Placeholder,
+  CharacterCount,
+  Dropcursor,
+  Gapcursor
+} from '@tiptap/extensions';
+
+// Typography and Mention are separate packages in v3
+import Typography from '@tiptap/extension-typography';
+import Mention from '@tiptap/extension-mention';
+
+// These may still be individual packages
 import Document from '@tiptap/extension-document';
 import Paragraph from '@tiptap/extension-paragraph';
 import Text from '@tiptap/extension-text';
@@ -28,6 +41,17 @@ import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import Blockquote from '@tiptap/extension-blockquote';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
+// History extension removed - not compatible with Collaboration extension
+import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
+import CodeBlock from '@tiptap/extension-code-block';
+
+// Additional formatting extensions
+import Highlight from '@tiptap/extension-highlight';
+import Subscript from '@tiptap/extension-subscript';
+import Superscript from '@tiptap/extension-superscript';
+import { TextStyle } from '@tiptap/extension-text-style'; // Named export in v3
+import Underline from '@tiptap/extension-underline';
 
 // Create collaborative document helper
 function createCollaborativeDocument() {
@@ -38,17 +62,20 @@ function createCollaborativeDocument() {
 const TiptapCollaboration = {
   // Core Y.js and provider
   HocuspocusProvider,
+  WebrtcProvider,
   Y,
   IndexeddbPersistence,
   createCollaborativeDocument,
   
   // TipTap core
   Editor,
+  EditorContent,
+  useEditor,
   StarterKit,
   
   // Collaboration extensions
   Collaboration,
-  CollaborationCursor,
+  CollaborationCaret,
   
   // Basic extensions
   Document,
@@ -68,7 +95,25 @@ const TiptapCollaboration = {
   TaskList,
   TaskItem,
   Blockquote,
-  HorizontalRule
+  HorizontalRule,
+  
+  // Additional extensions
+  // History, // Removed - not compatible with Collaboration extension
+  Link,
+  Image,
+  CodeBlock,
+  Dropcursor,
+  Gapcursor,
+  CharacterCount,
+  Typography,
+  Mention,
+  
+  // Formatting extensions
+  Highlight,
+  Subscript,
+  Superscript,
+  TextStyle,
+  Underline
 };
 
 // Make globally available
@@ -85,7 +130,7 @@ if (typeof window !== 'undefined') {
     hasEditor: !!TiptapCollaboration.Editor,
     hasStarterKit: !!TiptapCollaboration.StarterKit,
     hasCollaboration: !!TiptapCollaboration.Collaboration,
-    hasCollaborationCursor: !!TiptapCollaboration.CollaborationCursor,
+    hasCollaborationCaret: !!TiptapCollaboration.CollaborationCaret,
     extensionCount: Object.keys(TiptapCollaboration).length
   });
 }

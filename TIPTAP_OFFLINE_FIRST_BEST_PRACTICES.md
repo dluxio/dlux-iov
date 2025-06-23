@@ -4,7 +4,72 @@
 
 This document defines the **definitive architecture** for implementing TipTap's offline-first collaborative editing pattern based on official TipTap.dev documentation and best practices. Our implementation follows TipTap's recommended approach for maximum performance, reliability, and user experience.
 
-### 🚨 **CURRENT ARCHITECTURE: Temp Document Strategy (Updated 2024)**
+### 🚀 **Latest Updates (v2025.01.23)**
+- **Single Editor Architecture**: Title now uses simple input field, body uses TipTap
+- **Consolidated Y.js Maps**: All metadata in single `metadata` map
+- **Vue 3 Integration**: Proper use of `markRaw()` for editor instances
+- **Simplified State Management**: Removed complex multi-editor synchronization
+- **Bundle Access Pattern**: Fixed to handle both default and named exports
+- **URL Management**: Temp documents don't get URLs until explicit save
+- **Cache-First Loading**: Metadata preloading eliminates blank periods
+- **Authentication State**: Proper handling of auth loading states
+- **Vue 3 Computed Properties**: Must be accessed as properties, not called as functions
+- **Edit Pattern**: Three-state pattern for inline field editing (persistent/temp/original)
+
+### 🎯 **SINGLE EDITOR ARCHITECTURE**
+
+**DLUX IOV uses a single TipTap editor for body content only**. Title and other metadata are stored in Y.js maps, not as separate editors. This approach:
+- Simplifies state management
+- Reduces memory usage
+- Avoids synchronization issues between multiple editors
+- Follows TipTap's recommended patterns for collaborative editing
+
+```javascript
+// ✅ CORRECT: Single body editor with metadata in Y.js maps
+const bodyEditor = new Editor({
+    element: this.$refs.bodyEditor,
+    extensions: [
+        StarterKit.configure({ undoRedo: false }),
+        Collaboration.configure({
+            document: ydoc,
+            field: 'body'  // Single content field
+        })
+    ]
+});
+
+// Title stored in Y.js config map
+const config = ydoc.getMap('config');
+config.set('documentName', titleValue);
+
+// ❌ WRONG: Multiple editors approach (deprecated)
+const titleEditor = new Editor({ /* ... */ });  // NOT USED
+const bodyEditor = new Editor({ /* ... */ });
+```
+
+### 🔧 **VUE 3 INTEGRATION PATTERNS**
+
+**markRaw() Usage Pattern**:
+Based on production experience and debugging sessions:
+
+```javascript
+// ✅ CORRECT: TipTap editors MUST use markRaw when stored in Vue reactive data
+import { markRaw } from '/js/vue.esm-browser.js'
+this.bodyEditor = markRaw(new Editor({ /* ... */ }));
+
+// ✅ CORRECT: Y.js documents DON'T need markRaw
+const ydoc = new Y.Doc();
+this.ydoc = ydoc;  // Works fine without markRaw
+
+// ❌ WRONG: Using markRaw on Y.js documents can break providers
+const ydoc = markRaw(new Y.Doc()); // Can cause "_a.on is not a function" errors
+```
+
+**Why the difference?**:
+- **TipTap Editors**: When stored in Vue reactive data, Vue's proxy system interferes with ProseMirror's internal transaction system
+- **Y.js Documents**: Have their own state management that doesn't conflict with Vue
+- **Official Examples**: Don't show markRaw because they don't store editors in reactive component data
+
+### 🚨 **CURRENT ARCHITECTURE: Temp Document Strategy (Updated 2025)**
 
 **Our implementation uses IMMEDIATE Y.js document creation with temp document strategy:**
 
@@ -12,9 +77,283 @@ This document defines the **definitive architecture** for implementing TipTap's 
 - ✅ **Collaboration extension included from start** for all editors
 - ✅ **IndexedDB persistence delayed** until user shows intent (typing pause)
 - ✅ **No lazy Y.js creation patterns** - all documents have Y.js from start
-- ✅ **Two-tier system**: Tier 1 (no CollaborationCursor) vs Tier 2 (with CollaborationCursor)
+- ✅ **Two-tier system**: Tier 1 (no CollaborationCaret) vs Tier 2 (with CollaborationCaret)
+- ✅ **TipTap creates Y.js fragments** - Never pre-create fragments manually
 
 **This replaces the previous lazy Y.js creation approach** which had race conditions and violated TipTap best practices.
+
+### 📝 **ARCHITECTURAL NOTE ON CODE EXAMPLES**
+
+**Important**: While many code examples in this document show a two-editor approach (titleEditor and bodyEditor) for historical context and comparison purposes, DLUX IOV's actual implementation uses a **single editor architecture**:
+
+- **Title**: Stored in a simple `<input>` field with `v-model="titleInput"`
+- **Body**: Uses a single TipTap editor instance
+- **Benefits**: Simpler state management, less memory usage, no sync issues
+
+When reading code examples that reference `titleEditor`, understand that in the actual implementation:
+- `this.titleEditor.getText()` → `this.titleInput`
+- `this.titleEditor.commands.setContent()` → `this.titleInput = value`
+- Title content is synchronized to Y.js config map via input event handlers
+
+### 📚 **TipTap v3 Documentation References**
+- **Editor Overview**: https://next.tiptap.dev/docs/editor/getting-started/overview
+- **Collaboration Overview**: https://next.tiptap.dev/docs/collaboration/getting-started/overview
+- **Performance Guide**: https://next.tiptap.dev/docs/guides/performance
+- **Invalid Schema Handling**: https://next.tiptap.dev/docs/guides/invalid-schema
+- **Authentication**: https://next.tiptap.dev/docs/collaboration/getting-started/authenticate
+- **Offline Support**: https://next.tiptap.dev/docs/guides/offline-support
+- **Vue.js Integration**: https://next.tiptap.dev/docs/editor/getting-started/install/vue3
+- **StarterKit Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/starterkit
+- **Collaboration Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/collaboration
+- **CollaborationCaret Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/collaboration-caret
+- **UndoRedo Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/undo-redo
+- **Provider Integration**: https://next.tiptap.dev/docs/collaboration/provider/integration
+- **Webhooks**: https://next.tiptap.dev/docs/collaboration/core-concepts/webhooks
+- **REST API**: https://next.tiptap.dev/docs/collaboration/documents/rest-api
+- **Awareness**: https://next.tiptap.dev/docs/collaboration/core-concepts/awareness
+
+## 🚨 **CRITICAL: TIPTAP v3 BREAKING CHANGES**
+
+### **Extension Name Changes in v3**
+- **History** → **UndoRedo** ⚠️ BREAKING CHANGE
+  - UndoRedo has been moved to `@tiptap/extensions` package
+  - StarterKit still imports it from @tiptap/extensions by default
+  - MUST disable it when using Collaboration: `StarterKit.configure({ undoRedo: false })`
+- **CollaborationCursor** → **CollaborationCaret** ⚠️ BREAKING CHANGE
+
+### **Extension Consolidation in v3**
+Many extensions moved to `@tiptap/extensions` consolidated package:
+- Placeholder, CharacterCount, Dropcursor, Gapcursor, Focus, Selection, TrailingNode
+- Import from: `import { ExtensionName } from '@tiptap/extensions'`
+
+### **Vue 3 Integration Requirements**
+**CRITICAL**: TipTap editors and Y.js documents MUST be wrapped with `markRaw()` in Vue 3:
+
+```javascript
+// ✅ CORRECT: Import markRaw directly (not Vue.markRaw)
+import { markRaw } from '/js/vue.esm-browser.js'
+
+// ✅ CORRECT: Wrap Y.js documents
+const ydoc = markRaw(new Y.Doc())
+
+// ✅ CRITICAL: Wrap TipTap editors when storing in component
+const bodyEditor = new Editor({ /* ... */ })
+this.bodyEditor = markRaw(bodyEditor)  // THIS IS ESSENTIAL!
+
+// ❌ WRONG: Direct assignment without markRaw
+this.bodyEditor = bodyEditor  // Causes "mismatched transaction" errors!
+
+// ❌ WRONG: Using Vue.markRaw (causes "Vue is not defined")
+this.bodyEditor = Vue.markRaw(bodyEditor)  // Don't do this!
+```
+
+Without `markRaw()` on editors, Vue 3's proxy system causes:
+- "RangeError: Applying a mismatched transaction" when clicking formatting buttons
+- Bold/italic/other commands failing silently or not responding
+- State desynchronization between ProseMirror and Y.js
+- Editor appearing to work but formatting commands failing
+
+**Key Discovery**: The mismatched transaction error occurs because Vue's reactivity proxy interferes with ProseMirror's internal transaction system. This was discovered when the bold button stopped working after typing in the title field.
+
+**Extensions in StarterKit** (included by default in v3):
+- Document, Paragraph, Text, HardBreak
+- Bold, Italic, Strike, Code (inline marks)
+- Heading, BulletList, OrderedList, ListItem
+- Blockquote, CodeBlock, HorizontalRule
+- UndoRedo (imported from @tiptap/extensions)
+- Dropcursor, Gapcursor, Link, ListKeymap, TrailingNode, Underline
+
+**Separate Package Extensions** (NOT in consolidated package):
+- Typography (`@tiptap/extension-typography@beta`)
+- Mention (`@tiptap/extension-mention@beta`)
+- Highlight, Underline, Subscript, Superscript (individual packages)
+- TextStyle (`@tiptap/extension-text-style@beta`) - required for color/font
+
+### **Parameter Changes in v3**
+```javascript
+// ❌ v2 DEPRECATED SYNTAX
+Collaboration.configure({
+    document: ydoc,
+    fragment: 'content'  // v2 parameter name
+})
+
+// ✅ v3 CORRECT SYNTAX
+Collaboration.configure({
+    document: ydoc,
+    field: 'content'  // v3 parameter name
+})
+```
+
+### **Package Installation for v3**
+```bash
+# ✅ REQUIRED: Core packages with @beta tag
+npm install @tiptap/core@beta @tiptap/vue-3@beta @tiptap/pm@beta @tiptap/starter-kit@beta
+
+# ✅ REQUIRED: Collaboration packages
+npm install @tiptap/extension-collaboration@beta @tiptap/extension-collaboration-caret@beta
+
+# ✅ REQUIRED: Consolidated extensions package (includes Placeholder, etc.)
+npm install @tiptap/extensions@beta
+
+# ✅ REQUIRED: Y.js ecosystem
+npm install --legacy-peer-deps yjs@^13.6.27 y-indexeddb@^9.0.12 y-protocols@^1.0.6
+npm install --legacy-peer-deps @tiptap/y-tiptap@next  # TipTap's Y.js bindings
+
+# ✅ OPTIONAL: Cloud collaboration provider
+npm install --legacy-peer-deps @hocuspocus/provider@^3.1.3
+
+# ✅ OPTIONAL: Advanced formatting extensions (NOT in StarterKit)
+npm install --legacy-peer-deps @tiptap/extension-highlight@beta @tiptap/extension-underline@beta
+npm install --legacy-peer-deps @tiptap/extension-subscript@beta @tiptap/extension-superscript@beta
+npm install --legacy-peer-deps @tiptap/extension-text-style@beta  # Required for color/font customization
+
+# ✅ OPTIONAL: Special extensions (NOT in @tiptap/extensions consolidated package)
+npm install --legacy-peer-deps @tiptap/extension-typography@beta  # Smart typography
+npm install --legacy-peer-deps @tiptap/extension-mention@beta     # @mentions
+npm install --legacy-peer-deps @tiptap/suggestion@beta           # Required by mention
+
+# ✅ REQUIRED: Vue 3 (peer dependency of @tiptap/vue-3)
+npm install --legacy-peer-deps vue@^3.0.0
+```
+
+### **Vue.js Integration Changes in v3**
+```javascript
+// ✅ v3 CORRECT: Import from @tiptap/vue-3
+import { useEditor, EditorContent } from '@tiptap/vue-3'
+
+// ❌ v2 DEPRECATED: Import from @tiptap/vue-2
+import { useEditor, EditorContent } from '@tiptap/vue-2'
+```
+
+### **Vue 3 Reactivity and Editor Storage**
+```javascript
+// ✅ CORRECT: Use markRaw to prevent deep reactivity on ProseMirror instances
+this.bodyEditor = markRaw(bodyEditor);
+
+// ❌ WRONG: Direct assignment causes Vue reactivity interference
+this.bodyEditor = bodyEditor;
+```
+
+**Why markRaw is Required**: Vue 3's deep reactivity system can interfere with ProseMirror's internal state management, causing issues like:
+- Editor methods returning null unexpectedly
+- State synchronization problems
+- Performance degradation from unnecessary reactivity tracking
+
+**Best Practice**: Always wrap editor instances with `markRaw()` when storing them in Vue component data.
+
+### **Vue 3 Computed Properties**
+
+Vue 3 computed properties must be accessed as properties, not called as functions:
+
+```javascript
+// ✅ CORRECT: Access as properties
+computed: {
+    generatedPermlink() {
+        return this.titleInput?.trim().toLowerCase().replace(/\s+/g, '-');
+    }
+}
+// In template: {{ generatedPermlink }}
+// In methods: if (this.generatedPermlink) { ... }
+
+// ❌ WRONG: Calling as functions
+// In template: {{ generatedPermlink() }}
+// In methods: if (this.generatedPermlink()) { ... }
+```
+
+**Common Pitfall**: Accessing computed properties with parentheses returns the function object, leading to displays like "function () { [native code] }" in the UI.
+
+## Provider Configuration
+
+### **Hocuspocus Provider Setup (DLUX Implementation)**
+```javascript
+import { HocuspocusProvider } from '@hocuspocus/provider'
+
+const provider = new HocuspocusProvider({
+    url: `wss://data.dlux.io/collaboration/${owner}/${permlink}`,
+    name: documentId, // Y.js document name
+    document: ydoc,
+    token: '', // Not used - auth via headers
+    parameters: {
+        auth: JSON.stringify({
+            account: username,
+            challenge: timestamp,
+            pubkey: publicKey,
+            signature: signature
+        })
+    },
+    onSynced: () => console.log('Document synced'),
+    awareness: {
+        user: {
+            name: userName,
+            color: userColor
+        }
+    }
+})
+```
+
+### **Authentication with DLUX/Hive Blockchain**
+DLUX uses Hive blockchain authentication instead of JWT tokens:
+- **Headers Required**: x-account, x-challenge, x-pubkey, x-signature
+- **Validity**: 24 hours (challenge timestamp)
+- **Server**: Self-hosted Hocuspocus at data.dlux.io
+
+### **WebSocket Connection Management**
+})
+```
+
+**Note**: DLUX uses Hocuspocus server with custom blockchain authentication, not TipTap Cloud.
+
+## Available TipTap Extensions
+
+### **StarterKit Includes**
+- **Text Formatting**: Bold, Italic, Strike, Code (inline)
+- **Block Elements**: Paragraph, Heading, BlockQuote, CodeBlock
+- **Lists**: BulletList, OrderedList, ListItem
+- **Other**: HorizontalRule, HardBreak
+- **History**: UndoRedo (must be disabled when using Collaboration)
+
+### **Additional Formatting Extensions**
+```bash
+# Individual extensions available
+npm install --legacy-peer-deps @tiptap/extension-highlight@beta      # Text highlighting
+npm install --legacy-peer-deps @tiptap/extension-underline@beta     # Underlined text
+npm install --legacy-peer-deps @tiptap/extension-subscript@beta     # Subscript
+npm install --legacy-peer-deps @tiptap/extension-superscript@beta   # Superscript
+npm install --legacy-peer-deps @tiptap/extension-text-style@beta    # Required for colors
+
+# NOT in consolidated @tiptap/extensions package
+npm install --legacy-peer-deps @tiptap/extension-typography@beta    # Smart quotes
+npm install --legacy-peer-deps @tiptap/extension-mention@beta       # @mentions
+npm install --legacy-peer-deps @tiptap/suggestion@beta              # Required by mention
+```
+
+### **Extension Usage Notes**
+- Install individual extensions to override StarterKit defaults
+- Typography and Mention are NOT in the consolidated `@tiptap/extensions` package
+- TextStyle extension uses named export: `import { TextStyle } from '@tiptap/extension-text-style'`
+
+## Architecture: Y.js ↔ ProseMirror Integration
+
+Understanding how these components interact is critical for avoiding state synchronization issues:
+
+```
+User Action → ProseMirror Editor → y-tiptap → Y.js Document → IndexedDB
+                    ↑                   ↓
+                    └───────────────────┘
+```
+
+### Component Roles:
+- **Y.js Document**: CRDT-based source of truth, maintains complete change history
+- **y-tiptap**: Bidirectional binding that converts between Y.js updates and ProseMirror transactions
+- **IndexedDB Persistence**: Local storage that can cause timing issues if created after content changes
+- **ProseMirror**: The editor's state management and transaction system
+
+### Critical Insight: The "Mismatched Transaction" Problem
+When IndexedDB persistence is created after the editor already has content:
+1. IndexedDB loads historical Y.js data
+2. y-tiptap tries to sync this to ProseMirror
+3. ProseMirror's state becomes inconsistent
+4. Commands fail with "mismatched transaction" because they're based on outdated state
 
 ## Core Design Principles
 
@@ -27,15 +366,17 @@ This document defines the **definitive architecture** for implementing TipTap's 
 - **Rule**: Create Y.js document immediately but don't add to drafts list initially
 - **Rationale**: Avoids draft clutter while providing full TipTap collaborative functionality
 - **Implementation**: Only call `ensureLocalFileEntry()` when user saves or has meaningful content
+- **Temp ID Format**: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+- **Persistence Trigger**: User shows intent through typing pause (debounced)
 
-### 3. **Two-Tier Cursor Strategy**
-- **Rule**: CollaborationCursor extension CANNOT handle null providers (TipTap limitation)
+### 3. **Two-Tier Cursor Strategy (v3 Updated)**
+- **Rule**: CollaborationCaret extension CANNOT handle null providers (TipTap v3 limitation)
 - **Rationale**: TipTap/ProseMirror runtime errors occur with null providers
-- **Solution**: Use two-tier system: Tier 1 (no CollaborationCursor) vs Tier 2 (with CollaborationCursor)
+- **Solution**: Use two-tier system: Tier 1 (no CollaborationCaret) vs Tier 2 (with CollaborationCaret)
 
-### 4. **Extension Lifecycle Management**
-- **Rule**: Include Collaboration extension from editor creation, add CollaborationCursor only for cloud
-- **Rationale**: CollaborationCursor requires WebSocket provider, cannot be null
+### 4. **Extension Lifecycle Management (v3 Updated)**
+- **Rule**: Include Collaboration extension from editor creation, add CollaborationCaret only for cloud
+- **Rationale**: CollaborationCaret requires WebSocket provider, cannot be null
 - **Implementation**: Two distinct editor configurations based on cursor requirements
 
 ### 5. **Initialization Race Condition Prevention**
@@ -48,6 +389,194 @@ This document defines the **definitive architecture** for implementing TipTap's 
 - **Rationale**: Prevents content loss when loading existing documents while maintaining TipTap best practices
 - **Implementation**: Check for existing Y.js document before creating new one in editor creation methods
 
+### 7. **Y.js Fragment Creation (TipTap v3)**
+- **Rule**: NEVER pre-create Y.js fragments - Let TipTap create them via `field` parameter
+- **Rationale**: TipTap's Collaboration extension manages fragment creation internally
+- **Implementation**: Use `field` parameter in Collaboration.configure(), not `fragment` (v2 syntax)
+
+## 🔥 **TIPTAP v3 COMPLIANCE REQUIREMENTS**
+
+### **1. StarterKit Configuration for Collaboration**
+```javascript
+// ✅ v3 CORRECT: StarterKit includes UndoRedo which must be disabled for Collaboration
+import StarterKit from '@tiptap/starter-kit'
+import Collaboration from '@tiptap/extension-collaboration'
+
+const editor = new Editor({
+    extensions: [
+        StarterKit.configure({
+            undoRedo: false  // CRITICAL: Must disable when using Collaboration
+        }),
+        Collaboration.configure({
+            document: ydoc,
+            field: 'content'
+        })
+    ]
+})
+
+// ❌ WRONG: Forgetting to disable UndoRedo with Collaboration
+const editor = new Editor({
+    extensions: [
+        StarterKit,  // UndoRedo conflicts with Collaboration!
+        Collaboration.configure({ document: ydoc, field: 'content' })
+    ]
+})
+
+// ❌ WRONG: Importing UndoRedo with Collaboration
+import { UndoRedo } from '@tiptap/extensions'  // Conflicts with Collaboration
+```
+
+### **2. Document Extension Requirement**
+```javascript
+// ✅ v3 REQUIRED: Document extension must be explicitly imported
+import Document from '@tiptap/extension-document'
+// OR use StarterKit which includes it
+
+// ❌ v2 BEHAVIOR: Document was implicit, now explicit in v3
+```
+
+### **3. UndoRedo vs Collaboration**
+```javascript
+// ✅ v3 CORRECT: Import UndoRedo for non-collaborative editors
+import StarterKit from '@tiptap/starter-kit'
+import { UndoRedo } from '@tiptap/extensions'
+
+const localEditor = new Editor({
+    extensions: [
+        StarterKit,
+        UndoRedo.configure({
+            depth: 100,
+            newGroupDelay: 500
+        })
+    ]
+})
+
+// ✅ v3 CORRECT: Don't import UndoRedo for collaborative editors
+import StarterKit from '@tiptap/starter-kit'
+import Collaboration from '@tiptap/extension-collaboration'
+// DO NOT import UndoRedo
+
+const collaborativeEditor = new Editor({
+    element: document.querySelector('.editor'),
+    extensions: [
+        StarterKit,  // No UndoRedo configuration needed
+        Collaboration.configure({
+            document: ydoc,
+            field: 'content'  // Let TipTap create the fragment
+        })
+        // Collaboration handles its own undo/redo
+    ]
+    // NO immediatelyRender - not a valid TipTap v3 option
+    // NO content parameter - let Y.js handle initial state
+})
+```
+
+### **4. Command Execution with Safety Checks**
+```javascript
+// ✅ v3 BEST PRACTICE: Always check before executing
+if (editor.can().toggleBold()) {
+    editor.commands.toggleBold()
+}
+
+// ✅ v3 BEST PRACTICE: Chain commands with focus
+editor.chain()
+    .focus()  // CRITICAL: Ensures proper state for transaction
+    .toggleBold()
+    .run()
+
+// ❌ WRONG: Direct commands without chain/focus
+editor.commands.toggleBold() // Can cause mismatched transaction errors
+```
+
+### **5. Content Validation and Error Handling**
+```javascript
+// ✅ v3 BEST PRACTICE: Enable content validation
+const editor = new Editor({
+    enableContentCheck: true,
+    onContentError({ editor, error, disableCollaboration }) {
+        console.error('Schema error:', error)
+        disableCollaboration()
+        editor.setEditable(false)
+        // Notify user and provide recovery options
+    }
+})
+```
+
+### **6. Vue.js 3 Integration Patterns**
+```vue
+<!-- ✅ v3 CORRECT: Composition API with useEditor -->
+<template>
+  <editor-content :editor="editor" />
+</template>
+
+<script setup>
+import { useEditor, EditorContent } from '@tiptap/vue-3'
+import StarterKit from '@tiptap/starter-kit'
+
+const editor = useEditor({
+  content: '<p>Content</p>',
+  extensions: [StarterKit],
+  onUpdate: ({ editor }) => {
+    // Minimal reactive updates only
+    emit('content-changed', editor.getHTML())
+  }
+})
+// Cleanup handled automatically by useEditor
+</script>
+```
+
+### **7. Memory Management and Cleanup**
+```javascript
+// ✅ v3 CRITICAL: Proper cleanup sequence (from CLAUDE.md)
+beforeUnmount() {
+    // 1. Destroy Y.js document
+    if (this.ydoc) {
+        this.ydoc.destroy();
+        this.ydoc = null;
+    }
+    
+    // 2. Clean up IndexedDB provider
+    if (this.indexeddbProvider) {
+        this.indexeddbProvider.clearData();
+        this.indexeddbProvider = null;
+    }
+    
+    // 3. Disconnect WebSocket provider
+    if (this.websocketProvider) {
+        this.websocketProvider.disconnect();
+        this.websocketProvider = null;
+    }
+    
+    // 4. Destroy the single body editor
+    if (this.bodyEditor) {
+        this.bodyEditor.destroy();
+        this.bodyEditor = null;
+    }
+    }
+    
+    if (this.websocketProvider) {
+        this.websocketProvider.disconnect()
+        this.websocketProvider = null
+    }
+}
+```
+
+### **8. Performance Configuration**
+```javascript
+// ✅ v3 PERFORMANCE: Optimal rendering settings
+const editor = new Editor({
+    shouldRerenderOnTransaction: false, // v3 default - better performance
+    enableInputRules: true,
+    enablePasteRules: true,
+    
+    editorProps: {
+        attributes: {
+            class: 'prose focus:outline-none'
+        }
+    }
+})
+```
+
 ## Document Name vs Title Content: Critical Distinction
 
 ### **CRITICAL: Document Name ≠ Title Content**
@@ -55,7 +584,7 @@ This document defines the **definitive architecture** for implementing TipTap's 
 In DLUX collaborative editing, there are **two distinct concepts** that must be handled separately:
 
 1. **Document Name** (`config.documentName`): The display name shown in file lists, tabs, and UI
-2. **Title Content** (`title` XmlFragment): The actual content of the title editor field
+2. **Title Content** (`titleInput`): The actual title content stored in a simple input field (not a TipTap editor)
 
 #### **✅ CORRECT: Document Name Storage Pattern**
 
@@ -105,10 +634,10 @@ extractDocumentNameFromConfig() {
 #### **❌ WRONG: Extracting Document Name from Title Content**
 
 ```javascript
-// ❌ WRONG: Don't extract document name from title editor content
-extractDocumentNameFromTitleEditor() {
-    const titleText = this.titleEditor.getText(); // WRONG APPROACH
-    return titleText; // Document name should come from config, not content
+// ❌ WRONG: Don't extract document name from title content
+extractDocumentNameFromTitle() {
+    const titleText = this.titleInput; // WRONG APPROACH
+    return titleText; // Document name should come from config, not title input
 }
 ```
 
@@ -232,8 +761,8 @@ According to TipTap.dev official documentation, `editor.destroy()` only handles:
 Based on TipTap.dev documentation and Y.js community best practices:
 
 #### **1. Y.js Document (`this.ydoc`)**
-- **Lives independently** of editors
-- **Shared across multiple editors** (title, body, permlink)
+- **Lives independently** of the editor
+- **Contains all document data** (body content, config map, metadata)
 - **`editor.destroy()` does NOT destroy Y.js documents**
 - **Must be manually destroyed** to prevent memory leaks
 
@@ -297,11 +826,7 @@ async cleanupCurrentDocumentProperOrder() {
         this.provider.destroy();
     }
 
-    // STEP 2: Destroy editors before Y.js document  
-    if (this.titleEditor) {
-        this.titleEditor.destroy();
-        this.titleEditor = null;
-    }
+    // STEP 2: Destroy the single body editor before Y.js document  
     if (this.bodyEditor) {
         this.bodyEditor.destroy();
         this.bodyEditor = null;
@@ -343,12 +868,14 @@ async loadDocument(file) {
         this.indexeddbProvider.on('synced', resolve);
     });
     
-    // STEP 4: Create editors with Y.js document
-    this.titleEditor = new Editor({
+    // STEP 4: Create single body editor with Y.js document
+    this.bodyEditor = new Editor({
+        element: this.$refs.bodyEditor,
         extensions: [
+            StarterKit.configure({ undoRedo: false }),
             Collaboration.configure({
                 document: this.ydoc,  // ✅ Y.js document passed to editor
-                field: 'title'
+                field: 'body'
             })
         ]
     });
@@ -372,12 +899,13 @@ async createLocalEditorsWithUpgradeCapability(bundle) {
         }
     }
     
-    // Create editors with Y.js collaboration from start
-    this.titleEditor = new Editor({
+    // Create single body editor with Y.js collaboration from start
+    this.bodyEditor = new Editor({
         extensions: [
+            StarterKit.configure({ undoRedo: false }),  // Disable UndoRedo with Collaboration
             Collaboration.configure({
                 document: this.ydoc,  // ✅ Y.js document available immediately
-                field: 'title'
+                field: 'body'
             })
         ],
         onUpdate: ({ editor }) => {
@@ -388,6 +916,8 @@ async createLocalEditorsWithUpgradeCapability(bundle) {
             }
         }
     });
+    
+    // Title is handled via simple input field, not TipTap editor
 }
 ```
 
@@ -442,6 +972,364 @@ async loadLocalFile(file) {
 // Published posts: /@username/permlink
 ```
 
+### **API Endpoints (Hocuspocus + Custom REST)**
+**Base URL**: `https://data.dlux.io/api`
+**WebSocket**: `wss://data.dlux.io/collaboration/{owner}/{permlink}`
+
+#### Document Management
+- `GET /collaboration/documents` - List user's collaborative documents
+- `POST /collaboration/documents` - Create new collaborative document
+- `DELETE /collaboration/documents/{owner}/{permlink}` - Delete document
+- `GET /collaboration/info/{owner}/{permlink}` - Get document metadata
+- `POST /collaboration/info/{owner}/{permlink}` - Update document metadata
+
+#### Permissions Management
+- `GET /collaboration/permissions/{owner}/{permlink}` - List permissions
+- `POST /collaboration/permissions/{owner}/{permlink}` - Grant permission
+- `DELETE /collaboration/permissions/{owner}/{permlink}/{account}` - Revoke permission
+- `GET /collaboration/permissions-detailed/{owner}/{permlink}` - Get detailed permissions
+
+#### Activity & Statistics
+- `GET /collaboration/activity/{owner}/{permlink}` - Get document activity log
+- `GET /collaboration/stats/{owner}/{permlink}` - Get document statistics
+- `POST /collaboration/cleanup/manual/{owner}/{permlink}` - Manual cleanup (owner only)
+
+#### Authentication
+All requests require DLUX/Hive blockchain authentication headers:
+- `x-account`: DLUX username
+- `x-challenge`: Unix timestamp (23hr validity)
+- `x-pubkey`: Hive public key
+- `x-signature`: Signed challenge
+
+### **Y.js Transaction Management Pattern**
+
+#### **Using Transactions with Origin Tags**
+
+To prevent conflicts between editor operations and metadata updates, use Y.js transactions with origin tags:
+
+```javascript
+// ✅ ARCHITECTURE DECISION: Individual transactions per field
+// We chose individual transactions over batched updates for better reactivity
+
+// ✅ CORRECT: Separate transaction for each metadata field
+this.ydoc.transact(() => {
+    const metadata = this.ydoc.getMap('metadata');
+    metadata.set('allowVotes', newValue);
+}, 'metadata-update');
+
+// ✅ CORRECT: Another field, another transaction
+this.ydoc.transact(() => {
+    const metadata = this.ydoc.getMap('metadata');
+    metadata.set('tags', newTags);
+}, 'metadata-update');
+
+// ❌ NOT USED: Batched transactions (we chose individual approach)
+// this.ydoc.transact(() => {
+//     const metadata = this.ydoc.getMap('metadata');
+//     metadata.set('allowVotes', value1);
+//     metadata.set('tags', value2);
+//     metadata.set('beneficiaries', value3);
+// }, 'metadata-batch');
+```
+
+#### **Individual vs Batched Transaction Architecture**
+
+**✅ Our Choice: Individual Transactions**
+- Each metadata field gets its own transaction
+- Real-time collaborative sync (each field syncs immediately)
+- Vue watcher compatibility (each watcher handles one field)
+- Granular debugging (pinpoint exact field causing issues)
+- Better multi-user experience (no large transaction conflicts)
+
+**❌ Not Used: Batched Transactions**
+- Multiple fields in single transaction
+- Delayed sync until all fields ready
+- Potential conflicts in collaborative editing
+
+```javascript
+// ✅ CORRECT: Filter transactions by origin in editor handlers
+const editor = new Editor({
+    onUpdate: ({ editor, transaction }) => {
+        // Skip non-content transactions
+        if (transaction.origin === 'metadata-update' || 
+            transaction.origin === 'title-update' ||
+            transaction.origin === 'schema-init') {
+            return;
+        }
+        // Handle editor content changes
+        this.hasUnsavedChanges = true;
+    }
+});
+```
+
+#### **Standard Origin Tags**
+- `'metadata-update'` - General metadata changes (tags, beneficiaries, custom JSON)
+- `'title-update'` - Document title updates
+- `'schema-init'` - Initial document schema setup
+- `'metadata-sync'` - Bulk metadata synchronization
+- `'auto-naming'` - Automatic document naming from content
+- `'cache-load'` - Loading cached metadata
+
+#### **Benefits**
+1. **Prevents transaction conflicts** between editor and metadata operations
+2. **Enables selective processing** of different transaction types
+3. **Improves debugging** by identifying transaction sources
+4. **Follows Y.js best practices** for multi-source updates
+
+### **🚀 Latest Fixes and Patterns (v2025.01.23)**
+
+#### **Bundle Access Pattern**
+
+When accessing the TipTap collaboration bundle, handle both export patterns:
+
+```javascript
+// ✅ CORRECT: Handle both default and named exports
+const bundle = window.TiptapCollaboration;
+const tiptapBundle = bundle.Y ? bundle : bundle.default;
+const IndexeddbPersistence = tiptapBundle?.IndexeddbPersistence;
+const Y = tiptapBundle?.Y;
+
+// ❌ WRONG: Direct access without checking export pattern
+const IndexeddbPersistence = window.TiptapCollaboration.IndexeddbPersistence;
+```
+
+**Why**: The bundle may be exported as either `{ Y, IndexeddbPersistence }` or `{ default: { Y, IndexeddbPersistence } }`
+
+#### **State Management Patterns for Editable Fields**
+
+When implementing inline editing for metadata fields (permlink, document name, etc.), use the three-state pattern:
+
+```javascript
+// ✅ CORRECT: Three-state pattern with proper data flow
+data() {
+    return {
+        // Persistent state - synced with Y.js
+        permlinkInput: '',        // Custom permlink value
+        
+        // Temporary editing state
+        permlinkInputTemp: '',    // Edit-in-progress value
+        originalPermlinkValue: '', // For cancel restoration
+        showPermlinkEditor: false, // Edit mode flag
+    }
+},
+
+computed: {
+    // Display value computation
+    actualPermlink() {
+        if (this.permlinkInput && this.permlinkInput.trim()) {
+            return this.sanitizedCustomPermlink;
+        }
+        return this.generatedPermlink;
+    }
+}
+```
+
+**Key Implementation Steps**:
+
+1. **Starting Edit**: Initialize from display value
+```javascript
+togglePermlinkEditor() {
+    // Use computed display value, not raw input
+    const currentValue = this.actualPermlink || '';
+    this.originalPermlinkValue = currentValue;
+    this.permlinkInputTemp = currentValue;
+    this.showPermlinkEditor = true;
+}
+```
+
+2. **Saving Changes**: Commit to persistent state
+```javascript
+savePermlink() {
+    // Update persistent state first
+    this.permlinkInput = this.permlinkInputTemp.trim();
+    // Then sync to Y.js
+    this.debouncedSetPermlinkInMetadata();
+    this.showPermlinkEditor = false;
+}
+```
+
+3. **Canceling Edit**: Restore appropriate state
+```javascript
+cancelPermlinkEdit() {
+    // Distinguish between custom and generated values
+    if (this.originalPermlinkValue !== this.generatedPermlink) {
+        this.permlinkInput = this.originalPermlinkValue;  // Restore custom
+    } else {
+        this.permlinkInput = '';  // Clear for generated to show
+    }
+    this.showPermlinkEditor = false;
+}
+```
+
+4. **Loading from Y.js**: Populate only custom values
+```javascript
+loadMetadataFromYjs() {
+    const permlink = metadata.get('permlink') || '';
+    // Only populate input if it's a custom permlink
+    if (permlink && permlink !== this.generatedPermlink) {
+        this.permlinkInput = permlink;
+    } else {
+        this.permlinkInput = '';  // Let generated show
+    }
+}
+```
+
+**Benefits**:
+- Clear separation of display, edit, and persistent states
+- Proper handling of generated vs custom values
+- No UI flickering or value reversion
+- Consistent user experience across all editable fields
+
+#### **URL Management for Temporary Documents**
+
+Following offline-first principles, URLs should only be assigned when persistence is established:
+
+```javascript
+// ✅ CORRECT: No URL for auto-persisted temp documents
+if (this.isTemporaryDocument) {
+    // Create IndexedDB persistence without URL update
+    this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc);
+    console.log('📝 Temp document auto-persisted without URL update');
+}
+
+// ✅ CORRECT: Update URL only on explicit save with name
+saveDocument(newDocumentName) {
+    if (this.currentFile.id && this.currentFile.type === 'local') {
+        this.updateLocalStorageMetadata(this.currentFile.id, { name: newDocumentName });
+        this.cacheLocalDocumentMetadata(this.currentFile.id, newDocumentName);
+        
+        // Update URL when user explicitly saves
+        this.updateURLWithLocalParams(this.username || 'anonymous', this.currentFile.id);
+    }
+}
+
+// ❌ WRONG: Assigning URLs to temp documents during auto-persistence
+if (this.isTemporaryDocument) {
+    // Don't do this - violates offline-first principles
+    this.updateURLWithLocalParams(username, tempDocId);
+}
+```
+
+#### **Cache-First Pattern for Document Loading**
+
+Implement cache-first pattern to eliminate blank loading periods:
+
+```javascript
+// ✅ CORRECT: Try cache first, then IndexedDB
+async autoConnectToLocalDocument(documentId) {
+    // 1. Try to get metadata from cache for instant display
+    const cachedMetadata = this.preloadLocalDocumentMetadata(documentId);
+    let documentName = cachedMetadata?.documentName;
+    
+    // 2. If no cached name, extract from Y.js (may take time)
+    if (!documentName) {
+        documentName = await this.extractDocumentNameFromYjs(documentId) || documentId;
+        // Cache for future loads
+        if (documentName && documentName !== documentId) {
+            this.cacheLocalDocumentMetadata(documentId, documentName);
+        }
+    }
+    
+    // 3. Load document with preloaded metadata
+    await this.loadLocalDocument(documentId, documentName);
+}
+
+// ❌ WRONG: Always waiting for IndexedDB before displaying
+async autoConnectToLocalDocument(documentId) {
+    // This causes blank loading period
+    const documentName = await this.extractDocumentNameFromYjs(documentId);
+    await this.loadLocalDocument(documentId, documentName);
+}
+```
+
+#### **Document Metadata Caching**
+
+Cache document metadata for instant loading on refresh:
+
+```javascript
+// ✅ CORRECT: Multi-layer caching strategy
+cacheLocalDocumentMetadata(documentId, documentName) {
+    const metadataCache = {
+        documentName: documentName,
+        timestamp: Date.now(),
+        documentId: documentId,
+        type: 'local'
+    };
+    
+    // Layer 1: localStorage for persistence across sessions
+    localStorage.setItem(`dlux_local_doc_metadata_${documentId}`, JSON.stringify(metadataCache));
+    
+    // Layer 2: Memory cache for instant access
+    this.localDocumentMetadataCache[documentId] = metadataCache;
+}
+
+preloadLocalDocumentMetadata(documentId) {
+    // Try memory cache first
+    if (this.localDocumentMetadataCache[documentId]) {
+        return this.localDocumentMetadataCache[documentId];
+    }
+    
+    // Fall back to localStorage
+    try {
+        const cached = localStorage.getItem(`dlux_local_doc_metadata_${documentId}`);
+        if (cached) {
+            const metadata = JSON.parse(cached);
+            // Validate cache (24 hour expiry)
+            if (Date.now() - metadata.timestamp < 24 * 60 * 60 * 1000) {
+                this.localDocumentMetadataCache[documentId] = metadata;
+                return metadata;
+            }
+        }
+    } catch (e) {
+        console.error('Error loading cached metadata:', e);
+    }
+    
+    return null;
+}
+```
+
+#### **Authentication State Management**
+
+Proper handling of authentication loading states:
+
+```javascript
+// ✅ CORRECT: Track authentication state separately from logged-in status
+data() {
+    return {
+        hasReceivedInitialAuthHeaders: false,  // Tracks if we've received auth state
+        authLoading: false,  // Default to false, set true when expecting auth
+        username: null,      // null = not authenticated, string = authenticated
+    }
+}
+
+// ✅ CORRECT: Permission checks that handle loading state
+getUserPermissionLevel(fileType, owner) {
+    // Local files always accessible
+    if (fileType === 'local') {
+        return 'owner';
+    }
+    
+    // During auth loading, allow access to prevent UI lockout
+    if (!this.hasReceivedInitialAuthHeaders) {
+        return 'readonly';  // Temporary access until auth resolves
+    }
+    
+    // After auth headers received, enforce permissions
+    if (!this.username) {
+        return 'readonly';
+    }
+    
+    return owner === this.username ? 'owner' : 'readonly';
+}
+
+// ❌ WRONG: Blocking access during auth loading
+getUserPermissionLevel(fileType, owner) {
+    if (!this.username) {
+        return 'none';  // This locks out users during initial load
+    }
+}
+```
+
 ### **🏆 FINAL COMPLIANCE VERDICT**
 
 Our implementation achieves **100% TipTap.dev best practice compliance**:
@@ -450,8 +1338,15 @@ Our implementation achieves **100% TipTap.dev best practice compliance**:
 2. **✅ Y.js Management**: Proper document lifecycle with creation before editors
 3. **✅ Provider Cleanup**: Correct resource management for IndexedDB and WebSocket providers
 4. **✅ Temp Transitions**: Clean ID generation without "temp" in URLs
-5. **✅ Vue State Management**: Proper reactive data isolation between documents
+5. **✅ Vue State Management**: Proper reactive data isolation between documents with markRaw()
 6. **✅ URL Management**: Clean tier transitions with appropriate URL structures
+7. **✅ Authentication**: Blockchain-based auth with Hocuspocus server
+8. **✅ Bundle Access**: Proper handling of both default and named exports
+9. **✅ Offline-First**: URLs only assigned on explicit save, not auto-persistence
+10. **✅ Cache-First**: Metadata preloading for instant document display
+11. **✅ Auth States**: Proper handling of loading vs authenticated states
+12. **✅ Single Editor**: Simplified architecture with title as input field
+13. **✅ Configuration**: Proper undoRedo: false, onCreate patterns
 
 ### **🎯 KEY INSIGHT: TipTap Architecture Design**
 
@@ -469,6 +1364,118 @@ This separation allows for:
 - **Optimal performance** through selective resource management
 
 **Our architecture perfectly implements this TipTap design philosophy!** 🎉
+
+## 📋 **ESTABLISHED PATTERNS (v2025.01.23)**
+
+### **Transaction Filtering Pattern**
+Filter transactions in onUpdate to prevent conflicts and unwanted persistence:
+
+1. **Y.js Sync Transactions**: `transaction.getMeta('y-sync')`
+2. **Origin Tag Filtering**: Check `transaction.getMeta('y-origin')` for known metadata operations
+3. **Empty Transactions**: Check `transaction.docChanged` and `transaction.steps.length`
+4. **Initialization Window**: Skip updates within 500ms of editor creation
+5. **Command Execution State**: Skip updates when `isExecutingCommand` is true
+
+### **State Reset Pattern**
+Complete cleanup to prevent state leakage between documents:
+
+1. **Reset Editor Timestamp**: `this.editorCreatedAt = null`
+2. **Clear ALL Timers**: Use array of timer names for maintainability
+3. **Reset Document State**: All flags and reactive properties
+4. **Clear Permissions**: Reset access control state
+
+### **Persistence Creation Pattern**
+Safeguards to prevent duplicate or premature persistence:
+
+1. **Creation Flag**: Use `isCreatingPersistence` to prevent concurrent creation
+2. **Age Checks**: Verify editor age before creating persistence (1 second minimum)
+3. **Content Verification**: Check for real content before creating persistence
+4. **Multiple Conditions**: Check temporary status, existing persistence, and Y.js document
+
+### **Editor Initialization Pattern**
+Track editor lifecycle for proper timing:
+
+1. **Store Creation Time**: Set `editorCreatedAt` in onCreate handler
+2. **Use in Guards**: Check age before persistence operations
+3. **Reset on Cleanup**: Clear timestamp in state reset
+
+## 🚨 **TROUBLESHOOTING COMMON ERRORS**
+
+### **"RangeError: Applying a mismatched transaction"**
+
+**Root Cause**: State desynchronization between ProseMirror and Y.js
+
+**Common Scenarios**:
+1. Creating IndexedDB persistence after editor has content
+2. Y.js loading historical data that conflicts with current editor state
+3. Executing commands without proper focus/chain pattern
+4. Using incompatible versions of y-prosemirror (>1.2.3)
+5. Concurrent metadata and content updates without proper coordination
+
+**Solutions**:
+```javascript
+// ✅ Solution 1: Create persistence immediately
+const ydoc = new Y.Doc()
+const persistence = new IndexeddbPersistence(docId, ydoc)
+await persistence.whenSynced  // Wait for sync
+const editor = new Editor({ /* ... */ })
+
+// ✅ Solution 2: Use proper command pattern
+editor.chain().focus().toggleBold().run()
+
+// ✅ Solution 3: Disable commands until synced
+persistence.on('synced', () => {
+    enableEditorCommands()
+})
+
+// ✅ Solution 4: Use Y.js transactions with origin tags
+ydoc.transact(() => {
+    const metadata = ydoc.getMap('metadata');
+    metadata.set('tags', newTags);
+}, 'metadata-update'); // Origin tag identifies the source
+
+// ✅ Solution 5: Comprehensive transaction filtering in onUpdate
+onUpdate: ({ editor, transaction }) => {
+    // Skip Y.js sync transactions
+    if (transaction.getMeta('y-sync')) return;
+    
+    // Skip metadata transactions by origin
+    const origin = transaction.getMeta('y-origin');
+    if (origin === 'metadata-update' || origin === 'title-update' || 
+        origin === 'auto-naming' || origin === 'schema-init') return;
+    
+    // Skip empty initialization updates
+    if (!transaction.docChanged || transaction.steps.length === 0) return;
+    
+    // Skip updates within initialization window
+    const timeSinceCreation = Date.now() - (this.editorCreatedAt || 0);
+    if (timeSinceCreation < 500 && !editor.getText().trim()) return;
+    
+    // Handle content updates
+    this.hasUnsavedChanges = true;
+}
+
+// ✅ Solution 6: Clear all timers in state reset to prevent File > New bug
+resetComponentState() {
+    // Critical: Reset editor timestamp
+    this.editorCreatedAt = null;
+    
+    // Clear ALL debounce timers
+    const timers = ['contentUpdateTimeout', 'createPersistenceDebounceTimer', 
+                   'titleAutoSaveTimer', 'tempPersistenceTimeout'];
+    timers.forEach(timer => {
+        if (this[timer]) {
+            clearTimeout(this[timer]);
+            this[timer] = null;
+        }
+    });
+}
+```
+
+**Version-Specific Fix**: If using y-prosemirror, pin to version 1.2.3:
+```json
+"y-prosemirror": "1.2.3"
+```
 
 #### **✅ CRITICAL: Independent Loading Pattern**
 
@@ -580,7 +1587,7 @@ async loadDocument(file) {
    ```javascript
    // ❌ WRONG: Extract from title content instead of config
    updateDocumentName() {
-       const titleText = this.titleEditor.getText(); // WRONG
+       const titleText = this.titleInput; // WRONG
        this.currentFile.name = titleText;
    }
    
@@ -696,18 +1703,18 @@ bodyFragment.delete(0, 10); // WRONG
 #### **✅ CORRECT: Use TipTap Editor Methods**
 
 ```javascript
-// ✅ CORRECT: Use editor methods for content access
-const titleContent = this.titleEditor?.getHTML() || '';
+// ✅ CORRECT: Use appropriate methods for content access
+const titleContent = this.titleInput || '';  // Title from input field
 const bodyContent = this.bodyEditor?.getHTML() || '';
-const titleText = this.titleEditor?.getText() || '';
+const titleText = this.titleInput || '';  // Title is plain text
 const bodyText = this.bodyEditor?.getText() || '';
 
-// ✅ CORRECT: Use editor commands for content setting
-this.titleEditor?.commands.setContent(newTitleContent);
+// ✅ CORRECT: Use appropriate methods for content setting
+this.titleInput = newTitleContent;  // Direct assignment for input field
 this.bodyEditor?.commands.setContent(newBodyContent);
 
-// ✅ CORRECT: Use editor methods for content checking
-const hasContent = this.titleEditor?.getText().trim() || 
+// ✅ CORRECT: Use appropriate methods for content checking
+const hasContent = this.titleInput?.trim() || 
                   this.bodyEditor?.getText().trim();
 ```
 
@@ -791,7 +1798,7 @@ async convertToCollaborative(collaborativeFile) {
 ```javascript
 // ✅ CORRECT: Determine which editor tier to use
 shouldUseCloudTier(file) {
-    // Tier 2 (Cloud with CollaborationCursor) for:
+    // Tier 2 (Cloud with CollaborationCaret) for:
     // - Collaborative documents from server
     // - Author links (?owner=user&permlink=doc)
     // - Documents being actively shared
@@ -854,7 +1861,7 @@ async loadCollaborativeFile(doc) {
         this.indexeddbProvider.on('synced', resolve);
     });
     
-    // STEP 4: Create Tier 2 editors (cloud with CollaborationCursor)
+    // STEP 4: Create Tier 2 editors (cloud with CollaborationCaret)
     await this.createCloudEditorsWithCursors(bundle);
     
     // STEP 5: Connect to collaboration server
@@ -895,9 +1902,9 @@ async createNewDocument(initialContent = null) {
     if (initialContent && !this.ydoc.getMap('config').get('initialContentLoaded')) {
         this.ydoc.getMap('config').set('initialContentLoaded', true);
         
-        // Use editor commands, not direct Y.js manipulation
+        // Set initial title content in input field
         if (initialContent.title) {
-            this.titleEditor?.commands.setContent(initialContent.title);
+            this.titleInput = initialContent.title;
         }
         if (initialContent.body) {
             this.bodyEditor?.commands.setContent(initialContent.body);
@@ -914,7 +1921,7 @@ async loadExistingDocument(file) {
     await this.createEditors();
     
     // ❌ WRONG: Manual content setting for existing documents
-    this.titleEditor.commands.setContent(file.title); // BREAKS Y.js sync!
+    this.titleInput = file.title;  // Bypasses Y.js sync!
     this.bodyEditor.commands.setContent(file.body);   // BREAKS Y.js sync!
 }
 ```
@@ -1015,29 +2022,42 @@ Our Y.js schema is optimized for DLUX post creation with offline-first collabora
 
 ```javascript
 // Primary content (Y.XmlFragment for rich text editing)
-ydoc.get('title', Y.XmlFragment)        // Post title
-ydoc.get('body', Y.XmlFragment)         // Post body content
+ydoc.get('body', Y.XmlFragment)         // Post body content (auto-created by TipTap)
+// Note: Title is stored in a simple input field, not a TipTap editor
 
-// Post configuration (Y.Map for structured data)
-ydoc.getMap('config')                   // Post configuration
-├── postType: String                        // 'blog', 'video', '360', 'dapp', 'remix'
-├── version: String                         // '1.0.0'
-├── appVersion: String                      // 'dlux/1.0.0'
+// Document configuration (Y.Map for document-level settings)
+ydoc.getMap('config')                   // Document configuration
+├── documentName: String                    // Document display name
 ├── lastModified: String                    // ISO timestamp
-├── createdBy: String                       // Original creator
-└── documentName: String                    // Document display name (separate from title content)
+├── created: String                         // ISO timestamp
+├── version: String                         // '1.0'
+├── documentType: String                    // 'collaborative'
+├── lastWebSocketSync: String               // ISO timestamp
+├── cloudSyncActive: Boolean                // true/false
+├── serverVersion: String                   // Server version
+└── tierUpgraded: Boolean                   // Track tier upgrades
 
-// Advanced publishing options (Y.Map for atomic values only)
-ydoc.getMap('publishOptions')           // Atomic publishing settings
-├── maxAcceptedPayout: String               // '1000000.000 HBD'
-├── percentHbd: Number                      // 10000 = 100% HBD
-├── allowVotes: Boolean                     // true
-└── allowCurationRewards: Boolean           // true
+// ARCHITECTURE UPDATE (v2025.01): Consolidated Metadata Map
+// Previously: Separate Y.js maps for tags, customJson, beneficiaries
+// Now: All metadata consolidated in single map for better performance
 
-// Conflict-free collaborative arrays and maps
-ydoc.getArray('tags')                   // Conflict-free tag management
-ydoc.getArray('beneficiaries')          // Conflict-free beneficiary management  
-ydoc.getMap('customJson')               // Granular custom field updates
+ydoc.getMap('metadata')                 // ALL publishing metadata
+├── tags: Array                             // ['tag1', 'tag2']
+├── beneficiaries: Array                    // [{ account: 'alice', weight: 500 }]
+├── customJson: Object                      // { app: 'dlux/1.0', type: 'blog', ... }
+├── commentOptions: Object                  // Comment and payout settings
+│   ├── allowVotes: Boolean                 // true
+│   ├── allowCurationRewards: Boolean       // true
+│   ├── maxAcceptedPayout: String           // '1000000.000 SBD'
+│   └── percentSteemDollars: Number         // 10000
+├── permlink: String                        // URL slug
+└── initialized: Boolean                    // true
+
+// ✅ Benefits of consolidation:
+// - Single observer for all metadata changes
+// - Atomic transactions for related fields
+// - Better performance (fewer Y.js maps)
+// - Cleaner architecture
 
 // Operation coordination and schema versioning
 ydoc.getMap('_locks')                   // Operation locks (publishing, etc.)
@@ -1216,7 +2236,6 @@ GET /api/collaboration/documents
 POST /api/collaboration/documents
 {
   "documentName": "My New Document", 
-  "isPublic": false
 }
 
 // Delete collaborative document
@@ -1395,17 +2414,17 @@ handleContentValidationError(editorType, error, disableCollaboration) {
 
 ### Two-Tier Cursor Strategy: Local vs Cloud
 
-#### **CRITICAL: CollaborationCursor Cannot Handle Null Providers**
+#### **CRITICAL: CollaborationCaret Cannot Handle Null Providers**
 
 From TipTap.dev documentation and GitHub issues:
-- **CollaborationCursor extension REQUIRES a provider** - cannot be null/undefined
+- **CollaborationCaret extension REQUIRES a provider** - cannot be null/undefined
 - **Runtime errors occur** when provider is null: `'undefined doc' runtime error`
-- **TipTap's official examples** always show CollaborationCursor with a valid provider
+- **TipTap's official examples** always show CollaborationCaret with a valid provider
 
 **Solution**: Use two distinct editor configurations based on cursor requirements.
 
 #### **Tier 1: Local Documents** 📝
-*Offline-first editing WITHOUT CollaborationCursor*
+*Offline-first editing WITHOUT CollaborationCaret*
 
 **Use Cases:**
 - New documents (default)
@@ -1415,7 +2434,7 @@ From TipTap.dev documentation and GitHub issues:
 
 **Implementation:**
 ```javascript
-// Create editors WITHOUT CollaborationCursor (TipTap requirement)
+// Create editors WITHOUT CollaborationCaret (TipTap requirement)
 async createLocalEditorsWithTempYDoc() {
   // 1. Load Y.js components
   const { Y, bundle } = await this.loadYjsComponents()
@@ -1430,11 +2449,11 @@ async createLocalEditorsWithTempYDoc() {
   // 4. Initialize schema
   this.initializeCollaborativeSchema(Y)
   
-  // 5. Create editors WITHOUT CollaborationCursor (cannot handle null provider)
+  // 5. Create editors WITHOUT CollaborationCaret (cannot handle null provider)
   const getLocalExtensions = (field) => {
     return [
       StarterKit.configure({
-        history: false, // Y.js handles history
+        undoRedo: false, // Y.js handles history
         ...(field === 'title' ? {
           heading: false,
           bulletList: false,
@@ -1455,10 +2474,11 @@ async createLocalEditorsWithTempYDoc() {
       }),
       // Enhanced extensions (Link, Typography, etc.)
       ...this.getEnhancedExtensions(field, bundle)
-      // ❌ NO CollaborationCursor - cannot handle null provider
+      // ❌ NO CollaborationCaret - cannot handle null provider
     ]
   }
   
+  // ⚠️ HISTORICAL: Current implementation uses <input v-model="titleInput">
   this.titleEditor = new Editor({
     extensions: getLocalExtensions('title'),
     editable: !this.isReadOnlyMode,
@@ -1485,12 +2505,12 @@ async createLocalEditorsWithTempYDoc() {
 **Benefits:**
 - ✅ Maximum performance for offline editing
 - ✅ Y.js document created immediately (TipTap best practice)
-- ✅ No CollaborationCursor runtime errors
+- ✅ No CollaborationCaret runtime errors
 - ✅ Can upgrade to full collaboration with cursors
 - ✅ IndexedDB persistence from start
 
 #### **Tier 2: Cloud Documents** ☁️
-*Full collaborative editing WITH CollaborationCursor*
+*Full collaborative editing WITH CollaborationCaret*
 
 **Use Cases:**
 - Loading collaborative documents from cloud
@@ -1500,7 +2520,7 @@ async createLocalEditorsWithTempYDoc() {
 
 **Implementation:**
 ```javascript
-// Create editors WITH CollaborationCursor (requires WebSocket provider)
+// Create editors WITH CollaborationCaret (requires WebSocket provider)
 async createCloudEditorsWithCursors(bundle) {
   // 1. Load Y.js components
   const { Y, bundle } = await this.loadYjsComponents()
@@ -1512,7 +2532,7 @@ async createCloudEditorsWithCursors(bundle) {
   const documentId = `${owner}_${permlink}`
   this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc)
   
-  // 4. Create WebSocket provider (REQUIRED for CollaborationCursor)
+  // 4. Create WebSocket provider (REQUIRED for CollaborationCaret)
   this.provider = new HocuspocusProvider({
     url: 'wss://data.dlux.io/collaboration',
     name: `${owner}/${permlink}`,
@@ -1523,11 +2543,11 @@ async createCloudEditorsWithCursors(bundle) {
   // 5. Initialize schema
   this.initializeCollaborativeSchema(Y)
   
-  // 6. Create editors WITH CollaborationCursor (has valid provider)
+  // 6. Create editors WITH CollaborationCaret (has valid provider)
   const getCloudExtensions = (field) => {
     return [
       StarterKit.configure({
-        history: false, // Y.js handles history
+        undoRedo: false, // Y.js handles history
         ...(field === 'title' ? {
           heading: false,
           bulletList: false,
@@ -1541,7 +2561,7 @@ async createCloudEditorsWithCursors(bundle) {
         document: this.ydoc,
         field: field
       }),
-      CollaborationCursor.configure({
+      CollaborationCaret.configure({
         provider: this.provider, // ✅ Valid WebSocket provider
         user: {
           name: this.username || 'Anonymous',
@@ -1558,6 +2578,7 @@ async createCloudEditorsWithCursors(bundle) {
     ]
   }
   
+  // ⚠️ HISTORICAL: Current implementation uses <input v-model="titleInput">
   this.titleEditor = new Editor({
     extensions: getCloudExtensions('title'),
     editable: !this.isReadOnlyMode,
@@ -1583,58 +2604,59 @@ async createCloudEditorsWithCursors(bundle) {
 - ✅ User presence indicators
 - ✅ Smooth collaborative experience
 - ✅ Full WebSocket synchronization
-- ✅ CollaborationCursor works properly with valid provider
+- ✅ CollaborationCaret works properly with valid provider
 
 ### Decision Matrix: Local vs Cloud
 
 | Document Type | Loading Context | Tier | Method Used | Cursor Support |
 |---------------|----------------|------|-------------|----------------|
-| New Document | Default creation | **Tier 1** | `createLocalEditorsWithTempYDoc()` | None (no CollaborationCursor) |
-| Local File | File browser load | **Tier 1** | `createLocalEditorsWithTempYDoc()` | None (no CollaborationCursor) |
-| Collaborative Doc | Cloud file load | **Tier 2** | `createCloudEditorsWithCursors()` | Full cursors (with CollaborationCursor) |
-| Author Link | `?owner=user&permlink=doc` | **Tier 2** | `createCloudEditorsWithCursors()` | Full cursors (with CollaborationCursor) |
+| New Document | Default creation | **Tier 1** | `createLocalEditorsWithTempYDoc()` | None (no CollaborationCaret) |
+| Local File | File browser load | **Tier 1** | `createLocalEditorsWithTempYDoc()` | None (no CollaborationCaret) |
+| Collaborative Doc | Cloud file load | **Tier 2** | `createCloudEditorsWithCursors()` | Full cursors (with CollaborationCaret) |
+| Author Link | `?owner=user&permlink=doc` | **Tier 2** | `createCloudEditorsWithCursors()` | Full cursors (with CollaborationCaret) |
 | Local → Cloud | "Connect to Cloud" | **Tier 1 → 2** | `upgradeLocalToCloudWithCursors()` | Upgrade to full cursors |
 | Cloud Reconnect | Connection lost/restored | **Tier 2** | Reconnect provider only | Keep cursors |
 
 ### Cursor Upgrade Strategy for Local Documents
 
-When a local document (Tier 1) needs to connect to cloud, we must recreate editors with CollaborationCursor:
+When a local document (Tier 1) needs to connect to cloud, we must recreate editors with CollaborationCaret:
 
 #### **Full Upgrade Strategy** ⭐
-*Destroy and recreate editors with CollaborationCursor*
+*Destroy and recreate editors with CollaborationCaret*
 
 ```javascript
 async upgradeLocalToCloudWithCursors() {
-  console.log('🔄 Upgrading local document to cloud with CollaborationCursor support')
+  console.log('🔄 Upgrading local document to cloud with CollaborationCaret support')
   
   // 1. Preserve content and state
   const preservedContent = this.getEditorContent()
   
-  // 2. Clean up local editors (without CollaborationCursor)
+  // 2. Clean up local editors (without CollaborationCaret)
+  // ⚠️ HISTORICAL: In current implementation, only bodyEditor needs cleanup
   this.titleEditor?.destroy()
   this.bodyEditor?.destroy()
   
-  // 3. Create cloud editors with CollaborationCursor
+  // 3. Create cloud editors with CollaborationCaret
   await this.createCloudEditorsWithCursors()
   
   // 4. Restore content to new editors
   this.setEditorContent(preservedContent)
   
-  console.log('✅ Upgraded to cloud with CollaborationCursor support')
+  console.log('✅ Upgraded to cloud with CollaborationCaret support')
 }
 ```
 
 **Why Editor Recreation is Required:**
-- ❌ **CollaborationCursor cannot be added dynamically** to existing editors
+- ❌ **CollaborationCaret cannot be added dynamically** to existing editors
 - ❌ **TipTap/ProseMirror schema constraints** prevent extension addition
-- ❌ **Runtime errors occur** when CollaborationCursor has null provider
-- ✅ **Editor recreation is the only safe way** to add CollaborationCursor
+- ❌ **Runtime errors occur** when CollaborationCaret has null provider
+- ✅ **Editor recreation is the only safe way** to add CollaborationCaret
 
 **Benefits:**
 - ✅ Full cursor functionality
 - ✅ Best collaborative experience
 - ✅ Clean architecture following TipTap constraints
-- ✅ No runtime errors with CollaborationCursor
+- ✅ No runtime errors with CollaborationCaret
 - ✅ Consistent user experience
 - ⚠️ Brief editor recreation (required by TipTap limitations)
 
@@ -1669,9 +2691,9 @@ async connectToCloud() {
 #### ❌ **DON'T: Dynamic Cursor Addition**
 
 ```javascript
-// NEVER add CollaborationCursor to existing editors
-this.addCollaborationCursor(provider)  // ❌ Destroys editors
-editor.addExtension(CollaborationCursor)  // ❌ Not supported
+// NEVER add CollaborationCaret to existing editors
+this.addCollaborationCaret(provider)  // ❌ Destroys editors
+editor.addExtension(CollaborationCaret)  // ❌ Not supported
 ```
 
 #### ✅ **DO: Graceful Reconnection**
@@ -1686,37 +2708,37 @@ async reconnectToCloud() {
 }
 ```
 
-## Decision Tree: 2-Tier System Based on CollaborationCursor
+## Decision Tree: 2-Tier System Based on CollaborationCaret
 
 ```
 Document Load/Creation Request
-├── Is Collaborative Document? ──YES──> Tier 2: Cloud (WITH CollaborationCursor)
-├── Is Author Link? ──YES──> Tier 2: Cloud (WITH CollaborationCursor)  
-├── Is "Create Collaborative"? ──YES──> Tier 2: Cloud (WITH CollaborationCursor)
-└── Default Case ──> Tier 1: Local (WITHOUT CollaborationCursor)
+├── Is Collaborative Document? ──YES──> Tier 2: Cloud (WITH CollaborationCaret)
+├── Is Author Link? ──YES──> Tier 2: Cloud (WITH CollaborationCaret)  
+├── Is "Create Collaborative"? ──YES──> Tier 2: Cloud (WITH CollaborationCaret)
+└── Default Case ──> Tier 1: Local (WITHOUT CollaborationCaret)
                      │
                      └── User Types/Edits? ──YES──> Persist to Drafts (if meaningful content)
                          │                          Keep Tier 1 Editors
                          │
-                         └── User Clicks "Connect to Cloud"? ──YES──> Upgrade ──> Tier 2 (Recreate with CollaborationCursor)
+                         └── User Clicks "Connect to Cloud"? ──YES──> Upgrade ──> Tier 2 (Recreate with CollaborationCaret)
 ```
 
 ### **Summary of 2-Tier Strategy**
 
-1. **Tier 1 (Local)**: Temp Y.js documents WITHOUT CollaborationCursor
+1. **Tier 1 (Local)**: Temp Y.js documents WITHOUT CollaborationCaret
    - ✅ Follows TipTap best practices (Y.js + Collaboration from start)
    - ✅ No draft clutter (temp documents until user shows intent)
    - ✅ No content syncing issues (Y.js handles all content)
-   - ❌ No CollaborationCursor (cannot handle null provider)
+   - ❌ No CollaborationCaret (cannot handle null provider)
    - ✅ Link extension included from start (no dynamic addition needed)
 
-2. **Tier 2 (Cloud)**: Full collaborative editing WITH CollaborationCursor
-   - ✅ Collaborative editors with CollaborationCursor from start
+2. **Tier 2 (Cloud)**: Full collaborative editing WITH CollaborationCaret
+   - ✅ Collaborative editors with CollaborationCaret from start
    - ✅ Real-time cursor tracking and presence
    - ✅ WebSocket synchronization
-   - ✅ CollaborationCursor works with valid WebSocket provider
+   - ✅ CollaborationCaret works with valid WebSocket provider
 
-3. **Upgrade Path**: Recreate editors to add CollaborationCursor
+3. **Upgrade Path**: Recreate editors to add CollaborationCaret
    - ⚠️ Editor recreation required (TipTap/ProseMirror limitation)
    - ✅ Content preservation/restoration during upgrade
    - ✅ Y.js document continuity maintained
@@ -1798,7 +2820,7 @@ const collaborativeExtensions = [
   }),
   
   // Real-time Cursors
-  CollaborationCursor.configure({
+  CollaborationCaret.configure({
     provider: this.provider || null,  // WebSocket provider (null for local)
     user: {
       name: this.username || 'Anonymous',
@@ -1867,7 +2889,7 @@ const enhancedExtensions = [
 // StarterKit includes many extensions but we configure it carefully
 StarterKit.configure({
   // Disable history - Y.js handles this
-  history: false,
+  undoRedo: false,
   
   // Field-specific configuration
   ...(field === 'title' ? {
@@ -1923,7 +2945,7 @@ const getAllExtensions = (field) => {
 | **HorizontalRule** | collaboration-bundle | ✅ | - | Dividers |
 | **Placeholder** | collaboration-bundle | ✅ | - | Input placeholders |
 | **Collaboration** | collaboration-bundle | ✅ | - | Y.js integration |
-| **CollaborationCursor** | collaboration-bundle | ✅ | - | Real-time cursors |
+| **CollaborationCaret** | collaboration-bundle | ✅ | - | Real-time cursors |
 | **Link** | window.TiptapLink | - | ✅ | URL/link support |
 | **Typography** | window.TiptapTypography | - | ✅ | Smart quotes/dashes |
 | **Image** | window.TiptapImage | - | ✅ | Image embedding |
@@ -1965,9 +2987,9 @@ Our implementation has been verified to comply with all TipTap.dev best practice
 - **Our Implementation**: Collaboration extension included from start with proper Y.js document reference
 - **Compliance**: ✅ Follows TipTap collaborative editing best practices
 
-#### **4. CollaborationCursor Requirements** ✅
-- **TipTap Rule**: CollaborationCursor requires valid WebSocket provider, cannot be null
-- **Our Implementation**: Two-tier system - CollaborationCursor only for cloud documents with providers
+#### **4. CollaborationCaret Requirements** ✅
+- **TipTap Rule**: CollaborationCaret requires valid WebSocket provider, cannot be null
+- **Our Implementation**: Two-tier system - CollaborationCaret only for cloud documents with providers
 - **Compliance**: ✅ Prevents runtime errors from null providers
 
 #### **5. Content Loading Pattern** ✅
@@ -1997,7 +3019,7 @@ Our implementation has been verified to comply with all TipTap.dev best practice
 3. **Correct Y.js Usage**: Fresh documents for new content, preserve synced documents
 4. **Initialization Handling**: Proper async event filtering during editor setup
 5. **Content Loading**: Automatic loading from Y.js/IndexedDB, no manual intervention
-6. **Collaboration Architecture**: Two-tier system respecting CollaborationCursor requirements
+6. **Collaboration Architecture**: Two-tier system respecting CollaborationCaret requirements
 
 ### **Performance Benefits**
 
@@ -2147,9 +3169,9 @@ This ensures that:
    
    const collaborativeEditor = new Editor({
      extensions: [
-       StarterKit.configure({ history: false }), // Y.js handles history
+       StarterKit.configure({ undoRedo: false }), // Y.js handles history
        Collaboration.configure({ document: ydoc }),
-       CollaborationCursor.configure({ provider })
+       CollaborationCaret.configure({ provider })
      ]
    })
    ```
@@ -2332,10 +3354,10 @@ const newEditor = new Editor({
 
 ## Our Implementation Architecture
 
-### Two-Tier System Based on CollaborationCursor Requirements
+### Two-Tier System Based on CollaborationCaret Requirements
 
 ```javascript
-// TIER 1: LOCAL EDITORS (WITHOUT CollaborationCursor)
+// TIER 1: LOCAL EDITORS (WITHOUT CollaborationCaret)
 async createLocalEditorsWithTempYDoc() {
   // 1. Load Y.js components
   const { Y, bundle } = await this.loadYjsComponents()
@@ -2350,11 +3372,11 @@ async createLocalEditorsWithTempYDoc() {
   // 4. Initialize schema
   this.initializeCollaborativeSchema(Y)
   
-  // 5. Create editors WITHOUT CollaborationCursor (cannot handle null provider)
+  // 5. Create editors WITHOUT CollaborationCaret (cannot handle null provider)
   const getLocalExtensions = (field) => {
     return [
       StarterKit.configure({
-        history: false, // Y.js handles history
+        undoRedo: false, // Y.js handles history
         ...(field === 'title' ? {
         heading: false,
         bulletList: false,
@@ -2375,10 +3397,11 @@ async createLocalEditorsWithTempYDoc() {
       }),
       // Enhanced extensions (Link, Typography, etc.)
       ...this.getEnhancedExtensions(field, bundle)
-      // ❌ NO CollaborationCursor - cannot handle null provider
+      // ❌ NO CollaborationCaret - cannot handle null provider
     ]
   }
   
+  // ⚠️ HISTORICAL: Current implementation uses <input v-model="titleInput">
   this.titleEditor = new Editor({
     extensions: getLocalExtensions('title'),
     editable: !this.isReadOnlyMode,
@@ -2401,7 +3424,7 @@ async createLocalEditorsWithTempYDoc() {
   this.isCollaborativeMode = false // Local mode (no WebSocket provider)
 }
 
-// TIER 2: CLOUD EDITORS (WITH CollaborationCursor)
+// TIER 2: CLOUD EDITORS (WITH CollaborationCaret)
 async createCloudEditorsWithCursors() {
   // 1. Load Y.js components
   const { Y, bundle } = await this.loadYjsComponents()
@@ -2413,7 +3436,7 @@ async createCloudEditorsWithCursors() {
   const documentId = `${owner}_${permlink}`
   this.indexeddbProvider = new IndexeddbPersistence(documentId, this.ydoc)
   
-  // 4. Create WebSocket provider (REQUIRED for CollaborationCursor)
+  // 4. Create WebSocket provider (REQUIRED for CollaborationCaret)
   this.provider = new HocuspocusProvider({
     url: 'wss://data.dlux.io/collaboration',
     name: `${owner}/${permlink}`,
@@ -2424,11 +3447,11 @@ async createCloudEditorsWithCursors() {
   // 5. Initialize schema
   this.initializeCollaborativeSchema(Y)
   
-  // 6. Create editors WITH CollaborationCursor (has valid provider)
+  // 6. Create editors WITH CollaborationCaret (has valid provider)
   const getCloudExtensions = (field) => {
     return [
       StarterKit.configure({
-        history: false, // Y.js handles history
+        undoRedo: false, // Y.js handles history
         ...(field === 'title' ? {
           heading: false,
           bulletList: false,
@@ -2442,7 +3465,7 @@ async createCloudEditorsWithCursors() {
         document: this.ydoc,
         field: field
       }),
-      CollaborationCursor.configure({
+      CollaborationCaret.configure({
         provider: this.provider, // ✅ Valid WebSocket provider
         user: {
           name: this.username || 'Anonymous',
@@ -2459,6 +3482,7 @@ async createCloudEditorsWithCursors() {
     ]
   }
   
+  // ⚠️ HISTORICAL: Current implementation uses <input v-model="titleInput">
   this.titleEditor = new Editor({
     extensions: getCloudExtensions('title'),
     editable: !this.isReadOnlyMode,
@@ -2495,7 +3519,7 @@ async connectToCloud() {
     token: authToken
   })
   
-  // 3. CollaborationCursor automatically activates with provider
+  // 3. CollaborationCaret automatically activates with provider
   // No editor changes needed!
   
   this.connectionState = 'connected'
@@ -2512,7 +3536,7 @@ async disconnectFromCloud() {
   this.provider?.disconnect()
   this.provider = null
   
-  // 3. CollaborationCursor automatically deactivates
+  // 3. CollaborationCaret automatically deactivates
   // No editor changes needed!
   
   this.isCollaborativeMode = false
@@ -2607,6 +3631,7 @@ const App = () => {
 // ✅ Proper cleanup
 beforeUnmount() {
   // Destroy editors
+  // ⚠️ HISTORICAL: In current implementation, only bodyEditor needs cleanup
   this.titleEditor?.destroy()
   this.bodyEditor?.destroy()
   
@@ -3893,7 +4918,7 @@ The **destroy → create → load** sequence is **NON-NEGOTIABLE** for TipTap + 
 
 1. **Content Sync Conflicts**: Editors with different Y.js documents fight over content
 2. **Memory Leaks**: Orphaned Y.js documents and IndexedDB connections
-3. **Cursor Desync**: CollaborationCursor extension breaks with document mismatches
+3. **Cursor Desync**: CollaborationCaret extension breaks with document mismatches
 4. **Data Corruption**: Partial writes to wrong Y.js fragments
 5. **Performance Degradation**: Multiple IndexedDB providers for same document
 
@@ -4336,7 +5361,7 @@ module.exports = {
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Collaboration from '@tiptap/extension-collaboration';
-import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
+import CollaborationCaret from '@tiptap/extension-collaboration-cursor';
 import Placeholder from '@tiptap/extension-placeholder';
 
 // Optional extensions - only import if needed
@@ -4354,7 +5379,7 @@ export {
   Editor,
   StarterKit,
   Collaboration,
-  CollaborationCursor,
+  CollaborationCaret,
   Placeholder,
   Link,
   Typography,
@@ -5807,7 +6832,7 @@ publishOptions.observe((event) => {
 const getLocalExtensions = (field) => {
     return [
         StarterKit.configure({
-            history: false, // Y.js handles history
+            undoRedo: false, // Y.js handles history
             ...(field === 'title' ? {
                 heading: false,
                 bulletList: false,
@@ -5952,7 +6977,7 @@ handleContentValidationError(editorType, error, disableCollaboration) {
 1. **Editor Lifecycle**: ✅ Static extension configuration, proper destroy → create → load sequence
 2. **Y.js Integration**: ✅ Fresh documents for new content, preserve synced documents for existing
 3. **TaskItem Handling**: ✅ `onTransaction` event for comprehensive change detection
-4. **Collaboration**: ✅ Two-tier system respecting CollaborationCursor requirements
+4. **Collaboration**: ✅ Two-tier system respecting CollaborationCaret requirements
 5. **Content Loading**: ✅ Automatic loading from Y.js/IndexedDB, no manual intervention
 6. **Extension Management**: ✅ All extensions loaded from start, no dynamic changes
 7. **Memory Management**: ✅ Proper cleanup sequence following TipTap architecture
@@ -6893,8 +7918,8 @@ handlePermissionError(file, error) {
 
 // ✅ 403 ERROR HANDLING: Specific handling for owner-only endpoints
 handle403PermissionError(documentInfo, context) {
-    // 403 with public document = readonly access
-    if (documentInfo?.isPublic) {
+    // 403 = no access (authentication required)
+    if (false) { // Removed public access logic
         return {
             level: 'readonly',
             source: 'public-document-fallback',
@@ -7028,113 +8053,411 @@ This comprehensive permissions system ensures:
 
 ---
 
-# TipTap v3 Migration Considerations
+# 🚀 **COMPLETE TIPTAP v3 MIGRATION & COMPLIANCE GUIDE**
 
-## Executive Summary
+## 🚨 **CRITICAL v3 BREAKING CHANGES SUMMARY**
 
-TipTap v3 introduces significant improvements for collaborative editing while maintaining backward compatibility for most use cases. This section covers migration strategies, breaking changes, and new features relevant to our offline-first collaborative architecture.
+### **1. Extension Name Changes (Breaking)**
+- **History** → **UndoRedo** ⚠️ MUST UPDATE
+- **CollaborationCaret** → **CollaborationCaret** ⚠️ MUST UPDATE
 
-## TipTap v3 Key Changes
+### **2. Parameter Name Changes (Breaking)**
+- **Collaboration.configure({ fragment })** → **Collaboration.configure({ field })** ⚠️ MUST UPDATE
 
-### 1. **Enhanced Collaboration Features**
-- **New y-tiptap Package**: Extends y-prosemirror with TipTap-specific enhancements
-- **Improved Comments System**: Stable comments feature with better collaborative UX
-- **Enhanced TypeScript Support**: Stronger typing for extensions and collaborative features
+### **3. Package Changes (Breaking)**
+- All packages require **@beta** tag for v3
+- **@tiptap/vue-2** → **@tiptap/vue-3** for Vue.js integration
+- UMD builds removed, ESM only
 
-### 2. **Provider Requirements**
-```javascript
-// TipTap v3 Provider Dependencies
-npm install @hocuspocus/provider@3 y-tiptap
-```
+### **4. API Changes (Breaking)**
+- `editor.getCharacterCount()` method removed
+- `nodeView.getPos()` can return `undefined`
+- Stricter TypeScript typing
+- New `shouldRerenderOnTransaction` defaults to `false`
 
-### 3. **Breaking Changes**
-- **Provider Version**: Requires `@hocuspocus/provider` v3 for full compatibility
-- **Package Consolidation**: Some extensions moved to unified packages (e.g., TableKit)
-- **Schema Enforcement**: Stricter schema validation for collaborative documents
+## 📦 **v3 PACKAGE INSTALLATION**
 
-## Migration Strategy
-
-### Phase 1: Dependency Updates
+### **Complete Package List for v3**
 ```bash
-# Update core dependencies
-npm install @tiptap/core@3 @tiptap/starter-kit@3
-npm install @tiptap/extension-collaboration@3
-npm install @hocuspocus/provider@3
+# ✅ CORE v3 PACKAGES (All require @beta tag)
+npm install @tiptap/core@beta
+npm install @tiptap/starter-kit@beta
+npm install @tiptap/pm@beta
 
-# New collaborative enhancements
-npm install y-tiptap
+# ✅ VUE.JS v3 INTEGRATION
+npm install @tiptap/vue-3@beta
 
-# Verify Y.js compatibility
-npm list yjs y-prosemirror y-indexeddb
+# ✅ COLLABORATION PACKAGES
+npm install @tiptap/extension-collaboration@beta
+npm install @tiptap/extension-collaboration-caret@beta
+
+# ✅ ESSENTIAL EXTENSIONS
+npm install @tiptap/extension-document@beta
+npm install @tiptap/extension-placeholder@beta
+npm install @tiptap/extension-undo-redo@beta
+
+# ✅ Y.JS PACKAGES (Updated for v3)
+npm install yjs@latest
+npm install y-indexeddb@latest
+npm install @hocuspocus/provider@latest
+
+# ✅ REMOVE OLD v2 PACKAGES
+npm uninstall @tiptap/vue-2 @tiptap/extension-history @tiptap/extension-collaboration-cursor
 ```
 
-### Phase 2: Code Updates
-```javascript
-// Enhanced Y.js Integration with y-tiptap
-import { TiptapCollabProvider } from '@hocuspocus/provider'
-import { ySyncPlugin, yUndoPlugin, yCursorPlugin } from 'y-prosemirror'
-import { yTiptapEnhancements } from 'y-tiptap' // New package
+## 🔄 **STEP-BY-STEP MIGRATION STRATEGY**
 
-// Updated Provider Configuration
-const provider = new TiptapCollabProvider({
-  url: 'wss://collaborate.tiptap.dev',
-  name: documentId,
-  document: ydoc,
-  // Enhanced authentication
-  token: authToken,
-  // New v3 options
-  preserveConnection: true,
-  maxAttempts: 5
+### **Phase 1: Pre-Migration Audit**
+```bash
+# ✅ STEP 1: Audit current v2 usage
+grep -r "fragment:" src/  # Find v2 Collaboration syntax
+grep -r "CollaborationCaret" src/  # Find old extension names
+grep -r "@tiptap/vue-2" src/  # Find old Vue integration
+
+# ✅ STEP 2: Backup existing implementation
+git checkout -b backup-v2-implementation
+git commit -am "Backup: Pre-v3 migration state"
+```
+
+### **Phase 2: Package Updates**
+```bash
+# ✅ STEP 1: Remove v2 packages completely
+npm uninstall @tiptap/vue-2 @tiptap/extension-history @tiptap/extension-collaboration-cursor
+
+# ✅ STEP 2: Install v3 packages with @beta tag
+npm install @tiptap/core@beta @tiptap/starter-kit@beta @tiptap/pm@beta
+npm install @tiptap/vue-3@beta
+npm install @tiptap/extension-collaboration@beta @tiptap/extension-collaboration-caret@beta
+npm install @tiptap/extension-document@beta @tiptap/extension-placeholder@beta
+npm install @tiptap/extension-undo-redo@beta
+
+# ✅ STEP 3: Verify package consistency
+npm list | grep @tiptap  # All should show @beta versions
+```
+
+### **Phase 3: Code Updates**
+
+#### **3.1 Import Changes**
+```javascript
+// ❌ v2 IMPORTS (Remove these)
+import { useEditor, EditorContent } from '@tiptap/vue-2'
+import History from '@tiptap/extension-history'
+import CollaborationCaret from '@tiptap/extension-collaboration-cursor'
+
+// ✅ v3 IMPORTS (Replace with these)
+import { useEditor, EditorContent } from '@tiptap/vue-3'
+import UndoRedo from '@tiptap/extension-undo-redo'
+import CollaborationCaret from '@tiptap/extension-collaboration-caret'
+import Document from '@tiptap/extension-document'  // Now required
+```
+
+#### **3.2 Extension Configuration Updates**
+```javascript
+// ❌ v2 SYNTAX (Update these)
+StarterKit.configure({
+    history: true  // Remove - conflicts with Collaboration
+}),
+Collaboration.configure({
+    document: ydoc,
+    fragment: 'content'  // v2 parameter name
+}),
+CollaborationCaret.configure({  // v2 extension name
+    provider: websocketProvider
+})
+
+// ✅ v3 SYNTAX (Use these instead)
+StarterKit.configure({
+    undoRedo: false  // REQUIRED: Disable when using Collaboration
+}),
+Collaboration.configure({
+    document: ydoc,
+    field: 'content'  // v3 parameter name
+}),
+CollaborationCaret.configure({  // v3 extension name
+    provider: websocketProvider,
+    user: { name: username, color: userColor }
 })
 ```
 
-### Phase 3: Schema Validation
+#### **3.3 Editor Configuration Updates**
 ```javascript
-// Enhanced Schema Compatibility Validation
-validateSchemaCompatibility(ydoc) {
-  const schemaVersion = ydoc.getMap('config').get('schemaVersion');
-  const currentVersion = this.getTiptapSchemaVersion();
-  
-  if (!this.isCompatible(schemaVersion, currentVersion)) {
-    throw new Error(`Schema incompatibility: ${schemaVersion} vs ${currentVersion}`);
+// ✅ v3 PERFORMANCE: Add optimal configuration
+const editor = new Editor({
+    // Performance options configured via extensions
+    shouldRerenderOnTransaction: false, // v3 default - better performance
+    enableContentCheck: true,          // v3 schema validation
+    
+    extensions: [
+        Document,  // v3 REQUIRED: Explicit import
+        StarterKit.configure({ undoRedo: false }),
+        Collaboration.configure({
+            document: ydoc,
+            field: 'content'  // v3 parameter
+        }),
+        ...(websocketProvider ? [
+            CollaborationCaret.configure({  // v3 extension name
+                provider: websocketProvider,
+                user: { name: username, color: userColor }
+            })
+        ] : [])
+    ],
+    
+    // ✅ v3 ERROR HANDLING: Content validation
+    onContentError({ editor, error, disableCollaboration }) {
+        console.error('v3 Schema error:', error)
+        disableCollaboration()
+        editor.setEditable(false)
+    }
+})
+```
+
+#### **3.4 Vue.js Component Updates**
+```vue
+<!-- ✅ v3 VUE INTEGRATION: Composition API -->
+<template>
+  <editor-content :editor="editor" />
+</template>
+
+<script setup>
+import { useEditor, EditorContent } from '@tiptap/vue-3'  // v3 import
+import StarterKit from '@tiptap/starter-kit'
+
+const editor = useEditor({
+  content: '<p>Content</p>',
+  extensions: [
+    StarterKit.configure({ undoRedo: false }),  // v3 requirement
+    // Add other extensions
+  ],
+  onUpdate: ({ editor }) => {
+    // ✅ v3 BEST PRACTICE: Minimal updates only
+    emit('content-changed', editor.getHTML())
   }
-  
-  return true;
+})
+
+// ✅ v3: Cleanup handled automatically by useEditor
+</script>
+```
+
+## ✅ **COMPLETE v3 MIGRATION CHECKLIST**
+
+### **Phase 1: Pre-Migration Validation**
+- [ ] **Audit Current Code**: Search for v2 patterns (fragment, CollaborationCaret, History)
+- [ ] **Backup Implementation**: Create git branch with current v2 state
+- [ ] **Document Custom Extensions**: List all custom extensions and their v3 compatibility
+- [ ] **Test Baseline**: Ensure v2 implementation works correctly before migration
+- [ ] **Backup Y.js Documents**: Export existing documents before schema changes
+
+### **Phase 2: Package Migration**
+- [ ] **Remove v2 Packages**: Uninstall @tiptap/vue-2, extension-history, extension-collaboration-cursor
+- [ ] **Install v3 Packages**: Install all required @beta packages consistently
+- [ ] **Verify Dependencies**: Check all @tiptap packages show @beta versions
+- [ ] **Update Bundle**: Modify webpack/vite config for new package structure
+- [ ] **Clear Node Modules**: Remove node_modules and package-lock.json, reinstall fresh
+
+### **Phase 3: Code Updates**
+- [ ] **Update Imports**: Change @tiptap/vue-2 → @tiptap/vue-3
+- [ ] **Extension Names**: History → UndoRedo, CollaborationCaret → CollaborationCaret
+- [ ] **Parameter Names**: fragment → field in Collaboration.configure()
+- [ ] **Add Document Extension**: Import Document extension explicitly
+- [ ] **Update StarterKit**: Disable history when using Collaboration
+- [ ] **Add Performance Options**: Configure shouldRerenderOnTransaction
+- [ ] **Add Error Handling**: Implement onContentError for schema validation
+
+### **Phase 4: Testing & Validation**
+- [ ] **Local Editor**: Test basic editing without collaboration
+- [ ] **Collaborative Editor**: Test real-time collaboration with multiple users
+- [ ] **IndexedDB Persistence**: Verify offline documents save/load correctly
+- [ ] **WebSocket Connection**: Test connection, reconnection, and error handling
+- [ ] **Command Execution**: Test all toolbar buttons and commands
+- [ ] **Content Validation**: Test with invalid content and schema mismatches
+- [ ] **Memory Management**: Verify proper cleanup on component unmount
+- [ ] **Performance**: Compare before/after performance metrics
+
+### **Phase 5: Production Deployment**
+- [ ] **Staging Environment**: Deploy to staging with full v3 implementation
+- [ ] **User Acceptance Testing**: Test with real users and documents
+- [ ] **Performance Monitoring**: Set up monitoring for v3-specific metrics
+- [ ] **Rollback Plan**: Document rollback procedure if issues arise
+- [ ] **Production Deployment**: Deploy to production with monitoring
+- [ ] **Post-Deploy Verification**: Verify all features work in production
+
+## 🔧 **v3 DEBUGGING & TROUBLESHOOTING**
+
+### **Common v3 Migration Issues**
+
+#### **1. Extension Import Errors**
+```javascript
+// ❌ ERROR: Cannot find module '@tiptap/extension-history'
+import History from '@tiptap/extension-history'
+
+// ✅ SOLUTION: Use renamed extension
+import UndoRedo from '@tiptap/extension-undo-redo'
+```
+
+#### **2. Fragment Parameter Error**
+```javascript
+// ❌ ERROR: Unknown option 'fragment'
+Collaboration.configure({
+    document: ydoc,
+    fragment: 'content'
+})
+
+// ✅ SOLUTION: Use 'field' parameter
+Collaboration.configure({
+    document: ydoc,
+    field: 'content'
+})
+```
+
+#### **3. Document Extension Missing**
+```javascript
+// ❌ ERROR: Schema validation failed - document node missing
+
+// ✅ SOLUTION: Explicitly import Document
+import Document from '@tiptap/extension-document'
+const editor = new Editor({
+    extensions: [Document, StarterKit, /* other extensions */]
+})
+```
+
+#### **4. Vue Integration Errors**
+```javascript
+// ❌ ERROR: Cannot find module '@tiptap/vue-2'
+import { useEditor } from '@tiptap/vue-2'
+
+// ✅ SOLUTION: Update to v3 Vue integration
+import { useEditor } from '@tiptap/vue-3'
+```
+
+#### **5. CollaborationCaret Provider Errors**
+```javascript
+// ❌ ERROR: CollaborationCaret requires valid provider
+CollaborationCaret.configure({
+    provider: null  // Cannot be null
+})
+
+// ✅ SOLUTION: Conditional inclusion
+...(websocketProvider ? [
+    CollaborationCaret.configure({
+        provider: websocketProvider
+    })
+] : [])
+```
+
+### **v3 Validation Script**
+```javascript
+// ✅ AUTOMATED v3 COMPLIANCE CHECK
+function validateTiptapV3Compliance() {
+    const checks = {
+        packages: checkV3Packages(),
+        imports: checkV3Imports(),
+        configuration: checkV3Configuration(),
+        extensions: checkV3Extensions()
+    }
+    
+    console.log('🔍 TipTap v3 Compliance Check:', checks)
+    return Object.values(checks).every(check => check.passed)
 }
 
-// Automatic Schema Migration
-migrateToV3Schema(ydoc) {
-  const config = ydoc.getMap('config');
-  
-  // Update schema version markers
-  config.set('tiptapVersion', '3.0');
-  config.set('migrationDate', new Date().toISOString());
-  config.set('schemaVersion', 'v3.0.0');
-  
-  // Apply any necessary content transformations
-  this.applyV3ContentMigrations(ydoc);
+function checkV3Packages() {
+    // Check package.json for @beta versions
+    const packageJson = require('./package.json')
+    const tiptapDeps = Object.keys(packageJson.dependencies)
+        .filter(dep => dep.startsWith('@tiptap/'))
+    
+    const hasBetaVersions = tiptapDeps.every(dep => 
+        packageJson.dependencies[dep].includes('@beta'))
+    
+    return { passed: hasBetaVersions, packages: tiptapDeps }
 }
 ```
 
-## V3 Compatibility Checklist
+## 🚨 **PREVENTING MISMATCHED TRANSACTION ERRORS**
 
-### ✅ **Pre-Migration Validation**
-- [ ] Test current implementation with TipTap v2 baseline
-- [ ] Document all custom extensions and their v3 compatibility
-- [ ] Backup Y.js documents before migration
-- [ ] Verify WebSocket provider connectivity
+### Root Cause: Vue 3 Reactivity Interference
 
-### ✅ **Migration Execution**
-- [ ] Update package dependencies incrementally
-- [ ] Test collaborative features in isolated environment
-- [ ] Validate schema migration scripts
-- [ ] Update bundle configurations for new packages
+The "RangeError: Applying a mismatched transaction" error occurs when Vue 3's proxy system interferes with ProseMirror's internal state management. This was discovered through systematic debugging when the bold button stopped working after typing in the title field.
 
-### ✅ **Post-Migration Verification**
-- [ ] Collaborative editing functionality intact
-- [ ] IndexedDB persistence working correctly
-- [ ] WebSocket connections stable
-- [ ] Performance metrics within acceptable ranges
+### The Problem Flow
+1. User types in title input field
+2. Title updates trigger Y.js config updates
+3. Vue's reactivity proxy wraps the editor instance
+4. User clicks bold button
+5. ProseMirror tries to apply a transaction
+6. Vue's proxy intercepts and modifies the transaction
+7. **ERROR**: "Applying a mismatched transaction"
+
+### The Solution: markRaw()
+
+```javascript
+// ✅ COMPLETE SOLUTION
+import { markRaw } from '/js/vue.esm-browser.js'
+
+export default {
+    data() {
+        return {
+            bodyEditor: null,  // Will store TipTap editor
+            ydoc: null,        // Will store Y.js document
+        }
+    },
+    
+    methods: {
+        async initializeEditor() {
+            // 1. Create Y.js document with markRaw
+            const ydoc = markRaw(new Y.Doc())
+            this.ydoc = ydoc  // Store for cleanup
+            
+            // 2. Create TipTap editor
+            const bodyEditor = new Editor({
+                element: this.$refs.bodyEditor,
+                extensions: [
+                    StarterKit.configure({ undoRedo: false }),
+                    Collaboration.configure({
+                        document: ydoc,
+                        field: 'body'
+                    })
+                ]
+            })
+            
+            // 3. CRITICAL: Wrap with markRaw when storing
+            this.bodyEditor = markRaw(bodyEditor)
+        }
+    }
+}
+```
+
+### Common Mistakes That Cause The Error
+
+```javascript
+// ❌ WRONG: Direct assignment (Vue wraps with proxy)
+this.bodyEditor = bodyEditor
+
+// ❌ WRONG: Using Vue.markRaw (causes "Vue is not defined")
+this.bodyEditor = Vue.markRaw(bodyEditor)
+
+// ❌ WRONG: Forgetting to wrap in some code paths
+if (condition) {
+    this.bodyEditor = markRaw(bodyEditor)  // ✅ Correct
+} else {
+    this.bodyEditor = anotherEditor  // ❌ Forgot markRaw!
+}
+```
+
+### Debugging Tips
+
+1. **Check ALL assignment locations**: Search for `this.bodyEditor =` and ensure ALL use markRaw
+2. **Import correctly**: Use `import { markRaw } from '/js/vue.esm-browser.js'`
+3. **Test systematically**: Type in title, then immediately click bold button
+4. **Watch console**: Error appears as "RangeError: Applying a mismatched transaction"
+
+### Prevention Checklist
+
+- [ ] Import markRaw at top of file
+- [ ] Wrap ALL Y.js documents with markRaw
+- [ ] Wrap ALL TipTap editors with markRaw
+- [ ] Check every assignment location
+- [ ] Test formatting buttons after title/metadata changes
+- [ ] Verify no Vue.markRaw usage (should be just markRaw)
 
 ## V3 Feature Enhancements
 
@@ -7564,7 +8887,7 @@ class LargeDocumentOptimizer {
       ...editorConfig,
       
       // Reduce update frequency
-      immediatelyRender: false,
+      // Performance options configured in extensions,
       shouldRerenderOnTransaction: false,
       
       // Optimize extension configurations
@@ -8578,6 +9901,219 @@ class YjsCorruptionRecovery {
 }
 ```
 
+## Vue Reactivity Patterns for Y.js Integration
+
+### Overview
+
+Vue 3's reactivity system cannot track changes to Y.js maps directly. This section provides a comprehensive audit guide to identify and fix reactive pattern violations throughout the codebase.
+
+### The Reactive Pattern
+
+```javascript
+// ✅ CORRECT: Vue reactive properties synced from Y.js
+data() {
+    return {
+        // Mirror Y.js state in Vue reactive properties
+        reactiveTags: [],
+        reactiveBeneficiaries: [],
+        reactiveDocumentName: '',
+        reactivePermlink: '',
+        reactiveCommentOptions: {
+            allowVotes: true,
+            allowCurationRewards: true,
+            maxAcceptedPayout: false,
+            percentHbd: false
+        },
+        reactiveCustomJson: {}
+    }
+}
+
+// ❌ WRONG: Direct Y.js access in Vue
+computed: {
+    tags() {
+        // Vue cannot track this!
+        return this.ydoc.getMap('metadata').get('tags');
+    }
+}
+```
+
+### Reactive Pattern Audit Guide
+
+#### Step 1: Identify Pattern Violations
+
+Search for these patterns in your codebase:
+
+```bash
+# Direct Y.js map access
+grep -n "getMap.*\.get(" *.js
+
+# Legacy content object pattern
+grep -n "this\.content\." *.js | grep -E "(tags|beneficiaries|custom_json)"
+
+# Direct metadata/config access
+grep -n "metadata\.get\|config\.get" *.js
+```
+
+#### Step 2: Common Violations and Fixes
+
+##### 1. **Direct Y.js Access in Templates/Computed**
+
+```javascript
+// ❌ VIOLATION: Direct Y.js access
+computed: {
+    displayTags() {
+        const metadata = this.ydoc.getMap('metadata');
+        return metadata.get('tags') || [];
+    }
+}
+
+// ✅ FIX: Use reactive property
+computed: {
+    displayTags() {
+        return this.reactiveTags;
+    }
+}
+```
+
+##### 2. **Comment Options Pattern**
+
+```javascript
+// ❌ VIOLATION: Direct assignment from Y.js
+this.commentOptions.allowVotes = metadata.get('allowVotes') !== false;
+this.commentOptions.allowCurationRewards = metadata.get('allowCurationRewards') !== false;
+
+// ✅ FIX: Use reactive object with observer sync
+// In data():
+reactiveCommentOptions: {
+    allowVotes: true,
+    allowCurationRewards: true,
+    maxAcceptedPayout: false,
+    percentHbd: false
+}
+
+// In observer:
+this.reactiveCommentOptions.allowVotes = metadata.get('allowVotes') !== false;
+this.reactiveCommentOptions.allowCurationRewards = metadata.get('allowCurationRewards') !== false;
+```
+
+##### 3. **Custom JSON Access**
+
+```javascript
+// ❌ VIOLATION: Method returns direct Y.js reference
+getCustomJson() {
+    const metadata = this.ydoc.getMap('metadata');
+    return metadata.get('customJson') || {};
+}
+
+// ✅ FIX: Return reactive property
+getCustomJson() {
+    return this.reactiveCustomJson;
+}
+```
+
+##### 4. **Legacy Content Object**
+
+```javascript
+// ❌ VIOLATION: Using content object without observer sync
+this.content.tags = ['tag1', 'tag2'];
+this.content.beneficiaries = [];
+
+// ✅ FIX: Use reactive properties with Y.js sync
+// Update reactive property
+this.reactiveTags = ['tag1', 'tag2'];
+// Sync to Y.js in transaction
+this.ydoc.transact(() => {
+    metadata.set('tags', this.reactiveTags);
+}, 'tags-update');
+```
+
+#### Step 3: Implementation Checklist
+
+For each Y.js data field that needs Vue reactivity:
+
+1. **Add Reactive Property**
+   ```javascript
+   data() {
+       return {
+           reactiveFieldName: defaultValue
+       }
+   }
+   ```
+
+2. **Update Observer**
+   ```javascript
+   this.metadataObserver = (event) => {
+       this.reactiveFieldName = metadata.get('fieldName') || defaultValue;
+   };
+   ```
+
+3. **Replace Direct Access**
+   - In templates: Use `{{ reactiveFieldName }}`
+   - In computed: Return `this.reactiveFieldName`
+   - In methods: Work with `this.reactiveFieldName`
+
+4. **Sync Back to Y.js**
+   ```javascript
+   updateFieldName(newValue) {
+       this.reactiveFieldName = newValue;
+       this.ydoc.transact(() => {
+           metadata.set('fieldName', newValue);
+       }, 'field-update');
+   }
+   ```
+
+5. **Clean Up Observer**
+   ```javascript
+   beforeUnmount() {
+       if (this.metadataObserver && this.ydoc) {
+           metadata.unobserve(this.metadataObserver);
+       }
+   }
+   ```
+
+### Fields Requiring Reactive Patterns
+
+Based on codebase analysis, these fields need reactive wrappers:
+
+| Y.js Map | Field | Current Pattern | Required Reactive Property |
+|----------|-------|----------------|---------------------------|
+| metadata | tags | Mixed (some reactive, some direct) | `reactiveTags` ✅ |
+| metadata | beneficiaries | Mixed | `reactiveBeneficiaries` ✅ |
+| metadata | customJson | Direct access | `reactiveCustomJson` ❌ |
+| metadata | permlink | Direct access | `reactivePermlink` ❌ |
+| metadata | allowVotes | Direct assignment | `reactiveCommentOptions.allowVotes` ❌ |
+| metadata | allowCurationRewards | Direct assignment | `reactiveCommentOptions.allowCurationRewards` ❌ |
+| metadata | maxAcceptedPayout | Direct assignment | `reactiveCommentOptions.maxAcceptedPayout` ❌ |
+| metadata | percentHbd | Direct assignment | `reactiveCommentOptions.percentHbd` ❌ |
+| config | documentName | Partial reactive | `reactiveDocumentName` ⚠️ |
+| config | title | Input binding | `titleInput` ✅ |
+| config | permlink | Input binding | `permlinkInput` ✅ |
+
+Legend: ✅ = Implemented, ⚠️ = Partial, ❌ = Missing
+
+### Testing Reactive Patterns
+
+```javascript
+// Test that UI updates when Y.js changes
+testReactiveSync() {
+    // Change Y.js directly
+    const metadata = this.ydoc.getMap('metadata');
+    metadata.set('tags', ['new-tag']);
+    
+    // Vue should update automatically
+    this.$nextTick(() => {
+        console.assert(this.reactiveTags.includes('new-tag'), 'Reactive sync failed');
+    });
+}
+```
+
+### Performance Considerations
+
+1. **Batch Updates**: Use `$nextTick()` for multiple reactive updates
+2. **Shallow vs Deep**: Use spread operator for objects to trigger reactivity
+3. **Computed Caching**: Leverage computed properties for derived state
+4. **Observer Debouncing**: Consider debouncing for high-frequency updates
+
 This comprehensive update adds critical missing patterns to the TIPTAP_OFFLINE_FIRST_BEST_PRACTICES.md document, covering:
 
 1. **TipTap v3 compatibility and migration strategies**
@@ -8587,3 +10123,302 @@ This comprehensive update adds critical missing patterns to the TIPTAP_OFFLINE_F
 5. **Comprehensive error recovery strategies**
 
 These additions future-proof the document and provide production-ready patterns for handling edge cases and performance optimization.
+
+## 📡 **CONNECTION STATUS MANAGEMENT**
+
+### **Status Lifecycle**
+
+```javascript
+// Connection status values and their meanings
+connectionStatus: 'connecting'    // Initial state when loading collaborative docs
+connectionStatus: 'connected'     // WebSocket connected and syncing
+connectionStatus: 'disconnected'  // WebSocket disconnected but can reconnect
+connectionStatus: 'offline'       // Working with local storage only
+connectionStatus: 'auth-required' // Need authentication to connect
+connectionStatus: 'error'         // Connection error occurred
+```
+
+### **Setting Connection Status**
+
+```javascript
+// ✅ Set initial status when loading
+async autoConnectToCollaborativeDocument(owner, permlink) {
+    this.connectionStatus = 'connecting';
+    
+    if (this.authenticationState === 'loading') {
+        this.connectionStatus = 'auth-required';
+        return;
+    }
+}
+
+// ✅ Set status based on tier in DocumentManager
+if (tier === TierType.LOCAL) {
+    this.connectionStatus = 'offline';
+} else if (tier === TierType.CLOUD) {
+    this.connectionStatus = 'connecting';
+}
+
+// ✅ WebSocket callbacks update status
+provider.on('connect', () => this.connectionStatus = 'connected');
+provider.on('disconnect', () => this.connectionStatus = 'disconnected');
+```
+
+## 📄 **DOCUMENT TYPE IDENTIFICATION**
+
+### **Collaborative Document Detection**
+
+```javascript
+// ✅ CORRECT: Check explicit type/flags only
+isCollaborativeMode() {
+    if (!this.currentFile) return false;
+    return this.currentFile.type === 'collaborative' || 
+           this.currentFile.isCollaborative === true;
+}
+
+// ❌ WRONG: Don't rely on owner/permlink
+isCollaborativeMode() {
+    // Local docs can have these when:
+    // - Cached copies of collaborative docs
+    // - Loaded from URL parameters
+    // - Prepared for tier upgrade
+    return this.currentFile.owner && this.currentFile.permlink;
+}
+```
+
+## 🔐 **AUTHENTICATION STATE HANDLING**
+
+### **Deferred Document Loading**
+
+```javascript
+// Handle documents that load before auth completes
+if (this.authenticationState === 'loading') {
+    this.deferredCollabConnection = { owner, permlink };
+    this.connectionStatus = 'auth-required';
+    return; // Will be processed by auth watcher
+}
+
+// Auth watcher processes deferred connections
+watch: {
+    authHeaders(newHeaders) {
+        if (this.deferredCollabConnection && this.isAuthenticated) {
+            const { owner, permlink } = this.deferredCollabConnection;
+            this.autoConnectToCollaborativeDocument(owner, permlink);
+        }
+    }
+}
+```
+
+### **Permission Caching During Auth Loading**
+
+```javascript
+// Check cached permissions before defaulting to read-only
+if (this.authenticationState === 'loading' && 
+    this.currentFile?.type === 'collaborative') {
+    
+    const documentKey = `${this.currentFile.owner}/${this.currentFile.permlink}`;
+    const cachedPermission = this.permissionCache?.[documentKey];
+    
+    if (cachedPermission?.data?.permissionLevel) {
+        const level = cachedPermission.data.permissionLevel;
+        if (['owner', 'postable', 'editable'].includes(level)) {
+            return false; // Allow editing with cached permissions
+        }
+    }
+    
+    return true; // Default to read-only
+}
+```
+
+## 🚨 **COMMON DEBUGGING ISSUES**
+
+### **"TypeError: _a.on is not a function"**
+
+**Common Causes**:
+- Incorrect property access (e.g., `getUserColor()` instead of `getUserColor`)
+- Provider expecting method but getting non-function value
+- **NOT caused by markRaw() on Y.js documents** (despite initial debugging suspicion)
+
+**Debug Steps**:
+1. Check all function/property accesses in provider configuration
+2. Verify awareness configuration properties
+3. Ensure Y.js document is created without markRaw()
+
+### **Variable Scope in Vue Lifecycle**
+
+```javascript
+// ❌ WRONG: Variables out of scope in $nextTick
+mounted() {
+    const collabOwner = urlParams.get('collab_owner');
+    
+    this.$nextTick(() => {
+        if (collabOwner) { // Error: collabOwner not defined
+    });
+}
+
+// ✅ CORRECT: Re-read or store as component property
+mounted() {
+    this.$nextTick(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const collabOwner = urlParams.get('collab_owner');
+        if (collabOwner) { // Now in scope
+    });
+}
+```
+
+## 📋 **COMPREHENSIVE TROUBLESHOOTING GUIDE**
+
+### **"RangeError: Applying a mismatched transaction"**
+
+**Root Causes**:
+1. Creating IndexedDB persistence after editor has content
+2. Y.js loading historical data that conflicts with current editor state
+3. Commands executing with outdated base state
+4. Concurrent metadata and content updates without proper coordination
+5. Missing `markRaw()` on editor instances stored in Vue data
+
+**Solutions**:
+```javascript
+// ✅ CORRECT ORDER
+1. const ydoc = new Y.Doc()
+2. const persistence = new IndexeddbPersistence(id, ydoc)
+3. await persistence.once('synced')
+4. const editor = new Editor({ /* with ydoc */ })
+5. this.bodyEditor = markRaw(editor)
+
+// Use transactions with origin tags
+ydoc.transact(() => {
+    metadata.set('tags', newTags)
+}, 'metadata-update')
+
+// Filter in editor onUpdate
+onUpdate: ({ transaction }) => {
+    if (transaction.origin === 'metadata-update') return
+    // Handle content updates
+}
+```
+
+### **"function () { [native code] }" Display**
+
+**Cause**: Accessing Vue 3 computed properties as functions
+
+**Solution**:
+```javascript
+// ❌ WRONG
+{{ generatedPermlink() }}
+v-if="actualPermlink()"
+
+// ✅ CORRECT
+{{ generatedPermlink }}
+v-if="actualPermlink"
+```
+
+### **Permlink Edit Reverting/Not Saving**
+
+**Cause**: Improper state management between display/edit/persistent states
+
+**Solution**: Implement three-state pattern
+```javascript
+// Display: actualPermlink (computed)
+// Edit: permlinkInputTemp (temporary)
+// Persist: permlinkInput (reactive data)
+
+togglePermlinkEditor() {
+    this.permlinkInputTemp = this.actualPermlink || ''
+}
+
+savePermlink() {
+    this.permlinkInput = this.permlinkInputTemp
+    this.debouncedSetPermlinkInMetadata()
+}
+```
+
+### **Memory Leaks**
+
+**Common Sources**:
+1. Uncleared intervals/timeouts
+2. Uncleaned Y.js observers
+3. Undestroyed editors
+4. Active WebSocket connections
+
+**Cleanup Order**:
+```javascript
+beforeUnmount() {
+    // 1. Observers first
+    if (this.metadataObserver) {
+        ydoc.getMap('metadata').unobserve(this.metadataObserver)
+    }
+    
+    // 2. Editors
+    if (this.bodyEditor) {
+        this.bodyEditor.destroy()
+    }
+    
+    // 3. Providers
+    if (this.websocketProvider) {
+        this.websocketProvider.disconnect()
+    }
+    
+    // 4. Y.js document last
+    if (this.ydoc) {
+        this.ydoc.destroy()
+    }
+}
+```
+
+### **Collaboration Not Working**
+
+**Checklist**:
+1. ✓ Authentication headers valid (24hr expiry)
+2. ✓ WebSocket URL correct: `wss://data.dlux.io/collaboration/{owner}/{permlink}`
+3. ✓ User has appropriate permissions (editable/postable/owner)
+4. ✓ CollaborationCaret only with valid provider
+5. ✓ Y.js document shared between editor and provider
+
+### **State Not Persisting**
+
+**Common Issues**:
+1. IndexedDB not created for temp documents
+2. Metadata stored in wrong Y.js map
+3. Missing Y.js transactions
+4. Observer not set up properly
+
+**Debug Steps**:
+```javascript
+// Check Y.js maps
+console.log('Config:', Array.from(ydoc.getMap('config').entries()))
+console.log('Metadata:', Array.from(ydoc.getMap('metadata').entries()))
+
+// Verify IndexedDB
+if (this.indexeddbProvider) {
+    console.log('Persistence synced:', this.indexeddbProvider.synced)
+}
+```
+
+### **Performance Issues**
+
+**Optimization Strategies**:
+1. Use `markRaw()` on all non-reactive objects
+2. Debounce frequent operations
+3. Limit observer scope
+4. Clean up unused documents
+5. Monitor memory usage
+
+```javascript
+// Memory profiling
+const profile = {
+    yjsSize: Y.encodeStateAsUpdate(ydoc).length,
+    editorNodes: editor.state.doc.nodeSize,
+    indexedDBActive: !!this.indexeddbProvider
+}
+```
+
+---
+
+## 📚 **Quick Reference Links**
+
+- **TipTap v3 Docs**: https://next.tiptap.dev/docs
+- **Y.js Docs**: https://docs.yjs.dev
+- **Hocuspocus**: https://tiptap.dev/hocuspocus
+- **Project Implementation**: `js/tiptap-editor-modular.js`
+- **Architecture Guide**: This document
+- **Project Overview**: `CLAUDE.md`

@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.23.7",
-  "generated": "2025-06-23T19:36:22Z",
+  "version": "2025.06.23.13",
+  "generated": "2025-06-23T20:45:13Z",
   "files": {
-    "/img/csv-file-type-svgrepo-com.svg": {
-      "checksum": "eaf65c0be6b22858c041c8de3277046d",
-      "size": 2238,
-      "priority": "important"
-    },
     "/img/cube.png": {
       "checksum": "447344b02ceb4a0cbadc4c4f4046e2ff",
       "size": 12536735,
@@ -1003,8 +998,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/collaborative-tiptap-editor.js": {
-      "checksum": "623a94ea112d8b45d6491acf1be211a0",
-      "size": 16226,
+      "checksum": "13c0d4ddad488ae56cfae53500a38173",
+      "size": 16222,
       "priority": "important"
     },
     "/js/components/360-asset-manager.js": {
@@ -1273,8 +1268,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/simple-field-editor.js": {
-      "checksum": "68b87c94d41b38740f445068e1188c2f",
-      "size": 6226,
+      "checksum": "dffb9579db9f0cb7de741073b333e73f",
+      "size": 6223,
       "priority": "important"
     },
     "/js/spk-js.js": {
@@ -1308,7 +1303,7 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/sw-monitor.js": {
-      "checksum": "e54b7faa7555dae997303769305f9147",
+      "checksum": "a8841e94bb8bd626986032de8f1013d0",
       "size": 36523,
       "priority": "important"
     },
@@ -1323,18 +1318,18 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/tiptap-collaboration.bundle.js": {
-      "checksum": "6a762e6bba35a712154503abf519c157",
-      "size": 1430717,
+      "checksum": "8392fbe66da327a717e0cb83a12d382f",
+      "size": 2074921,
       "priority": "important"
     },
     "/js/tiptap-editor-with-file-menu.js": {
-      "checksum": "607b77d35b3933cb898895812f5f004f",
-      "size": 725322,
+      "checksum": "24ee98360e944c832ad03163ce6e081d",
+      "size": 730328,
       "priority": "important"
     },
     "/js/tiptap-editor.js": {
-      "checksum": "f96826534f8ff1d4edd88a6aca40deeb",
-      "size": 19217,
+      "checksum": "5f4b2d1fcbb4c4f87448ebbfff1d9b5b",
+      "size": 19215,
       "priority": "important"
     },
     "/js/tiptap-file-manager.js": {
@@ -1403,8 +1398,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/v3-user.js": {
-      "checksum": "2732beead974462ee95e372ed0f898a1",
-      "size": 229294,
+      "checksum": "04f05b99dd9a53d56742a3785a51dc43",
+      "size": 229277,
       "priority": "important"
     },
     "/js/vote.js": {
@@ -1463,8 +1458,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/new/index.html": {
-      "checksum": "6e2e8624c9f7b626d3cfdf2fd2cf5338",
-      "size": 65680,
+      "checksum": "7f197073ddc4abed31d7842c65ca801a",
+      "size": 65845,
       "priority": "important"
     },
     "/new/token/index.html": {
@@ -1528,13 +1523,13 @@ self.cacheManifest =
       "priority": "important"
     },
     "/reg-sw.js": {
-      "checksum": "2ab98c329b4c3999b1b7f7832eb17e73",
+      "checksum": "20d12f5e04319c66323b6d552c1878bd",
       "size": 7299,
       "priority": "important"
     },
     "/src/collaboration-bundle.js": {
-      "checksum": "a1bd4bd9f4784fd3fc942fd37bf9ef50",
-      "size": 2863,
+      "checksum": "11321c49afee69526b58fbe769c2845e",
+      "size": 4113,
       "priority": "important"
     },
     "/storage/index.html": {
@@ -1621,11 +1616,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/naf-playground/js/main.js": {
-      "checksum": "47fcbdb23a77e0b134f985c967662009",
-      "size": 645,
-      "priority": "page-specific"
     },
     "/naf-playground/js/monaco.js": {
       "checksum": "2f5eb2b94393d373d9b4376bcdaa815d",
@@ -2357,12 +2347,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
-      "checksum": "no-hash-symlink",
-      "size": 0,
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+      "checksum": "5f37ed7047b961772448e656b091ffdd",
+      "size": 114673,
       "priority": "lazy"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"

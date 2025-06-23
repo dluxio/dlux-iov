@@ -951,7 +951,7 @@
                         <div id="postEditor" class="accordion-collapse collapse show"
                             data-bs-parent="#postEditorAccordion">
                             <div class="accordion-body p-0">
-                                <tiptap-editor-with-file-menu v-if="account" :username="account"
+                                <tiptap-editor-modular v-if="account" :username="account"
                                     :auth-headers="collaborationAuthHeaders" :file-to-add="fileToAddToPost"
                                     :post-custom-json="postCustom_json" :initial-content="{
                                         title: postTitle,
@@ -962,7 +962,7 @@
                                         custom_json: postCustom_json
                                     }" @content-changed="handlePostContentChanged" @publish-post="handlePostPublish"
                                     @update:file-to-add="fileToAddToPost = null" @tosign="sendIt($event)"
-                                    @request-auth-headers="ensureCollaborationAuth"></tiptap-editor-with-file-menu>
+                                    @request-auth-headers="ensureCollaborationAuth"></tiptap-editor-modular>
                                 <div v-else class="text-center text-muted py-5">
                                     <i class="fas fa-sign-in-alt fa-3x mb-3"></i>
                                     <h5>Please Log In</h5>
@@ -1050,7 +1050,7 @@
         var video_page = true
     </script>
     <!-- TipTap Collaboration Bundle (includes Y.js and HocuspocusProvider) -->
-    <script src="/js/tiptap-collaboration.bundle.js"></script>
+    <script src="/js/tiptap-collaboration.bundle.js?v=20250122-aligned"></script>
     <script>
         // Verify that the TipTap collaboration bundle is loaded
         setTimeout(() => {
@@ -1064,7 +1064,9 @@
                 console.log('Y.js available:', typeof bundle?.Y);
                 console.log('HocuspocusProvider available:', typeof bundle?.HocuspocusProvider);
                 console.log('Collaboration extension available:', typeof bundle?.Collaboration);
-                console.log('CollaborationCursor available:', typeof bundle?.CollaborationCursor);
+                console.log('CollaborationCaret available:', typeof bundle?.CollaborationCaret);
+                console.log('Bold extension available:', typeof bundle?.Bold);
+                console.log('Italic extension available:', typeof bundle?.Italic);
                 console.log('TaskList extension available:', typeof bundle?.TaskList);
                 console.log('TaskItem extension available:', typeof bundle?.TaskItem);
 
