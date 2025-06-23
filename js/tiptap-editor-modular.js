@@ -8964,7 +8964,9 @@ export default {
         async linkLocalFileMetadata(localFile, collaborativeFile) {
             try {
                 const localFileMetadata = {
-                    collaborativeOwner: collaborativeFile.owner,
+                    cloudOwner: collaborativeFile.owner,
+                    cloudPermlink: collaborativeFile.permlink,
+                    collaborativeOwner: collaborativeFile.owner, // Keep both for compatibility
                     collaborativePermlink: collaborativeFile.permlink,
                     convertedToCollaborative: true,
                     collaborativeConvertedAt: new Date().toISOString(),
@@ -10001,6 +10003,73 @@ export default {
                         
                         if (response.ok) {
                             deletedCount++;
+                            
+                            // Also delete the local IndexedDB copies
+                            // Cloud documents can have multiple IndexedDB keys
+                            const possibleKeys = [
+                                `${this.username}__${doc.owner}/${doc.permlink}`, // User-isolated key
+                                `${doc.owner}/${doc.permlink}`, // Direct owner/permlink key
+                                `markegiles__${doc.owner}/${doc.permlink}`, // Hardcoded username key (legacy)
+                                `dlux-collaborative-${doc.owner}-${doc.permlink}` // Legacy pattern
+                            ];
+                            
+                            // Also scan for any database containing this permlink or owner
+                            if (indexedDB.databases) {
+                                try {
+                                    const allDatabases = await indexedDB.databases();
+                                    for (const db of allDatabases) {
+                                        if (db.name && (
+                                            db.name.includes(doc.permlink) || 
+                                            (db.name.includes(doc.owner) && db.name.includes('/'))
+                                        )) {
+                                            possibleKeys.push(db.name);
+                                        }
+                                    }
+                                    
+                                    // Also check localStorage for any local files that were converted to this cloud document
+                                    const localFiles = JSON.parse(localStorage.getItem('dlux_tiptap_files') || '[]');
+                                    const convertedFiles = localFiles.filter(f => 
+                                        f.cloudOwner === doc.owner && f.cloudPermlink === doc.permlink
+                                    );
+                                    
+                                    for (const convertedFile of convertedFiles) {
+                                        if (convertedFile.id) {
+                                            possibleKeys.push(convertedFile.id);
+                                            // Remove from localStorage
+                                            const updatedLocalFiles = localFiles.filter(f => f.id !== convertedFile.id);
+                                            localStorage.setItem('dlux_tiptap_files', JSON.stringify(updatedLocalFiles));
+                                            console.log('🧹 Removed converted local file from localStorage:', convertedFile.id);
+                                        }
+                                    }
+                                } catch (scanError) {
+                                    console.warn('⚠️ Could not scan for additional database keys:', scanError);
+                                }
+                            }
+                            
+                            // Remove duplicates
+                            const uniqueKeys = [...new Set(possibleKeys)];
+                            
+                            for (const indexedDBKey of uniqueKeys) {
+                                try {
+                                    const deleteReq = indexedDB.deleteDatabase(indexedDBKey);
+                                    await new Promise((resolve) => {
+                                        deleteReq.onsuccess = () => {
+                                            console.log('✅ Deleted local IndexedDB copy:', indexedDBKey);
+                                            resolve();
+                                        };
+                                        deleteReq.onerror = () => {
+                                            // Silently continue - database might not exist
+                                            resolve();
+                                        };
+                                        deleteReq.onblocked = () => {
+                                            console.warn('⚠️ Database deletion blocked:', indexedDBKey);
+                                            resolve(); // Continue anyway
+                                        };
+                                    });
+                                } catch (localError) {
+                                    // Continue with next key
+                                }
+                            }
                         } else {
                             errorCount++;
                             console.error('Failed to delete cloud document:', doc.documentName, response.statusText);
@@ -10011,10 +10080,53 @@ export default {
                     }
                 }
                 
-                // Refresh the list
+                // Final sweep - check all IndexedDB databases for any we might have missed
+                if (indexedDB.databases && deletedCount > 0) {
+                    try {
+                        const remainingDatabases = await indexedDB.databases();
+                        let additionalDeleted = 0;
+                        
+                        for (const db of remainingDatabases) {
+                            // Check if this database belongs to any of the deleted documents
+                            for (const doc of ownedDocs) {
+                                if (db.name && (
+                                    db.name.includes(doc.permlink) ||
+                                    db.name.includes(`${doc.owner}/${doc.permlink}`) ||
+                                    db.name === `local_${doc.permlink}` // In case permlink was reused
+                                )) {
+                                    try {
+                                        const deleteReq = indexedDB.deleteDatabase(db.name);
+                                        await new Promise((resolve) => {
+                                            deleteReq.onsuccess = () => {
+                                                console.log('🧹 Final sweep deleted:', db.name);
+                                                additionalDeleted++;
+                                                resolve();
+                                            };
+                                            deleteReq.onerror = resolve;
+                                            deleteReq.onblocked = resolve;
+                                        });
+                                    } catch (err) {
+                                        // Continue
+                                    }
+                                }
+                            }
+                        }
+                        
+                        if (additionalDeleted > 0) {
+                            console.log(`✅ Final sweep removed ${additionalDeleted} additional databases`);
+                        }
+                    } catch (sweepError) {
+                        console.warn('⚠️ Final sweep encountered error:', sweepError);
+                    }
+                }
+                
+                // Also refresh local files to remove any orphaned entries
+                await this.loadLocalFiles();
+                
+                // Refresh the collaborative docs list
                 await this.loadCollaborativeDocs();
                 
-                alert(`Cloud file cleanup complete:\n- Deleted: ${deletedCount} documents\n- Errors: ${errorCount} documents`);
+                alert(`Cloud file cleanup complete:\n- Deleted: ${deletedCount} documents (cloud and local copies)\n- Errors: ${errorCount} documents`);
                 
             } catch (error) {
                 console.error('❌ Failed to clear cloud files:', error);
@@ -10041,6 +10153,53 @@ export default {
                 });
                 
                 if (response.ok) {
+                    
+                    // Delete all possible local IndexedDB copies
+                    const possibleKeys = [
+                        `${this.username}__${file.owner}/${file.permlink}`, // User-isolated key
+                        `${file.owner}/${file.permlink}`, // Direct owner/permlink key
+                        `markegiles__${file.owner}/${file.permlink}`, // Hardcoded username key (legacy)
+                        `dlux-collaborative-${file.owner}-${file.permlink}` // Legacy pattern
+                    ];
+                    
+                    // Also scan for any database containing this permlink
+                    if (indexedDB.databases) {
+                        try {
+                            const allDatabases = await indexedDB.databases();
+                            for (const db of allDatabases) {
+                                if (db.name && db.name.includes(file.permlink)) {
+                                    possibleKeys.push(db.name);
+                                }
+                            }
+                        } catch (scanError) {
+                            console.warn('⚠️ Could not scan for additional database keys:', scanError);
+                        }
+                    }
+                    
+                    // Remove duplicates
+                    const uniqueKeys = [...new Set(possibleKeys)];
+                    
+                    for (const indexedDBKey of uniqueKeys) {
+                        try {
+                            const deleteReq = indexedDB.deleteDatabase(indexedDBKey);
+                            await new Promise((resolve) => {
+                                deleteReq.onsuccess = () => {
+                                    console.log('✅ Deleted local IndexedDB copy:', indexedDBKey);
+                                    resolve();
+                                };
+                                deleteReq.onerror = () => {
+                                    // Silently continue - database might not exist
+                                    resolve();
+                                };
+                                deleteReq.onblocked = () => {
+                                    console.warn('⚠️ Database deletion blocked:', indexedDBKey);
+                                    resolve(); // Continue anyway
+                                };
+                            });
+                        } catch (localError) {
+                            // Continue with next key
+                        }
+                    }
                     
                     // Refresh collaborative docs list
                     // ✅ OFFLINE-FIRST: Non-blocking collaborative docs refresh
