@@ -1,4 +1,4 @@
-this.version = "2025.06.23.7";
+this.version = "2025.06.23.8";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.23.13",
-  "generated": "2025-06-23T20:45:13Z",
+  "version": "2025.06.23.8",
+  "generated": "2025-06-23T20:46:17Z",
   "files": {
-    "/img/cube.png": {
-      "checksum": "447344b02ceb4a0cbadc4c4f4046e2ff",
-      "size": 12536735,
-      "priority": "important"
-    },
     "/img/dex-vr-comp.jpg": {
       "checksum": "e763f32eddfb928e99597355486c7654",
       "size": 101824,
@@ -998,8 +993,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/collaborative-tiptap-editor.js": {
-      "checksum": "13c0d4ddad488ae56cfae53500a38173",
-      "size": 16222,
+      "checksum": "623a94ea112d8b45d6491acf1be211a0",
+      "size": 16226,
       "priority": "important"
     },
     "/js/components/360-asset-manager.js": {
@@ -1268,8 +1263,8 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/simple-field-editor.js": {
-      "checksum": "dffb9579db9f0cb7de741073b333e73f",
-      "size": 6223,
+      "checksum": "68b87c94d41b38740f445068e1188c2f",
+      "size": 6226,
       "priority": "important"
     },
     "/js/spk-js.js": {
@@ -1323,13 +1318,13 @@ self.cacheManifest =
       "priority": "important"
     },
     "/js/tiptap-editor-with-file-menu.js": {
-      "checksum": "24ee98360e944c832ad03163ce6e081d",
-      "size": 730328,
+      "checksum": "607b77d35b3933cb898895812f5f004f",
+      "size": 725322,
       "priority": "important"
     },
     "/js/tiptap-editor.js": {
-      "checksum": "5f4b2d1fcbb4c4f87448ebbfff1d9b5b",
-      "size": 19215,
+      "checksum": "f96826534f8ff1d4edd88a6aca40deeb",
+      "size": 19217,
       "priority": "important"
     },
     "/js/tiptap-file-manager.js": {
@@ -1616,11 +1611,6 @@ self.cacheManifest =
       "checksum": "273ac7907252d9c47389428022d1e912",
       "size": 854,
       "priority": "important"
-    },
-    "/naf-playground/js/monaco.js": {
-      "checksum": "2f5eb2b94393d373d9b4376bcdaa815d",
-      "size": 64578,
-      "priority": "page-specific"
     },
     "/naf-playground/js/network-manager.js": {
       "checksum": "a44c210d1a833a9da4e95c87c22da749",
@@ -2347,12 +2337,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
