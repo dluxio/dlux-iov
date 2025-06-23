@@ -1222,6 +1222,7 @@ const app = createApp({
          let dailyAvailable = 0;
          let hiveBalance = 0;
          let ninjaGrant = 0;
+         let beneficiaryRewards = 0;
          
          if (hiveFundAccount) {
            if (hiveFundAccount.hbd_balance) {
@@ -1235,11 +1236,18 @@ const app = createApp({
            }
          }
          
+         // Beneficiary rewards: 200,000 Hive monthly from comment voting converted to HBD
+         
+         if (this.hiveprice?.hive?.usd) {
+           beneficiaryRewards = (200000 / 30) * this.hiveprice.hive.usd;
+         }
+         
          this.daoFund = {
            treasury: fundBalance,
            available: dailyAvailable,
            dailyInflow: dailyInflow,
            ninjaGrant: ninjaGrant,
+           beneficiaryRewards: beneficiaryRewards,
            hiveBalance: hiveBalance
          };
       } catch (error) {
@@ -1248,7 +1256,10 @@ const app = createApp({
         this.daoFund = {
           treasury: 0,
           available: 0,
-          dailyInflow: 0
+          dailyInflow: 0,
+          ninjaGrant: 0,
+          beneficiaryRewards: 0,
+          hiveBalance: 0
         };
       }
     },
@@ -1467,7 +1478,8 @@ const app = createApp({
     },
 
     fancyRounding(num) {
-      if (num >= 1000000) {
+      if (typeof num !== 'number') return '0';
+      else if (num >= 1000000) {
         return (num / 1000000).toFixed(1) + 'M';
       } else if (num >= 1000) {
         return (num / 1000).toFixed(1) + 'K';
@@ -1971,12 +1983,14 @@ const app = createApp({
       
       const projectedDailyInflow = this.daoFund.dailyInflow * (projectedPrice / currentPrice);
       const projectedNinjaGrant = this.daoFund.ninjaGrant * (projectedPrice / currentPrice);
+      const projectedBeneficiaryRewards = this.daoFund.beneficiaryRewards * (projectedPrice / currentPrice);
       
       return {
         projectedPrice,
         projectedDailyInflow,
         projectedNinjaGrant,
-        projectedTotalInflow: projectedDailyInflow + projectedNinjaGrant,
+        projectedBeneficiaryRewards,
+        projectedTotalInflow: projectedDailyInflow + projectedNinjaGrant + projectedBeneficiaryRewards,
         timeframe
       };
     },
@@ -1997,7 +2011,7 @@ const app = createApp({
       const priceGrowthRate = this.priceGrowthRate / 100;
       
       // Check current daily inflow
-      const currentTotalDailyInflow = this.daoFund.dailyInflow + this.daoFund.ninjaGrant;
+      const currentTotalDailyInflow = this.daoFund.dailyInflow + this.daoFund.ninjaGrant + this.daoFund.beneficiaryRewards;
       const currentRatio = currentTreasury / currentTotalDailyInflow;
       
       // If we're already at or below 150x, we're in the target band
@@ -2024,7 +2038,10 @@ const app = createApp({
           const dailyNinjaGrant = (hiveBalance * 0.0005) * projectedPrice;
           hiveBalance -= hiveBalance * 0.0005; // Reduce Hive balance
           
-          const totalDailyInflow = projectedRewardInflow + dailyNinjaGrant;
+          // Beneficiary rewards scale with price
+          const dailyBeneficiaryRewards = (200000 / 365) * projectedPrice;
+          
+          const totalDailyInflow = projectedRewardInflow + dailyNinjaGrant + dailyBeneficiaryRewards;
           treasury += totalDailyInflow - dailyOutflow;
           
           // Check if treasury has dropped to 150x daily inflow (sustainable level)
@@ -2066,8 +2083,9 @@ const app = createApp({
         const projectedRewardInflow = dailyRewardsInflow * Math.pow(rewardFundGrowthDaily, day) * (projectedPrice / currentPrice);
         const dailyNinjaGrant = (hiveBalance * 0.0005) * projectedPrice;
         hiveBalance -= hiveBalance * 0.0005;
+        const dailyBeneficiaryRewards = (200000 / 365) * projectedPrice;
         
-        totalInflow += projectedRewardInflow + dailyNinjaGrant;
+        totalInflow += projectedRewardInflow + dailyNinjaGrant + dailyBeneficiaryRewards;
       }
       
       const averageDailyInflow = totalInflow / (365 * 10);
@@ -2115,7 +2133,9 @@ const app = createApp({
         const dailyNinjaGrant = (hiveBalance * 0.0005) * projectedPrice;
         hiveBalance -= hiveBalance * 0.0005;
         
-        const totalDailyInflow = projectedRewardInflow + dailyNinjaGrant;
+        const dailyBeneficiaryRewards = (200000 / 365) * projectedPrice;
+        
+        const totalDailyInflow = projectedRewardInflow + dailyNinjaGrant + dailyBeneficiaryRewards;
         const netDailyChange = totalDailyInflow - currentDailyOutflow;
         treasury += netDailyChange;
         
@@ -2418,7 +2438,10 @@ const app = createApp({
         const dailyNinjaGrant = (currentHiveBalance * 0.0005) * projectedPrice;
         currentHiveBalance -= currentHiveBalance * 0.0005; // Reduce Hive balance
         
-        const totalDailyInflow = projectedRewardsInflow + dailyNinjaGrant;
+        // Beneficiary rewards: 200,000 Hive annually from comment voting
+        const dailyBeneficiaryRewards = (200000 / 365) * projectedPrice;
+        
+        const totalDailyInflow = projectedRewardsInflow + dailyNinjaGrant + dailyBeneficiaryRewards;
         
         // Calculate different outflow scenarios
         const dailyOutflowWithout = dailyOutflow;
@@ -2451,6 +2474,7 @@ const app = createApp({
             dailyInflow: Number(totalDailyInflow),
             dailyRewardsInflow: Number(projectedRewardsInflow),
             dailyNinjaGrant: Number(dailyNinjaGrant),
+            dailyBeneficiaryRewards: Number(dailyBeneficiaryRewards),
             dailyOutflowWithout: Number(dailyOutflowWithout),
             dailyOutflowWithProposal: Number(dailyOutflowWithProposal),
             dailyOutflowWithCustom: Number(dailyOutflowWithCustom),
@@ -2495,6 +2519,15 @@ const app = createApp({
           data: projections.map(p => p.dailyNinjaGrant),
           borderColor: 'rgb(153, 102, 255)',
           backgroundColor: 'rgba(153, 102, 255, 0.1)',
+          tension: 0.1,
+          yAxisID: 'y1',
+          fill: false
+        },
+        {
+          label: 'Daily Beneficiary Rewards',
+          data: projections.map(p => p.dailyBeneficiaryRewards),
+          borderColor: 'rgb(34, 197, 94)',
+          backgroundColor: 'rgba(34, 197, 94, 0.1)',
           tension: 0.1,
           yAxisID: 'y1',
           fill: false

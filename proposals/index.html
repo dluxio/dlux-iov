@@ -174,6 +174,16 @@
 						<div class="col-lg-2 col-md-4 col-sm-6 mb-3">
 							<div class="card bg-dark bg-opacity-75 text-light h-100">
 								<div class="card-body text-center">
+									<h6 class="card-title text-info">Beneficiary Rewards</h6>
+									<h4 class="text-success mb-1">${{ fancyRounding(daoFund.beneficiaryRewards) }}</h4>
+									<small class="text-muted">Comment voting</small>
+								</div>
+							</div>
+						</div>
+						
+						<div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+							<div class="card bg-dark bg-opacity-75 text-light h-100">
+								<div class="card-body text-center">
 									<h6 class="card-title text-info">Funded (All)</h6>
 									<h4 class="text-danger mb-1">${{ fancyRounding(healthStats.totalFundedOutflowsNoZero) }}</h4>
 									<small class="text-muted">Active only</small>
@@ -616,6 +626,7 @@
 												<li><span class="text-warning">Orange:</span> Hive balance (ninja fund)</li>
 												<li><span class="text-primary">Blue:</span> Total daily inflow</li>
 												<li><span class="text-success">Purple:</span> Ninja grant (decreasing)</li>
+												<li><span style="color: rgb(34, 197, 94);">Green:</span> Beneficiary rewards (comment voting)</li>
 												<li><span class="text-danger">Red:</span> Daily outflow</li>
 											</ul>
 										</div>
@@ -673,6 +684,15 @@
 													<span class="text-primary">${{ fancyRounding(getProjectedValues().projectedNinjaGrant * 365) }}</span>
 													<div v-if="priceGrowthRate !== 0" class="small text-muted">
 														was ${{ fancyRounding(daoFund.ninjaGrant * 365) }} @ 0%
+													</div>
+												</div>
+											</div>
+											<div class="d-flex justify-content-between align-items-center mb-2">
+												<span>Beneficiary Rewards:</span>
+												<div class="text-end">
+													<span class="text-success">${{ fancyRounding(getProjectedValues().projectedBeneficiaryRewards * 365) }}</span>
+													<div v-if="priceGrowthRate !== 0" class="small text-muted">
+														was ${{ fancyRounding(daoFund.beneficiaryRewards * 365) }} @ 0%
 													</div>
 												</div>
 											</div>
@@ -844,6 +864,10 @@
 											<div class="progress-bar bg-primary" role="progressbar" 
 												:style="'width: ' + Math.min((getProjectedValues().projectedNinjaGrant * 365 / (getProjectedValues().projectedTotalInflow * 365)) * 100, 100) + '%'">
 												Ninja
+											</div>
+											<div class="progress-bar" style="background-color: rgb(34, 197, 94);" role="progressbar" 
+												:style="'width: ' + Math.min((getProjectedValues().projectedBeneficiaryRewards * 365 / (getProjectedValues().projectedTotalInflow * 365)) * 100, 100) + '%'">
+												Beneficiary
 											</div>
 										</div>
 										<div class="progress" style="height: 20px;">
