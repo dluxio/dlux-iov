@@ -702,7 +702,7 @@
 												<div class="text-end">
 													<strong class="text-warning">${{ fancyRounding(getProjectedValues().projectedTotalInflow * 365) }}</strong>
 													<div v-if="priceGrowthRate !== 0" class="small text-muted">
-														was ${{ fancyRounding((daoFund.dailyInflow + daoFund.ninjaGrant) * 365) }} @ 0%
+														was ${{ fancyRounding((daoFund.dailyInflow + daoFund.ninjaGrant + daoFund.beneficiaryRewards) * 365) }} @ 0%
 													</div>
 												</div>
 											</div>
@@ -745,7 +745,7 @@
 														</strong>
 													</span>
 													<div v-if="priceGrowthRate !== 0" class="small text-muted">
-														was ${{ fancyRounding((daoFund.dailyInflow + daoFund.ninjaGrant) * 365 - healthStats.totalFundedOutflowsNoStabilizer * 365) }} @ 0%
+														was ${{ fancyRounding((daoFund.dailyInflow + daoFund.ninjaGrant + daoFund.beneficiaryRewards) * 365 - healthStats.totalFundedOutflowsNoStabilizer * 365) }} @ 0%
 													</div>
 												</div>
 											</div>
@@ -785,6 +785,44 @@
 																<span :class="getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? 'text-danger' : 'text-success'">
 																	{{ getProjectedValuesWithProposalImpact().proposalImpact.annualChange > 0 ? '+' : '' }}{{ (Math.abs(getProjectedValuesWithProposalImpact().proposalImpact.annualChange) / (getProjectedValues().projectedTotalInflow * 365) * 100).toFixed(2) }}%
 																</span>
+															</div>
+														</div>
+														
+														<!-- Voting Actions for Analyzed Proposal -->
+														<div v-if="account && isProposalActive(selectedProposalForAnalysis)" class="mt-3 p-3 rounded" style="background: rgba(255,255,255,0.05);">
+															<h6 class="text-light mb-2">
+																<i class="fa-solid fa-vote-yea me-2"></i>Quick Actions
+															</h6>
+															<div class="d-flex gap-2 align-items-center">
+																<div v-if="getUserVote(selectedProposalForAnalysis.id)" class="text-success small me-3">
+																	<i class="fa-solid fa-check me-1"></i>You are supporting this proposal
+																</div>
+																<div v-else class="text-muted small me-3">
+																	<i class="fa-solid fa-minus me-1"></i>Not voted
+																</div>
+																
+																<button v-if="!getUserVote(selectedProposalForAnalysis.id)" 
+																	@click="voteForProposal(selectedProposalForAnalysis.id, true)"
+																	:disabled="votingProposal === selectedProposalForAnalysis.id"
+																	class="btn btn-success btn-sm">
+																	<span v-if="votingProposal === selectedProposalForAnalysis.id" class="spinner-border spinner-border-sm me-1"></span>
+																	<i v-else class="fa-solid fa-thumbs-up me-1"></i>
+																	Support
+																</button>
+																<button v-else 
+																	@click="voteForProposal(selectedProposalForAnalysis.id, false)"
+																	:disabled="votingProposal === selectedProposalForAnalysis.id"
+																	class="btn btn-outline-danger btn-sm">
+																	<span v-if="votingProposal === selectedProposalForAnalysis.id" class="spinner-border spinner-border-sm me-1"></span>
+																	<i v-else class="fa-solid fa-thumbs-down me-1"></i>
+																	Remove Support
+																</button>
+																
+																<button @click="openProposalModal(selectedProposalForAnalysis)" 
+																	class="btn btn-outline-info btn-sm ms-2">
+																	<i class="fa-solid fa-info-circle me-1"></i>
+																	View Details
+																</button>
 															</div>
 														</div>
 													</div>
@@ -1123,12 +1161,24 @@
 														class="btn btn-outline-warning btn-sm w-100">
 														<i class="fa-solid fa-chart-line me-1"></i>Remove from Chart
 													</button>
-													<button v-else
+													<button v-else-if="proposal.id !== 0 && !isStabilizerProposal(proposal)"
 														@click="selectProposalForAnalysis(proposal)"
 														class="btn btn-outline-info btn-sm w-100">
 														<i class="fa-solid fa-chart-line me-1"></i>
 														{{ isProposalFunded(proposal) ? 'Analyze Removing' : 'Analyze Adding' }}
 													</button>
+													<div v-else-if="proposal.id === 0" class="text-center">
+														<small class="text-info">
+															<i class="fa-solid fa-info-circle me-1"></i>Return Proposal<br>
+															<span class="text-muted">Sets funding threshold</span>
+														</small>
+													</div>
+													<div v-else-if="isStabilizerProposal(proposal)" class="text-center">
+														<small class="text-secondary">
+															<i class="fa-solid fa-info-circle me-1"></i>Stabilizer Proposal<br>
+															<span class="text-muted">No net budget impact</span>
+														</small>
+													</div>
 												</div>
 											</div>
 										</div>
@@ -1236,92 +1286,132 @@
 		</div>
 
 		<!-- Proposal Detail Modal -->
-		<div v-if="selectedProposal" class="modal fade" id="proposalModal" tabindex="-1" aria-hidden="true">
+		<div v-if="showProposalModal" class="modal fade" id="proposalModal" tabindex="-1" aria-hidden="true">
 			<div class="modal-dialog modal-lg modal-dialog-centered">
 				<div class="modal-content bg-dark text-light">
 					<div class="modal-header border-secondary">
-						<h5 class="modal-title">{{ selectedProposal.subject }}</h5>
+						<h5 class="modal-title">
+							<span v-if="selectedProposal">{{ selectedProposal.subject }}</span>
+							<span v-else-if="pendingProposalId">Proposal #{{ pendingProposalId }}</span>
+							<span v-else>Loading Proposal...</span>
+						</h5>
 						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" 
 								@click="closeProposalModal"></button>
 					</div>
 					<div class="modal-body">
-						<div class="row mb-3">
-							<div class="col-md-6">
-								<strong class="text-info">Creator:</strong><br>
-								<a :href="'/@' + selectedProposal.creator" 
+						<!-- Loading State -->
+						<div v-if="!selectedProposal && pendingProposalId" class="text-center py-5">
+							<div class="spinner-border text-light mb-3" role="status">
+								<span class="visually-hidden">Loading...</span>
+							</div>
+							<p class="text-light">Fetching proposal details...</p>
+						</div>
+						
+						<!-- Proposal Content -->
+						<div v-else-if="selectedProposal">
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<strong class="text-info">Creator:</strong><br>
+									<a :href="'/@' + selectedProposal.creator" 
+										class="text-light text-decoration-none">
+										@{{ selectedProposal.creator }}
+									</a>
+								</div>
+								<div class="col-md-6">
+									<strong class="text-info">Status:</strong><br>
+									<span v-if="isProposalFunded(selectedProposal)" class="text-success">✓ Funded</span>
+									<span v-else-if="getVotePercentage(selectedProposal) >= 100" class="text-warning">Above Threshold</span>
+									<span v-else class="text-danger">{{ getSupportLabel(selectedProposal) }}</span>
+								</div>
+							</div>
+							
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<strong class="text-info">Daily Payment:</strong><br>
+									{{ fancyRounding(selectedProposal.daily_pay.amount / 1000) }} HBD
+								</div>
+								<div class="col-md-6">
+									<strong class="text-info">Total Support:</strong><br>
+									{{ formatVotes(selectedProposal.total_votes) }} HP
+								</div>
+							</div>
+							
+							<div class="row mb-3">
+								<div class="col-md-6">
+									<strong class="text-info">Start Date:</strong><br>
+									{{ formatDate(selectedProposal.start_date) }}
+								</div>
+								<div class="col-md-6">
+									<strong class="text-info">End Date:</strong><br>
+									{{ formatDate(selectedProposal.end_date) }}
+								</div>
+							</div>
+							
+							<div class="mb-3">
+								<strong class="text-info">Receiver:</strong><br>
+								<a :href="'/@' + selectedProposal.receiver" 
 									class="text-light text-decoration-none">
-									@{{ selectedProposal.creator }}
+									@{{ selectedProposal.receiver }}
 								</a>
 							</div>
-							<div class="col-md-6">
-								<strong class="text-info">Status:</strong><br>
-								<span v-if="isProposalFunded(selectedProposal)" class="text-success">✓ Funded</span>
-								<span v-else-if="getVotePercentage(selectedProposal) >= 100" class="text-warning">Above Threshold</span>
-								<span v-else class="text-danger">{{ getSupportLabel(selectedProposal) }}</span>
-							</div>
-						</div>
-						
-						<div class="row mb-3">
-							<div class="col-md-6">
-								<strong class="text-info">Daily Payment:</strong><br>
-								{{ fancyRounding(selectedProposal.daily_pay.amount / 1000) }} HBD
-							</div>
-							<div class="col-md-6">
-								<strong class="text-info">Total Support:</strong><br>
-								{{ formatVotes(selectedProposal.total_votes) }} HP
-							</div>
-						</div>
-						
-						<div class="row mb-3">
-							<div class="col-md-6">
-								<strong class="text-info">Start Date:</strong><br>
-								{{ formatDate(selectedProposal.start_date) }}
-							</div>
-							<div class="col-md-6">
-								<strong class="text-info">End Date:</strong><br>
-								{{ formatDate(selectedProposal.end_date) }}
-							</div>
-						</div>
-						
-						<div class="mb-3">
-							<strong class="text-info">Receiver:</strong><br>
-							<a :href="'/@' + selectedProposal.receiver" 
-								class="text-light text-decoration-none">
-								@{{ selectedProposal.receiver }}
-							</a>
-						</div>
 
-						<div class="mb-3">
-							<strong class="text-info">Support Progress:</strong>
-							<div class="progress mt-2" style="height: 12px;">
-								<div class="progress-bar" role="progressbar" 
-									:class="isProposalFunded(selectedProposal) ? 'bg-success' : (getVotePercentage(selectedProposal) >= 100 ? 'bg-warning' : 'bg-danger')"
-									:style="'width: ' + Math.max(getVotePercentage(selectedProposal), 5) + '%'">
-									{{ getVotePercentage(selectedProposal).toFixed(1) }}%
+							<div class="mb-3">
+								<strong class="text-info">Support Progress:</strong>
+								<div class="progress mt-2" style="height: 12px;">
+									<div class="progress-bar" role="progressbar" 
+										:class="isProposalFunded(selectedProposal) ? 'bg-success' : (getVotePercentage(selectedProposal) >= 100 ? 'bg-warning' : 'bg-danger')"
+										:style="'width: ' + Math.max(getVotePercentage(selectedProposal), 5) + '%'">
+										{{ getVotePercentage(selectedProposal).toFixed(1) }}%
+									</div>
+								</div>
+							</div>
+							
+							<!-- User Vote Status -->
+							<div v-if="account" class="mb-3 p-3 rounded" 
+								:class="getUserVote(selectedProposal.id) ? 'bg-success bg-opacity-25' : 'bg-secondary bg-opacity-25'">
+								<div v-if="getUserVote(selectedProposal.id)" class="text-success">
+									<i class="fa-solid fa-check me-2"></i>You are supporting this proposal
+								</div>
+								<div v-else class="text-muted">
+									<i class="fa-solid fa-minus me-2"></i>You have not voted on this proposal
 								</div>
 							</div>
 						</div>
 						
-						<!-- User Vote Status -->
-						<div v-if="account" class="mb-3 p-3 rounded" 
-							:class="getUserVote(selectedProposal.id) ? 'bg-success bg-opacity-25' : 'bg-secondary bg-opacity-25'">
-							<div v-if="getUserVote(selectedProposal.id)" class="text-success">
-								<i class="fa-solid fa-check me-2"></i>You are supporting this proposal
-							</div>
-							<div v-else class="text-muted">
-								<i class="fa-solid fa-minus me-2"></i>You have not voted on this proposal
-							</div>
+						<!-- Error State -->
+						<div v-else class="text-center py-5">
+							<i class="fa-solid fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+							<h5 class="text-light">Proposal Not Found</h5>
+							<p class="text-muted">The requested proposal could not be loaded.</p>
 						</div>
 					</div>
 					<div class="modal-footer border-secondary d-flex justify-content-between">
-						<button @click="openBlogModal(selectedProposal.creator, selectedProposal.permlink)" 
-							class="btn btn-outline-info">
-							<i class="fa-solid fa-file-alt me-1"></i>View Blog Post
-						</button>
+						<div class="d-flex gap-2">
+							<button v-if="selectedProposal" @click="openBlogModal(selectedProposal.creator, selectedProposal.permlink)" 
+								class="btn btn-outline-info">
+								<i class="fa-solid fa-file-alt me-1"></i>View Blog Post
+							</button>
+							
+							<!-- Analyze Button or Info -->
+							<div v-if="selectedProposal">
+								<button v-if="selectedProposal.id !== 0 && !isStabilizerProposal(selectedProposal)" 
+									@click="selectProposalForAnalysis(selectedProposal); dismissModal('proposalModal')"
+									class="btn btn-outline-warning">
+									<i class="fa-solid fa-chart-line me-1"></i>
+									{{ isProposalFunded(selectedProposal) ? 'Analyze Removing' : 'Analyze Adding' }}
+								</button>
+								<span v-else-if="selectedProposal.id === 0" class="badge bg-info">
+									<i class="fa-solid fa-info-circle me-1"></i>Return Proposal - Sets funding threshold
+								</span>
+								<span v-else-if="isStabilizerProposal(selectedProposal)" class="badge bg-secondary">
+									<i class="fa-solid fa-info-circle me-1"></i>Stabilizer - No net outflow impact
+								</span>
+							</div>
+						</div>
 						
-						<div v-if="account && isProposalActive(selectedProposal)">
+						<div v-if="selectedProposal && account && isProposalActive(selectedProposal)">
 							<button v-if="!getUserVote(selectedProposal.id)" 
-								@click="voteForProposal(selectedProposal.id, true); closeProposalModal()"
+								@click="voteForProposal(selectedProposal.id, true); dismissModal('proposalModal')"
 								:disabled="votingProposal === selectedProposal.id"
 								class="btn btn-success">
 								<span v-if="votingProposal === selectedProposal.id" class="spinner-border spinner-border-sm me-1"></span>
@@ -1329,7 +1419,7 @@
 								Support Proposal
 							</button>
 							<button v-else 
-								@click="voteForProposal(selectedProposal.id, false); closeProposalModal()"
+								@click="voteForProposal(selectedProposal.id, false); dismissModal('proposalModal')"
 								:disabled="votingProposal === selectedProposal.id"
 								class="btn btn-outline-danger">
 								<span v-if="votingProposal === selectedProposal.id" class="spinner-border spinner-border-sm me-1"></span>

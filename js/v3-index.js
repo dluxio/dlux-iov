@@ -94,6 +94,7 @@ const app = createApp({
       selectedProposal: null,
       selectedProposalForAnalysis: null,
       showProposalModal: false,
+      pendingProposalId: null, // For showing modal while proposals are loading
       // Custom analysis data
       customAnalysis: {
         active: false,
@@ -1128,6 +1129,15 @@ const app = createApp({
         }
         
         this.calculateProposalThreshold();
+        
+        // Handle pending proposal from URL routing
+        if (this.pendingProposalId && this.proposals.length > 0) {
+          const proposal = this.proposals.find(p => (p.proposal_id || p.id) === this.pendingProposalId);
+          if (proposal) {
+            this.selectedProposal = proposal;
+            this.pendingProposalId = null;
+          }
+        }
       } catch (error) {
         console.error('Error fetching proposals:', error);
         throw new Error(`Failed to fetch proposals: ${error.message}`);
@@ -1516,6 +1526,22 @@ const app = createApp({
     closeProposalModal() {
       this.showProposalModal = false;
       this.selectedProposal = null;
+      this.pendingProposalId = null;
+    },
+
+    dismissModal(modalId) {
+      // Properly dismiss Bootstrap modal and clear backdrop
+      const modalElement = document.getElementById(modalId);
+      if (modalElement) {
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+          modal.hide();
+        }
+      }
+      // Also call the appropriate close method
+      if (modalId === 'proposalModal') {
+        this.closeProposalModal();
+      }
     },
 
     async openBlogModal(author, permlink) {
@@ -1680,11 +1706,21 @@ const app = createApp({
       
       if (path.startsWith('/proposals/')) {
         const proposalId = parseInt(path.split('/')[2]);
-        if (proposalId && this.proposals.length > 0) {
-          const proposal = this.proposals.find(p => (p.proposal_id || p.id) === proposalId);
-          if (proposal) {
-            setTimeout(() => this.openProposalModal(proposal), 100);
+        if (proposalId && proposalId !== 0) { // Don't open modal for return proposal
+          // Show modal immediately with pending state
+          this.pendingProposalId = proposalId;
+          this.showProposalModal = true;
+          
+          // If proposals are already loaded, try to find and show the proposal
+          if (this.proposals.length > 0) {
+            const proposal = this.proposals.find(p => (p.proposal_id || p.id) === proposalId);
+            if (proposal) {
+              this.selectedProposal = proposal;
+              this.pendingProposalId = null;
+            }
           }
+          // If proposals aren't loaded yet, the modal will show a spinner
+          // and the proposal will be set when proposals finish loading
         }
       } else if (path.startsWith('/blog/@')) {
         const parts = path.split('/');
@@ -2039,7 +2075,7 @@ const app = createApp({
           hiveBalance -= hiveBalance * 0.0005; // Reduce Hive balance
           
           // Beneficiary rewards scale with price
-          const dailyBeneficiaryRewards = (200000 / 365) * projectedPrice;
+          const dailyBeneficiaryRewards = (200000 / 30) * projectedPrice;
           
           const totalDailyInflow = projectedRewardInflow + dailyNinjaGrant + dailyBeneficiaryRewards;
           treasury += totalDailyInflow - dailyOutflow;
@@ -2083,7 +2119,7 @@ const app = createApp({
         const projectedRewardInflow = dailyRewardsInflow * Math.pow(rewardFundGrowthDaily, day) * (projectedPrice / currentPrice);
         const dailyNinjaGrant = (hiveBalance * 0.0005) * projectedPrice;
         hiveBalance -= hiveBalance * 0.0005;
-        const dailyBeneficiaryRewards = (200000 / 365) * projectedPrice;
+        const dailyBeneficiaryRewards = (200000 / 30) * projectedPrice;
         
         totalInflow += projectedRewardInflow + dailyNinjaGrant + dailyBeneficiaryRewards;
       }
@@ -2133,7 +2169,7 @@ const app = createApp({
         const dailyNinjaGrant = (hiveBalance * 0.0005) * projectedPrice;
         hiveBalance -= hiveBalance * 0.0005;
         
-        const dailyBeneficiaryRewards = (200000 / 365) * projectedPrice;
+        const dailyBeneficiaryRewards = (200000 / 30) * projectedPrice;
         
         const totalDailyInflow = projectedRewardInflow + dailyNinjaGrant + dailyBeneficiaryRewards;
         const netDailyChange = totalDailyInflow - currentDailyOutflow;
@@ -2196,7 +2232,8 @@ const app = createApp({
         const dailyNinjaGrant = (hiveBalance * 0.0005) * projectedPrice;
         hiveBalance -= hiveBalance * 0.0005;
         
-        totalInflow += projectedRewardInflow + dailyNinjaGrant;
+        const dailyBeneficiaryRewards = (200000 / 30) * projectedPrice;
+        totalInflow += projectedRewardInflow + dailyNinjaGrant + dailyBeneficiaryRewards;
       }
       
       const avgDailyInflow = totalInflow / (365 * 5);
@@ -2220,7 +2257,7 @@ const app = createApp({
       const priceGrowthRate = this.priceGrowthRate / 100;
       
       // Quick check: if current inflows exceed outflows and we have positive price growth, runway is infinite
-      const currentTotalInflow = this.daoFund.dailyInflow + this.daoFund.ninjaGrant;
+      const currentTotalInflow = this.daoFund.dailyInflow + this.daoFund.ninjaGrant + this.daoFund.beneficiaryRewards;
       if (currentTotalInflow >= dailyOutflow && priceGrowthRate >= 0) {
         return null; // Effectively infinite runway
       }
@@ -2238,7 +2275,10 @@ const app = createApp({
         const dailyNinjaGrant = (hiveBalance * 0.0005) * projectedPrice;
         hiveBalance -= hiveBalance * 0.0005; // Reduce Hive balance
         
-        const totalDailyInflow = projectedRewardInflow + dailyNinjaGrant;
+        // Beneficiary rewards: 200,000 Hive monthly from comment voting
+        const dailyBeneficiaryRewards = (200000 / 30) * projectedPrice;
+        
+        const totalDailyInflow = projectedRewardInflow + dailyNinjaGrant + dailyBeneficiaryRewards;
         const netDailyChange = totalDailyInflow - dailyOutflow;
         treasury += netDailyChange;
         
@@ -2269,7 +2309,7 @@ const app = createApp({
       const dailyOutflow = this.healthStats.totalFundedOutflowsNoStabilizer;
       
       // Quick check: if current inflows exceed outflows at 0% growth, runway is infinite
-      const currentTotalInflow = this.daoFund.dailyInflow + this.daoFund.ninjaGrant;
+      const currentTotalInflow = this.daoFund.dailyInflow + this.daoFund.ninjaGrant + this.daoFund.beneficiaryRewards;
       if (currentTotalInflow >= dailyOutflow) {
         return null; // Effectively infinite runway
       }
@@ -2286,7 +2326,10 @@ const app = createApp({
         const dailyNinjaGrant = (hiveBalance * 0.0005) * currentPrice;
         hiveBalance -= hiveBalance * 0.0005; // Reduce Hive balance
         
-        const totalDailyInflow = projectedRewardInflow + dailyNinjaGrant;
+        // Beneficiary rewards at current price (no price growth)
+        const dailyBeneficiaryRewards = (200000 / 30) * currentPrice;
+        
+        const totalDailyInflow = projectedRewardInflow + dailyNinjaGrant + dailyBeneficiaryRewards;
         const netDailyChange = totalDailyInflow - dailyOutflow;
         treasury += netDailyChange;
         
@@ -2333,7 +2376,8 @@ const app = createApp({
          // Calculate daily inflows
          const dailyRewardInflow = projectedRewardFund * projectedPrice * 0.325;
          const dailyNinjaGrant = (projectedHiveBalance * 0.0005) * projectedPrice;
-         const totalDailyInflow = dailyRewardInflow + dailyNinjaGrant;
+         const dailyBeneficiaryRewards = (200000 / 30) * projectedPrice;
+         const totalDailyInflow = dailyRewardInflow + dailyNinjaGrant + dailyBeneficiaryRewards;
          
          // Calculate outflows (with or without selected proposal)
          let dailyOutflowWithoutProposal = dailyOutflow;
@@ -2438,8 +2482,8 @@ const app = createApp({
         const dailyNinjaGrant = (currentHiveBalance * 0.0005) * projectedPrice;
         currentHiveBalance -= currentHiveBalance * 0.0005; // Reduce Hive balance
         
-        // Beneficiary rewards: 200,000 Hive annually from comment voting
-        const dailyBeneficiaryRewards = (200000 / 365) * projectedPrice;
+        // Beneficiary rewards: 200,000 Hive monthly from comment voting
+        const dailyBeneficiaryRewards = (200000 / 30) * projectedPrice;
         
         const totalDailyInflow = projectedRewardsInflow + dailyNinjaGrant + dailyBeneficiaryRewards;
         
@@ -2754,6 +2798,12 @@ const app = createApp({
     selectProposalForAnalysis(proposal) {
       // Prevent rapid selections that could cause chart update issues
       if (this.updatingChart) return;
+      
+      // Don't allow analysis of return proposal (ID 0) or stabilizer proposals
+      if (proposal.id === 0 || this.isStabilizerProposal(proposal)) {
+        console.warn('Cannot analyze proposal:', proposal.id === 0 ? 'Return proposal' : 'Stabilizer proposal');
+        return;
+      }
       
       this.selectedProposalForAnalysis = proposal;
       
