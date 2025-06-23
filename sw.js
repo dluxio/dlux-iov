@@ -1,4 +1,4 @@
-this.version = "2025.06.23.14";
+this.version = "2025.06.23.15";
 console.log("SW:" + version + " - online.");
 const CACHE_NAME = "sw-cache-v" + version;
 
@@ -554,14 +554,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.23.14",
-  "generated": "2025-06-23T21:58:50Z",
+  "version": "2025.06.23.15",
+  "generated": "2025-06-23T21:59:05Z",
   "files": {
-    "/img/dlux-pen.png": {
-      "checksum": "0b1b6a3a9e66e6d845f394da6aaef046",
-      "size": 14937,
-      "priority": "important"
-    },
     "/img/dlux-qr.png": {
       "checksum": "3b4c09f50cb7f2314a3e5effce05ea58",
       "size": 33251,
@@ -1572,11 +1567,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/naf-playground/js/utils.js": {
-      "checksum": "95b3fc8635685c8713831b85962e8dcf",
-      "size": 14552,
-      "priority": "page-specific"
-    },
     "/naf-playground/js/watcher.js": {
       "checksum": "0ff437845e2574157e515f097909887b",
       "size": 56524,
@@ -2262,12 +2252,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
-      "checksum": "5f37ed7047b961772448e656b091ffdd",
-      "size": 114673,
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+      "checksum": "no-hash-symlink",
+      "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
