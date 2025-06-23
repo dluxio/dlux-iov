@@ -6616,6 +6616,43 @@ function buyNFT(setname, uid, price, type, callback){
         this.loadCollaborationAuthHeaders(); // Load collaboration headers for new user
       },
     },
+    "pageAccount": {
+      handler(newValue, oldValue) {
+        if (newValue && newValue !== oldValue) {
+          // Clear previous posts when navigating to a different user
+          this.displayPosts = [];
+          this[this.postSelect.entry] = [];
+          this.postSelect[this.postSelect.entry].o = 0;
+          this.postSelect[this.postSelect.entry].e = false;
+          this.postSelect[this.postSelect.entry].start_author = '';
+          this.postSelect[this.postSelect.entry].start_permlink = '';
+          
+          // Load posts for the new user if on blog tab
+          if (this.activeTab === 'blog') {
+            this.getPosts(true);
+          }
+          
+          // Load other user-specific data
+          this.getHiveUser(newValue);
+          this.getSapi(newValue, false);
+          this.getTokenUser(newValue, false);
+          this.getNFTs(newValue);
+          
+          // Update focus account
+          this.focus.account = newValue;
+          this.checkAccount("pageAccount", "focus");
+          
+          // Check if this is the current user
+          this.me = (newValue === this.account);
+          
+          // Load account relations if not current user
+          if (!this.me) {
+            this.accountRelations(newValue);
+          }
+        }
+      },
+      immediate: false
+    },
   },
   computed: {
     canClaim: {

@@ -116,6 +116,7 @@ const app = createApp({
       priceGrowthRate: 0, // -50 to 500% APR
       chartInstance: null,
       chartUpdateTimeout: null,
+      updatingChart: false,
       healthStats: {
         totalFundedOutflows: 0,
         totalFundedOutflowsNoZero: 0,
@@ -983,7 +984,7 @@ const app = createApp({
         }
         this.chartUpdateTimeout = setTimeout(() => {
           if (this.chartInstance && this.daoFund && this.hiveprice?.hive?.usd) {
-            this.updateChart();
+            this.updateChartData();
           }
         }, 100);
       },
@@ -1273,10 +1274,9 @@ const app = createApp({
           if (cumulativeDailyPayout + dailyPay <= this.daoFund.available) {
             // This proposal can still be funded
             cumulativeDailyPayout += dailyPay;
+          } else {
             lastFundedProposal = proposal;
             thresholdVotes = parseFloat(proposal.total_votes); // Update threshold to current proposal's votes
-          } else {
-            // This proposal would exceed the budget
             break;
           }
         }
@@ -2719,8 +2719,20 @@ const app = createApp({
     },
 
     selectProposalForAnalysis(proposal) {
+      // Prevent rapid selections that could cause chart update issues
+      if (this.updatingChart) return;
+      
       this.selectedProposalForAnalysis = proposal;
-      this.updateChartData();
+      
+      // Update chart with debouncing
+      if (this.chartUpdateTimeout) {
+        clearTimeout(this.chartUpdateTimeout);
+      }
+      this.chartUpdateTimeout = setTimeout(() => {
+        if (this.chartInstance) {
+          this.updateChartData();
+        }
+      }, 50);
       
       // Auto-scroll to the chart section
       this.$nextTick(() => {
@@ -2858,12 +2870,17 @@ const app = createApp({
 
     // New method to update chart data without destroying the chart
     updateChartData() {
-      if (!this.chartInstance) return;
+      if (!this.chartInstance || this.updatingChart) return;
+      
+      this.updatingChart = true;
       
       try {
         // Generate new chart data
         const chartData = this.generateChartData();
-        if (!chartData) return;
+        if (!chartData) {
+          this.updatingChart = false;
+          return;
+        }
         
         // Update the chart data directly
         this.chartInstance.data.labels = chartData.labels;
@@ -2871,10 +2888,27 @@ const app = createApp({
         
         // Update the chart
         this.chartInstance.update('none'); // 'none' = no animation for faster update
+        this.updatingChart = false;
       } catch (error) {
         console.error('Error updating chart data:', error);
-        // Fall back to full recreation if update fails
-        this.updateChart();
+        this.updatingChart = false;
+        
+        // Don't call updateChart() here as it can cause infinite loops
+        // Instead, try to recreate chart on next tick
+        this.$nextTick(() => {
+          if (this.chartInstance && !this.updatingChart) {
+            try {
+              this.updatingChart = true;
+              this.chartInstance.destroy();
+              this.chartInstance = null;
+              this.createChart();
+              this.updatingChart = false;
+            } catch (recreateError) {
+              console.error('Error recreating chart:', recreateError);
+              this.updatingChart = false;
+            }
+          }
+        });
       }
     },
 
