@@ -17221,6 +17221,12 @@ export default {
                 <i class="fas fa-fw fa-folder-open me-2"></i>Open
               </a></li>
                 <li><hr class="dropdown-divider"></li>
+                <li v-if="currentFile?.type !== 'collaborative'">
+                         <a class="dropdown-item" href="#" @click.prevent="convertToCollaborative">
+                             <i class="fas fa-cloud-bolt me-2"></i>Turn On Cloud Collaboration
+                             <small v-if="!isAuthenticated" class="d-block text-muted">Authentication required</small>
+                         </a>
+                     </li>
               <li v-if="canShare"><a class="dropdown-item" href="#" @click="shareDocument()">
                 <i class="fas fa-fw fa-user-plus me-2"></i>Share
               </a></li>
@@ -17510,24 +17516,17 @@ export default {
           </div>
         </div>
 
-        <!-- ==================== READ-ONLY WARNING ==================== -->
-        <div v-if="isReadOnlyMode" class="alert alert-info border-info bg-dark text-info mx-2 mb-3">
-          <i class="fas fa-eye me-2"></i>
-          <strong>Read-Only Mode</strong> - You can view this document but cannot make changes.
-          Contact <strong>@{{ currentFile?.owner }}</strong> for edit permissions.
-        </div>
-
         <!-- ==================== MAIN EDITOR SECTIONS ==================== -->
         <div class="d-flex flex-column gap-4 mx-2">
           
           <!-- Title Input Section (Single Editor Solution) -->
           <div class="title-section">
-            <div class="editor-field bg-dark border border-secondary rounded">
+            <div class="bg-dark border border-secondary rounded">
               <input 
                 v-model="titleInput" 
                 @input="onTitleInput" 
                 type="text" 
-                class="form-control bg-dark text-white border-0" 
+                class="form-control bg-dark text-white border-0 mb-0 p-2 fs-4" 
                 placeholder="Enter title..." 
                 :disabled="isReadOnlyMode"
               />
@@ -17657,10 +17656,10 @@ export default {
               <!-- Add tag input -->
               <div class="input-group" style="width: 200px;">
                 <input v-model="tagInput" @keydown.enter="addTag"
-                       class="form-control form-control-sm bg-dark text-white border-secondary"
+                       class="form-control bg-dark text-white border-secondary"
                        placeholder="Add a tag..." maxlength="50" 
                        :disabled="displayTags.length >= 10 || isReadOnlyMode">
-                <button @click="addTag" class="btn btn-sm btn-outline-primary"
+                <button @click="addTag" class="btn btn-dark border-secondary"
                         :disabled="displayTags.length >= 10 || !tagInput.trim() || isReadOnlyMode">
                   <i class="fas fa-plus"></i>
                 </button>

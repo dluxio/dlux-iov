@@ -1,4 +1,4 @@
-this.version = "2025.06.25.1";
+this.version = "2025.06.24.1";
 this.version = "2025.06.24.7";
 =======
 this.version = "2025.06.24.5";
@@ -558,14 +558,9 @@ function formatBytes(bytes) {
 // Cache manifest with checksums - auto-generated
 self.cacheManifest = 
 {
-  "version": "2025.06.25.1",
-  "generated": "2025-06-24T22:56:26Z",
+  "version": "2025.06.24.16",
+  "generated": "2025-06-24T23:15:43Z",
   "files": {
-    "/img/ragnarok_sealed.png": {
-      "checksum": "a7558e86491320184e56d6a8f909d695",
-      "size": 74886,
-      "priority": "important"
-    },
     "/img/rar-file-type-svgrepo-com.svg": {
       "checksum": "f02c8bfdfde0a153430b1f22ba611b5f",
       "size": 1835,
@@ -1386,11 +1381,6 @@ self.cacheManifest =
       "size": 854,
       "priority": "important"
     },
-    "/naf-playground/monaco-editor/vs/basic-languages/lua/lua.js": {
-      "checksum": "f84ef485240448f04f47ae177e7c66f7",
-      "size": 2944,
-      "priority": "page-specific"
-    },
     "/naf-playground/monaco-editor/vs/basic-languages/m3/m3.js": {
       "checksum": "c34c934e8f69865c733a040288167bca",
       "size": 3636,
@@ -1886,12 +1876,12 @@ self.cacheManifest =
       "size": 21317,
       "priority": "page-specific"
     },
-    "/packages/core/package/dist/umd/ffmpeg-core.js": {
+    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
     },
-    "/packages/ffmpeg/package/dist/umd/ffmpeg-core.wasm": {
+    "/packages/core/package/dist/umd/ffmpeg-core.js": {
       "checksum": "no-hash-symlink",
       "size": 0,
       "priority": "lazy"
