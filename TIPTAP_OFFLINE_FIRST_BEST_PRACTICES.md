@@ -5,6 +5,7 @@
 This document defines the **definitive architecture** for implementing TipTap's offline-first collaborative editing pattern based on official TipTap.dev documentation and best practices. Our implementation follows TipTap's recommended approach for maximum performance, reliability, and user experience.
 
 ### 🚀 **Latest Updates (v2025.06.24)**
+- **File > New Reset Fix**: Complete clean slate - all fields including permlink now reset properly
 - **User Intent Philosophy**: Any user interaction shows intent to create a document
 - **Persistence Fix**: Removed content validation blocking metadata-only documents
 - **Consistent Autosave**: All fields (metadata, content, settings) trigger persistence equally
@@ -191,6 +192,51 @@ if (event.keysChanged.has('permlink')) {
 - **METADATA MAP**: Publishing and collaboration data (tags, beneficiaries, permlink, comment options)
 - **Clear Separation**: No overlap between observers, each handles distinct field sets
 - **Performance**: Observers only fire when their specific fields change
+
+### 🔄 **FILE > NEW RESET PATTERNS**
+
+**Core Principle**: File > New must provide a complete clean slate.
+
+#### **Complete Reset Implementation**
+```javascript
+resetComponentState() {
+    // 1. Clear all input fields to defaults
+    this.component.titleInput = '';
+    this.component.permlinkInput = '';           // ✅ Recently fixed
+    this.component.tagInput = '';
+    this.component.documentNameInput = '';
+    
+    // 2. Reset all reactive properties  
+    this.component.reactiveTags = [];
+    this.component.reactiveBeneficiaries = [];
+    this.component.reactiveCommentOptions = {
+        allowVotes: true,
+        allowCurationRewards: true,
+        maxAcceptedPayout: false,
+        percentHbd: false
+    };
+    
+    // 3. Clear protection flags
+    this.component._isUpdatingPermlink = false;  // ✅ Recently added
+    
+    // 4. Reset UI state
+    this.component.showPermlinkEditor = false;
+    this.component.showAdvancedOptions = false;
+    
+    // 5. Clear all timers
+    clearTimeout(this.component.autoNameTimeout);
+    clearTimeout(this.component.contentUpdateTimeout);
+    // ... clear all debounce timers
+}
+```
+
+#### **Common Reset Issues & Solutions**
+- **❌ Persisting Field Values**: Some fields not reset → User confusion about document state
+- **✅ Solution**: Ensure ALL input fields reset to their data() defaults
+- **❌ Stale Protection Flags**: Recursion flags not cleared → Broken sync after reset
+- **✅ Solution**: Reset all protection flags (`_isUpdatingPermlink = false`)
+- **❌ Persisting Timers**: Debounce timers continue → Unwanted persistence after reset
+- **✅ Solution**: Clear all setTimeout/debounce timers in reset
 
 ### 🎯 **USER INTENT & PERSISTENCE PHILOSOPHY**
 

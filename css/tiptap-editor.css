@@ -259,4 +259,27 @@
     height: 20px;
     font-size: 0.625rem;
   }
+}
+
+/* Save Status Fade Transitions */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+/* Save Indicator Styles */
+.save-indicator {
+  position: relative;
+}
+
+.save-popover {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 10px;
+  min-width: 250px;
+  z-index: 1000;
 } 

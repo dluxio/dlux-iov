@@ -2040,8 +2040,13 @@ class EditorFactory {
                     // ✅ FIX: Don't set intent flags for temporary documents until we verify content
                     if (!this.component.isTemporaryDocument || this.component.indexeddbProvider) {
                         // For persistent documents, always track changes
+                        console.log('🔍 Setting hasUnsavedChanges = true from body editor');
                         this.component.hasUnsavedChanges = true;
                         this.component.hasUserIntent = true;
+                        // Call updateSaveStatus directly to ensure message shows
+                        this.component.$nextTick(() => {
+                            this.component.updateSaveStatus();
+                        });
                     } else {
                         // For temporary documents, defer intent detection to content check
                         this.component.hasUnsavedChanges = true; // Track that something changed
@@ -4111,7 +4116,15 @@ export default {
             // ===== FILE MANAGEMENT =====
             currentFile: null,
             hasUnsavedChanges: false,
+            saveError: false, // Track save errors for separate status indicators
             fileType: 'local', // 'local' or 'collaborative'
+            
+            // ===== SAVE STATUS DISPLAY =====
+            saveMessageVisible: false,
+            saveMessageText: '',
+            saveMessagePersistent: false,
+            saveMessageTimeout: null,
+            showSavePopover: false,
             
             // ===== TIPTAP EDITORS =====
             // NOTE: Editors are wrapped with markRaw() to prevent Vue's deep reactivity
@@ -4932,6 +4945,105 @@ export default {
             }
 
             return status;
+        },
+        
+        // ✅ CLOUD CONNECTION STATUS: Pure cloud collaboration connection state
+        cloudConnectionStatus() {
+            const isCollaborativeDocument = this.currentFile && 
+                (this.currentFile.type === 'collaborative' || 
+                 this.currentFile.isCollaborative === true);
+            
+            if (!isCollaborativeDocument) {
+                return {
+                    state: 'non-collaborative',
+                    icon: 'fas fa-cloud text-muted opacity-25',
+                    message: 'Local document',
+                    class: 'status-grey'
+                };
+            }
+            
+            // Collaborative document - check connection status
+            switch (this.connectionStatus) {
+                case 'connected':
+                    return {
+                        state: 'connected',
+                        icon: 'fas fa-cloud text-success',
+                        message: 'Connected',
+                        class: 'status-green'
+                    };
+                    
+                case 'connecting':
+                    return {
+                        state: 'connecting',
+                        icon: 'fas fa-cloud text-warning',
+                        message: 'Connecting...',
+                        class: 'status-orange'
+                    };
+                    
+                case 'disconnected':
+                case 'offline':
+                case 'error':
+                default:
+                    return {
+                        state: 'offline',
+                        icon: 'fas fa-cloud text-info',
+                        message: 'Offline',
+                        class: 'status-blue'
+                    };
+            }
+        },
+        
+        // ✅ SAVE STATUS: Pure document persistence state
+        saveStatus() {
+            // Show indicator when:
+            // 1. Document has persistence, OR
+            // 2. Document has unsaved changes (even if creating persistence)
+            const visible = (!this.isTemporaryDocument || this.hasIndexedDBPersistence || this.hasUnsavedChanges);
+            
+            console.log('🔍 saveStatus computed:', {
+                isTemporaryDocument: this.isTemporaryDocument,
+                hasIndexedDBPersistence: this.hasIndexedDBPersistence,
+                hasUnsavedChanges: this.hasUnsavedChanges,
+                visible: visible
+            });
+            
+            // Check if save failed first
+            if (this.saveError) {
+                return {
+                    state: 'error',
+                    icon: 'fas fa-exclamation-triangle text-warning',
+                    message: 'Save failed',
+                    class: 'status-error text-warning',
+                    visible: visible,
+                    persistent: true // Errors should not fade
+                };
+            }
+            
+            // For collaborative docs that are offline
+            const isCollaborativeOffline = this.currentFile && 
+                (this.currentFile.type === 'collaborative' || this.currentFile.isCollaborative === true) &&
+                this.connectionStatus !== 'connected';
+            
+            if (this.hasUnsavedChanges) {
+                return {
+                    state: 'saving',
+                    icon: 'fas fa-circle-notch fa-spin text-muted',
+                    message: this.getSaveMessage('saving'),
+                    class: 'status-saving text-muted',
+                    visible: visible,
+                    persistent: false // Can fade after save completes
+                };
+            }
+            
+            // Changes saved
+            return {
+                state: 'saved',
+                icon: 'fas fa-check text-muted',
+                message: this.getSaveMessage('saved'),
+                class: 'status-saved text-muted',
+                visible: visible,
+                persistent: isCollaborativeOffline // Persist if offline
+            };
         },
         
         isConnected() {
@@ -5792,6 +5904,51 @@ export default {
     },
 
     watch: {
+        // ✅ SAVE STATUS WATCHERS: Update save indicator when state changes
+        hasUnsavedChanges: {
+            handler(newValue, oldValue) {
+                if (newValue !== oldValue) {
+                    console.log('🔍 hasUnsavedChanges changed:', { 
+                        newValue, 
+                        oldValue, 
+                        hasIndexedDBPersistence: this.hasIndexedDBPersistence,
+                        saveStatusVisible: this.saveStatus.visible,
+                        saveStatusMessage: this.saveStatus.message
+                    });
+                    this.$nextTick(() => {
+                        console.log('🔍 Calling updateSaveStatus from watcher');
+                        this.updateSaveStatus();
+                    });
+                }
+            },
+            immediate: true
+        },
+        
+        saveError: {
+            handler(newValue, oldValue) {
+                if (newValue !== oldValue) {
+                    this.updateSaveStatus();
+                }
+            }
+        },
+        
+        hasIndexedDBPersistence: {
+            handler(newValue, oldValue) {
+                if (newValue !== oldValue) {
+                    this.updateSaveStatus();
+                }
+            }
+        },
+        
+        connectionStatus: {
+            handler(newValue, oldValue) {
+                if (newValue !== oldValue) {
+                    // Update save message when connection changes
+                    this.updateSaveStatus();
+                }
+            }
+        },
+        
         // ✅ SINGLE EDITOR SOLUTION: Watch title input and sync to Y.js config + auto-save
         titleInput: {
             handler(newTitle, oldTitle) {
@@ -5805,6 +5962,15 @@ export default {
                 // 2. Title actually changed 
                 // 3. Document isn't temporary anymore
                 if (this.ydoc && newTitle !== oldTitle && !this.isTemporaryDocument) {
+                    // Set unsaved changes flag
+                    this.hasUnsavedChanges = true;
+                    this.hasUserIntent = true;
+                    
+                    // Call updateSaveStatus directly to ensure message shows
+                    this.$nextTick(() => {
+                        this.updateSaveStatus();
+                    });
+                    
                     // Trigger auto-save for local documents
                     if (this.currentFile && this.currentFile.type === 'local') {
                         console.log('📝 Title changed, triggering auto-save for local document');
@@ -6987,7 +7153,7 @@ export default {
 
         displayTitleForUI() {
             // For UI display in templates - this is title CONTENT
-            const titleContent = this.displayTitle();
+            const titleContent = this.displayTitle;
             return titleContent || 'No title yet...';
         },
 
@@ -7003,6 +7169,96 @@ export default {
     },
     
     methods: {
+        // ===== STATUS MESSAGE HELPERS =====
+        
+        // ✅ GET SAVE MESSAGE: Contextual save status messages  
+        getSaveMessage(state) {
+            const isCollaborativeDocument = this.currentFile && 
+                (this.currentFile.type === 'collaborative' || 
+                 this.currentFile.isCollaborative === true);
+            
+            const isConnected = this.connectionStatus === 'connected';
+            
+            if (state === 'saving') {
+                if (isCollaborativeDocument && isConnected) {
+                    return 'Syncing to cloud...';
+                } else if (isCollaborativeDocument && !isConnected) {
+                    return 'Saving locally...';
+                } else {
+                    return 'Saving locally...';
+                }
+            }
+            
+            if (state === 'saved') {
+                if (isCollaborativeDocument && isConnected) {
+                    return 'Synced to cloud';
+                } else if (isCollaborativeDocument && !isConnected) {
+                    return 'Saved locally';
+                } else {
+                    return 'Saved locally';
+                }
+            }
+            
+            return 'Unknown status';
+        },
+        
+        // ✅ SAVE MESSAGE CONTROL: Show save status message with fade behavior
+        showSaveMessage(message, persistent = false) {
+            // Clear any existing timeout
+            if (this.saveMessageTimeout) {
+                clearTimeout(this.saveMessageTimeout);
+                this.saveMessageTimeout = null;
+            }
+            
+            // Show the message
+            this.saveMessageText = message;
+            this.saveMessageVisible = true;
+            this.saveMessagePersistent = persistent;
+            
+            // If not persistent, fade after 2 seconds
+            if (!persistent) {
+                this.saveMessageTimeout = setTimeout(() => {
+                    this.fadeSaveMessage();
+                }, 2000);
+            }
+        },
+        
+        // ✅ FADE SAVE MESSAGE: Gradually hide the save message
+        fadeSaveMessage() {
+            this.saveMessageVisible = false;
+            // Clear text after transition completes
+            setTimeout(() => {
+                if (!this.saveMessageVisible) {
+                    this.saveMessageText = '';
+                }
+            }, 300); // Match CSS transition duration
+        },
+        
+        // ✅ CLEAR SAVE MESSAGE: Immediately hide the save message
+        clearSaveMessage() {
+            if (this.saveMessageTimeout) {
+                clearTimeout(this.saveMessageTimeout);
+                this.saveMessageTimeout = null;
+            }
+            this.saveMessageVisible = false;
+            this.saveMessageText = '';
+            this.saveMessagePersistent = false;
+        },
+        
+        // ✅ UPDATE SAVE STATUS: Main logic for showing save status
+        updateSaveStatus() {
+            const status = this.saveStatus;
+            
+            if (!status.visible) {
+                this.clearSaveMessage();
+                return;
+            }
+            
+            // Show appropriate message based on state
+            console.log('🔍 updateSaveStatus showing message:', status.message, 'persistent:', status.persistent);
+            this.showSaveMessage(status.message, status.persistent);
+        },
+        
         // ===== AUTHENTICATION HANDLING =====
         
         // ✅ HANDLE AUTHENTICATION READY: Process pending operations when auth completes
@@ -8495,8 +8751,13 @@ export default {
             
             // Then, trigger the same auto-save logic as body editor
             if (!this.isReadOnlyMode) {
+                console.log('🔍 Setting hasUnsavedChanges = true from title input');
                 this.hasUnsavedChanges = true;
                 this.hasUserIntent = true;
+                // Call updateSaveStatus directly to ensure message shows
+                this.$nextTick(() => {
+                    this.updateSaveStatus();
+                });
                 this.debouncedUpdateContent();
                 
                 // ✅ CRITICAL: Trigger temp document promotion like body editor does
@@ -8747,7 +9008,7 @@ export default {
             const errors = [];
             
             // ✅ TIPTAP BEST PRACTICE: Use method calls for display data
-            const titleText = this.displayTitleForUI();
+            const titleText = this.displayTitleForUI;
             const permlink = this.actualPermlink;
             
             // Get tags from Y.js metadata
@@ -9269,7 +9530,7 @@ export default {
                     type: 'cloud-conversion',
                     originalFile: { ...this.currentFile },
                     timestamp: Date.now(),
-                    documentName: this.displayTitleForUI() || `Untitled - ${new Date().toLocaleDateString()}`
+                    documentName: this.displayTitleForUI || `Untitled - ${new Date().toLocaleDateString()}`
                 };
                 this.requestAuthentication();
                 return;
@@ -9285,7 +9546,7 @@ export default {
             
             try {
                 // Use pending data if resuming from authentication, otherwise use current state
-                const title = pendingData?.documentName || this.displayTitleForUI() || `Untitled - ${new Date().toLocaleDateString()}`;
+                const title = pendingData?.documentName || this.displayTitleForUI || `Untitled - ${new Date().toLocaleDateString()}`;
                 const description = 'Document created with DLUX TipTap Editor';
                 
                 // Create cloud document via API
@@ -13198,6 +13459,13 @@ export default {
                 if (this.hasIndexedDBPersistence || this.connectionStatus === 'connected') {
                     console.log('🔍 Auto-save completed - clearing unsaved flag');
                     this.hasUnsavedChanges = false;
+                    
+                    // Show save completed message
+                    if (this.connectionStatus === 'connected') {
+                        this.showSaveMessage('Synced to cloud', false);
+                    } else {
+                        this.showSaveMessage('Saved locally', false);
+                    }
                 } else {
                     console.log('🔍 No persistence available - checking for temp document conversion');
                     
@@ -13388,6 +13656,11 @@ export default {
                 this.isTemporaryDocument = false;
                 this.hasIndexedDBPersistence = true;
                 this.isPersistenceReady = true;
+                
+                // Show save message when persistence is first created
+                this.$nextTick(() => {
+                    this.showSaveMessage('Saved locally', false);
+                });
                 
                 // ✅ TIPTAP v3 COMPLIANT: Always get document name from config, never from content
                 const config = this.ydoc.getMap('config');
@@ -16955,15 +17228,54 @@ export default {
                 
             </div>
           </div>
+        
+          <!-- Save Status Indicator (only show after persistence) -->
+        <div v-if="saveStatus.visible" class="save-indicator d-flex align-items-center">
+            <!-- Icon with popover trigger -->
+            <span class="save-icon position-relative" 
+                  @click="showSavePopover = !showSavePopover"
+                  style="cursor: pointer;">
+                <i :class="saveStatus.icon"></i>
+                
+                <!-- Popover with details -->
+                <div v-if="showSavePopover" 
+                     class="save-popover position-absolute bg-dark text-white p-3 rounded shadow"
+                     style="bottom: 100%; right: 0; margin-bottom: 10px; min-width: 250px; z-index: 1000;">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="mb-0">Save Status</h6>
+                        <button @click="showSavePopover = false" class="btn-close btn-close-white btn-sm"></button>
+                    </div>
+                    <div class="small">
+                        <div class="mb-2">
+                            <strong>Current:</strong> {{ saveStatus.message }}
+                        </div>
+                        <div class="mb-2" v-if="cloudConnectionStatus.state !== 'non-collaborative'">
+                            <strong>Cloud:</strong> {{ cloudConnectionStatus.message }}
+                        </div>
+                        <div v-if="currentFile">
+                            <strong>Document:</strong> {{ currentFile.name || 'Untitled' }}
+                        </div>
+                    </div>
+                </div>
+            </span>
+            
+            <!-- Message (can fade or persist) -->
+            <transition name="fade">
+                <span v-if="saveMessageVisible" 
+                      :class="'ms-2 small ' + saveStatus.class">
+                    {{ saveMessageText }}
+                </span>
+            </transition>
+        </div>
+     
 
           <!-- Status Indicator -->
           <div class="btn-group">
             <button class="btn btn-dark no-caret dropdown-toggle" 
                     :style="getStatusStyle(unifiedStatusInfo.state)" 
                      data-bs-toggle="dropdown" aria-expanded="false">
-              <span v-html="documentTitleIndicator" class="me-2"></span>
-              <i :class="getStatusIconClass(unifiedStatusInfo.state)" class="me-2"></i>
-              <span class="status-message">{{ unifiedStatusInfo.message }}</span>
+              <span v-html="documentTitleIndicator"></span>
+              
             </button>
 
             <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-dark">
@@ -16978,7 +17290,7 @@ export default {
                     <!-- Document Publishing & Connection -->
                      <li v-if="currentFile?.type !== 'collaborative'">
                          <a class="dropdown-item" href="#" @click.prevent="convertToCollaborative">
-                             <i class="fas fa-cloud-upload-alt me-2"></i>Turn on Cloud Collaboration
+                             <i class="fas fa-cloud-upload-alt me-2"></i>Turn On Cloud Collaboration
                              <small v-if="!isAuthenticated" class="d-block text-muted">Authentication required</small>
                          </a>
                      </li>
@@ -17026,25 +17338,7 @@ export default {
                     
                     <li><hr class="dropdown-divider"></li>
                     
-                    <!-- Saving Status Indicator -->
-                    <li class="px-3 pt-1">
-                        <div class="d-flex align-items-center">
-                            <i :class="getStatusIconClass(unifiedStatusInfo.state)" class="me-2 small"></i>
-                            <span :class="getStatusTextClass(unifiedStatusInfo.state)" class="small fw-medium">
-                                 {{ unifiedStatusInfo.message }}
-                            </span>
-                        </div>
-                        <p class="small text-white-50 mb-2">{{ unifiedStatusInfo.details }}</p>
-                        <div v-if="unifiedStatusInfo.actions.length" class="d-flex gap-1">
-                            <button 
-                              v-for="action in unifiedStatusInfo.actions" 
-                              :key="action.label"
-                              @click.stop="handleStatusAction(action)"
-                              class="btn btn-sm btn-outline-light">
-                              {{ action.label }}
-                            </button>
-                        </div>
-                     </li>
+                    
                                                   
                 </ul>
             
@@ -17700,8 +17994,8 @@ export default {
                       <i class="fas fa-exclamation-triangle me-2"></i>
                       <strong>Missing Required Fields</strong>
                       <ul class="mb-0 mt-2">
-                        <li v-if="!displayTitleExists()">Title is required</li>
-                        <li v-if="!displayBodyExists()">Content is required</li>
+                        <li v-if="!displayTitleExists">Title is required</li>
+                        <li v-if="!displayBodyExists">Content is required</li>
                         <li v-if="displayTags.length === 0">At least one tag is required</li>
                       </ul>
                     </div>
@@ -17711,7 +18005,7 @@ export default {
                   <div class="mb-3">
                     <h6 class="fw-bold">Post Preview</h6>
                     <div class="border border-secondary rounded p-3">
-                      <h5 class="text-white">{{ displayTitleForUI() }}</h5>
+                      <h5 class="text-white">{{ displayTitleForUI }}</h5>
                       <div class="text-muted small mb-2">
                         by @{{ username }} 
                         <span v-if="displayTags.length > 0">

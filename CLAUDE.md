@@ -94,12 +94,15 @@ Critical fields use recursion protection flags:
 - **Consistent behavior**: All fields trigger autosave and document creation equally
 
 ### File Operations
-**File > New Behavior**:
-- All reactive properties reset to defaults (reactiveTags: [], reactiveBeneficiaries: [], etc.)
-- `permlinkInput` cleared to show generated permlink
-- `titleInput` cleared for new content
-- Y.js document and observers properly cleaned up and recreated
-- Recursion protection flags reset to prevent state pollution
+**File > New Behavior** (Complete Reset Pattern):
+- **Input Fields**: All cleared to defaults (`titleInput = ''`, `permlinkInput = ''`, `tagInput = ''`, etc.)
+- **Reactive Properties**: Reset to defaults (`reactiveTags = []`, `reactiveBeneficiaries = []`, `reactiveCommentOptions = {...}`)
+- **UI State**: All modals/editors closed (`showPermlinkEditor = false`, `showAdvancedOptions = false`)
+- **Y.js Documents**: Properly destroyed and recreated with fresh state
+- **Observers**: Cleaned up and reattached to new Y.js document
+- **Protection Flags**: All reset (`_isUpdatingPermlink = false`)
+- **Timers**: All debounce timers cleared to prevent persistence issues
+- **Result**: Complete clean slate - no field values persist from previous document
 
 ## API Endpoints
 
@@ -216,6 +219,12 @@ Key issues covered:
 **Note**: Always refer to the Official Documentation above for the latest best practices and implementation patterns.
 
 ## Recent Updates (v2025.06.24)
+### ✅ File > New Reset Fix
+- **Issue Fixed**: Custom permlink persisted after File > New, making document appear still loaded
+- **Root Cause**: `permlinkInput` was intentionally not reset due to recursion concerns
+- **Solution**: Reset `permlinkInput = ''` and `_isUpdatingPermlink = false` in resetComponentState
+- **Result**: Complete clean slate - all fields properly reset for new documents
+
 ### ✅ User Intent & Persistence Fix
 - **Issue Fixed**: Metadata changes (tags, beneficiaries, custom JSON) were hanging on save
 - **Root Cause**: Content validation blocking metadata-only documents from creating persistence
