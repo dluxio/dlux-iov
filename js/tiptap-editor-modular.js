@@ -1358,47 +1358,24 @@ class PersistenceManager {
                     }
                 },
                 
-                // Block stateless broadcasts for read-only users
+                // ✅ SERVER UPDATE: Server now handles read-only awareness updates
+                // No need to block broadcasts - server will filter appropriately
                 beforeBroadcastStateless(payload) {
-                    // Debug: Log all broadcast attempts
+                    // Debug: Log all broadcast attempts with more detail
+                    const payloadStr = payload ? JSON.stringify(payload).substring(0, 100) : 'null';
                     console.log('🔍 beforeBroadcastStateless called:', {
                         isReadOnlyMode: persistenceManager.component.isReadOnlyMode,
                         hasPayload: !!payload,
                         payloadType: typeof payload,
-                        hasAnnouncedPresence: persistenceManager.component.hasAnnouncedPresence
+                        payloadPreview: payloadStr,
+                        hasLastActivity: payloadStr.includes('lastActivity')
                     });
                     
-                    // ✅ COMPREHENSIVE READ-ONLY BLOCKING: Block all non-essential broadcasts
-                    if (persistenceManager.component.isReadOnlyMode && payload) {
-                        const payloadStr = JSON.stringify(payload);
-                        
-                        // Allow initial user presence announcement
-                        if (!persistenceManager.component.hasAnnouncedPresence && payloadStr.includes('user')) {
-                            persistenceManager.component.hasAnnouncedPresence = true;
-                            console.log('✅ Allowing initial presence announcement for read-only user');
-                            return payload;
-                        }
-                        
-                        // Block ALL awareness updates from read-only users
-                        // This includes cursor position, selection, and any other awareness state
-                        console.log('🔒 Read-only: Blocking awareness broadcast', {
-                            payloadPreview: payloadStr.substring(0, 100) + '...',
-                            payloadType: typeof payload,
-                            hasAwareness: payloadStr.includes('awareness'),
-                            hasCursor: payloadStr.includes('cursor'),
-                            hasSelection: payloadStr.includes('selection'),
-                            hasUser: payloadStr.includes('user')
-                        });
-                        
-                        // Block everything except the initial presence
-                        return null;
-                    }
-                    
-                    // For non-read-only users, allow everything
+                    // Allow all broadcasts - server handles permissions
                     return payload;
                 },
                 
-                // Also block regular broadcasts for read-only users
+                // Allow regular broadcasts - server handles permissions
                 beforeBroadcast(data) {
                     console.log('🔍 beforeBroadcast called:', {
                         isReadOnlyMode: persistenceManager.component.isReadOnlyMode,
@@ -1407,12 +1384,8 @@ class PersistenceManager {
                         dataKeys: data ? Object.keys(data) : []
                     });
                     
-                    if (persistenceManager.component.isReadOnlyMode) {
-                        console.log('🔒 Read-only: Blocking regular broadcast');
-                        return false; // Return false to block the broadcast
-                    }
-                    
-                    return true; // Allow for non-read-only users
+                    // Allow all broadcasts - server handles permissions
+                    return true;
                 }
             });
             
@@ -1429,11 +1402,25 @@ class PersistenceManager {
                 wsState: provider.ws?.readyState
             });
             
-            // ✅ CRITICAL: For read-only users, we rely on beforeBroadcastStateless to block broadcasts
-            // We DON'T override awareness methods because that prevents receiving other users' cursors
-            if (this.component.isReadOnlyMode) {
-                console.log('🔒 Read-only mode: Broadcast blocking enabled, awareness reception allowed');
-            }
+            // ✅ Y.JS COMPLIANCE: Implement proper awareness heartbeat
+            // Y.js awareness timeout is 30 seconds - send updates every 15 seconds
+            const awarenessHeartbeat = setInterval(() => {
+                if (provider.awareness && !provider.isDestroyed) {
+                    // Send lightweight awareness update to maintain Y.js 30s timeout
+                    provider.awareness.setLocalStateField('lastActivity', Date.now());
+                }
+            }, 15000); // 15 seconds - half of Y.js 30s timeout
+            
+            // Store heartbeat reference for cleanup
+            this.component.awarenessHeartbeat = awarenessHeartbeat;
+            
+            // Clean up heartbeat when provider is destroyed
+            provider.on('destroy', () => {
+                if (this.component.awarenessHeartbeat) {
+                    clearInterval(this.component.awarenessHeartbeat);
+                    this.component.awarenessHeartbeat = null;
+                }
+            });
             
             // ✅ TIPTAP BEST PRACTICE: Awareness state is properly set in onConnect
             // No need to clear it here - CollaborationCaret will work correctly
@@ -2229,6 +2216,7 @@ class EditorFactory {
                     isEditable: editor.isEditable,
                     editorCreatedAt: this.component.editorCreatedAt
                 });
+                
             },
             onUpdate: () => {
                 // ✅ TIPTAP COMPLIANCE: Only UI state flags in onUpdate, no content access
@@ -2770,6 +2758,12 @@ class LifecycleManager {
     }
     
     async cleanupWebSocketProvider() {
+        // ✅ Y.JS COMPLIANCE: Clean up awareness heartbeat
+        if (this.component.awarenessHeartbeat) {
+            clearInterval(this.component.awarenessHeartbeat);
+            this.component.awarenessHeartbeat = null;
+        }
+        
         if (this.component.provider) {
             try {
                 // First disconnect gracefully

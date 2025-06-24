@@ -95,7 +95,9 @@ When reading code examples that reference `titleEditor`, understand that in the 
 - `this.titleEditor.commands.setContent()` → `this.titleInput = value`
 - Title content is synchronized to Y.js config map via input event handlers
 
-### 📚 **TipTap v3 Documentation References**
+### 📚 **Official Documentation References**
+
+#### TipTap Documentation
 - **Editor Overview**: https://next.tiptap.dev/docs/editor/getting-started/overview
 - **Collaboration Overview**: https://next.tiptap.dev/docs/collaboration/getting-started/overview
 - **Performance Guide**: https://next.tiptap.dev/docs/guides/performance
@@ -111,6 +113,13 @@ When reading code examples that reference `titleEditor`, understand that in the 
 - **Webhooks**: https://next.tiptap.dev/docs/collaboration/core-concepts/webhooks
 - **REST API**: https://next.tiptap.dev/docs/collaboration/documents/rest-api
 - **Awareness**: https://next.tiptap.dev/docs/collaboration/core-concepts/awareness
+
+#### Y.js Documentation
+- **Y.js Documentation**: https://docs.yjs.dev/
+- **Y.js Protocols**: https://github.com/yjs/y-protocols
+
+#### Hocuspocus Documentation
+- **Hocuspocus Server**: https://github.com/ueberdosis/hocuspocus
 
 ## 🚨 **CRITICAL: TIPTAP v3 BREAKING CHANGES**
 

@@ -101,6 +101,32 @@ ydoc.getMap('permissions')  // DO NOT modify directly
 - CollaborationCursor renamed to CollaborationCaret
 - Import from `@tiptap/vue-3`, not `@tiptap/vue-2`
 
+## Official Documentation
+
+### Core Collaboration Framework
+- **TipTap Editor Overview**: https://next.tiptap.dev/docs/editor/getting-started/overview
+- **TipTap Collaboration Overview**: https://next.tiptap.dev/docs/collaboration/getting-started/overview
+- **TipTap Awareness Concepts**: https://next.tiptap.dev/docs/collaboration/core-concepts/awareness
+- **TipTap Performance Guide**: https://next.tiptap.dev/docs/guides/performance
+- **TipTap Invalid Schema Handling**: https://next.tiptap.dev/docs/guides/invalid-schema
+- **TipTap Authentication**: https://next.tiptap.dev/docs/collaboration/getting-started/authenticate
+- **TipTap Offline Support**: https://next.tiptap.dev/docs/guides/offline-support
+- **TipTap Vue.js Integration**: https://next.tiptap.dev/docs/editor/getting-started/install/vue3
+- **Y.js Documentation**: https://docs.yjs.dev/
+- **Y.js Protocols**: https://github.com/yjs/y-protocols
+
+### Extensions and Features
+- **TipTap StarterKit Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/starterkit
+- **TipTap Collaboration Extension**: https://next.tiptap.dev/docs/editor/extensions/functionality/collaboration
+- **TipTap CollaborationCaret**: https://next.tiptap.dev/docs/editor/extensions/functionality/collaboration-caret
+- **TipTap Extend Extension**: https://next.tiptap.dev/docs/editor/extensions/custom-extensions/extend-existing
+
+### Server Implementation
+- **Hocuspocus Server**: https://github.com/ueberdosis/hocuspocus
+- **TipTap Provider Integration**: https://next.tiptap.dev/docs/collaboration/provider/integration
+- **TipTap Webhooks**: https://next.tiptap.dev/docs/collaboration/core-concepts/webhooks
+- **TipTap REST API**: https://next.tiptap.dev/docs/collaboration/documents/rest-api
+
 ## Common Issues & Solutions
 
 For detailed troubleshooting, patterns, and implementation guidelines, see:
@@ -113,10 +139,19 @@ Key issues covered:
 - State synchronization problems
 - Memory management and cleanup
 
+**Note**: Always refer to the Official Documentation above for the latest best practices and implementation patterns.
+
 ## Recent Updates (v2025.01.24)
-### Server-Side Fixes for Readonly Users
-- **CORS**: Fixed /api/system/versions endpoint CORS headers
-- **WebSocket Timeout**: Extended to 5 minutes (was 30 seconds)
+### Readonly User Collaboration Fix
+- **Server-Side**: Added onAwarenessUpdate handler to accept cursor/presence updates from readonly users
+- **Server-Side**: Modified beforeHandleMessage to delegate awareness messages to Hocuspocus
+- **Client-Side**: Implemented Y.js-compliant awareness heartbeat (15s interval for 30s timeout)
+- **Client-Side**: Removed all artificial keepalive mechanisms in favor of standard awareness protocol
+
+### Y.js Awareness Compliance
+- **Heartbeat**: Sends awareness updates every 15 seconds to maintain Y.js 30-second timeout
+- **Cleanup**: Proper interval cleanup on provider destroy and component unmount
+- **Standard Protocol**: Uses `setLocalStateField('lastActivity', Date.now())` for heartbeat
 - **Message Handling**: Readonly users can now send all protocol messages (0-4, 8) including Awareness
 - **Connection Monitoring**: Server logs keepalive every 30 seconds
 - **Enhanced Logging**: Detailed connection/disconnection tracking
