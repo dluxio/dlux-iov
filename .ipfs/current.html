@@ -10,14 +10,14 @@
             margin: 0;
             height: 100%;
         }
-        
+
         iframe {
             border: 0;
             display: inline-block;
         }
     </style>
     <script>
-        function match (s,t) {var a=[];for(var i=0;i<s.length;i++){j=s.indexOf(t,i);if(j>=0){a.push(j);i=j}else return a}}
+        function match(s, t) { var a = []; for (var i = 0; i < s.length; i++) { j = s.indexOf(t, i); if (j >= 0) { a.push(j); i = j } else return a } }
         const dns01 = window.location.hostname.split('.')[0]
         function varval(name, arr) {
             for (var i = 0; i < arr.length; i++) {
@@ -31,27 +31,28 @@
         var stateObj,
             vars = location.href.split('?')[1],
             goAhead = true,
+            worker = null,
             vararr = vars.split('&'),
             author = varval('author', vararr),
             permlink = varval('permlink', vararr),
             hiveKey = `${author}/${permlink}`,
-            dots = match(author,'.'),
+            dots = match(author, '.'),
             authorizedDNS01 = dots.length ? dots.join('') + author.replaceAll('.', '-') : author
-            if(dns01 != authorizedDNS01){
-                goAhead = false
-                alert(`This dApp failed it's signature check.\nYou are likely following a malicious link:\nAuthor: ${dns01} != subdomain: ${authorizedDNS01}\n Please report`)
-            }
-        if(goAhead)hive.api.getContent(author, permlink, (err, result) => {
+        if (dns01 != authorizedDNS01) {
+            goAhead = false
+            alert(`This dApp failed it's signature check.\nYou are likely following a malicious link:\nAuthor: ${dns01} != subdomain: ${authorizedDNS01}\n Please report`)
+        }
+        if (goAhead) hive.api.getContent(author, permlink, (err, result) => {
             if (err) console.log(err)
             console.log(result)
             document.title = `DLUX | ${result.title}`
             stateObj = result
             var metadata = result.json_metadata
             var hashy = JSON.parse(metadata).vrHash
-	    //upgrade old dApps
-            if(hashy == "Qma4dk3mWP325HrHYBDz3UdL9h1A6q8CSvZdc8JhqfgiMp" 
-            || hashy == "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16"
-            || hashy == "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV")hashy = "QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k"
+            //upgrade old dApps
+            if (hashy == "Qma4dk3mWP325HrHYBDz3UdL9h1A6q8CSvZdc8JhqfgiMp"
+                || hashy == "QmNby3SMAAa9hBVHvdkKvvTqs7ssK4nYa2jBdZkxqmRc16"
+                || hashy == "QmZF2ZEZK8WBVUT7dnQyzA6eApLGnMXgNaJtWHFc3PCpqV") hashy = "QmcAkxXzczkzUJWrkWNhkJP9FF1L9Lu5sVCrUFtAZvem3k"
             var scrolling = JSON.parse(metadata).scrolling
             var vars = location.href.split('?')[1]
             var iframe = document.createElement('iframe');
@@ -63,9 +64,16 @@
             iframe.setAttribute('allow', 'gyroscope; accelerometer; microphone; camera')
             iframe.src = `/ipfs/${hashy}?${vars}`
             document.body.appendChild(iframe);
+            worker = new Worker(`/wd/@${author}/${permlink}/service-worker.js`);
+            worker.addEventListener('message', function (event) {
+                console.log(event.data);
+            });
+            worker.addEventListener('error', function (error) {
+                console.error('Error in worker:', error);
+            });
         });
         if (isIOS()) {
-            window.addEventListener('devicemotion', function(e) {
+            window.addEventListener('devicemotion', function (e) {
                 document.getElementById('theIframe').contentWindow.postMessage({
                     type: 'devicemotion',
                     deviceMotionEvent: cloneDeviceMotionEvent(e),
@@ -107,7 +115,7 @@
         function onMessage(event) {
             if (event.origin !== window.origin) return;
             let data = event.data
-            if (typeof(window[data.func]) == "function") {
+            if (typeof (window[data.func]) == "function") {
                 if (data.func == 'advPost' || data.func == 'vote' || data.func == 'signDecode' || data.func == 'signEncode' || data.func == 'follow' || data.func == 'aVote' || data.func == 'sendLink' || data.func == 'iloaded' || data.func == 'passGenerateHotLink' || data.func == 'comment' || data.func == 'reqsign') {
                     window[data.func].call(null, data.message);
                 }
@@ -117,7 +125,7 @@
         function sendLink(link) {
             if (link == 'back()') {
                 window.history.back();
-            } else if (link.split(';').length > 1){
+            } else if (link.split(';').length > 1) {
                 window.open(link.split(';')[0], link.split(';')[1]).opener = null;;
             } else {
                 location.href = link;
@@ -146,7 +154,7 @@
                         }
                     }, "*");
                 });
-            } else {}
+            } else { }
         }
 
         function signDecode(message) {
@@ -162,7 +170,7 @@
                         'msgid': message.msgid,
                     }
                 }, "*");
-            } else {}
+            } else { }
         }
         var userLoggedIn = 'Guest'
         if (userLoggedIn == 'Guest' && varval('user', vararr)) {
@@ -173,7 +181,7 @@
 
         function reqsign(op) {
             if (window.hive_keychain) {
-                hive_keychain.requestBroadcast(op[1][1], [op[0]], op[1][0], function(response) {
+                hive_keychain.requestBroadcast(op[1][1], [op[0]], op[1][0], function (response) {
                     console.log(response);
                     target.postMessage({
                         'func': 'keychainResponse',
@@ -184,7 +192,7 @@
         }
 
         function iloaded() {
-            hive.api.getContent(author, permlink, function(err, result) {
+            hive.api.getContent(author, permlink, function (err, result) {
                 var target = document.getElementById('theIframe').contentWindow
                 var un = 'Guest'
                 if (varval('user', vararr)) {

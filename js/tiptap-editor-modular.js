@@ -2649,6 +2649,31 @@ class SyncManager {
             
             metadata.observe(this.metadataObserver);
             
+            // ✅ PERMISSION BROADCAST OBSERVER: Listen for real-time permission changes
+            const permissions = yjsDoc.getMap('permissions');
+            this.permissionObserver = (event) => {
+                try {
+                    event.changes.keys.forEach((change, key) => {
+                        if (key.startsWith('update_') && change.action === 'add') {
+                            const permissionUpdate = permissions.get(key);
+                            if (permissionUpdate && permissionUpdate.broadcastType) {
+                                console.log('🔄 PERMISSION BROADCAST RECEIVED:', permissionUpdate);
+                                
+                                // Check if this affects the current user
+                                const currentUsername = this.component.username;
+                                if (permissionUpdate.account === currentUsername) {
+                                    this.handlePermissionBroadcast(permissionUpdate);
+                                }
+                            }
+                        }
+                    });
+                } catch (error) {
+                    console.error('❌ Error in Y.js permission observer:', error);
+                }
+            };
+            
+            permissions.observe(this.permissionObserver);
+            
             // ✅ RECURSION FIX: Don't load initial permlink into permlinkInput
             // permlinkInput is user input only - metadata provides separate reactive value
             // Initial permlink display is handled by actualPermlink() computed property
@@ -2676,10 +2701,110 @@ class SyncManager {
                     this.metadataObserver = null;
                 }
                 
+                if (this.permissionObserver) {
+                    const permissions = yjsDoc.getMap('permissions');
+                    permissions.unobserve(this.permissionObserver);
+                    this.permissionObserver = null;
+                }
+                
                 console.log('✅ Y.js observers cleaned up');
             } catch (error) {
                 console.warn('⚠️ Error cleaning up Y.js observers:', error);
             }
+        }
+    }
+
+    /**
+     * ✅ PERMISSION BROADCAST HANDLER: Process real-time permission changes
+     * Called when permission updates are received via Y.js WebSocket broadcast
+     */
+    handlePermissionBroadcast(permissionUpdate) {
+        try {
+            const { account, permissionType, grantedBy, timestamp, broadcastType } = permissionUpdate;
+            
+            console.log('🔄 PROCESSING PERMISSION BROADCAST:', {
+                account,
+                permissionType,
+                grantedBy,
+                broadcastType,
+                timestamp,
+                currentFile: this.component.currentFile?.permlink
+            });
+            
+            // ✅ REAL-TIME PERMISSION UPDATE: Refresh permissions immediately
+            this.component.$nextTick(async () => {
+                try {
+                    // Force refresh permissions from server
+                    await this.component.checkPermissions();
+                    
+                    // Show user notification about permission change
+                    let message = '';
+                    if (broadcastType === 'permission_granted') {
+                        message = `@${grantedBy} granted you ${permissionType} access to this document`;
+                    } else if (broadcastType === 'permission_revoked') {
+                        message = `@${grantedBy} revoked your access to this document`;
+                    }
+                    
+                    if (message) {
+                        // Show notification if notification system is available
+                        if (this.component.showNotification) {
+                            this.component.showNotification(message, broadcastType === 'permission_granted' ? 'success' : 'warning');
+                        } else {
+                            console.log('📢 PERMISSION NOTIFICATION:', message);
+                        }
+                    }
+                    
+                    // ✅ PERMISSION LEVEL CHANGE: Handle editor reconnection if needed
+                    const newPermissionLevel = this.component.getUserPermissionLevel(this.component.currentFile);
+                    const oldReadOnlyMode = this.component.isReadOnlyMode;
+                    
+                    console.log('🔄 PERMISSION CHANGE DETECTED:', {
+                        oldReadOnlyMode,
+                        newPermissionLevel,
+                        broadcastType
+                    });
+                    
+                    // If permission was revoked, handle immediate effects
+                    if (broadcastType === 'permission_revoked') {
+                        // Force read-only mode
+                        this.component.isReadOnlyMode = true;
+                        this.component.currentFile.permissionLevel = 'readonly';
+                        
+                        // Disable editors immediately
+                        if (this.component.bodyEditor && !this.component.bodyEditor.isDestroyed) {
+                            this.component.bodyEditor.setEditable(false);
+                        }
+                    }
+                    
+                    // If permission was granted and user was previously read-only, enable editing
+                    if (broadcastType === 'permission_granted' && oldReadOnlyMode) {
+                        const canEdit = ['editable', 'postable', 'owner'].includes(newPermissionLevel);
+                        if (canEdit) {
+                            this.component.isReadOnlyMode = false;
+                            this.component.currentFile.permissionLevel = newPermissionLevel;
+                            
+                            // Enable editors
+                            if (this.component.bodyEditor && !this.component.bodyEditor.isDestroyed) {
+                                this.component.bodyEditor.setEditable(true);
+                            }
+                            
+                            // ✅ WEBSOCKET RECONNECTION: Reconnect with new permission level for server validation
+                            if (this.component.provider && this.component.lifecycleManager) {
+                                console.log('🔄 Reconnecting WebSocket with new permission level...');
+                                await this.component.lifecycleManager.reconnectWebSocketForPermissionUpgrade();
+                            }
+                        }
+                    }
+                    
+                    console.log('✅ Permission broadcast processed successfully');
+                    
+                } catch (error) {
+                    console.error('❌ Error processing permission broadcast:', error);
+                }
+            });
+            
+        } catch (error) {
+            console.error('❌ Error in handlePermissionBroadcast:', error);
         }
     }
 

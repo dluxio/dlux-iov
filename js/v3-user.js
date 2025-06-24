@@ -6837,6 +6837,102 @@ function buyNFT(setname, uid, price, type, callback){
       );
     },
     
+    // ==================== PERMISSION SYSTEM COMPUTED PROPERTIES ====================
+    // Five-Tier Permission System: no-access, readonly, editable, postable, owner
+    
+    /**
+     * Get current permission level for the loaded document
+     * @returns {string} Permission level: 'no-access', 'readonly', 'editable', 'postable', 'owner'
+     */
+    currentPermissionLevel() {
+      if (!this.currentFile || this.currentFile.type !== 'collaborative') {
+        return 'owner'; // Local documents have full permissions
+      }
+      
+      return this.getUserPermissionLevel(this.currentFile);
+    },
+    
+    /**
+     * Check if user has owner privileges (full control)
+     * @returns {boolean}
+     */
+    isOwner() {
+      return this.currentPermissionLevel === 'owner';
+    },
+    
+    /**
+     * Check if user can publish to Hive blockchain
+     * @returns {boolean}
+     */
+    isPostable() {
+      return ['postable', 'owner'].includes(this.currentPermissionLevel);
+    },
+    
+    /**
+     * Check if user can edit document content
+     * @returns {boolean}
+     */
+    isEditable() {
+      return ['editable', 'postable', 'owner'].includes(this.currentPermissionLevel);
+    },
+    
+    /**
+     * Check if user has read-only access
+     * @returns {boolean}
+     */
+    isReadonly() {
+      return this.currentPermissionLevel === 'readonly';
+    },
+    
+    /**
+     * Check if user has no access (blocked)
+     * @returns {boolean}
+     */
+    hasNoAccess() {
+      return this.currentPermissionLevel === 'no-access';
+    },
+    
+    // ==================== UI FEATURE CONTROLS ====================
+    
+    /**
+     * Can user edit document content? (controls editor functionality)
+     * @returns {boolean}
+     */
+    canEdit() {
+      return this.isEditable && !this.hasNoAccess;
+    },
+    
+    /**
+     * Can user delete document? (owner only)
+     * @returns {boolean}
+     */
+    canDelete() {
+      return this.isOwner;
+    },
+    
+    /**
+     * Can user publish to Hive? (postable permission level)
+     * @returns {boolean}
+     */
+    canPublish() {
+      return this.isPostable && !this.hasNoAccess;
+    },
+    
+    /**
+     * Can user share document? (owner only)
+     * @returns {boolean}
+     */
+    canShare() {
+      return this.isOwner;
+    },
+    
+    /**
+     * Can user manage permissions? (owner only)
+     * @returns {boolean}
+     */
+    canManagePermissions() {
+      return this.isOwner;
+    },
 
   },
 }).mount('#app')

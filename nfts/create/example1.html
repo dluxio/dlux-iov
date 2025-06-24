@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+//<html><head><script>
+function compile(m,d){
+const D=['Whale','Orca','Dolphin','Vitalik'],R=['Common Green','Common Red','Common Blue','Legendary Red','Rare Blue','Rare Green','Rare Red','Epic Green'],P=[
+//dolphins
+'Base64EncodedPNGs',
+'etc',//0
+'etc',//1,
+'0'];
+const Base64 = {_Rixits:"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+=",toNumber:function(chars){var result=0;chars=chars.split('');for(var e=0;e<chars.length;e++){result=(result*64)+this._Rixits.indexOf(chars[e]);}return result}};let f=Base64.toNumber(m),t,p,b
+if(f<252){t=2;p=parseInt(f/18);b=f%18<12?parseInt((f%18)/3):4+parseInt(((f%18)-12)/2);}else if(f<461){f-=252;t=1;p=14+parseInt(f/11);b=f%11<8?parseInt((f%11)/2):4+parseInt((f%11)-8);}else if(f<546){f-=461;t=0;p=33+parseInt(f/6);b=f%6}else{t=3;b=7;p=47};const S=`<div style="position:relative"><img class="img-fluid" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AA${B[b]}"><img style="position:absolute;top:0;left:0;" class="img-fluid" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AA${P[p]}"></div>`;if(d){document.getElementById('body').innerHTML=S}else{return{HTML:S,attributes:[{"Type":D[t]},{"Rarity":R[b]}],set:{Color1:'#E31337',Color2:'#e7e7f1',Description:'The community is what makes a successful cryptocurrency project. What better way is there of honoring the Hive community than issuing an NFT collection based on some of its most dedicated members.',faicon:'fas fa-portrait', banner:'QmThedo5GSBcRgyiHqvxuxaMJCjuJYZqr4UTB6ZnfETAAU',featured:'QmP2Nnd9Ddo4sNM51yrH6ThbmGvspH7H6j7sTLFa9vHtqQ',logo:'QmRYrwWuUpjdkn3VW2CY9mD2NcqoGqiJzjN2DmWi49dRZX',wrapped:'QmRYrwWuUpjdkn3VW2CY9mD2NcqoGqiJzjN2DmWi49dRZX',category:['Collectibles'],links:[]}}}}
+//</script>
+/*
+//<script>
+if(window.addEventListener){window.addEventListener("message",onMessage,false);}else if(window.attachEvent){window.attachEvent("onmessage", onMessage, false);};function onMessage(event){var data=event.data;if(typeof (window[data.func])=="function"){const got=window[data.func].call(null,data.message);window.parent.postMessage({'func': 'compiled','message':got},"*")}};function onLoad(id){window.parent.postMessage({'func':'loaded','message':id},"*")}
+//</script>
+*/
+//</head><body id="body">Append ?NFT_UID to the address bar to see that NFT. "...html?A6"<script>const uid = location.href.split('?')[1]; if (uid) { compile(uid, true) } else { onLoad(uid) }</script></body></html>
