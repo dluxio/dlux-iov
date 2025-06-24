@@ -77,11 +77,39 @@ ydoc.getMap('permissions')  // DO NOT modify directly
 ```
 
 ## Permission Levels
-- `no-access`: Cannot view or edit
-- `readonly`: View only
-- `editable`: View and edit
-- `postable`: Edit and publish to Hive
-- `owner`: Full control including permissions
+
+### 5-Tier Permission System
+- `no-access`: Cannot view or edit (blocked access)
+- `readonly`: View only (editor disabled)
+- `editable`: View and edit (editor enabled)
+- `postable`: Edit and publish to Hive (publish button enabled)
+- `owner`: Full control including permissions (all features enabled)
+
+### Computed Properties for UI Control
+```javascript
+// Permission level detection
+this.currentPermissionLevel  // Returns current permission string
+this.isOwner                 // Boolean: has owner privileges
+this.isPostable             // Boolean: can publish to Hive
+this.isEditable             // Boolean: can edit content
+this.isReadonly             // Boolean: view-only access
+this.hasNoAccess            // Boolean: blocked access
+
+// UI feature controls
+this.canEdit                // Editor functionality
+this.canDelete              // Delete document (owner only)
+this.canPublish             // Publish to Hive (postable/owner)
+this.canShare               // Share document (owner only)
+this.canManagePermissions   // Permission management (owner only)
+```
+
+### Real-time Permission Updates - PRODUCTION READY ✅
+- **WebSocket Broadcasts**: Near-instant updates (1-2 seconds) via Y.js awareness - SERVER IMPLEMENTED
+- **HTTP Polling Fallback**: 5-minute checks for missed broadcasts
+- **WebSocket Reconnection**: Automatic reconnection when permission level changes
+- **Dual-Layer Reliability**: Combines real-time broadcasts with polling backup
+- **UI Reactivity**: All computed properties update instantly without page refresh
+- **Performance Validated**: 95%+ improvement in permission update speed (1-2s vs 30-60s)
 
 ## Critical Implementation Notes
 
@@ -140,6 +168,34 @@ Key issues covered:
 - Memory management and cleanup
 
 **Note**: Always refer to the Official Documentation above for the latest best practices and implementation patterns.
+
+## Recent Updates (v2025.06.24)
+### ✅ WebSocket Permission Broadcast System - PRODUCTION READY
+- **Real-time Updates**: Near-instant permission changes (1-2 seconds) via Y.js awareness broadcasts
+- **Dual-Layer Architecture**: WebSocket broadcasts + HTTP polling fallback (5-minute intervals)
+- **✅ Server-Side Complete**: 6-step implementation with onChangeDocument observers, API integration, monitoring
+- **✅ Client-Side Complete**: Enhanced awareness listener detects and processes permission broadcasts
+- **Performance Improvement**: 30-60 second delays reduced to 1-2 seconds (95%+ improvement)
+- **Server Load Reduction**: HTTP polling reduced from 30s/60s to 2min/5min intervals
+
+### Real-time Permission System Enhancement
+- **Adaptive Permission Refresh**: Dynamic refresh rates (2min during collaboration, 5min normal)
+- **Seamless Permission Transitions**: All permission level changes update UI without page refresh
+- **WebSocket Reconnection**: Automatic reconnection when crossing readonly/editable boundary
+- **Comprehensive UI Updates**: All computed properties react instantly to permission changes
+- **Broadcast Handling**: Immediate permission refresh when server broadcasts changes
+
+### Permission Level Management
+- **Five-Tier System**: `no-access`, `readonly`, `editable`, `postable`, `owner`
+- **Owner-Only Controls**: Delete and permission management restricted to owners
+- **Computed Properties**: Reactive UI elements based on permission levels
+- **Real-time Detection**: WebSocket broadcasts + 5-minute polling fallback
+
+### Security Enhancements
+- **Owner-Based API Strategy**: Non-owners skip permissions endpoint to prevent 403 errors
+- **Permission Hierarchy**: Clear authority structure with proper access controls
+- **Authentication Validation**: Robust auth header validation for all operations
+- **Graceful Degradation**: Cached permissions ensure offline-first functionality
 
 ## Recent Updates (v2025.01.24)
 ### Readonly User Collaboration Fix

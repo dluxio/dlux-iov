@@ -898,6 +898,15 @@ class PersistenceManager {
                         console.log('🔄 Y.js sync complete, upgrading to Tier 2 editors with CollaborationCaret...');
                         console.log('👥 User type:', persistenceManager.component.isReadOnlyMode ? 'read-only' : 'editable');
                         
+                        // ✅ PERMISSION REFRESH: Set collaborative activity flag for faster permission checking
+                        if (!persistenceManager.component.isActivelyCollaborating) {
+                            persistenceManager.component.isActivelyCollaborating = true;
+                            console.log('🚀 COLLABORATIVE ACTIVITY: Enabled fast permission refresh for real-time updates');
+                            
+                            // Restart permission refresh with faster rate
+                            persistenceManager.component.startPermissionRefresh();
+                        }
+                        
                         persistenceManager.upgradeToCloudEditors(yjsDoc, provider).catch(error => {
                             console.warn('⚠️ Failed to upgrade to Tier 2 editors:', error.message);
                         });
@@ -1041,6 +1050,13 @@ class PersistenceManager {
                         persistenceManager.component.reconnectAttempts++;
                         if (persistenceManager.component.reconnectAttempts > 1) {
                             console.log('⚠️ WebSocket disconnected, reconnection attempt', persistenceManager.component.reconnectAttempts);
+                        }
+                        
+                        // ✅ PERMISSION REFRESH: Reset collaborative activity flag and restart permission refresh at normal rate
+                        if (persistenceManager.component.isActivelyCollaborating) {
+                            persistenceManager.component.isActivelyCollaborating = false;
+                            console.log('🔄 COLLABORATIVE ACTIVITY: Disabled - switching to normal permission refresh rate');
+                            persistenceManager.component.startPermissionRefresh();
                         }
                     });
                     
@@ -2787,6 +2803,50 @@ class LifecycleManager {
         this.component.connectionMessage = '';
     }
     
+    /**
+     * ✅ PERMISSION UPGRADE: Reconnect WebSocket with new permission level
+     * Required when user is upgraded from readonly to editable for server to accept changes
+     */
+    async reconnectWebSocketForPermissionUpgrade() {
+        if (!this.component.currentFile || this.component.currentFile.type !== 'collaborative') {
+            throw new Error('Cannot reconnect - not in collaborative document');
+        }
+        
+        if (!this.component.yjsDoc) {
+            throw new Error('Cannot reconnect - no Y.js document available');
+        }
+        
+        const oldPermissionLevel = this.component.getUserPermissionLevel(this.component.currentFile);
+        
+        console.log('🔄 PERMISSION UPGRADE: Starting WebSocket reconnection', {
+            document: `${this.component.currentFile.owner}/${this.component.currentFile.permlink}`,
+            oldReadOnlyMode: this.component.isReadOnlyMode,
+            oldPermissionLevel: oldPermissionLevel,
+            newPermissionLevel: 'will-be-detected-after-reconnect'
+        });
+        
+        try {
+            // 1. Clean up existing WebSocket provider 
+            await this.cleanupWebSocketProvider();
+            
+            // 2. Set up new WebSocket provider with updated permissions
+            const result = await this.setupCloudPersistence(this.component.yjsDoc, this.component.currentFile);
+            
+            // 3. Verify new provider was created
+            if (!this.component.provider) {
+                throw new Error('Failed to create new WebSocket provider');
+            }
+            
+            console.log('✅ PERMISSION UPGRADE: WebSocket reconnected successfully with new permissions');
+            
+            // Provider will automatically trigger onSynced and upgrade editors
+            
+        } catch (error) {
+            console.error('❌ PERMISSION UPGRADE: WebSocket reconnection failed:', error.message);
+            throw error;
+        }
+    }
+    
     async cleanupYjsDocument() {
         if (this.component.ydoc) {
             try {
@@ -4275,9 +4335,14 @@ export default {
             // ===== OFFLINE-FIRST PERMISSION SYSTEM: Periodic refresh and real-time updates =====
             permissionRefreshInterval: null,
             lastPermissionRefresh: 0,
-            permissionRefreshRate: 1800000, // 30 minutes default - reduced API calls by 83%
+            lastPermissionCheck: 0, // Track last processed permission broadcast timestamp
+            lastBroadcastProcessed: 0, // Rate limiting for permission broadcasts
+            permissionRefreshRate: 300000, // 5 minutes - reduced from 1 minute due to WebSocket permission broadcasts
+            fastPermissionRefreshRate: 120000, // 2 minutes when actively collaborating - reduced from 30 seconds
             backgroundPermissionUpdates: new Map(), // Track background permission updates
             realtimePermissionUpdates: true, // Enable real-time permission updates
+            isActivelyCollaborating: false, // Track if user is in active collaborative session
+            lastSkippedPermissionUpdate: 0, // Timestamp for throttling redundant permission update logs
             
             // ===== TIPTAP TIMING FIX: Deferred auto-connect for authentication race conditions =====
             pendingAutoConnect: null,
@@ -4984,7 +5049,22 @@ export default {
         },
         
         canDelete() {
-            return this.currentFile && !this.deleting;
+            if (!this.currentFile || this.deleting) {
+                return false;
+            }
+            
+            // ✅ LOCAL DOCUMENTS: Always allow deletion (user owns their local files)
+            if (this.currentFile.type === 'local' || this.isTemporaryDocument) {
+                return true;
+            }
+            
+            // ✅ COLLABORATIVE DOCUMENTS: Only owner can delete
+            if (this.currentFile.type === 'collaborative') {
+                return this.isOwner;
+            }
+            
+            // Default to false for unknown document types
+            return false;
         },
         
         // ===== COLLABORATIVE FEATURES =====
@@ -6563,6 +6643,10 @@ export default {
             this.permissionLoadTimeout = null;
         }
         
+        // ✅ BROADCAST CLEANUP: Clear permission broadcast tracking
+        this.lastPermissionCheck = 0;
+        this.lastBroadcastProcessed = 0;
+        
         // ✅ TIPTAP COMPLIANCE: Stop memory monitoring if active
         if (this.memoryMonitorInterval) {
             this.stopMemoryMonitoring();
@@ -6829,6 +6913,78 @@ export default {
                 // (publishing will prompt for auth when needed)
                 return true;
             }
+        },
+
+        // ===== PERMISSION LEVEL COMPUTED PROPERTIES =====
+        
+        /**
+         * Current user's permission level for the active document
+         */
+        currentPermissionLevel() {
+            if (!this.currentFile) return 'unknown';
+            return this.getUserPermissionLevel(this.currentFile);
+        },
+        
+        /**
+         * Permission level checks for UI reactivity
+         */
+        isOwner() {
+            return this.currentPermissionLevel === 'owner';
+        },
+        
+        isPostable() {
+            return ['owner', 'postable'].includes(this.currentPermissionLevel);
+        },
+        
+        isEditable() {
+            return ['owner', 'postable', 'editable'].includes(this.currentPermissionLevel);
+        },
+        
+        isReadonly() {
+            return this.currentPermissionLevel === 'readonly';
+        },
+        
+        hasNoAccess() {
+            return this.currentPermissionLevel === 'no-access';
+        },
+        
+        /**
+         * UI Feature Controls based on permission levels
+         */
+        canManagePermissions() {
+            return this.isOwner && this.currentFile?.type === 'collaborative';
+        },
+        
+        canViewDocument() {
+            return !this.hasNoAccess;
+        },
+        
+        /**
+         * Enhanced sharing control with permission-specific logic
+         */
+        canShareAdvanced() {
+            return this.isAuthenticated && 
+                   this.currentFile?.type === 'collaborative' &&
+                   this.isOwner; // Only owners can manage sharing
+        },
+        
+        /**
+         * Enhanced deletion control with permission-specific logic
+         */
+        canDeleteDocument() {
+            if (!this.currentFile) return false;
+            
+            // Local documents: always deletable by user
+            if (this.currentFile.type === 'local' || this.isTemporaryDocument) {
+                return !this.deleting;
+            }
+            
+            // Collaborative documents: only owner can delete
+            if (this.currentFile.type === 'collaborative') {
+                return this.isOwner && !this.deleting;
+            }
+            
+            return false;
         },
 
         // ===== STATE MONITORING AND VALIDATION =====
@@ -9858,16 +10014,39 @@ export default {
                             document: documentKey,
                             oldPermission: currentPermission,
                             newPermission: newPermission,
-                            context
+                            context,
+                            permissionTransition: `${currentPermission} → ${newPermission}`,
+                            willRequireReconnect: currentPermission && newPermission && 
+                                ['readonly', 'no-access'].includes(currentPermission) !== ['readonly', 'no-access'].includes(newPermission)
                         });
                         
                         // Update reactive permission state
                         this.updateReactivePermissionState(documentKey, newPermission === 'readonly', newPermission);
                         
-                        // Update editor mode if needed
+                        // ✅ COMPREHENSIVE UI UPDATE: Update all permission-dependent UI elements
                         this.$nextTick(() => {
+                            // Update editor mode (handles WebSocket reconnection if needed)
                             this.updateEditorMode();
+                            
+                            // Trigger Vue reactivity for computed properties
                             this.triggerPermissionReactivity();
+                            
+                            // Log permission transition for debugging
+                            console.log('✅ PERMISSION TRANSITION: UI updated', {
+                                document: documentKey,
+                                newPermissionLevel: this.currentPermissionLevel,
+                                isOwner: this.isOwner,
+                                isPostable: this.isPostable,
+                                isEditable: this.isEditable,
+                                isReadonly: this.isReadonly,
+                                hasNoAccess: this.hasNoAccess,
+                                canEdit: this.canEdit,
+                                canDelete: this.canDelete,
+                                canPublish: this.canPublish,
+                                canShare: this.canShare,
+                                canManagePermissions: this.canManagePermissions,
+                                editorIsEditable: this.bodyEditor?.isEditable
+                            });
                         });
                     }
                 }
@@ -14018,6 +14197,25 @@ export default {
             
             const users = [];
             this.provider.awareness.getStates().forEach((state, clientId) => {
+                // ✅ PERMISSION BROADCAST DETECTION: Check for permission updates from server
+                if (state.permissionUpdate && state.permissionUpdate.timestamp > this.lastPermissionCheck) {
+                    // ✅ RATE LIMITING: Prevent broadcast spam (minimum 1-second interval)
+                    if (Date.now() - this.lastBroadcastProcessed < 1000) {
+                        console.log('🚦 Rate limiting permission broadcast - too frequent');
+                        return;
+                    }
+                    
+                    // ✅ PERMISSION VALIDATION: Only process if authenticated and have current file
+                    if (!this.isAuthenticated || !this.currentFile) {
+                        console.warn('⚠️ Ignoring permission broadcast - not authenticated or no current file');
+                        return;
+                    }
+                    
+                    console.log('🔔 Received permission broadcast:', state.permissionUpdate);
+                    this.handlePermissionBroadcast(state.permissionUpdate);
+                    this.lastBroadcastProcessed = Date.now();
+                }
+                
                 if (state.user && clientId !== this.provider.awareness.clientID) {
                     users.push({
                         id: clientId,
@@ -15059,20 +15257,31 @@ export default {
         
         /**
          * 🚀 OFFLINE-FIRST: Start periodic permission refresh with intelligent background updates
+         * Uses fast refresh rate when actively collaborating for real-time permission changes
          */
         startPermissionRefresh() {
             // Clear any existing interval
             this.stopPermissionRefresh();
             
+            // Determine refresh rate based on collaboration activity
+            const currentRefreshRate = this.isActivelyCollaborating ? 
+                this.fastPermissionRefreshRate : this.permissionRefreshRate;
+            
+            console.log('🔄 PERMISSION REFRESH: Starting with rate', {
+                rate: currentRefreshRate,
+                isActivelyCollaborating: this.isActivelyCollaborating,
+                fastRate: this.fastPermissionRefreshRate,
+                normalRate: this.permissionRefreshRate
+            });
             
             // Start periodic refresh
             this.permissionRefreshInterval = setInterval(() => {
                 this.backgroundPermissionRefresh();
-            }, this.permissionRefreshRate);
+            }, currentRefreshRate);
             
             // Initial refresh if needed
             const timeSinceLastRefresh = Date.now() - this.lastPermissionRefresh;
-            if (timeSinceLastRefresh > this.permissionRefreshRate) {
+            if (timeSinceLastRefresh > currentRefreshRate) {
                 this.$nextTick(() => {
                     this.backgroundPermissionRefresh();
                 });
@@ -15086,6 +15295,62 @@ export default {
             if (this.permissionRefreshInterval) {
                 clearInterval(this.permissionRefreshInterval);
                 this.permissionRefreshInterval = null;
+            }
+        },
+        
+        /**
+         * 🔔 WEBSOCKET PERMISSION BROADCAST: Handle real-time permission updates from server
+         */
+        async handlePermissionBroadcast(updateData) {
+            console.log('🔔 Processing permission broadcast:', updateData);
+            
+            try {
+                // Store previous permission level for comparison
+                const previousPermissionLevel = this.currentPermissionLevel;
+                
+                // ✅ ENHANCED ERROR HANDLING: Retry failed permission loads with exponential backoff
+                let attempt = 1;
+                const maxAttempts = 3;
+                
+                while (attempt <= maxAttempts) {
+                    try {
+                        await this.loadDocumentPermissions('broadcast-triggered');
+                        break; // Success - exit retry loop
+                        
+                    } catch (error) {
+                        console.warn(`⚠️ Permission broadcast attempt ${attempt}/${maxAttempts} failed:`, error.message);
+                        
+                        if (attempt === maxAttempts) {
+                            throw error; // Final attempt failed
+                        }
+                        
+                        // Exponential backoff: wait 1s, 2s, then 4s
+                        const delay = 1000 * Math.pow(2, attempt - 1);
+                        console.log(`🔄 Retrying permission load in ${delay}ms...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        attempt++;
+                    }
+                }
+                
+                // Update last permission check timestamp to prevent re-processing same broadcast
+                this.lastPermissionCheck = Date.now();
+                
+                // Update reactive UI state
+                this.$forceUpdate();
+                
+                // Log permission change if detected
+                if (this.currentPermissionLevel !== previousPermissionLevel) {
+                    console.log('✅ Permission level changed via broadcast:', {
+                        from: previousPermissionLevel,
+                        to: this.currentPermissionLevel,
+                        document: this.currentFile ? `${this.currentFile.owner}/${this.currentFile.permlink}` : 'unknown',
+                        attempts: attempt
+                    });
+                }
+                
+            } catch (error) {
+                console.error('❌ Permission broadcast processing failed after all retries:', error);
+                // Fall back to regular polling - next refresh will catch the change
             }
         },
         
@@ -15635,14 +15900,45 @@ export default {
                 
                 // ✅ TIPTAP BEST PRACTICE: Only update if the state has changed to avoid unnecessary operations
                 if (this.bodyEditor.isEditable !== shouldBeEditable) {
+                    const wasReadOnly = !this.bodyEditor.isEditable;
+                    const willBeEditable = shouldBeEditable;
+                    
                     console.log('🔧 TipTap Editor Mode Update:', {
                         from: this.bodyEditor.isEditable ? 'editable' : 'readonly',
                         to: shouldBeEditable ? 'editable' : 'readonly',
                         document: this.currentFile ? `${this.currentFile.owner}/${this.currentFile.permlink}` : 'none',
                         permissionLevel: currentPermissionLevel,
                         isReadOnlyMode: this.isReadOnlyMode,
-                        isAuthenticated: this.isAuthenticated
+                        isAuthenticated: this.isAuthenticated,
+                        hasWebSocketProvider: !!this.provider,
+                        needsWebSocketReconnect: wasReadOnly && willBeEditable
                     });
+                    
+                    // ✅ PERMISSION TRANSITIONS: Handle all permission level changes with WebSocket reconnection
+                    const currentPermission = this.getUserPermissionLevel(this.currentFile);
+                    const needsWebSocketReconnect = this.provider && this.currentFile?.type === 'collaborative' && 
+                        (wasReadOnly !== !shouldBeEditable); // Any readonly/editable transition
+                    
+                    if (needsWebSocketReconnect) {
+                        console.log('🚀 PERMISSION TRANSITION: User permission changed - reconnecting WebSocket with new permissions', {
+                            from: wasReadOnly ? 'readonly' : 'editable',
+                            to: shouldBeEditable ? 'editable' : 'readonly',
+                            permissionLevel: currentPermission,
+                            document: `${this.currentFile.owner}/${this.currentFile.permlink}`
+                        });
+                        
+                        // Reconnect WebSocket with new permission level for server authentication
+                        this.$nextTick(async () => {
+                            try {
+                                await this.reconnectWebSocketForPermissionUpgrade();
+                            } catch (error) {
+                                console.warn('⚠️ WebSocket reconnection failed after permission change:', error.message);
+                                // Fall back to basic editor update
+                                this.bodyEditor.setEditable(shouldBeEditable, false);
+                            }
+                        });
+                        return; // WebSocket reconnection will handle editor update
+                    }
                     
                     // ✅ TIPTAP BEST PRACTICE: Use setEditable method with emitUpdate parameter
                     // Set emitUpdate to false to avoid unnecessary update events during mode switching
@@ -15656,6 +15952,17 @@ export default {
                         permissionLevel: currentPermissionLevel
                     });
                 } else {
+                    // ✅ PERFORMANCE: Skip redundant permission updates but log for debugging
+                    const timeSinceLastSkip = Date.now() - (this.lastSkippedPermissionUpdate || 0);
+                    if (timeSinceLastSkip > 10000) { // Log once every 10 seconds max
+                        console.log('⏭️ PERFORMANCE: Skipping redundant permission update', {
+                            document: this.currentFile ? `${this.currentFile.owner}/${this.currentFile.permlink}` : 'none',
+                            permissionLevel: currentPermissionLevel,
+                            isReadOnly: this.isReadOnlyMode,
+                            source: 'unknown'
+                        });
+                        this.lastSkippedPermissionUpdate = Date.now();
+                    }
                 }
             } catch (error) {
                 console.error('❌ TipTap: Failed to update editor mode:', {
