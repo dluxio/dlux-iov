@@ -2958,6 +2958,9 @@ class LifecycleManager {
         // ✅ REACTIVITY FIX: Reset reactive document name
         this.component.reactiveDocumentName = null;
         
+        // ✅ RECURSION PROTECTION: Clear recursion protection flags
+        this.component._isUpdatingPermlink = false;
+        
         // ✅ DEBOUNCE CLEANUP: Clear all timers to prevent memory leaks and unwanted persistence
         if (this.component.autoNameTimeout) {
             clearTimeout(this.component.autoNameTimeout);
@@ -3009,9 +3012,9 @@ class LifecycleManager {
         this.component.customJsonString = '';
         this.component.customJsonError = '';
         
-        // ✅ CRITICAL FIX: Reset title input only
+        // ✅ CRITICAL FIX: Reset all input fields for clean slate
         this.component.titleInput = '';
-        // ✅ RECURSION FIX: Don't reset permlinkInput - let user keep their custom input
+        this.component.permlinkInput = ''; // Reset permlink input for File > New
         
         // ✅ Reset UI state
         this.component.showAdvancedOptions = false;
@@ -12962,17 +12965,9 @@ export default {
                 return;
             }
             
-            // Check for real content immediately
-            console.log('🔍 Checking real content for intent...');
-            const hasRealContent = this.checkRealContentForIntent();
-            console.log('🔍 Real content check result:', hasRealContent);
-            
-            if (hasRealContent) {
-                console.log('🔍 User intent detected - creating persistence immediately');
-                this.createIndexedDBForTempDocument();
-            } else {
-                console.log('🔍 No real content detected - skipping persistence');
-            }
+            // ✅ FIX: Any user interaction shows intent - create persistence immediately
+            console.log('🔍 User intent detected - creating persistence immediately');
+            this.createIndexedDBForTempDocument();
         },
 
         // ===== JSON PREVIEW METHODS =====
@@ -13208,14 +13203,9 @@ export default {
                     
                     // ✅ TEMP DOCUMENT CONVERSION: Trigger persistence creation if needed
                     if (this.isTemporaryDocument && !this.indexeddbProvider && !this.isCreatingPersistence) {
-                        // ✅ FIX: Check for actual content before triggering persistence
-                        const hasRealContent = this.checkRealContentForIntent();
-                        if (hasRealContent) {
-                            console.log('🔍 Content change detected - converting temp document to persistent');
-                            this.debouncedCreateIndexedDBForTempDocument();
-                        } else {
-                            console.log('🔍 Empty document - skipping persistence creation');
-                        }
+                        // ✅ FIX: User interaction detected - convert temp document to persistent
+                        console.log('🔍 User interaction detected - converting temp document to persistent');
+                        this.debouncedCreateIndexedDBForTempDocument();
                     }
                 }
                 
@@ -13255,14 +13245,9 @@ export default {
             this.createPersistenceDebounceTimer = setTimeout(() => {
                 console.log('🔍 Debounced persistence triggered from metadata change');
                 
-                // ✅ FIX: Check for actual content before creating persistence
-                const hasRealContent = this.checkRealContentForIntent();
-                if (hasRealContent) {
-                    console.log('🔍 Real content detected - creating persistence');
-                    this.createIndexedDBForTempDocument();
-                } else {
-                    console.log('🔍 Empty document - skipping persistence creation from metadata change');
-                }
+                // ✅ FIX: Metadata changes ARE user intent - create persistence immediately
+                console.log('🔍 User intent detected via metadata - creating persistence');
+                this.createIndexedDBForTempDocument();
             }, 300); // 300ms debounce for metadata changes
         },
         
@@ -13825,30 +13810,7 @@ export default {
             return hasTags || hasBeneficiaries || hasCustomJson || hasPermlink || hasCommentOptions;
         },
 
-        // ✅ TIPTAP COMPLIANCE: Separate method for actual content checking (export/display only)
-        checkRealContentForIntent() {
-            // ✅ CRITICAL FIX: Check titleInput field (regular input) in addition to TipTap editors
-            // The title is typed in this.titleInput, not in this.titleEditor
-            const titleInputText = (this.titleInput || '').trim();
-            const hasRealTitleInput = titleInputText && titleInputText.length > 0 && titleInputText !== '\n' && titleInputText !== '\r\n';
-            
-            // Check TipTap body editor
-            let hasRealBody = false;
-            
-            if (this.bodyEditor) {
-                const bodyText = this.bodyEditor.getText().trim();
-                hasRealBody = bodyText && bodyText.length > 0 && bodyText !== '\n' && bodyText !== '\r\n';
-            }
-            
-            console.log('🔍 checkRealContentForIntent:', {
-                titleInputText,
-                hasRealTitleInput,
-                hasRealBody,
-                result: hasRealTitleInput || hasRealBody
-            });
-            
-            return hasRealTitleInput || hasRealBody;
-        },
+        // ✅ REMOVED: checkRealContentForIntent() - metadata changes ARE user intent
         
         // ✅ TIPTAP v3 COMPLIANT: Load metadata from Y.js to Vue reactive data
         loadMetadataFromYjs() {

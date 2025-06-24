@@ -85,6 +85,14 @@ Critical fields use recursion protection flags:
 - **permlink**: Uses `_isUpdatingPermlink` flag to prevent circular updates
 - **Remote vs Local**: Y.js observers only update Vue when not in local update cycle
 
+### User Intent & Persistence
+**Any user interaction shows intent to create a document**:
+- **Metadata changes** (tags, beneficiaries, custom JSON, permlink) → immediate persistence
+- **Content changes** (title, body) → immediate persistence  
+- **Document settings** (document name, comment options) → immediate persistence
+- **No content validation**: Metadata-only documents are valid user intent
+- **Consistent behavior**: All fields trigger autosave and document creation equally
+
 ### File Operations
 **File > New Behavior**:
 - All reactive properties reset to defaults (reactiveTags: [], reactiveBeneficiaries: [], etc.)
@@ -208,6 +216,12 @@ Key issues covered:
 **Note**: Always refer to the Official Documentation above for the latest best practices and implementation patterns.
 
 ## Recent Updates (v2025.06.24)
+### ✅ User Intent & Persistence Fix
+- **Issue Fixed**: Metadata changes (tags, beneficiaries, custom JSON) were hanging on save
+- **Root Cause**: Content validation blocking metadata-only documents from creating persistence
+- **Solution**: Removed `checkRealContentForIntent()` - any user interaction shows intent
+- **Result**: All fields consistently trigger autosave and document creation
+
 ### ✅ Permlink Sync Resolution  
 - **Issue Fixed**: Permlink changes now sync correctly between owner and editor users
 - **Root Cause**: Missing permlink handler in metadata observer

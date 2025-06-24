@@ -5,10 +5,12 @@
 This document defines the **definitive architecture** for implementing TipTap's offline-first collaborative editing pattern based on official TipTap.dev documentation and best practices. Our implementation follows TipTap's recommended approach for maximum performance, reliability, and user experience.
 
 ### 🚀 **Latest Updates (v2025.06.24)**
+- **User Intent Philosophy**: Any user interaction shows intent to create a document
+- **Persistence Fix**: Removed content validation blocking metadata-only documents
+- **Consistent Autosave**: All fields (metadata, content, settings) trigger persistence equally
 - **Permlink Sync Resolution**: Fixed bidirectional sync between owner and editor users
 - **Observer Architecture**: Unified two-observer system handling all metadata fields
 - **Recursion Protection**: Robust circular update prevention for all reactive fields
-- **Field Consistency**: All metadata fields now consistently handled by observers
 
 ### 🚀 **Previous Updates (v2025.01.23)**
 - **Single Editor Architecture**: Title now uses simple input field, body uses TipTap
@@ -189,6 +191,41 @@ if (event.keysChanged.has('permlink')) {
 - **METADATA MAP**: Publishing and collaboration data (tags, beneficiaries, permlink, comment options)
 - **Clear Separation**: No overlap between observers, each handles distinct field sets
 - **Performance**: Observers only fire when their specific fields change
+
+### 🎯 **USER INTENT & PERSISTENCE PHILOSOPHY**
+
+**Core Principle**: Any user interaction shows intent to create a document.
+
+#### **What Counts as User Intent**
+```javascript
+// ✅ ALL of these trigger immediate persistence:
+this.titleInput = 'My Title';           // Content change
+this.addTagToYjs('blockchain');         // Metadata change  
+this.addBeneficiary({...});             // Metadata change
+this.setCustomJsonField('key', 'val');  // Metadata change
+this.permlinkInput = 'custom-url';      // Metadata change
+this.documentNameInput = 'My Doc';      // Settings change
+this.commentOptions.allowVotes = true;  // Settings change
+```
+
+#### **No Content Validation**
+- **Metadata-only documents** are valid user intent
+- **Empty title/body** doesn't prevent persistence if user set metadata
+- **User interaction** = document creation, regardless of content presence
+- **Consistent behavior** across all field types
+
+#### **Implementation Pattern**
+```javascript
+// ❌ OLD APPROACH (removed)
+const hasRealContent = this.checkRealContentForIntent();
+if (hasRealContent) {
+    this.createIndexedDBForTempDocument();
+}
+
+// ✅ NEW APPROACH  
+// Any field interaction = immediate persistence
+this.createIndexedDBForTempDocument();
+```
 
 ### 📚 **Official Documentation References**
 
